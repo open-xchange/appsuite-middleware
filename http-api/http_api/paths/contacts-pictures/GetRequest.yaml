@@ -14,25 +14,25 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
-        name: userId
+        name: user_id
         type: string
         description: |
           The user identifier.          
         required: false
       - in: query
-        name: contactId
+        name: contact_id
         type: string
         description: |
           The contact identifier.
         required: false
       - in: query
-        name: folderId
+        name: folder_id
         type: string
         description: |
           The folder id the contact id belongs to.
         required: false
       - in: query
-        name: mail
+        name: email
         type: string
         description: |
           The mail address of the contact.

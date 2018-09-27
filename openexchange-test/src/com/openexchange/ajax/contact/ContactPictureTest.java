@@ -110,6 +110,14 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
     }
+    
+    @Test
+    public void testGetFallbackPictureByWrongMail() throws Exception {
+        createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, "foobar@asd.com" , null, null, null, null, null, null, null, null, null);
+        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+    }
 
     @Test
     public void testGetContactPictureByMail() throws Exception {

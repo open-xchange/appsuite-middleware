@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.picture.json.util;
 
+import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.USER;
 import java.net.URISyntaxException;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
@@ -128,17 +131,17 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
             sb.append(OAuthConstants.OAUTH_SERVLET_SUBPREFIX);
         }
         sb.append(ContactPictureActionFactory.Module);
-        
+
         builder.setPath(sb.toString());
         builder.setParameter("action", "get");
-        
+
         if (contactId > -1 && folderId > -1) {
-            builder.setParameter("contactId", String.valueOf(contactId));
-            builder.setParameter("folderId", String.valueOf(folderId));
+            builder.setParameter(CONTACT.getParameter(), String.valueOf(contactId));
+            builder.setParameter(CONTACT_FOLDER.getParameter(), String.valueOf(folderId));
         } else {
-            builder.setParameter("userId", String.valueOf(userId));
+            builder.setParameter(USER.getParameter(), String.valueOf(userId));
         }
-        
+
         try {
             return builder.build().toString();
         } catch (URISyntaxException e) {
