@@ -88,9 +88,15 @@ public class ContactIDFinder extends AbstractContactFinder {
     @Override
     public PictureSearchData modfiyResult(Contact contact) {
         LinkedHashSet<String> set = new LinkedHashSet<>(4, .9f);
-        set.add(contact.getEmail1());
-        set.add(contact.getEmail2());
-        set.add(contact.getEmail3());
+        if (contact.containsEmail1() && contact.getEmail1() != null) {
+            set.add(contact.getEmail1());
+        }
+        if (contact.containsEmail2() && contact.getEmail2() != null) {
+            set.add(contact.getEmail2());
+        }
+        if (contact.containsEmail3() && contact.getEmail3() != null) {
+            set.add(contact.getEmail3());
+        }
         return new PictureSearchData(null, null, null, set);
     }
 
