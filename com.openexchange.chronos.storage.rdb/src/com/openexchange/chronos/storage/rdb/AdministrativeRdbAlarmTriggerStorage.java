@@ -153,7 +153,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
                 stringBuilder.append(" OR action=?");
             }
         }
-        stringBuilder.append(")");
+        stringBuilder.append(") ");
     }
 
     @Override
