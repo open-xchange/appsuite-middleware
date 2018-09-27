@@ -257,6 +257,7 @@ public class EventPostProcessor {
              * excluded if marked as hidden for the calendar user
              */
             //TODO: public folder?
+            return false;
         }
         if (isSeriesMaster(event)) {
             knownRecurrenceData.put(event.getSeriesId(), new DefaultRecurrenceData(event));
