@@ -95,6 +95,7 @@ import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
 import javapns.notification.Payload;
 import javapns.notification.PayloadPerDevice;
+import javapns.notification.PushNotificationBigPayload;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 
@@ -420,7 +421,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     }
 
     private Payload toPayload(Map<String, Object> message) throws JSONException {
-        PushNotificationPayload payload = new PushNotificationPayload();
+        PushNotificationPayload payload = new PushNotificationBigPayload();
 
         Map<String, Object> source = new HashMap<>(message);
         {

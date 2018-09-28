@@ -51,9 +51,11 @@ package com.openexchange.push.impl.balancing.reschedulerpolicy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,8 +80,12 @@ import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.push.PushManagerExtendedService;
@@ -358,6 +364,15 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         try {
             allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
             if (allPushUsers.isEmpty()) {
+                // No such users at all
+                return;
+            }
+
+            // Filter out such users residing in a context, which is currently updating or requires an update
+            allPushUsers = filterUsers(allPushUsers);
+
+            // Check again if any user left...
+            if (allPushUsers.isEmpty()) {
                 return;
             }
         } catch (Exception e) {
@@ -378,6 +393,43 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             // Submit task to thread pool
             threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, pushManagerRegistry, policy, remotePlan));
         }
+    }
+
+    private List<PushUser> filterUsers(List<PushUser> allPushUsers) throws OXException {
+        int size = allPushUsers.size();
+
+        // Get schema associations for involved contexts
+        Map<PoolAndSchema, List<Integer>> schemaAssociations;
+        {
+            Set<Integer> distinctContextIds = new HashSet<>(size);
+            for (PushUser pushUser : allPushUsers) {
+                distinctContextIds.add(Integer.valueOf(pushUser.getContextId()));
+            }
+            schemaAssociations = Services.requireService(ContextService.class).getSchemaAssociationsFor(new ArrayList<Integer>(distinctContextIds));
+        }
+
+        // Identify "dirty" contexts.
+        Set<Integer> dirtyContextIds = new HashSet<>(size);
+        for (Map.Entry<PoolAndSchema, List<Integer>> entry : schemaAssociations.entrySet()) {
+            PoolAndSchema poolAndSchema = entry.getKey();
+            UpdateStatus status = Updater.getInstance().getStatus(poolAndSchema.getSchema(), poolAndSchema.getPoolId());
+            if (status.blockingUpdatesRunning() || status.needsBlockingUpdates()) {
+                dirtyContextIds.addAll(entry.getValue());
+            }
+        }
+        if (dirtyContextIds.isEmpty()) {
+            // No "dirty" ones...
+            return allPushUsers;
+        }
+
+        // Drop such users residing in a "dirty" context. Use a new ArrayList instance to avoid steady System.arraycopy() calls
+        List<PushUser> filteredPushUsers = new ArrayList<PushUser>(size);
+        for (PushUser pushUser : allPushUsers) {
+            if (false == dirtyContextIds.contains(Integer.valueOf(pushUser.getContextId()))) {
+                filteredPushUsers.add(pushUser);
+            }
+        }
+        return filteredPushUsers;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
