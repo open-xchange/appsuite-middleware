@@ -110,7 +110,7 @@ public class LeaveCommand implements GroupCommand {
     }
 
     protected void doSignOff(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
-        Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
+        Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf(), stanza);
         if (null == signOffMessage) {
             // Apparently requester was no member of the group dispatcher
             return;

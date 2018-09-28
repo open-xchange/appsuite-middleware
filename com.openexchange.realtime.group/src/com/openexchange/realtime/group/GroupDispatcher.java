@@ -647,7 +647,7 @@ public class GroupDispatcher implements ComponentHandle {
         return welcome;
     }
 
-    public Stanza getSignOffMessage(ID onBehalfOf) {
+    public Stanza getSignOffMessage(ID onBehalfOf, Stanza optStanza) {
         Stanza goodbye = new Message();
         goodbye.setTo(onBehalfOf);
         goodbye.setFrom(getId());
