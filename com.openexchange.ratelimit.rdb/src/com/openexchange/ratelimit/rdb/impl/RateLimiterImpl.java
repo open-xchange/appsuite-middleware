@@ -108,7 +108,7 @@ public class RateLimiterImpl implements RateLimiter {
             if (numberOfPermits + permits > amount) {
                 return false;
             }
-            insertPermit(permits);
+            insertPermit(writeCon, permits);
             writeCon.commit();
             readOnly = false;
         } catch (OXException e) {
@@ -132,28 +132,16 @@ public class RateLimiterImpl implements RateLimiter {
     private static final String SQL_READ = "SELECT SUM(permits) FROM ratelimit WHERE cid=? AND userId=? AND id=?";
     private static final String SQL_INSERT = "INSERT INTO ratelimit VALUES (?,?,?,?,?)";
 
-    private void insertPermit(long permits) {
-        try {
-            Connection con = dbProvider.getWriteConnection(ctx);
-            int updates = 0;
-            try (PreparedStatement stmt = con.prepareStatement(SQL_INSERT)) {
-                int index = 1;
-                stmt.setInt(index++, ctx.getContextId());
-                stmt.setInt(index++, userId);
-                stmt.setString(index++, id);
-                stmt.setLong(index++, System.currentTimeMillis());
-                stmt.setLong(index++, permits);
-                updates = stmt.executeUpdate();
-            } catch (SQLException e) {
-                LOG.error("Unable to insert permit: {}", e.getMessage(), e);
-            } finally {
-                if (updates > 0) {
-                    dbProvider.releaseWriteConnection(ctx, con);
-                } else {
-                    dbProvider.releaseWriteConnectionAfterReading(ctx, con);
-                }
-            }
-        } catch (OXException e) {
+    private void insertPermit(Connection writeCon, long permits) {
+        try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
+            int index = 1;
+            stmt.setInt(index++, ctx.getContextId());
+            stmt.setInt(index++, userId);
+            stmt.setString(index++, id);
+            stmt.setLong(index++, System.currentTimeMillis());
+            stmt.setLong(index++, permits);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
             LOG.error("Unable to insert permit: {}", e.getMessage(), e);
         }
     }

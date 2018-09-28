@@ -50,8 +50,9 @@
 package com.openexchange.chronos.alarm.sms;
 
 import java.text.DateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -108,9 +109,9 @@ public class SMSNotificationService implements AlarmNotificationService {
         if(phoneNumber == null) {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
-        } else {
-            smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, user), userId, contextId);
         }
+        smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, user), userId, contextId);
+        
     }
 
     /**
@@ -142,14 +143,25 @@ public class SMSNotificationService implements AlarmNotificationService {
         }
         Translator translator = translatorFactory.translatorFor(locale);
         DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
-        String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
+        
+        
+        boolean diffTZ= !TimeZone.getTimeZone(user.getTimeZone()).equals(event.getStartDate().getTimeZone());
+        
+        Calendar instance = Calendar.getInstance(event.getStartDate().getTimeZone());
+        instance.setTimeInMillis(event.getStartDate().getTimestamp());
+        String formattedStartDate = df.format(instance.getTime());
 
         String summary = event.getSummary();
         if (summary.length() > (100 - formattedStartDate.length())) {
             summary = summary.substring(0, (100 - formattedStartDate.length() - 3)).concat("...");
         }
 
-        return translator.translate(SMSAlarmStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
+        String result = translator.translate(SMSAlarmStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
+        
+        if(diffTZ) {
+            return result.concat(" ").concat(event.getStartDate().getTimeZone().getDisplayName(true, TimeZone.SHORT));    
+        }
+        return result;
     }
 
     @Override
@@ -158,17 +170,17 @@ public class SMSNotificationService implements AlarmNotificationService {
     }
 
     @Override
-    public int getShift() throws OXException {
+    public int getShift() {
         return leanConfigurationService.getIntProperty(SMSAlarmConfig.SMS_SHIFT);
     }
 
     @Override
-    public boolean isEnabled(int userId, int contextId) throws OXException {
+    public boolean isEnabled(int userId, int contextId) {
         return leanConfigurationService.getBooleanProperty(userId, contextId, SMSAlarmConfig.SMS_ENABLED);
     }
 
     @Override
-    public Rate getRate(int userId, int contextId) throws OXException {
+    public Rate getRate(int userId, int contextId) {
         return Rate.create( leanConfigurationService.getIntProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_AMOUNT),
                             leanConfigurationService.getLongProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_TIME_FRAME));
     }

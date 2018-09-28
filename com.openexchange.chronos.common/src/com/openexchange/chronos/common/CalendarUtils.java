@@ -1381,8 +1381,12 @@ public class CalendarUtils {
         /*
          * prefer scheme-specific part from "mailto:"-URI if possible
          */
-        if (null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
-            value = uri.getSchemeSpecificPart();
+        if (null != uri ) {
+            if("mailto".equalsIgnoreCase(uri.getScheme())) {
+                value = uri.getSchemeSpecificPart();
+            } else if("tel".equalsIgnoreCase(uri.getScheme())) {
+               return null; 
+            }
         }
         /*
          * decode any punycoded names, too

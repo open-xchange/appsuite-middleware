@@ -344,8 +344,8 @@ class SingleMessageDeliveryTask implements Runnable {
      */
     private Event prepareEvent(Connection writeCon) throws OXException {
         SimpleDBProvider provider = new SimpleDBProvider(writeCon, writeCon);
-        CalendarStorage storage = factory.create(ctx, account, optEntityResolver(ctx.getContextId()), provider, DBTransactionPolicy.NO_TRANSACTIONS);
-        AlarmTrigger loadedTrigger = storage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm());
+        CalendarStorage calStorage = factory.create(ctx, account, optEntityResolver(ctx.getContextId()), provider, DBTransactionPolicy.NO_TRANSACTIONS);
+        AlarmTrigger loadedTrigger = calStorage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm());
         if (loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
             // Abort since the triggers is either gone or picked up by another node (e.g. because of an update)
             LOG.trace("Skipped message alarm task for {}. Its trigger is not up to date!", new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
@@ -359,15 +359,14 @@ class SingleMessageDeliveryTask implements Runnable {
             if (calendarAccount == null) {
                 LOG.trace("Unable to load calendar account.");
                 return null;
+            }
+            CalendarProvider calendarProvider = calendarProviderRegistry.getCalendarProvider(calendarAccount.getProviderId());
+            if (calendarProvider instanceof AdministrativeCalendarProvider) {
+                adminCalProvider = (AdministrativeCalendarProvider) calendarProvider;
+                event = adminCalProvider.getEventByAlarm(ctx, calendarAccount, trigger.getEventId(), null);
             } else {
-                CalendarProvider calendarProvider = calendarProviderRegistry.getCalendarProvider(calendarAccount.getProviderId());
-                if (calendarProvider instanceof AdministrativeCalendarProvider) {
-                    adminCalProvider = (AdministrativeCalendarProvider) calendarProvider;
-                    event = adminCalProvider.getEventByAlarm(ctx, calendarAccount, trigger.getEventId(), trigger.getRecurrenceId());
-                } else {
-                    LOG.trace("Unable to load event for the given provider.");
-                    return null;
-                }
+                LOG.trace("Unable to load event for the given provider.");
+                return null;
             }
         } catch (OXException e) {
             LOG.trace("Unable to load event with id {}: {}",trigger.getEventId(), e.getMessage());
@@ -384,10 +383,10 @@ class SingleMessageDeliveryTask implements Runnable {
                 break;
             }
         }
-        storage.getAlarmStorage().updateAlarms(event, trigger.getUserId(), alarms);
-        Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
-        storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
+        calStorage.getAlarmStorage().updateAlarms(event, trigger.getUserId(), alarms);
+        Map<Integer, List<Alarm>> loadAlarms = calStorage.getAlarmStorage().loadAlarms(event);
+        calStorage.getAlarmTriggerStorage().deleteTriggers(event.getId());
+        calStorage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
         if (adminCalProvider != null && calendarAccount != null) {
             adminCalProvider.touchEvent(ctx, calendarAccount, trigger.getEventId());
         }
@@ -441,8 +440,8 @@ class SingleMessageDeliveryTask implements Runnable {
         List<AlarmTrigger> triggers = callback.checkEvents(writeCon, Collections.singletonList(event), cid, account, true);
         if (triggers.isEmpty() == false) {
             CalendarStorage calStorage = factory.create(ctx, account, optEntityResolver(cid), new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
-            for (AlarmTrigger trigger : triggers) {
-                callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
+            for (AlarmTrigger tmpTrigger : triggers) {
+                callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, tmpTrigger.getEventId(), tmpTrigger.getAlarm()), tmpTrigger);
             }
             return false;
         }
