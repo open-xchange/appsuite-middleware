@@ -58,9 +58,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.HTTPRequestInputStreamProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -77,6 +80,7 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.CustomGateAction;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -157,12 +161,24 @@ public class QueryAction extends RTAction {
         }
         StateEntry stateEntry = stateManager.retrieveState(id);
 
-        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.requireData());
+        HttpServletRequest servletRequest = request.optHttpServletRequest();
+
+        JSONObject data = (JSONObject) request.getData();
+        if (null == data && (servletRequest != null)) {
+            // try to extract body data using a different approach
+            request.setUploadStreamProvider(null);
+            AJAXRequestDataTools.loadRequestBody(request);
+            data = (JSONObject) request.getData();
+        }
+
+        if (null == data)
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+
+        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, data);
 
         Stanza stanza = stanzaBuilder.build();
 
-        HttpServletRequest servletRequest = request.optHttpServletRequest();
-		if (servletRequest != null) {
+        if (servletRequest != null) {
 	        HttpSession httpSession = servletRequest.getSession();
 			String jsessionid = httpSession.getId();
 			stanza.setChannelAttribute("JSESSIONID", jsessionid);
