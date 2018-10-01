@@ -22,6 +22,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.timer.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.alarm"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.alarm.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.alarm.sms"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.alarm.message"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.calendar.account.service.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.compat"/>
@@ -36,6 +39,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.composition.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.internal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.recurrence"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.storage.rdb"/>
@@ -48,6 +52,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.configuration.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.datasource"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.picture"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.picture.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.picture.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.similarity"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.impl"/>
@@ -115,6 +123,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.imagetransformation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.imagetransformation.java"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.importexport"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ipcheck.countrycode"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.java"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jolokia"/>
@@ -185,6 +194,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.push.udp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quota"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ratelimit"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ratelimit.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.reseller"/>

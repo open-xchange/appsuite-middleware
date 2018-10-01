@@ -98,6 +98,10 @@ public enum AttendeeField {
      */
     FOLDER_ID,
     /**
+     * The <i>hidden</i> marker to exclude the event from the attendee's folder view.
+     */
+    HIDDEN,
+    /**
      * The group- or list membership of the attendee.
      */
     MEMBER,

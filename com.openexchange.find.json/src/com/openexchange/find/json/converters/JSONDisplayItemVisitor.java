@@ -52,9 +52,6 @@ package com.openexchange.find.json.converters;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.FormattableDisplayItem;
@@ -69,8 +66,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.6.0
  */
 public class JSONDisplayItemVisitor implements DisplayItemVisitor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JSONDisplayItemVisitor.class);
 
     private final StringTranslator translator;
 
@@ -110,12 +105,8 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
             jItem.put("name", item.getDisplayName());
             jItem.put("detail", item.getDetail());
             if (item.hasImageData()) {
-                try {
-                    String imageUrl = item.getImageDataSource().generateUrl(item.getImageLocation(), session);
-                    jItem.put("image_url", imageUrl);
-                } catch (OXException e) {
-                    LOG.warn("Could not generate image url for ComplexDisplayItem.", e);
-                }
+                String imageUrl = item.getImageUrl(session);
+                jItem.put("image_url", imageUrl);
             }
         } catch (JSONException e) {
             exception = e;

@@ -188,14 +188,6 @@ public class GetResponse {
         return null;
     }
 
-    private String getProperty(String property) {
-        ExtendedProperty extendedProperty = CalendarUtils.optExtendedProperty(this.importedCalendar, property);
-        if (extendedProperty == null) {
-            return null;
-        }
-        return String.valueOf(extendedProperty.getValue());
-    }
-
     public GetResponseState getState() {
         return state;
     }

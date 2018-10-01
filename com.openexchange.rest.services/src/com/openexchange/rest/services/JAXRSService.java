@@ -62,25 +62,25 @@ import javax.ws.rs.core.UriInfo;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * <p>
  * A convenience superclass for JAX-RS based REST services. Provides
  * access to all potential necessary context objects like {@link HttpServletRequest}
  * or {@link Application} and lets you work with a plain {@link AJAXRequestData}
  * instance, if wanted.
- * </p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
 public abstract class JAXRSService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JAXRSService.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JAXRSService.class);
+    }
 
     @Context
     protected Application application;
@@ -107,10 +107,13 @@ public abstract class JAXRSService {
     protected HttpServletResponse servletResponse;
 
     private final ServiceLookup services;
-
     private final BundleContext bundleContext;
 
-
+    /**
+     * Initializes a new {@link JAXRSService}.
+     *
+     * @param services The OSGi services to use
+     */
     protected JAXRSService(ServiceLookup services) {
         super();
         if (services == null) {
@@ -121,6 +124,11 @@ public abstract class JAXRSService {
         this.bundleContext = null;
     }
 
+    /**
+     * Initializes a new {@link JAXRSService}.
+     *
+     * @param bundleContext The bundle context to use
+     */
     protected JAXRSService(BundleContext bundleContext) {
         super();
         if (bundleContext == null) {
@@ -152,17 +160,17 @@ public abstract class JAXRSService {
     }
 
     /**
-     * Gets a service via the provided {@link ServiceLookup} or {@link BundleContext}.
+     * Gets a service either via (at initialization time) provided {@link ServiceLookup} or {@link BundleContext}.
      *
-     * @param clazz The service interface
-     * @return The service
-     * @throws ServiceUnavailableException if the service is not available
+     * @param clazz The class of the service interface
+     * @return The service instance
+     * @throws ServiceUnavailableException If the service is not available
      */
     protected <T> T getService(Class<T> clazz) {
         T service = optService(clazz);
         if (service == null) {
             ServiceUnavailableException e = new ServiceUnavailableException();
-            LOG.error("Service '" + clazz.getName() + "' is not available.", e);
+            LoggerHolder.LOG.error("Service '{}' is not available.", clazz.getName(), e);
             throw e;
         }
 
@@ -170,10 +178,10 @@ public abstract class JAXRSService {
     }
 
     /**
-     * Gets a service via the provided {@link ServiceLookup} or {@link BundleContext}.
+     * Gets a service either via (at initialization time) provided {@link ServiceLookup} or {@link BundleContext}.
      *
-     * @param clazz The service interface
-     * @return The service or <code>null</code> if the service is not available
+     * @param clazz The class of the service interface
+     * @return The service instance or <code>null</code> if the service is not available
      */
     protected <T> T optService(Class<T> clazz) {
         T service = null;

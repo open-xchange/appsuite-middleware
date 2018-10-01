@@ -67,7 +67,8 @@ public interface MailSenderService {
      * @param mail The {@link NotificationMail} to send
      * @param session The {@link Session} of the user acting
      * @param principal The {@link CalendarUser}
+     * @param comment An optional user comment
      * @throws OXException If mail can't be send
      */
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal) throws OXException;
+    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException;
 }

@@ -50,6 +50,7 @@
 package com.openexchange.halo.pictures.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.pictures.PictureHaloActionFactory;
 
@@ -57,7 +58,7 @@ public class PictureHaloActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContactHalo.class};
+        return new Class[] { ContactHalo.class, ContactPictureService.class};
     }
 
     @Override

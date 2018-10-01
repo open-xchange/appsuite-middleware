@@ -64,13 +64,20 @@ public interface SyncResult<T extends DriveVersion> {
      *
      * @return The actionsForClient
      */
-    public List<DriveAction<T>> getActionsForClient();
+    List<DriveAction<T>> getActionsForClient();
 
     /**
      * Gets the diagnostics log.
      *
      * @return The diagnostics log, or <code>null</code> if not available
      */
-    public String getDiagnostics();
+    String getDiagnostics();
+
+    /**
+     * Gets the quota information
+     * 
+     * @return The quota information, or <code>null</code> if not available
+     */
+    DriveQuota getQuota();
 
 }

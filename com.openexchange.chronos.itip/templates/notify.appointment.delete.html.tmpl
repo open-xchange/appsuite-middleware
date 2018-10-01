@@ -10,7 +10,14 @@
     <body>
         <div class="content">
         	${templating.include( "notify.appointment.intro.html.tmpl" )}
-            <div class="calendar-action">${labels.deleteIntroduction}</div>
+            <div class="calendar-action">
+                ${labels.deleteIntroduction}
+                <#if (labels.comment??)>
+                    <div class="comment">
+                        ${labels.comment}
+                    </div>
+                </#if>
+            </div>
             ${templating.include( "notify.appointment.show.mini.html.tmpl" )}
 	    </div>
     </body>

@@ -1,0 +1,106 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2018-09-15 19:18+0300\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: \n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: tr_TR\n"
+
+# Drive Application
+msgid "Drive Application"
+msgstr "Drive Uygulaması"
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr "Drive uygulamamızla dosyalarınızı senkronize edin."
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr "E-posta + Takvim + Adres Defteri"
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+"E-posta, takvim, görevler ve adres defteri verilerinizi eşitlemek için "
+"masaüstü uygulamalarımız indirip kurun."
+
+# Drive App
+msgid "Drive App"
+msgstr "Drive Uygulaması"
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr "Drive uygulamamızla dosyalarınızı senkronize edin."
+
+# Mail App
+msgid "Mail App"
+msgstr "E-posta Uygulaması"
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr "E-posta uygulamamızla e-postalarınızı senkronize edin."
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr "Takvim + Adres Defteri"
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr "Takvim ve adres defteri verilerinizi cihazınızla senkronize edin."
+
+# OX Sync
+msgid "OX Sync"
+msgstr "OX Sync"
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr "Tüm randevularınızı ve kişilerinizi senkronize edin"
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+"Takvim ve adres defteri hesaplarınızı elle ayarlamak için lütfen aşağıdaki "
+"bilgileri kullanın."
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr ""
+"Posta, takvim ve adres defteri verilerinizi cihazınızla senkronize edin."
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+"Posta, takvim ve adres defteri hesaplarınızı elle kurmak için lütfen "
+"aşağıdaki bilgileri kullanın."
+
+# Mail
+msgid "Mail"
+msgstr "E-posta"
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr "E-postalarınızı Apple Mail uygulamasıyla senkronize edin."
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+"E-posta hesabınızı elle kurmak için lütfen aşağıdaki bilgileri kullanın"

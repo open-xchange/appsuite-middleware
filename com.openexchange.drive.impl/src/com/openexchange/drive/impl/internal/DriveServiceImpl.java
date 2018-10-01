@@ -138,8 +138,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
-        List<DirectoryVersion> clientVersions) throws OXException {
+    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException {
         /*
          * check (hard) version restrictions
          */
@@ -257,6 +256,10 @@ public class DriveServiceImpl implements DriveService {
                     actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, false));
                 }
             }
+            DriveQuota quota = null;
+            if (includeQuota) { 
+                quota = getQuota(session);
+            }
             /*
              * return actions for client
              */
@@ -264,12 +267,12 @@ public class DriveServiceImpl implements DriveService {
                 driveSession.trace("syncFolders with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
             }
-            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, driveSession.getDiagnosticsLog());
+            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, driveSession.getDiagnosticsLog(), quota);
         }
     }
 
     @Override
-    public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
+    public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateFileVersions(originalVersions);
         DriveVersionValidator.validateFileVersions(clientVersions);
@@ -331,6 +334,10 @@ public class DriveServiceImpl implements DriveService {
                 }
                 throw e;
             }
+            DriveQuota quota = null;
+            if (includeQuota) { 
+                quota = getQuota(session);
+            }
             /*
              * return actions for client
              */
@@ -338,7 +345,7 @@ public class DriveServiceImpl implements DriveService {
                 driveSession.trace("syncFiles with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
             }
-            return new DefaultSyncResult<FileVersion>(actionsForClient, driveSession.getDiagnosticsLog());
+            return new DefaultSyncResult<FileVersion>(actionsForClient, driveSession.getDiagnosticsLog(), quota);
         }
     }
 

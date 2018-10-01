@@ -641,6 +641,7 @@ public final class Tools {
         preparedSearchObject.setYomiCompany(contactSearch.getYomiCompany());
         preparedSearchObject.setYomiFirstname(contactSearch.getYomiFirstName());
         preparedSearchObject.setYomiLastName(contactSearch.getYomiLastName());
+        preparedSearchObject.setHasImage(contactSearch.hasImage());
         return preparedSearchObject;
 	}
 
@@ -734,6 +735,7 @@ public final class Tools {
         preparedSearchObject.setYomiCompany(addWildcards(contactSearch.getYomiCompany(), prependWildcard, appendWildcard));
         preparedSearchObject.setYomiFirstname(addWildcards(contactSearch.getYomiFirstName(), prependWildcard, appendWildcard));
         preparedSearchObject.setYomiLastName(addWildcards(contactSearch.getYomiLastName(), prependWildcard, appendWildcard));
+        preparedSearchObject.setHasImage(contactSearch.hasImage());
         return preparedSearchObject;
     }
 

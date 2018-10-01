@@ -1,0 +1,29 @@
+/onboarding?action=download:
+  get:
+    operationId: downloadClientOnboardingProfile
+    tags: 
+      - Clientonboarding
+    summary: Direct-downloads a profile to configure an apple device for CalDAV and/or CardDAV
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: type
+        type: string
+        description: |
+          The identifier of profile to download; one of
+          - caldav
+          - carddav
+          - dav
+        enum: [
+                "caldav",
+                "carddav",
+                "dav"                
+              ]
+        required: true
+    responses:
+      200:
+        description: |
+          The profile
+        schema:
+          type: string
+          format: binary

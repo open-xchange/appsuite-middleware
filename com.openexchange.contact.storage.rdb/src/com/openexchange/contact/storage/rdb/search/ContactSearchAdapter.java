@@ -137,12 +137,12 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	             * construct clause using UNION SELECTs
 	             */
                 Entry<ContactField, Object> entry = iterator.next();
-                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
+                appendComparison(contactSearch, contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
                     emailAutoComplete, exact);
 	            while (iterator.hasNext()) {
 	                stringBuilder.append(" UNION ");
 	                entry = iterator.next();
-	                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), emailAutoComplete, exact);
+                    appendComparison(contactSearch, contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), emailAutoComplete, exact);
 	            }
 	        } else {
 	            /*
@@ -156,13 +156,20 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
                     stringBuilder.append(" AND ");
                     appendComparison(entry.getKey(), entry.getValue(), exact);
                 }
+                if (contactSearch.hasImage()) {
+                    stringBuilder.append(" AND ").append(IMG_CLAUSE);
+                }
 	        }
 		} else {
 		    /*
 		     * no comparison, just use folders and context id
 		     */
             stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause);
+            if (contactSearch.hasImage()) {
+                stringBuilder.append(" AND ").append(IMG_CLAUSE);
+            }
 		}
+
 	}
 
 	private static final Pattern P_DIGIT = Pattern.compile("\\d");
@@ -212,7 +219,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 	}
 
-	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, boolean needsEMail, boolean exact) throws OXException {
+    private void appendComparison(ContactSearchObject cso, String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, boolean needsEMail, boolean exact) throws OXException {
 		stringBuilder.append('(').append(selectClause);
 		stringBuilder.append(" WHERE ").append(contextIDClause).append(" AND ");
 		appendComparison(field, value, exact);
@@ -220,6 +227,9 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		if (needsEMail) {
 			stringBuilder.append(" AND (").append(getEMailAutoCompleteClause()).append(')');
 		}
+        if (cso.hasImage()) {
+            stringBuilder.append(" AND ").append(IMG_CLAUSE);
+        }
 		stringBuilder.append(')');
 	}
 

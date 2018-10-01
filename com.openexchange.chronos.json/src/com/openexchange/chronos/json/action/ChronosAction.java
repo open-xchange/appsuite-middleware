@@ -97,6 +97,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class ChronosAction extends AbstractChronosAction {
 
+    protected static final String EVENT = "event";
+
+    protected static final String EVENTS = "events";
+
+    protected static final String BODY_PARAM_COMMENT = "comment";
+
     /**
      * Initializes a new {@link ChronosAction}.
      *
@@ -200,13 +206,26 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * @throws OXException if a parsing error occurs
      */
     protected Event parseEvent(AJAXRequestData requestData) throws OXException {
+        return parseEvent(requestData, null);
+    }
+
+    /**
+     * Parses the {@link Event} from the payload object of the specified {@link AJAXRequestData}.
+     * Any {@link Attachment} uploads will also be handled and properly attached to the {@link Event}.
+     *
+     * @param requestData The {@link AJAXRequestData}
+     * @param params Optional parameter map to be filled, if the payload is contained in a sub object
+     * @return The parsed {@link Event}
+     * @throws OXException if a parsing error occurs
+     */
+    protected Event parseEvent(AJAXRequestData requestData, Map<String, Object> params) throws OXException {
         Map<String, UploadFile> uploads = new HashMap<>();
         JSONObject jsonEvent;
         long maxUploadSize = AttachmentConfig.getMaxUploadSize();
         if (requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
-            jsonEvent = handleUploads(requestData, uploads);
+            jsonEvent = handleUploads(requestData, uploads, params);
         } else {
-            jsonEvent = extractJsonBody(requestData);
+            jsonEvent = extractJsonBody(requestData, params);
         }
         try {
             Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(requestData));
@@ -286,10 +305,11 @@ public abstract class ChronosAction extends AbstractChronosAction {
      *
      * @param requestData The {@link AJAXRequestData}
      * @param uploads The {@link Map} with the uploads
+     * @param params Optional parameter map to be filled, if the payload is contained in a sub object
      * @return The {@link JSONObject} payload of the POST request
      * @throws OXException if an error is occurred
      */
-    private JSONObject handleUploads(AJAXRequestData requestData, Map<String, UploadFile> uploads) throws OXException {
+    private JSONObject handleUploads(AJAXRequestData requestData, Map<String, UploadFile> uploads, Map<String, Object> params) throws OXException {
         UploadEvent uploadEvent = requestData.getUploadEvent();
         final List<UploadFile> uploadFiles = uploadEvent.getUploadFiles();
         for (UploadFile uploadFile : uploadFiles) {
@@ -303,7 +323,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             uploads.put(contentId, uploadFile);
         }
 
-        return extractJsonBody(uploadEvent);
+        return extractJsonBody(uploadEvent, params);
     }
 
     /**
@@ -322,13 +342,47 @@ public abstract class ChronosAction extends AbstractChronosAction {
     }
 
     /**
+     * Extracts the {@link JSONObject} payload from the specified {@link AJAXRequestData}
+     *
+     * @param requestData the {@link AJAXRequestData} to extract the {@link JSONObject} payload from
+     * @param params Optional parameter map to be filled, if the payload is contained in a sub object
+     * @return The extracted {@link JSONObject} payload
+     * @throws OXException if the payload is missing, or a parsing error occurs
+     */
+    protected JSONObject extractJsonBody(AJAXRequestData requestData, Map<String, Object> params) throws OXException {
+        Object data = requestData.getData();
+        if (data == null || !(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+        JSONObject retval = (JSONObject) data;
+
+        try {
+            if (retval.has(EVENT)) {
+                if (params != null) {
+                    for (String key : retval.keySet()) {
+                        if (key.equals(EVENT)) {
+                            continue;
+                        }
+                        params.put(key, retval.get(key));
+                    }
+                }
+                retval = retval.getJSONObject(EVENT);
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+
+        return retval;
+    }
+
+    /**
      * Extracts the {@link JSONObject} payload from the specified {@link UploadEvent}
      *
      * @param upload the {@link UploadEvent} to extract the {@link JSONObject} payload from
      * @return The extracted {@link JSONObject} payload
      * @throws OXException if the payload is missing, or a parsing error occurs
      */
-    private JSONObject extractJsonBody(UploadEvent upload) throws OXException {
+    private JSONObject extractJsonBody(UploadEvent upload, Map<String, Object> params) throws OXException {
         try {
             final String obj = upload.getFormField("json_0");
             if (Strings.isEmpty(obj)) {
@@ -338,7 +392,21 @@ public abstract class ChronosAction extends AbstractChronosAction {
             JSONObject json = new JSONObject();
             json.reset();
             json.parseJSONString(obj);
-            return json;
+            JSONObject retval = json;
+
+            if (retval.has(EVENT)) {
+                if (params != null) {
+                    for (String key : retval.keySet()) {
+                        if (key.equals(EVENT)) {
+                            continue;
+                        }
+                        params.put(key, retval.get(key));
+                    }
+                }
+                retval = retval.getJSONObject(EVENT);
+            }
+
+            return retval;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

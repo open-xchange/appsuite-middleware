@@ -1172,21 +1172,23 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
+            String contentType = null;
             try {
-                String contentType;
                 try {
                     contentType = message.getContentType();
                 } catch (MessagingException e) {
                     String[] header = message.getHeader("Content-Type");
                     if (null != header && header.length > 0) {
                         contentType = header[0];
-                    } else {
-                        contentType = null;
                     }
                 }
-                msg.setAlternativeHasAttachment(null == contentType ? false : MimeMessageUtility.hasAttachments(message));
+                msg.setAlternativeHasAttachment(null == contentType ? false : MimeMessageUtility.hasAttachments(message, contentType));
             } catch (MessagingException e) {
-                throw MimeMailException.handleMessagingException(e);
+                if (null == contentType) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+                // Don't know better...
+                msg.setAlternativeHasAttachment(Strings.asciiLowerCase(contentType).startsWith("multipart/mixed"));
             } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);

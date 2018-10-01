@@ -53,14 +53,26 @@ import static com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvi
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.chronos.common.CreateResultImpl;
+import com.openexchange.chronos.common.DefaultCalendarEvent;
+import com.openexchange.chronos.common.DeleteResultImpl;
+import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
+import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -174,28 +186,79 @@ public class ContactEventHandler implements EventHandler {
     private void processNewBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         for (CalendarAccount account : getBirthdaysCalendarAccounts(context, affectedUserIds)) {
+            com.openexchange.chronos.Event event = loadEvent(contact, context, account);
             insertDefaultAlarms(context, account, contact);
+            notifyHandlers(EventType.creation, context, account, event, contact);
         }
+    }
+
+    private com.openexchange.chronos.Event loadEvent(Contact contact, Context context, CalendarAccount account) throws OXException {
+        com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
+        return getAlarmHelper(context, account).applyAlarms(event);
     }
 
     private void processChangedBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         for (CalendarAccount account : getBirthdaysCalendarAccounts(context, affectedUserIds)) {
-            deleteAlarms(context, account, contact);
-            insertDefaultAlarms(context, account, contact);
+            com.openexchange.chronos.Event event = loadEvent(contact, context, account);
+            recreateAlarms(context, account, contact);
+            notifyHandlers(EventType.update, context, account, event, contact);
         }
+    }
+
+    private void recreateAlarms(Context context, CalendarAccount account, Contact contact) throws OXException {
+        deleteAlarms(context, account, contact);
+        insertDefaultAlarms(context, account, contact);
     }
 
     private void processRemovedBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         for (CalendarAccount account : getBirthdaysCalendarAccounts(context, affectedUserIds)) {
+            com.openexchange.chronos.Event event = loadEvent(contact, context, account);
             deleteAlarms(context, account, contact);
+            notifyHandlers(EventType.deletion, context, account, event, contact);
         }
     }
 
     private void deleteAlarms(Context context, CalendarAccount account, Contact contact) throws OXException {
         String eventId = getEventConverter(account).getEventId(contact);
         getAlarmHelper(context, account).deleteAlarms(eventId);
+    }
+
+    private void notifyHandlers(EventType type, Context context, CalendarAccount account, com.openexchange.chronos.Event original, Contact contact) throws OXException {
+        com.openexchange.chronos.Event updated = loadEvent(contact, context, account);
+        CalendarEvent event = getEvent(type, context, account, original, updated);
+        services.getService(CalendarEventNotificationService.class).notifyHandlers(event);
+    }
+
+    private CalendarEvent getEvent(EventType type, Context context, CalendarAccount account, com.openexchange.chronos.Event original, com.openexchange.chronos.Event updated) throws OXException {
+        List<CreateResult> creations = null;
+        List<UpdateResult> updates = null;
+        List<DeleteResult> deletions = null;
+        switch (type) {
+            case creation:
+                creations = Collections.singletonList(new CreateResultImpl(updated));
+                break;
+            case deletion:
+                deletions = Collections.singletonList(new DeleteResultImpl(new Date().getTime(), original));
+                break;
+            case update:
+                updates = Collections.singletonList(new UpdateResultImpl(original, updated));
+                break;
+            default:
+                // Should never occur
+                return null;
+        }
+        return new DefaultCalendarEvent(context.getContextId(),
+                                        account.getAccountId(),
+                                        account.getUserId(),
+                                        Collections.singletonMap(account.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+                                        creations,
+                                        updates,
+                                        deletions,
+                                        null,
+                                        null,
+                                        null);
     }
 
     private void insertDefaultAlarms(Context context, CalendarAccount account, Contact contact) throws OXException {
@@ -216,6 +279,12 @@ public class ContactEventHandler implements EventHandler {
     private List<CalendarAccount> getBirthdaysCalendarAccounts(Context context, Collection<Integer> affectedUserIds) throws OXException {
         AdministrativeCalendarAccountService accountService = requireService(AdministrativeCalendarAccountService.class, services);
         return accountService.getAccounts(context.getContextId(), I2i(affectedUserIds), PROVIDER_ID);
+    }
+
+    private enum EventType {
+        creation,
+        deletion,
+        update
     }
 
 }

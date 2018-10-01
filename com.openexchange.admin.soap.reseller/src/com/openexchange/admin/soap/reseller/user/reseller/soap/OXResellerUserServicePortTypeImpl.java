@@ -1538,7 +1538,12 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
 
         Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
-            user.setConvertDriveUserFolders(bool_tmp);
+            user.setConvertDriveUserFolders(bool_tmp.booleanValue());
+        }
+        
+        bool_tmp = soapUser.isLoadRemoteMailContentByDefault();
+        if (bool_tmp != null) {
+            user.setLoadRemoteMailContentByDefault(bool_tmp);
         }
 
         tmp = soapUser.getDepartment();
@@ -2299,6 +2304,8 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
         soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
+        soapUser.setConvertDriveUserFolders(Boolean.valueOf(user.isConvertDriveUserFolders()));
+        soapUser.setLoadRemoteMailContentByDefault(user.isLoadRemoteMailContentByDefault());
         return soapUser;
     }
 

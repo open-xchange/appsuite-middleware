@@ -59,6 +59,7 @@ import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider;
 import com.openexchange.chronos.provider.birthdays.ContactEventHandler;
 import com.openexchange.chronos.provider.birthdays.DefaultAlarmDate;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -91,7 +92,7 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class, CalendarStorageFactory.class,
             DatabaseService.class, ContextService.class, AdministrativeCalendarAccountService.class, ConversionService.class,
-            CapabilityService.class, CalendarAccountService.class, I18nServiceRegistry.class
+            CapabilityService.class, CalendarAccountService.class, I18nServiceRegistry.class, CalendarEventNotificationService.class
         };
     }
 

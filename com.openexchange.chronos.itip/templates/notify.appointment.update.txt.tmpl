@@ -1,5 +1,9 @@
 ${labels.updateIntroduction}
 
+<#if (labels.comment??)>
+${labels.comment}
+</#if>
+
 <#list changes as change>
 ${change}
 </#list>

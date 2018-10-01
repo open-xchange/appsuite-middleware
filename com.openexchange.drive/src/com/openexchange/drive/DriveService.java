@@ -76,10 +76,11 @@ public interface DriveService {
      * @param session The session
      * @param originalVersions A list of directory versions previously known by the client
      * @param clientVersions The current list of client directory versions
+     * @param includeQuota boolean to indicate if quota information are requested
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions) throws OXException;
+    SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException;
 
     /**
      * Synchronizes the files in a folder.
@@ -88,10 +89,11 @@ public interface DriveService {
      * @param path The path to the synchronized folder, relative to the root folder
      * @param originalVersions A list of file versions previously known by the client
      * @param clientVersions The current list of client file versions
+     * @param includeQuota boolean to indicate if quota information are requested
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException;
+    SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException;
 
     /**
      * Processes a file upload to the server.

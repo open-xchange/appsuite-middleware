@@ -53,8 +53,10 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.json.OnboardingActionFactory;
 import com.openexchange.client.onboarding.json.converter.OnboardingViewConverter;
+import com.openexchange.client.onboarding.json.converter.PListDownloadConverter;
 import com.openexchange.client.onboarding.json.converter.ScenarioConverter;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -75,7 +77,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, OnboardingService.class, ConfigViewFactory.class };
+        return new Class<?>[] { CapabilityService.class, OnboardingService.class, ConfigViewFactory.class, DownloadLinkProvider.class };
     }
 
     @Override
@@ -85,6 +87,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
 
         registerService(ResultConverter.class, new OnboardingViewConverter(this));
         registerService(ResultConverter.class, new ScenarioConverter(this));
+        registerService(ResultConverter.class, new PListDownloadConverter());
         registerModule(new OnboardingActionFactory(this), "onboarding");
     }
 

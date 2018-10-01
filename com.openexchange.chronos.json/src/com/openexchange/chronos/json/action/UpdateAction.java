@@ -50,8 +50,11 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -75,7 +78,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class UpdateAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS, PARAMETER_PUSH_TOKEN);
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -94,7 +97,13 @@ public class UpdateAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
-        Event event = parseEvent(requestData);
+
+        Map<String, Object> bodyParameters = new HashMap<>();
+        Event event = parseEvent(requestData, bodyParameters);
+        if (bodyParameters.containsKey(BODY_PARAM_COMMENT)) {
+            calendarAccess.set(CalendarParameters.PARAMETER_COMMENT, bodyParameters.get(BODY_PARAM_COMMENT));
+        }
+
         if (false == calendarAccess.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {
             calendarAccess.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
         }

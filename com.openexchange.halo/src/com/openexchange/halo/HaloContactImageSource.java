@@ -49,6 +49,7 @@
 
 package com.openexchange.halo;
 
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -62,7 +63,7 @@ public interface HaloContactImageSource {
 
     int getPriority();
 
-    Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException;
+    ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException;
 
     String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException;
 

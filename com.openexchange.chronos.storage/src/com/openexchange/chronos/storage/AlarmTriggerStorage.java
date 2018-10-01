@@ -141,6 +141,16 @@ public interface AlarmTriggerStorage {
     List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException;
 
     /**
+     * Retrieves the given trigger
+     *
+     * @param id The alarm id
+     * @return The {@link AlarmTrigger} or null
+     * @throws OXException
+     */
+    AlarmTrigger loadTrigger(int id) throws OXException;
+
+
+    /**
      * Recalculates the trigger time for floating events. E.g. to adapt to a timezone change of the user.
      *
      * @param userId The user id

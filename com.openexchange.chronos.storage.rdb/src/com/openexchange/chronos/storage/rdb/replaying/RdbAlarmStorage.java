@@ -170,4 +170,9 @@ public class RdbAlarmStorage implements AlarmStorage {
         return delegate.deleteAllAlarms();
     }
 
+    @Override
+    public Alarm loadAlarm(int alarmId) throws OXException {
+        return delegate.loadAlarm(alarmId);
+    }
+
 }

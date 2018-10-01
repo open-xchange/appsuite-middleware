@@ -847,4 +847,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
 
     }
+
+    @Override
+    public Alarm loadAlarm(int alarmId) throws OXException {
+        throw new UnsupportedOperationException();
+    }
 }

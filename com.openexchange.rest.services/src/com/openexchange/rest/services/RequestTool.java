@@ -49,14 +49,20 @@
 package com.openexchange.rest.services;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * Provides helpful methods for REST requests.
@@ -68,6 +74,55 @@ public class RequestTool {
 
     private RequestTool() {
         super();
+    }
+
+    private static final AtomicReference<DispatcherPrefixService> PREFIX_REFERENCE = new AtomicReference<>(null);
+
+    /**
+     * Sets the prefix reference to given prefix service
+     *
+     * @param prefixService The prefix service to set
+     */
+    public static void setDispatcherPrefixService(DispatcherPrefixService prefixService) {
+        PREFIX_REFERENCE.set(prefixService);
+    }
+
+    /**
+     * Gets the dispatcher path prefix; e.g. <code>"/ajax/"</code>.
+     *
+     * @return The dispatcher prefix or <code>null</code> if unavailable
+     */
+    public static String getDispatcherPrefix() {
+        DispatcherPrefixService dispatcherPrefixService = PREFIX_REFERENCE.get();
+        return null == dispatcherPrefixService ? null : dispatcherPrefixService.getPrefix();
+    }
+
+    /**
+     * Gets the dispatcher path prefix w/o leading/trailing slash characters; e.g. <code>"ajax"</code>.
+     *
+     * @return The dispatcher prefix (w/o leading/trailing slash characters) or <code>null</code> if unavailable
+     */
+    public static String getDispatcherPrefixWithoutSlashes() {
+        DispatcherPrefixService dispatcherPrefixService = PREFIX_REFERENCE.get();
+        if (null == dispatcherPrefixService) {
+            return null;
+        }
+
+        String prefix = dispatcherPrefixService.getPrefix();
+        if (Strings.isEmpty(prefix)) {
+            return null;
+        }
+
+        if (prefix.charAt(0) == '/') {
+            prefix = prefix.substring(1);
+        }
+
+        int length = prefix.length();
+        if (length > 0 && prefix.charAt(length - 1) == '/') {
+            prefix = prefix.substring(0, length - 1);
+        }
+
+        return prefix;
     }
 
     /**
@@ -89,9 +144,9 @@ public class RequestTool {
      * Parses the HTTP request headers and body into an {@link AJAXRequestData} instance.
      *
      * @param httpHeaders The headers
-     * @param uriInfo The uri info
-     * @param servletRequest The servlet request
-     * @param servletResponse The servlet response
+     * @param uriInfo The URI info
+     * @param servletRequest The Servlet request
+     * @param servletResponse The Servlet response
      * @return The request data
      * @throws OXException if parsing fails
      */
@@ -111,24 +166,36 @@ public class RequestTool {
             throw new BadRequestException(e);
         }
 
-        for (String header : httpHeaders.getRequestHeaders().keySet()) {
-            String value = httpHeaders.getRequestHeaders().getFirst(header);
-            if (value != null) {
-                requestData.setHeader(header, value);
+        MultivaluedMap<String, String> requestHeaders = httpHeaders.getRequestHeaders();
+        for (Map.Entry<String, List<String>> headerEntry : requestHeaders.entrySet()) {
+            List<String> values = headerEntry.getValue();
+            if (!values.isEmpty()) {
+                String value = values.get(0);
+                if (value != null) {
+                    requestData.setHeader(headerEntry.getKey(), value);
+                }
             }
         }
 
-        for (String param : uriInfo.getPathParameters().keySet()) {
-            String value = uriInfo.getPathParameters().getFirst(param);
-            if (value != null) {
-                requestData.putParameter(param, value);
+        MultivaluedMap<String, String> pathParameters = uriInfo.getPathParameters();
+        for (Map.Entry<String, List<String>> paramEntry : pathParameters.entrySet()) {
+            List<String> values = paramEntry.getValue();
+            if (!values.isEmpty()) {
+                String value = values.get(0);
+                if (value != null) {
+                    requestData.putParameter(paramEntry.getKey(), value);
+                }
             }
         }
 
-        for (String param : uriInfo.getQueryParameters().keySet()) {
-            String value = uriInfo.getQueryParameters().getFirst(param);
-            if (value != null) {
-                requestData.putParameter(param, value);
+        MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+        for (Map.Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
+            List<String> values = paramEntry.getValue();
+            if (!values.isEmpty()) {
+                String value = values.get(0);
+                if (value != null) {
+                    requestData.putParameter(paramEntry.getKey(), value);
+                }
             }
         }
 

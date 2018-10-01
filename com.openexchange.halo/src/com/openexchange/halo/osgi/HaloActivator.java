@@ -67,7 +67,7 @@ public class HaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, UserPermissionService.class, ContactService.class,
+        return new Class<?>[] { UserService.class, UserPermissionService.class, ContactService.class,
             SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class };
     }
 

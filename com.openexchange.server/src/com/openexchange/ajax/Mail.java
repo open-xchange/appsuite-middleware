@@ -100,7 +100,7 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.Category;

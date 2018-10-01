@@ -283,7 +283,10 @@ public class DefaultEntityResolver implements EntityResolver {
              * copy over email address for external attendees
              */
             if (null == attendee.getEMail()) {
-                attendee.setEMail(extractEMailAddress(attendee.getUri()));
+                String eMailAddress = extractEMailAddress(attendee.getUri());
+                if(eMailAddress != null) {
+                    attendee.setEMail(eMailAddress);
+                }
             }
         }
         /*

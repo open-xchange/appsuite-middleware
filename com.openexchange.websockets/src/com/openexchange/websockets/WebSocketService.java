@@ -86,20 +86,23 @@ public interface WebSocketService {
     // --------------------------------------------------------------------------------------------------------------
 
     /**
-     * Sends a text message to denoted user's remote end-points, blocking until all of the message has been transmitted.
+     * Sends a text message to denoted user's remote end-points, blocking until all of the message has been transmitted. End-points whose
+     * connection identifier matches the optional source token are excluded implicitly.
      *
      * @param message The message to be sent
+     * @param sourceToken The push token of the client triggering the update, or <code>null</code> if not available
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The handler which will be notified of progress.
      * @throws OXException If there is a problem delivering the message.
      */
-    void sendMessage(String message, int userId, int contextId) throws OXException;
+    void sendMessage(String message, String sourceToken, int userId, int contextId) throws OXException;
 
     // -------------------------------------------------------------------------------------------------------------
 
     /**
-     * Sends a text message to those end-points of the denoted user having its {@link WebSocket#getPath() path} starting with given filter.
+     * Sends a text message to those end-points of the denoted user having its {@link WebSocket#getPath() path} starting with given filter. 
+     * End-points whose connection identifier matches the optional source token are excluded implicitly.
      * <p>
      * This method blocks until all of the message has been transmitted.
      *
@@ -126,13 +129,14 @@ public interface WebSocketService {
      * </pre>
      *
      * @param message The message to be sent
+     * @param sourceToken The push token of the client triggering the update, or <code>null</code> if not available
      * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>); if <code>null</code> it is the same behavior as {@link #sendMessage(String, int, int)}
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The handler which will be notified of progress
      * @throws OXException If there is a problem delivering the message.
      */
-    void sendMessage(String message, String pathFilter, int userId, int contextId) throws OXException;
+    void sendMessage(String message, String sourceToken, String pathFilter, int userId, int contextId) throws OXException;
 
     // -------------------------------------------------------------------------------------------------------------
 

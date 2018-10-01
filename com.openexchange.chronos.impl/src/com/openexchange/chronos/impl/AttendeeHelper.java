@@ -59,6 +59,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
+import static com.openexchange.chronos.impl.Utils.isSkipExternalAttendeeURIChecks;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -284,10 +285,12 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
          * apply updated attendee data
          */
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
-            Attendee attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
-            if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
-                attendee = Check.requireValidEMail(attendee);
+            Attendee attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), null, (AttendeeField[]) null);
+            attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.URI)) {
+                if (false == isInternal(attendee) && false == isSkipExternalAttendeeURIChecks(session)) {
+                    attendee = Check.requireValidEMail(attendee);
+                }
             }
             if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
                 /*
@@ -377,7 +380,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
                 LOG.debug("Skipping duplicate external attendee {}", attendee);
                 continue;
             }
-            attendees.add(session.getConfig().isSkipExternalAttendeeURIChecks() ? attendee : Check.requireValidEMail(attendee));
+            attendees.add(isSkipExternalAttendeeURIChecks(session) ? attendee : Check.requireValidEMail(attendee));
         }
         return attendees;
     }

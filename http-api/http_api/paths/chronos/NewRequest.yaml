@@ -12,6 +12,7 @@
       - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosPushToken"
       - in: query
         name: rangeStart
         type: string
