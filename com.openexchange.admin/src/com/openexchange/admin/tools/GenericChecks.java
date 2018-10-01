@@ -144,8 +144,8 @@ public class GenericChecks {
 
         try {
             PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
-            List<String> knownIdentifiers = mechFactory.getApplicableIdentifiers();
-            for (String identifier : knownIdentifiers) {
+            List<String> identifiers = mechFactory.getIdentifiers();
+            for (String identifier : identifiers) {
                 if (identifier.equalsIgnoreCase(mech)) {
                     return;
                 }
@@ -166,7 +166,7 @@ public class GenericChecks {
      * @param salt The salt used for encoding
      * @return <code>true</code> if authentication succeeds and false if it fails
      */
-    public final static boolean authByMech(String crypted, String clear, String mech, String salt) {
+    public final static boolean authByMech(String crypted, String clear, String mech, byte[] salt) {
         if (Strings.isEmpty(mech)) {
             return false;
         }

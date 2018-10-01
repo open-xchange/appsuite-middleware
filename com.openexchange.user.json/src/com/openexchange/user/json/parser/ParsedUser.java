@@ -176,7 +176,7 @@ public final class ParsedUser implements User {
     }
 
     @Override
-    public String getSalt() {
+    public byte[] getSalt() {
         return null;
     }
 

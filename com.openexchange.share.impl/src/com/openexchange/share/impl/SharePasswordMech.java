@@ -49,8 +49,6 @@
 
 package com.openexchange.share.impl;
 
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -93,7 +91,7 @@ public class SharePasswordMech implements IPasswordMech {
     }
 
     @Override
-    public boolean check(String toCheck, String encoded, String salt) throws OXException {
+    public boolean check(String toCheck, String encoded, byte[] salt) throws OXException {
         if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
             return true;
         } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
@@ -110,17 +108,17 @@ public class SharePasswordMech implements IPasswordMech {
     }
 
     @Override
-    public String decode(String encodedPassword, String salt) throws OXException {
+    public String decode(String encodedPassword, byte[] salt) throws OXException {
         return cryptoService.decrypt(encodedPassword, cryptKey);
-    }
-
-    @Override
-    public List<String> getAlternativeIdentifiers() {
-        return Collections.emptyList();
     }
 
     @Override
     public int getHashLength() {
         return 64; // will not be used
+    }
+
+    @Override
+    public boolean expose() {
+        return false;
     }
 }

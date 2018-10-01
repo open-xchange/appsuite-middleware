@@ -71,7 +71,7 @@ public class Credentials implements Serializable {
 
     private String passwordMech;
 
-    private String salt;
+    private byte[] salt;
 
     /**
      * Creates a new instance of the object
@@ -152,7 +152,7 @@ public class Credentials implements Serializable {
      *
      * @return The salt
      */
-    public String getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 
@@ -161,7 +161,7 @@ public class Credentials implements Serializable {
      *
      * @param salt The salt to set
      */
-    public void setSalt(String salt) {
+    public void setSalt(byte[] salt) {
         this.salt = salt;
     }
 

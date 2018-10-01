@@ -208,7 +208,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
         }
 
         @Override
-        public String getSalt() {
+        public byte[] getSalt() {
             return null;
         }
 

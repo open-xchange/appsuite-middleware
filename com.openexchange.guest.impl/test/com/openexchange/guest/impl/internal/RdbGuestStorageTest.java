@@ -102,7 +102,7 @@ public class RdbGuestStorageTest {
     private static final String GROUP_ID = "default";
     private static final String GUEST_PASSWORD = "myToppiPasswordi";
     private static final String GUEST_PASSWORD_MECH = "{BCRYPT}";
-    private static final String GUEST_PASSWORD_SALT = "theSalt";
+    private static final byte[] GUEST_PASSWORD_SALT = "theSalt".getBytes();
 
     @Before
     public void setUp() throws Exception {

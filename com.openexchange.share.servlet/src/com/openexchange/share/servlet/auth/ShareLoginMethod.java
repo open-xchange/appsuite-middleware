@@ -232,7 +232,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
      * @return The decrypted value
      * @throws OXException If decryption fails
      */
-    public static String decrypt(String value, String salt) throws OXException {
+    public static String decrypt(String value, byte[] salt) throws OXException {
         return ShareServiceLookup.getService(PasswordMechRegistry.class, true).get(ShareConstants.PASSWORD_MECH_ID).decode(value, salt);
     }
 

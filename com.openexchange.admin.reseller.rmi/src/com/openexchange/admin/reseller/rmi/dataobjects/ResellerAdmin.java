@@ -85,7 +85,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     private boolean passwordMechset = false;
 
-    private String salt;
+    private byte[] salt;
 
     private boolean saltSet = false;
 
@@ -185,7 +185,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     }
 
     @Override
-    public String getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 
@@ -302,7 +302,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     /**
      * @param salt the salt to set
      */
-    public void setSalt(final String salt) {
+    public void setSalt(final byte[] salt) {
         this.saltSet = true;
         this.salt = salt;
     }

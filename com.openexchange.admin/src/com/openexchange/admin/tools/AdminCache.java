@@ -737,7 +737,7 @@ public class AdminCache {
                 if (user_pass_combination.length == 4) {
                     String salt = user_pass_combination[3];
                     if (Strings.isNotEmpty(salt)) {
-                        masterCredentials.setSalt(salt);
+                        masterCredentials.setSalt(salt.getBytes());
                     }
                 }
                 return masterCredentials;

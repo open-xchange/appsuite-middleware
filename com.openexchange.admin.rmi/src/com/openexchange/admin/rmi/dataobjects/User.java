@@ -98,7 +98,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean passwordMechset = false;
 
-    private String salt;
+    private byte[] salt;
 
     private boolean saltSet = false;
 
@@ -4577,11 +4577,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     @Override
-    final public String getSalt() {
+    final public byte[] getSalt() {
         return salt;
     }
 
-    final public void setSalt(final String salt) {
+    final public void setSalt(final byte[] salt) {
         if (null == salt) {
             this.saltSet = true;
         }

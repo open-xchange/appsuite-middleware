@@ -204,10 +204,11 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                 }
                 try {
                     PasswordDetails passwordDetails = adminCache.encryptPassword(userData);
-                    boolean passwordSet = setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, passwordDetails.getEncodedPassword()), connection);
-                    setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SALT, passwordDetails.getSalt()), connection);
-                    setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.PASSWORD_MECH, passwordDetails.getPasswordMech()), connection);
-                    return passwordSet;
+                    Map<Attribute, Object> attributes = new HashMap<>();
+                    attributes.put(UserAttribute.USER_PASSWORD, passwordDetails.getEncodedPassword());
+                    attributes.put(UserAttribute.SALT, passwordDetails.getSalt());
+                    attributes.put(UserAttribute.PASSWORD_MECH, passwordDetails.getPasswordMech());
+                    return setAttributes(userId, contextId, TABLE, attributes, connection);
                 } catch (StorageException e) {
                     // TODO: throw storage exception?
                 }

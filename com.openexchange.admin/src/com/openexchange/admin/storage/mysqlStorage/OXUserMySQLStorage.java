@@ -870,7 +870,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, userId);
                 stmt.setString(3, passwordDetails.getEncodedPassword());
                 stmt.setString(4, passwordDetails.getPasswordMech());
-                stmt.setString(5, passwordDetails.getSalt());
+                stmt.setBytes(5, passwordDetails.getSalt());
 
                 if (usrdata.getPassword_expired() == null) {
                     usrdata.setPassword_expired(Boolean.FALSE);

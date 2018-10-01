@@ -51,8 +51,6 @@ package com.openexchange.password.mechanism.impl.algorithm;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -72,12 +70,12 @@ public final class SHACrypt {
      * @deprecated Use SHA256 to generate new password instead
      */
     @Deprecated
-    public static final SHACrypt SHA1 = new SHACrypt("{SHA}", Arrays.asList("{SHA1}", "{SHA-1}"));
+    public static final SHACrypt SHA1 = new SHACrypt("{SHA}");
 
     /**
      * SHA-256 algorithm
      */
-    public static final SHACrypt SHA256 = new SHACrypt("{SHA256}", Arrays.asList("{SHA-256}"));
+    public static final SHACrypt SHA256 = new SHACrypt("{SHA256}");
 
     /**
      * SHA-512 algorithm.
@@ -86,18 +84,15 @@ public final class SHACrypt {
      * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
      * 
      */
-    public static final SHACrypt SHA512 = new SHACrypt("{SHA512}", Arrays.asList("{SHA-512}"));
+    public static final SHACrypt SHA512 = new SHACrypt("{SHA512}");
 
     private final String identifier;
 
-    private final List<String> alternatives;
-
     // -------------------------------------------------------------------
 
-    private SHACrypt(String lIdentifier, List<String> lAlternatives) {
+    private SHACrypt(String lIdentifier) {
         super();
         this.identifier = lIdentifier;
-        this.alternatives = lAlternatives;
     }
 
     // -------------------------------------------------------------------
@@ -117,11 +112,11 @@ public final class SHACrypt {
         return makeSHAPasswd(raw, null);
     }
 
-    public String makeSHAPasswd(String raw, String salt) throws NoSuchAlgorithmException {
+    public String makeSHAPasswd(String raw, byte[] salt) throws NoSuchAlgorithmException {
         final MessageDigest sha = MessageDigest.getInstance(makeDigestReady(getIdentifier()));
         sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
         if (null != salt) {
-            sha.update(salt.getBytes());
+            sha.update(salt);
         }
 
         final byte[] hash = sha.digest();
@@ -136,14 +131,5 @@ public final class SHACrypt {
      */
     public String getIdentifier() {
         return identifier;
-    }
-
-    /**
-     * Gets the lAlternatives
-     *
-     * @return The lAlternatives
-     */
-    public List<String> getAlternativeIdentifiers() {
-        return alternatives;
     }
 }

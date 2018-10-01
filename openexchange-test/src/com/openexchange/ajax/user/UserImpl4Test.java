@@ -31,7 +31,7 @@ public class UserImpl4Test implements User {
 
     private final String passwordMech = null;
 
-    private final String salt = null;
+    private final byte[] salt = null;
 
     private final boolean mailEnabled = false;
 
@@ -93,7 +93,7 @@ public class UserImpl4Test implements User {
     }
 
     @Override
-    public String getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 

@@ -102,7 +102,7 @@ public enum UserAttribute implements Attribute {
     /**
      * The 'salt' column
      */
-    SALT("salt", "salt", String.class),
+    SALT("salt", "salt", Byte.class),
     /**
      * The quota column
      */

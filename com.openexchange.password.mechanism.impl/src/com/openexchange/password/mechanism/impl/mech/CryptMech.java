@@ -75,8 +75,9 @@ public class CryptMech extends ConfigAwarePasswordMech {
     public PasswordDetails encode(String str) throws OXException {
         try {
             if (doSalt()) {
-                String salt = Base64.getUrlEncoder().withoutPadding().encodeToString(getSalt());
-                return new PasswordDetails(str, UnixCrypt.crypt(salt, str), getIdentifier(), salt);
+                byte[] salt = getSalt();
+                String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
+                return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), salt);
             }
             return new PasswordDetails(str, UnixCrypt.crypt(str), getIdentifier(), null);
         } catch (UnsupportedEncodingException e) {
@@ -86,7 +87,7 @@ public class CryptMech extends ConfigAwarePasswordMech {
     }
 
     @Override
-    public boolean checkPassword(String candidate, String encoded, String salt) throws OXException {
+    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
         try {
             return UnixCrypt.matches(encoded, candidate);
         } catch (UnsupportedEncodingException e) {

@@ -69,15 +69,15 @@ public class BCryptMech extends ConfigAwarePasswordMech {
 
     @Override
     public PasswordDetails encode(String str) {
+        String salt = BCrypt.gensalt();
         if (doSalt()) {
-            String salt = BCrypt.gensalt();
-            return new PasswordDetails(str, BCrypt.hashpw(str, salt), this.getIdentifier(), salt);
+            return new PasswordDetails(str, BCrypt.hashpw(str, salt), this.getIdentifier(), salt.getBytes());
         }
-        return new PasswordDetails(str, BCrypt.hashpw(str, BCrypt.gensalt()), this.getIdentifier(), null);
+        return new PasswordDetails(str, BCrypt.hashpw(str, salt), this.getIdentifier(), null);
     }
 
     @Override
-    public boolean checkPassword(String candidate, String encoded, String salt) {
+    public boolean checkPassword(String candidate, String encoded, byte[] salt) {
         return BCrypt.checkpw(candidate, encoded);
     }
 

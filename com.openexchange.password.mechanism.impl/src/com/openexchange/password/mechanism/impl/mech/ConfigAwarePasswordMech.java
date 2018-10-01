@@ -49,7 +49,6 @@
 
 package com.openexchange.password.mechanism.impl.mech;
 
-import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.password.mechanism.AbstractPasswordMech;
 import com.openexchange.password.mechanism.impl.osgi.Services;
@@ -68,10 +67,6 @@ public abstract class ConfigAwarePasswordMech extends AbstractPasswordMech {
 
     public ConfigAwarePasswordMech(String mechIdentifier) {
         super(mechIdentifier);
-    }
-
-    public ConfigAwarePasswordMech(String mechIdentifier, List<String> alternativeIdentifiers) {
-        super(mechIdentifier, alternativeIdentifiers);
     }
 
     //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT

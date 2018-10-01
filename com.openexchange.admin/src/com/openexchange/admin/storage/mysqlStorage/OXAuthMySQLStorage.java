@@ -207,7 +207,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
             }
             String encryptedPassword = rs.getString("userPassword");
             String passwordMechanism = rs.getString("passwordMech");
-            String salt = rs.getString("salt");
+            byte[] salt = rs.getBytes("salt");
             // Check via our crypt mech the password
             if (!GenericChecks.authByMech(encryptedPassword, credentials.getPassword(), passwordMechanism, salt)) {
                 log.debug("Password for {} \"{}\" did not match!", isAdmin ? "admin user" : "user", credentials.getLogin());

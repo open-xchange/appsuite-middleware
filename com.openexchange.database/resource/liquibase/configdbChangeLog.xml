@@ -289,7 +289,7 @@
             Add column 'salt' to table subadmin.
         </comment>
         <sql>
-            ALTER TABLE subadmin ADD salt VARCHAR(128) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL;
+            ALTER TABLE subadmin ADD salt binary(128) DEFAULT NULL;
         </sql>
         <rollback>
             <dropColumn tableName="subadmin" columnName="salt" />

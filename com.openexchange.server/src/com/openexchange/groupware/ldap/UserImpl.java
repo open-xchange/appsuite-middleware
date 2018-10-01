@@ -168,7 +168,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * The salt used for password encryption.
      */
-    private String salt = null;
+    private byte[] salt = null;
 
     /**
      * Determines if the user is enabled or disabled.
@@ -242,7 +242,7 @@ public class UserImpl implements User, Cloneable {
     }
 
     @Override
-    public String getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 
@@ -294,7 +294,7 @@ public class UserImpl implements User, Cloneable {
      * 
      * @param salt The salt.
      */
-    public void setSalt(final String salt) {
+    public void setSalt(final byte[] salt) {
         this.salt = salt;
     }
 

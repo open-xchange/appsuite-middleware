@@ -62,6 +62,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,9 +179,10 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             PasswordDetails passwordDetails = encryptPassword(parameters.get(Parameter.encryption), clearPassword);
             clearPassword = null;
             parameters.put(Parameter.adminpass, passwordDetails.getEncodedPassword());
-            String salt = passwordDetails.getSalt();
-            if (Strings.isNotEmpty(salt)) {
-                parameters.put(Parameter.salt, salt);
+            byte[] salt = passwordDetails.getSalt();
+            if (salt != null) {
+                String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
+                parameters.put(Parameter.salt, saltString);
             }
             if (cmd.hasOption("f")) {
                 parameters.put(Parameter.mpasswdfile, cmd.getOptionValue("f"));

@@ -102,7 +102,7 @@ public interface GuestService {
      * @param salt - the salt used for the password
      * @throws OXException
      */
-    void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, String salt) throws OXException;
+    void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, byte[] salt) throws OXException;
 
     /**
      * Remove an existing guest. If the last assignment for a guest was removed even the complete guest will be removed.

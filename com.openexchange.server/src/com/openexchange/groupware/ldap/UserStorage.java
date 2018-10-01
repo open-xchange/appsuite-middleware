@@ -284,11 +284,11 @@ public abstract class UserStorage {
      * @param salt The salt 
      * @throws OXException if an error occurs.
      */
-    public void updatePassword(Connection connection, Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException {
+    public void updatePassword(Connection connection, Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException {
         updatePasswordInternal(connection, context, userId, mech, password, salt);
     }
 
-    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException;
+    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException;
 
     /**
      * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user

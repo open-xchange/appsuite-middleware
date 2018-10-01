@@ -49,7 +49,6 @@
 
 package com.openexchange.password.mechanism;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,11 +67,11 @@ public interface IPasswordMech {
     String getIdentifier();
 
     /**
-     * Returns alternative identifiers that might get used to identify the password mechanism
+     * Returns if the password mechanism should be exposed or just used internally.
      * 
-     * @return {@link List} with alternative identifiers
+     * @return <code>true</code> if the password mechanism should be exposed. Otherwise <code>false</code>
      */
-    List<String> getAlternativeIdentifiers();
+    boolean expose();
 
     /**
      * Encodes the given string according to this password mechanism and returns the encoded string.
@@ -87,10 +86,11 @@ public interface IPasswordMech {
      * Decodes the given string according to its password mechanism and returns the decoded string.
      *
      * @param password The password to decode
+     * @param salt The salt used for encoding or <code>null</code> if no salt was used while encoding
      * @return The decoded string
      * @throws OXException
      */
-    String decode(String encodedPassword, String salt) throws OXException;
+    String decode(String encodedPassword, byte[] salt) throws OXException;
 
     /**
      * Checks if given password matches the encoded string according to this password mechanism.
@@ -101,7 +101,7 @@ public interface IPasswordMech {
      * @return <code>true</code> if string matches; otherwise <code>false</code>
      * @throws OXException
      */
-    boolean check(String toCheck, String encoded, String salt) throws OXException;
+    boolean check(String toCheck, String encoded, byte[] salt) throws OXException;
 
     /**
      * Character length of the resulting hash

@@ -49,7 +49,6 @@
 
 package com.openexchange.password.mechanism.impl.mech;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -77,8 +76,6 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
 
     private final Map<String, IPasswordMech> registeredPasswordMechs = new ConcurrentSkipListMap<String, IPasswordMech>(String.CASE_INSENSITIVE_ORDER);
 
-    private final Map<String, IPasswordMech> alternatives = new ConcurrentSkipListMap<String, IPasswordMech>(String.CASE_INSENSITIVE_ORDER);
-
     // -----------------------------------------------------------------------------------
 
     // Dirty hack to keep 'GenerateMasterPasswordCLT' working
@@ -102,9 +99,6 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
         for (IPasswordMech mech : passwordMech) {
             String id = adaptIdentifier(mech.getIdentifier());
             registeredPasswordMechs.put(id, mech);
-            for (String alternativeIdentifier : mech.getAlternativeIdentifiers()) {
-                alternatives.put(alternativeIdentifier, mech);
-            }
         }
     }
 
@@ -114,11 +108,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
     @Override
     public IPasswordMech get(String identifier) {
         String id = adaptIdentifier(identifier);
-        IPasswordMech iPasswordMech = registeredPasswordMechs.get(id);
-        if (iPasswordMech == null) {
-            iPasswordMech = alternatives.get(id);
-        }
-        return iPasswordMech;
+        return registeredPasswordMechs.get(id);
     }
 
     private IPasswordMech defaultMech = new SHAMech(SHACrypt.SHA256);
@@ -136,7 +126,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
                 return;
             }
         }
-        LOG.warn("Unable to find a registered implementation for the provided password mechanism '{}'. Will use the default {}. Available password mechanisms are: {}", identifier, defaultMech.getIdentifier(), String.join(",", getApplicableIdentifiers()));
+        LOG.warn("Unable to find a registered implementation for the provided password mechanism '{}'. Will use the default {}. Available password mechanisms are: {}", identifier, defaultMech.getIdentifier(), String.join(",", getIdentifiers()));
         defaultMech = new SHAMech(SHACrypt.SHA256);
     }
 
@@ -172,28 +162,16 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
     }
 
     @Override
-    public List<IPasswordMech> getAll() {
-        return new ArrayList<IPasswordMech>(registeredPasswordMechs.values());
-    }
-
-    @Override
-    public List<String> getApplicableIdentifiers() {
-        List<String> knownIdentifiers = registeredPasswordMechs.keySet().stream().collect(Collectors.toList());
-        knownIdentifiers.addAll(alternatives.keySet().stream().collect(Collectors.toList()));
-        return knownIdentifiers;
-    }
-
-    @Override
     public List<String> getIdentifiers() {
-        return registeredPasswordMechs.keySet().stream().collect(Collectors.toList());
+        return registeredPasswordMechs.entrySet().stream()
+            .filter(x -> x.getValue().expose())
+            .map(x->x.getKey())
+            .collect(Collectors.toList());
     }
 
     @Override
     public void unregister(IPasswordMech passwordMech) {
         String id = adaptIdentifier(passwordMech.getIdentifier());
         registeredPasswordMechs.remove(id);
-        for (String alternativeIdentifier : passwordMech.getAlternativeIdentifiers()) {
-            alternatives.remove(alternativeIdentifier);
-        }
     }
 }

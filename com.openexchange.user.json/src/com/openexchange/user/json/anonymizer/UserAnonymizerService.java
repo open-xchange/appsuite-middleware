@@ -117,7 +117,7 @@ public class UserAnonymizerService implements AnonymizerService<User> {
         }
 
         @Override
-        public String getSalt() {
+        public byte[] getSalt() {
             return null;
         }
 

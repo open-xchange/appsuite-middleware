@@ -137,7 +137,7 @@ public class MockUser implements User {
      */
     private String userPassword = "x";
 
-    private String salt = null;
+    private byte[] salt = null;
 
     /**
      * Determines if the user is enabled or disabled.
@@ -195,7 +195,7 @@ public class MockUser implements User {
     }
 
     @Override
-    public String getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 
@@ -218,7 +218,7 @@ public class MockUser implements User {
         this.userPassword = userPassword;
     }
 
-    public void setSalt(final String salt) {
+    public void setSalt(final byte[] salt) {
         this.salt = salt;
     }
 

@@ -85,7 +85,7 @@ public class UserAdapter implements User {
     }
 
     @Override
-    public String getSalt() {
+    public byte[] getSalt() {
         return delegate.getSalt();
     }
 

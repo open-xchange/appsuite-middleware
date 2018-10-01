@@ -50,9 +50,7 @@
 package com.openexchange.password.mechanism.impl.mech;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
 import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
@@ -73,7 +71,7 @@ public class SHAMech extends ConfigAwarePasswordMech {
      * @param crypt The {@link SHACrypt} to use
      */
     public SHAMech(SHACrypt crypt) {
-        super(crypt.getIdentifier(), crypt.getAlternativeIdentifiers());
+        super(crypt.getIdentifier());
         this.crypt = crypt;
     }
 
@@ -81,7 +79,7 @@ public class SHAMech extends ConfigAwarePasswordMech {
     public PasswordDetails encode(String str) throws OXException {
         try {
             if (doSalt()) {
-                String salt = Base64.getUrlEncoder().withoutPadding().encodeToString(getSalt());
+                byte[] salt = getSalt();
                 return new PasswordDetails(str, crypt.makeSHAPasswd(str, salt), getIdentifier(), salt);
             }
             return new PasswordDetails(str, crypt.makeSHAPasswd(str), getIdentifier(), null);
@@ -92,9 +90,9 @@ public class SHAMech extends ConfigAwarePasswordMech {
     }
 
     @Override
-    public boolean checkPassword(String candidate, String encoded, String salt) throws OXException {
+    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
         try {
-            if (Strings.isEmpty(salt)) {
+            if (salt == null) {
                 return crypt.makeSHAPasswd(candidate).equals(encoded);
             }
             return crypt.makeSHAPasswd(candidate, salt).equals(encoded);
@@ -112,10 +110,10 @@ public class SHAMech extends ConfigAwarePasswordMech {
     @Override
     public int getHashLength() {
         if (this.crypt == SHACrypt.SHA1) {
-            return 16;
-        } else if (this.crypt == SHACrypt.SHA256) {
             return 32;
+        } else if (this.crypt == SHACrypt.SHA256) {
+            return 64;
         }
-        return 64;
+        return 128;
     }
 }

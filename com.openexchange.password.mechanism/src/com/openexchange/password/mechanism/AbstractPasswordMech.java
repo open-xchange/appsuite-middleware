@@ -51,8 +51,6 @@ package com.openexchange.password.mechanism;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -71,31 +69,17 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
 
     private final String mechIdentifier;
 
-    private final List<String> alternativeIdentifiers;
-
     /**
      * Initializes a new {@link AbstractPasswordMech}.
      * 
      * @param mechIdentifier The identifier of the algorithm
      */
     public AbstractPasswordMech(String mechIdentifier) {
-        this(mechIdentifier, Collections.emptyList());
-    }
-
-    /**
-     * Initializes a new {@link AbstractPasswordMech}.
-     * 
-     * @param mechIdentifier The identifier of the algorithm
-     * @param alternativeIdentifiers Alternative identifiers of this algorithm
-     */
-    public AbstractPasswordMech(String mechIdentifier, List<String> alternativeIdentifiers) {
-        super();
         this.mechIdentifier = mechIdentifier;
-        this.alternativeIdentifiers = alternativeIdentifiers;
     }
 
     @Override
-    public boolean check(String toCheck, String encoded, String salt) throws OXException {
+    public boolean check(String toCheck, String encoded, byte[] salt) throws OXException {
         if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
             return true;
         } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
@@ -111,13 +95,14 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
      * 
      * @param candidate The plain text candidate
      * @param encoded The encoded password
+     * @param salt The salt used while password hashing
      * @return <code>true</code> if the password match
      * @throws OXException In case of error
      */
-    public abstract boolean checkPassword(String candidate, String encoded, String salt) throws OXException;
+    public abstract boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException;
 
     @Override
-    public String decode(String encodedPassword, String salt) throws OXException {
+    public String decode(String encodedPassword, byte[] salt) throws OXException {
         throw PasswordMechExceptionCodes.UNSUPPORTED_OPERATION.create(getIdentifier());
     }
 
@@ -127,8 +112,8 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
     }
 
     @Override
-    public List<String> getAlternativeIdentifiers() {
-        return alternativeIdentifiers;
+    public boolean expose() {
+        return true;
     }
 
     protected byte[] getSalt() throws OXException {

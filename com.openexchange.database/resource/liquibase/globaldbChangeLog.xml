@@ -260,7 +260,7 @@
             Add column 'salt' to table guest2context.
         </comment>
         <sql>
-            ALTER TABLE guest2context ADD salt VARCHAR(128) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL;
+            ALTER TABLE guest2context ADD salt binary(128) DEFAULT NULL;
         </sql>
         <rollback>
             <dropColumn tableName="guest2context" columnName="salt" />

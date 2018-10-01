@@ -170,7 +170,7 @@ public class DefaultGuestService implements GuestService {
      * {@inheritDoc}
      */
     @Override
-    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, String salt) throws OXException {
+    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, byte[] salt) throws OXException {
         check(mailAddress);
 
         GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);

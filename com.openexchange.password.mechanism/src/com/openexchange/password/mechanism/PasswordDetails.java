@@ -72,21 +72,21 @@ public class PasswordDetails {
     /**
      * The salt that was used while encrypting
      */
-    private final String salt;
+    private final byte[] salt;
 
     /*
      * The encrypted password
      */
     private final String encodedPassword;
 
-    public PasswordDetails(String plainPassword, String encodedPassword, String passwordMech, String salt) {
+    public PasswordDetails(String plainPassword, String encodedPassword, String passwordMech, byte[] salt) {
         this.plainPassword = plainPassword;
         this.encodedPassword = encodedPassword;
         this.passwordMech = passwordMech;
         this.salt = salt;
     }
 
-    public String getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 

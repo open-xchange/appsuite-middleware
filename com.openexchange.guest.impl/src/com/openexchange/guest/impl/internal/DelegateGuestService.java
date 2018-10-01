@@ -108,7 +108,7 @@ public class DelegateGuestService implements GuestService {
     }
 
     @Override
-    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, String salt) throws OXException {
+    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, byte[] salt) throws OXException {
         if (configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false)) {
             this.delegate.addGuest(mailAddress, groupId, contextId, userId, password, passwordMech, salt);
         }

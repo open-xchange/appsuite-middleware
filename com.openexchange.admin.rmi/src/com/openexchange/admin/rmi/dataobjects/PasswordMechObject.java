@@ -82,7 +82,7 @@ public interface PasswordMechObject {
     /**
      * Return the salt of this user object.
      *
-     * @return A {@link String} containing the salt
+     * @return A {@link byte[]} containing the salt
      */
-    String getSalt();
+    byte[] getSalt();
 }

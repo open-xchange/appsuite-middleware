@@ -210,7 +210,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setInt(3, assignment.getUserId());
             statement.setString(4, assignment.getPassword());
             statement.setString(5, assignment.getPasswordMech());
-            statement.setString(6, assignment.getSalt());
+            statement.setBytes(6, assignment.getSalt());
 
             long affectedRows = statement.executeUpdate();
 
@@ -540,7 +540,7 @@ public class RdbGuestStorage extends GuestStorage {
                 int uid = result.getInt(2);
                 String password = result.getString(3);
                 String passwordMech = result.getString(4);
-                String salt = result.getString(5);
+                byte[] salt = result.getBytes(5);
                 guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech, salt));
             }
         } catch (final SQLException e) {
@@ -571,7 +571,7 @@ public class RdbGuestStorage extends GuestStorage {
             while (result.next()) {
                 String password = result.getString(1);
                 String passwordMech = result.getString(2);
-                String salt = result.getString(3);
+                byte[] salt = result.getBytes(3);
                 return new GuestAssignment(guestId, contextId, userId, password, passwordMech, salt);
             }
 
@@ -597,7 +597,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(UPDATE_GUEST_PASSWORD);
             statement.setString(1, assignment.getPassword());
             statement.setString(2, assignment.getPasswordMech());
-            statement.setString(3, assignment.getSalt());
+            statement.setBytes(3, assignment.getSalt());
             statement.setInt(4, assignment.getContextId());
             statement.setInt(5, assignment.getUserId());
             statement.setLong(6, assignment.getGuestId());

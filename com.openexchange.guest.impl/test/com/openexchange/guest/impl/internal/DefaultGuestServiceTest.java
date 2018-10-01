@@ -97,7 +97,7 @@ public class DefaultGuestServiceTest {
     private static final String GUEST_MAIL_ADDRESS = "hotte@example.com";
     private static final String GUEST_PASSWORD = "myToppiPasswordi";
     private static final String GUEST_PASSWORD_MECH = "{BCRYPT}";
-    private static final String GUEST_PASSWORD_SALT = "theSalt";
+    private static final byte[] GUEST_PASSWORD_SALT = "theSalt".getBytes();
     private static final String GROUP_ID = "default";
     private static final long GUEST_ID = 77;
     private static final int CONTEXT_ID = 1;
@@ -181,7 +181,7 @@ public class DefaultGuestServiceTest {
         contact.setInternalUserId((int) GUEST_ID);
 
         assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT));
-        assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech", "salt"));
+        assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech", "salt".getBytes()));
 
         this.defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory, passwordMechFactory);
     }

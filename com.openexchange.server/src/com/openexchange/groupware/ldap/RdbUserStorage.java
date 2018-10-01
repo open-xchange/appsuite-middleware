@@ -251,7 +251,7 @@ public class RdbUserStorage extends UserStorage {
                 setStringOrNull(i++, stmt, null); // filestore_password
                 stmt.setLong(i++, 0); // quota_max
             }
-            setStringOrNull(i++, stmt, user.getSalt()); // salt
+            stmt.setBytes(i++, user.getSalt());
 
             stmt.executeUpdate();
 
@@ -564,7 +564,7 @@ public class RdbUserStorage extends UserStorage {
                             user.setFileStorageQuota(quotaMax);
                         }
                         {
-                            String salt = result.getString(pos++);
+                            byte[] salt = trim(result.getBytes(pos++));
                             user.setSalt(salt);
                         }
 
@@ -600,6 +600,18 @@ public class RdbUserStorage extends UserStorage {
             retval[i] = users.get(userIds[i]);
         }
         return retval;
+    }
+
+    private static byte[] trim(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        int i = bytes.length - 1;
+        while (i >= 0 && bytes[i] == 0) {
+            --i;
+        }
+
+        return java.util.Arrays.copyOf(bytes, i + 1);
     }
 
     @Override
@@ -925,7 +937,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
@@ -936,7 +948,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException {
         if (connection == null) {
             updatePasswordInternal(context, userId, mech, password, salt);
             return;
@@ -948,7 +960,7 @@ public class RdbUserStorage extends UserStorage {
             int pos = 1;
             stmt.setString(pos++, password);
             stmt.setString(pos++, mech != null ? mech.getIdentifier() : "");
-            stmt.setString(pos++, salt);
+            stmt.setBytes(pos++, salt);
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
             stmt.execute();
@@ -1369,8 +1381,7 @@ public class RdbUserStorage extends UserStorage {
                 /*
                  * Use utf8*_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insensitive.
                  */
-                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ")
-                    .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
+                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ").append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
                 if (excludeUsers) {
                     /*
                      * exclude all regular users
@@ -1621,6 +1632,7 @@ public class RdbUserStorage extends UserStorage {
     // -----------------------------------------------------------------------------------------
 
     public static final class ValuePair {
+
         public final String newValue;
         public final String oldValue;
 
