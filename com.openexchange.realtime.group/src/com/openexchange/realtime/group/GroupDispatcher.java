@@ -621,7 +621,10 @@ public class GroupDispatcher implements ComponentHandle {
      * 'com.openexchange.realtime.client.inactivity'.
      * @throws OXException
      */
-    public void handleInactivityNotice(Stanza stanza) throws OXException {}
+    @SuppressWarnings("unused")
+    public void handleInactivityNotice(Stanza stanza) throws OXException {
+        // must be implemented by sub-class
+    }
 
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
@@ -637,7 +640,8 @@ public class GroupDispatcher implements ComponentHandle {
         return false;
     }
 
-    public Stanza getWelcomeMessage(ID onBehalfOf) {
+    @SuppressWarnings("unused")
+    public Stanza getWelcomeMessage(ID onBehalfOf, Stanza joinStanza) {
         Stanza welcome = new Message();
         welcome.setTo(onBehalfOf);
         welcome.setFrom(getId());
@@ -647,7 +651,8 @@ public class GroupDispatcher implements ComponentHandle {
         return welcome;
     }
 
-    public Stanza getSignOffMessage(ID onBehalfOf, Stanza optStanza) {
+    @SuppressWarnings("unused")
+    public Stanza getSignOffMessage(ID onBehalfOf, Stanza leaveStanza) {
         Stanza goodbye = new Message();
         goodbye.setTo(onBehalfOf);
         goodbye.setFrom(getId());
