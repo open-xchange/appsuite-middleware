@@ -59,6 +59,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
  */
 public enum UserMailSettingAttribute implements Attribute {
 
+    BITS("permission-bits", "bits", Integer.class),
     SEND_ADDRESS("default-sender-address", "send_addr", String.class),
     STD_DRAFTS("standard-drafts-folder-name", "std_drafts", String.class),
     STD_SENT("standard-sent-folder-name", "std_sent", String.class),

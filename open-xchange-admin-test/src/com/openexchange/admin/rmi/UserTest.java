@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -76,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
+import com.openexchange.data.conversion.ical.Assert;
 
 /**
  * {@link UserTest}
@@ -160,6 +162,54 @@ public class UserTest extends AbstractRMITest {
             fail("Expected to get user data for added user");
         }
     }
+
+    @Test
+    public void testCreateUserLoadRemoteMailContentByDefault() throws Exception {
+        // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        usr.setLoadRemoteMailContentByDefault(Boolean.TRUE);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+
+        // See if value was set
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("Loading remote content should be allowed!", srv_loaded.isLoadRemoteMailContentByDefault(), is(Boolean.TRUE));
+    }
+
+    @Test
+    public void testChangeUserLoadRemoteMailContentByDefault() throws Exception {
+        // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        usr.setLoadRemoteMailContentByDefault(Boolean.TRUE);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+        
+        // Change value 
+        createduser.setLoadRemoteMailContentByDefault(Boolean.FALSE);
+        getUserManager().change(context, createduser, contextAdminCredentials);
+        
+        // Check value
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("Loading remote content should be disabled!", srv_loaded.isLoadRemoteMailContentByDefault(), is(Boolean.FALSE));
+    }
+
+    @Test
+    public void testChangeUserWithoutLoadRemoteMailContentByDefault() throws Exception {
+        // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        usr.setLoadRemoteMailContentByDefault(Boolean.TRUE);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+        
+        // Don't set value
+        createduser.setLoadRemoteMailContentByDefault(null);
+        getUserManager().change(context, createduser, contextAdminCredentials);
+        
+        // Value should be unchanged
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("Loading remote content should still be enabled!", srv_loaded.isLoadRemoteMailContentByDefault(), is(Boolean.TRUE));
+    }
+    
 
     /**
      * Tests the user creation with context module access rights

@@ -194,13 +194,15 @@ public class ScenarioConverter implements ResultConverter {
         }
         {
             List<Scenario> alternatives = scenario.getAlternatives(session);
-            JSONArray jAlternatives = new JSONArray(alternatives.size());
-            for (Scenario alternative : alternatives) {
-                DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), ClientDevice.IMPLIES_ALL, scenario.getDevice(), session);
-                JSONObject jAlternative = toJson(deviceAwareScenario, requestData, session, onboardingService);
-                jAlternatives.put(jAlternative);
+            if (null != alternatives) {
+                JSONArray jAlternatives = new JSONArray(alternatives.size());
+                for (Scenario alternative : alternatives) {
+                    DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), ClientDevice.IMPLIES_ALL, scenario.getDevice(), session);
+                    JSONObject jAlternative = toJson(deviceAwareScenario, requestData, session, onboardingService);
+                    jAlternatives.put(jAlternative);
+                }
+                jScenario.put("alternatives", jAlternatives);
             }
-            jScenario.put("alternatives", jAlternatives);
         }
 
         return jScenario;

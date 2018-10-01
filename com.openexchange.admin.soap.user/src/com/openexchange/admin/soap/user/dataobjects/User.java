@@ -154,6 +154,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="load_remote_mail_content_by_default" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -296,7 +297,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield19",
     "userfield20",
     "primaryAccountName",
-    "convertDriveUserFolders"
+    "convertDriveUserFolders",
+    "loadRemoteMailContentByDefault"
 })
 public class User {
 
@@ -565,6 +567,8 @@ public class User {
     private String primaryAccountName;
     @XmlElement(name = "convert_drive_user_folders", nillable = true)
     protected Boolean convertDriveUserFolders;
+    @XmlElement(name = "load_remote_mail_content_by_default", nillable = true)
+    protected Boolean loadRemoteMailContentByDefault;
 
     /**
      * Gets the value of the aliases property.
@@ -3784,6 +3788,27 @@ public class User {
 
     public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
         this.convertDriveUserFolders = convertDriveUserFolders;
+    }
+
+    /**
+     * Indicates whether the loading of content from remote servers is allowed per default when displaying HTML mails
+     * 
+     * @return A {@link Boolean}. The boolean is
+     *         <code>true</code> if loading of content from remote servers is allowed per default when displaying HTML mails
+     *         <code>false</code> if loading of content from remote servers isn't allowed per default when displaying HTML mails
+     *         <code>null</code> if not set
+     */
+    public Boolean isLoadRemoteMailContentByDefault() {
+        return loadRemoteMailContentByDefault;
+    }
+
+    /**
+     * Set the value for load-remote-mail-content-by-default
+     * 
+     * @param loadRemoteMailContentByDefault The {@link Boolean} to set
+     */
+    public void setLoadRemoteMailContentByDefault(Boolean loadRemoteMailContentByDefault) {
+        this.loadRemoteMailContentByDefault = loadRemoteMailContentByDefault;
     }
 
 }

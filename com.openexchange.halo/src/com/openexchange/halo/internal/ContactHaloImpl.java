@@ -70,6 +70,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ParsedDisplayName;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -82,7 +83,6 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.HaloExceptionCodes;
-import com.openexchange.halo.Picture;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
@@ -134,21 +134,18 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     @Override
-    public Picture getPicture(Contact contact, ServerSession session) throws OXException {
+    public ContactPicture getPicture(Contact contact, ServerSession session) throws OXException {
         HaloContactQuery contactQuery = buildQuery(contact, session, true);
 
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
                 continue;
             }
-            Picture picture = source.getPicture(contactQuery, session);
+            ContactPicture picture = source.getPicture(contactQuery, session);
             if (picture != null){
                 StringBuilder etagBuilder = new StringBuilder();
-                etagBuilder.append(source.getClass().getName()).append("://").append(picture.getEtag());
-
-                picture.setEtag(etagBuilder.toString());
-
-                return picture;
+                etagBuilder.append(source.getClass().getName()).append("://").append(picture.getETag());
+                return new ContactPicture(etagBuilder.toString(), picture.getFileHolder(), picture.getLastModified());
             }
         }
         return null;

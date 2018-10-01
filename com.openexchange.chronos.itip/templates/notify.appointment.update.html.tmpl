@@ -12,6 +12,11 @@
             ${templating.include( "notify.appointment.intro.html.tmpl" )}
             <div class="calendar-action">
                 ${labels.updateIntroduction}
+                <#if (labels.comment??)>
+                    <div class="comment">
+                        ${labels.comment}
+                    </div>
+                </#if>
                 <div class="changes">
                     <#list changes as change>
                         <div class="change">${change}</div>

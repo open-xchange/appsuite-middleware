@@ -89,7 +89,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         private final BundleContext context;
 
         /**
-         * Initializes a new {@link ServiceTrackerCustomizerImplementation}.
+         * Initializes a new {@link ServiceLookupTrackerCustomizer}.
          *
          * @param clazz The service's class to look-up
          * @param activator The activator

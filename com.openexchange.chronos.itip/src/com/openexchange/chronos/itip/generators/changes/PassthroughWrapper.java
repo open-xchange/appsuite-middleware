@@ -104,4 +104,9 @@ public class PassthroughWrapper implements TypeWrapper {
 		return none(argument);
 	}
 
+    @Override
+    public String italic(Object argument) {
+        return none(argument);
+    }
+
 }

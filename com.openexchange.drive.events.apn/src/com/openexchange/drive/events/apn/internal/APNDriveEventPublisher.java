@@ -65,6 +65,7 @@ import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
 import javapns.notification.PayloadPerDevice;
+import javapns.notification.PushNotificationBigPayload;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
@@ -197,7 +198,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
             try {
-                PushNotificationPayload payload = new PushNotificationPayload();
+                PushNotificationPayload payload = new PushNotificationBigPayload();
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
                 JSONObject apsObject = payload.getPayload().getJSONObject("aps");
                 if (null == apsObject) {
@@ -225,7 +226,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                 continue;
             }
             try {
-                PushNotificationPayload payload = new PushNotificationPayload();
+                PushNotificationPayload payload = new PushNotificationBigPayload();
                 payload.addCustomAlertLocKey("TRIGGER_SYNC");
                 payload.addCustomAlertActionLocKey("OK");
                 payload.addCustomDictionary("root", subscription.getRootFolderID());

@@ -90,16 +90,21 @@ import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -128,7 +133,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final int calendarUserId;
     protected final CalendarFolder folder;
     protected final Date timestamp;
-
     protected final ResultTracker resultTracker;
     protected EnumSet<Role> roles;
 
@@ -282,16 +286,18 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Deletes a specific internal user attendee from a single event from the storage. This can be used for any kind of event, i.e. a
-     * single, non-recurring event, an existing exception of an event series, or an event series. For the latter one, the attendee is deleted from
-     * any existing event exceptions as well.
+     * Virtually deletes a specific internal user attendee from a single event from the storage by setting the <i>hidden</i>-flag and
+     * participation status accordingly.
+     * <p/>
+     * This can be used for any kind of event, i.e. a single, non-recurring event, an existing exception of an event series, or an event
+     * series. For the latter one, the attendee is deleted from any existing event exceptions as well.
      * <p/>
      * The deletion includes:
      * <ul>
      * <li>insertion of a <i>tombstone</i> record for the original event</li>
      * <li>insertion of <i>tombstone</i> records for the original attendee</li>
      * <li>deletion of any alarms of the attendee associated with the event</li>
-     * <li>deletion of the attendee from the event</li>
+     * <li>marking the attendee as <i>hidden</i> in the event</li>
      * <li>update of the last-modification timestamp of the original event</li>
      * </ul>
      *
@@ -307,14 +313,18 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             deleteExceptions(originalEvent, originalEvent.getChangeExceptionDates(), userId);
         }
         /*
-         * delete event data from storage for this attendee
+         * mark event as deleted for this attendee & insert appropriate tombstone record
          */
         String id = originalEvent.getId();
         Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser);
         tombstone.setAttendees(Collections.singletonList(storage.getUtilities().getTombstone(originalAttendee)));
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, originalEvent.getAttendees());
-        storage.getAttendeeStorage().deleteAttendees(id, Collections.singletonList(originalAttendee));
+        Attendee updatedAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+        updatedAttendee.setHidden(true);
+        updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
+        updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
+        storage.getAttendeeStorage().updateAttendee(id, updatedAttendee);
         storage.getAlarmStorage().deleteAlarms(id, userId);
         /*
          * 'touch' event & track calendar results
@@ -330,7 +340,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Deletes a specific internal user attendee from change exception events from the storage.
+     * Virtually deletes a specific internal user attendee from a change exception events from the storage by setting the <i>hidden</i>-
+     * flag and participation status accordingly.
      * <p/>
      * For each change exception, the data is removed by invoking {@link #delete(Event, Attendee)} for the exception, in case the
      * user is found the exception's attendee list.
@@ -349,9 +360,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Deletes a specific internal user attendee from a specific occurrence of a series event that does not yet exist as change exception.
-     * This includes the creation of the corresponding change exception, and the removal of the user attendee from this exception's
-     * attendee list.
+     * Virtually deletes a specific internal user attendee from a specific occurrence of a series event that does not yet exist as change
+     * exception by setting the <i>hidden</i>-flag and participation status accordingly.
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceId The recurrence identifier of the occurrence to remove the attendee for
@@ -359,7 +369,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      */
     protected void deleteFromRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
         /*
-         * prepare & insert a plain exception first, based on the original data from the master, leaving out the removed attendee
+         * prepare & insert a plain exception first, based on the original data from the master, marking the attendee as deleted
          */
         Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
         Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
@@ -367,6 +377,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getEventStorage().insertEvent(newExceptionEvent);
         List<Attendee> attendees = new ArrayList<Attendee>(originalSeriesMaster.getAttendees());
         attendees.remove(originalAttendee);
+        Attendee updatedAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
+        updatedAttendee.setHidden(true);
+        updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
+        updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
+        attendees.add(updatedAttendee);
         storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), attendees);
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
         for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
@@ -428,12 +443,14 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Map<Integer, List<Alarm>> newAlarmsByUserId = new HashMap<Integer, List<Alarm>>(alarmsByUserId.size());
         for (Entry<Integer, List<Alarm>> entry : alarmsByUserId.entrySet()) {
             List<Alarm> newAlarms = new ArrayList<Alarm>(entry.getValue().size());
+            AlarmPreparator.getInstance().prepareEMailAlarms(session, entry.getValue());
             for (Alarm alarm : entry.getValue()) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
                 if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
+
                 newAlarms.add(newAlarm);
             }
             String folderView = getFolderView(event, i(entry.getKey()));
@@ -467,6 +484,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if there were any updates, <code>false</code>, otherwise
      */
     protected boolean updateAlarms(Event event, int userId, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+        AlarmPreparator.getInstance().prepareEMailAlarms(session, updatedAlarms);
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
             return false;

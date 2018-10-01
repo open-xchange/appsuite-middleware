@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  */
 public interface EventNotificationPoolService {
 
-    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException;
+    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException;
 
     public void fasttrack(Event event, Session session) throws OXException;
 

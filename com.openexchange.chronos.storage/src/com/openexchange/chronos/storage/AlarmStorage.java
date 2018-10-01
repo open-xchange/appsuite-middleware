@@ -199,4 +199,13 @@ public interface AlarmStorage {
      */
     void deleteAlarms(String eventId, int userId, int[] alarmIds) throws OXException;
 
+    /**
+     * Gets the alarm with the given id
+     *
+     * @param alarmId The alarm id
+     * @return The alarm
+     * @throws OXException
+     */
+    Alarm loadAlarm(int alarmId) throws OXException;
+
 }

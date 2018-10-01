@@ -240,7 +240,7 @@ properties:
       tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.skipExternalAttendeeURIChecks
       description: |
-         Controls whether checks of (external) attendee URIs are disabled or not. 
+         Controls whether checks of (external) attendee URIs are always disabled in or not.  
       defaultValue: false
       version: 7.10.0
       reloadable: true
@@ -249,3 +249,195 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar"]
+
+    - key: com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+      description: |
+        In order to properly deliver message alarms a message alarm delivery worker is needed. This worker checks all schemata for due alarms and schedules delivery worker for each of them.
+
+        This property enables or disables this worker.
+      defaultValue: true
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.period
+        - com.openexchange.calendar.alarm.message.backgroundWorker.initialDelay
+        - com.openexchange.calendar.alarm.message.backgroundWorker.lookAhead
+        - com.openexchange.calendar.alarm.message.backgroundWorker.overdueWaitTime
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]
+    - key: com.openexchange.calendar.alarm.message.backgroundWorker.period
+      description: |
+        In order to properly deliver message alarms a message alarm delivery worker is spawned (see [[com.openexchange.calendar.alarm.message.backgroundWorker.enabled]].
+
+        This property defines the time in minutes between executions of this worker.
+      defaultValue: 30
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+        - com.openexchange.calendar.alarm.message.backgroundWorker.initialDelay
+        - com.openexchange.calendar.alarm.message.backgroundWorker.lookAhead
+        - com.openexchange.calendar.alarm.message.backgroundWorker.overdueWaitTime
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]
+    - key: com.openexchange.calendar.alarm.message.backgroundWorker.initialDelay
+      description: |
+        In order to properly deliver message alarms a message alarm delivery worker is spawned (see [[com.openexchange.calendar.alarm.message.backgroundWorker.enabled]].
+        
+        This property defines the initial delay in minutes after which the message delivery worker runs for the first time.
+      defaultValue: 10
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+        - com.openexchange.calendar.alarm.message.backgroundWorker.period
+        - com.openexchange.calendar.alarm.message.backgroundWorker.lookAhead
+        - com.openexchange.calendar.alarm.message.backgroundWorker.overdueWaitTime
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]
+    - key: com.openexchange.calendar.alarm.message.backgroundWorker.lookAhead
+      description: |
+        In order to properly deliver message alarms a message alarm delivery worker is spawned (see [[com.openexchange.calendar.alarm.message.backgroundWorker.enabled]].
+        
+        This property defines the time in minutes the delivery worker looks ahead to pick up message alarms. Must not be smaller than [[com.openexchange.calendar.alarm.message.backgroundWorker.lookAhead]].
+      defaultValue: 35
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+        - com.openexchange.calendar.alarm.message.backgroundWorker.period
+        - com.openexchange.calendar.alarm.message.backgroundWorker.initialDelay
+        - com.openexchange.calendar.alarm.message.backgroundWorker.overdueWaitTime
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]
+    - key: com.openexchange.calendar.alarm.message.backgroundWorker.overdueWaitTime
+      description: |
+        Defines the time in minutes that is waited until an alarm that is already in processing is picked up. E.g. because the node who originally was going to process the trigger has died.
+      defaultValue: 5
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+        - com.openexchange.calendar.alarm.message.backgroundWorker.period
+        - com.openexchange.calendar.alarm.message.backgroundWorker.initialDelay
+        - com.openexchange.calendar.alarm.message.backgroundWorker.lookAhead
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]
+
+
+
+    - key: com.openexchange.calendar.alarm.mail.time.shift
+      description: |
+        Defines the time in milliseconds the trigger time of a mail alarm should be shifted before the trigger time.
+        With this property the admin can configure the average time needed by the mail system to send out the mail.
+        This way the mail should usually be send out on time and not a few seconds late.
+      defaultValue: 0
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Mail"]
+    - key: com.openexchange.calendar.alarm.mail.enabled
+      description: |
+        Enables or disables mail alarms.
+      defaultValue: true
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Mail"]
+    - key: com.openexchange.calendar.alarm.mail.limit.amount
+      description: |
+        Defines the amount of mails which are allowed to be send within the given time-frame. A negative value deactivates this limit.
+      defaultValue: -1
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+        - com.openexchange.calendar.alarm.mail.enabled
+        - com.openexchange.calendar.alarm.mail.limit.timeframe
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Mail"]
+    - key: com.openexchange.calendar.alarm.mail.limit.timeframe
+      description: |
+        Defines the timeframe in milliseconds for the [[com.openexchange.calendar.alarm.mail.limit.amount]].
+      defaultValue: 60000
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.mail.enabled
+        - com.openexchange.calendar.alarm.mail.limit.amount
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Mail"]      
+
+    - key: com.openexchange.calendar.alarm.sms.time.shift
+      description: |
+        Defines the time in milliseconds the trigger time of a sms alarm should be shifted before the trigger time.
+        With this property the admin can configure the average time needed to send out a sms.
+        This way the sms should usually be send out on time and not a few seconds late.
+      defaultValue: 0
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "SMS"]
+    - key: com.openexchange.calendar.alarm.sms.enabled
+      description: |
+        Enables or disables sms alarms.
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+        - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "SMS"]
+    - key: com.openexchange.calendar.alarm.sms.limit.amount
+      description: |
+        Defines the amount of sms which are allowed to be send within the given time-frame. A negative value deactivates this limit.
+      defaultValue: 50
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+        - com.openexchange.calendar.alarm.sms.enabled
+        - com.openexchange.calendar.alarm.sms.limit.timeframe
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "SMS"]
+    - key: com.openexchange.calendar.alarm.sms.limit.timeframe
+      description: |
+        Defines the timeframe in milliseconds for the [[com.openexchange.calendar.alarm.sms.limit.amount]].
+      defaultValue: 60000
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.sms.enabled
+        - com.openexchange.calendar.alarm.sms.limit.amount
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "SMS"]      

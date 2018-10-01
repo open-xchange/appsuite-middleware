@@ -50,12 +50,15 @@
 package com.openexchange.rest.services.osgi;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -63,6 +66,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.rest.services.RequestTool;
+import com.openexchange.rest.services.jersey.AJAXFilter;
 import com.openexchange.rest.services.jersey.JSONReaderWriter;
 import com.openexchange.rest.services.jersey.JerseyConfiguration;
 import com.openexchange.rest.services.jersey.OXExceptionMapper;
@@ -74,10 +80,10 @@ import com.openexchange.rest.services.security.AuthenticationFilter;
  */
 public class Activator implements BundleActivator {
 
-
-    private ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker;
-    private ServiceTracker<ConfigurationService, ConfigurationService> csTracker;
+    private List<ServiceTracker<?, ?>> trackers;
+    private List<ServiceRegistration<?>> registrations;
     final AtomicBoolean authRegistered = new AtomicBoolean();
+    ServiceRegistration<AJAXFilter> ajaxFilterRegistration;
 
     /**
      * Initializes a new {@link Activator}.
@@ -90,72 +96,123 @@ public class Activator implements BundleActivator {
     public synchronized void start(final BundleContext context) throws Exception {
         final Logger logger = LoggerFactory.getLogger(Activator.class);
 
-        cmTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
+        List<ServiceTracker<?, ?>> trackers = new ArrayList<>(6);
+        List<ServiceRegistration<?>> registrations = new ArrayList<>(6);
+        try {
+            trackers.add(new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
 
-            @Override
-            public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
-                ConfigurationAdmin service = super.addingService(reference);
-                if (service != null) {
-                    try {
-                        Configuration configuration = service.getConfiguration("com.eclipsesource.jaxrs.connector", null);
-                        Dictionary<String, Object> properties = configuration.getProperties();
-                        if (properties == null) {
-                            properties = new Hashtable<String, Object>(1);
+                @Override
+                public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
+                    ConfigurationAdmin service = super.addingService(reference);
+                    if (service != null) {
+                        try {
+                            Configuration configuration = service.getConfiguration("com.eclipsesource.jaxrs.connector", null);
+                            Dictionary<String, Object> properties = configuration.getProperties();
+                            if (properties == null) {
+                                properties = new Hashtable<String, Object>(1);
+                            }
+                            properties.put("root", "/");
+                            configuration.update(properties);
+                        } catch (IOException e) {
+                            logger.error("Could not set root path for jersey servlet. REST API will not be available!", e);
                         }
-                        properties.put("root", "/");
-                        configuration.update(properties);
-                    } catch (IOException e) {
-                        logger.error("Could not set root path for jersey servlet. REST API will not be available!", e);
                     }
+                    return service;
                 }
-                return service;
-            }
-        };
-        cmTracker.open();
+            });
 
-        csTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, null) {
+            trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, null) {
 
-            @Override
-            public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
-                ConfigurationService service = super.addingService(reference);
-                if (service != null && authRegistered.compareAndSet(false, true)) {
-                    String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
-                    String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
-                    context.registerService(AuthenticationFilter.class, new AuthenticationFilter(authLogin, authPassword), null);
+                @Override
+                public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+                    ConfigurationService service = super.addingService(reference);
+                    if (service != null && authRegistered.compareAndSet(false, true)) {
+                        String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
+                        String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
+                        context.registerService(AuthenticationFilter.class, new AuthenticationFilter(authLogin, authPassword), null);
+                    }
+                    return service;
                 }
-                return service;
+            });
+
+            trackers.add(new ServiceTracker<DispatcherPrefixService, DispatcherPrefixService>(context, DispatcherPrefixService.class, null) {
+
+                @Override
+                public DispatcherPrefixService addingService(ServiceReference<DispatcherPrefixService> reference) {
+                    DispatcherPrefixService service = super.addingService(reference);
+                    if (service != null) {
+                        RequestTool.setDispatcherPrefixService(service);
+                        Activator.this.ajaxFilterRegistration = context.registerService(AJAXFilter.class, new AJAXFilter(service.getPrefix()), null);
+                    }
+                    return service;
+                }
+
+                @Override
+                public void removedService(ServiceReference<DispatcherPrefixService> reference, DispatcherPrefixService service) {
+                    RequestTool.setDispatcherPrefixService(null);
+                    ServiceRegistration<AJAXFilter> ajaxFilterRegistration = Activator.this.ajaxFilterRegistration;
+                    if (null != ajaxFilterRegistration) {
+                        Activator.this.ajaxFilterRegistration = null;
+                        ajaxFilterRegistration.unregister();
+                    }
+                    super.removedService(reference, service);
+                }
+            });
+            for (ServiceTracker<?,?> tracker : trackers) {
+                tracker.open();
             }
-        };
-        csTracker.open();
 
-        context.registerService(JSONReaderWriter.class, new JSONReaderWriter(), null);
-        context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null);
-        context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null);
+            registrations.add(context.registerService(JSONReaderWriter.class, new JSONReaderWriter(), null));
+            registrations.add(context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null));
+            registrations.add(context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null));
 
-        /*-
-         * From now on all instances of registerable classes are handled/added in:
-         *  com.eclipsesource.jaxrs.publisher.internal.ResourceTracker.addingService(ResourceTracker.java:45)
-         *
-         * A registerable instance is defined as:
-         *
-         *   private boolean isRegisterableAnnotationPresent( Class<?> type ) {
-         *    return type.isAnnotationPresent( javax.ws.rs.Path.class ) || type.isAnnotationPresent( javax.ws.rs.ext.Provider.class );
-         *   }
-         */
+            /*-
+             * From now on all instances of registerable classes are handled/added in:
+             *  com.eclipsesource.jaxrs.publisher.internal.ResourceTracker.addingService(ResourceTracker.java:45)
+             *
+             * A registerable instance is defined as:
+             *
+             *   private boolean isRegisterableAnnotationPresent( Class<?> type ) {
+             *    return type.isAnnotationPresent( javax.ws.rs.Path.class ) || type.isAnnotationPresent( javax.ws.rs.ext.Provider.class );
+             *   }
+             */
+
+            // All went fine
+            this.trackers = trackers;
+            trackers = null;
+
+            this.registrations = registrations;
+            registrations = null;
+        } finally {
+            if (null != registrations) {
+                for (ServiceRegistration<?> serviceRegistration : registrations) {
+                    serviceRegistration.unregister();
+                }
+            }
+            if (null != trackers) {
+                for (ServiceTracker<?, ?> serviceTracker : trackers) {
+                    serviceTracker.close();
+                }
+            }
+        }
     }
 
     @Override
     public synchronized void stop(BundleContext context) throws Exception {
-        ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker = this.cmTracker;
-        if (null != cmTracker) {
-            cmTracker.close();
-            this.cmTracker = null;
+        List<ServiceRegistration<?>> registrations = this.registrations;
+        if (null != registrations) {
+            this.registrations = null;
+            for (ServiceRegistration<?> serviceRegistration : registrations) {
+                serviceRegistration.unregister();
+            }
         }
 
-        ServiceTracker<ConfigurationService, ConfigurationService> csTracker = this.csTracker;
-        if (null != csTracker) {
-            csTracker.close();
-            this.csTracker = null;
+        List<ServiceTracker<?, ?>> trackers = this.trackers;
+        if (null != trackers) {
+            this.trackers = null;
+            for (ServiceTracker<?, ?> serviceTracker : trackers) {
+                serviceTracker.close();
+            }
         }
     }
 

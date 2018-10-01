@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link ITipChange}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -75,12 +75,6 @@ public interface ITipIntegrationUtility {
 
     String getPrivateCalendarFolderId(int cid, int userId) throws OXException;
 
-    void createEvent(Event event, CalendarSession session) throws OXException;
-
-    void updateEvent(Event update, CalendarSession session, Date clientLastModified) throws OXException;
-
-    void changeConfirmationForExternalParticipant(Event update, ConfirmationChange change, CalendarSession session) throws OXException;
-
     void deleteEvent(Event event, CalendarSession session, Date clientLastModified) throws OXException;
 
     Event loadEvent(Event event, CalendarSession session) throws OXException;
@@ -89,7 +83,7 @@ public interface ITipIntegrationUtility {
 
     /**
      * Looks up if the current user is acting on behalf of the organizer of the event
-     * 
+     *
      * @param event The {@link Event} to extract the organizer from
      * @param session The {@link Session} to get the current user from
      * @return <code>true</code> only if the organizers {@link CalendarUser#getSentBy()} field is set

@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp.config;
 
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -125,6 +126,7 @@ public final class SMTPSessionProperties {
     /**
      * This method can only be exclusively accessed
      */
+    @SuppressWarnings("unchecked")
     private static void initializeSMTPProperties() {
         /*
          * Define SMTP properties
@@ -134,6 +136,7 @@ public final class SMTPSessionProperties {
          * Set some global JavaMail properties
          */
         final Properties properties = sessionProperties;
+        properties.putAll((Map<? extends Object, ? extends Object>) System.getProperties().clone());
         if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
             properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
             System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");

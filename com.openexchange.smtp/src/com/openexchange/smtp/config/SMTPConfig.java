@@ -49,8 +49,10 @@
 
 package com.openexchange.smtp.config;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -90,6 +92,7 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
     private int smtpPort;
 
     private String smtpServer;
+    private InetAddress smtpServerAddress;
 
     private ISMTPProperties transportProperties;
 
@@ -157,6 +160,23 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
     @Override
     public void setServer(final String smtpServer) {
         this.smtpServer = null == smtpServer ? null : IDNA.toUnicode(smtpServer);
+    }
+
+    /**
+     * Gets the Internet Protocol (IP) address of the SMTP server.
+     *
+     * @return The Internet Protocol (IP) address of the SMTP server.
+     * @throws OXException If SMTP server cannot be resolved
+     */
+    public InetAddress getSmtpServerAddress() throws OXException {
+        if (null == smtpServerAddress) {
+            try {
+                smtpServerAddress = InetAddress.getByName(getServer());
+            } catch (final UnknownHostException e) {
+                throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        return smtpServerAddress;
     }
 
     @Override

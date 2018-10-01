@@ -58,7 +58,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;

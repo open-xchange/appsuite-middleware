@@ -161,6 +161,8 @@ public class Messages implements LocalizableStrings {
 
     public static final String UPDATE_INTRO = "%1$s has changed an event:";
 
+    public static final String COMMENT_INTRO = "%1$s";
+
     public static final String UPDATE_ON_BEHALF_INTRO = "%1$s has changed an event on behalf of %2$s:";
 
     public static final String UPDATE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an event on your behalf:";

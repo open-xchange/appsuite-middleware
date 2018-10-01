@@ -188,14 +188,14 @@ com.mysql.jdbc:
 In the step above we have created an PKCS#12 key store. This can be used instead of the JKS store, too:
 
 ```
- clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/client-keystore.p12
+clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/client-keystore.p12
 clientCertificateKeyStorePassword: changeit
 clientCertificateKeyStoreType: PKCS12
 ```
 
 Note: Properties for the `configdb` will be overwritten by the properties defined in `configdb.properties`!!
 
-Note: Based on the underlying JDK there might be problems with the available TLS versions. Newer JDK versions might only use TLSv1.1 or higher and the configured database might only accept TLSv1.
+Note: Based on the underlying JDK there might be problems with the available TLS versions. Newer JDK versions might only use TLSv1.1 or higher and the configured database might only accept TLSv1. PLease have a look at the [supported database]({{ site.baseurl }}/middleware/components/database/supported_versions.html) section, for supported TLS versions.
 
 For a full property overview please have a look at the official [documentation](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-configuration-properties.html).
 

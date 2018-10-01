@@ -537,4 +537,10 @@ QueryParamChronosUpdateCache:
     If set to 'true' the cache will be forced to be updated (e. g. by contacting the underlying external account)
   required: false
   default: false
-  
+QueryParamChronosPushToken:
+  name: pushToken
+  in: query
+  type: string
+  description: |
+    The client's push token to allow filtering of push events for modified calendar data
+  required: false

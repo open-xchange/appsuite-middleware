@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.osgi;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.impl.CalendarEventNotificationServiceImpl;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.groupware.CalendarDeleteListener;
@@ -60,6 +61,7 @@ import com.openexchange.chronos.impl.osgi.event.EventAdminServiceTracker;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -126,17 +128,19 @@ public class ChronosActivator extends HousekeepingActivator {
              */
             ServiceSet<CalendarHandler> calendarHandlers = new ServiceSet<CalendarHandler>();
             track(CalendarHandler.class, calendarHandlers);
+            CalendarEventNotificationService notificationService = new CalendarEventNotificationServiceImpl(calendarHandlers);
+            registerService(CalendarEventNotificationService.class, notificationService);
             /*
              * register services
              */
             DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
-            registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
+            registerService(CalendarService.class, new CalendarServiceImpl(notificationService));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             // Availability disabled until further notice
             //registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
-            registerService(DeleteListener.class, new CalendarDeleteListener(calendarUtilities, calendarHandlers));
-            DowngradeRegistry.getInstance().registerDowngradeListener(new CalendarDowngradeListener(calendarUtilities, calendarHandlers));
+            registerService(DeleteListener.class, new CalendarDeleteListener(calendarUtilities, notificationService));
+            DowngradeRegistry.getInstance().registerDowngradeListener(new CalendarDowngradeListener(calendarUtilities, notificationService));
             /*
              * register calendar handler to propagate OSGi events
              */

@@ -17,6 +17,10 @@ properties:
         e.g. <code>http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081</code>  
         Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior.
 
+        If more than one end-point is specified, the client (Open-Xchange Middleware) performs some sort of load-balancing. That is to
+        black-list inaccessible end-points and check periodically (as defined by com.openexchange.dovecot.doveadm.endpoints.checkInterval),
+        if it appears to be accessible again. If only one end-point is given, no client-side black-listing is performed at all.
+        
         Full example :  
         <pre>
         com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081

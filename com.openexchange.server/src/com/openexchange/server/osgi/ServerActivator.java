@@ -151,7 +151,6 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
@@ -772,11 +771,6 @@ public final class ServerActivator extends HousekeepingActivator {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.attachment");
             registerService(DataSource.class, new AttachmentMailPartDataSource(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registerService(DataSource.class, new ContactDataSource(), props);
         }
         // {
         // final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();

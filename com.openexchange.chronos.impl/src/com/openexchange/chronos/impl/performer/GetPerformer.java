@@ -93,7 +93,7 @@ public class GetPerformer extends AbstractQueryPerformer {
      */
     public Event perform(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         /*
-         * load event data, check permissions & userize event
+         * load event data
          */
         CalendarFolder folder = getFolder(session, folderId, false);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
@@ -101,36 +101,34 @@ public class GetPerformer extends AbstractQueryPerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
+        if (null != recurrenceId && isSeriesMaster(event) && contains(event.getChangeExceptionDates(), recurrenceId)) {
+            Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, new EventField[] { EventField.ID });
+            if (null == exceptionEvent) {
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
+            }
+            return perform(folderId, exceptionEvent.getId(), recurrenceId);
+        }
         event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
-        event = Check.eventIsVisible(folder, event);
+        /*
+         * check permissions & userize event
+         */
+        Check.eventIsVisible(folder, event);
         Check.eventIsInFolder(event, folder);
-        event = new EventPostProcessor(session, storage).process(event, folder).getFirstEvent();
+        event = postProcessor().process(event, folder).getFirstEvent();
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
         /*
-         * retrieve targeted event occurrence if specified (either existing change exception or resolved occurrence)
+         * retrieve targeted event occurrence if specified
          */
         if (null != recurrenceId) {
             if (isSeriesMaster(event)) {
-                if (contains(event.getChangeExceptionDates(), recurrenceId)) {
-                    Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
-                    if (null != exceptionEvent) {
-                        exceptionEvent = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), exceptionEvent, fields);
-                        exceptionEvent = Check.eventIsVisible(folder, exceptionEvent);
-                        event = new EventPostProcessor(session, storage).process(exceptionEvent, folder).getFirstEvent();
-                    }
-                } else {
-                    event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
-                }
+                event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
             }
             if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
             }
         }
-        /*
-         * return event
-         */
         return event;
     }
 

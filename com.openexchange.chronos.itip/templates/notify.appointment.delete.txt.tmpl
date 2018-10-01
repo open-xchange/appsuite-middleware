@@ -1,5 +1,7 @@
 ${labels.deleteIntroduction}
 
-
+<#if (labels.comment??)>
+${labels.comment}
+</#if>
 
 ${templating.include( "notify.appointment.show.mini.txt.tmpl" )}

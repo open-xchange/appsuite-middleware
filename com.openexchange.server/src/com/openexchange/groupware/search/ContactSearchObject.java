@@ -125,6 +125,8 @@ public class ContactSearchObject extends SearchObject {
 
     private boolean emailAutoComplete = false;
 
+    private boolean hasImage = false;
+
     private boolean orSearch = false;
 
     private boolean exactMatch = false;
@@ -423,6 +425,24 @@ public class ContactSearchObject extends SearchObject {
 	public String getTo() {
 		return to;
 	}
+
+    /**
+     * Gets the hasImage
+     *
+     * @return The hasImage
+     */
+    public boolean hasImage() {
+        return hasImage;
+    }
+
+    /**
+     * Sets the hasImage
+     *
+     * @param hasImage The hasImage to set
+     */
+    public void setHasImage(boolean hasImage) {
+        this.hasImage = hasImage;
+    }
 
     /**
      * Gets the exactMatch

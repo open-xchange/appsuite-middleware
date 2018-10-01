@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -26,7 +26,7 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-This package provides connectivity to an GeoIP service as well as the possibility to configure an IP check against country code plausibility
+This package provides connectivity to an GeoIP service.
 
 
 Authors:
@@ -55,6 +55,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Thu Sep 06 2018 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.10.1 release
+* Tue Aug 21 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Adjusted the package description
 * Fri Jun 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Thorben Betten <thorben.betten@open-xchange.com>

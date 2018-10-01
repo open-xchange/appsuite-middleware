@@ -97,19 +97,19 @@ public class WebSocketServiceImpl implements WebSocketService {
     }
 
     @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        sendMessage(message, null, userId, contextId);
+    public void sendMessage(String message, String sourceToken, int userId, int contextId) throws OXException {
+        sendMessage(message, sourceToken, null, userId, contextId);
     }
 
     // -------------------------------------------------------------------------------------------------------------
 
     @Override
-    public void sendMessage(String message, String pathFilter, int userId, int contextId) throws OXException {
+    public void sendMessage(String message, String sourceToken, String pathFilter, int userId, int contextId) throws OXException {
         if (false == WebSockets.validatePath(pathFilter)) {
             throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
         }
 
-        localApp.sendToUser(message, pathFilter, false, userId, contextId);
+        localApp.sendToUser(message, sourceToken, pathFilter, false, userId, contextId);
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId);
     }
 

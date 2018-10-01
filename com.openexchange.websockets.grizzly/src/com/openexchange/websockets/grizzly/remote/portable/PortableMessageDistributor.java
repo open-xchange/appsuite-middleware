@@ -207,7 +207,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
 
         try {
             for (String msg : messages) {
-                application.sendToUserAsync(msg, filter, true, userId, contextId);
+                application.sendToUserAsync(msg, null, filter, true, userId, contextId);
                 WS_LOGGER.debug("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", GrizzlyWebSocketUtils.abbreviateMessageArg(msg), filter, I(userId), I(contextId));
             }
             return null;
