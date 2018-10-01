@@ -357,7 +357,7 @@ public class Bug60589Test extends CalDAVTest {
         appointment = getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
         rememberForCleanUp(appointment);
-        assertEquals("wrong number of participants", 1, appointment.getParticipants().length);
+        assertEquals("wrong number of participants", 2, appointment.getParticipants().length);
         Participant resourceParticipant = null;
         for (Participant participant : appointment.getParticipants()) {
             if (Participant.RESOURCE == participant.getType()) {
