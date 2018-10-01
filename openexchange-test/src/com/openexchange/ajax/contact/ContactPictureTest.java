@@ -253,8 +253,8 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     private void assertImage(byte[] actual, byte[] expected) {
         Assert.assertNotNull("Response should not be null.", actual);
-        Assert.assertEquals(expected.length, actual.length);
-        Assert.assertArrayEquals(expected, actual);
+        Assert.assertEquals("The image length is different.", expected.length, actual.length);
+        Assert.assertArrayEquals("The image content is different.", expected, actual);
     }
 
     private void deleteContact(final String contactId) throws ApiException {
