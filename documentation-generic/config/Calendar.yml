@@ -406,7 +406,7 @@ properties:
     - key: com.openexchange.calendar.alarm.sms.enabled
       description: |
         Enables or disables sms alarms.
-      defaultValue: true
+      defaultValue: false
       version: 7.10.1
       reloadable: true
       configcascadeAware: true
