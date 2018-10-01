@@ -29,10 +29,11 @@ is used to obtained the API keys.
 You need to specify the following scopes in the verification form, depending on which functionality you do offer. 
 Unfortunately, every change of your offered feature set or changes by Open-Xchange might require re-verification in the future:
 
-* https://mail.google.com/
-* https://www.googleapis.com/auth/calendar.readonly
-* https://www.googleapis.com/auth/contacts.readonly
-* https://www.googleapis.com/auth/drive
+* https://mail.google.com/ (Read, send, delete, and manage users' email)
+* https://www.googleapis.com/auth/calendar.readonly (View users' calendars)
+* https://www.googleapis.com/auth/contacts.readonly (View users' contacts)
+* https://www.googleapis.com/auth/drive (View and manage the files in the users' Google Drive)
+* https://www.googleapis.com/auth/userinfo.profile (View the users' basic profile info, used to retrieve the users' unique identifiers)
 
 Also, you need to provide an explanation why your instance of OX App Suite requires these scopes. A possible statement could be:
 
