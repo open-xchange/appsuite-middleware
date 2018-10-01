@@ -151,7 +151,7 @@ public class QueryAction extends RTAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, ServerSession session) throws OXException {
-        ID id = constructID(request, session);
+        final ID id = constructID(request, session);
 
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
@@ -159,13 +159,14 @@ public class QueryAction extends RTAction {
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
         }
-        StateEntry stateEntry = stateManager.retrieveState(id);
+        final StateEntry stateEntry = stateManager.retrieveState(id);
 
-        HttpServletRequest servletRequest = request.optHttpServletRequest();
+        final HttpServletRequest servletRequest = request.optHttpServletRequest();
 
         JSONObject data = (JSONObject) request.getData();
         if (null == data && (servletRequest != null)) {
-            // try to extract body data using a different approach
+            // try to extract body data using a different approach (e.g.
+            // support POST with preferStream = false)
             request.setUploadStreamProvider(null);
             AJAXRequestDataTools.loadRequestBody(request);
             data = (JSONObject) request.getData();
@@ -174,9 +175,9 @@ public class QueryAction extends RTAction {
         if (null == data)
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
 
-        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, data);
+        final StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, data);
 
-        Stanza stanza = stanzaBuilder.build();
+        final Stanza stanza = stanzaBuilder.build();
 
         if (servletRequest != null) {
 	        HttpSession httpSession = servletRequest.getSession();
