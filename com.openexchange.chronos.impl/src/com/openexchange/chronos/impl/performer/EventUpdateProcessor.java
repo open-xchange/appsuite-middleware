@@ -169,7 +169,7 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalEvent, changedEvent, true);
         this.eventUpdate = new DefaultItemUpdate<Event, EventField>(originalEvent, changedEvent, differentFields);
-        this.attendeeUpdates = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), changedEvent.getAttendees());
+        this.attendeeUpdates = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent, changedEvent);
         this.attachmentUpdates = CalendarUtils.getAttachmentUpdates(originalEvent.getAttachments(), changedEvent.getAttachments());
         this.alarmUpdates = AlarmUtils.getAlarmUpdates(originalEvent.getAlarms(), changedEvent.getAlarms());
         this.exceptionUpdates = CalendarUtils.getEventUpdates(originalChangeExceptions, changedChangeExceptions, EventField.ID);
@@ -471,7 +471,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * (virtually) apply & take over attendee updates in changed event
          */
         if (updatedFields.contains(EventField.ATTENDEES)) {
-            List<Attendee> changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
+            List<Attendee> changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent, updatedEvent).previewChanges();
             /*
              * only consider 'own' attendee in attendee scheduling resources as needed
              */
@@ -627,7 +627,7 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * apply added & removed attendees
          */
-        AttendeeHelper attendeeUpdates = AttendeeHelper.onUpdatedEvent(session, folder, originalMaster.getAttendees(), updatedMaster.getAttendees());
+        AttendeeHelper attendeeUpdates = AttendeeHelper.onUpdatedEvent(session, folder, originalMaster, updatedMaster);
         changedChangeExceptions = propagateAttendeeUpdates(attendeeUpdates, changedChangeExceptions);
         return changedChangeExceptions;
     }
