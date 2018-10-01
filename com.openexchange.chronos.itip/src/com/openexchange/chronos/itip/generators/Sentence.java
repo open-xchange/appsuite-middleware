@@ -133,6 +133,9 @@ public class Sentence {
                 case EMPHASIZED:
                     wrapped.add(wrapper.emphasiszed(argument));
                     break;
+                case ITALIC:
+                    wrapped.add(wrapper.italic(argument));
+                    break;
                 case REFERENCE:
                     wrapped.add(wrapper.reference(argument));
                     break;

@@ -75,6 +75,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -92,11 +94,14 @@ import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.RootFolderPermissionsAware;
+import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -317,8 +322,30 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FolderID folderID = new FolderID(folderId);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
+        if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
+            String rootId = folderAccess.getRootFolder().getId();
+            if (rootId.equals(folderID.getFolderId())) {
+                // rename of root folder -> rename account
+                FileStorageAccountManagerLookupService service = Services.getService(FileStorageAccountManagerLookupService.class);
+                if (service == null) {
+                    throw ServiceExceptionCode.absentService(FileStorageAccountManagerLookupService.class);
+                }
+                FileStorageAccountManager accountManager = service.getAccountManager(folderID.getAccountId(), this.session);
+                if (accountManager == null) {
+                    throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(folderID.getService());
+                }
+                final DefaultFileStorageAccount updatedAccount = new DefaultFileStorageAccount();
+                updatedAccount.setId(folderID.getAccountId());
+                updatedAccount.setDisplayName(newName);
+                accountManager.updateAccount(updatedAccount, session);
+                FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), rootId);
+                fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
+                return newFolderID.toUniqueID();
+            }
+        }
+
         String newID = folderAccess.renameFolder(folderID.getFolderId(), newName);
-        FolderID newFolderID =new FolderID(folderID.getService(), folderID.getAccountId(), newID);
+        FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), newID);
         fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }
@@ -336,6 +363,28 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         }
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
+
+        if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
+            String rootId = folderAccess.getRootFolder().getId();
+            if (rootId.equals(folderID.getFolderId())) {
+                // delete of root folder -> delete account
+                FileStorageAccountManagerLookupService service = Services.getService(FileStorageAccountManagerLookupService.class);
+                if (service == null) {
+                    throw ServiceExceptionCode.absentService(FileStorageAccountManagerLookupService.class);
+                }
+                FileStorageAccountManager accountManager = service.getAccountManager(folderID.getAccountId(), this.session);
+                if (accountManager == null) {
+                    throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(folderID.getService());
+                }
+                final DefaultFileStorageAccount updatedAccount = new DefaultFileStorageAccount();
+                updatedAccount.setId(folderID.getAccountId());
+                accountManager.deleteAccount(updatedAccount, session);
+                FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), rootId);
+                fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
+                return newFolderID.toUniqueID();
+            }
+        }
+
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
         Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
         eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));

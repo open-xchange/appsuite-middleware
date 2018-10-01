@@ -67,6 +67,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AcknowledgeAndSnoozeTest.class,
     BasicAlarmTest.class,
     BasicAlarmTriggerTest.class,
+    MailAlarmTriggerTest.class,
     //BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
     SchedJoulesTestSuite.class,
@@ -81,7 +82,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ICalImportAccessTest.class,
     ChronosBugsTestSuite.class,
     ITipTestSuite.class,
-    BirthdayCalendarExportTest.class
+    BirthdayCalendarExportTest.class,
+    BasicCommentTest.class
     // @formatter:on
 
 })

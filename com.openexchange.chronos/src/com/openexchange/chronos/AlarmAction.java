@@ -74,6 +74,11 @@ public class AlarmAction extends EnumeratedProperty {
     public static final AlarmAction EMAIL = new AlarmAction("EMAIL");
 
     /**
+     * Specifies an alarm that causes an SMS to be delivered to one or more phone numbers.
+     */
+    public static final AlarmAction SMS = new AlarmAction("X-SMS");
+
+    /**
      * Specifies an alarm that causes a procedure or program to be invoked.
      *
      * @deprecated with <a href="https://tools.ietf.org/html/rfc5545#appendix-A.3">RFC 5545, appendix A.3</a>
@@ -99,7 +104,7 @@ public class AlarmAction extends EnumeratedProperty {
 
     @Override
     protected String[] getStandardValues() {
-        return getValues(DISPLAY, AUDIO, EMAIL, PROCEDURE);
+        return getValues(DISPLAY, AUDIO, EMAIL, SMS, PROCEDURE);
     }
 
 }

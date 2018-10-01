@@ -56,11 +56,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.Picture;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -177,7 +177,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
     }
 
     @Override
-    public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+    public ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         return null;
     }
 

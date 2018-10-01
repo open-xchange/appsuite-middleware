@@ -86,6 +86,7 @@ import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.server.ServiceExceptionCode;
@@ -97,7 +98,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess, PathKnowingFileStorageFolderAccess {
+public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess, PathKnowingFileStorageFolderAccess, UserCreatedFileStorageFolderAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFolderAccess.class);
 

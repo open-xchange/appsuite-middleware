@@ -60,6 +60,7 @@ import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
+import javapns.notification.PushNotificationBigPayload;
 import javapns.notification.PushNotificationPayload;
 
 /**
@@ -126,7 +127,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
 
-            final PushNotificationPayload payload = new PushNotificationPayload();
+            final PushNotificationPayload payload = new PushNotificationBigPayload();
             Map<String, Object> messageData = notification.getMessageData();
             try {
                 String subject = MessageDataUtil.getSubject(messageData);

@@ -199,7 +199,7 @@ public class NotificationMail {
 
     public ITipEventUpdate getDiff() throws OXException {
         if (diff == null && original != null && event != null) {
-            diff = new ITipEventUpdate(original, event, true, NotificationMailGenerator.DEFAULT_SKIP);
+            diff = new ITipEventUpdate(original, event, true, ITipNotificationMailGenerator.DEFAULT_SKIP);
         }
         return diff;
     }
@@ -268,17 +268,17 @@ public class NotificationMail {
     }
 
     public boolean actionIsDoneOnBehalfOfAnother() throws OXException {
-        if (getActor().hasRole(ITipRole.PRINCIPAL)) {
+        if (actor == null || actor.hasRole(ITipRole.PRINCIPAL)) {
             return false;
         }
-        return !getActor().equals(getOnBehalfOf());
+        return !actor.equals(getOnBehalfOf());
     }
 
     public boolean actionIsDoneOnMyBehalf() throws OXException {
         if (isAboutActorsStateChangeOnly()) {
             return false;
         }
-        if (actor.hasRole(ITipRole.PRINCIPAL)) {
+        if (actor != null && actor.hasRole(ITipRole.PRINCIPAL)) {
             return false;
         }
 
@@ -292,6 +292,9 @@ public class NotificationMail {
 
     public List<NotificationParticipant> getParticipants() {
         if (!sortedParticipants) {
+            if (participants == null) {
+                return null;
+            }
             Collections.sort(participants, new Comparator<NotificationParticipant>() {
 
                 @Override

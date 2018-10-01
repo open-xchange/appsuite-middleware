@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Push support for chronos calendar
+Bundle-SymbolicName: com.openexchange.chronos.push
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.collect,
+ com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
+ com.openexchange.chronos.provider.composition,
+ com.openexchange.chronos.service,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.pns,
+ com.openexchange.tools.arrays,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
+Bundle-Activator: com.openexchange.chronos.push.osgi.ChronosPushActivator

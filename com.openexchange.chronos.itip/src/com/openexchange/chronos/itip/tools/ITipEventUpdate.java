@@ -83,6 +83,7 @@ public class ITipEventUpdate implements EventUpdate {
         IGNOREES.add(AttendeeField.ENTITY);
         IGNOREES.add(AttendeeField.ROLE);
         IGNOREES.add(AttendeeField.RSVP);
+        IGNOREES.add(AttendeeField.HIDDEN);
     }
 
     private EventUpdate delegate;
@@ -208,6 +209,8 @@ public class ITipEventUpdate implements EventUpdate {
             Set<AttendeeField> temp = new HashSet<>(updatedItem.getUpdatedFields());
             temp.remove(AttendeeField.PARTSTAT);
             temp.remove(AttendeeField.COMMENT);
+            temp.remove(AttendeeField.HIDDEN);
+            temp.remove(AttendeeField.TRANSP);
             if (!temp.isEmpty()) {
                 return false;
             }

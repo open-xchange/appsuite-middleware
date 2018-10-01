@@ -56,11 +56,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
-import com.openexchange.chronos.impl.DefaultCalendarEvent;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.DeleteResult;
@@ -100,14 +101,12 @@ class SimpleResultTracker {
      * @param calendarHandlers The handlers to notify
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    public void notifyCalenderHandlers(Session session, EntityResolver entityResolver, Set<CalendarHandler> calendarHandlers, CalendarParameters parameters) throws OXException {
+    public void notifyCalenderHandlers(Session session, EntityResolver entityResolver, CalendarEventNotificationService notificationService, CalendarParameters parameters) throws OXException {
         Map<Integer, List<String>> affectedFoldersPerUser = Utils.getAffectedFoldersPerUser(session.getContextId(), entityResolver, affectedFolders);
         if (false == affectedFoldersPerUser.isEmpty()) {
             DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(
                 session.getContextId(), Utils.ACCOUNT_ID, -1, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, session, entityResolver, parameters);
-            for (CalendarHandler handler : calendarHandlers) {
-                handler.handle(calendarEvent);
-            }
+            notificationService.notifyHandlers(calendarEvent, false);
         }
     }
 

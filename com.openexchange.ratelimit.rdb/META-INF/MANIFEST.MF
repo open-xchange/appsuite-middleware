@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RDB based Rate Limiter
+Bundle-SymbolicName: com.openexchange.ratelimit.rdb
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.ratelimit.rdb
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.database.provider,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.update,
+ com.openexchange.osgi,
+ com.openexchange.ratelimit,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.ratelimit.rdb.osgi.RateLimitActivator

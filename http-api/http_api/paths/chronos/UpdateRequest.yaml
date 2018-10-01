@@ -15,6 +15,7 @@
       - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosPushToken"
       - in: query
         name: rangeStart
         type: string
@@ -31,11 +32,18 @@
         required: false
       - $ref: "#/parameters/QueryParamChronosExpand"
       - in: body
-        name: body
+        name: updateBody
         description: A JSON object containing the event's data.
         required: true
         schema:
-          $ref: "#/definitions/EventData"
+          type: object
+          properties:
+            event:
+              type: object
+              $ref: "#/definitions/EventData"
+            comment:
+              type: string
+              description: Optional comment for the user to provide information about the update of the event. This will not be peristed and is just used to inform the attendees via notifications and invitation mails
       - in: query
         name: timestamp
         type: integer
@@ -82,7 +90,9 @@
       - in: formData
         name: json_0
         type: string
-        description: A JSON object containing the event's data as described in [EventData](#/definitions/EventData).
+        description: |
+          A JSON object containing an optional comment for the user to provide information about the update of the event under the key 'comment' and 
+          the event's data as described in [EventData](#/definitions/EventData) under the key 'data'.
         required: true
       - in: formData
         name: file_0

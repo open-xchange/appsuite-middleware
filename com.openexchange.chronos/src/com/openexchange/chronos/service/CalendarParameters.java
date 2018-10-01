@@ -131,6 +131,13 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
+     * Signals that the checks of (external) attendee URIs should be disabled when storing event data.
+     */
+    static final String PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS = "skipExternalAttendeeURIChecks";
+
+    /**
+     * {@link Boolean}
+     * <p/>
      * Specifies that attendees should be notified about the changes when saving a meeting or not.
      */
     static final String PARAMETER_NOTIFICATION = "notification";
@@ -180,6 +187,16 @@ public interface CalendarParameters {
      * @see <a href="https://raw.githubusercontent.com/apple/ccs-calendarserver/master/doc/Extensions/icalendar-maskuids.txt">icalendar-maskuids-03, section 4.1</a>
      */
     static final String PARAMETER_MASK_ID = "maskId";
+
+    /**
+     * {@link String}
+     * <p/>
+     * The push token identifier used by the client to allow filtering of push events for modified calendar data, i.e. to avoid that push
+     * notifications generated from an operation performed within the session are sent back to the acting client.
+     *
+     * @see <a href="https://tools.ietf.org/html/draft-gajda-dav-push-00#section-7.1">draft-gajda-dav-push-00, section 7.1</a>
+     */
+    static final String PARAMETER_PUSH_TOKEN = "pushToken";
 
     /**
      * {@link UIDConflictStrategy}
@@ -272,6 +289,14 @@ public interface CalendarParameters {
      * <p/>
      */
     static final String PARAMETER_SUPPRESS_ITIP = "itip.suppress";
+
+    /**
+     * {@link String}
+     * <p/>
+     * A comment set by the user when updating/deleting events.
+     * <p/>
+     */
+    static final String PARAMETER_COMMENT = "comment";
 
     /**
      * Sets a parameter.

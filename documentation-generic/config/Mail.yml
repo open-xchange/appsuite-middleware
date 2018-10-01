@@ -872,3 +872,21 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.remoteContentPerDefault
+      description: |
+        This option specifies whether content from remote servers will be loaded per default when displaying HTML mails.
+        
+        Setting this option to <code>true</code> means that content from remote server will be loaded and displayed in HTML mails. This can e.g.
+        mean that a user can be tracked.
+        
+        Setting this option to <code>false</code> means that no content from remote servers is loaded. This will e.g. block pictures embedded in
+        the mail. The client still is capable to load the content on its own.
+         
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

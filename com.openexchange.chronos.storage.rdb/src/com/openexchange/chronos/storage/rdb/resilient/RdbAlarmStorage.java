@@ -164,4 +164,9 @@ public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage
         delegate.deleteAlarms(eventId, userId, alarmIds);
     }
 
+    @Override
+    public Alarm loadAlarm(int alarmId) throws OXException {
+        return delegate.loadAlarm(alarmId);
+    }
+
 }

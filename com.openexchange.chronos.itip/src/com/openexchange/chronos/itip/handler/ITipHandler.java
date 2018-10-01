@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.handler;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -59,6 +60,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -66,8 +69,8 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
+import com.openexchange.chronos.itip.generators.ITipNotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationMail;
-import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
@@ -76,8 +79,10 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
@@ -111,10 +116,21 @@ public class ITipHandler implements CalendarHandler {
      */
     private final static EventField[] EXCEPTION_DELETE = new EventField[] { EventField.DELETE_EXCEPTION_DATES };
 
-    private NotificationMailGeneratorFactory generators;
-    private MailSenderService                sender;
+    private static final EnumSet<EventField> allButAttendee = EnumSet.allOf(EventField.class);
+    private static final EnumSet<AttendeeField> allButDeleted = EnumSet.allOf(AttendeeField.class);
+    static {
+        allButAttendee.remove(EventField.ATTENDEES);
+        allButAttendee.remove(EventField.LAST_MODIFIED);
+        allButAttendee.remove(EventField.MODIFIED_BY);
+        allButAttendee.remove(EventField.TIMESTAMP);
+        allButDeleted.remove(AttendeeField.HIDDEN);
+        allButDeleted.remove(AttendeeField.TRANSP);
+    }
 
-    public ITipHandler(NotificationMailGeneratorFactory generatorFactory, MailSenderService sender) {
+    private final ITipNotificationMailGeneratorFactory generators;
+    private final MailSenderService sender;
+
+    public ITipHandler(ITipNotificationMailGeneratorFactory generatorFactory, MailSenderService sender) {
         this.generators = generatorFactory;
         this.sender = sender;
     }
@@ -175,6 +191,26 @@ public class ITipHandler implements CalendarHandler {
             }
         }
 
+        outer: for (UpdateResult updateResult : event.getUpdates()) {
+            if (updateResult.getUpdatedFields().stream().anyMatch(field -> allButAttendee.contains(field))) {
+                break outer;
+            }
+            CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = updateResult.getAttendeeUpdates();
+            if (!attendeeUpdates.getAddedItems().isEmpty() || !attendeeUpdates.getRemovedItems().isEmpty()) {
+                break outer;
+            }
+            List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
+            if (updatedItems.isEmpty()) {
+                break outer;
+            }
+            for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
+                if (updatedItem.getUpdatedFields().stream().anyMatch(field -> allButDeleted.contains(field))) {
+                    break outer;
+                }
+            }
+            return false;
+        }
+
         return true;
     }
 
@@ -198,7 +234,7 @@ public class ITipHandler implements CalendarHandler {
         List<UpdateResult> exceptions = Collections.emptyList();
 
         if (CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(EXCEPTION_DELETE)) {
-            // Handle as delete 
+            // Handle as delete
             RecurrenceService service = Services.getService(RecurrenceService.class, true);
             RecurrenceIterator<Event> recurrenceIterator = service.iterateEventOccurrences(update.getOriginal(), null, null);
 
@@ -227,10 +263,7 @@ public class ITipHandler implements CalendarHandler {
             // Check for series update
             // Get all events of the series
             String seriesId = update.getUpdate().getSeriesId();
-            List<UpdateResult> eventGroup = updates.stream()
-                .filter(u -> !ignore.contains(u))
-                .filter(u -> seriesId.equals(u.getUpdate().getSeriesId()))
-                .collect(Collectors.toList());
+            List<UpdateResult> eventGroup = updates.stream().filter(u -> !ignore.contains(u)).filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
@@ -270,14 +303,11 @@ public class ITipHandler implements CalendarHandler {
         if (delete.getOriginal().containsSeriesId()) {
             // Get all events of the series
             String seriesId = delete.getOriginal().getSeriesId();
-            List<DeleteResult> eventGroup = deletions.stream()
-                .filter(u -> !ignore.contains(u))
-                .filter(u -> seriesId.equals(u.getOriginal().getSeriesId()))
-                .collect(Collectors.toList());
+            List<DeleteResult> eventGroup = deletions.stream().filter(u -> !ignore.contains(u)).filter(u -> seriesId.equals(u.getOriginal().getSeriesId())).collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
-                // Check if master is present 
+                // Check if master is present
                 Optional<DeleteResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getOriginal().getId())).findFirst();
                 if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getOriginal())) {
                     // Series update, remove those items from the update list and the master from the exceptions
@@ -298,12 +328,13 @@ public class ITipHandler implements CalendarHandler {
         Session session = event.getSession();
         int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
+        String comment = event.getCalendarParameters().get(CalendarParameters.PARAMETER_COMMENT, String.class);
 
         // Copy event to avoid UOE due UnmodifieableEvent
         if (null != original) {
             original = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         }
-        ITipMailGenerator generator = generators.create(original, EventMapper.getInstance().copy(update, new Event(), (EventField[]) null), session, onBehalfOf, principal);
+        ITipMailGenerator generator = generators.create(original, EventMapper.getInstance().copy(update, new Event(), (EventField[]) null), session, onBehalfOf, principal, comment);
         List<NotificationParticipant> recipients = generator.getRecipients();
         for (NotificationParticipant notificationParticipant : recipients) {
             NotificationMail mail;
@@ -334,7 +365,7 @@ public class ITipHandler implements CalendarHandler {
                         mail.getMessage().addException(exception);
                     }
                 }
-                sender.sendMail(mail, session, principal);
+                sender.sendMail(mail, session, principal, comment);
             }
         }
     }

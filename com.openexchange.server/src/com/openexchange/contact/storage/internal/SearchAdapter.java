@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONException;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
@@ -174,12 +175,18 @@ public class SearchAdapter {
         if (null != contactSearch.getYomiCompany()) {
             searchTerm.addSearchTerm(getSearchTerm(ContactField.YOMI_COMPANY, contactSearch.getYomiCompany(), false == orSearch, true));
         }
+
+        if (contactSearch.hasImage()) {
+            searchTerm = getCompositeTerm(searchTerm, HAS_IMG_TERM);
+        }
+
         /*
          * combine with email auto complete
          */
         if (emailAutoComplete) {
             searchTerm = getCompositeTerm(searchTerm, HAS_EMAIL_TERM);
         }
+
         /*
          * combine with folders term when set
          */
@@ -352,6 +359,15 @@ public class SearchAdapter {
         hasEmailTerm.addSearchTerm(notTerm);
         hasEmailTerm.addSearchTerm(distributionListTerm);
         HAS_EMAIL_TERM = hasEmailTerm;
+    }
+
+    private static final SingleSearchTerm HAS_IMG_TERM;
+
+    static {
+        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
+        term.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_IMAGES));
+        term.addOperand(new ConstantOperand<Integer>(I(0)));
+        HAS_IMG_TERM = term;
     }
 
     private static SingleSearchTerm getSearchTerm(ContactField field, String pattern, boolean prependWildcard,

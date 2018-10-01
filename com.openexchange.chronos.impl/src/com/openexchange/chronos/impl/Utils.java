@@ -107,6 +107,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
 import com.openexchange.chronos.impl.session.DefaultEntityResolver;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -339,6 +340,20 @@ public class Utils {
      */
     public static boolean isCheckConflicts(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
+    }
+    
+    /**
+     * Gets a value indicating whether the checks of (external) attendee URIs are disabled or not, considering both the calendar
+     * parameters and general configuration.
+     *
+     * @param session The calendar session to evaluate
+     * @return <code>true</code> if the URI checks are disabled, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS
+     * @see CalendarConfig#isSkipExternalAttendeeURIChecks()
+     */
+    public static boolean isSkipExternalAttendeeURIChecks(CalendarSession session) {
+        return b(session.get(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.class, Boolean.FALSE)) ||
+             session.getConfig().isSkipExternalAttendeeURIChecks();
     }
 
     /**
@@ -597,7 +612,8 @@ public class Utils {
 
     /**
      * Gets a value indicating whether a specific event is actually present in the supplied folder. Based on the folder type, the
-     * event's public folder identifier or the attendee's personal calendar folder is checked.
+     * event's public folder identifier or the attendee's personal calendar folder is checked, as well as the attendee's <i>hidden</i>
+     * marker.
      *
      * @param event The event to check
      * @param folder The folder where the event should appear in
@@ -608,7 +624,7 @@ public class Utils {
             return folder.getId().equals(event.getFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId());
+            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId()) && false == userAttendee.isHidden();
         }
     }
 
@@ -780,6 +796,9 @@ public class Utils {
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesMaster.getSeriesId()))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(forUser)))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.NOT_EQUALS, Boolean.TRUE)))
         ;
         EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID };
         List<Event> attendedChangeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
@@ -801,7 +820,7 @@ public class Utils {
      * @return The passed event reference, with possibly adjusted exception dates
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
-    public static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) throws OXException {
+    private static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) throws OXException {
         /*
          * check which change exceptions exist where the user is attending
          */
@@ -1221,7 +1240,7 @@ public class Utils {
                 /*
                  * take over external organizer as-is
                  */
-                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
+                return isSkipExternalAttendeeURIChecks(session) ? organizer : Check.requireValidEMail(organizer);
             }
         } else {
             /*

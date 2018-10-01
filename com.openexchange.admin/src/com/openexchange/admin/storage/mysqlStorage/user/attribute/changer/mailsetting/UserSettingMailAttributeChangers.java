@@ -55,10 +55,15 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.usersetting.CachingUserSettingMailStorage;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
  * {@link UserSettingMailAttributeChangers}
@@ -67,6 +72,8 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAt
  * @since v7.10.1
  */
 public class UserSettingMailAttributeChangers extends AbstractUserAttributeChangers {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
 
     private static final String TABLE = "user_setting_mail";
 
@@ -85,6 +92,27 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
     @Override
     protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserMailSettingAttribute, UserAttributeChanger> c = new HashMap<>();
+        c.put(UserMailSettingAttribute.BITS, new AbstractUserSettingMailAttributeChanger() {
+
+            @Override
+            public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
+                Boolean loadRemoteMailContentByDefault = userData.isLoadRemoteMailContentByDefault();
+                if (loadRemoteMailContentByDefault == null) {
+                    return false;
+                }
+                try {
+                    UserSettingMail userSettingMail = CachingUserSettingMailStorage.getInstance().getUserSettingMail(userId, contextId);
+                    if (loadRemoteMailContentByDefault.booleanValue() != userSettingMail.isAllowHTMLImages()) {
+                        userSettingMail.setAllowHTMLImages(loadRemoteMailContentByDefault.booleanValue());
+                        return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.BITS, Integer.valueOf(userSettingMail.getBitsValue())), connection);
+                    }
+                } catch (OXException e) {
+                    // Fall through
+                    LOGGER.warn("Couldn't change permission bits", e);
+                }
+                return false;
+            }
+        });
         c.put(UserMailSettingAttribute.SEND_ADDRESS, new AbstractUserSettingMailAttributeChanger() {
 
             @Override

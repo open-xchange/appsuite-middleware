@@ -52,6 +52,7 @@ package com.openexchange.halo;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -83,7 +84,7 @@ public interface ContactHalo {
      * @return The picture or <code>null</code>
      * @throws OXException If returning the picture fails
      */
-    Picture getPicture(Contact contact, ServerSession session) throws OXException;
+    ContactPicture getPicture(Contact contact, ServerSession session) throws OXException;
 
     /**
      * Gets the ETag of the contact's picture.

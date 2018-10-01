@@ -99,6 +99,12 @@ public final class CommonActivator implements BundleActivator {
                 		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n";
                 mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
             }
+
+            String propValue = System.getProperty("networkaddress.cache.ttl", "3600");
+            java.security.Security.setProperty("networkaddress.cache.ttl" , propValue);
+
+            propValue = System.getProperty("networkaddress.cache.negative.ttl", "10");
+            java.security.Security.setProperty("networkaddress.cache.negative.ttl" , propValue);
         } catch (final Exception e) {
             logger.error("Starting bundle ''com.openexchange.common'' failed", e);
             throw e;

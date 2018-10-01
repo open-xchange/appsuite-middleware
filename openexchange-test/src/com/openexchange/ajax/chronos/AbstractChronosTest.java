@@ -64,12 +64,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
+import com.openexchange.testing.httpclient.models.UpdateBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
@@ -136,24 +139,24 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(eventIds), null, null, false, false, null);
+                DeleteBody body = new DeleteBody();
+                body.setEvents(new ArrayList<>(eventIds));
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null);
             }
-        } catch (Exception e) {
-            exception = e;
-        }
-        // Clean-up event manager
-        eventManager.cleanUp();
-        folderManager.cleanUp();
+            // Clean-up event manager
+            eventManager.cleanUp();
+            folderManager.cleanUp();
 
-        try {
-            if (folderToDelete != null) {
-                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", System.currentTimeMillis(), "event", true, false, false);
+            try {
+                if (folderToDelete != null) {
+                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
+                }
+            } catch (Exception e) {
+                exception = e;
             }
-        } catch (Exception e) {
-            exception = e;
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
 
         if (exception != null) {
             throw exception;
@@ -289,7 +292,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the default calendar folder cannot be found
      */
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, EVENT_MODULE, "1,308", "0");
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         } else {
@@ -316,10 +319,11 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
                 return folderName.get(0).toString();
             }
         }
-        throw new Exception("Unable to find default "+module+" folder!");
+        throw new Exception("Unable to find default " + module + " folder!");
     }
 
     /**
+     * @param api The {@link FoldersApi} to use
      * @param session The session of the user
      * @param module The folder module
      * @param columns The columns identifier
@@ -382,4 +386,15 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         return data;
     }
 
+    /**
+     * Generates an {@link UpdateBody}.
+     *
+     * @param eventData The {@link EventData} to update
+     * @return An {@link UpdateBody}.
+     */
+    protected UpdateBody getUpdateBody(EventData eventData) {
+        UpdateBody body = new UpdateBody();
+        body.setEvent(eventData);
+        return body;
+    }
 }

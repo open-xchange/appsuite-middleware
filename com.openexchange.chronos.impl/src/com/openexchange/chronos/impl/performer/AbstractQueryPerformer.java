@@ -179,4 +179,13 @@ public abstract class AbstractQueryPerformer {
         return CalendarUtils.sortEvents(events, new SearchOptions(session).getSortOrders(), Utils.getTimeZone(session));
     }
 
+    /**
+     * Initializes a new event post processor for this performed.
+     * 
+     * @return The event post processor
+     */
+    protected EventPostProcessor postProcessor() throws OXException {
+        return new EventPostProcessor(session, storage, getSelfProtection());
+    }
+
 }

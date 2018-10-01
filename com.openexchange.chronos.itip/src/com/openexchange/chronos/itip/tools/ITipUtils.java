@@ -97,4 +97,24 @@ public class ITipUtils {
         }
         return null;
     }
+    
+    /**
+     * Build the value for a header
+     * 
+     * @param uid The event unique identifier
+     * @param timestamp <code>true></code> to add a timestamp to the value, <code>false</code> otherwise
+     * @return The header value
+     */
+    public static String generateHeaderValue(String uid, boolean timestamp) {
+        StringBuilder builder = new StringBuilder("<Appointment.");
+        builder.append(uid);
+        if (timestamp) {
+            builder.append(".");
+            builder.append(String.valueOf(System.currentTimeMillis()));
+        }
+        builder.append("@");
+        builder.append("open-xchange.com");
+        builder.append(">");
+        return builder.toString();
+    }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common.mapping;
 
+import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -241,6 +242,21 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
     @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
         return attachmentUpdates;
+    }
+
+    @Override
+    public Set<EventField> getUpdatedFields() {
+        Set<EventField> updatedFields = new HashSet<EventField>(super.getUpdatedFields());
+        if (false == attendeeUpdates.isEmpty()) {
+            updatedFields.add(EventField.ATTENDEES);
+        }
+        if (false == attachmentUpdates.isEmpty()) {
+            updatedFields.add(EventField.ATTACHMENTS);
+        }
+        if (false == alarmUpdates.isEmpty()) {
+            updatedFields.add(EventField.ALARMS);
+        }
+        return updatedFields;
     }
 
 }
