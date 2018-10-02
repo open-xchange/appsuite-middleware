@@ -373,7 +373,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                      * Filter against possible POP3 storage folders
                      */
                     if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
-                        filterPOP3StorageFolderInfos(folderInfos, session);
+                        filterPOP3StorageFolderInfos(folderInfos, session, true);
                     }
                     /*
                      * Sort by name
@@ -454,7 +454,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
              * Filter against possible POP3 storage folders
              */
             if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
-                filterPOP3StorageFolders(folders, session);
+                filterPOP3StorageFolders(folders, session, true);
             }
             /*
              * Sort by name
@@ -1092,7 +1092,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                          * Filter against possible POP3 storage folders
                          */
                         if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
-                            filterPOP3StorageFolderInfos(folderInfos, session);
+                            filterPOP3StorageFolderInfos(folderInfos, session, false);
                         }
                         final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
                         Collections.sort(folderInfos, new SimpleMailFolderInfoComparator(storageParameters.getUser().getLocale(), translate, false, isArchive));
@@ -1112,7 +1112,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                      * Filter against possible POP3 storage folders
                      */
                     if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
-                        filterPOP3StorageFolders(children, session);
+                        filterPOP3StorageFolders(children, session, false);
                     }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), false, isArchive));
                     final String[] subfolderIds = new String[children.size()];
@@ -1129,22 +1129,63 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         return retval;
     }
 
-    private static void filterPOP3StorageFolders(final List<MailFolder> folders, final ServerSession session) throws OXException {
-        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
-        for (final Iterator<MailFolder> it = folders.iterator(); it.hasNext();) {
-            if (pop3StorageFolders.contains(it.next().getFullname())) {
-                it.remove();
+    private static void filterPOP3StorageFolders(List<MailFolder> folders, ServerSession session, boolean startsWith) throws OXException {
+        Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+        if (pop3StorageFolders.isEmpty()) {
+            return;
+        }
+
+        if (startsWith) {
+            // Filter any folder identifier (full name) which starts with either of POP3 storage folders
+            char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
+            for (Iterator<MailFolder> it = folders.iterator(); it.hasNext();) {
+                String fullname = it.next().getFullname();
+                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname, pop3StorageFolders, defaultSeparator)) {
+                    it.remove();
+                }
+            }
+        } else {
+            // Filter any folder identifier (full name) which is equal to either of POP3 storage folders
+            for (Iterator<MailFolder> it = folders.iterator(); it.hasNext();) {
+                if (pop3StorageFolders.contains(it.next().getFullname())) {
+                    it.remove();
+                }
             }
         }
     }
 
-    private static void filterPOP3StorageFolderInfos(final List<MailFolderInfo> folders, final ServerSession session) throws OXException {
-        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
-        for (final Iterator<MailFolderInfo> it = folders.iterator(); it.hasNext();) {
-            if (pop3StorageFolders.contains(it.next().getFullname())) {
-                it.remove();
+    private static void filterPOP3StorageFolderInfos(List<MailFolderInfo> folders, ServerSession session, boolean startsWith) throws OXException {
+        Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+        if (pop3StorageFolders.isEmpty()) {
+            return;
+        }
+
+        if (startsWith) {
+            // Filter any folder identifier (full name) which starts with either of POP3 storage folders
+            char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
+            for (Iterator<MailFolderInfo> it = folders.iterator(); it.hasNext();) {
+                String fullname = it.next().getFullname();
+                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname, pop3StorageFolders, defaultSeparator)) {
+                    it.remove();
+                }
+            }
+        } else {
+            // Filter any folder identifier (full name) which is equal to either of POP3 storage folders
+            for (Iterator<MailFolderInfo> it = folders.iterator(); it.hasNext();) {
+                if (pop3StorageFolders.contains(it.next().getFullname())) {
+                    it.remove();
+                }
             }
         }
+    }
+
+    private static boolean startsWithAny(String toTest, Set<String> prefixes, char separator) {
+        for (String prefix : prefixes) {
+            if (toTest.startsWith(prefix + separator, 0)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static ServerSession getServerSession(final StorageParameters storageParameters) throws OXException, OXException {
@@ -1346,7 +1387,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                      * Filter against possible POP3 storage folders
                      */
                     if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
-                        filterPOP3StorageFolderInfos(folderInfos, session);
+                        filterPOP3StorageFolderInfos(folderInfos, session, false);
                     }
                     addWarnings(mailAccess, storageParameters);
                     /*
@@ -1423,7 +1464,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
              * Filter against possible POP3 storage folders
              */
             if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
-                filterPOP3StorageFolders(children, session);
+                filterPOP3StorageFolders(children, session, false);
             }
             addWarnings(mailAccess, storageParameters);
             /*
