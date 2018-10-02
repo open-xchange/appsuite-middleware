@@ -53,8 +53,12 @@ import static com.openexchange.contact.picture.json.PictureRequestParameter.CONT
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.MAIL;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.USER;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Date;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -96,10 +100,54 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, getData(requestData));
+        if (ContactPicture.FALLBACK_PICTURE == picture) {
+            AJAXRequestResult handleFallbackPicture = handleFallbackPicture(picture, requestData);
+            if (handleFallbackPicture != null) {
+                return handleFallbackPicture;
+            }
+        }
+
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         result.setHeader("Last-Modified", Tools.formatHeaderDate(picture.getLastModified()));
         return result;
+    }
+
+    private AJAXRequestResult handleFallbackPicture(ContactPicture picture, AJAXRequestData requestData) throws OXException {
+
+        ByteArrayFileHolder fileHolder = (ByteArrayFileHolder) picture.getFileHolder();
+        if (requestData.setResponseHeader("Content-Type", fileHolder.getContentType())) {
+            // Set HTTP response headers
+            {
+                final StringBuilder sb = new StringBuilder(256);
+                sb.append("inline");
+                DownloadUtility.appendFilenameParameter(fileHolder.getName(), fileHolder.getContentType(), requestData.getUserAgent(), sb);
+                requestData.setResponseHeader("Content-Disposition", sb.toString());
+
+                String eTag = picture.getETag();
+                long expires = Tools.getDefaultImageExpiry();
+                if (null == eTag) {
+                    if (expires > 0) {
+                        Tools.setExpires(expires, requestData.optHttpServletResponse());
+                    }
+                } else {
+                    Tools.setETag(eTag, expires > 0 ? expires : -1L, requestData.optHttpServletResponse());
+                }
+            }
+
+            // Write image file
+            try {
+                OutputStream out = requestData.optOutputStream();
+                out.write(fileHolder.getBytes());
+                out.flush();
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+
+            // Signal direct response
+            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+        }
+        return null;
     }
 
     private PictureSearchData getData(AJAXRequestData requestData) throws OXException {
