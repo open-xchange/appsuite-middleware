@@ -49,7 +49,10 @@
 
 package com.openexchange.contact.picture.json;
 
-import static com.openexchange.contact.picture.json.PictureRequestParameter.*;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.MAIL;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.USER;
 import java.util.Collections;
 import java.util.Date;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -127,7 +130,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
     }
 
     @Override
-    public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
+    public void setETag(String eTag, long expires, AJAXRequestResult result) {
         result.setExpires(expires);
         if (eTag != null) {
             result.setHeader("ETag", eTag);
