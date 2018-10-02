@@ -436,6 +436,8 @@ Import-Package: com.adobe.xmp,
  org.apache.tika.sax,
  org.apache.tika.sax.xpath,
  org.apache.tika.utils,
+ org.bouncycastle.cms,
+ org.bouncycastle.mail.smime,
  org.cliffc.high_scale_lib,
  org.dmfs.rfc5545,
  org.fishwife.jrugged,
@@ -655,8 +657,5 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.webdav.xml.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/bcmail-jdk15on-152.jar,
- lib/bcpkix-jdk15on-152.jar,
- lib/bcprov-jdk15on-152.jar,
  lib/jacksum.jar,
  lib/jaudiotagger-2.2.2.jar
