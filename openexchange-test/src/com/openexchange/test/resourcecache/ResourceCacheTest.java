@@ -66,8 +66,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
@@ -87,6 +88,7 @@ import com.openexchange.test.resourcecache.actions.UsedRequest;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class ResourceCacheTest extends AbstractAJAXSession {
 
     private static final String FS = "FS";
@@ -99,7 +101,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         super();
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             clearCache();

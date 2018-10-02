@@ -811,7 +811,7 @@ public final class PushManagerRegistry implements PushListenerService {
             LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
-        if (false == PushUtility.allowedClient(session.getClient(), null, true)) {
+        if (false == PushUtility.allowedClient(session.getClient(), session, true)) {
             /*
              * No push listener for the client associated with current session.
              */

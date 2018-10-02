@@ -129,25 +129,28 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         LOG.info("Teardown...");
         Exception exception = null;
         try {
-            if (eventIds != null) {
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<EventId>(eventIds), null, null, false, false);
+            try {
+                if (eventIds != null) {
+                    defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<EventId>(eventIds), null, null, false, false);
+                }
+            } catch (Exception e) {
+                exception = e;
             }
-        } catch (Exception e) {
-            exception = e;
-        }
-        // Clean-up event manager
-        eventManager.cleanUp();
-        folderManager.cleanUp();
+            // Clean-up event manager
+            eventManager.cleanUp();
+            folderManager.cleanUp();
 
-        try {
-            if (folderToDelete != null) {
-                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", System.currentTimeMillis(), "event", true, false, false);
+            try {
+                if (folderToDelete != null) {
+                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", System.currentTimeMillis(), "event", true, false, false);
+                }
+            } catch (Exception e) {
+                exception = e;
             }
-        } catch (Exception e) {
-            exception = e;
-        }
+        } finally {
+            super.tearDown();
 
-        super.tearDown();
+        }
 
         if (exception != null) {
             throw exception;
