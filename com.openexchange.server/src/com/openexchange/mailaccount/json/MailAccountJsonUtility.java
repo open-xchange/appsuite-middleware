@@ -127,6 +127,9 @@ public class MailAccountJsonUtility {
         if (isEmpty(accountDescription.getPassword()) && false == accountDescription.isMailOAuthAble()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PASSWORD);
         }
+        if (isEmpty(accountDescription.getPrimaryAddress())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PRIMARY_ADDRESS);
+        }
     }
 
 }
