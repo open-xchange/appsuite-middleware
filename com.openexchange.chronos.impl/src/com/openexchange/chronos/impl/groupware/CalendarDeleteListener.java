@@ -178,10 +178,17 @@ public final class CalendarDeleteListener implements DeleteListener {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
             .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
             .addSearchTerm(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
-            .addSearchTerm(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)))
             .addSearchTerm(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, '*' + ResourceId.forUser(context.getContextId(), userId) + '*'))
         ;
         updater.replaceAttendeeIn(updater.searchEvents(searchTerm));
+        try {
+            // Legacy storage doesen't know a calendar user, so make an independent call
+            updater.replaceAttendeeIn(updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId))));
+        } catch (IllegalArgumentException e) {
+            if(false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
+                throw e;
+            }
+        }
         /*
          * Delete account
          */
