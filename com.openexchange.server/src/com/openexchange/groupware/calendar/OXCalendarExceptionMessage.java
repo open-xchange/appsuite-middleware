@@ -223,7 +223,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String TASK_UID_ALREDY_EXISTS_MSG = "Cannot create that task. A task having the same unique identifier already exists.";
 
     //Sequence number is outdated.
-    public static final String OUTDATED_SEQUENCE = "This appointment already exists in your calendar.";
+    public static final String OUTDATED_SEQUENCE = "Sequence number is outdated.";
 
     /**
      * The calendar is currently under maintenance. Please try again later.
