@@ -179,7 +179,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         return RegistrationResult.successRegistrationResult();
     }
 
-    private RegistrationResult initateRegistration(Session session) throws OXException {
+    private RegistrationResult initateRegistration(Session session) {
         String logInfo = null;
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
