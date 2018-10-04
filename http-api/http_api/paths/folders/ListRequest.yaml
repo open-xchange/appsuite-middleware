@@ -19,6 +19,7 @@
         required: false
       - $ref: "#/parameters/gblQueryParamFolderTree"
       - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - $ref: "#/parameters/gblQueryParamLanguage"
       - in: query
         name: errorOnDuplicateName
         type: boolean
