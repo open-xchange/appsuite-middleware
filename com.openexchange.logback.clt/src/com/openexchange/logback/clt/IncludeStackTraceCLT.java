@@ -106,7 +106,7 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        boolean enable = cmd.hasOption("e") ? true : false;
+        boolean enable = cmd.hasOption("e");
         int contextId = parseInt('c', -1, cmd, options);
         int userId = parseInt('u', -1, cmd, options);
         if (contextId <= 0 || userId <= 0) {
