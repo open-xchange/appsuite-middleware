@@ -134,7 +134,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         boolean error = true;
         try {
             // Option for help
-            options.addOption("h", "help", false, "Prints a help text");
+            options.addOption("h", "help", false, "Prints this help text");
 
             // Option for RMI connect
             options.addOption(createArgumentOption("s", "server", "rmiHost", "The optional RMI server (default: localhost)", false));

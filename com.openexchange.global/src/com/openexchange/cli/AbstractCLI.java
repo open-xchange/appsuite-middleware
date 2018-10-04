@@ -88,7 +88,7 @@ public abstract class AbstractCLI<R, C> {
         boolean error = true;
         try {
             // Option for help
-            options.addOption(createSwitch("h", "help", "Prints a help text", false));
+            options.addOption(createSwitch("h", "help", "Prints this help text", false));
 
             // Add other options
             addOptions(options);
