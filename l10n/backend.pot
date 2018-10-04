@@ -8745,10 +8745,10 @@ msgid "The allowed quota on mail server exceeded."
 msgstr ""
 
 #. *
-#. * The allowed quota for your account \"%6$s\" was exceeded.
+#. * The allowed storage limit for your account \"%6$s\" was exceeded.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-msgid "The allowed quota for your account \"%6$s\" was exceeded."
+msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
 msgstr ""
 
 #. *
