@@ -90,6 +90,7 @@ import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -139,6 +140,10 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         checkNeededFields(accountDescription);
+
+        if (isEmpty(accountDescription.getSpamHandler())) {
+            accountDescription.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
+        }
 
         // Check if account denotes a Unified Mail account
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {

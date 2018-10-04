@@ -159,9 +159,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (requiresRootFolderID() && Strings.isEmpty(rootFolderID)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
         }
-        int apiVersion = requestData.containsParameter("apiVersion") ? requestData.getParameter("apiVersion", Integer.class).intValue() : 0;
-        DefaultDriveSession driveSession = new DefaultDriveSession(
-            session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData), extractLocale(requestData));
+        int apiVersion = getAPIVersion(requestData);
+        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData), extractLocale(requestData));
         /*
          * extract device name information if present
          */
@@ -209,6 +208,28 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * perform
          */
         return doPerform(requestData, driveSession);
+    }
+
+    /**
+     * Extracts the value of the 'apiVersion' URL parameter if present.
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @return The value of the 'apiVersion' URL parameter. If the parameter is absent 0 is returned.
+     * @throws OXException if value coercion fails or if the parameter contains an invalid value
+     */
+    private int getAPIVersion(AJAXRequestData requestData) throws OXException {
+        if (false == requestData.containsParameter("apiVersion")) {
+            return 0;
+        }
+        String apiVersion = requestData.getParameter("apiVersion");
+        if (null == apiVersion) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(apiVersion);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("apiVersion", "\"" + apiVersion + "\"");
+        }
     }
 
     private static DriveClientVersion extractClientVersion(AJAXRequestData requestData) throws OXException {
@@ -350,7 +371,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
     protected void enableUnlimitedBodySize(AJAXRequestData requestData) {
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
         if (servletRequest instanceof CountingHttpServletRequest) {
-            ((CountingHttpServletRequest)servletRequest).setMax(-1);
+            ((CountingHttpServletRequest) servletRequest).setMax(-1);
         }
     }
 

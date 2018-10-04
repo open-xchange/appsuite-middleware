@@ -281,7 +281,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     protected EventData createEvent(EventData event) throws ApiException {
-        return chronosApi.createEvent(session, defaultFolderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, null, null, Boolean.FALSE).getData().getCreated().get(0);
+
+        return chronosApi.createEvent(session, defaultFolderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, null, null, null, Boolean.FALSE).getData().getCreated().get(0);
     }
 
     protected void deleteEvent(EventData data) throws Exception {
@@ -290,7 +291,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         id.setId(data.getId());
         DeleteBody body  = new DeleteBody();
         body.addEventsItem(id);
-        chronosApi.deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null);
+        chronosApi.deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
     }
 
     private Long now() {
