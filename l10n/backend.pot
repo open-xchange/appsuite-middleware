@@ -5286,7 +5286,7 @@ msgstr ""
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
+msgid "This appointment already exists in your calendar."
 msgstr ""
 
 #. *
