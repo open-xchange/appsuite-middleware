@@ -51,7 +51,6 @@ package com.openexchange.logback.clt;
 
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
@@ -139,7 +138,6 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
      */
     @Override
     protected void printHelp(Options options) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(120, getName(), getHeader(), options, getFooter(), false);
+        printHelp(options, 120, false);
     }
 }

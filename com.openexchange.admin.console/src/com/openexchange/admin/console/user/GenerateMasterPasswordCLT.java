@@ -87,7 +87,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
     }
 
     private static final String SYNTAX = "generatempasswd [-A <adminuser>] [-P <adminpassword>] [-e <encryption>] [-f </path/for/mpasswdfile>]";
-    private static final String FOOTER = "\n\nValid encryption/hashing algorithms: " + getValidEncHashAlgos();
+    private static final String FOOTER = "Valid encryption/hashing algorithms: " + getValidEncHashAlgos();
 
     enum Parameter {
         adminuser, adminpass, encryption, mpasswdfile

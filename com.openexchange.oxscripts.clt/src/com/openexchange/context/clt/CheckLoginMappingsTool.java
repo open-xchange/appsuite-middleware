@@ -66,7 +66,7 @@ import com.openexchange.context.rmi.ContextRMIService;
 public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
 
     private static final String SYNTAX = "checkloginmappings [[[-c <contextId>] | [-a]] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
-    private static final String FOOTER = "\n\nThe options -c/--context and -a/--all are mutually exclusive.";
+    private static final String FOOTER = "The options -c/--context and -a/--all are mutually exclusive.";
 
     private Integer contextId;
 

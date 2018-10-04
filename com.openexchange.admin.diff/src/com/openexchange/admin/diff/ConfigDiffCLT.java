@@ -66,7 +66,7 @@ import com.openexchange.cli.AbstractCLI;
 public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
 
     private static final String SYNTAX = "listconfigdiff [-f <filename>] | [-h]";
-    private static final String FOOTER = "\n\nLists the differences between the default and the installed configuration";
+    private static final String FOOTER = "Lists the differences between the default and the installed configuration";
 
     /**
      * Entry point

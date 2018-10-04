@@ -230,7 +230,7 @@ public abstract class AbstractCLI<R, C> {
      */
     protected void printHelp(Options options, int width, boolean usage) {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(width, getName(), getHeader(), options, getFooter(), usage);
+        helpFormatter.printHelp(width, getName(), getHeader(), options, formatFooter(), usage);
     }
 
     /**
@@ -264,6 +264,15 @@ public abstract class AbstractCLI<R, C> {
     }
 
     // -----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Prepends two new lines for the footer
+     * 
+     * @return The footer with two new lines prepended
+     */
+    private String formatFooter() {
+        return "\n\n" + getFooter();
+    }
 
     /**
      * Parses & validates the port value for given option.
