@@ -21,7 +21,7 @@ Import-Package: com.openexchange.exception,
  javax.management.remote.rmi,
  javax.management.timer,
  org.apache.commons.logging,
- org.osgi.framework;version="1.9.0",
- org.osgi.util.tracker;version="1.5.2",
+ org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.management
