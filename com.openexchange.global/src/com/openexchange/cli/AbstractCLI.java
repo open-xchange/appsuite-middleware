@@ -218,8 +218,19 @@ public abstract class AbstractCLI<R, C> {
      * @param width The width of the help screen
      */
     protected void printHelp(Options options, int width) {
+        printHelp(options, width, false);
+    }
+
+    /**
+     * Prints the <code>--help</code> text.
+     *
+     * @param options The help output
+     * @param width The width of the help screen
+     * @param usage Whether to automatically generate the usage line
+     */
+    protected void printHelp(Options options, int width, boolean usage) {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(width, getName(), getHeader(), options, getFooter(), false);
+        helpFormatter.printHelp(width, getName(), getHeader(), options, getFooter(), usage);
     }
 
     /**
