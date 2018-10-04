@@ -111,7 +111,7 @@ public final class LastLoginTimeStampTool extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("c", "context", "contextId", "A valid (numeric) context identifier", false));
         options.addOption(createArgumentOption("u", "user", "userId", "A valid (numeric) user identifier", false));
         options.addOption(createArgumentOption("d", "datepattern", "datePattern", "The optional date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"", false));
-        options.addOption(createSwitch(null, "list-clients", "Outputs a table of known client identifiers", false));
+        options.addOption(createSwitch("l", "list-clients", "Outputs a table of known client identifiers", false));
 
         OptionGroup optionGroup = new OptionGroup();
         optionGroup.setRequired(false);
@@ -176,7 +176,7 @@ public final class LastLoginTimeStampTool extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        if (cmd.hasOption("listclients")) {
+        if (cmd.hasOption("l")) {
             printClients();
             System.exit(0);
         }
