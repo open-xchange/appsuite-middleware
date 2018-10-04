@@ -88,17 +88,17 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class,
             AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
-            ThreadControlService.class };
+            ThreadControlService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
-            rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            rememberTracker(new ServiceTracker<>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             OSGiFileFieldCollector fieldCollector = new OSGiFileFieldCollector(context);
             Services.setFieldCollector(fieldCollector);
-            rememberTracker(new ServiceTracker<AdditionalFileField, AdditionalFileField>(context, AdditionalFileField.class.getName(), fieldCollector));
+            rememberTracker(new ServiceTracker<>(context, AdditionalFileField.class.getName(), fieldCollector));
 
             trackService(ShareNotificationService.class);
             trackService(RdiffService.class);

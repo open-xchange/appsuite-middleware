@@ -176,7 +176,6 @@ public final class ContactImageDataSource implements ImageDataSource {
 
         PictureSearchData contactPictureRequestData = new PictureSearchData(null, I(folder), I(contactId), null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
-
         IFileHolder fileHolder = picture.getFileHolder();
 
         /*
@@ -232,9 +231,8 @@ public final class ContactImageDataSource implements ImageDataSource {
             if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e) || ContactExceptionCodes.NOT_IN_FOLDER.equals(e)) {
                 LOG.debug("unable to get contact", e);
                 return null;
-            } else {
-                throw e;
             }
+            throw e;
         }
     }
 

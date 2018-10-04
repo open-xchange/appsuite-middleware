@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.validation;
 
+import java.util.List;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
@@ -76,17 +77,17 @@ public class AssertionValidators {
      */
     public static final class AssertionSignatureValidator implements AssertionValidator {
 
-        private final Credential validationCredential;
+        private final List<Credential> validationCredentials;
 
         private final boolean enforceSignature;
 
         /**
-         * @param validationCredential The credential containing a public key to verify the signature
+         * @param validationCredentials The credential list, containing public keys to verify the signature
          * @param enforceSignature Whether either the assertion or its response must be signed
          */
-        public AssertionSignatureValidator(Credential validationCredential, boolean enforceSignature) {
+        public AssertionSignatureValidator(List<Credential> validationCredentials, boolean enforceSignature) {
             super();
-            this.validationCredential = validationCredential;
+            this.validationCredentials = validationCredentials;
             this.enforceSignature = enforceSignature;
         }
 
@@ -94,27 +95,26 @@ public class AssertionValidators {
         public ValidationError validate(Response response, Assertion assertion) {
             String assertionID = assertion.getID();
             if (assertion.isSigned()) {
-                ValidationError error = SignatureHelper.validateSignature(assertion, validationCredential);
+                ValidationError error = SignatureHelper.validateSignature(assertion, validationCredentials);
                 if (error == null) {
                     LOG.debug("Assertion '{}' contains a valid signature", assertionID);
                 } else if (error.getThrowable() != null) {
                     LOG.debug("", error.getThrowable());
                 }
                 return error;
-            } else {
-                /*
-                 * A SAML assertion may be embedded within another SAML element, such as an enclosing <Assertion>
-                 * or a request or response, which may be signed. When a SAML assertion does not contain a
-                 * <ds:Signature> element, but is contained in an enclosing SAML element that contains a
-                 * <ds:Signature> element, and the signature applies to the <Assertion> element and all its children,
-                 * then the assertion can be considered to inherit the signature from the enclosing element. The resulting
-                 * interpretation should be equivalent to the case where the assertion itself was signed with the same key
-                 * and signature options.
-                 * [core 06 - 5.3p70/71]
-                 */
-                if (!response.isSigned() && enforceSignature) {
-                    return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "Assertion '" + assertionID + "' is not signed");
-                }
+            }
+            /*
+             * A SAML assertion may be embedded within another SAML element, such as an enclosing <Assertion>
+             * or a request or response, which may be signed. When a SAML assertion does not contain a
+             * <ds:Signature> element, but is contained in an enclosing SAML element that contains a
+             * <ds:Signature> element, and the signature applies to the <Assertion> element and all its children,
+             * then the assertion can be considered to inherit the signature from the enclosing element. The resulting
+             * interpretation should be equivalent to the case where the assertion itself was signed with the same key
+             * and signature options.
+             * [core 06 - 5.3p70/71]
+             */
+            if (!response.isSigned() && enforceSignature) {
+                return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "Assertion '" + assertionID + "' is not signed");
             }
 
             return null;
@@ -142,19 +142,18 @@ public class AssertionValidators {
             Issuer issuer = assertion.getIssuer();
             if (issuer == null) {
                 return new ValidationError(ValidationFailedReason.MISSING_ELEMENT, "'Issuer' is missing in assertion '" + assertionID + "'");
-            } else {
-                String issuerFormat = issuer.getFormat();
-                if (issuerFormat != null && !NameIDType.ENTITY.equals(issuerFormat)) {
-                    return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected format: " + issuerFormat);
-                }
-
-                String issuerValue = issuer.getValue();
-                if (!issuerValue.equals(expected)) {
-                    return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected value: " + issuerValue);
-                }
-
-                LOG.debug("Assertion '{}' contains a valid 'Issuer' element: {}", assertionID, issuerValue);
             }
+            String issuerFormat = issuer.getFormat();
+            if (issuerFormat != null && !NameIDType.ENTITY.equals(issuerFormat)) {
+                return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected format: " + issuerFormat);
+            }
+
+            String issuerValue = issuer.getValue();
+            if (!issuerValue.equals(expected)) {
+                return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected value: " + issuerValue);
+            }
+
+            LOG.debug("Assertion '{}' contains a valid 'Issuer' element: {}", assertionID, issuerValue);
 
             return null;
         }

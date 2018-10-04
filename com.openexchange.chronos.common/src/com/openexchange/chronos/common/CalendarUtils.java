@@ -176,7 +176,7 @@ public class CalendarUtils {
     /** A collection of identifying meta fields */
     private static final Set<EventField> IDENTIFYING_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.UID, EventField.FILENAME,
-        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY
+        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE
     )));
 
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
@@ -2155,7 +2155,20 @@ public class CalendarUtils {
      * @param additionals Additional event flags to include
      * @return The event flags
      */
-    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, EventFlag... additionals) {
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user) {
+        return getFlags(event, calendarUser, user, false);
+    }
+
+    /**
+     * Generates the flags for a specific event (see {@link EventFlag}).
+     *
+     * @param event The event to get the flags for
+     * @param calendarUser The identifier of the calendar user to get flags for
+     * @param user The identifier of the current user, in case he is different from the calendar user
+     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise 
+     * @return The event flags
+     */
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, boolean publicFolder) {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
@@ -2167,13 +2180,12 @@ public class CalendarUtils {
             flags.add(EventFlag.SCHEDULED);
         }
         if (isOrganizerSchedulingResource(event, calendarUser)) {
-            flags.add(EventFlag.ORGANIZER);
-            flags.add(EventFlag.ATTENDEE);
-        } else if (isAttendeeSchedulingResource(event, calendarUser)) {
-            flags.add(EventFlag.ATTENDEE);
+            flags.add(calendarUser == user ? EventFlag.ORGANIZER : EventFlag.ORGANIZER_ON_BEHALF);
+        } else if (publicFolder) {
+            flags.add(EventFlag.ORGANIZER_ON_BEHALF);
         }
-        if (calendarUser != user) {
-            flags.add(EventFlag.ON_BEHALF);
+        if (isAttendeeSchedulingResource(event, calendarUser)) {
+            flags.add(calendarUser == user ? EventFlag.ATTENDEE : EventFlag.ATTENDEE_ON_BEHALF);
         }
         if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
             flags.add(EventFlag.CONFIDENTIAL);
@@ -2208,9 +2220,6 @@ public class CalendarUtils {
             flags.add(EventFlag.SERIES);
         } else if (isSeriesException(event)) {
             flags.add(EventFlag.OVERRIDDEN);
-        }
-        if (null != additionals) {
-            flags.addAll(Arrays.asList(additionals));
         }
         return flags;
     }

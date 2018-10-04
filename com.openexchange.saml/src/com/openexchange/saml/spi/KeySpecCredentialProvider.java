@@ -56,6 +56,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Collections;
+import java.util.List;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
@@ -70,7 +72,7 @@ import org.opensaml.xml.security.credential.UsageType;
  */
 public class KeySpecCredentialProvider extends AbstractCredentialProvider {
 
-    public static enum Algorithm {
+    public enum Algorithm {
         RSA,
         DSA
     }
@@ -120,8 +122,8 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
 
     }
 
-    private KeySpecCredentialProvider(Credential idpPublicKeyCredential, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
-        super(idpPublicKeyCredential, signingPrivateKeyCredential, decryptionPrivateKeyCredential);
+    private KeySpecCredentialProvider(List<Credential> idpPublicKeyCredentials, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
+        super(idpPublicKeyCredentials, signingPrivateKeyCredential, decryptionPrivateKeyCredential);
     }
 
     /**
@@ -173,6 +175,6 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
             decryptionPrivateKeyCredential.setPublicKey(encryptionKey);
         }
 
-        return new KeySpecCredentialProvider(idpPublicKeyCredential, signingPrivateKeyCredential, decryptionPrivateKeyCredential);
+        return new KeySpecCredentialProvider(Collections.singletonList(idpPublicKeyCredential), signingPrivateKeyCredential, decryptionPrivateKeyCredential);
     }
 }

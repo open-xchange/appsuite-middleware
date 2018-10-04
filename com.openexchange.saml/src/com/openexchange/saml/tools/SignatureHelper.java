@@ -50,6 +50,8 @@
 package com.openexchange.saml.tools;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.opensaml.security.SAMLSignatureProfileValidator;
@@ -60,9 +62,12 @@ import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.SignableXMLObject;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
+import org.opensaml.xml.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.saml.validation.ValidationError;
 import com.openexchange.saml.validation.ValidationFailedReason;
-
 
 /**
  * {@link SignatureHelper}
@@ -72,20 +77,21 @@ import com.openexchange.saml.validation.ValidationFailedReason;
  */
 public class SignatureHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SignatureHelper.class);
+    
     /**
      * Validates the signature of a {@link SignableXMLObject} with the passed {@link Credential}.
      *
      * @param object The signed object
-     * @param credential The credential
+     * @param credentials The credential list
      * @return A {@link ValidationError} if signature validation fails or <code>null</code> if the signature is valid
      */
-    public static ValidationError validateSignature(SignableXMLObject object, Credential credential) {
+    public static ValidationError validateSignature(SignableXMLObject object, List<Credential> credentials) {
         try {
             Signature signature = object.getSignature();
             SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
             profileValidator.validate(signature);
-            SignatureValidator signatureValidator = new SignatureValidator(credential);
-            signatureValidator.validate(signature);
+            validateWithCredentials(credentials, signature);
         } catch (org.opensaml.xml.validation.ValidationException e) {
             return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, e.getMessage(), e);
         }
@@ -93,14 +99,32 @@ public class SignatureHelper {
         return null;
     }
 
+    private static void validateWithCredentials(List<Credential> credentials, Signature signature) throws ValidationException {
+        boolean isValid = false;
+        
+        Iterator<Credential> iterator = credentials.iterator();
+        while (iterator.hasNext()) {
+            Credential credential = iterator.next();
+            SignatureValidator signatureValidator = new SignatureValidator(credential);
+            try {
+                signatureValidator.validate(signature);
+                isValid = true;
+            } catch (org.opensaml.xml.validation.ValidationException e) {
+                if (iterator.hasNext() == false && isValid == false) {
+                    throw e;
+                }
+            }
+        }
+    }
+
     /**
      * Validates the signature of a HTTP-Redirect request.
      *
      * @param httpRequest The HTTP request
-     * @param credential The credential
+     * @param credentials The credential list
      * @return A {@link ValidationError} if signature validation fails or <code>null</code> if the signature is valid
      */
-    public static ValidationError validateURISignature(HttpServletRequest httpRequest, Credential credential) {
+    public static ValidationError validateURISignature(HttpServletRequest httpRequest, List<Credential> credentials) {
         String sigAlg = httpRequest.getParameter("SigAlg");
         if (sigAlg == null) {
             return new ValidationError(ValidationFailedReason.INVALID_REQUEST, "Parameter 'SigAlg' is not set");
@@ -124,13 +148,24 @@ public class SignatureHelper {
         }
         signedContent.append('&').append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SigAlg"));
 
+        return getValidationError(credentials, sigAlg, signature, signedContent);
+    }
+
+    private static ValidationError getValidationError(List<Credential> credentials, String sigAlg, String signature, StringBuilder signedContent) {
         try {
-            if (!SigningUtil.verifyWithURI(credential, sigAlg, Base64.decodeBase64(signature), signedContent.toString().getBytes("UTF-8"))) {
-                return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "The signature does not match the signed content");
+            boolean isInvalid = true;
+            for (final Credential credential : credentials) {
+                if (SigningUtil.verifyWithURI(credential, sigAlg, Base64.decodeBase64(signature), signedContent.toString().getBytes("UTF-8"))) {
+                    isInvalid = false;
+                } else {
+                    String fingerprint = Strings.isEmpty(credential.getEntityId()) ? "" : credential.getEntityId();
+                    LOG.debug("Invalid certificate found in keystore with fingerprint {}", fingerprint);
+                }
             }
-        } catch (UnsupportedEncodingException e) {
-            return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, e.getMessage(), e);
-        } catch (SecurityException e) {
+            if (isInvalid) {
+                return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "The signatures do not match the signed content", new org.opensaml.xml.validation.ValidationException());
+            }
+        } catch (UnsupportedEncodingException | SecurityException e) {
             return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, e.getMessage(), e);
         }
 

@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -124,6 +125,10 @@ public class ContactMailFinder extends AbstractContactFinder {
         Set<String> emails = data.getEmails();
         for (Iterator<String> iterator = emails.iterator(); iterator.hasNext();) {
             String email = iterator.next();
+            if (Strings.isEmpty(email)) {
+                // skip empty email addresses
+                continue;
+            }
 
             ContactSearchObject cso = new ContactSearchObject();
             cso.setEmail1(email);

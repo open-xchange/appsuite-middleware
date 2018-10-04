@@ -105,7 +105,7 @@ public abstract class AbstractQueryPerformer {
         this.storage = storage;
     }
 
-    protected SelfProtection getSelfProtection() throws OXException{
+    protected SelfProtection getSelfProtection() {
         if(selfProtection==null){
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
             selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);

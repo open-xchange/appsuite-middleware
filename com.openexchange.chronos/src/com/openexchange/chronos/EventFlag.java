@@ -74,13 +74,17 @@ public enum EventFlag {
      */
     ORGANIZER,
     /**
+     * The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.
+     */
+    ORGANIZER_ON_BEHALF,
+    /**
      * The calendar user is <i>attendee<i> of the meeting.
      */
     ATTENDEE,
     /**
-     * The current user is different from the calendar user, hence acts <i>on behalf of</i> the calendar user.
+     * The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.
      */
-    ON_BEHALF,
+    ATTENDEE_ON_BEHALF,
     /**
      * Event is classified <i>private</i>, so is invisible for others.
      */

@@ -49,11 +49,8 @@
 
 package com.openexchange.halo.pictures;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
@@ -61,7 +58,6 @@ import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,7 +74,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
     final ServiceLookup services;
 
     /**
-     * Initialises a new {@link GetPictureAction}.
+     * Initializes a new {@link GetPictureAction}.
      *
      * @param services The OSGi service look-up
      */
@@ -90,49 +86,15 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ContactPicture picture = getPicture(requestData, session);
-        if (picture == null) {
+        IFileHolder fileHolder = picture.getFileHolder();
+        if (fileHolder == null) {
             // 404 - Not Found
             AJAXRequestResult result = new AJAXRequestResult();
             result.setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND);
             return result;
         }
 
-        if (ContactPicture.FALLBACK_PICTURE == picture) {
-            ByteArrayFileHolder fileHolder = (ByteArrayFileHolder) picture.getFileHolder();
-            if (requestData.setResponseHeader("Content-Type", fileHolder.getContentType())) {
-                // Set HTTP response headers
-                {
-                    final StringBuilder sb = new StringBuilder(256);
-                    sb.append("inline");
-                    DownloadUtility.appendFilenameParameter(fileHolder.getName(), fileHolder.getContentType(), requestData.getUserAgent(), sb);
-                    requestData.setResponseHeader("Content-Disposition", sb.toString());
-
-                    String eTag = picture.getETag();
-                    long expires = Tools.getDefaultImageExpiry();
-                    if (null == eTag) {
-                        if (expires > 0) {
-                            Tools.setExpires(expires, requestData.optHttpServletResponse());
-                        }
-                    } else {
-                        Tools.setETag(eTag, expires > 0 ? expires : -1L, requestData.optHttpServletResponse());
-                    }
-                }
-
-                // Write image file
-                try {
-                    OutputStream out = requestData.optOutputStream();
-                    out.write(fileHolder.getBytes());
-                    out.flush();
-                } catch (IOException e) {
-                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                }
-
-                // Signal direct response
-                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-            }
-        }
-
-        AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
+        AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
     }
@@ -150,7 +112,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
     }
 
     @Override
-    public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
+    public void setETag(String eTag, long expires, AJAXRequestResult result) {
         result.setExpires(expires);
         if (eTag != null) {
             result.setHeader("ETag", eTag);

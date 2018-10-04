@@ -93,10 +93,10 @@ public class CalendarExportImpl implements CalendarExport {
     private final ICalParameters parameters;
     private final VCalendar vCalendar;
     private final Set<String> timezoneIDs;
-
+    
     /**
      * Initializes a new {@link CalendarExportImpl}.
-     *
+     * 
      * @param mapper The iCal mapper to use
      * @param parameters The iCal parameters
      * @param warnings The warnings
@@ -171,11 +171,6 @@ public class CalendarExportImpl implements CalendarExport {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.CalendarExport#add(com.openexchange.chronos.CalendarAvailability)
-     */
     @Override
     public CalendarExport add(Availability calendarAvailability) throws OXException {
         vCalendar.add(exportAvailability(calendarAvailability));
@@ -214,7 +209,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         ICalUtils.exportCalendar(vCalendar, outputStream);
     }
-
+    
     @Override
     public InputStream getClosingStream() throws OXException {
         return getVCalendar().getClosingStream();
@@ -302,6 +297,14 @@ public class CalendarExportImpl implements CalendarExport {
                     added |= trackTimezones(dateTime.getTimeZone().getID());
                 }
             }
+        }
+        return added;
+    }
+    
+    public boolean trackTimeZones(Event event) {
+        boolean added = false;
+        if (false == CalendarUtils.isFloating(event)) {
+            added |= trackTimezones(event.getStartDate(), event.getEndDate());
         }
         return added;
     }
