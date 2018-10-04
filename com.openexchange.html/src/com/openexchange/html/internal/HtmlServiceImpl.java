@@ -96,6 +96,7 @@ import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
@@ -585,11 +586,13 @@ public final class HtmlServiceImpl implements HtmlService {
         return tmp.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public HtmlSanitizeResult sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix, final int maxContentSize) throws OXException {
+    public HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) throws OXException {
+        return sanitize(htmlContent, HtmlSanitizeOptions.builder().setCssPrefix(cssPrefix).setDropExternalImages(dropExternalImages).setMaxContentSize(maxContentSize).setModified(modified).setOptConfigName(optConfigName).build());
+    }
+
+    @Override
+    public HtmlSanitizeResult sanitize(String htmlContent, HtmlSanitizeOptions options) throws OXException {
         HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(htmlContent);
         if (isEmpty(htmlContent)) {
             return htmlSanitizeResult;
@@ -613,7 +616,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
 
-            html = removeComments(html, hasBody);
+            html = removeComments(html, hasBody, options);
 
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
@@ -634,12 +637,13 @@ public final class HtmlServiceImpl implements HtmlService {
             // CSS- and tag-wise sanitizing
             {
                 // Initialize the handler
-                FilterJerichoHandler handler = getHandlerFor(html.length(), optConfigName);
-                handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
+                FilterJerichoHandler handler = getHandlerFor(html.length(), options.getOptConfigName());
+                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
 
                 // Parse the HTML content
-                JerichoParser.getInstance().parse(html, handler, maxContentSize <= 0);
-                if (dropExternalImages && null != modified) {
+                JerichoParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
+                boolean[] modified = options.getModified();
+                if (options.isDropExternalImages() && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
                 html = handler.getHTML();
@@ -657,7 +661,13 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static String removeComments(String html, boolean hasBody) {
+    private static void handlePrettyPrint(HtmlSanitizeOptions options, Document document) {
+        if (false == options.isPrettyPrint()) {
+            document.outputSettings(new Document.OutputSettings().prettyPrint(false));
+        }
+    }
+
+    private static String removeComments(String html, boolean hasBody, HtmlSanitizeOptions options) {
         Document document = Jsoup.parse(html);
         final Set<Node> removedNodes = new HashSet<Node>(16, 0.9F);
         document.traverse(new NodeVisitor() {
@@ -677,6 +687,7 @@ public final class HtmlServiceImpl implements HtmlService {
         for (Node node : removedNodes) {
             node.remove();
         }
+        handlePrettyPrint(options, document);
         return hasBody ? document.outerHtml() : document.body().html();
     }
 

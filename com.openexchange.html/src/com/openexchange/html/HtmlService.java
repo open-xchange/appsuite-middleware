@@ -142,6 +142,15 @@ public interface HtmlService {
     HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) throws OXException;
 
     /**
+     * Sanitizes specified HTML content by limiting the content size to the character count provided with maxContentSize.
+     *
+     * @param htmlContent The HTML content to sanitize
+     * @param options The options for performing the sanitizing
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e.g. if the content was truncated
+     */
+    HtmlSanitizeResult sanitize(String htmlContent, HtmlSanitizeOptions options) throws OXException;
+
+    /**
      * Sanitizes specified HTML content.
      *
      * @param htmlContent The HTML content to sanitize
