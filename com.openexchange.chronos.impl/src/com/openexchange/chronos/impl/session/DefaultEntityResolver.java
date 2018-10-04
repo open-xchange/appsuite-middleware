@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.session;
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.getURI;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.optEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -66,8 +67,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -155,6 +154,7 @@ public class DefaultEntityResolver implements EntityResolver {
         return prepare(attendees, false);
     }
 
+    @Override
     public List<Attendee> prepare(List<Attendee> attendees, boolean resolveResourceIds) throws OXException {
         if (null != attendees) {
             for (Attendee attendee : attendees) {
@@ -263,10 +263,7 @@ public class DefaultEntityResolver implements EntityResolver {
              * copy over email address for external attendees
              */
             if (null == attendee.getEMail()) {
-                String eMailAddress = extractEMailAddress(attendee.getUri());
-                if(eMailAddress != null) {
-                    attendee.setEMail(eMailAddress);
-                }
+                attendee.setEMail(optEMailAddress(attendee.getEMail()));
             }
         }
         /*
@@ -316,7 +313,7 @@ public class DefaultEntityResolver implements EntityResolver {
              * copy over email address for external attendees
              */
             if (null == calendarUser.getEMail()) {
-                calendarUser.setEMail(extractEMailAddress(calendarUser.getUri()));
+                calendarUser.setEMail(optEMailAddress(calendarUser.getUri()));
             }
         }
         /*
@@ -555,16 +552,11 @@ public class DefaultEntityResolver implements EntityResolver {
         attendee.setCn(Strings.isNotEmpty(attendee.getCn()) ? attendee.getCn() : user.getDisplayName());
         if (Strings.isEmpty(attendee.getUri())) {
             attendee.setUri(getCalAddress(user));
+            attendee.setUri(getEMail(user));
         } else {
             attendee.setUri(Check.calendarAddressMatches(attendee.getUri(), context.getContextId(), user));
-        }
-        try {
-            String email = extractEMailAddress(attendee.getUri());
-            new InternetAddress(email);
-            attendee.setEMail(email);
-        } catch (AddressException e) {
-            LOG.debug("Unable to extract valid e-mail address from {}: {}. falling back to user's default e-mail address.", attendee.getUri(), e.getMessage(), e);
-            attendee.setEMail(getEMail(user));
+            String email = optEMailAddress(attendee.getUri());
+            attendee.setEMail(null != email ? email : getEMail(user));
         }
         return attendee;
     }

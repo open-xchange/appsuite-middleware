@@ -1381,17 +1381,42 @@ public class CalendarUtils {
         /*
          * prefer scheme-specific part from "mailto:"-URI if possible
          */
-        if (null != uri ) {
-            if("mailto".equalsIgnoreCase(uri.getScheme())) {
-                value = uri.getSchemeSpecificPart();
-            } else if("tel".equalsIgnoreCase(uri.getScheme())) {
-               return null; 
-            }
+        if (null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
+            value = uri.getSchemeSpecificPart();
         }
         /*
          * decode any punycoded names, too
          */
         return IDNA.toIDN(value);
+    }
+
+    /**
+     * Optionally gets an e-mail address from the supplied URI string. Decoding of sequences of escaped octets is performed implicitly,
+     * which includes decoding of percent-encoded scheme-specific parts. Additionally, any ASCII-encoded parts of the address string are
+     * decoded back to their unicode representation.
+     * <p/>
+     * Examples:<br/>
+     * <ul>
+     * <li>For input string <code>horst@xn--mller-kva.de</code>, the mail address <code>horst@m&uuml;ller.de</code> is extracted</li>
+     * <li>For input string <code>mailto:horst@m%C3%BCller.de</code>, the mail address <code>horst@m&uuml;ller</code> is extracted</li>
+     * </ul>
+     *
+     * @param value The URI address string to extract the e-mail address from
+     * @return The extracted e-mail address, or <code>null</code> if no valid e-mail address could be extracted
+     */
+    public static String optEMailAddress(String value) {
+        String address = extractEMailAddress(value);
+        if (Strings.isNotEmpty(address)) {
+            CalendarUser calendarUser = new CalendarUser();
+            calendarUser.setUri(getURI(address));
+            try {
+                Check.requireValidEMail(calendarUser);
+                return address;
+            } catch (OXException e) {
+                // ignore
+            }
+        }
+        return null;
     }
 
     /**
@@ -1406,7 +1431,7 @@ public class CalendarUtils {
     public static String getURI(String emailAddress) {
         if (Strings.isNotEmpty(emailAddress)) {
             try {
-                return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
+                return new URI("mailto", extractEMailAddress(emailAddress), null).toASCIIString();
             } catch (URISyntaxException e) {
                 getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
             }
