@@ -205,6 +205,7 @@ public class InfostoreAutodeleteSettings {
      * @param retentionDays The number of retention days to set
      * @param session The session to set for
      * @throws OXException If number of retention days cannot be set
+     * @see #mayChangeAutodeleteSettings(Session)
      */
     public static void setNumberOfRetentionDays(int retentionDays, Session session) throws OXException {
         setInt(ATTRIBUTE_RETENTION_DAYS, retentionDays, session.getUserId(), session.getContextId(), session);
@@ -249,6 +250,7 @@ public class InfostoreAutodeleteSettings {
      * @param maxVersions The max. number of file versions to set
      * @param session The session to set for
      * @throws OXException If max. number of file versions cannot be set
+     * @see #mayChangeAutodeleteSettings(Session)
      */
     public static void setMaxNumberOfFileVersions(int maxVersions, Session session) throws OXException {
         setInt(ATTRIBUTE_MAX_VERSIONS, maxVersions, session.getUserId(), session.getContextId(), session);
