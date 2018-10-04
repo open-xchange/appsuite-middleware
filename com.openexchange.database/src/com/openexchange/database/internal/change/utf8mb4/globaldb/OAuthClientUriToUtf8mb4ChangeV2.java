@@ -49,6 +49,8 @@
 
 package com.openexchange.database.internal.change.utf8mb4.globaldb;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.database.internal.change.utf8mb4.AbstractSingleTableChange;
 
 /**
@@ -58,11 +60,16 @@ import com.openexchange.database.internal.change.utf8mb4.AbstractSingleTableChan
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class OAuthClientUriToUtf8mb4Change extends AbstractSingleTableChange {
+public class OAuthClientUriToUtf8mb4ChangeV2 extends AbstractSingleTableChange {
 
     @Override
     protected String tableToConvert() {
         return "oauth_client_uri";
+    }
+
+    @Override
+    protected void before(Connection connection, String schemaName) throws SQLException {
+        recreateKey(connection, tableToConvert(), new String[] { "client" }, new int[] { 191 });
     }
 
     @Override
