@@ -65,11 +65,13 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.SessionAwareTargetFolderDefinition;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.session.Session;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
@@ -237,17 +239,24 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Object getFromSession(final int key, final Object session) {
         return ((Map<Integer, Object>) session).get(key);
     }
 
     @Override
-    public Object startSession(final TargetFolderDefinition target) throws OXException {
+    public Object startSession(final TargetFolderDefinition target) {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        final TargetFolderSession session = new TargetFolderSession(target);
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
         userInfo.put(SQL_INTERFACE, contactService);
         userInfo.put(TARGET, target);
+        Session session = null;
+        if (target instanceof SessionAwareTargetFolderDefinition) {
+            session = ((SessionAwareTargetFolderDefinition) target).getSession();
+        }
+        if (session == null) {
+            session = new TargetFolderSession(target);
+        }
         userInfo.put(SESSION, session);
         return userInfo;
     }
