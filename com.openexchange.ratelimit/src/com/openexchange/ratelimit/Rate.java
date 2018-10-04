@@ -51,7 +51,7 @@ package com.openexchange.ratelimit;
 
 
 /**
- * {@link Rate} defines a rate limit (the amount and time frame).
+ * {@link Rate} defines a rate limit which contains the amount of permits and the time frame in milliseconds.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
@@ -62,7 +62,7 @@ public class Rate {
      * Creates a new rate for given max. amount of permits in specified time frame.
      *
      * @param amount The max. number of permits
-     * @param timeframe The time frame in milliseconds, in which at max given number of permits are legit
+     * @param timeframe The time frame in milliseconds, in which the defined amount of permits are available.
      * @return The new rate
      */
     public static Rate create(int amount, long timeframe) {
