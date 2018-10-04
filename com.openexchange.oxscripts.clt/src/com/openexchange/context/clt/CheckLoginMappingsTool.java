@@ -49,6 +49,7 @@
 
 package com.openexchange.context.clt;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
@@ -171,7 +172,7 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('c')) {
             String contextVal = cmd.getOptionValue('c');
             try {
-                contextId = Integer.parseInt(contextVal.trim());
+                contextId = I((Integer.parseInt(contextVal.trim())));
             } catch (NumberFormatException e) {
                 System.err.println("Cannot parse '" + contextVal + "' as a context id");
                 printHelp();
