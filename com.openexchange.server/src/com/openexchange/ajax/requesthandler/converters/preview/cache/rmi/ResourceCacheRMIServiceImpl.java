@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.management.MBeanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
@@ -163,7 +162,7 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
             DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
             if (null == databaseService) {
                 String message = "Missing service: " + DatabaseService.class.getName();
-                throw new MBeanException(new Exception(message), message);
+                throw new RemoteException(message, new Exception(message));
             }
 
             Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
@@ -281,20 +280,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
                 return "Context " + contextId + " does not hold any documents.";
             }
 
-            class Tuple {
-
-                int id;
-                int version;
-                String mimeType;
-
-                Tuple(String mimeType, ResultSet rs) throws SQLException {
-                    super();
-                    id = rs.getInt(1);
-                    version = rs.getInt(2);
-                    this.mimeType = mimeType;
-                }
-            }
-
             String defaultMimeType = MimeTypes.MIME_APPL_OCTET;
             List<Tuple> tuples = new LinkedList<Tuple>();
             do {
@@ -321,9 +306,9 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
             stmt.setInt(2, contextId);
 
             for (Tuple tuple : tuples) {
-                stmt.setString(1, tuple.mimeType);
-                stmt.setInt(3, tuple.id);
-                stmt.setInt(4, tuple.version);
+                stmt.setString(1, tuple.getMimeType());
+                stmt.setInt(3, tuple.getId());
+                stmt.setInt(4, tuple.getVersion());
                 stmt.addBatch();
             }
 
@@ -371,5 +356,55 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
             return false;
         }
         return Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(Strings.toLowerCase(getPrimaryType(contentType2)));
+    }
+
+    ///////////////////////////////////////// NESTED ////////////////////////////////////////////////
+
+    private static class Tuple {
+
+        private final int id;
+        private final int version;
+        private final String mimeType;
+
+        /**
+         * Initialises a new {@link Tuple}.
+         * 
+         * @param mimeType The mime type
+         * @param rs The {@link ResultSet} from which to extract the id and the version
+         * @throws SQLException if an SQL error is occurred
+         */
+        protected Tuple(String mimeType, ResultSet rs) throws SQLException {
+            super();
+            this.id = rs.getInt(1);
+            this.version = rs.getInt(2);
+            this.mimeType = mimeType;
+        }
+
+        /**
+         * Gets the id
+         *
+         * @return The id
+         */
+        public int getId() {
+            return id;
+        }
+
+        /**
+         * Gets the version
+         *
+         * @return The version
+         */
+        public int getVersion() {
+            return version;
+        }
+
+        /**
+         * Gets the mimeType
+         *
+         * @return The mimeType
+         */
+        public String getMimeType() {
+            return mimeType;
+        }
     }
 }
