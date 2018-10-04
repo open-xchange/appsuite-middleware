@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import javax.management.MBeanException;
 
 /**
  * {@link GABRestorerRMIService} - The RMI service for restoring default permissions on global address book folder.
@@ -67,8 +66,7 @@ public interface GABRestorerRMIService extends Remote {
      * Restores default permissions on global address book folder.
      *
      * @param cid The context ID
-     * @param enable Whether to enable or disable global address book access for each user
-     * @throws MBeanException If invocation fails
+     * @throws RemoteException If an error is occurred
      */
     void restoreDefaultPermissions(int cid) throws RemoteException;
 }

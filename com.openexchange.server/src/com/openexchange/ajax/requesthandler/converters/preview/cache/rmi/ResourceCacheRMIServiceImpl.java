@@ -255,13 +255,14 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
     }
 
     /**
+     * Processes the specified context
      * 
-     * @param contextId
-     * @param invalidsSet
-     * @param databaseService
-     * @return
-     * @throws OXException
-     * @throws SQLException
+     * @param contextId The context identifier
+     * @param invalidsSet A {@link Set} with the invalid content types
+     * @param databaseService The {@link DatabaseService}
+     * @return The outcome of the operation
+     * @throws OXException if an error is occurred
+     * @throws SQLException if an SQL error is occurred
      */
     private String processContext(int contextId, Set<String> invalidsSet, DatabaseService databaseService) throws OXException, SQLException {
         Connection con = null;
@@ -342,6 +343,13 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         }
     }
 
+    /**
+     * Returns the primary type of the specified content-type
+     * 
+     * @param contentType The content-type from which to return the primary type
+     * @return The primary type of the specified content-type, or an empty
+     *         string or <code>null</code> if the content-type is empty or <code>null</code> respectively
+     */
     private String getPrimaryType(String contentType) {
         if (Strings.isEmpty(contentType)) {
             return contentType;
@@ -350,11 +358,18 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
+    /**
+     * Checks whether the specified content types are equal, by checking their primary types
+     * 
+     * @param contentType1 The first content type
+     * @param contentType2 The second content type
+     * @return <code>true</code> if the primary types of the specified content types are equal; <code>false</code>
+     *         otherwise
+     */
     private boolean equalPrimaryTypes(String contentType1, String contentType2) {
         if (null == contentType1 || null == contentType2) {
             return false;
         }
         return Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(Strings.toLowerCase(getPrimaryType(contentType2)));
     }
-
 }

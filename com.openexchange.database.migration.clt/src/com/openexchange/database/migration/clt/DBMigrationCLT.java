@@ -89,7 +89,7 @@ public class DBMigrationCLT extends AbstractRmiCLI<Void> {
     // ------------------------------------------------------------------------------------ //
 
     /**
-     * Initializes a new {@link CloseSessionsCLT}.
+     * Initializes a new {@link DBMigrationCLT}.
      */
     private DBMigrationCLT() {
         super();
@@ -170,7 +170,7 @@ public class DBMigrationCLT extends AbstractRmiCLI<Void> {
         try {
             rmiService = getRmiStub(optRmiHostName, DBMigrationRMIService.RMI_NAME);
         } catch (NotBoundException e) {
-            System.err.println("No migration MBean found for schema name \"" + schemaName + "\"");
+            System.err.println("No migration RMI service found for schema name \"" + schemaName + "\"");
             System.exit(1);
             return null;
         }

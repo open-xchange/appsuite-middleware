@@ -75,11 +75,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
      * Defines the actions of the CLT
      */
     private enum Action {
-    list_unassigned("Lists names of orphaned files held in file storage"),
-    list_missing("Lists names of files that are still referenced, but do no more exist in actual file storage"),
-    repair("Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
-    repair_configdb("Deletes artefacts of non-existing contexts from config database. Requires no further options."),
-    check_configdb("Checks for artefacts of non-existing contexts in config database. Requires no further options.");
+        list_unassigned("Lists names of orphaned files held in file storage"),
+        list_missing("Lists names of files that are still referenced, but do no more exist in actual file storage"),
+        repair("Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
+        repair_configdb("Deletes artefacts of non-existing contexts from config database. Requires no further options."),
+        check_configdb("Checks for artefacts of non-existing contexts in config database. Requires no further options.");
 
         private final String description;
 
@@ -322,9 +322,10 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
     ///////////////////////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////////////////
 
     /**
+     * Lists the missing files
      * 
-     * @param rmiService
-     * @throws RemoteException
+     * @param rmiService The {@link ConsistencyRMIService}
+     * @throws RemoteException if a remote error is occurred
      */
     private void listMissing(ConsistencyRMIService rmiService) throws RemoteException {
         switch (source) {
@@ -348,9 +349,10 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
     }
 
     /**
+     * Lists the unassigned files
      * 
-     * @param rmiService
-     * @throws RemoteException
+     * @param rmiService The {@link ConsistencyRMIService}
+     * @throws RemoteException if a remote error is occurred
      */
     private void listUnassigned(ConsistencyRMIService rmiService) throws RemoteException {
         switch (source) {
@@ -375,9 +377,10 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
     }
 
     /**
+     * Performs a repair
      * 
-     * @param rmiService
-     * @throws RemoteException
+     * @param rmiService The {@link ConsistencyRMIService}
+     * @throws RemoteException if a remote error is occurred
      */
     private void repair(ConsistencyRMIService rmiService) throws RemoteException {
         switch (source) {
@@ -403,7 +406,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
     /**
      * Get the policy string
      *
-     * @return
+     * @return the policy string
      */
     private String getPolicyString() {
         return (policy != null) ? policy.name() + ":" + policyAction.name() : "";
@@ -506,6 +509,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         }
     }
 
+    /**
+     * Prints to the console the specified list of strings
+     * 
+     * @param results the list to print
+     */
     private void printList(List<String> results) {
         for (String s : results) {
             System.out.println(s);
@@ -513,8 +521,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
     }
 
     /**
-     * @param keySet
-     * @return
+     * Converts and returns the specified {@link Set} of {@link ConsistencyEntity}s
+     * as a {@link List} of Strings.
+     * 
+     * @param keySet The {@link Set} to convert
+     * @return The converted set as a {@link List}
      */
     private List<String> compileListOfEntities(Set<ConsistencyEntity> keySet) {
         List<String> entities = new ArrayList<String>(keySet.size());

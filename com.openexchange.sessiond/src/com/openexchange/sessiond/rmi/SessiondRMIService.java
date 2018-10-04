@@ -52,7 +52,6 @@ package com.openexchange.sessiond.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Set;
-import javax.management.MBeanException;
 import com.openexchange.session.Session;
 
 /**
@@ -71,6 +70,7 @@ public interface SessiondRMIService extends Remote {
      * @param userId The user ID
      * @param contextId The context ID
      * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * @throws RemoteException If the operation fails or any other error is occurred
      */
     int clearUserSessions(int userId, int contextId) throws RemoteException;
 
@@ -79,8 +79,7 @@ public interface SessiondRMIService extends Remote {
      *
      * @param userId The user ID
      * @param contextId The context ID
-     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
-     * @throws MBeanException If operation fails
+     * @throws RemoteException If the operation fails or any other error is occurred
      */
     void clearUserSessionsGlobally(int userId, int contextId) throws RemoteException;
 
@@ -88,6 +87,7 @@ public interface SessiondRMIService extends Remote {
      * Clears all sessions belonging to specified context
      *
      * @param contextId The context identifier
+     * @throws RemoteException If the operation fails or any other error is occurred
      */
     void clearContextSessions(int contextId) throws RemoteException;
 
@@ -95,6 +95,7 @@ public interface SessiondRMIService extends Remote {
      * Clears all sessions belonging to given context.
      *
      * @param contextId The context identifier to remove sessions for
+     * @throws RemoteException If the operation fails or any other error is occurred
      */
     void clearContextSessionsGlobally(int contextId) throws RemoteException;
 
@@ -102,11 +103,14 @@ public interface SessiondRMIService extends Remote {
      * Clears all sessions belonging to given contexts.
      *
      * @param contextId The context identifiers to remove sessions for
+     * @throws RemoteException If the operation fails or any other error is occurred
      */
     void clearContextSessionsGlobally(Set<Integer> contextIds) throws RemoteException;
 
     /**
      * Clear all sessions in central session storage. This does not affect the local short term session container.
+     * 
+     * @throws RemoteException If the operation fails or any other error is occurred
      */
     void clearSessionStorage() throws RemoteException;
 }

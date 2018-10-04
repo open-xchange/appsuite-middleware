@@ -75,11 +75,11 @@ public class PolicyResolver {
     /**
      * Initialises a new {@link PolicyResolver}.
      * 
-     * @param dbSolver
-     * @param attachmentSolver
-     * @param snippetSolver
-     * @param fileSolver
-     * @param vCardSolver
+     * @param dbSolver The db {@link ProblemSolver}
+     * @param attachmentSolver The attachment {@link ProblemSolver}
+     * @param snippetSolver The snippet {@link ProblemSolver}
+     * @param fileSolver The file {@link ProblemSolver}
+     * @param vCardSolver The VCard {@link ProblemSolver}
      */
     private PolicyResolver(ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver) {
         this.dbSolver = dbSolver;

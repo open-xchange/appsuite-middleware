@@ -66,39 +66,44 @@ public interface DBMigrationRMIService extends Remote {
 
     /**
      * Force running the core configdb changelog
-     *
-     * @throws RemoteException
+     * 
+     * @param schemaName The name of the schema for which to force the migration
+     * @throws RemoteException if an error is occurred
      */
     void forceMigration(String schemaName) throws RemoteException;
 
     /**
-     * Rollback to the given tag of a changeset of the core changelog
+     * Roll-back to the given tag of a change set of the core change log
      *
-     * @param changeSetTag
-     * @throws RemoteException
+     * @param schemaName The name of the schema for which to roll-back the migration
+     * @param changeSetTag the change set tag
+     * @throws RemoteException if an error is occurred
      */
     void rollbackMigration(String schemaName, String changeSetTag) throws RemoteException;
 
     /**
      * Releases all configdb migration locks. Use this in case no lock can be acquired by liquibase.
-     *
-     * @throws RemoteException
+     * 
+     * @param schemaName The name of the schema for which to release the locks
+     * @throws RemoteException if an error is occurred
      */
     void releaseLocks(String schemaName) throws RemoteException;
 
     /**
      * Gets a human-readable migration status string for the configdb.
      *
+     * @param schemaName The name of the schema for which to get the migration status
      * @return The status
-     * @throws RemoteException
+     * @throws RemoteException if an error is occurred
      */
     String getMigrationStatus(String schemaName) throws RemoteException;
 
     /**
      * Gets a human-readable lock status string for the configdb.
      *
+     * @param schemaName The name of the schema for which to get the lock status
      * @return The status
-     * @throws RemoteException
+     * @throws RemoteException if an error is occurred
      */
     String getLockStatus(String schemaName) throws RemoteException;
 }

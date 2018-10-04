@@ -67,8 +67,9 @@ public interface DeferredActivatorRMIService extends Remote {
     /**
      * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
      *
-     * @name The bundle name
+     * @param name The bundle name
      * @return A list of canonical class names of missing services
+     * @throws RemoteException if an error is occurred
      */
     List<String> listMissingServices(String name) throws RemoteException;
 
@@ -76,14 +77,16 @@ public interface DeferredActivatorRMIService extends Remote {
      * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available.
      *
      * @return A canonical class names of missing services mapped to bundle
+     * @throws RemoteException if an error is occurred
      */
     Map<String, List<String>> listAllMissingServices() throws RemoteException;
 
     /**
      * Checks if activator for specified bundle is active; meaning all needed services are available.
      *
-     * @name The bundle name
+     * @param name The bundle name
      * @return <code>true</code> if active; otherwise <code>false</code>
+     * @throws RemoteException if an error is occurred
      */
     boolean isActive(String name) throws RemoteException;
 
@@ -91,6 +94,7 @@ public interface DeferredActivatorRMIService extends Remote {
      * Lists all available bundles.
      *
      * @return All available bundles
+     * @throws RemoteException if an error is occurred
      */
     List<String> listAvailableBundles() throws RemoteException;
 }
