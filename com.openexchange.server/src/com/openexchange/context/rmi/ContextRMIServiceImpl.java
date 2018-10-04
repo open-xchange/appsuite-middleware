@@ -85,7 +85,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
      * @see com.openexchange.context.rmi.ContextRMIService#checkLogin2ContextMapping()
      */
     @Override
-    public void checkLogin2ContextMapping() throws RemoteException {
+    public boolean checkLogin2ContextMapping() throws RemoteException {
         DatabaseService databaseService = getDatabaseService();
 
         Connection con = null;
@@ -110,13 +110,14 @@ public class ContextRMIServiceImpl implements ContextRMIService {
             }
 
             if (contextIds.isEmpty()) {
-                return;
+                return false;
             }
 
             // Logger
             Logger logger = org.slf4j.LoggerFactory.getLogger(ContextRMIServiceImpl.class);
 
             // Iterate context identifiers
+            int inserted = 0;
             for (int contextId : contextIds.toArray()) {
                 PreparedStatement stmt = null;
                 try {
@@ -124,7 +125,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
                     stmt.setInt(1, contextId);
                     stmt.setString(2, Integer.toString(contextId));
                     try {
-                        stmt.executeUpdate();
+                        inserted += stmt.executeUpdate();
                     } catch (Exception e) {
                         logger.warn("Couldn't add context identifier to login2context mappings for context {}", Integer.valueOf(contextId), e);
                     }
@@ -135,11 +136,15 @@ public class ContextRMIServiceImpl implements ContextRMIService {
                 }
             }
 
-            // Invalidate cache
-            ContextStorage cs = ContextStorage.getInstance();
-            for (int contextId : contextIds.toArray()) {
-                invalidateContext(contextId, cs);
+            boolean invalidate = inserted > 0;
+            if (invalidate) {
+                // Invalidate cache
+                ContextStorage cs = ContextStorage.getInstance();
+                for (int contextId : contextIds.toArray()) {
+                    invalidateContext(contextId, cs);
+                }
             }
+            return invalidate;
         } catch (OXException e) {
             throw new RemoteException(e.getMessage(), e);
         } finally {
@@ -153,17 +158,18 @@ public class ContextRMIServiceImpl implements ContextRMIService {
      * @see com.openexchange.context.rmi.ContextRMIService#checkLogin2ContextMapping(int)
      */
     @Override
-    public void checkLogin2ContextMapping(int contextId) throws RemoteException {
+    public boolean checkLogin2ContextMapping(int contextId) throws RemoteException {
         DatabaseService databaseService = getDatabaseService();
 
         Connection con = null;
         PreparedStatement stmt = null;
+        boolean invalidate = false;
         try {
             con = databaseService.getWritable();
             stmt = con.prepareStatement("INSERT INTO login2context (cid, login_info) VALUES (?, ?)");
             stmt.setInt(1, contextId);
             stmt.setString(2, Integer.toString(contextId));
-            stmt.executeUpdate();
+            invalidate = stmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw new RemoteException(e.getMessage(), e);
         } catch (OXException e) {
@@ -173,9 +179,12 @@ public class ContextRMIServiceImpl implements ContextRMIService {
             databaseService.backWritable(con);
         }
 
-        // Invalidate cache
-        ContextStorage cs = ContextStorage.getInstance();
-        invalidateContext(contextId, cs);
+        if (invalidate) {
+            // Invalidate cache
+            ContextStorage cs = ContextStorage.getInstance();
+            invalidateContext(contextId, cs);
+        }
+        return invalidate;
     }
 
     /**

@@ -67,7 +67,7 @@ public interface ContextRMIService extends Remote {
      *
      * @throws RemoteException If check fails for any reason
      */
-    void checkLogin2ContextMapping() throws RemoteException;
+    boolean checkLogin2ContextMapping() throws RemoteException;
 
     /**
      * Checks the entry in login2context table that belongs to specified context for
@@ -76,5 +76,5 @@ public interface ContextRMIService extends Remote {
      * @param contextId The context identifier
      * @throws RemoteException If check fails for any reason
      */
-    void checkLogin2ContextMapping(int contextId) throws RemoteException;
+    boolean checkLogin2ContextMapping(int contextId) throws RemoteException;
 }

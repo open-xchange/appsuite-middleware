@@ -50,6 +50,8 @@
 package com.openexchange.context.clt;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
@@ -123,13 +125,10 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         boolean error = true;
         try {
-            ContextRMIService contextRMI = getRmiStub(optRmiHostName, ContextRMIService.RMI_NAME);
             if (null == contextId) {
-                contextRMI.checkLogin2ContextMapping();
-                System.out.println("All cache entries cleared.");
+                clearAllEntries(optRmiHostName);
             } else {
-                contextRMI.checkLogin2ContextMapping(contextId.intValue());
-                System.out.println("All cache entries cleared for context " + contextId.intValue());
+                clearContextEntry(optRmiHostName);
             }
             error = false;
         } catch (final RemoteException e) {
@@ -204,5 +203,35 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
     @Override
     protected String getName() {
         return SYNTAX;
+    }
+
+    /**
+     * Clears a single context entry
+     * 
+     * @param optRmiHostName The optional RMI hostname
+     * @throws RemoteException if an error is occurred
+     * @throws MalformedURLException if a malformed URL is used for the RMI server
+     * @throws NotBoundException if there is no RMI service bound with the specified name
+     */
+    private void clearContextEntry(String optRmiHostName) throws RemoteException, MalformedURLException, NotBoundException {
+        ContextRMIService contextRMI = getRmiStub(optRmiHostName, ContextRMIService.RMI_NAME);
+        if (contextRMI.checkLogin2ContextMapping(contextId.intValue())) {
+            System.out.println("All cache entries cleared for context " + contextId.intValue());
+        }
+    }
+
+    /**
+     * Clears all entries for all contexts
+     * 
+     * @param optRmiHostName The optional RMI hostname
+     * @throws RemoteException if an error is occurred
+     * @throws MalformedURLException if a malformed URL is used for the RMI server
+     * @throws NotBoundException if there is no RMI service bound with the specified name
+     */
+    private void clearAllEntries(String optRmiHostName) throws RemoteException, MalformedURLException, NotBoundException {
+        ContextRMIService contextRMI = getRmiStub(optRmiHostName, ContextRMIService.RMI_NAME);
+        if (contextRMI.checkLogin2ContextMapping()) {
+            System.out.println("All cache entries cleared.");
+        }
     }
 }
