@@ -69,7 +69,7 @@ public class OAuthClientUriToUtf8mb4ChangeV2 extends AbstractSingleTableChange {
 
     @Override
     protected void before(Connection connection, String schemaName) throws SQLException {
-        recreateKey(connection, tableToConvert(), new String[] { "client_index" }, new int[] { 191 });
+        recreateKey(connection, tableToConvert(), new String[] { "client" }, new int[] { 191 });
     }
 
     @Override
