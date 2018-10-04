@@ -79,7 +79,6 @@ import com.openexchange.consistency.internal.solver.DoNothingSolver;
 import com.openexchange.consistency.internal.solver.PolicyResolver;
 import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
-import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -772,12 +771,12 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @throws OXException if the vcard file store locations cannot be returned
      */
     private SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
-        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
-        if (vCardStorageMetadataStore != null) {
-            Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId(), user.getId());
-            return new TreeSet<String>(loadRefIds);
+        VCardStorageMetadataStore vCardStorageMetadataStore = services.getOptionalService(VCardStorageMetadataStore.class);
+        if (vCardStorageMetadataStore == null) {
+            return new TreeSet<String>();
         }
-        return new TreeSet<String>();
+        Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId(), user.getId());
+        return new TreeSet<String>(loadRefIds);
     }
 
     /**
