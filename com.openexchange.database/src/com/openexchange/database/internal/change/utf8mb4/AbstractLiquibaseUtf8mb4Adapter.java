@@ -55,12 +55,16 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -563,6 +567,144 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Re-creates the specified key for the specified table.
+     *
+     * @param connection The {@link Connection}
+     * @param table The table's name
+     * @param columnNames the column names
+     * @param columnSizes The column sizes (use -1 for full column length)
+     * @throws SQLException if an SQL error is occurred
+     */
+    protected void recreateKey(Connection connection, String table, String[] columnNames, int[] columnSizes) throws SQLException {
+        String indexName = existsIndex(connection, table, columnNames);
+        if (Strings.isNotEmpty(indexName)) {
+            dropKey(connection, table, indexName);
+        }
+        createKey(connection, table, columnNames, columnSizes, false, indexName);
+    }
+
+    /**
+     * @param con readable database connection.
+     * @param table table name that indexes should be tested.
+     * @param columns column names that the index must cover.
+     * @return the name of an index that matches the given columns or <code>null</code> if no matching index is found.
+     * @throws SQLException if some SQL problem occurs.
+     * @throws NullPointerException if one of the columns is <code>null</code>.
+     */
+    protected static final String existsIndex(final Connection con, final String table, final String[] columns) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        final Map<String, ArrayList<String>> indexes = new HashMap<String, ArrayList<String>>();
+        ResultSet result = null;
+        try {
+            result = metaData.getIndexInfo(null, null, table, false, false);
+            while (result.next()) {
+                final String indexName = result.getString(6);
+                final int columnPos = result.getInt(8);
+                final String columnName = result.getString(9);
+                ArrayList<String> foundColumns = indexes.get(indexName);
+                if (null == foundColumns) {
+                    foundColumns = new ArrayList<String>();
+                    indexes.put(indexName, foundColumns);
+                }
+                while (foundColumns.size() < columnPos) {
+                    foundColumns.add(null);
+                }
+                foundColumns.set(columnPos - 1, columnName);
+            }
+        } finally {
+            closeSQLStuff(result);
+        }
+        String foundIndex = null;
+        final Iterator<Entry<String, ArrayList<String>>> iter = indexes.entrySet().iterator();
+        while (null == foundIndex && iter.hasNext()) {
+            final Entry<String, ArrayList<String>> entry = iter.next();
+            final ArrayList<String> foundColumns = entry.getValue();
+            if (columns.length != foundColumns.size()) {
+                continue;
+            }
+            boolean matches = true;
+            for (int i = 0; matches && i < columns.length; i++) {
+                matches = columns[i].equalsIgnoreCase(foundColumns.get(i));
+            }
+            if (matches) {
+                foundIndex = entry.getKey();
+            }
+        }
+        return foundIndex;
+    }
+    
+    /**
+     * This method creates a new (primary) key on a table. Beware, this method is vulnerable to SQL injection because table and column names
+     * can not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table name of the table that should get a new primary key.
+     * @param columns names of the columns the key should cover.
+     * @param lengths The column lengths; <code>-1</code> for full column
+     * @param primary <code>true</code> if a <code>PRIMARY KEY</code> is to be created; <code>false</code> for a <code>KEY</code>
+     * @param name The name of the <code>KEY</code>. In case of a <code>PRIMARY KEY</code> the name will simply be ignored. 
+     * @throws SQLException if some SQL problem occurs.
+     */
+    protected static final void createKey(final Connection con, final String table, final String[] columns, final int[] lengths, boolean primary, String name) throws SQLException {
+        final StringBuilder sql = new StringBuilder("ALTER TABLE `");
+        sql.append(table);
+        sql.append("` ADD ");
+        if (primary) {
+            sql.append("PRIMARY ");
+        }
+        sql.append("KEY ");
+        if (!primary && Strings.isNotEmpty(name)) {
+            sql.append('`').append(name).append('`');
+        }
+        sql.append(" (");
+        {
+            final String column = columns[0];
+            sql.append('`').append(column).append('`');
+            final int len = lengths[0];
+            if (len > 0) {
+                sql.append('(').append(len).append(')');
+            }
+        }
+        for (int i = 1; i < columns.length; i++) {
+            final String column = columns[i];
+            sql.append(',');
+            sql.append('`').append(column).append('`');
+            final int len = lengths[i];
+            if (len > 0) {
+                sql.append('(').append(len).append(')');
+            }
+        }
+        sql.append(')');
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
+     * Drops the key with the specified name. Beware, this method is vulnerable to SQL injection because table and key name can
+     * not be set through a {@link PreparedStatement}.
+     * 
+     * @param con writable database connection.
+     * @param table table name that index should be dropped.
+     * @param key name of the key to drop.
+     * @throws SQLException if some SQL problem occurs.
+     */
+    protected static final void dropKey(Connection con, String table, String key) throws SQLException {
+        String sql = "ALTER TABLE `" + table + "` DROP KEY `" + key + "`";
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
     }
 
 }

@@ -207,7 +207,7 @@
             <changeSetExecuted id="7.8.0:guest:create" author="martin.schneider@open-xchange.com" changeLogFile="globaldbChangeLog" />
         </preConditions>
         <comment>Converts the table/column definition to support utf8mb4</comment>
-        <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.GuestToUtf8mb4Change" />
+        <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.GuestToUtf8mb4ChangeV2" />
     </changeSet>
 
     <changeSet id="7.10.0:guest2context:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
@@ -231,7 +231,7 @@
             <changeSetExecuted id="7.8.0:oauth_client_uri:create" author="steffen.templin@open-xchange.com" changeLogFile="globaldbChangeLog" />
         </preConditions>
         <comment>Converts the table/column definition to support utf8mb4</comment>
-        <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.OAuthClientUriToUtf8mb4Change" />
+        <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.OAuthClientUriToUtf8mb4ChangeV2" />
     </changeSet>
 
     <changeSet id="7.10.0:feedback:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
