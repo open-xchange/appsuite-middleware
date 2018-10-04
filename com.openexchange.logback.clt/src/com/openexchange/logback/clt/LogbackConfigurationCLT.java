@@ -87,7 +87,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
     private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -e <sessionid>] [-l <logger_name>=<logger_level> ...] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
-    private static final String FOOTER = "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
+    private static final String FOOTER = "The flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
 
     /**
      * Initialises a new {@link LogbackConfigurationCLT}.
