@@ -92,7 +92,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
             return service.checkOrRepairConfigDB(repair);
         } catch (OXException e) {
             LOG.error("", e);
-            final Exception wrapMe = new Exception(e.getMessage());
+            Exception wrapMe = new Exception(e.getMessage());
             throw new RemoteException(e.getMessage(), wrapMe);
         } catch (RuntimeException e) {
             LOG.error("", e);
