@@ -51,12 +51,25 @@ package com.openexchange.ratelimit;
 
 
 /**
- * {@link Rate} defines a ratelimit (the amount and timeframe).
+ * {@link Rate} defines a rate limit (the amount and time frame).
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
 public class Rate {
+
+    /**
+     * Creates a new rate for given max. amount of permits in specified time frame.
+     *
+     * @param amount The max. number of permits
+     * @param timeframe The time frame in milliseconds, in which at max given number of permits are legit
+     * @return The new rate
+     */
+    public static Rate create(int amount, long timeframe) {
+        return new Rate(amount, timeframe);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final int amount;
     private final long timeframe;
@@ -69,10 +82,6 @@ public class Rate {
         this.timeframe = timeframe;
     }
 
-    public static Rate create(int amount, long timeframe) {
-        return new Rate(amount, timeframe);
-    }
-
     /**
      * Gets the amount
      *
@@ -83,14 +92,19 @@ public class Rate {
     }
 
     /**
-     * Gets the timeframe
+     * Gets the time frame in milliseconds
      *
-     * @return The timeframe
+     * @return The time frame
      */
     public long getTimeframe() {
         return timeframe;
     }
 
+    /**
+     * Checks is this rate is effectively enabled; that is specified max. number of permits is greater than 0 (zero).
+     *
+     * @return <code>true</code> if enabled; other wise <code>false</code>
+     */
     public boolean isEnabled() {
         return amount >= 0;
     }

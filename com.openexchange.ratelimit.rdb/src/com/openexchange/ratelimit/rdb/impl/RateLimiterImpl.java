@@ -99,9 +99,11 @@ public class RateLimiterImpl implements RateLimiter {
     public boolean acquire(long permits) {
         Connection writeCon = null;
         boolean readOnly = true;
+        int rollback = 0;
         try {
             writeCon = dbProvider.getWriteConnection(ctx);
             Databases.startTransaction(writeCon);
+            rollback = 1;
 
             readOnly = deleteOldPermits(writeCon) <= 0;
             long numberOfPermits = getPermits();
@@ -109,15 +111,22 @@ public class RateLimiterImpl implements RateLimiter {
                 return false;
             }
             insertPermit(writeCon, permits);
+
             writeCon.commit();
+            rollback = 2;
             readOnly = false;
         } catch (OXException e) {
             LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
         } finally {
-            Databases.autocommit(writeCon);
             if (writeCon != null) {
+                if (rollback > 0) {
+                    Databases.autocommit(writeCon);
+                    if (rollback == 1) {
+                        Databases.rollback(writeCon);
+                    }
+                }
                 if (readOnly) {
                     dbProvider.releaseWriteConnectionAfterReading(ctx, writeCon);
                 } else {
