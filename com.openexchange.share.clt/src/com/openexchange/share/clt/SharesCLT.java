@@ -60,6 +60,7 @@ import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.share.impl.rmi.ShareRMIService;
 
@@ -189,7 +190,7 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
     private Void removeShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException, MissingOptionException, OXException {
         ShareRMIService rmiService = getRmiStub(optRmiHostName, ShareRMIService.RMI_NAME);
         int result = 0;
-        if (null != token && !token.isEmpty()) {
+        if (Strings.isNotEmpty(token)) {
             if (isShareURL(token)) {
                 token = extractTokenFromURL(token);
             }
@@ -234,7 +235,7 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
         return null;
     }
 
-    private Pair<String, String> parseToken(String token) throws OXException {
+    private Pair<String, String> parseToken(String token) {
         String shareToken = null;
         String targetPath = null;
         String[] split = token.split("/", 2);
