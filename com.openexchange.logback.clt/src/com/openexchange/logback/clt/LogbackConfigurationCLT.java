@@ -115,6 +115,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         options.addOption(createArgumentOption("oec", "override-exception-categories", "exceptionCategories", "Override the exception categories to be suppressed", false));
         options.addOption(createArgumentOption("e", "session", "sessionId", "The session id for which to enable logging", false));
 
+        // The following option 'level' is a "polymorphic" option that can be used either as a switch or an argument option depending on other present options and switches.
         Option o = createOption("l", "level", false, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
         options.addOption(o);
@@ -467,6 +468,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
          * @param commandLine The {@link CommandLine} containing the arguments
          * @param logbackConfigService The {@link LogbackConfigurationRMIService}
          * @throws RemoteException if an error is occurred
+         * @throws IllegalArgumentException if an invalid argument is specified
          */
         abstract void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException;
     }
