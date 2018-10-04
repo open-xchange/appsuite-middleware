@@ -101,6 +101,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.report.internal.Tools;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.tools.sql.DBUtils;
@@ -117,12 +118,14 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     private static final Logger LOG = LoggerFactory.getLogger(ConsistencyServiceImpl.class);
 
     private DatabaseImpl database;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link ConsistencyServiceImpl}.
      */
-    public ConsistencyServiceImpl() {
+    public ConsistencyServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /*
@@ -143,7 +146,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
 
         Map<String, List<Integer>> schemaMap = new HashMap<String, List<Integer>>();
         try {
-            databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
+            databaseService = services.getServiceSafe(DatabaseService.class);
 
             Map<String, Integer> schemaPoolMap = Tools.getAllSchemata(LOG);
             confCon = databaseService.getReadOnly();
@@ -682,7 +685,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
+        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
         try {
             con = databaseService.getReadOnly(ctx);
             if (DBUtils.tableExists(con, "snippet")) {
@@ -719,7 +722,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
+        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
         try {
             con = databaseService.getReadOnly(ctx);
             if (DBUtils.tableExists(con, "snippet")) {
@@ -752,12 +755,12 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @throws OXException if the vcard file store locations cannot be returned
      */
     private SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
-        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
-        if (vCardStorageMetadataStore != null) {
-            Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId());
-            return new TreeSet<String>(loadRefIds);
+        VCardStorageMetadataStore vCardStorageMetadataStore = services.getOptionalService(VCardStorageMetadataStore.class);
+        if (vCardStorageMetadataStore == null) {
+            return new TreeSet<String>();
         }
-        return new TreeSet<String>();
+        Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId());
+        return new TreeSet<String>(loadRefIds);
     }
 
     /**

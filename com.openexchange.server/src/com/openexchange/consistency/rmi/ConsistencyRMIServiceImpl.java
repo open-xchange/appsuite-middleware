@@ -59,8 +59,8 @@ import com.openexchange.consistency.ConsistencyService;
 import com.openexchange.consistency.Entity;
 import com.openexchange.consistency.RepairAction;
 import com.openexchange.consistency.RepairPolicy;
-import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ConsistencyRMIServiceImpl}
@@ -71,12 +71,14 @@ import com.openexchange.exception.OXException;
 public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsistencyRMIServiceImpl.class);
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link ConsistencyRMIServiceImpl}.
      */
-    public ConsistencyRMIServiceImpl() {
+    public ConsistencyRMIServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /*
@@ -88,7 +90,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public List<String> checkOrRepairConfigDB(boolean repair) throws RemoteException {
         try {
             LOG.info("RMI invocation for: {} inconsistent configdb", repair ? "Repair" : "List");
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return service.checkOrRepairConfigDB(repair);
         } catch (OXException e) {
             LOG.error("", e);
@@ -112,7 +114,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public List<String> listMissingFilesInContext(int contextId) throws RemoteException {
         try {
             LOG.info("RMI invocation for: Listing missing files in context {}", contextId);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return service.listMissingFilesInContext(contextId);
         } catch (OXException e) {
             LOG.error("", e);
@@ -136,7 +138,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public Map<ConsistencyEntity, List<String>> listMissingFilesInFilestore(int filestoreId) throws RemoteException {
         try {
             LOG.info("RMI invocation for: Listing missing files in filestore {}", filestoreId);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return convertMap(service.listMissingFilesInFilestore(filestoreId));
         } catch (OXException e) {
             LOG.error("", e);
@@ -160,7 +162,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public Map<ConsistencyEntity, List<String>> listMissingFilesInDatabase(int databaseId) throws RemoteException {
         try {
             LOG.info("RMI invocation for: List missing files in database {}", databaseId);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return convertMap(service.listMissingFilesInDatabase(databaseId));
         } catch (OXException e) {
             LOG.error("", e);
@@ -184,7 +186,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public Map<ConsistencyEntity, List<String>> listAllMissingFiles() throws RemoteException {
         try {
             LOG.info("RMI invocation for: List all missing files");
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return convertMap(service.listAllMissingFiles());
         } catch (OXException e) {
             LOG.error("", e);
@@ -208,7 +210,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public List<String> listUnassignedFilesInContext(int contextId) throws RemoteException {
         try {
             LOG.info("RMI invocation for: List all unassigned files in context {}", contextId);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return service.listUnassignedFilesInContext(contextId);
         } catch (OXException e) {
             LOG.error("", e);
@@ -232,7 +234,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public Map<ConsistencyEntity, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws RemoteException {
         try {
             LOG.info("RMI invocation for: List all unassigned files in filestore {}", filestoreId);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return convertMap(service.listMissingFilesInFilestore(filestoreId));
         } catch (OXException e) {
             LOG.error("", e);
@@ -256,7 +258,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public Map<ConsistencyEntity, List<String>> listUnassignedFilesInDatabase(int databaseId) throws RemoteException {
         try {
             LOG.info("RMI invocation for: List all unassigned files in database {}", databaseId);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return convertMap(service.listUnassignedFilesInDatabase(databaseId));
         } catch (OXException e) {
             LOG.error("", e);
@@ -280,7 +282,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public Map<ConsistencyEntity, List<String>> listAllUnassignedFiles() throws RemoteException {
         try {
             LOG.info("RMI invocation for: List all unassigned files");
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             return convertMap(service.listAllUnassignedFiles());
         } catch (OXException e) {
             LOG.error("", e);
@@ -304,7 +306,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public void repairFilesInContext(int contextId, String repairPolicy, String repairAction) throws RemoteException {
         try {
             LOG.info("RMI invocation for: Repair files in context {} with repair policy {} and repair action {}", contextId, repairPolicy, repairAction);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             service.repairFilesInContext(contextId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (OXException e) {
             LOG.error("", e);
@@ -328,7 +330,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public void repairFilesInFilestore(int filestoreId, String repairPolicy, String repairAction) throws RemoteException {
         try {
             LOG.info("RMI invocation for: Repair files in filestore {} with repair policy {} and repair action {}", filestoreId, repairPolicy, repairAction);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             service.repairFilesInFilestore(filestoreId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -352,7 +354,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public void repairFilesInDatabase(int databaseId, String repairPolicy, String repairAction) throws RemoteException {
         try {
             LOG.info("RMI invocation for: Repair files in database {} with repair policy {} and repair action {}", databaseId, repairPolicy, repairAction);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             service.repairFilesInDatabase(databaseId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -376,7 +378,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     public void repairAllFiles(String repairPolicy, String repairAction) throws RemoteException {
         try {
             LOG.info("RMI invocation for: Repair files with repair policy {} and repair action {}", repairPolicy, repairAction);
-            ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
+            ConsistencyService service = services.getServiceSafe(ConsistencyService.class);
             service.repairAllFiles(RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (final OXException e) {
             LOG.error("", e);

@@ -76,8 +76,8 @@ public final class ConsistencyActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.consistency");
         ConsistencyServiceLookup.set(this);
-        registerService(ConsistencyService.class, new ConsistencyServiceImpl());
-        registerService(Remote.class, new ConsistencyRMIServiceImpl());
+        registerService(ConsistencyService.class, new ConsistencyServiceImpl(this));
+        registerService(Remote.class, new ConsistencyRMIServiceImpl(this));
 
         trackService(VCardStorageMetadataStore.class);
         trackService(DatabaseService.class);
