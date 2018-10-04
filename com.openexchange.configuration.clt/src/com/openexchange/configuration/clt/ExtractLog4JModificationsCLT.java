@@ -276,4 +276,14 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         // ALL
         return retval;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
 }

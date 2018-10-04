@@ -267,6 +267,16 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         return SYNTAX;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
+
     //////////////////////////////////////// HELPERS //////////////////////////////////////
 
     private static Node findParentNode(Document document, XPathExpression expression, Document insert) throws XPathExpressionException {

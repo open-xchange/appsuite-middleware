@@ -156,4 +156,14 @@ public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
             System.exit(1);
         }
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
 }

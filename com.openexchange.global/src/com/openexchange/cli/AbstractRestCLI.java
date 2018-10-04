@@ -83,6 +83,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
     protected static final String USER_LONG = "api-user";
     protected static final String USER_SHORT = "U";
 
+    private Builder executionContext;
+
     /**
      * Initializes a new {@link AbstractRestCLI}.
      */
@@ -131,13 +133,13 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
                 return null;
             }
 
-            Builder request = endpoint.request();
+            executionContext = endpoint.request();
             if (requiresAdministrativePermission()) {
                 String authString = cmd.getOptionValue(USER_SHORT);
                 String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
-                request.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
+                executionContext.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
             }
-            R retval = invoke(options, cmd, request);
+            R retval = invoke(options, cmd, executionContext);
             error = false;
             return retval;
         } catch (ParseException e) {
@@ -206,6 +208,14 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
         }
         return false;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Builder getContext() {
+        return executionContext;
     }
 
     protected abstract void checkArguments(CommandLine cmd);

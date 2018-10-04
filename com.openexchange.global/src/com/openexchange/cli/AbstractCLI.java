@@ -145,11 +145,11 @@ public abstract class AbstractCLI<R, C> {
      *
      * @param option The options
      * @param cmd The command line providing parameters/options
-     * @param context The execution context
+     * @param executionContext The execution context
      * @return The return value
      * @throws Exception If invocation fails
      */
-    protected abstract R invoke(Options option, CommandLine cmd, C context) throws Exception;
+    protected abstract R invoke(Options option, CommandLine cmd, C executionContext) throws Exception;
 
     /**
      * Creates an initially empty {@link ReservedOptions} instance.
@@ -241,9 +241,7 @@ public abstract class AbstractCLI<R, C> {
      * 
      * @return the execution context {@link C}
      */
-    protected C getContext() {
-        return null;
-    }
+    protected abstract C getContext();
 
     /**
      * Returns the command line tool's header

@@ -77,6 +77,8 @@ import com.openexchange.java.Strings;
  */
 public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, MBeanServerConnection> {
 
+    private MBeanServerConnection executionContext;
+
     /**
      * Initializes a new {@link AbstractMBeanCLI}.
      */
@@ -179,10 +181,10 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
 
             R retval = null;
             try {
-                MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+                executionContext = jmxConnector.getMBeanServerConnection();
                 try {
                     if (requiresAdministrativePermission) {
-                        AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
+                        AuthenticatorMBean authenticator = authenticatorMBean(executionContext);
                         if (isAuthEnabled(authenticator)) {
                             // Options for administrative authentication
                             String adminLogin = cmd.getOptionValue('A');
@@ -206,7 +208,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
                             administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
                         }
                     }
-                    retval = invoke(options, cmd, mbsc);
+                    retval = invoke(options, cmd, executionContext);
                 } catch (Exception e) {
                     Throwable t = e.getCause();
                     throw new ExecutionFault(null == t ? e : t);
@@ -318,6 +320,16 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      */
     @Override
     protected abstract R invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected MBeanServerConnection getContext() {
+        return executionContext;
+    }
 
     /**
      * Gets the MBean instance.

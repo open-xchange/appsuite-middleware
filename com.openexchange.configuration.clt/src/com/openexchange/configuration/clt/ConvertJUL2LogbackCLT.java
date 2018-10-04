@@ -255,4 +255,14 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
         // ALL
         return retval;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
 }

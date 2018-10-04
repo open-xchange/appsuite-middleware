@@ -188,4 +188,14 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
     protected String getName() {
         return SYNTAX;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
 }

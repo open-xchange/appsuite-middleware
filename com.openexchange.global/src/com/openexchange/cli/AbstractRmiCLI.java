@@ -94,6 +94,8 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
 
     }
 
+    private String executionContext = RMI_HOSTNAME.get();
+
     // -------------------------------------------------------------------------------------------------
 
     /**
@@ -161,14 +163,11 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             }
 
             // Check for port/server
-            String optRmiHostName = null;
-            {
-                if (cmd.hasOption('p')) {
-                    int optPort = parsePort('p', 1099, cmd, options);
-                    String optServer = cmd.getOptionValue('s');
-                    if (optPort > 0 || null != optServer) {
-                        optRmiHostName = "rmi://" + (null == optServer ? "localhost" : optServer) + ":" + (optPort > 0 ? optPort : 1099) + "/";
-                    }
+            if (cmd.hasOption('p')) {
+                int optPort = parsePort('p', 1099, cmd, options);
+                String optServer = cmd.getOptionValue('s');
+                if (optPort > 0 || null != optServer) {
+                    executionContext = "rmi://" + (null == optServer ? "localhost" : optServer) + ":" + (optPort > 0 ? optPort : 1099) + "/";
                 }
             }
 
@@ -196,7 +195,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             R retval = null;
             try {
                 if (requiresAdministrativePermission) {
-                    RemoteAuthenticator authenticator = authenticatorStub(optRmiHostName);
+                    RemoteAuthenticator authenticator = authenticatorStub(executionContext);
                     if (isAuthEnabled(authenticator)) {
                         // Options for administrative authentication
                         String adminLogin = cmd.getOptionValue('A');
@@ -218,7 +217,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
                         administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
                     }
                 }
-                retval = invoke(options, cmd, optRmiHostName);
+                retval = invoke(options, cmd, executionContext);
             } catch (MalformedURLException x) {
                 throw x;
             } catch (NotBoundException x) {
@@ -334,6 +333,16 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
      */
     @Override
     protected abstract R invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected String getContext() {
+        return executionContext;
+    }
 
     /**
      * Gets the specified RMI reference/stub for given name using default RMI host.
