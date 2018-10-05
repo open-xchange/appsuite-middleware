@@ -77,6 +77,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import com.openexchange.exception.OXException;
+import com.openexchange.pgp.keys.common.ModifyingPGPPublicKeyRing;
 import com.openexchange.pgp.keys.exceptions.PGPKeysExceptionCodes;
 
 /**
@@ -539,7 +540,7 @@ public final class PGPKeysUtil {
     public static PGPPublicKeyRing revokeKey(PGPPrivateKey privateKey, PGPPublicKeyRing publicKeyRing, long keyId, String revocationReason) throws PGPException, OXException {
         privateKey = Objects.requireNonNull(privateKey, "privateKey must not be null");
         publicKeyRing = Objects.requireNonNull(publicKeyRing, "publicKeyRing must not be null");
-        PGPPublicKeyRing ret = publicKeyRing;
+        ModifyingPGPPublicKeyRing ret = new ModifyingPGPPublicKeyRing(publicKeyRing);
         Iterator<PGPPublicKey> pkeys = publicKeyRing.getPublicKeys();
         PGPPublicKey master = getPublicMasterKey(publicKeyRing);
         if (master == null) {
@@ -549,8 +550,7 @@ public final class PGPKeysUtil {
         while (pkeys.hasNext()) {
             PGPPublicKey pub = pkeys.next();
             if (pub.getKeyID() == keyId || keyId == 0) {
-                ret = PGPPublicKeyRing.removePublicKey(ret, pub);
-                if (ret != null) {
+                if (ret.removePublicKey(pub)) {
                     PGPSignatureSubpacketGenerator subHashGenerator = new PGPSignatureSubpacketGenerator();
                     PGPSignatureSubpacketGenerator subUnHashGenerator = new PGPSignatureSubpacketGenerator();
                     PGPSignatureGenerator generator = new PGPSignatureGenerator(
@@ -574,7 +574,7 @@ public final class PGPKeysUtil {
                         pub = PGPPublicKey.addCertification(pub, signature);
                     }
 
-                    ret = PGPPublicKeyRing.insertPublicKey(ret, pub);
+                    ret.addPublicKey(pub);
                 }
                 else {
                    throw new PGPException("Error while removing public key: key not found in keyring");
@@ -582,6 +582,6 @@ public final class PGPKeysUtil {
             }
         }
 
-        return ret;
+        return ret.getRing();
     }
 }
