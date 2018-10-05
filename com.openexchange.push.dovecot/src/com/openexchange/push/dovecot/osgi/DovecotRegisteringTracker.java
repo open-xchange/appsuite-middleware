@@ -232,7 +232,7 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
                 activator.addService(HazelcastInstance.class, hzInstance);
             }
 
-            reg = context.registerService(PushManagerService.class, DovecotPushManagerService.newInstance(configuration.getEndPoint(), configuration.getClusterLock(), activator), null);
+            reg = context.registerService(PushManagerService.class, DovecotPushManagerService.newInstance(configuration.getClusterLock(), activator), null);
         } catch (Exception e) {
             LOG.warn("Failed start-up for {}", context.getBundle().getSymbolicName(), e);
         }

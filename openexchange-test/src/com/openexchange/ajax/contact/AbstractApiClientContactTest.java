@@ -179,7 +179,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0");
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }

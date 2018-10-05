@@ -172,5 +172,4 @@ public final class DatabaseFolderStorageUtility {
             }
         }
     } // End of 'localizeFolderNames' method
-
 }

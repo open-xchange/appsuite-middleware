@@ -170,7 +170,7 @@ public class CalendarFolderManager extends AbstractManager {
      * @throws ChronosApiException
      */
     public FolderData getFolder(String folderId, boolean expectedException) throws ApiException, ChronosApiException {
-        FolderResponse response = foldersApi.getFolder(userApi.getSession(), folderId, TREE_ID, CALENDAR_MODULE);
+        FolderResponse response = foldersApi.getFolder(userApi.getSession(), folderId, TREE_ID, CALENDAR_MODULE, null);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());

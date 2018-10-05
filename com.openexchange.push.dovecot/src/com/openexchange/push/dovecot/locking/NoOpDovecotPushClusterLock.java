@@ -49,9 +49,6 @@
 
 package com.openexchange.push.dovecot.locking;
 
-import com.openexchange.exception.OXException;
-
-
 /**
  * {@link NoOpDovecotPushClusterLock}
  *
@@ -72,17 +69,17 @@ public class NoOpDovecotPushClusterLock implements DovecotPushClusterLock {
     }
 
     @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
+    public boolean acquireLock(SessionInfo sessionInfo) {
         return true;
     }
 
     @Override
-    public void refreshLock(SessionInfo sessionInfo) throws OXException {
+    public void refreshLock(SessionInfo sessionInfo) {
         // Empty
     }
 
     @Override
-    public void releaseLock(SessionInfo sessionInfo) throws OXException {
+    public void releaseLock(SessionInfo sessionInfo) {
         // Empty
     }
 

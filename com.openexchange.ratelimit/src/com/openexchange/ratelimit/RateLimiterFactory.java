@@ -50,6 +50,7 @@
 package com.openexchange.ratelimit;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link RateLimiterFactory} is a factory for {@link RateLimiter}.
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
+@SingletonService
 public interface RateLimiterFactory {
 
     /**

@@ -123,7 +123,7 @@ public class DovecotPushRESTService {
                         }
 
                         @Override
-                        public boolean accepts(Session session) {
+                        public boolean accepts(Session session_tmp) {
                             return true;
                         }}
                     );

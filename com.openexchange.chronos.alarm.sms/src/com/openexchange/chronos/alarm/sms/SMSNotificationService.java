@@ -144,24 +144,24 @@ public class SMSNotificationService implements AlarmNotificationService {
         Translator translator = translatorFactory.translatorFor(locale);
         DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
         
-        
-        boolean diffTZ= !TimeZone.getTimeZone(user.getTimeZone()).equals(event.getStartDate().getTimeZone());
+        String timezone = null;
+        if (!TimeZone.getTimeZone(user.getTimeZone()).equals(event.getStartDate().getTimeZone())) {
+            timezone = event.getStartDate().getTimeZone().getDisplayName(true, TimeZone.SHORT);
+        }
         
         Calendar instance = Calendar.getInstance(event.getStartDate().getTimeZone());
         instance.setTimeInMillis(event.getStartDate().getTimestamp());
         String formattedStartDate = df.format(instance.getTime());
+        if (timezone != null) {
+            formattedStartDate = formattedStartDate.concat(" ").concat(timezone);
+        }
 
         String summary = event.getSummary();
         if (summary.length() > (100 - formattedStartDate.length())) {
             summary = summary.substring(0, (100 - formattedStartDate.length() - 3)).concat("...");
         }
 
-        String result = translator.translate(SMSAlarmStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
-        
-        if(diffTZ) {
-            return result.concat(" ").concat(event.getStartDate().getTimeZone().getDisplayName(true, TimeZone.SHORT));    
-        }
-        return result;
+        return translator.translate(SMSAlarmStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
     }
 
     @Override
