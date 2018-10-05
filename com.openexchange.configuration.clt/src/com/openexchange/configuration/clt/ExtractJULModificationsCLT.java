@@ -73,7 +73,11 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.exit(new ExtractJULModificationsCLT().execute(args));
+        Integer retVal = new ExtractJULModificationsCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
     }
 
     /**
@@ -92,7 +96,7 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
     protected Integer invoke(Options option, CommandLine cmd, Void context) throws Exception {
         Properties properties = XMLUtil.parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
         if (null == properties) {
-            return 1;
+            return Integer.valueOf(1);
         }
 
         InputStream resourceStream = null;
@@ -115,7 +119,7 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
             // Write output
             OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
             if (os == null) {
-                return 1;
+                return Integer.valueOf(1);
             }
             try {
                 added.store(os, "added loggers in file-logging.properties");
@@ -125,7 +129,7 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
         } catch (IOException e) {
             System.err.println("Can not read file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } finally {
             if (null != resourceStream) {
                 try {
@@ -135,7 +139,7 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
                 }
             }
         }
-        return 0;
+        return Integer.valueOf(0);
     }
 
     /*

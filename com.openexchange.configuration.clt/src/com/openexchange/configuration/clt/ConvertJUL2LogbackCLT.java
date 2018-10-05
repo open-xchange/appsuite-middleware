@@ -86,7 +86,11 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.exit(new ConvertJUL2LogbackCLT().execute(args));
+        Integer retVal = new ConvertJUL2LogbackCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
     }
 
     /**
@@ -119,7 +123,7 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
         } catch (ParserConfigurationException e) {
             System.err.println("Can not configure XML parser: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
         Transformer transformer;
         try {
@@ -127,20 +131,20 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
         } catch (TransformerConfigurationException e) {
             System.err.println("Can not configure XML writer: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         Properties properties = XMLUtil.parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
         if (null == properties) {
-            return 1;
+            return Integer.valueOf(1);
         }
         try {
             Document document = db.newDocument();
             convert(properties, document);
             OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
             if (null == os) {
-                return 1;
+                return Integer.valueOf(1);
             }
             try {
                 transformer.transform(new DOMSource(document), new StreamResult(os));
@@ -150,13 +154,13 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
         } catch (IOException e) {
             System.err.println("Can not write file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (TransformerException e) {
             System.err.println("Can not write XML document" + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
-        return 0;
+        return Integer.valueOf(0);
     }
 
     /*

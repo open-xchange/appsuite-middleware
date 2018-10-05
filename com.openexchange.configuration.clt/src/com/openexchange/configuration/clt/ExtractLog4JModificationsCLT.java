@@ -89,7 +89,11 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.exit(new ExtractLog4JModificationsCLT().execute(args));
+        Integer retVal = new ExtractLog4JModificationsCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
     }
 
     /**
@@ -113,7 +117,7 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         } catch (ParserConfigurationException e) {
             System.err.println("Can not configure XML parser: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
         try {
             InputStream resourceAsStream = ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml");
@@ -130,7 +134,7 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
             // Write output
             OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
             if (os == null) {
-                return 1;
+                return Integer.valueOf(1);
             }
             try {
                 properties.store(os, "file-logging.properties");
@@ -140,17 +144,17 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         } catch (SAXException e) {
             System.err.println("Can not parse XML document: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (XPathExpressionException e) {
             System.err.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (IOException e) {
             System.err.println("Can not read XML file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
-        return 0;
+        return Integer.valueOf(0);
     }
 
     /*
