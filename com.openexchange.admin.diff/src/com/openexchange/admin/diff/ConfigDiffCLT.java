@@ -62,7 +62,6 @@ import com.openexchange.cli.AbstractCLI;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-// Shouldn't it rather inherit from AbstractAdministrativeCLI?
 public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
 
     private static final String SYNTAX = "listconfigdiff [-f <filename>] | [-h]";
