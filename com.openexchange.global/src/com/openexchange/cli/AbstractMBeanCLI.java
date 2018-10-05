@@ -98,7 +98,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
         boolean error = true;
         try {
             // Option for help
-            options.addOption("h", "help", false, "Prints this help text");
+            options.addOption(createSwitch("h", "help", "Prints this help text", false));
 
             // Option for JMX connect & authentication
             options.addOption(createArgumentOption("H", "host", "jmxHost", "The optional JMX host (default:localhost)", false));

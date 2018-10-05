@@ -49,7 +49,6 @@
 
 package com.openexchange.cli;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.AccessException;
 import java.rmi.ConnectException;
@@ -74,6 +73,8 @@ import com.openexchange.java.Strings;
  * @since 7.6.2
  */
 public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String> {
+
+    protected final static String BASIC_USAGE = "-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
 
     protected final static AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
 
@@ -134,7 +135,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         boolean error = true;
         try {
             // Option for help
-            options.addOption("h", "help", false, "Prints this help text");
+            options.addOption(createSwitch("h", "help", "Prints this help text", false));
 
             // Option for RMI connect
             options.addOption(createArgumentOption("s", "server", "rmiHost", "The optional RMI server (default: localhost)", false));
@@ -244,8 +245,6 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
         } catch (ConnectException e) {
             System.err.println("Unable to connect to server");
-        } catch (IOException e) {
-            System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();

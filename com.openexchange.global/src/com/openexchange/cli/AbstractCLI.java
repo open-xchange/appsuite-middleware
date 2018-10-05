@@ -99,7 +99,7 @@ public abstract class AbstractCLI<R, C> {
 
             // Check if help output is requested
             if (cmd.hasOption('h')) {
-                printHelp(options);
+                printHelp(options, 120, true);
                 System.exit(0);
                 return null;
             }
