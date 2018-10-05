@@ -68,7 +68,7 @@ import com.openexchange.push.rmi.PushRMIService;
  */
 public class PushUsersCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "pushusers [-l | [ -r -c <contextId> -u <userId> -i <client>] ] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "pushusers [-l | [ -r -c <contextId> -u <userId> -i <client>] ] " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "Command-line tool for unregistering and listing (registered) push users";
 
     private int contextId;
@@ -217,9 +217,6 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Lists the registered push users
-     * 
-     * @throws NotBoundException
-     * @throws MalformedURLException
      */
     private void listRegisteredPushUsers(String optRmiHostName) throws RemoteException, MalformedURLException, NotBoundException {
         PushRMIService rmiService = getRmiStub(optRmiHostName, PushRMIService.RMI_NAME);

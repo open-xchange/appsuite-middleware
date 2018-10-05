@@ -72,7 +72,7 @@ import com.openexchange.share.impl.rmi.ShareRMIService;
  */
 public class SharesCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "shares [-c <contextId> -i <userId> -T <tokenId>] [-r [-f]] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "shares [-c <contextId> -i <userId> -T <tokenId>] [-r [-f]] " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "Command line tool to list and delete shares";
 
     /**

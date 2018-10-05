@@ -64,7 +64,7 @@ import com.openexchange.tools.oxfolder.GABRestorerRMIService;
  */
 public class GABRestorerCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "restoregabdefaults -c -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | -h";
+    private static final String SYNTAX = "restoregabdefaults -c <contextId> " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "Restores the default permissions for the global address book (GAB).";
 
     /**

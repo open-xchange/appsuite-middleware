@@ -392,6 +392,21 @@ public abstract class AbstractCLI<R, C> {
     }
 
     /**
+     * Creates an {@link Option} with arguments
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argumentName The argument's name
+     * @param argumentType The argument's type
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     * @return the new {@link Option}
+     */
+    protected Option createArgumentOption(String shortName, String longName, String argumentName, Class<?> argumentType, String description, boolean mandatory) {
+        return createOption(shortName, longName, argumentName, true, argumentType, description, mandatory);
+    }
+
+    /**
      * Create an {@link Option} with the {@link OptionBuilder}
      * 
      * @param shortName The short name of the {@link Option}
@@ -420,6 +435,27 @@ public abstract class AbstractCLI<R, C> {
         OptionBuilder.withArgName(argName);
         OptionBuilder.withDescription(description);
         OptionBuilder.isRequired(mandatory);
+        return OptionBuilder.create(shortName);
+    }
+
+    /**
+     * Create an {@link Option} with the {@link OptionBuilder}
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argName The argument's name
+     * @param argumentType The argument's type
+     * @param hasArgs boolean flag to indicate whether or not the option has arguments
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     */
+    protected Option createOption(String shortName, String longName, String argName, boolean hasArgs, Class<?> type, String description, boolean mandatory) {
+        OptionBuilder.withLongOpt(longName);
+        OptionBuilder.hasArg(hasArgs);
+        OptionBuilder.withArgName(argName);
+        OptionBuilder.withDescription(description);
+        OptionBuilder.isRequired(mandatory);
+        OptionBuilder.withType(type);
         return OptionBuilder.create(shortName);
     }
 }

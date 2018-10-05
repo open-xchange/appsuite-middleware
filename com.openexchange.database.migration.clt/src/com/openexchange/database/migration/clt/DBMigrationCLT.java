@@ -71,7 +71,7 @@ import com.openexchange.java.Strings;
 public class DBMigrationCLT extends AbstractRmiCLI<Void> {
 
     private static final String FOOTER = "Prints the current migration status if no option is set.";
-    private static final String SYNTAX = "dbmigrations -n <schemaName> [[-f] | [-ll] [-u]] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "dbmigrations -n <schemaName> [[-f] | [-ll] [-u]] " + BASIC_MASTER_ADMIN_USAGE;
 
     private static final String OPT_SCHEMA_NAME_SHORT = "n";
     private static final String OPT_SCHEMA_NAME_LONG = "name";

@@ -62,7 +62,7 @@ import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
  */
 public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministrativeCLI<Void> {
 
-    private static final String SYNTAX = "includestacktrace [-e | -d] [-u <userid>] [-c <contextid>] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "includestacktrace [-e | -d] [-u <userid>] [-c <contextid>] " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "The flags -e and -d are mutually exclusive.";
 
     /**

@@ -85,7 +85,7 @@ public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void>
      * Initialises a new {@link ListUpdateTaskNamespaces}.
      */
     private ListUpdateTaskNamespaces() {
-        super("listUpdateTaskNamespaces", FOOTER);
+        super("listUpdateTaskNamespaces -n " + BASIC_MASTER_ADMIN_USAGE, FOOTER);
     }
 
     /*
@@ -95,7 +95,7 @@ public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void>
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("n", "namespaces-only", false, "Prints only the available namespaces without their update tasks");
+        options.addOption(createSwitch("n", "namespaces-only", "Prints only the available namespaces without their update tasks", false));
     }
 
     /*

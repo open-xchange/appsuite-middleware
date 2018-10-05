@@ -66,7 +66,7 @@ import com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService;
  */
 public class FileChecksumsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "calculatefilechecksums [-d <databaseId> | -c <contextId>] [-C] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "calculatefilechecksums [-d <databaseId> | -c <contextId>] [-C] " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "Command-line tool to calculate missing file checksums";
 
     public static void main(String[] args) {

@@ -316,7 +316,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] [--responsetimeout <responseTimeout>] | [-h]";
+        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] " + BASIC_MASTER_ADMIN_USAGE;
     }
 
     ///////////////////////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////////////////

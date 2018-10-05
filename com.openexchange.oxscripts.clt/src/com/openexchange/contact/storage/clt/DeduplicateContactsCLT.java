@@ -66,7 +66,7 @@ import com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIService;
 public class DeduplicateContactsCLT extends AbstractRmiCLI<Void> {
 
     private static final String FOOTER = "Handle with care and review the found duplicates before executing the de-duplication. Detected duplicates are deleted permanently, with no recovery option.";
-    private static final String SYNTAX = "deduplicatecontacts -c <contextId> -f <folderId> [-m <maxNumber>] [-e] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "deduplicatecontacts -c <contextId> -f <folderId> [-m <maxNumber>] [-e] " + BASIC_MASTER_ADMIN_USAGE;
 
     /**
      * Entry point

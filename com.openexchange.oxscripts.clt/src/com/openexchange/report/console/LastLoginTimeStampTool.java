@@ -72,7 +72,7 @@ import com.openexchange.report.internal.LoginCounterRMIService;
 public final class LastLoginTimeStampTool extends AbstractRmiCLI<Void> {
 
     private static final String HEADER = "Prints the time stamp of the last login for a user using a certain client.";
-    private static final String SYNTAX = "lastlogintimestamp -c <contextId> [-u <userId> | -i <userId>] -t <clientId> [-d <datePattern>] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | --listclients | [-h]";
+    private static final String SYNTAX = "lastlogintimestamp -c <contextId> [-u <userId> | -i <userId>] -t <clientId> [-d <datePattern>] | --listclients " + BASIC_MASTER_ADMIN_USAGE;
     private static final String FOOTER = "Examples:\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite -d \"yyyy.MM.dd G 'at' HH:mm:ss z\"";
 
     public static void main(final String[] args) {
