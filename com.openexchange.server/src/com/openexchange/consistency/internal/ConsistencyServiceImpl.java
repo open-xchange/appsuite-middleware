@@ -519,7 +519,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
         return contexts;
     }
-
+    
     /**
      * Gets a {@link List} with {@link Entity} objects that are using the {@link FileStorage} with the specified filestore identifier
      *
@@ -669,7 +669,6 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         return UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
     }
 
-    //TODO: move to get performers///
     //////////////////////////////////// GET PERFORMERS ///////////////////////////////////
 
     /**
