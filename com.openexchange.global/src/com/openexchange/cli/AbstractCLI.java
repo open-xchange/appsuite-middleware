@@ -188,7 +188,6 @@ public abstract class AbstractCLI<R, C> {
      * Checks other mandatory options.
      *
      * @param cmd The command line
-     * @param options The associated options
      */
     protected abstract void checkOptions(CommandLine cmd);
 
@@ -250,7 +249,7 @@ public abstract class AbstractCLI<R, C> {
     /**
      * Returns the execution context {@link C}
      * 
-     * @return the execution context {@link C}
+     * @return the execution context {@link C} C
      */
     protected abstract C getContext();
 
@@ -382,7 +381,7 @@ public abstract class AbstractCLI<R, C> {
      * 
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
-     * @param argName The argument's name
+     * @param argumentName The argument's name
      * @param description The description of the {@link Option}
      * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
      * @return the new {@link Option}
@@ -444,8 +443,8 @@ public abstract class AbstractCLI<R, C> {
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param argName The argument's name
-     * @param argumentType The argument's type
      * @param hasArgs boolean flag to indicate whether or not the option has arguments
+     * @param type The argument's type
      * @param description The description of the {@link Option}
      * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
      */
