@@ -106,7 +106,11 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.exit(new XMLModifierCLT().execute(args));
+        Integer retVal = new XMLModifierCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
     }
 
     /**
@@ -129,15 +133,15 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         } catch (TransformerConfigurationException e) {
             System.err.println("Can not configure XML writer: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
         Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
         if (null == document) {
-            return 1;
+            return Integer.valueOf(1);
         }
         Document copy = copyDocument(document);
         if (null == copy) {
-            return 1;
+            return Integer.valueOf(1);
         }
         try {
             if (cmd.hasOption('s')) {
@@ -177,7 +181,7 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
             if (differences) {
                 final OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
                 if (null == os) {
-                    return 1;
+                    return Integer.valueOf(1);
                 }
                 try {
                     transformer.transform(new DOMSource(document), new StreamResult(os));
@@ -188,25 +192,25 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         } catch (XPathExpressionException e) {
             System.err.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (TransformerException e) {
             System.err.println("Can not write XML document" + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (IOException e) {
             System.err.println("Can not read XML file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (SCRException e) {
             System.err.println("Error whily trying to apply Software Change Request: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
-        return 0;
+        return Integer.valueOf(0);
     }
 
     /*
