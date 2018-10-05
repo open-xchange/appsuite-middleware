@@ -133,11 +133,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
     private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
 
     /**
-     * Expected pattern for legacy Guard files
-     */
-    private static final Pattern GUARD_STORAGE_PATTERN = Pattern.compile("ext_[\\d]+_[\\d]+");
-
-    /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
     private static final int RANKING = 5634;
@@ -497,13 +492,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
             return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
         }
 
-        if (path.startsWith("ext_")) {
-            Matcher matcher = GUARD_STORAGE_PATTERN.matcher(path);
-            // Legacy Guard S3 storage.  Don't remove underscore for these files
-            if (matcher.matches()) {
-                return path;
-            }
-        }
         // Any path that serves as prefix; e.g. "photos"
         return sanitizePathForPrefix(path, uri);
     }
