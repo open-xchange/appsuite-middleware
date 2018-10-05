@@ -99,6 +99,7 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
@@ -1789,6 +1790,36 @@ public class CalendarUtils {
 
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property parameter with a specific name.
+     *
+     * @param parameters The parameters to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to get
+     * @return The value of the extended property parameter, or <code>null</code> if not set
+     */
+    public static String optExtendedParameterValue(List<ExtendedPropertyParameter> parameters, String name) {
+        ExtendedPropertyParameter parameter = optExtendedParameter(parameters, name);
+        return null != parameter ? parameter.getValue() : null;
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property parameter with a specific name.
+     *
+     * @param parameters The parameters to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to get
+     * @return The value of the extended property parameter, or <code>null</code> if not set
+     */
+    public static ExtendedPropertyParameter optExtendedParameter(List<ExtendedPropertyParameter> parameters, String name) {
+        if (null != parameters) {
+            for (ExtendedPropertyParameter parameter : parameters) {
+                if (name.equals(parameter.getName())) {
+                    return parameter;
+                }
+            }
+        }
+        return null;
     }
 
     /**
