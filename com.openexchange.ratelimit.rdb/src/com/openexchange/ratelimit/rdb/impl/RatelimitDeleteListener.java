@@ -47,41 +47,52 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.osgi;
+package com.openexchange.ratelimit.rdb.impl;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.provider.DBProvider;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.ratelimit.RateLimiterFactory;
-import com.openexchange.ratelimit.rdb.impl.CreateTableUpdateTask;
-import com.openexchange.ratelimit.rdb.impl.RateLimiterFactoryImpl;
-import com.openexchange.ratelimit.rdb.impl.RatelimitCreateTableService;
-import com.openexchange.ratelimit.rdb.impl.RatelimitDeleteListener;
 
 /**
- * {@link RateLimitActivator}
+ * 
+ * {@link RatelimitDeleteListener}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RateLimitActivator extends HousekeepingActivator{
+public class RatelimitDeleteListener implements DeleteListener {
+
+    private static final String SQL_DELETE_CONTEXT = "DELETE FROM ratelimit WHERE cid=?";
+    private static final String SQL_DELETE_USER    = "DELETE FROM ratelimit WHERE cid=? AND userId=?";
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {DBProvider.class, ContextService.class};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        RatelimitCreateTableService ratelimitCreateTableService = new RatelimitCreateTableService();
-        registerService(CreateTableService.class, ratelimitCreateTableService);
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateTableUpdateTask(ratelimitCreateTableService)));
-        registerService(RateLimiterFactory.class, new RateLimiterFactoryImpl(this));
-        registerService(DeleteListener.class, new RatelimitDeleteListener());
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if(event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            int ctxId = event.getId();
+            try (PreparedStatement stmt = writeCon.prepareStatement(SQL_DELETE_CONTEXT)) {
+                stmt.setInt(1, ctxId);
+                stmt.executeUpdate();
+                return;
+            } catch (SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        if(event.getType() == DeleteEvent.TYPE_USER) {
+            int userId = event.getId();
+            int ctxId = event.getContext().getContextId();
+            try (PreparedStatement stmt = writeCon.prepareStatement(SQL_DELETE_USER)) {
+                stmt.setInt(1, ctxId);
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                return;
+            } catch (SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
 }
