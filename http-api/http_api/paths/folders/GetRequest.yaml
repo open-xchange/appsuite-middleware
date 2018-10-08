@@ -13,6 +13,7 @@
         required: true
       - $ref: "#/parameters/gblQueryParamFolderTree"
       - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - $ref: "#/parameters/gblQueryParamLanguage"
     responses:
       200:
         description: |

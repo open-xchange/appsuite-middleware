@@ -14,7 +14,7 @@ properties:
     - key: com.openexchange.dovecot.doveadm.endpoints
       description: |
         Specifies the URIs to the Dovecot DoveAdm REST interface end-points.  
-        e.g. <code>http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081</code>  
+        e.g. <code>http://dovecot1.host.invalid:8081/doveadm/v1, http://dovecot2.host.invalid:8081/doveadm/v1, http://dovecot3.host.invalid:8081/doveadm/v1</code>  
         Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior.
 
         If more than one end-point is specified, the client (Open-Xchange Middleware) performs some sort of load-balancing. That is to
@@ -23,7 +23,7 @@ properties:
         
         Full example :  
         <pre>
-        com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
+        com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081/doveadm/v1, http://dovecot2.host.invalid:8081/doveadm/v1
         com.openexchange.dovecot.doveadm.endpoints.totalConnections=100
         com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0
         com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000

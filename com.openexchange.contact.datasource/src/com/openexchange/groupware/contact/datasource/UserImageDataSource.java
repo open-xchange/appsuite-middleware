@@ -121,7 +121,6 @@ public final class UserImageDataSource implements ImageDataSource {
 
         PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
-
         IFileHolder fileHolder = picture.getFileHolder();
 
         /*

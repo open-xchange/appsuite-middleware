@@ -83,9 +83,9 @@ public enum DoveAdmClientExceptionCodes implements DisplayableOXExceptionCode {
      */
     NOT_FOUND("The DoveAdm resource does not exist: %1$s", DoveAdmClientExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
-     * The DoveAdm resource does not exist
+     * Doveadm HTTP API communication error: 404 Not Found
      */
-    NOT_FOUND_SIMPLE("The DoveAdm resource does not exist", DoveAdmClientExceptionMessages.NOT_FOUND_SIMPLE_MSG, NOT_FOUND.getCategory(), NOT_FOUND.getNumber()),
+    NOT_FOUND_SIMPLE("Doveadm HTTP API communication error: 404 Not Found", DoveAdmClientExceptionMessages.NOT_FOUND_SIMPLE_MSG, NOT_FOUND.getCategory(), NOT_FOUND.getNumber()),
     /**
      * An I/O error occurred: %1$s
      */

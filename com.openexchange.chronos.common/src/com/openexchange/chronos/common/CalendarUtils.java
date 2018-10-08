@@ -99,6 +99,7 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
@@ -176,7 +177,7 @@ public class CalendarUtils {
     /** A collection of identifying meta fields */
     private static final Set<EventField> IDENTIFYING_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.UID, EventField.FILENAME,
-        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY
+        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE
     )));
 
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
@@ -1381,17 +1382,42 @@ public class CalendarUtils {
         /*
          * prefer scheme-specific part from "mailto:"-URI if possible
          */
-        if (null != uri ) {
-            if("mailto".equalsIgnoreCase(uri.getScheme())) {
-                value = uri.getSchemeSpecificPart();
-            } else if("tel".equalsIgnoreCase(uri.getScheme())) {
-               return null; 
-            }
+        if (null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
+            value = uri.getSchemeSpecificPart();
         }
         /*
          * decode any punycoded names, too
          */
         return IDNA.toIDN(value);
+    }
+
+    /**
+     * Optionally gets an e-mail address from the supplied URI string. Decoding of sequences of escaped octets is performed implicitly,
+     * which includes decoding of percent-encoded scheme-specific parts. Additionally, any ASCII-encoded parts of the address string are
+     * decoded back to their unicode representation.
+     * <p/>
+     * Examples:<br/>
+     * <ul>
+     * <li>For input string <code>horst@xn--mller-kva.de</code>, the mail address <code>horst@m&uuml;ller.de</code> is extracted</li>
+     * <li>For input string <code>mailto:horst@m%C3%BCller.de</code>, the mail address <code>horst@m&uuml;ller</code> is extracted</li>
+     * </ul>
+     *
+     * @param value The URI address string to extract the e-mail address from
+     * @return The extracted e-mail address, or <code>null</code> if no valid e-mail address could be extracted
+     */
+    public static String optEMailAddress(String value) {
+        String address = extractEMailAddress(value);
+        if (Strings.isNotEmpty(address)) {
+            CalendarUser calendarUser = new CalendarUser();
+            calendarUser.setUri(getURI(address));
+            try {
+                Check.requireValidEMail(calendarUser);
+                return address;
+            } catch (OXException e) {
+                // ignore
+            }
+        }
+        return null;
     }
 
     /**
@@ -1406,7 +1432,7 @@ public class CalendarUtils {
     public static String getURI(String emailAddress) {
         if (Strings.isNotEmpty(emailAddress)) {
             try {
-                return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
+                return new URI("mailto", extractEMailAddress(emailAddress), null).toASCIIString();
             } catch (URISyntaxException e) {
                 getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
             }
@@ -1764,6 +1790,36 @@ public class CalendarUtils {
 
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property parameter with a specific name.
+     *
+     * @param parameters The parameters to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to get
+     * @return The value of the extended property parameter, or <code>null</code> if not set
+     */
+    public static String optExtendedParameterValue(List<ExtendedPropertyParameter> parameters, String name) {
+        ExtendedPropertyParameter parameter = optExtendedParameter(parameters, name);
+        return null != parameter ? parameter.getValue() : null;
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property parameter with a specific name.
+     *
+     * @param parameters The parameters to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to get
+     * @return The value of the extended property parameter, or <code>null</code> if not set
+     */
+    public static ExtendedPropertyParameter optExtendedParameter(List<ExtendedPropertyParameter> parameters, String name) {
+        if (null != parameters) {
+            for (ExtendedPropertyParameter parameter : parameters) {
+                if (name.equals(parameter.getName())) {
+                    return parameter;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -2130,7 +2186,20 @@ public class CalendarUtils {
      * @param additionals Additional event flags to include
      * @return The event flags
      */
-    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, EventFlag... additionals) {
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user) {
+        return getFlags(event, calendarUser, user, false);
+    }
+
+    /**
+     * Generates the flags for a specific event (see {@link EventFlag}).
+     *
+     * @param event The event to get the flags for
+     * @param calendarUser The identifier of the calendar user to get flags for
+     * @param user The identifier of the current user, in case he is different from the calendar user
+     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise 
+     * @return The event flags
+     */
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, boolean publicFolder) {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
@@ -2142,13 +2211,12 @@ public class CalendarUtils {
             flags.add(EventFlag.SCHEDULED);
         }
         if (isOrganizerSchedulingResource(event, calendarUser)) {
-            flags.add(EventFlag.ORGANIZER);
-            flags.add(EventFlag.ATTENDEE);
-        } else if (isAttendeeSchedulingResource(event, calendarUser)) {
-            flags.add(EventFlag.ATTENDEE);
+            flags.add(calendarUser == user ? EventFlag.ORGANIZER : EventFlag.ORGANIZER_ON_BEHALF);
+        } else if (publicFolder) {
+            flags.add(EventFlag.ORGANIZER_ON_BEHALF);
         }
-        if (calendarUser != user) {
-            flags.add(EventFlag.ON_BEHALF);
+        if (isAttendeeSchedulingResource(event, calendarUser)) {
+            flags.add(calendarUser == user ? EventFlag.ATTENDEE : EventFlag.ATTENDEE_ON_BEHALF);
         }
         if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
             flags.add(EventFlag.CONFIDENTIAL);
@@ -2183,9 +2251,6 @@ public class CalendarUtils {
             flags.add(EventFlag.SERIES);
         } else if (isSeriesException(event)) {
             flags.add(EventFlag.OVERRIDDEN);
-        }
-        if (null != additionals) {
-            flags.addAll(Arrays.asList(additionals));
         }
         return flags;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import java.util.Arrays;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccounts;
@@ -334,6 +335,53 @@ public class DatabaseFolder extends AbstractFolder {
         }
         final String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
         return null == sessionId ? null : SessiondService.SERVICE_REFERENCE.get().getSession(sessionId);
+    }
+    
+    /**
+     * Determine if the current user can see this folder because of his non system permissions. Group
+     * permissions are also considered.
+     * 
+     * @return true, if this folder is hidden false if the user has the permission to see this folder
+     */
+    public boolean isHidden() {
+        final Type type = this.getType();
+        if(SystemType.getInstance().equals(type) || (PublicType.getInstance().equals(type) && this.isDefault())) {
+            return false;
+        }
+        boolean isHidden = true;
+        try {
+            final Session session = this.getSession();
+            if (session != null) {
+                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+                final int userId = session.getUserId();
+                isHidden = !hasUserOrGroupPermission(ctx, userId);
+            }
+        } catch (OXException e) {
+            // Ignore
+            LOG.debug("", e);
+        }
+        
+        return isHidden;
+    }
+
+    private boolean hasUserOrGroupPermission(final Context ctx, final int userId) throws OXException {
+        boolean hasPermission = hasNonSystemPermission(userId);
+        final User user = UserStorage.getInstance().getUser(userId, ctx);
+        int[] groups = user.getGroups();
+        if (groups.length > 0) {
+            for (int groupId : groups) {
+                if (hasNonSystemPermission(groupId)) {
+                    hasPermission = true;
+                }
+            }
+        }
+        return hasPermission;
+    }
+
+    private boolean hasNonSystemPermission(int entityId) {
+        return Arrays.asList(folderObject.getNonSystemPermissionsAsArray()).stream()
+        .anyMatch(permission -> permission.getEntity() == entityId
+        && permission.getSystem() <= 0);
     }
 
 }

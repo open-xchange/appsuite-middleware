@@ -170,6 +170,12 @@ gblQueryParamFolderTree:
   description: The identifier of the folder tree. If missing "0" (primary folder tree) is assumed.
   required: false
   default: "0"
+gblQueryParamLanguage:
+  name: language
+  in: query
+  type: string
+  description: Optional locale to use instead of the currently configured locale of the user.
+  required: false
 gblQueryParamFolderColumns:
   name: columns
   in: query

@@ -866,6 +866,11 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             public void remove(Event event) {
                 event.removeOrganizer();
             }
+
+            @Override
+            public int getSqlType() {
+                return Types.NULL;
+            }
         });
         //      EventField.ATTENDEES
         //      EventField.ATTACHMENT

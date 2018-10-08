@@ -180,9 +180,9 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String QUOTA_EXCEEDED_MSG_DISPLAY = "The allowed quota on mail server exceeded.";
 
     /**
-     * The allowed quota on mail server "%1$s" exceeded.
+     * The allowed storage limit for your account \"%6$s\" was exceeded.
      */
-    public final static String QUOTA_EXCEEDED_EXT_MSG_DISPLAY = "The allowed quota on mail server \"%1$s\" exceeded.";
+    public final static String QUOTA_EXCEEDED_EXT_MSG_DISPLAY = "The allowed storage limit for your account \"%6$s\" was exceeded.";
 
     /**
      * The mailbox is already in use. Please try again later.

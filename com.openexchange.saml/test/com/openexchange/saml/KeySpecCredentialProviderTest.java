@@ -51,6 +51,7 @@ package com.openexchange.saml;
 
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opensaml.xml.security.SigningUtil;
@@ -89,9 +90,9 @@ public class KeySpecCredentialProviderTest {
         X509EncodedKeySpec idpPublicKeySpec = new X509EncodedKeySpec(Base64.decode(B64_DSA_512_DER_PUBLIC_KEY));
         PKCS8EncodedKeySpec idpPrivateKeySpec = new PKCS8EncodedKeySpec(Base64.decode(B64_DSA_512_DER_PRIVATE_KEY));
         KeySpecCredentialProvider credentialProvider = KeySpecCredentialProvider.newInstance(new SpecContainer(idpPublicKeySpec, null, Algorithm.DSA), new SpecContainer(null, idpPrivateKeySpec, Algorithm.DSA), null);
-        Assert.assertTrue(credentialProvider.hasValidationCredential());
-        Credential validationCredential = credentialProvider.getValidationCredential();
-        Assert.assertNotNull(validationCredential);
+        Assert.assertTrue(credentialProvider.hasValidationCredentials());
+        List<Credential> validationCredentials = credentialProvider.getValidationCredentials();
+        Assert.assertNotNull(validationCredentials);
         Assert.assertTrue(credentialProvider.hasSigningCredential());
         Credential signingCredential = credentialProvider.getSigningCredential();
         Assert.assertNotNull(signingCredential);
@@ -99,7 +100,7 @@ public class KeySpecCredentialProviderTest {
         byte[] signature = SigningUtil.sign(signingCredential, "SHA1withDSA", false, SIGNING_INPUT.getBytes());
         Assert.assertNotNull(signature);
         Assert.assertTrue(signature.length > 0);
-        SigningUtil.verify(validationCredential, "SHA1withDSA", false, signature, SIGNING_INPUT.getBytes());
+        SigningUtil.verify(validationCredentials.get(0), "SHA1withDSA", false, signature, SIGNING_INPUT.getBytes());
     }
 
 }

@@ -50,7 +50,9 @@
 package com.openexchange.chronos.ical.impl;
 
 import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.ical.CalendarExport;
@@ -58,6 +60,7 @@ import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.ical.StreamedCalendarExport;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 
@@ -70,7 +73,8 @@ import com.openexchange.exception.OXException;
 public class ICalServiceImpl implements ICalService {
 
     private final ICalMapper mapper;
-    private final ICalUtilities iCalUtilities;
+
+    private final ICalUtilitiesImpl iCalUtilities;
 
     /**
      * Initializes a new {@link ICalServiceImpl}.
@@ -103,6 +107,12 @@ public class ICalServiceImpl implements ICalService {
     @Override
     public ICalUtilities getUtilities() {
         return iCalUtilities;
+    }
+
+    @Override
+    public StreamedCalendarExport getStreamedExport(OutputStream outputStream, ICalParameters parameters) throws IOException {
+        ICalParameters iCalParameters = getParametersOrDefault(parameters);
+        return new StreamedCalendarExportImpl(iCalUtilities, iCalParameters, outputStream);
     }
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.picture.impl;
 
-import static com.openexchange.contact.picture.ContactPicture.FALLBACK_PICTURE;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -89,10 +88,9 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
 
     @Override
     public ContactPicture getPicture(Session session, PictureSearchData searchData) {
-        ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
+        return get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
             return f.getPicture(s, d);
         });
-        return null == picture ? FALLBACK_PICTURE : picture;
     }
 
     @Override
@@ -100,7 +98,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
             return f.getETag(s, d);
         });
-        return null == picture ? FALLBACK_PICTURE.getETag() : picture.getETag();
+        return null == picture ? null : picture.getETag();
     }
 
     @Override
@@ -108,7 +106,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
             return f.getLastModified(s, d);
         });
-        return null == picture ? FALLBACK_PICTURE.getLastModified() : picture.getLastModified();
+        return null == picture ? ContactPicture.UNMODIFIED : picture.getLastModified();
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -134,7 +132,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         } catch (OXException e) {
             LOGGER.debug("Unable to get contact picture. Using fallback instead.", e);
         }
-        return null;
+        return ContactPicture.NOT_FOUND;
     }
 
     private PictureSearchData mergeResult(PictureSearchData data, PictureResult pictureResult) {

@@ -1490,7 +1490,7 @@ public final class HtmlServiceImpl implements HtmlService {
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern HREF_PATTERN = Pattern.compile(
-        "(<[a-zA-Z]+[^>]*?)(?:(?:href=([^\\s>]*))|(?:href=\"([^\"]*)\"))([^>]*/?>)",
+        "(<[a-zA-Z]+[^>]*?)(?:(?:href=\\\"([^\\\"]*)\\\")|(?:href=([^\\s>]*)))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {

@@ -130,7 +130,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * check targeted attendee
          */
-        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null));
+        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null), attendee.getCuType());
         Attendee originalAttendee = Check.attendeeExists(originalEvent, resolvedAttendee);
         if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()

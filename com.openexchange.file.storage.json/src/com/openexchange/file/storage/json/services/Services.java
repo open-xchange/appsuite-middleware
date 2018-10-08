@@ -74,8 +74,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class Services {
 
-    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
-    private static AtomicReference<OSGiFileFieldCollector> FIELD_COLLECTOR = new AtomicReference<OSGiFileFieldCollector>();
+    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<>();
+    private static AtomicReference<OSGiFileFieldCollector> FIELD_COLLECTOR = new AtomicReference<>();
 
     /**
      * Sets the file field collector instance.
@@ -168,5 +168,4 @@ public class Services {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(ThreadControlService.class);
     }
-
 }

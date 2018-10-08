@@ -49,10 +49,12 @@
 
 package com.openexchange.groupware.infostore.osgi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
@@ -81,8 +83,11 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
+import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.MaxVersionCount;
+import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.RetentionDays;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.services.SharedInfostoreJSlob;
@@ -101,14 +106,15 @@ public class InfostoreActivator implements BundleActivator {
      */
     public static final AtomicReference<InfostoreAvailable> INFOSTORE_FILE_STORAGE_AVAILABLE = new AtomicReference<InfostoreAvailable>();
 
-    private volatile Queue<ServiceRegistration<?>> registrations;
-    private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
-    private volatile ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
-    private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
-    private volatile ServiceTracker<ManagementService, ManagementService> mgmtTracker;
+    private Queue<ServiceRegistration<?>> registrations;
+    private ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
+    private ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
+    private ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
+    private ServiceTracker<ManagementService, ManagementService> mgmtTracker;
+    private List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         try {
 
             LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
@@ -218,6 +224,15 @@ public class InfostoreActivator implements BundleActivator {
             this.mgmtTracker = mgmtTracker;
             mgmtTracker.open();
 
+            // Register settings
+            List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings = new ArrayList<ServiceRegistration<ConfigTreeEquivalent>>(4);
+            MaxVersionCount maxVersionCount = new MaxVersionCount(); // --> Statically registered via ConfigTree class
+            registeredSettings.add(context.registerService(ConfigTreeEquivalent.class, maxVersionCount, null));
+
+            RetentionDays retentionDays = new RetentionDays(); // --> Statically registered via ConfigTree class
+            registeredSettings.add(context.registerService(ConfigTreeEquivalent.class, retentionDays, null));
+
+            this.registeredSettings = registeredSettings;
         } catch (final Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
@@ -226,8 +241,16 @@ public class InfostoreActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         try {
+            List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings = this.registeredSettings;
+            if (null != registeredSettings) {
+                this.registeredSettings = null;
+                for (ServiceRegistration<ConfigTreeEquivalent> serviceRegistration : registeredSettings) {
+                    serviceRegistration.unregister();
+                }
+            }
+
             ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
             if (null != mgmtTracker) {
                 mgmtTracker.close();

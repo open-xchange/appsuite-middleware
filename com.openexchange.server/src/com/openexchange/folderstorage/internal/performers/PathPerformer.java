@@ -257,7 +257,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
      * @return The user-sensitive folders describing the path to root folder
      * @throws OXException If a folder error occurs
      */
-    public String[] doForcePath(final String treeId, final String folderId, final boolean all) throws OXException {
+    public String[] doForcePath(final String treeId, final String folderId) throws OXException {
         if (FolderStorage.ROOT_ID.equals(folderId)) {
             return new String[0];
         }
