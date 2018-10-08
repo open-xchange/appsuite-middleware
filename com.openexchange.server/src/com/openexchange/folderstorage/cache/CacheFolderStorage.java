@@ -1324,14 +1324,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Try from cache
          */
-        Folder folder = null;
-        if (storageParameters.getUser().isAnonymousGuest() == false) {
-            folder = getCloneFromCache(treeId, folderId, storageParameters);
-            if (null != folder) {
-                return folder;
-            }
+        Folder folder = getCloneFromCache(treeId, folderId, storageParameters);
+        if (null != folder) {
+            return folder;
         }
-        
         /*
          * Load folder from appropriate storage
          */
@@ -1372,6 +1368,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             return null;
         }
         int contextId = params.getContextId();
+        if (null != params.getUser() && params.getUser().isAnonymousGuest()) {
+            LOG.debug("Bypassing cache for folder {} from context {} for user {}", folderId, Integer.valueOf(contextId), Integer.valueOf(params.getUserId()));
+            return null; // bypass cache for anonymous users
+        }
         /*
          * Try global cache key
          */
@@ -1420,28 +1420,24 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Get the ones from cache
          */
-       
-            for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
+            /*
+             * Try from cache
+             */
+            String folderId = folderIds.get(i);
+            Folder folder = getCloneFromCache(treeId, folderId, storageParameters);
+            if (null == folder) {
                 /*
-                 * Try from cache
+                 * Cache miss; Load from storage
                  */
-                String folderId = folderIds.get(i);
-                Folder folder = null;
-                if (storageParameters.getUser().isAnonymousGuest() == false) {
-                    folder = getCloneFromCache(treeId, folderId, storageParameters);
-                }
-                if (null == folder) {
-                    /*
-                     * Cache miss; Load from storage
-                     */
-                    toLoad.put(folderId, i);
-                } else {
-                    /*
-                     * Cache hit
-                     */
-                    ret[i] = folder;
-                }
+                toLoad.put(folderId, i);
+            } else {
+                /*
+                 * Cache hit
+                 */
+                ret[i] = folder;
             }
+        }
         /*
          * Load the ones from storage
          */
@@ -2214,5 +2210,5 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
         return false;
     }
-
+    
 }
