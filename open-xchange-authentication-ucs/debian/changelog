@@ -1,3 +1,9 @@
+open-xchange-authentication-ucs (7.10.0-18) stable; urgency=medium
+
+  * Build for patch 2018-10-15 (4918)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 08 Oct 2018 15:54:33 +0200
+
 open-xchange-authentication-ucs (7.10.0-17) stable; urgency=medium
 
   * Build for patch 2018-10-01 (4897)
