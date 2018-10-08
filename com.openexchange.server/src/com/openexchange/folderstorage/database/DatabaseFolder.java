@@ -49,7 +49,10 @@
 
 package com.openexchange.folderstorage.database;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageCapability;
@@ -346,5 +349,29 @@ public class DatabaseFolder extends AbstractFolder {
         }
         return true;
     }
-
+    
+    /**
+     * Checks if the current user has visibility permissions granted through system
+     * permissions for this folder. Group permissions are considered also.
+     * 
+     * @return true, if the user has system granted visibility permissions, false otherwise
+     */
+    public boolean isVisibleThroughSystemPermissions() {
+        try {
+            ServerSession session = getSession();
+            if (null != session) {
+                List<Integer> entities = Arrays.stream(session.getUser().getGroups()).boxed().collect(Collectors.toList());
+                entities.add(session.getUserId());
+                for (OCLPermission permission : folderObject.getPermissions()) {
+                    if (entities.contains(permission.getEntity()) && permission.isFolderVisible() && permission.isSystem()) {
+                        return true;
+                    }
+                }
+            }
+        } catch (OXException e) {
+            // Ignore
+            LOG.debug("Error checking visibility state of folder {}, assuming 'false'.", folderObject, e);
+        }
+        return false;
+    }
 }
