@@ -71,7 +71,7 @@ public class RateLimiterImpl implements RateLimiter {
     private static final Logger LOG = LoggerFactory.getLogger(RateLimiterImpl.class);
 
     private final long timeframe;
-    private final int amount;
+    private final long amount;
     private final int userId;
     private final Context ctx;
     private final String id;
@@ -80,7 +80,7 @@ public class RateLimiterImpl implements RateLimiter {
     /**
      * Initializes a new {@link RateLimiterImpl}.
      */
-    public RateLimiterImpl(String id, int user, Context ctx, int amount, long timeframe, DBProvider provider) {
+    public RateLimiterImpl(String id, int user, Context ctx, long amount, long timeframe, DBProvider provider) {
         this.id = id;
         this.amount = amount;
         this.timeframe = timeframe;
