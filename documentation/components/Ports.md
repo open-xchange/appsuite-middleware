@@ -6,7 +6,7 @@ This document describes the ports the AppSuite middleware listens on and their r
 
 | Default port | Purpose | Configuration |
 |:-------------|:--------|:--------------|
-| 143 | Port on which the IMAP server is listening. | [IMAP_PORT]((http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#IMAP_PORT) |
+| 143 | Port on which the IMAP server is listening. | [IMAP_PORT](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#IMAP_PORT) |
 | 1099 | The RMI port. | [com.openexchange.rmi.port](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rmi.port) |
 | 5701 | The port Hazelcast will listen for incoming connections. | [com.openexchange.hazelcast.network.port](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.hazelcast.network.port) |
 | 8009 | The default port for the connector's HTTP network listener. | [com.openexchange.connector.networkListenerPort](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.connector.networkListenerPort) |
