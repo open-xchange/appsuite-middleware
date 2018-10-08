@@ -112,6 +112,7 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
         if (contextId <= 0 || userId <= 0) {
             System.err.println("Invalid context and/or user identifier specified.");
             printHelp();
+            System.exit(1);
         }
 
         LogbackConfigurationRMIService rmiService = getRmiStub(optRmiHostName, LogbackConfigurationRMIService.RMI_NAME);
