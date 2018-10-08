@@ -51,7 +51,6 @@ package com.openexchange.ratelimit.rdb.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,25 +98,29 @@ public class RateLimiterImpl implements RateLimiter {
     public boolean acquire(long permits) {
         Connection writeCon = null;
         boolean readOnly = true;
+        int rollback = 0;
         try {
             writeCon = dbProvider.getWriteConnection(ctx);
             Databases.startTransaction(writeCon);
-
+            rollback = 1;
             readOnly = deleteOldPermits(writeCon) <= 0;
-            long numberOfPermits = getPermits();
-            if (numberOfPermits + permits > amount) {
-                return false;
-            }
-            insertPermit(writeCon, permits);
+            boolean result = insertPermit(writeCon, permits);
             writeCon.commit();
-            readOnly = false;
+            rollback = 2;
+            readOnly = readOnly && !result;
+            return result;
         } catch (OXException e) {
             LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
         } finally {
-            Databases.autocommit(writeCon);
             if (writeCon != null) {
+                if (rollback > 0) {
+                    Databases.autocommit(writeCon);
+                    if (rollback == 1) {
+                        Databases.rollback(writeCon);
+                    }
+                }
                 if (readOnly) {
                     dbProvider.releaseWriteConnectionAfterReading(ctx, writeCon);
                 } else {
@@ -125,32 +128,60 @@ public class RateLimiterImpl implements RateLimiter {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private static final String SQL_DELTE_OLD = "DELETE FROM ratelimit WHERE cid=? AND userId=? AND id=? AND timestamp < ?";
-    private static final String SQL_READ = "SELECT SUM(permits) FROM ratelimit WHERE cid=? AND userId=? AND id=?";
-    private static final String SQL_INSERT = "INSERT INTO ratelimit VALUES (?,?,?,?,?)";
+    private static final String SQL_INSERT = "INSERT INTO ratelimit SELECT ?,?,?,?,? FROM dual WHERE ? >= (SELECT COALESCE(sum(permits), 0) FROM ratelimit WHERE cid=? AND userId=? AND id=?);";
+    /**
+     * The MYSQL error code for duplicate primary key
+     */
+    public static final int MYSQL_DUPLICATE_PK = 1062;
 
-    private void insertPermit(Connection writeCon, long permits) {
+    /**
+     * Inserts the given amount of permits if possible
+     *
+     * @param writeCon The writable connection
+     * @param permits The number of permits
+     * @return true if the insert was successful, false otherwise
+     */
+    private boolean insertPermit(Connection writeCon, long permits) {
         try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
-            int index = 1;
-            stmt.setInt(index++, ctx.getContextId());
-            stmt.setInt(index++, userId);
-            stmt.setString(index++, id);
-            stmt.setLong(index++, System.currentTimeMillis());
-            stmt.setLong(index++, permits);
-            stmt.executeUpdate();
+            return executeStmt(stmt, permits);
         } catch (SQLException e) {
+            if (e.getErrorCode() == MYSQL_DUPLICATE_PK) {
+                // Duplicate primary key. Try again
+                try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
+                    return executeStmt(stmt, permits);
+                } catch (SQLException e2) {
+                    // ignore
+                }
+            }
             LOG.error("Unable to insert permit: {}", e.getMessage(), e);
         }
+        return false;
+    }
+
+    private boolean executeStmt(PreparedStatement stmt, long permits) throws SQLException {
+        int index = 1;
+        stmt.setInt(index++, ctx.getContextId());
+        stmt.setInt(index++, userId);
+        stmt.setString(index++, id);
+        stmt.setLong(index++, System.currentTimeMillis());
+        stmt.setLong(index++, permits);
+        stmt.setLong(index++, amount - permits);
+        stmt.setInt(index++, ctx.getContextId());
+        stmt.setInt(index++, userId);
+        stmt.setString(index++, id);
+        return 1 == stmt.executeUpdate();
     }
 
 
     /**
+     * Deletes old permits
      *
      * @param con The write connection
-     * @return true if it
+     * @return the number of deleted entries
      */
     private int deleteOldPermits(Connection con) {
         long start = System.currentTimeMillis() - timeframe;
@@ -165,30 +196,6 @@ public class RateLimiterImpl implements RateLimiter {
             LOG.error("Unable to delete old permits: {}", e.getMessage(), e);
             return -1;
         }
-    }
-
-    private int getPermits() {
-        try {
-            Connection con = dbProvider.getReadConnection(ctx);
-            ResultSet rs;
-            try (PreparedStatement stmt = con.prepareStatement(SQL_READ)) {
-                int index = 1;
-                stmt.setInt(index++, ctx.getContextId());
-                stmt.setInt(index++, userId);
-                stmt.setString(index++, id);
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    return rs.getInt(1);
-                }
-            } catch (SQLException e) {
-                LOG.error("Unable to get permits: {}", e.getMessage(), e);
-            } finally {
-                dbProvider.releaseReadConnection(ctx, con);
-            }
-        } catch (OXException e) {
-            LOG.error("Unable to get permits: {}", e.getMessage(), e);
-        }
-        return Integer.MAX_VALUE;
     }
 
 }

@@ -137,7 +137,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     }
 
     @Override
-    public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
+    public PictureResult getETag(Session session, PictureSearchData data) {
         Contact contact = getContact0(session, data, SearchFields.ETAG);
         if (null == contact) {
             return new PictureResult(data);

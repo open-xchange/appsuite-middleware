@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -170,10 +169,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         return resultTracker.getResult();
     }
 
-    private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {
-        return AttendeeHelper.onNewEvent(session, folder, attendeeData).getAddedItems();
-    }
-
     private Event prepareEvent(Event eventData) throws OXException {
         Event event = new Event();
         /*
@@ -201,7 +196,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * attendees, attachments
          */
-        event.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(eventData.getAttendees())));
+        event.setAttendees(Check.maxAttendees(getSelfProtection(), AttendeeHelper.onNewEvent(session, folder, eventData).getAddedItems()));
         event.setAttachments(Check.attachmentsAreVisible(session, storage, eventData.getAttachments()));
         /*
          * classification, transparency, color, geo

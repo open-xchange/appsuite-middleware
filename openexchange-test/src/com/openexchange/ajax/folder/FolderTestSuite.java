@@ -139,7 +139,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     PublicFolderMovePermissionTest.class,
 
     // API Client tests
-    MailFolderCountTest.class
+    MailFolderCountTest.class,
+    CheckLimitsTest.class,
 
 })
 public final class FolderTestSuite {

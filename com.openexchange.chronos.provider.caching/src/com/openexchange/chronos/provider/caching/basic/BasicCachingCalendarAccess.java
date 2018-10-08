@@ -510,12 +510,12 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
             if (!attendeeUpdates.isEmpty()) {
-                updateAttendees(calendarStorage, updatedEvent.getId(), attendeeUpdates);
+                updateAttendees(calendarStorage, deltaEvent.getId(), attendeeUpdates);
             }
 
             CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
             if (!alarmUpdates.isEmpty()) {
-                updateAlarms(calendarStorage, updatedEvent, alarmUpdates);
+                updateAlarms(calendarStorage, deltaEvent, alarmUpdates);
             }
         }
     }

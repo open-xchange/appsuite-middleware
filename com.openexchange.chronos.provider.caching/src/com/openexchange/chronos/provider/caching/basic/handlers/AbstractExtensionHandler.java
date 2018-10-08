@@ -65,7 +65,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -84,10 +83,9 @@ abstract class AbstractExtensionHandler {
     /**
      * Initialises a new {@link AbstractExtensionHandler}.
      *
-     * @param services The {@link ServiceLookup} instance
-     * @param sssion The groupware {@link Session}
+     * @param session The groupware {@link Session}
      * @param account The {@link CalendarAccount}
-     * @param calendarParameters The {@link CalendarParameters}
+     * @param parameters The {@link CalendarParameters}
      * @throws OXException
      */
     public AbstractExtensionHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {

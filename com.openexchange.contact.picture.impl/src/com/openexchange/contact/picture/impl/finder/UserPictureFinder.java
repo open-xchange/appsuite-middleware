@@ -88,12 +88,12 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public PictureResult getPicture(Session session, PictureSearchData data) throws OXException {
+    public PictureResult getPicture(Session session, PictureSearchData data) {
         return provideUserData(session, data);
     }
 
     @Override
-    public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
+    public PictureResult getETag(Session session, PictureSearchData data) {
         return provideUserData(session, data);
     }
 

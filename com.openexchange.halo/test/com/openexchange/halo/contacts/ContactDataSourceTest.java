@@ -51,7 +51,6 @@ package com.openexchange.halo.contacts;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +59,6 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.junit.MockitoJUnitRunner;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
@@ -69,7 +67,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.server.MockingServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -117,7 +114,7 @@ public class ContactDataSourceTest {
 
         ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -147,7 +144,7 @@ public class ContactDataSourceTest {
 
         ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -178,7 +175,7 @@ public class ContactDataSourceTest {
 
         ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -211,7 +208,7 @@ public class ContactDataSourceTest {
 
         ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -219,24 +216,6 @@ public class ContactDataSourceTest {
         assertEquals(-1, stream.read());
 
         stream.close();
-    }
-
-    private ContactSearchObject searchFor(final String address) {
-        return argThat(new ArgumentMatcher<ContactSearchObject>() {
-
-            @Override
-            public boolean matches(ContactSearchObject item) {
-                if (!(item instanceof ContactSearchObject)) {
-                    return false;
-                }
-
-                ContactSearchObject cso = item;
-                if (!cso.isOrSearch()) {
-                    return false;
-                }
-                return cso.getEmail1().equals(address) && cso.getEmail2().equals(address) && cso.getEmail3().equals(address);
-            }
-        });
     }
 
 }

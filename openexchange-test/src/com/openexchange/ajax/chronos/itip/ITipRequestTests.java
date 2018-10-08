@@ -196,7 +196,7 @@ public class ITipRequestTests extends AbstractITipTest {
     }
 
     private void validateEvent(ActionResponse response, PartStat partStat) {
-        Assert.assertThat("Only one object hosuld have been retunred", Integer.valueOf(response.getData().size()), is(Integer.valueOf(1)));
+        Assert.assertThat("Only one object should have been returned", Integer.valueOf(response.getData().size()), is(Integer.valueOf(1)));
         updatedEvent = response.getData().get(0);
         Assert.assertThat("Should be the same start date", updatedEvent.getStartDate(), is(event.getStartDate()));
         Assert.assertThat("Should be the same end date", updatedEvent.getEndDate(), is(event.getEndDate()));
@@ -206,7 +206,7 @@ public class ITipRequestTests extends AbstractITipTest {
         Assert.assertThat("Should be the same organizer", updatedEvent.getOrganizer().getEmail(), is(organizer.getEmail()));
 
         // Get acting user
-        Attendee attendee = updatedEvent.getAttendees().stream().filter(a -> false == a.getEmail().equals(organizer.getEmail())).findAny().get();
+        Attendee attendee = updatedEvent.getAttendees().stream().filter(a -> null != a.getEmail() && false == a.getEmail().equals(organizer.getEmail())).findAny().get();
         Assert.assertThat("Participants status didn't change!!", attendee.getPartStat().toUpperCase(), is(partStat.name().toUpperCase()));
     }
 

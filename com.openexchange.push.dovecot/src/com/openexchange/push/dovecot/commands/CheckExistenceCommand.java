@@ -50,7 +50,6 @@
 package com.openexchange.push.dovecot.commands;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
-import org.slf4j.Logger;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
@@ -71,8 +70,6 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  * @since v7.8.0
  */
 public class CheckExistenceCommand implements ProtocolCommand {
-
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CheckExistenceCommand.class);
 
     private final Session session;
     private final IMAPFolder imapFolder;

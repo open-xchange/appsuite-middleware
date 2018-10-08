@@ -125,7 +125,7 @@ public class EventManager extends AbstractManager {
         try {
             DeleteBody body = new DeleteBody();
             body.setEvents(eventIds);
-            userApi.getChronosApi().deleteEvent(userApi.getSession(), L(System.currentTimeMillis()), body, null, null, EXPAND_SERIES, Boolean.FALSE, null);
+            userApi.getChronosApi().deleteEvent(userApi.getSession(), L(System.currentTimeMillis()), body, null, null, EXPAND_SERIES, Boolean.FALSE, null, null);
         } catch (Exception e) {
             System.err.println("Could not clean up the events for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
@@ -152,7 +152,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData createEvent(EventData eventData, boolean ignoreConflicts) throws ApiException {
-        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), getFolder(eventData), eventData, B(ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), getFolder(eventData), eventData, B(ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
         EventData event = handleCreation(createEvent);
         return event;
     }
@@ -326,7 +326,7 @@ public class EventManager extends AbstractManager {
         event.setEndDate(DateTimeUtil.getDateTime(endTime));
         UpdateBody body = new UpdateBody();
         body.setEvent(event);
-        ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(event), eventId, body, timestamp == null ? L(lastTimeStamp) : timestamp, recurrence, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(event), eventId, body, timestamp == null ? L(lastTimeStamp) : timestamp, recurrence, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
         assertNull(updateEvent.getErrorDesc(), updateEvent.getError());
         assertNotNull("Missing timestamp", updateEvent.getTimestamp());
         setLastTimeStamp(updateEvent.getTimestamp());
@@ -475,7 +475,7 @@ public class EventManager extends AbstractManager {
     public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
         DeleteBody body = new DeleteBody();
         body.addEventsItem(eventId);
-        ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), L(timestamp), body, null, null, EXPAND_SERIES, Boolean.FALSE, null);
+        ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), L(timestamp), body, null, null, EXPAND_SERIES, Boolean.FALSE, null, null);
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(eventId);
         setLastTimeStamp(deleteResponse.getTimestamp());
@@ -506,7 +506,7 @@ public class EventManager extends AbstractManager {
     public EventData updateEvent(EventData eventData, boolean expectException, boolean checkconflicts) throws ApiException, ChronosApiException {
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, eventData.getLastModified(), null, null, B(checkconflicts), Boolean.FALSE, Boolean.FALSE, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, eventData.getLastModified(), null, null, B(checkconflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
         return handleUpdate(updateResponse, expectException);
     }
 
@@ -538,7 +538,7 @@ public class EventManager extends AbstractManager {
     public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, boolean expectException, boolean ignoreConflicts) throws ApiException, ChronosApiException {
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, null, B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, null, B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
         return handleUpdate(updateResponse, expectException);
     }
 
@@ -671,7 +671,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, L(lastTimeStamp), attendeeAndAlarm, null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, L(lastTimeStamp), attendeeAndAlarm, null, Boolean.FALSE, Boolean.TRUE, null, Boolean.FALSE, null, null, EXPAND_SERIES);
         if (expectException) {
             assertNotNull("An error was expected", updateAttendee.getError());
             throw new ChronosApiException(updateAttendee.getCode(), updateAttendee.getError());
@@ -790,8 +790,6 @@ public class EventManager extends AbstractManager {
 
     /**
      * Removes the specified {@link EventId} for the specified user from the cache
-     * 0
-     * 
      * @param eventId The {@link EventId}
      */
     protected void forgetEventId(EventId eventId) {

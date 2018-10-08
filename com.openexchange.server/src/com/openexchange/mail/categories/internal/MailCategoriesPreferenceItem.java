@@ -185,6 +185,11 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService, Con
             }
 
             @Override
+            public boolean isWritable(Session session) {
+                return true;
+            }
+
+            @Override
             public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
 
                 CapabilityService capabilityService = lookupService.getService(CapabilityService.class);

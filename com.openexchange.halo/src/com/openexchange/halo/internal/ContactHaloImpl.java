@@ -64,6 +64,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -142,10 +143,11 @@ public class ContactHaloImpl implements ContactHalo {
                 continue;
             }
             ContactPicture picture = source.getPicture(contactQuery, session);
-            if (picture != null){
+            IFileHolder fileHolder = picture.getFileHolder();
+            if (fileHolder != null) {
                 StringBuilder etagBuilder = new StringBuilder();
                 etagBuilder.append(source.getClass().getName()).append("://").append(picture.getETag());
-                return new ContactPicture(etagBuilder.toString(), picture.getFileHolder(), picture.getLastModified());
+                return new ContactPicture(etagBuilder.toString(), fileHolder, picture.getLastModified());
             }
         }
         return null;

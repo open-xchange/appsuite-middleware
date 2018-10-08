@@ -483,6 +483,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private int updateEvent(Connection connection, String id, Event event) throws SQLException, OXException {
         EventField[] assignedfields = MAPPER.getAssignedFields(event);
+        if (0 == assignedfields.length) {
+            return 0;
+        }
         String sql = new StringBuilder()
             .append("UPDATE calendar_event SET ").append(MAPPER.getAssignments(assignedfields))
             .append(" WHERE cid=? AND account=? AND id=?;")
@@ -499,6 +502,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private int updateEvent(Connection connection, String id, Event event, long rangeFrom, long rangeUntil) throws SQLException, OXException {
         EventField[] assignedfields = MAPPER.getAssignedFields(event);
+        if (0 == assignedfields.length) {
+            return 0;
+        }
         String sql = new StringBuilder()
             .append("UPDATE calendar_event SET ").append(MAPPER.getAssignments(assignedfields))
             .append(",rangeFrom=?,rangeUntil=? WHERE cid=? AND account=? AND id=?;")

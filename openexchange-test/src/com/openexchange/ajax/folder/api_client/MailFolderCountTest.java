@@ -151,13 +151,13 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
 
     @Test
     public void testFolderCount() throws Exception {
-        FolderResponse resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null);
+        FolderResponse resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null, null);
         FolderData folder = checkResponse(resp);
         Assert.assertEquals(2, folder.getUnread().intValue());
 
         CONFIG.put("com.openexchange.imap.ignoreDeleted", Boolean.TRUE.toString());
         super.setUpConfiguration();
-        resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null);
+        resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null, null);
         folder = checkResponse(resp);
         Assert.assertEquals(1, folder.getUnread().intValue());
     }

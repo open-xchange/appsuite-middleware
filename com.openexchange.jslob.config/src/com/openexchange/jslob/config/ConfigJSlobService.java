@@ -82,6 +82,8 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.IValueHandlerExtended;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -1017,6 +1019,11 @@ public final class ConfigJSlobService implements JSlobService {
                         SettingStorage stor = SettingStorage.getInstance(session);
                         ConfigTree configTree = ConfigTree.getInstance();
                         Setting setting = configTree.getSettingByPath(configTreePath);
+                        IValueHandler valueHandler = setting.getShared();
+                        if (null != valueHandler && false == (valueHandler instanceof IValueHandlerExtended ? ((IValueHandlerExtended) valueHandler).isWritable(session) : valueHandler.isWritable())) {
+                            // Not writable
+                            throw JSlobExceptionCodes.PROTECTED.create(path.get(0).getName());
+                        }
                         setting.setSingleValue(value);
                         saveSettingWithSubs(stor, setting);
                     }

@@ -64,6 +64,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,6 +105,8 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
+import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeletePerformer;
+import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteSettings;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
 import com.openexchange.groupware.infostore.database.FilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
@@ -160,6 +163,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -1144,7 +1148,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     private void storeNewData(SaveParameters parameters) throws OXException {
-        QuotaFileStorage qfs = getFileStorage(parameters.getOptFolderAdmin(), parameters.getContext().getContextId());
+        int folderAdmin = parameters.getOptFolderAdmin();
+        QuotaFileStorage qfs = getFileStorage(folderAdmin, parameters.getContext().getContextId());
         if (0 < parameters.getOffset()) {
             AppendFileAction appendFile = new AppendFileAction(qfs, parameters.getData(), parameters.getOldDocument().getFilestoreLocation(), parameters.getDocument().getFileSize(), parameters.getOffset());
             perform(appendFile, false);
@@ -1177,7 +1182,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         // Set version
-        Session session = parameters.getSession();
+        ServerSession session = parameters.getSession();
+        boolean newVersion = false;
         final UndoableAction action;
         if (parameters.isIgnoreVersion()) {
             parameters.getDocument().setVersion(parameters.getOldDocument().getVersion());
@@ -1202,10 +1208,41 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
 
             action = new CreateVersionAction(this, QUERIES, parameters.getContext(), Collections.singletonList(parameters.getDocument()), session);
+            newVersion = true;
         }
 
         // Perform action
         perform(action, true);
+
+        // Auto-delete old versions (if applicable)
+        if (newVersion && folderAdmin > 0) {
+            int id = parameters.getDocument().getId();
+            if (id != NEW && checkAutodeleteCapabilitySafe(folderAdmin, session)) {
+                int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(folderAdmin, session.getContextId());
+                if (maxVersions > 0) {
+                    new InfostoreAutodeletePerformer(this).removeVersionsByMaxCount(id, maxVersions, session);
+                }
+            }
+        }
+    }
+
+    private boolean checkAutodeleteCapabilitySafe(int folderAdmin, Session session) {
+        try {
+            if (folderAdmin == session.getUserId()) {
+                return InfostoreAutodeleteSettings.hasAutodeleteCapability(session);
+            }
+
+            SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            Session otherSession;
+            if (null != service && (otherSession = service.getAnyActiveSessionForUser(folderAdmin, session.getContextId())) != null) {
+                return InfostoreAutodeleteSettings.hasAutodeleteCapability(otherSession);
+            }
+
+            return InfostoreAutodeleteSettings.hasAutodeleteCapability(folderAdmin, session.getContextId());
+        } catch (Exception e) {
+            LOG.error("Failed to check for the capability required to perform auto-deletion of versions. Assumin that capability is not granted for now.", e);
+            return false;
+        }
     }
 
     @Override
@@ -1722,6 +1759,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) throws OXException {
+        return removeVersion(id, versionIds, true, session);
+    }
+
+    /**
+     * Removes denoted versions.
+     *
+     * @param id The document identifier
+     * @param versionIds The identifiers of the versions to remove
+     * @param allowRemoveCurrentVersion <code>true</code> to allow removing the current version; otherwise <code>false</code>
+     * @param session The session
+     * @return The identifiers of those versions that could <b>not</b> be deleted successfully
+     * @throws OXException If remove operation fails
+     */
+    public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, ServerSession session) throws OXException {
         if (null == versionIds || 0 == versionIds.length) {
             return new int[0];
         }
@@ -1756,13 +1807,30 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ", Metadata.VALUES_ARRAY, this, context).asList();
 
+        boolean anyRemoved = false;
         boolean removeCurrent = false;
-        for (final DocumentMetadata v : allVersions) {
+        NextVersion: for (Iterator<DocumentMetadata> it = allVersions.iterator(); it.hasNext();) {
+            DocumentMetadata v = it.next();
             if (v.getVersion() == metadata.getVersion()) {
-                removeCurrent = true;
+                if (allowRemoveCurrentVersion) {
+                    removeCurrent = true;
+                } else {
+                    it.remove();
+                    continue NextVersion;
+                }
             }
             versionSet.remove(Integer.valueOf(v.getVersion()));
             removeFile(context, v.getFilestoreLocation(), security.getFolderOwner(v, context));
+            anyRemoved = true;
+        }
+
+        if (false == anyRemoved) {
+            int[] retval = new int[versionSet.size()];
+            int i = 0;
+            for (Integer versionNumber : versionSet) {
+                retval[i++] = versionNumber.intValue();
+            }
+            return retval;
         }
 
         // update version number if needed
@@ -1811,12 +1879,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             // Remove Versions
             perform(new DeleteVersionAction(this, QUERIES, context, allVersions, session), true);
 
-            final int[] retval = new int[versionSet.size()];
+            int[] retval = new int[versionSet.size()];
             int i = 0;
-            for (final Integer integer : versionSet) {
-                retval[i++] = integer.intValue();
+            for (Integer versionNumber : versionSet) {
+                retval[i++] = versionNumber.intValue();
             }
-
             return retval;
         } finally {
             if (null != filenameReserver) {

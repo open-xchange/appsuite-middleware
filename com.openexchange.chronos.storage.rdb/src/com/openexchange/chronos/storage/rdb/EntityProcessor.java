@@ -49,11 +49,14 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.optExtendedParameter;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -71,6 +74,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -146,7 +150,7 @@ public class EntityProcessor {
      * Adjusts certain properties of an attendee prior inserting it into the database.
      * <p/>
      * This includes the default adjustments for internal attendees, as well as assigning virtual (negative) entity identifiers for
-     * external attendees.
+     * external attendees and moving properties to the extended parameters collection.
      *
      * @param attendee The attendee to adjust
      * @param usedEntities The so far used entities to avoid hash collisions when generating virtual entity identifiers for external attendees
@@ -154,10 +158,10 @@ public class EntityProcessor {
      */
     public Attendee adjustPriorInsert(Attendee attendee, Set<Integer> usedEntities) throws OXException {
         if (isInternal(attendee)) {
-            usedEntities.add(I(attendee.getEntity()));
             /*
-             * remove redundant properties for non-individual internal attendees 
+             * track entity & remove redundant properties for non-individual internal attendees
              */
+            usedEntities.add(I(attendee.getEntity()));
             if (CalendarUserType.GROUP.equals(attendee.getCuType()) || CalendarUserType.RESOURCE.equals(attendee.getCuType()) || 
                 CalendarUserType.ROOM.equals(attendee.getCuType())) {
                 AttendeeField[] preservedFields = Arrays.remove(AttendeeField.values(), AttendeeField.CN, AttendeeField.COMMENT);
@@ -165,8 +169,24 @@ public class EntityProcessor {
             }
             return attendee;
         }
+        /*
+         * assign and track entity & store email as extended parameter if needed
+         */
         Attendee savedAttendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
         savedAttendee.setEntity(determineEntity(attendee, usedEntities));
+        if (Strings.isNotEmpty(attendee.getEMail()) && false == attendee.getEMail().equals(extractEMailAddress(attendee.getUri()))) {
+            List<ExtendedPropertyParameter> extendedParameters = savedAttendee.getExtendedParameters();
+            if (null == extendedParameters) {
+                extendedParameters = new ArrayList<ExtendedPropertyParameter>(1);
+                savedAttendee.setExtendedParameters(extendedParameters);
+            } else {
+                ExtendedPropertyParameter parameter = optExtendedParameter(extendedParameters, "EMAIL");
+                if (null != parameter) {
+                    extendedParameters.remove(parameter);
+                }
+            }
+            extendedParameters.add(new ExtendedPropertyParameter("EMAIL", attendee.getEMail()));
+        }
         return savedAttendee;
     }
 
@@ -213,8 +233,18 @@ public class EntityProcessor {
         if (0 > attendee.getEntity()) {
             attendee.removeEntity();
         }
+        List<ExtendedPropertyParameter> extendedParameters = attendee.getExtendedParameters();
+        if (null != extendedParameters && 0 < extendedParameters.size()) {
+            /*
+             * move over extended parameters as needed
+             */
+            ExtendedPropertyParameter parameter = optExtendedParameter(extendedParameters, "EMAIL");
+            if (null != parameter && extendedParameters.remove(parameter)) {
+                attendee.setEMail(parameter.getValue());
+            }
+        }
         /*
-         * apply entity data
+         * apply entity data afterwards
          */
         if (null != entityResolver) {
             attendee = entityResolver.applyEntityData(attendee);

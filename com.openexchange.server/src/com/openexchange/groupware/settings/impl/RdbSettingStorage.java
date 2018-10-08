@@ -119,8 +119,7 @@ public class RdbSettingStorage extends SettingStorage {
         this(session, session.getContextId(), session.getUserId());
     }
 
-    RdbSettingStorage(final Session session, final int ctxId,
-        final int userId) throws OXException {
+    RdbSettingStorage(final Session session, final int ctxId, final int userId) throws OXException {
         super();
         this.session = session;
         this.ctxId = ctxId;
@@ -137,8 +136,7 @@ public class RdbSettingStorage extends SettingStorage {
         }
     }
 
-    RdbSettingStorage(final Session session, final Context ctx, final User user,
-        final UserConfiguration userConfig) {
+    RdbSettingStorage(final Session session, final Context ctx, final User user, final UserConfiguration userConfig) {
         super();
         this.session = session;
         this.ctx = ctx;
@@ -169,14 +167,13 @@ public class RdbSettingStorage extends SettingStorage {
     }
 
     @Override
-    public void save(final Connection con, final Setting setting) throws
-        OXException {
+    public void save(final Connection con, final Setting setting) throws OXException {
         if (!setting.isLeaf()) {
             throw SettingExceptionCodes.NOT_LEAF.create(setting.getName());
         }
         if (setting.isShared()) {
             final IValueHandler value = getSharedValue(setting);
-            if (null != value && value.isWritable()) {
+            if (null != value && (value instanceof IValueHandlerExtended ? ((IValueHandlerExtended) value).isWritable(session) : value.isWritable())) {
                 value.writeValue(session, ctx, user, setting);
             } else {
                 // final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
@@ -193,8 +190,7 @@ public class RdbSettingStorage extends SettingStorage {
      * @param setting setting to store.
      * @throws OXException if storing fails.
      */
-    private void saveInternal(final Connection con, final Setting setting)
-        throws OXException {
+    private void saveInternal(final Connection con, final Setting setting) throws OXException {
         if (null == con) {
             Connection myCon = null;
             try {

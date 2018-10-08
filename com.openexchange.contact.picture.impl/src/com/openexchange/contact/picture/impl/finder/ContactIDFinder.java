@@ -55,6 +55,7 @@ import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -88,13 +89,13 @@ public class ContactIDFinder extends AbstractContactFinder {
     @Override
     public PictureSearchData modfiyResult(Contact contact) {
         LinkedHashSet<String> set = new LinkedHashSet<>(4, .9f);
-        if (contact.containsEmail1() && contact.getEmail1() != null) {
+        if (contact.containsEmail1() && Strings.isNotEmpty(contact.getEmail1())) {
             set.add(contact.getEmail1());
         }
-        if (contact.containsEmail2() && contact.getEmail2() != null) {
+        if (contact.containsEmail2() && Strings.isNotEmpty(contact.getEmail2())) {
             set.add(contact.getEmail2());
         }
-        if (contact.containsEmail3() && contact.getEmail3() != null) {
+        if (contact.containsEmail3() && Strings.isNotEmpty(contact.getEmail3())) {
             set.add(contact.getEmail3());
         }
         return new PictureSearchData(null, null, null, set);

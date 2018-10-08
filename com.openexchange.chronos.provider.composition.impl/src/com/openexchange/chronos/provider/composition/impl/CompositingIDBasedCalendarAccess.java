@@ -991,7 +991,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return results;
     }
 
-    private SelfProtection getSelfProtection() throws OXException {
+    private SelfProtection getSelfProtection() {
         if (protection == null) {
             LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
             protection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);

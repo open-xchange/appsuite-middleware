@@ -76,9 +76,9 @@ public final class DoveAdmClientExceptionMessages implements LocalizableStrings 
     // Authentication failed: %1$s
     public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
 
-    // The DoveAdm resource does not exist
-    public static final String NOT_FOUND_SIMPLE_MSG = "The DoveAdm resource does not exist";
-    
+    // Doveadm HTTP API communication error: 404 Not Found
+    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
+
     // A temporary failure because a subsystem is down. Please try again later.
     public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
 

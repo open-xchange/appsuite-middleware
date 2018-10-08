@@ -751,7 +751,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                     pathPerformer.getStorageParameters().putParameter(FolderType.GLOBAL, "DO_NOT_CACHE", Boolean.TRUE);
                     if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                         UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
-                        ids = new ArrayList<String>(path.length);
+                        ids = new ArrayList<>(path.length);
                         for (UserizedFolder userizedFolder : path) {
                             ids.add(userizedFolder.getID());
                         }
@@ -762,7 +762,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                     org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
                     log.debug("", e);
                     try {
-                        ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
+                        ids = new ArrayList<>(Arrays.asList(pathPerformer.doForcePath(treeId, id)));
                     } catch (Exception e1) {
                         log.debug("", e1);
                         ids = Collections.singletonList(id);
@@ -776,7 +776,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             Cache cache = globalCache;
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             if (realTreeId.equals(treeId)) {
-                List<Serializable> keys = new LinkedList<Serializable>();
+                List<Serializable> keys = new LinkedList<>();
                 for (String folderId : ids) {
                     if (Tools.isGlobalId(folderId)) {
                         keys.add(newCacheKey(folderId, treeId));
@@ -787,7 +787,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                     cache.removeFromGroup(keys, Integer.toString(contextId));
                 }
             } else {
-                List<Serializable> keys = new LinkedList<Serializable>();
+                List<Serializable> keys = new LinkedList<>();
                 for (String folderId : ids) {
                     if (Tools.isGlobalId(folderId)) {
                         keys.add(newCacheKey(folderId, treeId));
@@ -844,7 +844,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                     }
                 }
             } else {
-                List<Serializable> keys = new LinkedList<Serializable>();
+                List<Serializable> keys = new LinkedList<>();
                 for (String tid : new HashSet<String>(Arrays.asList(treeId, realTreeId))) {
                     for (String id : ids) {
                         // Add affected cache keys
@@ -1016,7 +1016,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             folderMapManagement.dropFor(Arrays.asList(folderId, parentId), treeId, userId, contextId, session);
             if (!treeId.equals(realTreeId)) {
-                List<String> fids = new ArrayList<String>(Arrays.asList(folderId, parentId));
+                List<String> fids = new ArrayList<>(Arrays.asList(folderId, parentId));
                 if (null != realParentId) {
                     fids.add(realParentId);
                 }
@@ -1130,7 +1130,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             folderMapManagement.dropFor(Arrays.asList(folderId, parentId), treeId, userId, contextId, session);
             if (!treeId.equals(realTreeId)) {
-                List<String> fids = new ArrayList<String>(Arrays.asList(folderId, parentId));
+                List<String> fids = new ArrayList<>(Arrays.asList(folderId, parentId));
                 if (null != realParentId) {
                     fids.add(realParentId);
                 }
@@ -1138,7 +1138,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             }
         }
         {
-            List<Serializable> keys = new LinkedList<Serializable>();
+            List<Serializable> keys = new LinkedList<>();
             if (Tools.isGlobalId(folderId)) {
                 keys.add(newCacheKey(folderId, treeId));
             }
@@ -1324,10 +1324,14 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Try from cache
          */
-        Folder folder = getCloneFromCache(treeId, folderId, storageParameters);
-        if (null != folder) {
-            return folder;
+        Folder folder = null;
+        if (storageParameters.getUser().isAnonymousGuest() == false) {
+            folder = getCloneFromCache(treeId, folderId, storageParameters);
+            if (null != folder) {
+                return folder;
+            }
         }
+        
         /*
          * Load folder from appropriate storage
          */
@@ -1416,24 +1420,28 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Get the ones from cache
          */
-        for (int i = 0; i < size; i++) {
-            /*
-             * Try from cache
-             */
-            String folderId = folderIds.get(i);
-            Folder folder = getCloneFromCache(treeId, folderId, storageParameters);
-            if (null == folder) {
+       
+            for (int i = 0; i < size; i++) {
                 /*
-                 * Cache miss; Load from storage
+                 * Try from cache
                  */
-                toLoad.put(folderId, i);
-            } else {
-                /*
-                 * Cache hit
-                 */
-                ret[i] = folder;
+                String folderId = folderIds.get(i);
+                Folder folder = null;
+                if (storageParameters.getUser().isAnonymousGuest() == false) {
+                    folder = getCloneFromCache(treeId, folderId, storageParameters);
+                }
+                if (null == folder) {
+                    /*
+                     * Cache miss; Load from storage
+                     */
+                    toLoad.put(folderId, i);
+                } else {
+                    /*
+                     * Cache hit
+                     */
+                    ret[i] = folder;
+                }
             }
-        }
         /*
          * Load the ones from storage
          */

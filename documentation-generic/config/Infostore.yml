@@ -33,3 +33,72 @@ properties:
       file: infostore.properties
       packageName: open-xchange-core
       tags: ["Infostore"]
+
+    - key: com.openexchange.capability.autodelete_file_versions
+      description: |
+        Enables or disables the "autodelete_file_versions" capability. The capability
+        can also be set more fine-grained via config cascade. It is only effectively
+        enabled for users that have the "infostore" permission set.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore", "Capability"]
+
+    - key: com.openexchange.infostore.autodelete.editable
+      description: |
+        Specifies whether a user may change/edit the auto-delete settings
+        
+        Requires the "autodelete_file_versions" capability to be available.
+      defaultValue: true
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.capability.autodelete_file_versions
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]
+
+    - key: com.openexchange.infostore.autodelete.default.retentionDays
+      description: |
+        Specifies the default value to assume for how many days multiple versions of a Drive item/document
+        are kept until they are automatically deleted. However, the current version is never deleted regardless
+        of its age. Cleanup is triggered whenever a new versions is about to be added to an existent Drive
+        item/document. A value equal to or less than <code>0</code> (zero) disables the auto-deletion by
+        retention days.
+        
+        Users may set that value on their own if property "com.openexchange.infostore.autodelete.editable" signals
+        "true", in which case this default value is no more considered.
+        
+        Requires the "autodelete_file_versions" capability to be available for a user.
+      defaultValue: 0
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.capability.autodelete_file_versions", "com.openexchange.infostore.autodelete.editable"]
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]
+ 
+    - key: com.openexchange.infostore.autodelete.default.maxVersions
+      description: |
+        Specifies the default value to assume for how many multiple versions of a Drive item/document are allowed
+        to be maintained. If the number of versions for a Drive item/document exceeds that threshold, oldest ones
+        are automatically deleted. Cleanup is triggered during user login. A value equal to or less than <code>0</code>
+        (zero) disables the auto-deletion by max. allowed number of versions.
+        
+        Users may set that value on their own if property "com.openexchange.infostore.autodelete.editable" signals
+        "true", in which case this default value is no more considered.
+        
+        Requires the "autodelete_file_versions" capability to be available for a user.
+      defaultValue: 0
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.capability.autodelete_file_versions", "com.openexchange.infostore.autodelete.editable"]
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]

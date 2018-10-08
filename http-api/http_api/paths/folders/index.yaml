@@ -12,3 +12,4 @@ requests:
   - SharesRequest.yaml
   - NotifyRequest.yaml
   - RestoreRequest.yaml
+  - CheckLimitsRequest.yaml

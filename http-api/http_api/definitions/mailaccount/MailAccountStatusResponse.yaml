@@ -3,6 +3,7 @@ properties:
   $ref: ../common/CommonResponseData.yaml
   data:
     type: object
+    title: Status
     properties:
       status:
         type: string

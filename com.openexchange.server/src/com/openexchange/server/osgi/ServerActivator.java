@@ -157,6 +157,7 @@ import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
+import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteFileVersionsLoginHandler;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -920,6 +921,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(InfostoreFacade.class, infostoreFacade);
         registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
         registerService(InfostoreSearchEngine.class, infostoreFacade);
+        registerService(LoginHandlerService.class, new InfostoreAutodeleteFileVersionsLoginHandler(infostoreFacade));
     }
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
