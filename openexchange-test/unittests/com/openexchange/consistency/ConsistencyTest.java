@@ -80,6 +80,7 @@ import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
@@ -169,7 +170,9 @@ public class ConsistencyTest {
         simulateBrokenContext(ctx2);
         simulateBrokenContext(ctx3);
 
-        consistency = PowerMockito.spy(new ConsistencyServiceImpl());
+        ServiceLookup services = PowerMockito.mock(ServiceLookup.class);
+        
+        consistency = PowerMockito.spy(new ConsistencyServiceImpl(services));
         PowerMockito.doReturn(ctx).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(1);
         PowerMockito.doReturn(ctx2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(2);
         PowerMockito.doReturn(ctx3).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(3);
