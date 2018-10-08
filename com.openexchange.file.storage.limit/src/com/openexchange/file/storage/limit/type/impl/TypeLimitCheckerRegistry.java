@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.limit.type.impl;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -65,16 +66,18 @@ import com.openexchange.java.ConcurrentList;
  */
 public class TypeLimitCheckerRegistry {
 
-    private final ConcurrentMap<String, List<TypeLimitChecker>> typeLimitCheckers = new ConcurrentHashMap<>();
-
     private static final TypeLimitCheckerRegistry SINGLETON = new TypeLimitCheckerRegistry();
-
-    private TypeLimitCheckerRegistry() {
-        // prevent instantiation
-    }
 
     public static TypeLimitCheckerRegistry getInstance() {
         return SINGLETON;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<String, List<TypeLimitChecker>> typeLimitCheckers = new ConcurrentHashMap<>();
+
+    private TypeLimitCheckerRegistry() {
+        // prevent instantiation
     }
 
     public synchronized void register(TypeLimitChecker... lTypeLimitCheckers) {
@@ -92,13 +95,15 @@ public class TypeLimitCheckerRegistry {
         for (TypeLimitChecker checkerToUnregister : checkersToUnregister) {
             List<TypeLimitChecker> availableCheckersForType = this.typeLimitCheckers.get(checkerToUnregister.getType().toLowerCase());
 
-            for (TypeLimitChecker checker : availableCheckersForType) {
+            for (Iterator<TypeLimitChecker> it = availableCheckersForType.iterator(); it.hasNext();) {
+                TypeLimitChecker checker = it.next();
                 if (checker.equals(checkerToUnregister)) {
-                    availableCheckersForType.remove(checkerToUnregister);
+                    it.remove();
                 }
             }
-            if (availableCheckersForType.isEmpty())
+            if (availableCheckersForType.isEmpty()) {
                 this.typeLimitCheckers.remove(checkerToUnregister.getType().toLowerCase());
+            }
         }
     }
 
