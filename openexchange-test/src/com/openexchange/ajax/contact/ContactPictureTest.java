@@ -245,6 +245,22 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         }
         Assert.fail("Client should have received a 404");
     }
+    
+    private void assertThatPictureIsMissing(String userId, String contactId, String mail) throws ApiException {
+        assertThatPictureIsMissing(userId, contactId, mail, contactFolderId);
+    }
+    
+    private void assertThatPictureIsMissing(String userId, String contactId, String mail, String contactFolderId) throws ApiException, IllegalStateException {
+        try {
+            getContactPicture(userId, contactId, mail, contactFolderId);
+        } catch (ApiException e) {
+            if (e.getCode() == 404) {
+                return;
+            }
+            throw e;
+        }
+        throw new IllegalStateException("Client should have received a 404");
+    }
 
     private void setImage(final ContactData contactObj) {
         setImage(contactObj, IMAGE);
