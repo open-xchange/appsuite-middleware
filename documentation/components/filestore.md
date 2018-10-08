@@ -1,3 +1,7 @@
+---
+title: Filestore 
+---
+
 # Filestore Documentation
 
 This document provides an overview about filestores and how they can be configured. It also answers a majority of frequently asked questions.
