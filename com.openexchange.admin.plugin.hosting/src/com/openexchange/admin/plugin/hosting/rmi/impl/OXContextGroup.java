@@ -50,10 +50,10 @@
 package com.openexchange.admin.plugin.hosting.rmi.impl;
 
 import java.rmi.RemoteException;
+import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface;
 import com.openexchange.admin.rmi.OXContextGroupInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.exception.OXException;
 
 /**
