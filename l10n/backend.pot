@@ -2312,9 +2312,9 @@ msgstr ""
 msgid "Authentication failed: %1$s"
 msgstr ""
 
-#. The DoveAdm resource does not exist
+#. Doveadm HTTP API communication error: 404 Not Found
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
-msgid "The DoveAdm resource does not exist"
+msgid "Doveadm HTTP API communication error: 404 Not Found"
 msgstr ""
 
 #. A temporary failure because a subsystem is down. Please try again later.

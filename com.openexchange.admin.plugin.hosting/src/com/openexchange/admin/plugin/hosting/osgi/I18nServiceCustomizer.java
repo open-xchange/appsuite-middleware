@@ -47,46 +47,46 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client;
+package com.openexchange.admin.plugin.hosting.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.plugin.hosting.services.I18nServices;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
+ * Adds a found {@link I18nService} to the registry for the services.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
+public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
+    private final BundleContext context;
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
-
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
-
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
-
-    /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
-     */
-    private DoveAdmClientExceptionMessages() {
+    public I18nServiceCustomizer(final BundleContext context) {
         super();
+        this.context = context;
     }
 
+    @Override
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService i18n = context.getService(reference);
+        I18nServices.getInstance().addService(i18n);
+        return i18n;
+    }
+
+    @Override
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        try {
+            I18nServices.getInstance().removeService(service);
+        } finally {
+            context.ungetService(reference);
+        }
+    }
 }

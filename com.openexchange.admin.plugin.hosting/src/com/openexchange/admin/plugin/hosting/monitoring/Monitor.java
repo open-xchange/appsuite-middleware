@@ -46,47 +46,67 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.admin.plugin.hosting.monitoring;
 
-package com.openexchange.dovecot.doveadm.client;
-
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author cutmasta
  */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
+public final class Monitor implements MonitorMBean {
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
+    private static final Monitor SINGLETON = new Monitor();
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
+    private final AtomicLong createResourceCalls = new AtomicLong(0);
 
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
+    private final AtomicLong createContextCalls = new AtomicLong(0);
 
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
+    private final AtomicLong createUserCalls = new AtomicLong(0);
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    private final AtomicLong createGroupCalls = new AtomicLong(0);
 
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
-
-    /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
-     */
-    private DoveAdmClientExceptionMessages() {
+    public Monitor() {
         super();
     }
 
+    public static Monitor getInstance() {
+        return SINGLETON;
+    }
+
+    public void incrementNumberOfCreateResourceCalled() {
+        createResourceCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateContextCalled() {
+        createContextCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateUserCalled() {
+        createUserCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateGroupCalled() {
+        createGroupCalls.incrementAndGet();
+    }
+
+    @Override
+    public long getNumberOfCreateResourceCalled() {
+        return createResourceCalls.get();
+    }
+
+    @Override
+    public long getNumberOfCreateContextCalled() {
+        return createContextCalls.get();
+    }
+
+    @Override
+    public long getNumberOfCreateUserCalled() {
+        return createUserCalls.get();
+    }
+
+    @Override
+    public long getNumberOfCreateGroupCalled() {
+        return createGroupCalls.get();
+    }
 }

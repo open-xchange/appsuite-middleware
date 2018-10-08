@@ -65,9 +65,9 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
+import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.java.Strings;
 
 /**

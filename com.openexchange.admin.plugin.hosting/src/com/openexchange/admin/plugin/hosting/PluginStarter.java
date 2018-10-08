@@ -47,46 +47,58 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client;
+package com.openexchange.admin.plugin.hosting;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.admin.plugin.hosting.rmi.impl.OXContextGroup;
+import com.openexchange.admin.rmi.OXContextGroupInterface;
 
-/**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
+public class PluginStarter {
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
-
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
-
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
-
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
+    private BundleContext context;
+    private final List<ServiceRegistration<Remote>> services = new LinkedList<ServiceRegistration<Remote>>();
 
     /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
+     * Initializes a new {@link PluginStarter}.
      */
-    private DoveAdmClientExceptionMessages() {
+    public PluginStarter() {
         super();
+    }
+
+    public void start(BundleContext context) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
+        try {
+            this.context = context;
+
+            // Create all OLD Objects and bind export them
+            com.openexchange.admin.plugin.hosting.rmi.impl.OXContext oxctx_v2 = new com.openexchange.admin.plugin.hosting.rmi.impl.OXContext(context);
+
+            // bind all NEW Objects to registry
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxctx_v2, properties));
+            
+            // Register RMI interface for ContextGroup
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", OXContextGroupInterface.RMI_NAME);
+            OXContextGroupInterface oxContextGroup = new OXContextGroup();
+            services.add(context.registerService(Remote.class, oxContextGroup, properties));
+        } catch (Exception e) {
+            logger.error("Error while creating one instance for RMI interface", e);
+            throw e;
+        }
+    }
+
+    public void stop() {
+        for (ServiceRegistration<Remote> registration : services) {
+            context.ungetService(registration.getReference());
+        }
     }
 
 }

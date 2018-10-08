@@ -189,7 +189,7 @@ In order to convert between the legacy properties for organizer/principal and th
 
 # Per-Attendee delete exceptions
 
-As invited attendees may delete a meeting from their personal calendar if they do not want to attend ("decline, and remove me from attendee list"), they may also do so for specific occurrences of a recurring event series. From the organizer's and the other attendee's point of view, this leads to a new change exception event with an updated list of attendees (with this deleting attendee being no longer listed there). However, for the attendee who has deleted a specific occurrence of the series, this rather means the creation of a new delete exception in the event series. 
+As invited attendees may delete a meeting from their personal calendar if they do not want to attend ("decline, and remove the event from my calendar"), they may also do so for specific occurrences of a recurring event series. From the organizer's and the other attendee's point of view, this leads to a new change exception event, where the attendee's participation status is set to declined. However, for the attendee who has deleted a specific occurrence of the series from his calendar view, this rather means the creation of a new delete exception in the event series. Similarly, an attendee can be removed or uninvited from a specific occurrence of an event series by the organizer, so that the attendee list no longer includes him. 
 
 According to the RFC 6638, in such a scenario the attendee effectively gets a different set of delete exception dates (``EXDATE`` property in iCal), while the organizer and the other attendees see this exception date as overridden instance (change exception): 
 
@@ -635,6 +635,16 @@ However, iCalendar standards require to consider different *roles* here - mainly
 In order to comply with the standards, the new calendaring stack introduces appropriate restrictions in case the user is not the organizer, or is not acting on behalf of him. Effectively, the permitted changes then boil down to modifications of the user's personal alarms and his own participation status. Additionally, the attendee is still allowed to remove himself from an event (beyond declining it). Those changes can also be performed on a single instance of a recurring event series (which may indirectly cause new change and/or delete exceptions for the series).
 
 When acting on behalf of another user in a *shared* calendar folder, always this shared folder's owner is considered when determining if the event is updated as organizer or attendee. In *public* folders, the original creator is stored as the organizer implicitly. All consecutive changes by other internal users can then be performed on behalf of this organizer, provided that the underlying permissions in the folder are sufficient. See also chapter Permissions below for further details. 
+
+## Delete as Attendee
+
+Previously, when an internal user attendee performed a delete operation on an event he's been invited to, he was removed from the attendee list in the storage. While this is the way the legacy calendar implementation handled it (and the way our users are used to), it is *de-facto* a not allowed attendee change, as the collection of attendees can only be altered by the event's organizer. As such, it would also be wrong to propagate such a change to an external organizer via iMIP, as it would rather be a COUNTER and no DECLINE. Same goes for possibly internal notification messages for an updated event that would be sent out superfluously.
+
+To work around this, the delete operation performed as attendee in a group-scheduled event needs to be treated pretty much as setting the attendee's participation status to "declined". Additionally, in case an attendee "delete-declines" by EXDATE'ing an instance, this is also handled by setting the participation status accordingly.
+
+Internally, whenever the request to delete an event from an attendee's point of view is processed, the attendee will effectively not be removed from the attendee list, but his participation status is set to "declined". From the iTIP perspective, this will also be indicated as CANCEL to the organizer. Whenever the event is re-scheduled (e.g. the start time is adjusted), the attendee's participation status is reset to "needs-action" again, even if the attendee "deleted" the event previously from his point of view.
+
+Therefore, on the storage layer, a new ``hidden`` column is introduced for attendees in group scheduled events, that indicates that such an event appears deleted from this attendee's point of view. The API remains unchanged, i.e. all existing delete operations will be adjusted to set this *hidden* flag instead of removing the attendee. To aid synchronization, we will still insert a tombstone record for the attendee whenever the "hidden" flag is set, so that such an event is also indicated with status 404 on sync-collection responses in CalDAV.
 
 ## HTTP API
 

@@ -47,46 +47,59 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client;
+package com.openexchange.admin.plugin.hosting.services;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
+ * Registry for all found {@link I18nService} instances.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
+public class I18nServices {
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static final I18nServices SINGLETON = new I18nServices();
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
-
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
-
-    /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
-     */
-    private DoveAdmClientExceptionMessages() {
+    private I18nServices() {
         super();
     }
 
+    public void addService(final I18nService i18n) {
+        if (null != services.put(i18n.getLocale(), i18n)) {
+            LOG.warn("Another i18n translation service found for {}", i18n.getLocale());
+        }
+    }
+
+    public void removeService(final I18nService i18n) {
+        if (null == services.remove(i18n.getLocale())) {
+            LOG.warn("Unknown i18n translation service shut down for {}", i18n.getLocale());
+        }
+    }
+
+    public static I18nServices getInstance() {
+        return SINGLETON;
+    }
+
+    public String translate(final Locale locale, final String toTranslate) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService service = services.get(loc);
+        if (null == service) {
+            if (!"en".equalsIgnoreCase(loc.getLanguage())) {
+                LOG.warn("No i18n service for locale {}.", loc);
+            }
+            return toTranslate;
+        }
+        if (!service.hasKey(toTranslate)) {
+            LOG.debug("I18n service for locale {} has no translation for \"{}\".", loc, toTranslate);
+            return toTranslate;
+        }
+        return service.getLocalized(toTranslate);
+    }
 }

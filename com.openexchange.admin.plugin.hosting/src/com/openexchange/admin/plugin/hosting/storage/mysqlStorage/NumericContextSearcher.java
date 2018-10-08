@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,46 +47,27 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client;
+package com.openexchange.admin.plugin.hosting.storage.mysqlStorage;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.admin.tools.AdminCacheExtended;
+
 
 /**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
+ * {@link NumericContextSearcher}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
-
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
-
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
-
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
-
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
+public class NumericContextSearcher extends ContextSearcher {
 
     /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
+     * Initializes a new {@link NumericContextSearcher}.
+     *
+     * @param cache The cache reference used to acquire/release a connection
+     * @param contextId The context identifier to look-for
      */
-    private DoveAdmClientExceptionMessages() {
-        super();
+    public NumericContextSearcher(AdminCacheExtended cache, int contextId) {
+        super(cache, "SELECT cid FROM context WHERE cid = " + contextId, null);
     }
 
 }

@@ -47,46 +47,18 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client;
+package com.openexchange.admin.plugin.hosting.storage.sqlStorage;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
 
 /**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
+ * This class implements the global storage interface and creates a layer
+ * between the abstract storage definition and a storage in a SQL accessible
+ * database
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author d7
+ *
  */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
-
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
-
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
-
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
-
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
-
-    /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
-     */
-    private DoveAdmClientExceptionMessages() {
-        super();
-    }
+public abstract class OXContextSQLStorage extends OXContextStorageInterface {
 
 }

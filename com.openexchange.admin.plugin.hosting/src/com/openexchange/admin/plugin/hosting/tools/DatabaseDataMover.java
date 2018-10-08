@@ -47,46 +47,50 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client;
 
-import com.openexchange.i18n.LocalizableStrings;
+package com.openexchange.admin.plugin.hosting.tools;
 
-/**
- * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
+import java.util.concurrent.Callable;
+import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
+public class DatabaseDataMover implements Callable<Void> {
 
-    // A DoveAdm error occurred: %1$s
-    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatabaseDataMover.class);
 
-    // Invalid DoveAdm URL: %1$s
-    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
+    private Context ctx = null;
 
-    // The DoveAdm resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
+    private Database db = null;
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Authentication failed: %1$s
-    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
-
-    // Doveadm HTTP API communication error: 404 Not Found
-    public static final String NOT_FOUND_SIMPLE_MSG = "Doveadm HTTP API communication error: 404 Not Found";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
+    private MaintenanceReason reason_id = null;
 
     /**
-     * Initializes a new {@link DoveAdmClientExceptionMessages}.
+     *
      */
-    private DoveAdmClientExceptionMessages() {
-        super();
+    public DatabaseDataMover(final Context ctx, final Database db, final MaintenanceReason reason) {
+        this.ctx = ctx;
+        this.db = db;
+        this.reason_id = reason;
+    }
+
+    @Override
+    public Void call() throws StorageException {
+        try {
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.moveDatabaseContext(ctx, db, reason_id);
+        } catch (final StorageException e) {
+            log.error("", e);
+            // Because the client side only knows of the exceptions defined in the core we have
+            // to throw the trace as string
+            throw new StorageException(e.toString());
+        } catch (final RuntimeException e) {
+            log.error("", e);
+            throw e;
+        }
+        return null;
     }
 
 }
