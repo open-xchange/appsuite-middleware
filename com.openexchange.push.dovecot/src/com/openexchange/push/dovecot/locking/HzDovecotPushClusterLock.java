@@ -88,12 +88,12 @@ public class HzDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
     }
 
     private IMap<String, String> map(HazelcastInstance hzInstance) throws OXException {
-        String mapName = this.mapName;
-        if (null == mapName) {
+        String mapName_tmp = this.mapName;
+        if (null == mapName_tmp) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create("Missing map name");
         }
         try {
-            return hzInstance.getMap(mapName);
+            return hzInstance.getMap(mapName_tmp);
         } catch (HazelcastInstanceNotActiveException e) {
             handleNotActiveException(e);
             // Obviously Hazelcast is absent

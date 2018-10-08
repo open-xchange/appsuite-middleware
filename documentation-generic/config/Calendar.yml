@@ -240,7 +240,7 @@ properties:
       tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.skipExternalAttendeeURIChecks
       description: |
-         Controls whether checks of (external) attendee URIs are disabled or not. 
+         Controls whether checks of (external) attendee URIs are always disabled in or not.  
       defaultValue: false
       version: 7.10.0
       reloadable: true
@@ -406,7 +406,7 @@ properties:
     - key: com.openexchange.calendar.alarm.sms.enabled
       description: |
         Enables or disables sms alarms.
-      defaultValue: true
+      defaultValue: false
       version: 7.10.1
       reloadable: true
       configcascadeAware: true

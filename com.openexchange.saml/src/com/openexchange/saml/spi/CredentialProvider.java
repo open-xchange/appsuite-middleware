@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.spi;
 
+import java.util.List;
 import org.opensaml.xml.security.credential.Credential;
 
 
@@ -64,21 +65,21 @@ import org.opensaml.xml.security.credential.Credential;
 public interface CredentialProvider {
 
     /**
-     * Checks if this provider contains a credential to validate the signatures of digitally signed SAML objects that have been
+     * Checks if this provider contains a credential list to validate the signatures of digitally signed SAML objects that have been
      * received from the IDP.
      *
-     * @return <code>true</code> if {@link #getValidationCredential()} returns a valid credential
+     * @return <code>true</code> if {@link #getValidationCredentials()} returns a valid credential
      */
-    boolean hasValidationCredential();
+    boolean hasValidationCredentials();
 
     /**
-     * Gets the credential that can be used to validate the signatures of digitally signed SAML objects that have been
+     * Gets the credential list that can be used to validate the signatures of digitally signed SAML objects that have been
      * received from the IDP.
      *
-     * @return The credential or <code>null</code> if none is available
+     * @return The List of credentials or an empty list if none are available
      */
-    Credential getValidationCredential();
-
+    List<Credential> getValidationCredentials();
+    
     /**
      * Checks if this provider contains a credential to sign SAML objects that are to be sent to the IDP.
      *

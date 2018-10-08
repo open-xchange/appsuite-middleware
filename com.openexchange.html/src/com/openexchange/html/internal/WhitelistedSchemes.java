@@ -49,13 +49,13 @@
 
 package com.openexchange.html.internal;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 
@@ -120,13 +120,13 @@ public class WhitelistedSchemes {
      */
     private WhitelistedSchemes(Collection<String> schemes) {
         super();
-        whitelistedSchemes = Collections.unmodifiableList(new ArrayList<String>(schemes));
+        whitelistedSchemes = ImmutableList.copyOf(schemes);
     }
 
     /**
      * Gets the list of white-listed schemes.
      *
-     * @return The white-listed sschemes.
+     * @return The white-listed schemes.
      */
     public List<String> getSchemes() {
         return whitelistedSchemes;

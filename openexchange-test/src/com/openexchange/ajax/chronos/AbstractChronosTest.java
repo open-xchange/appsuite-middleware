@@ -141,7 +141,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             if (eventIds != null) {
                 DeleteBody body = new DeleteBody();
                 body.setEvents(new ArrayList<>(eventIds));
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
             }
             // Clean-up event manager
             eventManager.cleanUp();
@@ -333,7 +333,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     @SuppressWarnings({ "unchecked" })
     private ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }

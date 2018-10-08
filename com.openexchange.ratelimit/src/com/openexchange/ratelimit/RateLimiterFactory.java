@@ -50,6 +50,7 @@
 package com.openexchange.ratelimit;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link RateLimiterFactory} is a factory for {@link RateLimiter}.
@@ -57,18 +58,19 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
+@SingletonService
 public interface RateLimiterFactory {
 
     /**
-     * Creates a {@link RateLimiter} with the given {@link Rate} for the given user and context.
+     * Creates a {@link RateLimiter} with the specified {@link Rate} for the given user and context.
      *
      * @param id The identifier of the {@link RateLimiter}
      * @param rate The rate of the {@link RateLimiter}
-     * @param userId The user id
-     * @param ctxId The context id
-     * @return The {@link RateLimiter}
-     * @throws OXException
+     * @param userId The user identifier
+     * @param ctxId The context identifier
+     * @return The {@link RateLimiter} instance
+     * @throws OXException If such a rate limiter cannot be returned
      */
-    public RateLimiter createLimiter(String id, Rate rate, int userId, int ctxId) throws OXException;
+    RateLimiter createLimiter(String id, Rate rate, int userId, int ctxId) throws OXException;
 
 }

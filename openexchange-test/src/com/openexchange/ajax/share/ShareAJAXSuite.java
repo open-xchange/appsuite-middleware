@@ -70,6 +70,7 @@ import com.openexchange.ajax.share.bugs.Bug58051Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AddGuestUserToGroupTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
+import com.openexchange.ajax.share.tests.AnonymousGuestFoldersTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestTest;
 import com.openexchange.ajax.share.tests.ConvertToInternalPermissionTest;
@@ -156,6 +157,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug44962Test.class,
     Bug52843Test.class,
     Bug58051Test.class,
+    AnonymousGuestFoldersTest.class,
 
 })
 public class ShareAJAXSuite  {

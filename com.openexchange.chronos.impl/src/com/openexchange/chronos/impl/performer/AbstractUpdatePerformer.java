@@ -727,6 +727,12 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
+        if (PublicType.getInstance().equals(folder.getType())) {
+            /*
+             * event located in public folder, assume change as or on behalf of organizer
+             */
+            return;
+        }
         if (isGroupScheduled(originalEvent) && false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
             /*
              * not allowed attendee change in group scheduled resource, throw error if configured

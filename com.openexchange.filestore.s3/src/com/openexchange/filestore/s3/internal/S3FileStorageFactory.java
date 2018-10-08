@@ -465,6 +465,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
      */
     private static String extractFilestorePrefix(URI uri) throws IllegalArgumentException {
+        // Extract & prepare path to be used as prefix
         String path = uri.getPath();
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
@@ -472,12 +473,9 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        /*
-         * Remove underscore characters to be conform to bucket name & prefix restrictions
-         * http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html /
-         * http://docs.aws.amazon.com/AmazonS3/latest/dev/ListingKeysHierarchy.html
-         */
+
         if (path.endsWith("ctx_store")) {
+            // Expect context store identifier
             Matcher matcher = CTX_STORE_PATTERN.matcher(path);
             if (false == matcher.matches()) {
                 throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\" in URI: " + uri);
@@ -498,6 +496,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return sanitizePathForPrefix(path, uri);
     }
 
+    /**
+     * Strips all characters from specified prefix path, which are no allows according to
+     * <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html">this article</a>
+     *
+     * @param path The path to sanitize
+     * @param uri The file store URI containing the path
+     * @return The sanitized path ready to be used as prefix
+     */
     private static String sanitizePathForPrefix(String path, URI uri) {
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException("Path is empty in URI: " + uri);
@@ -506,20 +512,38 @@ public class S3FileStorageFactory implements FileStorageProvider {
         StringBuilder sb = null;
         for (int k = path.length(), i = 0; k-- > 0; i++) {
             char ch = path.charAt(i);
-            if ('_' == ch) {
-                // Underscore not allowed
-                if (null == sb) {
-                    sb = new StringBuilder(path.length());
-                    sb.append(path, 0, i);
-                }
-            } else {
+            if (Strings.isAsciiLetterOrDigit(ch) || isAllowedSpecial(ch)) {
                 // Append
                 if (null != sb) {
                     sb.append(ch);
                 }
+            } else {
+                // Not allowed in prefix
+                if (null == sb) {
+                    sb = new StringBuilder(path.length());
+                    if (i > 0) {
+                        sb.append(path, 0, i);
+                    }
+                }
             }
         }
         return null == sb ? path : sb.toString();
+    }
+
+    private static boolean isAllowedSpecial(char ch) {
+        switch (ch) {
+            case '!':
+            case '-':
+            case '_':
+            case '.':
+            case '*':
+            case '\'':
+            case '(':
+            case ')':
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**

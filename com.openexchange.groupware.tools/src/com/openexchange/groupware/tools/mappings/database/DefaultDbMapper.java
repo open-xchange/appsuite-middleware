@@ -304,7 +304,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
      * @return The passed string builder reference
      */
     private static StringBuilder appendAssignments(StringBuilder stringBuilder, DbMapping<?, ?> mapping) {
-        String[] labels = getColumnLabels(mapping);
+        String[] labels = getColumnLabels(mapping, null);
         stringBuilder.append(labels[0]).append("=?");
         for (int i = 1; i < labels.length; i++) {
             stringBuilder.append(',').append(labels[i]).append("=?");
@@ -322,16 +322,10 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
      * @return The passed string builder reference
      */
     private static StringBuilder appendColumnLabels(StringBuilder stringBuilder, DbMapping<?, ?> mapping, String columnLabelPrefix) {
-        String[] labels = getColumnLabels(mapping);
-        if (null != columnLabelPrefix) {
-            stringBuilder.append(columnLabelPrefix);
-        }
+        String[] labels = getColumnLabels(mapping, columnLabelPrefix);
         stringBuilder.append(labels[0]);
         for (int i = 1; i < labels.length; i++) {
             stringBuilder.append(',');
-            if (null != columnLabelPrefix) {
-                stringBuilder.append(columnLabelPrefix);
-            }
             stringBuilder.append(labels[i]);
         }
         return stringBuilder;
@@ -343,11 +337,11 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
      * @param mapping The mapping to get the labels for
      * @return The column labels
      */
-    private static String[] getColumnLabels(DbMapping<?, ?> mapping) {
+    private static String[] getColumnLabels(DbMapping<?, ?> mapping, String prefix) {
         if (DbMultiMapping.class.isInstance(mapping)) {
-            return ((DbMultiMapping<?, ?>) mapping).getColumnLabels();
+            return null == prefix ? ((DbMultiMapping<?, ?>) mapping).getColumnLabels() : ((DbMultiMapping<?, ?>) mapping).getColumnLabels(prefix);
         } else {
-            return new String[] { mapping.getColumnLabel() };
+            return new String[] { null == prefix ? mapping.getColumnLabel() : mapping.getColumnLabel(prefix) };
         }
     }
 

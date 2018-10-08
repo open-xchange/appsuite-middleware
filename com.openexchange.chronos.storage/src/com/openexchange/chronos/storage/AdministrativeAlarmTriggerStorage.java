@@ -67,7 +67,7 @@ import com.openexchange.java.util.Pair;
 public interface AdministrativeAlarmTriggerStorage {
 
     /**
-     * Retrieves a mapping of cic/account {@link Pair}s to a list of {@link AlarmTrigger}s which are either
+     * Retrieves a mapping of cid/account {@link Pair}s to a list of {@link AlarmTrigger}s which are either
      * not processed yet and have a trigger time before the given until value or are older than the given overdue time.
      *
      * @param con The connection to use

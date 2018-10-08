@@ -259,7 +259,7 @@ public class SAMLWebSSOProviderTest {
         String relayState = parseURIQuery(authnRequestURI).get("RelayState");
         Assert.assertNotNull(relayState);
         SimHttpServletRequest authnHTTPRequest = prepareHTTPRequest("GET", authnRequestURI);
-        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, testCredentials.getSPSigningCredential()));
+        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
         AuthnRequest authnRequest = parseAuthnRequest(authnHTTPRequest);
 
         /*
@@ -316,7 +316,7 @@ public class SAMLWebSSOProviderTest {
         String relayState = parseURIQuery(authnRequestURI).get("RelayState");
         Assert.assertNotNull(relayState);
         SimHttpServletRequest authnHTTPRequest = prepareHTTPRequest("GET", authnRequestURI);
-        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, testCredentials.getSPSigningCredential()));
+        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
         AuthnRequest authnRequest = parseAuthnRequest(authnHTTPRequest);
 
         /*
@@ -432,7 +432,7 @@ public class SAMLWebSSOProviderTest {
         String relayState = parseURIQuery(logoutRequestURI).get("RelayState");
         Assert.assertNotNull(relayState);
         SimHttpServletRequest idpHTTPLogoutRequest = prepareHTTPRequest("GET", logoutRequestURI);
-        Assert.assertNull(SignatureHelper.validateURISignature(idpHTTPLogoutRequest, testCredentials.getSPSigningCredential()));
+        Assert.assertNull(SignatureHelper.validateURISignature(idpHTTPLogoutRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
         LogoutRequest logoutRequest = parseLogoutRequest(idpHTTPLogoutRequest);
         Assert.assertEquals(marshalledNameID, openSAML.marshall(logoutRequest.getNameID()));
         Assert.assertEquals(sessionIndex, logoutRequest.getSessionIndexes().get(0).getSessionIndex());
@@ -501,7 +501,7 @@ public class SAMLWebSSOProviderTest {
         String relayState = parseURIQuery(logoutRequestURI).get("RelayState");
         Assert.assertNotNull(relayState);
         SimHttpServletRequest idpHTTPLogoutRequest = prepareHTTPRequest("GET", logoutRequestURI);
-        Assert.assertNull(SignatureHelper.validateURISignature(idpHTTPLogoutRequest, testCredentials.getSPSigningCredential()));
+        Assert.assertNull(SignatureHelper.validateURISignature(idpHTTPLogoutRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
         LogoutRequest logoutRequest = parseLogoutRequest(idpHTTPLogoutRequest);
         Assert.assertEquals(marshalledNameID, openSAML.marshall(logoutRequest.getNameID()));
         Assert.assertEquals(sessionIndex, logoutRequest.getSessionIndexes().get(0).getSessionIndex());
@@ -606,7 +606,7 @@ public class SAMLWebSSOProviderTest {
         Map<String, String> params = parseURIQuery(responseRedirectURI);
         Assert.assertEquals(relayState, params.get("RelayState"));
         SimHttpServletRequest logoutResponseHTTPRequest = prepareHTTPRequest("GET", responseRedirectURI);
-        Assert.assertNull(SignatureHelper.validateURISignature(logoutResponseHTTPRequest, testCredentials.getSPSigningCredential()));
+        Assert.assertNull(SignatureHelper.validateURISignature(logoutResponseHTTPRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
         LogoutResponse logoutResponse = parseLogoutResponse(logoutResponseHTTPRequest);
         Assert.assertEquals(logoutRequest.getID(), logoutResponse.getInResponseTo());
         Status status = logoutResponse.getStatus();

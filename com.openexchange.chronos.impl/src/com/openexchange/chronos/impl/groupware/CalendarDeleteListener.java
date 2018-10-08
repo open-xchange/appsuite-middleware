@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.groupware;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,7 +152,7 @@ public final class CalendarDeleteListener implements DeleteListener {
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, userId, null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, userId, null != destinationUserId && 0 < i(destinationUserId) ? i(destinationUserId) : context.getMailadmin());
         /*
          * Get all events the user attends & distinguish between those that can be deleted completely, and those that need to be updated
          */
@@ -177,10 +178,17 @@ public final class CalendarDeleteListener implements DeleteListener {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
             .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
             .addSearchTerm(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
-            .addSearchTerm(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)))
             .addSearchTerm(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, '*' + ResourceId.forUser(context.getContextId(), userId) + '*'))
         ;
         updater.replaceAttendeeIn(updater.searchEvents(searchTerm));
+        try {
+            // Legacy storage doesen't know a calendar user, so make an independent call
+            updater.replaceAttendeeIn(updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId))));
+        } catch (IllegalArgumentException e) {
+            if(false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
+                throw e;
+            }
+        }
         /*
          * Delete account
          */

@@ -107,6 +107,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
 import com.openexchange.chronos.impl.session.DefaultEntityResolver;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -339,6 +340,20 @@ public class Utils {
      */
     public static boolean isCheckConflicts(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
+    }
+    
+    /**
+     * Gets a value indicating whether the checks of (external) attendee URIs are disabled or not, considering both the calendar
+     * parameters and general configuration.
+     *
+     * @param session The calendar session to evaluate
+     * @return <code>true</code> if the URI checks are disabled, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS
+     * @see CalendarConfig#isSkipExternalAttendeeURIChecks()
+     */
+    public static boolean isSkipExternalAttendeeURIChecks(CalendarSession session) {
+        return b(session.get(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.class, Boolean.FALSE)) ||
+             session.getConfig().isSkipExternalAttendeeURIChecks();
     }
 
     /**
@@ -1225,7 +1240,7 @@ public class Utils {
                 /*
                  * take over external organizer as-is
                  */
-                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
+                return isSkipExternalAttendeeURIChecks(session) ? organizer : Check.requireValidEMail(organizer);
             }
         } else {
             /*

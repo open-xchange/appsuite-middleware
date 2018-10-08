@@ -51,6 +51,8 @@ package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -163,6 +165,20 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
             return copy;
         }
         return event;
+    }
+
+    /**
+     * Prepares an list of events for export.
+     *
+     * @param events The events to export
+     * @return The prepared event as {@link List}
+     */
+    protected static List<Event> prepareForExport(List<Event> events) {
+        List<Event> copied = new LinkedList<>();
+        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+            copied.add(prepareForExport(iterator.next()));
+        }
+        return copied;
     }
 
 }

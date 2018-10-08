@@ -49,9 +49,14 @@
 
 package com.openexchange.caching.events.ms.internal;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
@@ -63,66 +68,117 @@ import com.openexchange.ms.Topic;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class MsCacheEventHandler implements CacheListener, MessageListener<PortableCacheEvent> {
+public final class MsCacheEventHandler implements CacheListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
 
-    private static final String TOPIC_NAME = "cacheEvents-3";
+    private static final String TOPIC_PREFIX = "cacheEvents-3-";
 
     private final PortableMsService messagingService;
     private final CacheEventService cacheEvents;
-    private final String senderId;
+    private final int topicCount;
+    private final List<MessageListener<PortableCacheEvent>> listeners;
 
     /**
      * Initializes a new {@link MsCacheEventHandler}.
      *
      * @throws OXException
      */
-    public MsCacheEventHandler(PortableMsService messagingService, CacheEventService cacheEvents) throws OXException {
+    public MsCacheEventHandler(PortableMsService messagingService, CacheEventService cacheEvents, ConfigurationService configurationService) {
         super();
         this.messagingService = messagingService;
         this.cacheEvents = cacheEvents;
+        int defaultTopicCount = 5;
+        int topicCount = configurationService.getIntProperty("com.openexchange.caching.events.ms.topicCount", defaultTopicCount);
+        if (topicCount <= 0) {
+            topicCount = defaultTopicCount;
+        }
+        this.topicCount = topicCount;
         cacheEvents.addListener(this);
-        Topic<PortableCacheEvent> topic = getTopic();
-        this.senderId = topic.getSenderId();
-        topic.addMessageListener(this);
+
+        listeners = new ArrayList<>(topicCount);
+
+        int i = 0;
+        do {
+            Topic<PortableCacheEvent> topic = getTopic(i++);
+            MessageListener<PortableCacheEvent> listener = new CacheEventMessageListener(cacheEvents);
+            topic.addMessageListener(listener);
+            listeners.add(listener);
+        } while (i < topicCount);
     }
 
     public void stop() {
         cacheEvents.removeListener(this);
-        try {
-            getTopic().removeMessageListener(this);
-        } catch (OXException e) {
-            LOG.warn("Error removing message listener", e);
-        }
+        int i = 0;
+        do {
+            try {
+                getTopic(i).removeMessageListener(listeners.get(i));
+                listeners.remove(i);
+                i++;
+            } catch (RuntimeException e) {
+                LOG.warn("Error removing message listener " + i++, e);
+            }
+        } while (i < topicCount);
     }
 
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (false == fromRemote) {
-            LOG.debug("Re-publishing locally received cache event to remote: {} [{}]", cacheEvent, senderId);
             try {
-                getTopic().publish(PortableCacheEvent.wrap(cacheEvent));
-            } catch (OXException e) {
+                int contextId = getContextId(cacheEvent);
+                Topic<PortableCacheEvent> topic = getTopic(contextId);
+                LOG.debug("Re-publishing locally received cache event to remote: {} [{}]", cacheEvent, topic.getSenderId());
+                topic.publish(PortableCacheEvent.wrap(cacheEvent));
+            } catch (RuntimeException e) {
                 LOG.warn("Error publishing cache event", e);
             }
         }
     }
 
-    private Topic<PortableCacheEvent> getTopic() throws OXException {
-        return messagingService.getTopic(TOPIC_NAME);
-    }
-
-    @Override
-    public void onMessage(Message<PortableCacheEvent> message) {
-        if (null != message && message.isRemote()) {
-            PortableCacheEvent cacheEvent = message.getMessageObject();
-            if (null != cacheEvent) {
-                LOG.debug("Re-publishing remotely received cache event locally: {} [{}]", message.getMessageObject(), message.getSenderId());
-                cacheEvents.notify(this, PortableCacheEvent.unwrap(cacheEvent), true);
-            } else {
-                LOG.warn("Discarding empty cache event message.");
+    private int getContextId(CacheEvent event) {
+        int contextId = 0;
+        if (null != event && null != event.getKeys()) {
+            for (Serializable key : event.getKeys()) {
+                if (CacheKey.class.isInstance(key)) {
+                    CacheKey cacheKey = (CacheKey) key;
+                    contextId = cacheKey.getContextId();
+                    if (contextId > 0) {
+                        break;
+                    }
+                }
             }
         }
+        return contextId;
     }
+
+    private Topic<PortableCacheEvent> getTopic(int contextId) {
+        return messagingService.getTopic(TOPIC_PREFIX + (contextId % topicCount));
+    }
+
+    private static class CacheEventMessageListener implements MessageListener<PortableCacheEvent> {
+
+        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventMessageListener.class);
+
+        private final CacheEventService cacheEvents;
+
+        public CacheEventMessageListener(CacheEventService cacheEvents) {
+            super();
+            this.cacheEvents = cacheEvents;
+        }
+
+        @Override
+        public void onMessage(Message<PortableCacheEvent> message) {
+            if (null != message && message.isRemote()) {
+                PortableCacheEvent cacheEvent = message.getMessageObject();
+                if (null != cacheEvent) {
+                    LOG.debug("Re-publishing remotely received cache event locally: {} [{}]", message.getMessageObject(), message.getSenderId());
+                    cacheEvents.notify(this, PortableCacheEvent.unwrap(cacheEvent), true);
+                } else {
+                    LOG.warn("Discarding empty cache event message.");
+                }
+            }
+        }
+
+    }
+
 }

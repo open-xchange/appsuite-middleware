@@ -52,6 +52,7 @@ package com.openexchange.ratelimit.rdb.osgi;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -59,6 +60,7 @@ import com.openexchange.ratelimit.RateLimiterFactory;
 import com.openexchange.ratelimit.rdb.impl.CreateTableUpdateTask;
 import com.openexchange.ratelimit.rdb.impl.RateLimiterFactoryImpl;
 import com.openexchange.ratelimit.rdb.impl.RatelimitCreateTableService;
+import com.openexchange.ratelimit.rdb.impl.RatelimitDeleteListener;
 
 /**
  * {@link RateLimitActivator}
@@ -79,6 +81,7 @@ public class RateLimitActivator extends HousekeepingActivator{
         registerService(CreateTableService.class, ratelimitCreateTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateTableUpdateTask(ratelimitCreateTableService)));
         registerService(RateLimiterFactory.class, new RateLimiterFactoryImpl(this));
+        registerService(DeleteListener.class, new RatelimitDeleteListener());
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.spi;
 
+import java.util.List;
 import org.opensaml.xml.security.credential.Credential;
 
 
@@ -60,7 +61,7 @@ import org.opensaml.xml.security.credential.Credential;
  */
 public abstract class AbstractCredentialProvider implements CredentialProvider {
 
-    private final Credential idpCertificateCredential;
+    private final List<Credential> idpCertificateCredential;
 
     private final Credential signingCredential;
 
@@ -70,24 +71,24 @@ public abstract class AbstractCredentialProvider implements CredentialProvider {
     /**
      * Initializes a new {@link KeyStoreCredentialProvider}.
      *
-     * @param idpPublicKeyCredential The credential containing the IDPs public key used for validating signatures or <code>null</code>
+     * @param idpPublicKeyCredentials The credential list containing the IDPs public keys used for validating signatures or <code>null</code>
      * @param signingPrivateKeyCredential The credential containing the SPs private key used for signing requests or <code>null</code>
      * @param decryptionPrivateKeyCredential The credential containing the private key used to decrypt encrypted data or encryption keys or <code>null</code>
      */
-    protected AbstractCredentialProvider(Credential idpPublicKeyCredential, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
+    protected AbstractCredentialProvider(List<Credential> idpPublicKeyCredentials, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
         super();
-        this.idpCertificateCredential = idpPublicKeyCredential;
+        this.idpCertificateCredential = idpPublicKeyCredentials;
         this.signingCredential = signingPrivateKeyCredential;
         this.decryptionCredential = decryptionPrivateKeyCredential;
     }
 
     @Override
-    public boolean hasValidationCredential() {
+    public boolean hasValidationCredentials() {
         return idpCertificateCredential != null;
     }
 
     @Override
-    public Credential getValidationCredential() {
+    public List<Credential> getValidationCredentials() {
         return idpCertificateCredential;
     }
 
@@ -110,5 +111,4 @@ public abstract class AbstractCredentialProvider implements CredentialProvider {
     public Credential getDecryptionCredential() {
         return decryptionCredential;
     }
-
 }

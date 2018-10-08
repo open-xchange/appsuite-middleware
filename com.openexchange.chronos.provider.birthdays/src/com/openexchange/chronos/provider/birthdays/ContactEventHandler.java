@@ -238,6 +238,7 @@ public class ContactEventHandler implements EventHandler {
         switch (type) {
             case creation:
                 creations = Collections.singletonList(new CreateResultImpl(updated));
+                break;
             case deletion:
                 deletions = Collections.singletonList(new DeleteResultImpl(new Date().getTime(), original));
                 break;

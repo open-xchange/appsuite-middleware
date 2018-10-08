@@ -79,7 +79,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     }
 
     @Override
-    public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+    public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) {
         List<Contact> mergedContacts = query.getMergedContacts();
         List<Contact> allContacts = new ArrayList<Contact>(mergedContacts.size() + 1);
         allContacts.add(query.getContact());

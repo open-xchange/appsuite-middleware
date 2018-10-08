@@ -131,6 +131,13 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
+     * Signals that the checks of (external) attendee URIs should be disabled when storing event data.
+     */
+    static final String PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS = "skipExternalAttendeeURIChecks";
+
+    /**
+     * {@link Boolean}
+     * <p/>
      * Specifies that attendees should be notified about the changes when saving a meeting or not.
      */
     static final String PARAMETER_NOTIFICATION = "notification";

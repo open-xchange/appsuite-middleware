@@ -127,7 +127,7 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
         MWHealthCheckResult result = null;
         if (null == service) {
             MWHealthCheckService.LOG.error("Health Status: DOWN (MWHealthCheckService is unavailable)");
-            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
         try {

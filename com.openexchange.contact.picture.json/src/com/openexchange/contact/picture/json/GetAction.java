@@ -49,8 +49,14 @@
 
 package com.openexchange.contact.picture.json;
 
+import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.MAIL;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.USER;
 import java.util.Collections;
 import java.util.Date;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -77,16 +83,6 @@ import com.openexchange.tools.session.ServerSession;
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
 public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
-    private static final String MAIL_PARAM = "mail";
-
-    private static final String USER_PARAM = "userId";
-
-    private static final String CONTACT_PARAM = "contactId";
-
-    private static final String CONTACT_FOLDER_PARAM = "folderId";
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
     final ServiceLookup services;
 
     /**
@@ -102,6 +98,14 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, getData(requestData));
+        IFileHolder fileHolder = picture.getFileHolder();
+        if (null == fileHolder) {
+            // 404 - Not Found
+            AJAXRequestResult result = new AJAXRequestResult();
+            result.setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND);
+            return result;
+        }
+
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         result.setHeader("Last-Modified", Tools.formatHeaderDate(picture.getLastModified()));
@@ -112,13 +116,13 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         if (null == requestData) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-        Integer contactId = requestData.getParameter(CONTACT_PARAM, Integer.class, true);
-        Integer folderId = requestData.getParameter(CONTACT_FOLDER_PARAM, Integer.class, true);
+        Integer contactId = requestData.getParameter(CONTACT.getParameter(), Integer.class, true);
+        Integer folderId = requestData.getParameter(CONTACT_FOLDER.getParameter(), Integer.class, true);
         if (folderId == null && contactId != null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(CONTACT_FOLDER_PARAM);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(CONTACT_FOLDER.getParameter());
         }
-        String email = requestData.getParameter(MAIL_PARAM);
-        Integer userId = requestData.getParameter(USER_PARAM, Integer.class, true);
+        String email = requestData.getParameter(MAIL.getParameter());
+        Integer userId = requestData.getParameter(USER.getParameter(), Integer.class, true);
 
         return new PictureSearchData(userId, folderId, contactId, email == null ? null : Collections.singleton(email));
     }
@@ -136,7 +140,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
     }
 
     @Override
-    public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
+    public void setETag(String eTag, long expires, AJAXRequestResult result) {
         result.setExpires(expires);
         if (eTag != null) {
             result.setHeader("ETag", eTag);

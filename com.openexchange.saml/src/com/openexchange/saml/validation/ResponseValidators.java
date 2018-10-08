@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.validation;
 
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
@@ -77,17 +78,17 @@ public class ResponseValidators {
      */
     public static final class ResponseSignatureValidator implements ResponseValidator {
 
-        private final Credential validationCredential;
+        private final List<Credential> validationCredential;
 
         private final boolean enforceSignature;
 
         /**
-         * @param validationCredential The credential containing a public key to verify the signature
+         * @param validationCredentials The credential list, containing all public keys to verify the signature
          * @param enforceSignature Whether validation should fail if response is not signed
          */
-        public ResponseSignatureValidator(Credential validationCredential, boolean enforceSignature) {
+        public ResponseSignatureValidator(List<Credential> validationCredentials, boolean enforceSignature) {
             super();
-            this.validationCredential = validationCredential;
+            this.validationCredential = validationCredentials;
             this.enforceSignature = enforceSignature;
         }
 
@@ -119,7 +120,7 @@ public class ResponseValidators {
      */
     public static final class ResponseURISignatureValidator implements ResponseValidator {
 
-        private final Credential validationCredential;
+        private final List<Credential> validationCredentials;
 
         private final HttpServletRequest httpRequest;
 
@@ -130,9 +131,9 @@ public class ResponseValidators {
          * @param httpRequest The servlet request containing the signed request URI
          * @param enforceSignature Whether validation should fail if response is not signed
          */
-        public ResponseURISignatureValidator(Credential validationCredential, HttpServletRequest httpRequest, boolean enforceSignature) {
+        public ResponseURISignatureValidator(List<Credential> validationCredentials, HttpServletRequest httpRequest, boolean enforceSignature) {
             super();
-            this.validationCredential = validationCredential;
+            this.validationCredentials = validationCredentials;
             this.httpRequest = httpRequest;
             this.enforceSignature = enforceSignature;
         }
@@ -153,7 +154,7 @@ public class ResponseValidators {
              */
             String signature = httpRequest.getParameter("Signature");
             if (signature != null) {
-                ValidationError error = SignatureHelper.validateURISignature(httpRequest, validationCredential);
+                ValidationError error = SignatureHelper.validateURISignature(httpRequest, validationCredentials);
                 if (error == null) {
                     LOG.debug("Response is signed via request URI and the signature is valid");
                 } else if (error.getThrowable() != null) {
@@ -323,12 +324,11 @@ public class ResponseValidators {
                     return null;
                 }
                 return new ValidationError(ValidationFailedReason.MISSING_ATTRIBUTE, "'InResponseTo' is missing in response");
+            }
+            if (inResponseTo.equals(expected)) {
+                LOG.debug("Response {} has valid 'InResponseTo' attribute: {}", response.getID(), inResponseTo);
             } else {
-                if (inResponseTo.equals(expected)) {
-                    LOG.debug("Response has valid 'InResponseTo' attribute: {}", response.getID(), inResponseTo);
-                } else {
-                    return new ValidationError(ValidationFailedReason.INVALID_ATTRIBUTE, "'InResponseTo' attribute of response contains unexpected value: " + inResponseTo);
-                }
+                return new ValidationError(ValidationFailedReason.INVALID_ATTRIBUTE, "'InResponseTo' attribute of response contains unexpected value: " + inResponseTo);
             }
 
             return null;

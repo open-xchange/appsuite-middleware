@@ -65,7 +65,6 @@ import com.openexchange.server.ServiceLookup;
 public class DovecotPushConfiguration {
 
     private DovecotPushClusterLock clusterLock;
-    private String endPoint;
 
     /**
      * Initializes a new {@link DovecotPushConfiguration}.
@@ -82,19 +81,13 @@ public class DovecotPushConfiguration {
     public void init(ServiceLookup services) {
         ConfigurationService configService = services.getService(ConfigurationService.class);
 
-        {
-            endPoint = configService.getProperty("com.openexchange.push.dovecot.endpoint.host", "").trim();
-        }
-
-        {
-            String tmp = configService.getProperty("com.openexchange.push.dovecot.clusterLock", "hz").trim();
-            if ("hz".equalsIgnoreCase(tmp)) {
-                clusterLock = new HzDovecotPushClusterLock(services);
-            } else if ("db".equalsIgnoreCase(tmp)) {
-                clusterLock = new DbDovecotPushClusterLock(services);
-            } else {
-                clusterLock = new NoOpDovecotPushClusterLock();
-            }
+        String tmp = configService.getProperty("com.openexchange.push.dovecot.clusterLock", "hz").trim();
+        if ("hz".equalsIgnoreCase(tmp)) {
+            clusterLock = new HzDovecotPushClusterLock(services);
+        } else if ("db".equalsIgnoreCase(tmp)) {
+            clusterLock = new DbDovecotPushClusterLock(services);
+        } else {
+            clusterLock = new NoOpDovecotPushClusterLock();
         }
     }
 
@@ -105,15 +98,6 @@ public class DovecotPushConfiguration {
      */
     public DovecotPushClusterLock getClusterLock() {
         return clusterLock;
-    }
-
-    /**
-     * Gets the HTTP end-point
-     *
-     * @return The HTTP end-point
-     */
-    public String getEndPoint() {
-        return endPoint;
     }
 
 }

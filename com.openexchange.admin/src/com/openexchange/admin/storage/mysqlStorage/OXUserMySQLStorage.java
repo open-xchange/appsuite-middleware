@@ -1353,7 +1353,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * 2) passed value for MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT<br>
      * 3) value for <strong>com.openexchange.mail.remoteContentPerDefault</strong> from config cascade<br>
      * 4) false as fallback<br>
-     * 
+     *
      * @param flags The flag bitmap
      * @param isLoadRemoteMailContentByDefault {@link Boolean} if remote HTML loading in mails is allowed per default
      * @param contextId The ID of the context, the user gets created in
@@ -1377,7 +1377,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     /**
      * Get a {@link Boolean} for the specified property name
-     * 
+     *
      * @param userId The ID of the user to be created
      * @param contextId The ID of the context, the user gets created in
      * @param propertyName The name of the property to get
@@ -2366,9 +2366,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     lock(contextId, con);
 
                     delete(ctx, users, destUser, con);
-                    for (final User user : users) {
-                        LOG.info("User {} deleted!", user.getId());
-                    }
 
                     con.commit();
                     rollback = false;
@@ -2895,7 +2892,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         translatedName = nb.advance().toString();
                     }
                 }
-                result.add(new Pair<Integer, String>(folderId, translatedName));
+                result.add(new Pair<>(folderId, translatedName));
             }
             return result;
         } finally {

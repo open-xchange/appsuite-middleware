@@ -61,7 +61,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.sortEvents;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
-import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.getUntil;
@@ -80,7 +80,6 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -94,6 +93,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -147,9 +147,8 @@ public class EventPostProcessor {
      * @return A self reference
      */
     public EventPostProcessor process(Collection<Event> events, CalendarFolder inFolder) throws OXException {
-        int calendarUserId = getCalendarUserId(inFolder);
         for (Event event : events) {
-            process(event, inFolder.getId(), calendarUserId);
+            doProcess(event, inFolder);
             checkResultSizeNotExceeded();
         }
         return this;
@@ -172,8 +171,7 @@ public class EventPostProcessor {
      * @return A self reference
      */
     public EventPostProcessor process(Event event, CalendarFolder inFolder) throws OXException {
-        int calendarUserId = getCalendarUserId(inFolder);
-        process(event, inFolder.getId(), calendarUserId);
+        doProcess(event, inFolder);
         checkResultSizeNotExceeded();
         return this;
     }
@@ -198,7 +196,7 @@ public class EventPostProcessor {
      */
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
         for (Event event : events) {
-            process(event, getFolderView(event, forUser), forUser);
+            doProcess(event, getFolder(session, getFolderView(event, forUser), false));
             checkResultSizeNotExceeded();
         }
         return this;
@@ -244,26 +242,27 @@ public class EventPostProcessor {
         return maximumTimestamp;
     }
 
-    private boolean process(Event event, String folderId, int calendarUserId) throws OXException {
+    private boolean doProcess(Event event, CalendarFolder folder) throws OXException {
         if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
             /*
              * excluded if classified as private for the session user
              */
             return false;
         }
-        Attendee attendee = find(event.getAttendees(), calendarUserId);
+        Attendee attendee = find(event.getAttendees(), folder.getCalendarUserId());
         if (null != attendee && attendee.isHidden()) {
             /*
              * excluded if marked as hidden for the calendar user
              */
             //TODO: public folder?
+            return false;
         }
         if (isSeriesMaster(event)) {
             knownRecurrenceData.put(event.getSeriesId(), new DefaultRecurrenceData(event));
         }
-        event.setFolderId(folderId);
+        event.setFolderId(folder.getId());
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
-            event = applyFlags(event, calendarUserId, session.getUserId());
+            event = applyFlags(event, folder);
         }
         maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);
@@ -284,7 +283,7 @@ public class EventPostProcessor {
              */
             if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
-                return events.add(applyExceptionDates(storage, event, calendarUserId));
+                return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
             }
             return events.add(event);
         }
@@ -297,8 +296,8 @@ public class EventPostProcessor {
         return events.add(event);
     }
 
-    private Event applyFlags(Event event, int calendarUser, int user) throws OXException {
-        EnumSet<EventFlag> flags = getFlags(event, calendarUser, session.getUserId());
+    private Event applyFlags(Event event, CalendarFolder folder) throws OXException {
+        EnumSet<EventFlag> flags = getFlags(event, folder.getCalendarUserId(), session.getUserId(), PublicType.getInstance().equals(folder.getType()));
         if (isSeriesException(event)) {
             RecurrenceData recurrenceData = optRecurrenceData(event);
             if (null != recurrenceData) {
@@ -348,9 +347,8 @@ public class EventPostProcessor {
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
             Event event = itrerator.next();
-            if (CalendarUtils.isInRange(event, from, until, timeZone)) {
+            if (isInRange(event, from, until, timeZone)) {
                 list.add(event);
-                checkResultSizeNotExceeded();
             }
         }
         return list;
