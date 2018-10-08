@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.limit.exceptions.FileLimitExceptionCodes;
 import com.openexchange.file.storage.limit.type.TypeLimitChecker;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TypeLimitCheckerRegistry}
@@ -80,12 +81,12 @@ public class TypeLimitCheckerRegistry {
         // prevent instantiation
     }
 
-    public synchronized void register(TypeLimitChecker... lTypeLimitCheckers) {
-        for (TypeLimitChecker typeLimitChecker : lTypeLimitCheckers) {
-            List<TypeLimitChecker> list = this.typeLimitCheckers.get(typeLimitChecker.getType().toLowerCase());
+    public synchronized void register(TypeLimitChecker... checkersToRegister) {
+        for (TypeLimitChecker typeLimitChecker : checkersToRegister) {
+            List<TypeLimitChecker> list = typeLimitCheckers.get(Strings.asciiLowerCase(typeLimitChecker.getType()));
             if (list == null) {
                 list = new ConcurrentList<TypeLimitChecker>();
-                typeLimitCheckers.put(typeLimitChecker.getType().toLowerCase(), list);
+                typeLimitCheckers.put(Strings.asciiLowerCase(typeLimitChecker.getType()), list);
             }
             list.add(typeLimitChecker);
         }
@@ -93,22 +94,24 @@ public class TypeLimitCheckerRegistry {
 
     public synchronized void unregister(TypeLimitChecker... checkersToUnregister) {
         for (TypeLimitChecker checkerToUnregister : checkersToUnregister) {
-            List<TypeLimitChecker> availableCheckersForType = this.typeLimitCheckers.get(checkerToUnregister.getType().toLowerCase());
+            List<TypeLimitChecker> availableCheckersForType = typeLimitCheckers.get(Strings.asciiLowerCase(checkerToUnregister.getType()));
 
-            for (Iterator<TypeLimitChecker> it = availableCheckersForType.iterator(); it.hasNext();) {
-                TypeLimitChecker checker = it.next();
-                if (checker.equals(checkerToUnregister)) {
-                    it.remove();
+            if (null != availableCheckersForType) {
+                for (Iterator<TypeLimitChecker> it = availableCheckersForType.iterator(); it.hasNext();) {
+                    TypeLimitChecker checker = it.next();
+                    if (checker.equals(checkerToUnregister)) {
+                        it.remove();
+                    }
                 }
-            }
-            if (availableCheckersForType.isEmpty()) {
-                this.typeLimitCheckers.remove(checkerToUnregister.getType().toLowerCase());
+                if (availableCheckersForType.isEmpty()) {
+                    typeLimitCheckers.remove(Strings.asciiLowerCase(checkerToUnregister.getType()));
+                }
             }
         }
     }
 
     public List<TypeLimitChecker> get(String type) throws OXException {
-        List<TypeLimitChecker> list = typeLimitCheckers.get(type.toLowerCase());
+        List<TypeLimitChecker> list = typeLimitCheckers.get(Strings.asciiLowerCase(type));
         if (list != null && !list.isEmpty()) {
             return list;
         }
