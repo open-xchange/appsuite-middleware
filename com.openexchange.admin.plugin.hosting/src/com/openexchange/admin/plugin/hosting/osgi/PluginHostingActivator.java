@@ -51,8 +51,6 @@ package com.openexchange.admin.plugin.hosting.osgi;
 
 import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.plugin.hosting.PluginStarter;
-import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
-import com.openexchange.admin.plugin.hosting.services.PluginInterfaces;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface;
 import com.openexchange.admin.plugin.hosting.storage.mysqlStorage.OXContextGroupMySQLStorage;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
@@ -60,6 +58,8 @@ import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
