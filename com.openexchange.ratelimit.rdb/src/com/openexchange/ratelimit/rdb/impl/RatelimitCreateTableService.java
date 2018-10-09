@@ -73,7 +73,7 @@ public class RatelimitCreateTableService extends AbstractCreateTableImpl {
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] {   "CREATE TABLE ratelimit (" +
+        return new String[] {   "CREATE TABLE " + TABLE_NAME + " (" +
                                     "cid INT4 UNSIGNED NOT NULL," +
                                     "userId INT4 UNSIGNED NOT NULL," +
                                     "id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +

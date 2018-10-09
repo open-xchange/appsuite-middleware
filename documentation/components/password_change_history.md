@@ -1,5 +1,5 @@
 ---
-Title: Password change history
+title: Password change history
 ---
 
 # Introduction
