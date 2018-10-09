@@ -49,13 +49,17 @@
 
 package com.openexchange.ajax.login.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.RateLimiterByLogin;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.config.ConfigurationService;
@@ -63,6 +67,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.format.CompositeLoginFormatter;
+import com.openexchange.login.listener.LoginListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -160,5 +165,16 @@ public class LoginActivator extends HousekeepingActivator {
         LoginPerformer.setLoginFormatter(new CompositeLoginFormatter(loginFormat, logoutFormat));
 
         com.openexchange.tools.servlet.http.Tools.setConfigurationService(configurationService);
+
+        // Login name rate limiter
+        boolean rateLimitByLogin = configurationService.getBoolProperty("com.openexchange.ajax.login.rateLimitByLogin.enabled", false);
+        if (rateLimitByLogin) {
+            int permits = configurationService.getIntProperty("com.openexchange.ajax.login.rateLimitByLogin.permits", 3);
+            long timeFrameInSeconds = configurationService.getIntProperty("com.openexchange.ajax.login.rateLimitByLogin.timeFrameInSeconds", 30);
+
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(999));
+            registerService(LoginListener.class, new RateLimiterByLogin(permits, timeFrameInSeconds), properties);
+        }
     }
 }

@@ -277,3 +277,40 @@ properties:
     file: login.properties
     packageName: open-xchange-core
     tags: ["Login"]
+  - key: com.openexchange.ajax.login.rateLimitByLogin.enabled
+    description: |
+      If set to "true" a rate limiter based on user names for login is enabled. The rate limiter uses the token bucket algorithm and tracks
+      failed login attempts.
+      
+      Before every login attempt, a check is performed if user name is already rate limited. In which case the login attempt is denied. On
+      every failed login attempt due to invalid credentials, the number of possible further attempts in the current time frame is decreased.
+    defaultValue: false
+    version: 7.10.1
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rateLimitByLogin.permits
+    description: |
+      Specified the number of available permits for the rate limiter based on user names for login.
+    defaultValue: 3
+    version: 7.10.1
+    reloadable: false
+    configcascadeAware: false
+    related: ["com.openexchange.ajax.login.rateLimitByLogin.enabled", "com.openexchange.ajax.login.rateLimitByLogin.timeFrameInSeconds"]
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rateLimitByLogin.timeFrameInSeconds
+    description: |
+      Specified the time frame in seconds for the rate limiter based on user names for login.
+    defaultValue: 30
+    version: 7.10.1
+    reloadable: false
+    configcascadeAware: false
+    related: ["com.openexchange.ajax.login.rateLimitByLogin.enabled", "com.openexchange.ajax.login.rateLimitByLogin.permits"]
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
