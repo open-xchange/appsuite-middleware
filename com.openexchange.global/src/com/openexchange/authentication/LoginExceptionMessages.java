@@ -115,6 +115,12 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Login denied
     public static final String LOGIN_DENIED_MSG = "Login denied.";
 
+    // Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
+    public static final String LOGIN_DENIED_WITH_MESSAGE_MSG = "%1$s";
+
+    // Used in case there were too many failed login attempts for an account within a certain timeframe.
+    public static final String TOO_MANY_LOGIN_ATTEMPTS_MSG = "Too many login attempts. Please try again later.";
+
     private LoginExceptionMessages() {
         super();
     }
