@@ -105,7 +105,7 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
 
     /**
      * Initializes a new {@link StreamedCalendarExportImpl}.
-     * 
+     *
      * @param iCalUtilities The {@link ICalUtilities}
      * @param parameters The {@link ICalParameters}
      * @param outputStream The {@link OutputStream}
@@ -196,7 +196,7 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
      * <a href="https://tools.ietf.org/html/rfc5545#section-3.4">RFC 5545, section 3.4</a>.
      */
     private String getStart() {
-        // Begin calendar 
+        // Begin calendar
         final StringBuilder sb = new StringBuilder();
         sb.append(BEGIN);
         sb.append(':');
@@ -236,7 +236,7 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
 
     /**
      * Get the method for exporting
-     * 
+     *
      * @param toMatch The method name or <code>null</code>
      * @return The {@link Method} or {@link Method#PUBLISH} as default
      */
@@ -283,7 +283,10 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
 
     protected boolean setTimeZone(Set<VTimeZone> timeZones, org.dmfs.rfc5545.DateTime dateTime) {
         if (null != dateTime && false == dateTime.isFloating() && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
-            return timeZones.add(getTimeZone(dateTime.getTimeZone().getID()));
+            VTimeZone timeZone = getTimeZone(dateTime.getTimeZone().getID());
+            if (null != timeZone) {
+                return timeZones.add(timeZone);
+            }
         }
         return false;
     }
@@ -291,7 +294,7 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
     protected VTimeZone getTimeZone(String timeZoneID) {
         TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
         net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timeZoneID);
-        return timeZone.getVTimeZone();
+        return null == timeZone ? null : timeZone.getVTimeZone();
     }
 
 }
