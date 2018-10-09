@@ -113,11 +113,6 @@ public class SharePasswordMech implements IPasswordMech {
     }
 
     @Override
-    public int getHashLength() {
-        return 64; // will not be used
-    }
-
-    @Override
     public boolean expose() {
         return false;
     }

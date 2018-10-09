@@ -102,11 +102,4 @@ public interface IPasswordMech {
      * @throws OXException
      */
     boolean check(String toCheck, String encoded, byte[] salt) throws OXException;
-
-    /**
-     * Character length of the resulting hash
-     * 
-     * @return int defining the length of the resulting password hash
-     */
-    int getHashLength();
 }

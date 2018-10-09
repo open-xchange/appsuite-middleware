@@ -64,7 +64,7 @@ public class BCryptMech extends ConfigAwarePasswordMech {
      * Initializes a new {@link BCryptMech}.
      */
     public BCryptMech() {
-        super("{BCRYPT}");
+        super("{BCRYPT}", 64);
     }
 
     @Override
@@ -79,11 +79,5 @@ public class BCryptMech extends ConfigAwarePasswordMech {
     @Override
     public boolean checkPassword(String candidate, String encoded, byte[] salt) {
         return BCrypt.checkpw(candidate, encoded);
-    }
-
-    @Override
-    public int getHashLength() {
-        // won't be used as salt is handled by BCRYPT internally
-        return 64;
     }
 }

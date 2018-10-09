@@ -71,7 +71,7 @@ public class SHAMech extends ConfigAwarePasswordMech {
      * @param crypt The {@link SHACrypt} to use
      */
     public SHAMech(SHACrypt crypt) {
-        super(crypt.getIdentifier());
+        super(crypt.getIdentifier(), getHashLength(crypt));
         this.crypt = crypt;
     }
 
@@ -102,16 +102,10 @@ public class SHAMech extends ConfigAwarePasswordMech {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * Returns not the full possible length as the following Base64 encoding will enhance the length
-     */
-    @Override
-    public int getHashLength() {
-        if (this.crypt == SHACrypt.SHA1) {
+    private static int getHashLength(SHACrypt crypt) {
+        if (crypt == SHACrypt.SHA1) {
             return 32;
-        } else if (this.crypt == SHACrypt.SHA256) {
+        } else if (crypt == SHACrypt.SHA256) {
             return 64;
         }
         return 128;

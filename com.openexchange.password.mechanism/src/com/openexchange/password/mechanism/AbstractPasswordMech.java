@@ -69,13 +69,26 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
 
     private final String mechIdentifier;
 
+    private SecureRandom instance;
+
+    private int hashSize;
+
     /**
      * Initializes a new {@link AbstractPasswordMech}.
      * 
      * @param mechIdentifier The identifier of the algorithm
+     * @hashSize hashSize The size of the resulting hash
+     * @throws OXException
      */
-    public AbstractPasswordMech(String mechIdentifier) {
+    public AbstractPasswordMech(String mechIdentifier, int hashSize) {
         this.mechIdentifier = mechIdentifier;
+        try {
+            this.instance = SecureRandom.getInstance("SHA1PRNG");
+            this.instance.setSeed(hashSize);
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("Error retrieving SecureRandom instance", e);
+        }
+        this.hashSize = hashSize;
     }
 
     @Override
@@ -116,15 +129,9 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
         return true;
     }
 
-    protected byte[] getSalt() throws OXException {
-        try {
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            byte[] salt = new byte[getHashLength()];
-            sr.nextBytes(salt);
-            return salt;
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Error retrieving SecureRandom instance", e);
-            throw PasswordMechExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+    protected byte[] getSalt() {
+        byte[] salt = new byte[this.hashSize];
+        instance.nextBytes(salt);
+        return salt;
     }
 }

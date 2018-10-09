@@ -65,8 +65,8 @@ public abstract class ConfigAwarePasswordMech extends AbstractPasswordMech {
     //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
     private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED = "com.openexchange.password.mechanism.salt.enabled";
 
-    public ConfigAwarePasswordMech(String mechIdentifier) {
-        super(mechIdentifier);
+    public ConfigAwarePasswordMech(String mechIdentifier, int hashSize) {
+        super(mechIdentifier, hashSize);
     }
 
     //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT

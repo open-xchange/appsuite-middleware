@@ -68,7 +68,7 @@ public class CryptMech extends ConfigAwarePasswordMech {
      * Initializes a new {@link CryptMech}.
      */
     public CryptMech() {
-        super("{CRYPT}");
+        super("{CRYPT}", 32);
     }
 
     @Override
@@ -94,10 +94,5 @@ public class CryptMech extends ConfigAwarePasswordMech {
             LOGGER.error("Error checking password according to CRYPT mechanism", e);
             throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
-    }
-
-    @Override
-    public int getHashLength() {
-        return 32;
     }
 }
