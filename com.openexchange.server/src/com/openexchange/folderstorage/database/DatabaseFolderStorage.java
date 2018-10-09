@@ -1045,7 +1045,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         if (PublicType.getInstance().equals(type) && folder.isDefault() == false) {
             folder.setParentID(getFirstNonSystemVisibleParent(folder, treeId, storageType, storageParameters, con).getID());
         }
-        folder.setSubfolderIDs(getAllNonSystemVisibleSubfolders(folder, treeId, storageType, storageParameters));
+        folder.setSubfolderIDs(getNonHiddenSubfolders(folder, treeId, storageType, storageParameters).stream().map(f -> f.getID()).toArray(String[]::new));
         folder.setCacheable(false);
     }
 
@@ -1058,6 +1058,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
      * @param storageType - The storage type to use
      * @param storageParameters - The storage parameters with needed user information
      * @param con - The connection to use for storage operations
+     * @return The first visible folder without system permissions
      * @throws OXException - If loading a folder fails
      */
     private DatabaseFolder getFirstNonSystemVisibleParent(final DatabaseFolder folder, final String treeId, final StorageType storageType, final StorageParameters storageParameters, final Connection con) throws OXException {
@@ -1077,29 +1078,46 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
      * @param treeId - The tree id, needed to load folders
      * @param storageType - The storage type to use
      * @param storageParameters - The storage parameters with needed user information
+     * @return Return a list of all folders that are visible to the user with non system permissions or an empty list
      * @throws OXException - If loading a folder fails
      */
-    private String[] getAllNonSystemVisibleSubfolders(final DatabaseFolder folder, final String treeId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final List<String> resultingSubfolders = new ArrayList<>();
-        List<Folder> subfolders = getFolders(treeId, Arrays.asList(folder.getSubfolderIDs()), storageType, storageParameters);
-        final List<String> visibleFolders = new ArrayList<>();
-        // while there are subfolders that are visible to the user, check their subfolders
-        while (subfolders.isEmpty() == false) {
-            for (final Folder subfolder : subfolders) {
-                if (((DatabaseFolder) subfolder).isHidden() == false) {
-                    resultingSubfolders.add(subfolder.getID());
-                } else if (Arrays.asList(subfolder.getPermissions()).stream().anyMatch(permission -> permission.getEntity() == storageParameters.getUserId() && permission.isVisible())) {
-                    visibleFolders.addAll(Arrays.asList(subfolder.getSubfolderIDs()));
+    private List<Folder> getNonHiddenSubfolders(Folder folder, String treeId, StorageType storageType, StorageParameters storageParameters) throws OXException {
+        /*
+         * gather all subfolder identifiers
+         */
+        String[] subfolderIDs = folder.getSubfolderIDs();
+        if (null == subfolderIDs) {
+            SortableId[] sortableIds = getSubfolders(treeId, folder.getID(), storageParameters);
+            subfolderIDs = new String[sortableIds.length];
+            for (int i = 0; i < sortableIds.length; i++) {
+                subfolderIDs[i] = sortableIds[i].getId();                    
+            }                
+        } 
+        if (0 == subfolderIDs.length) {
+            return Collections.emptyList();
+        }        
+        /*
+         * collect all non-hidden subfolders recursively
+         */
+        List<Folder> resultingSubfolders = new ArrayList<>();
+        for (Folder subfolder : getFolders(treeId, Arrays.asList(folder.getSubfolderIDs()), storageType, storageParameters)) {
+            if (DatabaseFolder.class.isInstance(subfolder) && ((DatabaseFolder) subfolder).isHidden()) {
+                /*
+                 * this subfolder is hidden, recursively collect remaining non-hidden folders from subtree  
+                 */   
+                if (((DatabaseFolder) subfolder).isVisibleThroughSystemPermissions()) {
+                    resultingSubfolders.addAll(getNonHiddenSubfolders(subfolder, treeId, storageType, storageParameters));
                 }
+            } else {
+                /*
+                 * add non-hidden subfolder
+                 */
+                resultingSubfolders.add(subfolder);
             }
-            // Load all subfolders of the still visible subfolders with system permission set. Those should contain folders with non
-            // system permissions for this user
-            subfolders = getFolders(treeId, visibleFolders, storageType, storageParameters);
-            visibleFolders.clear();
         }
-        return resultingSubfolders.toArray(new String[resultingSubfolders.size()]);
+        return resultingSubfolders;
     }
-    
+
     @Override
     public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         /*

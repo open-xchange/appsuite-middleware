@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.limit.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.limit.File;
@@ -59,7 +60,7 @@ import com.openexchange.file.storage.limit.type.impl.TypeLimitCheckerRegistry;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link DefaultFileLimitService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -69,18 +70,30 @@ public class DefaultFileLimitService implements FileLimitService {
 
     private final TypeLimitCheckerRegistry typeLimitCheckerRegistry;
 
+    /**
+     * Initializes a new {@link DefaultFileLimitService}.
+     *
+     * @param registry The registry to use
+     */
     public DefaultFileLimitService(TypeLimitCheckerRegistry registry) {
         this.typeLimitCheckerRegistry = registry;
     }
 
     @Override
     public List<OXException> checkLimits(Session session, String folderId, List<File> files, String type) throws OXException {
-        List<OXException> exceptions = new ArrayList<>();
+        List<OXException> exceptions = null;
 
         List<TypeLimitChecker> typeLimitCheckers = this.typeLimitCheckerRegistry.get(type);
         for (TypeLimitChecker typeLimitChecker : typeLimitCheckers) {
-            exceptions.addAll(typeLimitChecker.check(session, folderId, files));
+            List<OXException> checked = typeLimitChecker.check(session, folderId, files);
+            if (null != checked && !checked.isEmpty()) {
+                if (null == exceptions) {
+                    exceptions = new ArrayList<>(checked);
+                } else {
+                    exceptions.addAll(exceptions);
+                }
+            }
         }
-        return exceptions;
+        return null == exceptions ? Collections.emptyList() : exceptions;
     }
 }

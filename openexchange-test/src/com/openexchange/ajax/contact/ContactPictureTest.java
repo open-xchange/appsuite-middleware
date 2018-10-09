@@ -90,8 +90,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     @Test
     public void testUserFallbackPicture() throws Exception {
-        byte[] contactPicture = getContactPicture(apiClient.getUserId().toString(), null, null, null);
-        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+        assertThatPictureIsMissing(apiClient.getUserId().toString(), null, null);
     }
 
     @Test
@@ -99,8 +98,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         removeImage();
         final String contactId = createContact(contactObj);
 
-        byte[] contactPicture = getContactPicture(null, contactId, null);
-        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+        assertThatPictureIsMissing(null, contactId, null);
     }
 
     @Test
@@ -115,8 +113,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     public void testGetFallbackPictureByWrongMail() throws Exception {
         createContact(contactObj);
 
-        byte[] contactPicture = getContactPicture(null, null, "foobar@asd.com");
-        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+        assertThatPictureIsMissing(null, null, "foobar@asd.com");
     }
 
     @Test
@@ -209,8 +206,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         removeImage();
         updateContact(contactObj, contactFolderId);
 
-        contactPicture = getContactPicture(null, contactId, null);
-        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+        assertThatPictureIsMissing(null, contactId, null);
     }
 
     @Test
@@ -220,10 +216,8 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         assertImage(contactPicture);
 
         deleteContact(contactId);
-
-        // Even if the contact is not found the FALLBACK_IMAGE should be returned
-        contactPicture = getContactPicture(null, contactId, null);
-        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+        
+        assertThatPictureIsMissing(null, contactId, null);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -234,6 +228,22 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     private byte[] getContactPicture(String userId, String contactId, String mail, String contactFolderId) throws ApiException {
         return contactsApi.getContactPicture(getSessionId(), userId, contactId, contactFolderId, mail, null, null, null, null, null, null, null, null, null);
+    }
+    
+    private void assertThatPictureIsMissing(String userId, String contactId, String mail) throws ApiException {
+        assertThatPictureIsMissing(userId, contactId, mail, contactFolderId);
+    }
+    
+    private void assertThatPictureIsMissing(String userId, String contactId, String mail, String contactFolderId) throws ApiException, IllegalStateException {
+        try {
+            getContactPicture(userId, contactId, mail, contactFolderId);
+        } catch (ApiException e) {
+            if (e.getCode() == 404) {
+                return;
+            }
+            throw e;
+        }
+        throw new IllegalStateException("Client should have received a 404");
     }
 
     private void setImage(final ContactData contactObj) {

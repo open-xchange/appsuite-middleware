@@ -88,7 +88,12 @@ public final class MsCacheEventHandler implements CacheListener {
         super();
         this.messagingService = messagingService;
         this.cacheEvents = cacheEvents;
-        this.topicCount = configurationService.getIntProperty("com.openexchange.caching.events.ms.topicCount", 5);
+        int defaultTopicCount = 5;
+        int topicCount = configurationService.getIntProperty("com.openexchange.caching.events.ms.topicCount", defaultTopicCount);
+        if (topicCount <= 0) {
+            topicCount = defaultTopicCount;
+        }
+        this.topicCount = topicCount;
         cacheEvents.addListener(this);
 
         listeners = new ArrayList<>(topicCount);

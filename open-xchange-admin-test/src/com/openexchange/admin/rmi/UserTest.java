@@ -1004,7 +1004,6 @@ public class UserTest extends AbstractRMITest {
         notallowed.add("setMail_folder_trash_name");
         notallowed.add("setMail_folder_confirmed_ham_name");
         notallowed.add("setMail_folder_confirmed_spam_name");
-        notallowed.add("setLoadRemoteMailContentByDefault");
         // #                                                                     #
 
         notallowed.add("setId");// we cannot change the id of a user, is a mandatory field for a change
@@ -1557,7 +1556,6 @@ public class UserTest extends AbstractRMITest {
         notallowed.add("setFilestore_name");
         notallowed.add("setFilestoreOwner");
         notallowed.add("setPrimaryAccountName");
-        notallowed.add("setLoadRemoteMailContentByDefault");
         return notallowed;
     }
 
