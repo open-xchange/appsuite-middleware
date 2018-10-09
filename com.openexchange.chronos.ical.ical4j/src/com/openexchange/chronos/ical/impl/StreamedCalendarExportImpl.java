@@ -64,7 +64,6 @@ import com.google.common.collect.ImmutableList;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.StreamedCalendarExport;
@@ -75,8 +74,6 @@ import com.openexchange.java.Strings;
 import net.fortuna.ical4j.data.FoldingWriter;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.property.Method;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Version;
@@ -271,30 +268,4 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
     protected void write(String str) throws IOException {
         writer.write(str);
     }
-
-    protected boolean setTimeZones(Event event, Set<VTimeZone> timeZones) {
-        boolean added = false;
-        if (false == CalendarUtils.isFloating(event)) {
-            added |= setTimeZone(timeZones, event.getStartDate());
-            added |= setTimeZone(timeZones, event.getEndDate());
-        }
-        return added;
-    }
-
-    protected boolean setTimeZone(Set<VTimeZone> timeZones, org.dmfs.rfc5545.DateTime dateTime) {
-        if (null != dateTime && false == dateTime.isFloating() && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
-            VTimeZone timeZone = getTimeZone(dateTime.getTimeZone().getID());
-            if (null != timeZone) {
-                return timeZones.add(timeZone);
-            }
-        }
-        return false;
-    }
-
-    protected VTimeZone getTimeZone(String timeZoneID) {
-        TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
-        net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timeZoneID);
-        return null == timeZone ? null : timeZone.getVTimeZone();
-    }
-
 }
