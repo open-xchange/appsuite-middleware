@@ -51,13 +51,15 @@ package com.openexchange.ratelimit;
 
 
 /**
- * {@link RateLimiter} provides methods to do rate limiting. RateLimiter are created via a {@link RateLimiterFactory}.
- *
- * Every RateLimiter provides a given number of permits for a specific user and context in a given time-frame. By calling {@link #acquire()} or {@link #acquire(long)} it is tried to reduce this number of permits
- * by one or by the given number. If it is successful the amount is reduced and the method returns <code>true</code>. If the operation would reduce the amount of permits to a value equal to or smaller than 0 then
- * the amount is not reduced and false is returned instead.
- *
- * The caller is then responsible to handle it appropriately. E.g. by throwing an error or by waiting a specified amount of time and try again.
+ * {@link RateLimiter} provides methods to do rate limiting. <code>RateLimiter</code> instances are created via a {@link RateLimiterFactory}.
+ * <p>
+ * Every <code>RateLimiter</code> provides a given number of permits for a specific user and context in a given time-frame.
+ * By calling {@link #acquire()} or {@link #acquire(long)} it is tried to reduce this number of permits by one or by the given number.
+ * If it is successful the amount is reduced and the method returns <code>true</code>. If the operation would reduce the amount of permits
+ * to a value equal to or smaller than <code>0</code> (zero) then the amount is not reduced and <code>false</code> is returned instead.
+ * <p>
+ * The caller is then responsible to handle it appropriately. E.g. by throwing an error or by waiting a specified amount of time and try
+ * again.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
@@ -65,17 +67,18 @@ package com.openexchange.ratelimit;
 public interface RateLimiter {
 
     /**
-     * Tries to acquire a single permit. E.g. for to send a single message via a transport service like sms.
+     * Tries to acquire a single permit. E.g. for sending a single message via a transport service like SMS.
      *
-     * @return false in case the maximum amount of permits is reached, true otherwise
+     * @return <code>false</code> in case the maximum amount of permits is reached; otherwise <code>true</code>
      */
-    public boolean acquire();
+    boolean acquire();
 
     /**
-     * Tries to acquire x permits. E.g. the number of bytes for a download limit.
+     * Tries to acquire given number of permits. E.g. the number of bytes for a download limit.
      *
-     * @return false in case the maximum amount of permits is reached, true otherwise
+     * @param permits The number of permits to acquire
+     * @return <code>false</code> in case the maximum amount of permits is reached; otherwise <code>true</code>
      */
-    public boolean acquire(long size);
+    boolean acquire(long permits);
 
 }

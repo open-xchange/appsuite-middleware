@@ -310,10 +310,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         }
     }
 
-    public boolean hasSize() {
-        return false;
-    }
-
     @Override
     public DocumentMetadata next() throws OXException {
         hasNext();
@@ -401,14 +397,18 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return -1;
     }
 
-
+    /**
+     * Gets the list view for the remaining elements of this iterator and closes all resources.
+     *
+     * @return A listing of remaining elements
+     * @throws OXException If list view cannot be returned
+     */
     public List<DocumentMetadata> asList() throws OXException {
         try {
-            final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
-            while(hasNext()) {
+            List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
+            while (hasNext()) {
                 result.add(next());
             }
-
             return result;
         } finally {
             close();

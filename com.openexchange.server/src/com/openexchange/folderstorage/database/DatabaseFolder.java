@@ -51,6 +51,8 @@ package com.openexchange.folderstorage.database;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageCapability;
@@ -83,20 +85,15 @@ import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -295,93 +292,86 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     private int itemCount() {
-        final Session session = getSession();
-        if (null != session) {
-            try {
-                final FolderObject folderObject = this.folderObject;
-                if (session instanceof ServerSession) {
-                    final ServerSession serverSession = (ServerSession) session;
-                    final EffectivePermission permission = folderObject.getEffectiveUserPermission(session.getUserId(), serverSession.getUserConfiguration());
-                    if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
-                        return 0;
-                    }
-                    final Context ctx = serverSession.getContext();
-                    final int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
-                    return count < 0 ? super.getTotal() : count;
-                }
-                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-                final int userId = session.getUserId();
-                final User user = UserStorage.getInstance().getUser(userId, ctx);
-                final UserPermissionBits userPerm = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
-                userPerm.setGroups(user.getGroups());
-                final EffectivePermission permission = folderObject.getEffectiveUserPermission(userId, userPerm);
+        try {
+            ServerSession session = getSession();
+            if (null != session) {
+                FolderObject folderObject = this.folderObject;
+                EffectivePermission permission = folderObject.getEffectiveUserPermission(session.getUserId(), session.getUserConfiguration());
                 if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
                     return 0;
                 }
-                final int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
+                Context ctx = session.getContext();
+                int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
                 return count < 0 ? super.getTotal() : count;
-            } catch (final OXException e) {
-                // Ignore
-                LOG.debug("", e);
             }
+        } catch (final OXException e) {
+            // Ignore
+            LOG.debug("", e);
         }
         return super.getTotal();
     }
 
-    private Session getSession() {
+    private ServerSession getSession() throws OXException {
         ServerSession session = ThreadLocalSessionHolder.getInstance().getSessionObject();
         if (null != session) {
             return session;
         }
         final String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
-        return null == sessionId ? null : SessiondService.SERVICE_REFERENCE.get().getSession(sessionId);
+        return null == sessionId ? null : ServerSessionAdapter.valueOf(SessiondService.SERVICE_REFERENCE.get().getSession(sessionId));
     }
     
     /**
      * Determine if the current user can see this folder because of his non system permissions. Group
      * permissions are also considered.
      * 
-     * @return true, if this folder is hidden false if the user has the permission to see this folder
+     * @return true, if this folder is hidden, false if the user has the permission to see this folder
      */
     public boolean isHidden() {
         final Type type = this.getType();
         if(SystemType.getInstance().equals(type) || (PublicType.getInstance().equals(type) && this.isDefault())) {
             return false;
         }
-        boolean isHidden = true;
         try {
-            final Session session = this.getSession();
-            if (session != null) {
-                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-                final int userId = session.getUserId();
-                isHidden = !hasUserOrGroupPermission(ctx, userId);
+            ServerSession session = getSession();
+            if (null != session) {
+                if (folderObject.isNonSystemVisible(session.getUserId())) {
+                    return false;
+                }
+                for (int entity : session.getUser().getGroups()) {
+                    if (folderObject.isNonSystemVisible(entity)) {
+                        return false;
+                    }
+                }
             }
         } catch (OXException e) {
             // Ignore
-            LOG.debug("", e);
+            LOG.debug("Error checking hidden state of folder {}, assuming 'true'.", folderObject, e);
         }
-        
-        return isHidden;
+        return true;
     }
-
-    private boolean hasUserOrGroupPermission(final Context ctx, final int userId) throws OXException {
-        boolean hasPermission = hasNonSystemPermission(userId);
-        final User user = UserStorage.getInstance().getUser(userId, ctx);
-        int[] groups = user.getGroups();
-        if (groups.length > 0) {
-            for (int groupId : groups) {
-                if (hasNonSystemPermission(groupId)) {
-                    hasPermission = true;
+    
+    /**
+     * Checks if the current user has visibility permissions granted through system
+     * permissions for this folder. Group permissions are considered also.
+     * 
+     * @return true, if the user has system granted visibility permissions, false otherwise
+     */
+    public boolean isVisibleThroughSystemPermissions() {
+        try {
+            ServerSession session = getSession();
+            if (null != session) {
+                List<Integer> entities = Arrays.stream(session.getUser().getGroups()).boxed().collect(Collectors.toList());
+                entities.add(session.getUserId());
+                for (OCLPermission permission : folderObject.getPermissions()) {
+                    if (entities.contains(permission.getEntity()) && permission.isFolderVisible() && permission.isSystem()) {
+                        return true;
+                    }
                 }
             }
+        } catch (OXException e) {
+            // Ignore
+            LOG.debug("Error checking visibility state of folder {}, assuming 'false'.", folderObject, e);
         }
-        return hasPermission;
+        return false;
     }
-
-    private boolean hasNonSystemPermission(int entityId) {
-        return Arrays.asList(folderObject.getNonSystemPermissionsAsArray()).stream()
-        .anyMatch(permission -> permission.getEntity() == entityId
-        && permission.getSystem() <= 0);
-    }
-
 }

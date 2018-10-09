@@ -71,7 +71,7 @@ public class RateLimiterImpl implements RateLimiter {
     private static final Logger LOG = LoggerFactory.getLogger(RateLimiterImpl.class);
 
     private final long timeframe;
-    private final int amount;
+    private final long amount;
     private final int userId;
     private final Context ctx;
     private final String id;
@@ -80,7 +80,7 @@ public class RateLimiterImpl implements RateLimiter {
     /**
      * Initializes a new {@link RateLimiterImpl}.
      */
-    public RateLimiterImpl(String id, int user, Context ctx, int amount, long timeframe, DBProvider provider) {
+    public RateLimiterImpl(String id, int user, Context ctx, long amount, long timeframe, DBProvider provider) {
         this.id = id;
         this.amount = amount;
         this.timeframe = timeframe;
@@ -133,23 +133,19 @@ public class RateLimiterImpl implements RateLimiter {
 
     private static final String SQL_DELTE_OLD = "DELETE FROM ratelimit WHERE cid=? AND userId=? AND id=? AND timestamp < ?";
     private static final String SQL_INSERT = "INSERT INTO ratelimit SELECT ?,?,?,?,? FROM dual WHERE ? >= (SELECT COALESCE(sum(permits), 0) FROM ratelimit WHERE cid=? AND userId=? AND id=?);";
-    /**
-     * The MYSQL error code for duplicate primary key
-     */
-    public static final int MYSQL_DUPLICATE_PK = 1062;
 
     /**
      * Inserts the given amount of permits if possible
      *
      * @param writeCon The writable connection
      * @param permits The number of permits
-     * @return true if the insert was successful, false otherwise
+     * @return <code>true</code> if the insert was successful, <code>false</code> otherwise
      */
     private boolean insertPermit(Connection writeCon, long permits) {
         try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
             return executeStmt(stmt, permits);
         } catch (SQLException e) {
-            if (e.getErrorCode() == MYSQL_DUPLICATE_PK) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                 // Duplicate primary key. Try again
                 try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
                     return executeStmt(stmt, permits);

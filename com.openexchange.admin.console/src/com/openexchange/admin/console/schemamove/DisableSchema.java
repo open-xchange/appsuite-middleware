@@ -53,8 +53,8 @@ import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 
 /**
  *
