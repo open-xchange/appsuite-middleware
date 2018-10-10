@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
@@ -1772,7 +1771,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
 
             } catch (OXException e) {
-                LOGGER.error("Unable to set special use check property!");
+                LOGGER.error("Unable to set special use check property!", e);
             }
         }
 
@@ -1849,8 +1848,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
 
             }
+
+            ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (destUser == null) { // Move to ctx store
                 for (User filestoreOwner : filestoreOwners) {
+                    // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                    disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+
+                    // Move files...
                     LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
                     moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
@@ -1865,9 +1870,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                     User masterUser = new User(destUser.intValue());
                     for (User filestoreOwner : filestoreOwners) {
+                        // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                        disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+
+                        // Move files...
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
                         moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
-                        LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                        LOGGER.info("Moved all files from user {} to filestore of user {}.", filestoreOwner.getId(), masterUser.getId());
                     }
                 }
             }
@@ -1968,13 +1977,30 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    private void disableUnifiedQuotaIfEnabled(User user, Context ctx, ConfigViewFactory optConfigViewFactory) {
+        if (null != optConfigViewFactory) {
+            try {
+                ConfigView view = optConfigViewFactory.getView(user.getId().intValue(), ctx.getId().intValue());
+                String property = "com.openexchange.unifiedquota.enabled";
+                Boolean enabled = view.opt(property, Boolean.class, Boolean.FALSE);
+                if (enabled != null && enabled.booleanValue()) {
+                    ConfigProperty<Boolean> prop = view.property("user", property, Boolean.class);
+                    prop.set(Boolean.FALSE);
+                    user.setUserAttribute("config", property, Boolean.FALSE.toString());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Failed to disable Unified Quota for user {} in context {}", user.getId(), ctx.getId(), e);
+            }
+        }
+    }
+
     private String mapToString(Map<Integer, List<Integer>> map) {
         StringBuilder builder = new StringBuilder();
-        for (Entry<Integer, List<Integer>> cidEntry : map.entrySet()) {
+        for (Map.Entry<Integer, List<Integer>> cidEntry : map.entrySet()) {
             builder.append("\nCID: ").append(cidEntry.getKey()).append(", User IDs: ");
             List<Integer> ids = cidEntry.getValue();
             for (Integer id : ids) {
-                builder.append(id).append(",");
+                builder.append(id).append(',');
             }
             builder.setLength(builder.length() - 1);
         }
@@ -2335,12 +2361,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      * checking for some requirements when changing existing user data
      *
-     * @param ctx
-     * @param newuser
-     * @param dbuser
-     * @param prop
-     * @throws StorageException
-     * @throws InvalidDataException
+     * @param ctx The {@link Context}
+     * @param newuser The {@link User}
+     * @param dbuser The database {@link User}
+     * @param prop Additional {@link PropertyHandler}
+     * @throws StorageException If user can't be found
+     * @throws InvalidDataException If data already exists or is flawed
      */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
         if (newuser.getName() != null) {
