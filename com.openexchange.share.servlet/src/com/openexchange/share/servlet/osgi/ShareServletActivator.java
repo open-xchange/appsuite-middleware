@@ -54,6 +54,7 @@ import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -85,7 +86,8 @@ public class ShareServletActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ShareService.class, UserService.class, ContextService.class, SessiondService.class, PasswordMechFactory.class,
-            ConfigurationService.class, ModuleSupport.class, GuestService.class, TranslatorFactory.class, BasicPasswordChangeService.class };
+            ConfigurationService.class, ModuleSupport.class, GuestService.class, TranslatorFactory.class, BasicPasswordChangeService.class,
+            LeanConfigurationService.class };
     }
 
     @Override
