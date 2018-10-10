@@ -69,7 +69,8 @@ public enum ServerProperty implements Property {
 
     private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.server.";
-    private Object defaultValue;
+
+    private final Object defaultValue;
 
     /**
      * Initialises a new {@link ServerProperty}.
@@ -78,23 +79,14 @@ public enum ServerProperty implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;
     }
+
 }
