@@ -116,12 +116,9 @@ public abstract class DataParser {
     /**
      * Parses optional field out of specified JSON object.
      *
-     * @param jsonObj
-     *            The JSON object to parse
-     * @param name
-     *            The optional field name
-     * @return The optional field's value or <code>null</code> if there's no
-     *         such field
+     * @param jsonObj The JSON object to parse
+     * @param name The field name
+     * @return The field's string value or <code>null</code> if there's no such field or field is JSON NULL
      */
     public static String parseString(final JSONObject jsonObj, final String name) {
         String retval = null;
