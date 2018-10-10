@@ -60,7 +60,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+import javax.jms.IllegalStateException;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -493,10 +495,20 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     public static byte[] loadImageByURL(AJAXClient client, String imageUrl) throws Exception {
+        return loadImageByURL(client, imageUrl, false);
+    }
+
+    public static byte[] loadImageByURL(AJAXClient client, String imageUrl, boolean expectMissing) throws Exception {
         InputStream inputStream = null;
         try {
             HttpGet httpRequest = new HttpGet(client.getProtocol() + "://" + client.getHostname() + imageUrl);
             final HttpResponse httpResponse = client.getSession().getHttpClient().execute(httpRequest);
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                if (expectMissing) {
+                    return new byte[0];
+                }
+                throw new IllegalStateException("Image was not found!");
+            }
             inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;
             final byte[] buf = new byte[len];
