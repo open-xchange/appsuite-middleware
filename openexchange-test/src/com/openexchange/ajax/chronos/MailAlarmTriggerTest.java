@@ -50,7 +50,6 @@
 package com.openexchange.ajax.chronos;
 
 import java.rmi.server.UID;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -58,7 +57,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.data.conversion.ical.Assert;
@@ -107,7 +105,8 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     @Test
     public void testBasicMailAlarm() throws ApiException, ChronosApiException, InterruptedException {
 
-        String summary = "testCreateSingleAlarmTrigger_"+new UID().toString();
+        String summary = "mailAlarmTest_" + new UID().toString();
+        summary = summary.substring(0, 30); // reduce length to 30 to not being limited during mail generation
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(15));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
@@ -199,42 +198,6 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // wait until the mail is send (30 seconds + 15 seconds as a buffer)
         Thread.sleep(TimeUnit.SECONDS.toMillis(45));
         checkMail(summary, time, Collections.singletonList(expectedSentDate), 1);
-    }
-
-    /**
-     * Creates an event series with a mail alarm and two occurrences and checks if a mail is send out on time for both occurrences.
-     *
-     * @throws ChronosApiException
-     * @throws ApiException
-     * @throws InterruptedException
-     */
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testEventSeries() throws ApiException, ChronosApiException, InterruptedException {
-
-        // Create event
-        String summary = "testEventSeries_"+new UID().toString();
-        long currentTime = System.currentTimeMillis();
-        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30));
-        DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
-        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null);
-
-        Calendar time = Calendar.getInstance(getUserTimeZone());
-        List<Long> expectedSentDates = new ArrayList<>();
-        expectedSentDates.add(new Long(time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30)));
-        expectedSentDates.add(new Long(time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30) + TimeUnit.MINUTES.toMillis(1)));
-
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), summary, 2, folderId, RecurringFrequency.MINUTELY);
-        toCreate.setStartDate(startDate);
-        toCreate.setEndDate(endDate);
-        toCreate.setAlarms(Collections.singletonList(mailAlarm));
-        EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1, folderId);
-
-        // wait until the mails are send (90 seconds + 15 seconds as a buffer)
-        Thread.sleep(TimeUnit.SECONDS.toMillis(105));
-
-        checkMail(summary, time, expectedSentDates, 2);
     }
 
     private TimeZone getUserTimeZone() throws ApiException {
