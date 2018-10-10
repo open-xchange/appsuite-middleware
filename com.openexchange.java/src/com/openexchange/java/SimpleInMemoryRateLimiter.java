@@ -163,7 +163,7 @@ public class SimpleInMemoryRateLimiter {
         private Thread leader = null;
 
         /**
-         * Condition signalled when a newer element becomes available
+         * Condition signaled when a newer element becomes available
          * at the head of the queue or a new thread may need to
          * become leader.
          */
@@ -171,6 +171,9 @@ public class SimpleInMemoryRateLimiter {
 
         /**
          * Creates a new {@code DelayQueue} that is initially empty.
+         *
+         * @param permits The number of permits
+         * @param timeFrameInNanos The timeframe in nanos seconds
          */
         Bucket(int permits, long timeFrameInNanos) {
             super();
@@ -269,6 +272,8 @@ public class SimpleInMemoryRateLimiter {
          * Retrieves and removes the first token of this bucket, waiting if necessary
          * until a token with an expired delay is available, or the specified wait time expires.
          *
+         * @param timeout The maximum time to wait
+         * @param unit The time unit of the time to wait
          * @return the first token, or {@code null} if the
          *         specified waiting time elapses before a token with
          *         an expired delay becomes available
