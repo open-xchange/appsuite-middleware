@@ -6,9 +6,7 @@ title: Health-check for middleware
 With v7.10.1 the Open-Xchange middleware offers health-checks to verify the middleware is running fine or get information which component is in trouble. This information can be retrieved via a REST interface.
 
 # Installation
-The health-check feature is included in 
-``open-xchange-core``
-package. Thus, no additional packages need to be installed. The REST interface will be available via 
+The health-check feature is included in ``open-xchange-core`` package. Thus, no additional packages need to be installed. The REST interface will be available via 
 ```
 GET hostname:8009/health
 ```
@@ -18,29 +16,13 @@ GET hostname:8009/health
 # Configuration
 
 ## Enable authentication to access REST interface
-By default, there is no authentication for accessing the REST interface. To enable authentication, the properties
-```
-com.openexchange.health.username
-```
-and 
-```
-com.openexchange.health.password
-```
-must be set.
+By default, there is no authentication for accessing the REST interface. To enable authentication, the properties ``com.openexchange.health.username`` and ``com.openexchange.health.password`` must be set.
 
 ## Skip health-checks
-To disable too expensive or invasive health-checks based on their names, the comma-separated list
-```
-com.openexchange.health.skip
-```
-can be set. Health-checks listed here will not be executed at all.
+To disable too expensive or invasive health-checks based on their names, the comma-separated list ``com.openexchange.health.skip`` can be set. Health-checks listed here will not be executed at all.
 
 ## Ignore health-check results
-To ignore health-check results based on their names when evaluating the overall status, the comma-separated list
-```
-com.openexchange.health.ignore
-```
-can be set. Health-checks listed here will be executed and their results will be included in the response, but their status will not affect the overall status.
+To ignore health-check results based on their names when evaluating the overall status, the comma-separated list ``com.openexchange.health.ignore`` can be set. Health-checks listed here will be executed and their results will be included in the response, but their status will not affect the overall status.
 
 
 # Response
