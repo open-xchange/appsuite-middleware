@@ -111,7 +111,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(15));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
-        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null);
 
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(15);
@@ -142,7 +142,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
-        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null);
 
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30);
@@ -180,7 +180,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30) + TimeUnit.HOURS.toMillis(3));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1) + TimeUnit.HOURS.toMillis(3));
-        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null);
 
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30);
@@ -217,7 +217,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
-        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null);
 
         Calendar time = Calendar.getInstance(getUserTimeZone());
         List<Long> expectedSentDates = new ArrayList<>();
