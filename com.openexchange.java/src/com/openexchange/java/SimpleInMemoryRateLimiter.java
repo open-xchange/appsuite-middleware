@@ -70,9 +70,9 @@ public class SimpleInMemoryRateLimiter {
      * Initializes a new {@link SimpleInMemoryRateLimiter}.
      *
      * @param permits The number of permits
-     * @param timeFrameInMillis The time frame
+     * @param timeFrame The time frame
      * @param unit The time unit
-     * @throws IllegalArgumentException If either permits or timeFrameInMillis is negative or <code>0</code> (zero)
+     * @throws IllegalArgumentException If either <code>permits</code> or <code>timeFrame</code> is negative or <code>0</code> (zero)
      */
     public SimpleInMemoryRateLimiter(int permits, long timeFrame, TimeUnit unit) {
         super();
