@@ -4,7 +4,7 @@ title: Login Rate Limiting
 
 # Introduction
 
-Starting with v7.10.1 the Open-Xchange Middleware offers two rate limiting possibilities. Both act the same way: 
+The Open-Xchange Middleware offers two rate limiting possibilities. Both act the same way: 
 
 * The [token bucket](https://en.wikipedia.org/wiki/Token_bucket) algorithm is used
 * Before every login attempt, check if login attempt is already rate limited (all tokens/permits exhausted)
@@ -22,12 +22,16 @@ The other one is solely based on the unique user name provided by login. A clien
 
 ## Rate Limiting by HTTP attributes/characterirstics
 
+Available with v7.8.0.
+
 ### Configuration
 
 * `com.openexchange.ajax.login.maxRate` Specifies the maximum number of permits that applies to incoming HTTP login requests. Default value is `50`.
 * `com.openexchange.ajax.login.maxRateTimeWindow` Specifies the rate limit's time window in which to track incoming HTTP login requests. Default value is `300000` (5 minutes).
 
 ## Rate Limiting by login user name
+
+Available with v7.10.1.
 
 ### Configuration
 
