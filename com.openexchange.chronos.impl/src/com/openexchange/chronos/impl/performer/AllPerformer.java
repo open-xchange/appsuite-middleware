@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
@@ -61,15 +62,19 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Arrays.remove;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultEventsResult;
@@ -176,9 +181,25 @@ public class AllPerformer extends AbstractQueryPerformer {
             }
         }
         /*
+         * evaluate fields to query from storage based on requested fields
+         */
+        EventField[] fields;
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        if (null == requestedFields || contains(requestedFields, EventField.ATTENDEES) || false == contains(requestedFields, EventField.FLAGS)) {
+            /*
+             * all attendees, or no event flags requested, no special handling needed
+             */
+            fields = getFields(requestedFields);
+        } else {
+            /*
+             * event flags are requested, but not all attendees; temporary remove flags field to supply info for event flag generation
+             * afterwards, also ensure to include further fields relevant for event flag generation
+             */
+            fields = getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
+        }
+        /*
          * load event data per folder & additional event data per calendar user
          */
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         SearchOptions searchOptions = new SearchOptions(session);
         Map<CalendarFolder, List<Event>> eventsPerFolder = new HashMap<CalendarFolder, List<Event>>(folders.size());
         for (Entry<Integer, List<CalendarFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
@@ -205,10 +226,50 @@ public class AllPerformer extends AbstractQueryPerformer {
          * post process events, based on each requested folder's perspective
          */
         for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            resultsPerFolderId.put(entry.getKey().getId(), postProcessor().process(entry.getValue(), entry.getKey()).getEventsResult());
-            Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+            EventPostProcessor postProcessor = postProcessor(getObjectIDs(entry.getValue()), entry.getKey().getCalendarUserId(), requestedFields, fields);
+            resultsPerFolderId.put(entry.getKey().getId(), postProcessor.process(entry.getValue(), entry.getKey()).getEventsResult());
+            Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, requestedFields);
         }
         return resultsPerFolderId;
+    }
+
+    /**
+     * Initializes a new event post processor, implicitly supplying further data for the calendar user attendee and event flags as needed.
+     * 
+     * @param eventIds The identifiers of the events being processed
+     * @param calendarUserId The identifier of the underlying calendar user
+     * @param requestedFields The fields as requested by the client
+     * @param queriedFields The fields loaded from the storage
+     * @return The event post processor, enriched with further data as needed
+     */
+    protected EventPostProcessor postProcessor(String[] eventIds, int calendarUserId, EventField[] requestedFields, EventField[] queriedFields) throws OXException {
+        EventPostProcessor postProcessor = super.postProcessor();
+        /*
+         * always supply essential data for actual calendar user attendee, unless already requested explicitly
+         */
+        if (false == contains(queriedFields, EventField.ATTENDEES)) {
+            Attendee attendee = new Attendee();
+            attendee.setEntity(calendarUserId);
+            AttendeeField[] fields = {
+                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, AttendeeField.PARTSTAT, AttendeeField.HIDDEN
+            };
+            postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
+        }
+        /*
+         * supply info for event flag generation as needed
+         */
+        if (contains(requestedFields, EventField.FLAGS)) {
+            if (false == contains(queriedFields, EventFlag.ATTACHMENTS)) {
+                postProcessor.setAttachmentsFlagInfo(storage.getAttachmentStorage().hasAttachments(eventIds));
+            }
+            if (false == contains(queriedFields, EventFlag.ALARMS)) {
+                postProcessor.setAlarmsFlagInfo(storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds));
+            }
+            if (false == contains(queriedFields, EventField.ATTENDEES)) {
+                postProcessor.setScheduledFlagInfo(storage.getAttendeeStorage().loadAttendeeCounts(eventIds, null));
+            }
+        }
+        return postProcessor;
     }
 
     /**

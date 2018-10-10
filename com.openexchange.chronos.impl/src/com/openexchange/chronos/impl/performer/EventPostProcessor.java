@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isFirstOccurrence;
@@ -66,8 +65,10 @@ import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -80,6 +81,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -112,6 +114,10 @@ public class EventPostProcessor {
     private final SelfProtection selfProtection;
 
     private long maximumTimestamp;
+    private Map<String, Boolean> attachmentsPerEventId;
+    private Map<String, Boolean> alarmTriggersPerEventId;
+    private Map<String, Integer> attendeeCountsPerEventId;
+    private Map<String, Attendee> userAttendeePerEventId;
 
     /**
      * Initializes a new {@link EventPostProcessor}.
@@ -128,6 +134,50 @@ public class EventPostProcessor {
         this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
+    }
+
+    /**
+     * Sets a map holding additional hints to assign the {@link EventFlag#ATTACHMENTS} when processing the events.
+     * 
+     * @param attachmentsPerEventId A map that associates the identifiers of those events where at least one attachment stored to {@link Boolean#TRUE}
+     * @return A self reference
+     */
+    EventPostProcessor setAttachmentsFlagInfo(Map<String, Boolean> attachmentsPerEventId) {
+        this.attachmentsPerEventId = attachmentsPerEventId;
+        return this;
+    }
+
+    /**
+     * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
+     * 
+     * @param alarmTriggersPerEventId A map that associates the identifiers of those events where at least one alarm trigger is stored for the user to {@link Boolean#TRUE}
+     * @return A self reference
+     */
+    EventPostProcessor setAlarmsFlagInfo(Map<String, Boolean> alarmTriggersPerEventId) {
+        this.alarmTriggersPerEventId = alarmTriggersPerEventId;
+        return this;
+    }
+
+    /**
+     * Sets a map holding additional hints to assign the {@link EventFlag#SCHEDULED} when processing the events.
+     * 
+     * @param attendeeCountsPerEventId The number of attendees, mapped to the identifiers of the corresponding events
+     * @return A self reference
+     */
+    EventPostProcessor setScheduledFlagInfo(Map<String, Integer> attendeeCountsPerEventId) {
+        this.attendeeCountsPerEventId = attendeeCountsPerEventId;
+        return this;
+    }
+
+    /**
+     * Sets a map holding essential information about the calendar user attendee when processing the events.
+     * 
+     * @param userAttendeePerEventId The calendar user attendees, mapped to the identifiers of the corresponding events
+     * @return A self reference
+     */
+    EventPostProcessor setUserAttendeeInfo(Map<String, Attendee> userAttendeePerEventId) {
+        this.userAttendeePerEventId = userAttendeePerEventId;
+        return this;
     }
 
     /**
@@ -242,7 +292,16 @@ public class EventPostProcessor {
         return maximumTimestamp;
     }
 
-    private boolean doProcess(Event event, CalendarFolder folder) throws OXException {
+    protected boolean doProcess(Event event, CalendarFolder folder) throws OXException {
+        if (null != userAttendeePerEventId) {
+            /*
+             * inject data for attendee of underlying calendar user
+             */
+            Attendee attendee = userAttendeePerEventId.get(event.getId());
+            if (null != attendee) {
+                event.setAttendees(Collections.singletonList(attendee));
+            }
+        }
         if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
             /*
              * excluded if classified as private for the session user
@@ -262,7 +321,7 @@ public class EventPostProcessor {
         }
         event.setFolderId(folder.getId());
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
-            event = applyFlags(event, folder);
+            event.setFlags(getFlags(event, folder));
         }
         maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);
@@ -296,8 +355,11 @@ public class EventPostProcessor {
         return events.add(event);
     }
 
-    private Event applyFlags(Event event, CalendarFolder folder) throws OXException {
-        EnumSet<EventFlag> flags = getFlags(event, folder.getCalendarUserId(), session.getUserId(), PublicType.getInstance().equals(folder.getType()));
+    protected EnumSet<EventFlag> getFlags(Event event, CalendarFolder folder) throws OXException {
+        /*
+         * get default flags for event data & derive recurrence position info
+         */
+        EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, folder.getCalendarUserId(), session.getUserId(), PublicType.getInstance().equals(folder.getType()));
         if (isSeriesException(event)) {
             RecurrenceData recurrenceData = optRecurrenceData(event);
             if (null != recurrenceData) {
@@ -309,8 +371,22 @@ public class EventPostProcessor {
                 }
             }
         }
-        event.setFlags(flags);
-        return event;
+        /*
+         * inject additional flags based on available data
+         */
+        if (null != attachmentsPerEventId && Boolean.TRUE.equals(attachmentsPerEventId.get(event.getId()))) {
+            flags.add(EventFlag.ATTACHMENTS);
+        }
+        if (null != alarmTriggersPerEventId && Boolean.TRUE.equals(alarmTriggersPerEventId.get(event.getId()))) {
+            flags.add(EventFlag.ALARMS);
+        }
+        if (null != attendeeCountsPerEventId) {
+            Integer attendeeCount = attendeeCountsPerEventId.get(event.getId());
+            if (null != attendeeCount && 1 < i(attendeeCount)) {
+                flags.add(EventFlag.SCHEDULED);
+            }
+        }
+        return flags;
     }
 
     private RecurrenceData optRecurrenceData(Event event) throws OXException {
