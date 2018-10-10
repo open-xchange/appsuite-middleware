@@ -52,6 +52,7 @@ package com.openexchange.groupware.settings.tree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -72,9 +73,9 @@ import com.openexchange.session.Session;
  * Provide an array of sharding subdomains determined for each host via as-config.yml.
  * Attention, to use cookies correctly, the following properties have to be set also
  * for the host: <br><br>
-    com.openexchange.cookie.domain.enabled<br>
-    com.openexchange.cookie.domain<br>
-    com.openexchange.cookie.domain.prefixWithDot<br>
+ * com.openexchange.cookie.domain.enabled<br>
+ * com.openexchange.cookie.domain<br>
+ * com.openexchange.cookie.domain.prefixWithDot<br>
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.4
@@ -113,7 +114,7 @@ public class ShardingSubdomains implements PreferencesItemService, ConfigTreeEqu
                     try {
                         customHostConfigurations = serverConfigService.getCustomHostConfigurations(LogProperties.getHostName(), userConfig.getUserId(), userConfig.getContext().getContextId());
                     } catch (OXException e) {
-                        e.printStackTrace();
+                        LoggerFactory.getLogger(ShardingSubdomains.class).error("Unable to retrieve sharding subdomains.", e);
                     }
                 }
                 return areShardingHostsAvailable(customHostConfigurations);
