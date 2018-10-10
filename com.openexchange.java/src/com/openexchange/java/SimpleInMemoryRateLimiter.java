@@ -129,58 +129,76 @@ public class SimpleInMemoryRateLimiter {
 
     // ------------------------------------------------------------------------------------------------------------------------------------
 
-    private static class Token implements Delayed {
+    private static abstract class Token implements Delayed {
 
-        private final long stamp;
-        private final boolean immediateDelivery;
-        private final long delayNanos;
+        protected final long stamp;
 
-        Token(long delayNanos, boolean immediateDelivery) {
+        protected Token() {
             super();
-            this.delayNanos = delayNanos;
-            stamp = immediateDelivery ? 0 : System.nanoTime();
-            this.immediateDelivery = immediateDelivery;
+            this.stamp = System.nanoTime();
         }
 
         @Override
-        public int compareTo(final Delayed o) {
-            final long thisStamp = stamp;
-            final long otherStamp = ((Token) o).stamp;
+        public final int compareTo(final Delayed o) {
+            long thisStamp = stamp;
+            long otherStamp = ((Token) o).stamp;
             return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+        }
+    }
+
+    private static class ImmediateToken extends Token {
+
+        ImmediateToken() {
+            super();
         }
 
         @Override
         public long getDelay(final TimeUnit unit) {
-            return immediateDelivery ? 0L : unit.convert(delayNanos - (System.nanoTime() - stamp), TimeUnit.NANOSECONDS);
+            return 0L;
+        }
+    }
+
+    private static class DelayedToken extends Token {
+
+        private final long delayNanos;
+
+        DelayedToken(long delayNanos) {
+            super();
+            this.delayNanos = delayNanos;
+        }
+
+        @Override
+        public long getDelay(final TimeUnit unit) {
+            return unit.convert(delayNanos - (System.nanoTime() - stamp), TimeUnit.NANOSECONDS);
         }
     }
 
     private static class Bucket {
 
         private final long timeFrameInNanos;
-        private final transient ReentrantLock lock = new ReentrantLock();
-        private final PriorityQueue<Token> q = new PriorityQueue<Token>();
+        private final PriorityQueue<Token> q;
+        private final ReentrantLock lock;
+        private final Condition available;
         private Thread leader = null;
 
         /**
-         * Condition signaled when a newer element becomes available
-         * at the head of the queue or a new thread may need to
-         * become leader.
-         */
-        private final Condition available = lock.newCondition();
-
-        /**
-         * Creates a new {@code DelayQueue} that is initially empty.
+         * Creates a new {@code Bucket} that is initially empty.
          *
          * @param permits The number of permits
-         * @param timeFrameInNanos The timeframe in nanos seconds
+         * @param timeFrameInNanos The time frame in nanoseconds
          */
         Bucket(int permits, long timeFrameInNanos) {
             super();
             this.timeFrameInNanos = timeFrameInNanos;
+
+            // Initialize members
+            q = new PriorityQueue<Token>(permits);
+            lock = new ReentrantLock();
+            available = lock.newCondition();
+
             // Offer immediately available tokens
             for (int i = permits; i-- > 0;) {
-                Token token = new Token(0, true);
+                Token token = new ImmediateToken();
                 q.offer(token);
                 if (q.peek() == token) {
                     leader = null;
@@ -188,7 +206,8 @@ public class SimpleInMemoryRateLimiter {
             }
         }
 
-        private void replenish(Token token) {
+        private void replenish() {
+            Token token = new DelayedToken(timeFrameInNanos);
             q.offer(token);
             if (q.peek() == token) {
                 leader = null;
@@ -197,14 +216,12 @@ public class SimpleInMemoryRateLimiter {
         }
 
         /**
-         * Retrieves and removes the first token, or returns {@code null}
-         * if this bucket has no tokens with an expired delay.
+         * Retrieves, removes and replenishes the first token, or returns <code>null</code> if this bucket has no tokens with an expired
+         * delay.
          *
-         * @return the first token, or {@code null} if this
-         *         bucket has no tokens with an expired delay
+         * @return The first token, or <code>null</code> if this bucket has no tokens with an expired delay
          */
         public Token pollExpired() {
-            final ReentrantLock lock = this.lock;
             lock.lock();
             try {
                 Token first = q.peek();
@@ -213,7 +230,7 @@ public class SimpleInMemoryRateLimiter {
                 }
 
                 Token polled = q.poll();
-                replenish(new Token(timeFrameInNanos, false));
+                replenish();
                 return polled;
             } finally {
                 lock.unlock();
@@ -221,16 +238,13 @@ public class SimpleInMemoryRateLimiter {
         }
 
         /**
-         * Retrieves and removes the first token of this bucket, waiting if necessary
-         * until a token with an expired delay is available.
-         * <p>
-         * Replenishes the token after retrieval
+         * Retrieves, removes and replenishes the first token of this bucket, waiting if necessary until a token with an expired delay is
+         * available.
          *
-         * @return the first token
+         * @return The first token
          * @throws InterruptedException If interrupted while waiting
          */
         public Token takeExpired() throws InterruptedException {
-            final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
                 for (;;) {
@@ -241,7 +255,7 @@ public class SimpleInMemoryRateLimiter {
                         long delay = first.getDelay(NANOSECONDS);
                         if (delay <= 0) {
                             Token polled = q.poll();
-                            replenish(new Token(timeFrameInNanos, false));
+                            replenish();
                             return polled;
                         }
                         first = null; // don't retain ref while waiting
@@ -269,21 +283,19 @@ public class SimpleInMemoryRateLimiter {
         }
 
         /**
-         * Retrieves and removes the first token of this bucket, waiting if necessary
-         * until a token with an expired delay is available, or the specified wait time expires.
+         * Retrieves, removes and replenishes the first token of this bucket, waiting if necessary until a token with an expired delay is
+         * available, or the specified wait time expires.
          *
          * @param timeout The maximum time to wait
          * @param unit The time unit of the time to wait
-         * @return the first token, or {@code null} if the
-         *         specified waiting time elapses before a token with
-         *         an expired delay becomes available
+         * @return The first token, or <code>null</code> if the specified waiting time elapses before a token with an expired delay becomes
+         *         available
          * @throws InterruptedException If interrupted while waiting
          */
         public Token pollExpired(long timeout, TimeUnit unit) throws InterruptedException {
-            long nanos = unit.toNanos(timeout);
-            final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
+                long nanos = unit.toNanos(timeout);
                 for (;;) {
                     Token first = q.peek();
                     if (first == null) {
@@ -296,7 +308,7 @@ public class SimpleInMemoryRateLimiter {
                         long delay = first.getDelay(NANOSECONDS);
                         if (delay <= 0) {
                             Token polled = q.poll();
-                            replenish(new Token(timeFrameInNanos, false));
+                            replenish();
                             return polled;
                         }
                         if (nanos <= 0) {
@@ -328,13 +340,12 @@ public class SimpleInMemoryRateLimiter {
         }
 
         /**
-         * Retrieves, but does not remove, the first token of this bucket, or
-         * returns {@code null} if this bucket is empty or has no tokens with expired delay.
+         * Retrieves, but does not remove/replenish, the first token of this bucket, or returns <code>null</code> if this bucket is empty or
+         * has no tokens with expired delay.
          *
-         * @return the first token of this bucket, or {@code null}
+         * @return The first token of this bucket, or <code>null</code>
          */
         public Token peekExpired() {
-            final ReentrantLock lock = this.lock;
             lock.lock();
             try {
                 Token first = q.peek();
