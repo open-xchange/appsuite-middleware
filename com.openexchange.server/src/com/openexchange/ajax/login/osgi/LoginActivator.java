@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.RateLimiterByLogin;
 import com.openexchange.ajax.login.LoginRequestHandler;
@@ -86,6 +87,11 @@ import com.openexchange.tokenlogin.TokenLoginService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class LoginActivator extends HousekeepingActivator {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginActivator.class);
+    }
 
     public LoginActivator() {
         super();
@@ -169,12 +175,18 @@ public class LoginActivator extends HousekeepingActivator {
         // Login name rate limiter
         boolean rateLimitByLogin = configurationService.getBoolProperty("com.openexchange.ajax.login.rateLimitByLogin.enabled", false);
         if (rateLimitByLogin) {
-            int permits = configurationService.getIntProperty("com.openexchange.ajax.login.rateLimitByLogin.permits", 3);
-            long timeFrameInSeconds = configurationService.getIntProperty("com.openexchange.ajax.login.rateLimitByLogin.timeFrameInSeconds", 30);
-
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(999));
-            registerService(LoginListener.class, new RateLimiterByLogin(permits, timeFrameInSeconds), properties);
+            String propPermits = "com.openexchange.ajax.login.rateLimitByLogin.permits";
+            String propTimeFrame = "com.openexchange.ajax.login.rateLimitByLogin.timeFrameInSeconds";
+            int permits = configurationService.getIntProperty(propPermits, 3);
+            long timeFrameInSeconds = configurationService.getIntProperty(propTimeFrame, 30);
+            if (permits > 0 && timeFrameInSeconds > 0) {
+                Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+                properties.put(Constants.SERVICE_RANKING, Integer.valueOf(999));
+                registerService(LoginListener.class, new RateLimiterByLogin(permits, timeFrameInSeconds), properties);
+            } else {
+                LoggerHolder.LOG.warn("Value configured for \"{}\" and/or \"{}\" property must be positive. Rate limiting by login name is effectively disabled!", propPermits, propTimeFrame);
+            }
         }
     }
+
 }
