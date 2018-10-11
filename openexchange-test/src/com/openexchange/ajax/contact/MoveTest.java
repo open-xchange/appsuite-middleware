@@ -107,6 +107,7 @@ public class MoveTest extends AbstractContactTest {
         compareObject(contactObj, loadContact);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
