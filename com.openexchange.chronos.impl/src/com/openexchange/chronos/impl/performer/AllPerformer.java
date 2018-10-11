@@ -77,6 +77,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -197,7 +198,7 @@ public class AllPerformer extends AbstractQueryPerformer {
              */
             fields = getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
         }
-        SearchOptions searchOptions = new SearchOptions(session);
+        SearchOptions searchOptions = getSearchOptionsForStorage(session);
         for (Entry<Integer, List<CalendarFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
             /*
              * load event data per folder & additional event data per calendar user
@@ -356,7 +357,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          * perform search & userize the results for the current session's user
          */
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
         return postProcessor().process(events, session.getUserId()).getEvents();
     }
@@ -378,7 +379,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         /*
          * get events with default fields & load additional event data as needed
          */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
         return postProcessor().process(events, folder).getEvents();
     }
@@ -389,6 +390,35 @@ public class AllPerformer extends AbstractQueryPerformer {
             com.openexchange.tools.arrays.Collections.put(foldersPerCalendarUserId, I(getCalendarUserId(folder)), folder);
         }
         return foldersPerCalendarUserId;
+    }
+
+    /**
+     * Gets the (possible adjusted) search options to pass down to the storage in case a subsequent <i>post-processing</i> of the events
+     * will take place, based on the supplied calendar parameters.
+     * <p/>
+     * In case the resulting events are <i>post-processed</i>, sorting is down by the {@link EventPostProcessor}, so that the storage does
+     * not need to consider an <code>ORDER BY ...</code> clause.
+     * 
+     * @param parameters The parameters to get the storage search options from
+     * @return The search options to use for storage operations
+     */
+    private static SearchOptions getSearchOptionsForStorage(CalendarParameters parameters) {
+        Integer leftHandLimit = parameters.get(CalendarParameters.PARAMETER_LEFT_HAND_LIMIT, Integer.class);
+        Integer rightHandLimit = parameters.get(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, Integer.class);
+        EventField by = parameters.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
+        if (null == by || null != leftHandLimit || null != rightHandLimit) {
+            /*
+             * no order by, or order by with limit, pass-through to storage as-is
+             */
+            return new SearchOptions(parameters);
+        }
+        /*
+         * ignore order by when getting data from storage
+         */
+        return new SearchOptions(new DefaultCalendarParameters(parameters)
+            .set(CalendarParameters.PARAMETER_ORDER, null)
+            .set(CalendarParameters.PARAMETER_ORDER_BY, null))
+        ;
     }
 
 }

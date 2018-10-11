@@ -499,7 +499,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         if (null != internal) {
             stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
         }
-        stringBuilder.append(';');
+        stringBuilder.append(" GROUP BY event;");
         Map<String, Integer> attendeeCountsByEventId = new HashMap<String, Integer>(eventIds.length);
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
