@@ -51,9 +51,13 @@ package com.openexchange.admin.monitoring;
 
 /**
  * Defines the attributes to be monitored.
+ * 
  * @author cutmasta
  */
 public interface MonitorMBean {
+
+    public static final String MBEAN_NAME = "CallMonitor";
+    public static final String MBEAN_DOMAIN = "com.openexchange.admin.monitor";
 
     long getNumberOfCreateResourceCalled();
 
