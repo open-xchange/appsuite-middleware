@@ -47,57 +47,68 @@
  *
  */
 
+package com.openexchange.saml.ucs.impl;
 
-
-package com.openexchange.authentication.ucs.impl;
-
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.LoginInfo;
-import com.openexchange.authentication.ucs.common.UCSLookup;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.saml.spi.ExceptionHandler;
+import com.openexchange.tools.servlet.http.Tools;
+
 
 /**
+ * {@link UCSSamlExceptionHandler}
  *
- * Authentication Plugin for the UCS Server Product.
- * This Class implements the needed Authentication against an UCS LDAP Server:
- * 1. User enters following information on Loginscreen: username and password (NO CONTEXT, will be resolved by the LDAP Attribute)
- * 1a. Search for given "username"  (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
- * 2. If user is found, bind to LDAP Server with the found DN
- * 3. If BIND successfull, fetch the configured "context" Attribute and parse out the context name.
- * 4. Return context name and username to OX API!
- * 5. User is logged in!
- *
- * @author Manuel Kraft
- *
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @since v7.8.1
  */
-public class UCSAuthentication implements AuthenticationService {
+public class UCSSamlExceptionHandler implements ExceptionHandler {
 
-    private final UCSLookup ucsLookup;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSSamlExceptionHandler.class);
+
+    private final String redirectUri;
+    private final String failureLogoutRedirectUrl;
 
     /**
-     * Default constructor.
+     * Initializes a new {@link UCSSamlExceptionHandler}.
      *
-     * @param configService The service to use
-     * @throws OXException If initialization fails
+     * @param redirectUri The redirect URI
+     * @param failureLogoutRedirectUrl
      */
-    public UCSAuthentication(UCSLookup ucsLookup) throws OXException {
+    public UCSSamlExceptionHandler(String redirectUri, String failureLogoutRedirectUrl) {
         super();
-        this.ucsLookup = ucsLookup;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
-        return ucsLookup.handleLoginInfo(loginInfo);
+        this.redirectUri = redirectUri;
+        this.failureLogoutRedirectUrl = failureLogoutRedirectUrl;
     }
 
     @Override
-    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
-        throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
+    public void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+        sendRedirect(httpRequest, httpResponse, exception, redirectUri);
+    }
+
+    @Override
+    public void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+        sendRedirect(httpRequest, httpResponse, exception, failureLogoutRedirectUrl);
+    }
+
+    private void sendRedirect(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception, String redirectUri) {
+        Tools.disableCaching(httpResponse);
+        try {
+            httpResponse.sendRedirect(redirectUri);
+            LOG.debug("Sent redirect to {} due to {}", redirectUri, exception.getMessage());
+        } catch (IOException e) {
+            LOG.error("Caught error while trying to send redirect", e);
+            try {
+                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (IOException x) {
+                // nothing to do here
+                LOG.error("Caught error while trying to send error after failing to send redirect", x);
+            } catch (IllegalStateException x) {
+                // nothing to do here
+                LOG.error("Caught error while trying to send error after failing to send redirect", x);
+            }
+        }
     }
 
 }

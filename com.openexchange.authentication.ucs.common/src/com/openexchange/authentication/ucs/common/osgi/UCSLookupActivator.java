@@ -47,57 +47,45 @@
  *
  */
 
+package com.openexchange.authentication.ucs.common.osgi;
 
-
-package com.openexchange.authentication.ucs.impl;
-
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.ucs.common.UCSLookup;
-import com.openexchange.exception.OXException;
+import com.openexchange.authentication.ucs.common.impl.UCSLookupImpl;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- *
- * Authentication Plugin for the UCS Server Product.
- * This Class implements the needed Authentication against an UCS LDAP Server:
- * 1. User enters following information on Loginscreen: username and password (NO CONTEXT, will be resolved by the LDAP Attribute)
- * 1a. Search for given "username"  (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
- * 2. If user is found, bind to LDAP Server with the found DN
- * 3. If BIND successfull, fetch the configured "context" Attribute and parse out the context name.
- * 4. Return context name and username to OX API!
- * 5. User is logged in!
- *
- * @author Manuel Kraft
- *
+ * {@link UCSLookupActivator} - The activator for the <code>"com.openexchange.authentication.ucs"</code> bundle.
  */
-public class UCSAuthentication implements AuthenticationService {
+public class UCSLookupActivator extends HousekeepingActivator {
 
-    private final UCSLookup ucsLookup;
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSLookupActivator.class);
 
     /**
-     * Default constructor.
-     *
-     * @param configService The service to use
-     * @throws OXException If initialization fails
+     * Initializes a new {@link UCSLookupActivator}.
      */
-    public UCSAuthentication(UCSLookup ucsLookup) throws OXException {
+    public UCSLookupActivator() {
         super();
-        this.ucsLookup = ucsLookup;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
-        return ucsLookup.handleLoginInfo(loginInfo);
     }
 
     @Override
-    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
-        throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 
+    @Override
+    protected synchronized void startBundle() throws Exception {
+        LOG.info("starting bundle: com.openexchange.authentication.ucs.common");
+
+        UCSLookupImpl impl = new UCSLookupImpl(getServiceSafe(ConfigurationService.class));
+        registerService(UCSLookup.class, impl);
+        registerService(Reloadable.class, impl);
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
+        LOG.info("Stopping bundle: com.openexchange.authentication.ucs.common");
+        super.stopBundle();
+    }
 }

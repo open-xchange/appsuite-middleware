@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pname=open-xchange-authentication-ucs
+pname=open-xchange-saml-ucs
 installroot=$(CURDIR)/debian/$(pname)
 
 configure: configure-stamp

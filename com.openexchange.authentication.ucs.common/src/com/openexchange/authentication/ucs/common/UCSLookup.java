@@ -47,57 +47,52 @@
  *
  */
 
-
-
-package com.openexchange.authentication.ucs.impl;
+package com.openexchange.authentication.ucs.common;
 
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
-import com.openexchange.authentication.ucs.common.UCSLookup;
 import com.openexchange.exception.OXException;
 
 /**
+ * 
+ * {@link UCSLookup}
  *
- * Authentication Plugin for the UCS Server Product.
- * This Class implements the needed Authentication against an UCS LDAP Server:
- * 1. User enters following information on Loginscreen: username and password (NO CONTEXT, will be resolved by the LDAP Attribute)
- * 1a. Search for given "username"  (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
- * 2. If user is found, bind to LDAP Server with the found DN
- * 3. If BIND successfull, fetch the configured "context" Attribute and parse out the context name.
- * 4. Return context name and username to OX API!
- * 5. User is logged in!
- *
- * @author Manuel Kraft
- *
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @since v7.10.1
  */
-public class UCSAuthentication implements AuthenticationService {
-
-    private final UCSLookup ucsLookup;
+public interface UCSLookup {
 
     /**
-     * Default constructor.
+     * Authentication Plugin for the UCS Server Product.
+     * This Class implements the needed Authentication against an UCS LDAP Server:
+     * 1. User enters following information on Loginscreen: username and password (NO CONTEXT, will be resolved by the LDAP Attribute)
+     * 1a. Search for given "username" (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
+     * 2. If user is found, bind to LDAP Server with the found DN
+     * 3. If BIND successful, fetch the configured "context" Attribute and parse out the context name.
+     * 4. Return context name and username to OX API!
+     * 5. User is logged in!
      *
-     * @param configService The service to use
-     * @throws OXException If initialization fails
+     * @param loginInfo The loginInfo containing username and password
+     * @return An Authenticated if the user is logged in
+     * @throws OXException If the login fails at any step
      */
-    public UCSAuthentication(UCSLookup ucsLookup) throws OXException {
-        super();
-        this.ucsLookup = ucsLookup;
-    }
+    public Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
 
     /**
-     * {@inheritDoc}
+     * Authentication Plugin for the UCS Server Product.
+     * This Class implements the needed Authentication against an UCS LDAP Server:
+     * 1. User is redirected to a SAML endpoint and comes back to the OX server with a username (NO CONTEXT, will be resolved by the LDAP Attribute)
+     * 1a. Search for given "username" (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
+     * 2. If user is found, fetch the configured "context" Attribute and parse out the context name.
+     * 3. Return context name and username to OX API!
+     * 4. User is logged in!
+     * <br>
+     * DO NOT use this method for the normal AuthenticationService it ignores the user password
+     *
+     * @param loginInfo The loginInfo containing username and password
+     * @return An Authenticated if the user is logged in
+     * @throws OXException If the login fails at any step
      */
-    @Override
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
-        return ucsLookup.handleLoginInfo(loginInfo);
-    }
-
-    @Override
-    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
-        throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
-    }
+    public Authenticated handleLoginInfo(String loginInfo) throws OXException;
 
 }
