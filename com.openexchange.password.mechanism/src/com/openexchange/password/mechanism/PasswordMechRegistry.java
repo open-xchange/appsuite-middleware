@@ -82,15 +82,6 @@ public interface PasswordMechRegistry {
     public IPasswordMech get(String identifier);
 
     /**
-     * Returns all known and applicable identifiers of the registered {@link IPasswordMech}s. One {@link IPasswordMech} might have multiple identifiers.
-     * 
-     * Note: this handling has been introduced for usability reasons
-     * 
-     * @return {@link List} containing all identifiers a {@link IPasswordMech} is available for.
-     */
-//    public List<String> getApplicableIdentifiers();
-
-    /**
      * Returns the main identifiers of the registered {@link IPasswordMech}s which might be used.
      * 
      * @return {@link List} containing the main identifiers of the registered {@link IPasswordMech}.
