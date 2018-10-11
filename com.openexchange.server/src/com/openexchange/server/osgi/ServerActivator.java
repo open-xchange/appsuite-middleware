@@ -219,6 +219,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -520,27 +521,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Authenticator
         track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));
-        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
-
-            @Override
-            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
-                try {
-                    ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
-                    management.registerMBean(objectName, new AuthenticatorMBeanImpl());
-                } catch (Exception e) {
-                    LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
-                }
-            }
-
-            @Override
-            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
-                try {
-                    management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
-                } catch (Exception e) {
-                    LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
-                }
-            }
-        });
+        track(ManagementService.class, new HousekeepingManagementTracker(context, AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN, new AuthenticatorMBeanImpl()));
         {
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put("RMIName", RemoteAuthenticator.RMI_NAME);
