@@ -97,15 +97,20 @@ public class HousekeepingManagementTracker implements ServiceTrackerCustomizer<M
     @Override
     public ManagementService addingService(ServiceReference<ManagementService> reference) {
         ManagementService managementService = context.getService(reference);
+        boolean error = true;
         try {
             ObjectName objectName = Managements.getObjectName(mbeanName, domainName);
             managementService.registerMBean(objectName, mbean);
+            error = false;
             LOG.info("Registered MBean {}", mbeanName);
             return managementService;
         } catch (Exception e) {
             LOG.warn("Could not register MBean {}", mbeanName, e);
+        } finally {
+            if (error) {
+                context.ungetService(reference);
+            }
         }
-        context.ungetService(reference);
         return null;
     }
 
