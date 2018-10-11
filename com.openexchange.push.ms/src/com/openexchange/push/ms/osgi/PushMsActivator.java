@@ -59,12 +59,15 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.ms.PushMsHandler;
 import com.openexchange.push.ms.PushMsInit;
 import com.openexchange.push.ms.Services;
+import com.openexchange.push.ms.mbean.PushMsMBean;
+import com.openexchange.push.ms.mbean.PushMsMBeanImpl;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -128,7 +131,7 @@ public class PushMsActivator extends HousekeepingActivator {
             /*
              * Service trackers
              */
-            track(ManagementService.class, new ManagementRegisterer(context));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, PushMsMBeanImpl.class.getName(), PushMsMBean.PUSH_MS_DOMAIN, new PushMsMBeanImpl()));
             track(TimerService.class);
             openTrackers();
             activated = true;
