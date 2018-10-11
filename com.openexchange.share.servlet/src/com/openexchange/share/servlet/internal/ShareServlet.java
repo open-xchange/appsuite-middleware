@@ -267,16 +267,14 @@ public class ShareServlet extends AbstractShareServlet {
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.warn("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-            String migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
+            String migrationRedirectURL = configService.getProperty("com.openexchange.share.migrationRedirectURL");
             if (Strings.isEmpty(migrationRedirectURL)) {
-                LOG.error("Cannot redirect. The property 'com.openexchange.server.migrationRedirectURL' is not set.");
+                LOG.error("Cannot redirect. The property 'com.openexchange.share.migrationRedirectURL' is not set.");
                 LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return;
             }
-            OXException redirectExc = LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
-            LoginLocation location = new LoginLocation().status("redirect").loginType(LoginType.MESSAGE).message(MessageType.ERROR, redirectExc.getMessage());
-            LoginLocationRegistry.getInstance().putAndRedirect(location, response, Collections.singletonList(request.getPathInfo()));
+            response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
             return;
         }
 
