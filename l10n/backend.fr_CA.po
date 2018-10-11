@@ -1,21 +1,21 @@
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011, 2012.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2012, 2013, 2014.
 # Antje Faber, 2011.
-# Nicolas Ternisien <nicolas@bureau-cornavin.com>, 2014, 2015, 2016.
+# Nicolas Ternisien <nicolas@bureau-cornavin.com>, 2014, 2015, 2016, 2018.
 # Sandrine Burriel <sandrine@bureau-cornavin.com>, 2014, 2015, 2016, 2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-07-16 13:32+0200\n"
-"Last-Translator: Sandrine Burriel <sandrine@workshop-chapina.com>\n"
-"Language-Team: French <fr@workshop-chapina.com>\n"
+"PO-Revision-Date: 2018-10-08 14:20+0100\n"
+"Last-Translator: Nicolas Ternisien <nicolas@workshop-chapina.com>\n"
+"Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Lokalize 2.0\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -5828,8 +5828,8 @@ msgstr ""
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
-msgstr "Le numéro de séquence est obsolète."
+msgid "This appointment already exists in your calendar."
+msgstr "Ce rendez-vous existe déjà dans votre agenda."
 
 #. *
 #. * The calendar is currently under maintenance. Please try again later.
@@ -13482,6 +13482,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid "Sequence number is outdated."
+#~ msgstr "Le numéro de séquence est obsolète."
 
 #~ msgid "????????? 1 month"
 #~ msgstr "????????? 1 mois"

@@ -1,18 +1,19 @@
 # Antje Faber <antje.faber@open-xchange.com>, 2009, 2010, 2012.
 # Andres Herrera <andres@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017.
+# Andrés Herrera <andres@workshop-chapina.com>, 2018.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-07-16 13:32+0200\n"
-"Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
-"Language-Team: Spanish <es@bureau-cornavin.com>\n"
+"PO-Revision-Date: 2018-10-08 22:16+0100\n"
+"Last-Translator: Andrés Herrera <andres@workshop-chapina.com>\n"
+"Language-Team: Spanish <ox7doc@workshop-chapina.com>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Lokalize 2.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -5732,8 +5733,8 @@ msgstr ""
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
-msgstr "El número de secuencia está desactualizado."
+msgid "This appointment already exists in your calendar."
+msgstr "Esta cita ya existe en su calendario."
 
 #. *
 #. * The calendar is currently under maintenance. Please try again later.
@@ -13341,6 +13342,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulú"
+
+#~ msgid "Sequence number is outdated."
+#~ msgstr "El número de secuencia está desactualizado."
 
 #~ msgid "????????? 1 month"
 #~ msgstr "????????? 1 mes"
