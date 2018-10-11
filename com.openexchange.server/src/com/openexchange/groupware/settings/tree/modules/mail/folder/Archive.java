@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -101,14 +102,13 @@ public class Archive implements PreferencesItemService {
         }
 
         @Override
-        protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException {
+        protected void getValue(Setting setting, Reference<MailAccessAndStorage> mailAccessReference, Session session) throws OXException {
             MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null == mass) {
                 setting.setSingleValue(null);
                 return;
             }
 
-            Session session = primaryMailAccess.getSession();
             MailAccount mailAccount = mass.getMailAccount(MailAccount.DEFAULT_ID, session.getUserId(), session.getContextId());
             String archiveFullname = mailAccount.getArchiveFullname();
 
@@ -116,6 +116,7 @@ public class Archive implements PreferencesItemService {
                 setting.setSingleValue(null);
             } else {
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(archiveFullname);
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess = getConnectedMailAccess(session, mailAccessReference);
                 if (primaryMailAccess.getFolderStorage().exists(fa.getFullName())) {
                     setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, archiveFullname));
                 } else {
