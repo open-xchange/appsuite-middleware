@@ -69,6 +69,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareExceptionMessages;
+import com.openexchange.share.ShareProperty;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -259,16 +260,14 @@ public class ShareServlet extends AbstractShareServlet {
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.warn("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             LeanConfigurationService configService = ShareServiceLookup.getService(LeanConfigurationService.class);
-            String migrationRedirectURL = configService.getProperty(ServerProperty.migrationRedirectURL);
+            String migrationRedirectURL = configService.getProperty(ShareProperty.migrationRedirectURL);
             if (Strings.isEmpty(migrationRedirectURL)) {
-                LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
+                LOG.error("Cannot redirect. The property '{}' is not set.", ShareProperty.migrationRedirectURL.getFQPropertyName());
                 LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return;
             }
-            OXException redirectExc = LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
-            LoginLocation location = new LoginLocation().status("redirect").loginType(LoginType.MESSAGE).message(MessageType.ERROR, redirectExc.getMessage());
-            LoginLocationRegistry.getInstance().putAndRedirect(location, response, Collections.singletonList(request.getPathInfo()));
+            response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
             return;
         }
         if (SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.equals(e)) {
