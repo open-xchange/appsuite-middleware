@@ -128,7 +128,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
         FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "bla");
 
-        assertEquals("UPL-LIM-4001", checkLimits.getCode());
+        assertEquals("FILE-LIMIT-4001", checkLimits.getCode());
         assertNull(checkLimits.getData());
     }
 
