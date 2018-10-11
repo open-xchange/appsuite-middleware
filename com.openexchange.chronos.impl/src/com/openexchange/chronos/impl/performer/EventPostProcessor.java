@@ -75,6 +75,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
@@ -114,8 +115,8 @@ public class EventPostProcessor {
     private final SelfProtection selfProtection;
 
     private long maximumTimestamp;
-    private Map<String, Boolean> attachmentsPerEventId;
-    private Map<String, Boolean> alarmTriggersPerEventId;
+    private Set<String> eventIdsWithAttachment;
+    private Set<String> alarmTriggersPerEventId;
     private Map<String, Integer> attendeeCountsPerEventId;
     private Map<String, Attendee> userAttendeePerEventId;
 
@@ -139,21 +140,21 @@ public class EventPostProcessor {
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ATTACHMENTS} when processing the events.
      * 
-     * @param attachmentsPerEventId A map that associates the identifiers of those events where at least one attachment stored to {@link Boolean#TRUE}
+     * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one attachment stored
      * @return A self reference
      */
-    EventPostProcessor setAttachmentsFlagInfo(Map<String, Boolean> attachmentsPerEventId) {
-        this.attachmentsPerEventId = attachmentsPerEventId;
+    EventPostProcessor setAttachmentsFlagInfo(Set<String> eventIdsWithAttachment) {
+        this.eventIdsWithAttachment = eventIdsWithAttachment;
         return this;
     }
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
      * 
-     * @param alarmTriggersPerEventId A map that associates the identifiers of those events where at least one alarm trigger is stored for the user to {@link Boolean#TRUE}
+     * @param alarmTriggersPerEventId A set holding the identifiers of those events where at least one alarm trigger is stored for the user
      * @return A self reference
      */
-    EventPostProcessor setAlarmsFlagInfo(Map<String, Boolean> alarmTriggersPerEventId) {
+    EventPostProcessor setAlarmsFlagInfo(Set<String> alarmTriggersPerEventId) {
         this.alarmTriggersPerEventId = alarmTriggersPerEventId;
         return this;
     }
@@ -374,10 +375,10 @@ public class EventPostProcessor {
         /*
          * inject additional flags based on available data
          */
-        if (null != attachmentsPerEventId && Boolean.TRUE.equals(attachmentsPerEventId.get(event.getId()))) {
+        if (null != eventIdsWithAttachment && eventIdsWithAttachment.contains(event.getId())) {
             flags.add(EventFlag.ATTACHMENTS);
         }
-        if (null != alarmTriggersPerEventId && Boolean.TRUE.equals(alarmTriggersPerEventId.get(event.getId()))) {
+        if (null != alarmTriggersPerEventId && alarmTriggersPerEventId.contains(event.getId())) {
             flags.add(EventFlag.ALARMS);
         }
         if (null != attendeeCountsPerEventId) {

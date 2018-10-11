@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -92,9 +93,9 @@ public interface AttachmentStorage {
      * Loads information about which events have at least one attachment in the storage.
      *
      * @param eventIds The identifiers of the event to get the attachment information for
-     * @return A map that associates the identifiers of those events where at least one attachment stored to {@link Boolean#TRUE}
+     * @return A set holding the identifiers of those events where at least one attachment stored
      */
-    Map<String, Boolean> hasAttachments(String[] eventIds) throws OXException;
+    Set<String> hasAttachments(String[] eventIds) throws OXException;
 
     /**
      * Loads metadata for all attachments of a specific event.

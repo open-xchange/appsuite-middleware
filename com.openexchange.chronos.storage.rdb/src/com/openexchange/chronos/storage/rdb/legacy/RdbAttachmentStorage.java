@@ -62,8 +62,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
@@ -130,7 +132,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public Map<String, Boolean> hasAttachments(String[] eventIds) throws OXException {
+    public Set<String> hasAttachments(String[] eventIds) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
@@ -347,11 +349,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return attachmentsById;
     }
 
-    private static Map<String, Boolean> selectHasAttachments(Connection connection, int contextID, String[] eventIds) throws SQLException {
+    private static Set<String> selectHasAttachments(Connection connection, int contextID, String[] eventIds) throws SQLException {
         if (null == eventIds || 0 == eventIds.length) {
-            return Collections.emptyMap();
+            return Collections.emptySet();
         }
-        Map<String, Boolean> attachmentsById = new HashMap<String, Boolean>();
+        Set<String> eventIdsWithAttachment = new HashSet<String>();
         String sql = new StringBuilder()
             .append("SELECT DISTINCT(attached) FROM prg_attachment ")
             .append("WHERE cid=? AND attached").append(getPlaceholders(eventIds.length)).append(';')
@@ -364,11 +366,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    attachmentsById.put(String.valueOf(resultSet.getInt("attached")), Boolean.TRUE);
+                    eventIdsWithAttachment.add(String.valueOf(resultSet.getInt("attached")));
                 }
             }
         }
-        return attachmentsById;
+        return eventIdsWithAttachment;
     }
 
     private static String selectFileID(Connection connection, int contextID, int attachmentID) throws SQLException {
