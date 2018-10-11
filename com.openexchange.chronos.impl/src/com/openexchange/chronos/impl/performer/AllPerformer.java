@@ -197,13 +197,14 @@ public class AllPerformer extends AbstractQueryPerformer {
              */
             fields = getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
         }
-        /*
-         * load event data per folder & additional event data per calendar user
-         */
         SearchOptions searchOptions = new SearchOptions(session);
-        Map<CalendarFolder, List<Event>> eventsPerFolder = new HashMap<CalendarFolder, List<Event>>(folders.size());
         for (Entry<Integer, List<CalendarFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
+            /*
+             * load event data per folder & additional event data per calendar user
+             */
+            int calendarUserId = i(entry.getKey());
             List<Event> eventsForCalendarUser = new ArrayList<Event>();
+            Map<CalendarFolder, List<Event>> eventsPerFolder = new HashMap<CalendarFolder, List<Event>>(entry.getValue().size());
             for (CalendarFolder folder : entry.getValue()) {
                 /*
                  * load events in folder
@@ -218,17 +219,17 @@ public class AllPerformer extends AbstractQueryPerformer {
                 }
             }
             /*
-             * batch-load additional event data for this calendar user
+             * batch-load additional event data for this calendar user & prepare associated event post-processor
              */
-            storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
-        }
-        /*
-         * post process events, based on each requested folder's perspective
-         */
-        for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            EventPostProcessor postProcessor = postProcessor(getObjectIDs(entry.getValue()), entry.getKey().getCalendarUserId(), requestedFields, fields);
-            resultsPerFolderId.put(entry.getKey().getId(), postProcessor.process(entry.getValue(), entry.getKey()).getEventsResult());
-            Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, requestedFields);
+            storage.getUtilities().loadAdditionalEventData(calendarUserId, eventsForCalendarUser, fields);
+            EventPostProcessor postProcessor = postProcessor(getObjectIDs(eventsForCalendarUser), calendarUserId, requestedFields, fields);
+            /*
+             * post process events per folder, based on each requested folder's perspective
+             */
+            for (Entry<CalendarFolder, List<Event>> eventsInFolder : eventsPerFolder.entrySet()) {
+                resultsPerFolderId.put(eventsInFolder.getKey().getId(), postProcessor.process(eventsInFolder.getValue(), eventsInFolder.getKey()).getEventsResult());
+                Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, requestedFields);
+            }
         }
         return resultsPerFolderId;
     }
