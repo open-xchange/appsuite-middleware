@@ -13,7 +13,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -58,7 +58,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/com.hazelcast.ini
 
 %changelog
-* Thu Sep 06 2018 Martin Schneider <martin.schneider@open-xchange.com>
-prepare for 7.10.1 release
+* Thu Oct 11 2018 Martin Schneider <martin.schneider@open-xchange.com>
+First candidate for 7.10.1 release
 * Mon Aug 13 2018 Martin Schneider <martin.schneider@open-xchange.com>
 Initial release
