@@ -62,8 +62,8 @@ import com.openexchange.groupware.container.FolderObject;
 public class MoveTest extends AbstractContactTest {
 
     private FolderObject folder;
-    private int targetFolder;
-    private int objectId;
+    private Integer targetFolder;
+    private Integer objectId;
 
     @Test
     public void testMove2PrivateFolder() throws Exception {
@@ -111,8 +111,12 @@ public class MoveTest extends AbstractContactTest {
     @After
     public void tearDown() throws Exception {
         try {
-            deleteContact(objectId, targetFolder, true);
-            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
+            if (objectId != null && targetFolder != null) {
+                deleteContact(objectId, targetFolder, true);
+            }
+            if (folder != null) {
+                getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
+            }
         } finally {
             super.tearDown();
         }

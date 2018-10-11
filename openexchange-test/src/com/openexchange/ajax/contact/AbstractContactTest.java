@@ -480,8 +480,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return jsonArray2ContactArray((JSONArray) response.getData(), cols);
     }
 
-    public Contact loadUser(final int userId) throws OXException, IOException, JSONException {
-        final GetContactForUserRequest request = new GetContactForUserRequest(userId, true, tz);
+    public Contact loadUser(final int uid) throws OXException, IOException, JSONException {
+        final GetContactForUserRequest request = new GetContactForUserRequest(uid, true, tz);
         final GetResponse response = getClient().execute(request);
 
         return response.getContact();
@@ -1147,12 +1147,12 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return distributionlist;
     }
 
-    private HashSet distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
+    private HashSet<?> distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
         if (distributionListEntry == null) {
             return null;
         }
 
-        final HashSet hs = new HashSet();
+        final HashSet<String> hs = new HashSet<>();
 
         for (DistributionListEntryObject element : distributionListEntry) {
             hs.add(entry2String(element));
