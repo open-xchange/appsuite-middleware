@@ -74,9 +74,9 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
         try {
             uploadInfoItem(file, MIME_TEXT_PLAIN);
-            fail();
+            fail("Upload was unexpectedly successful.");
         } catch (Throwable e) {
-            assertFalse(e instanceof AssertionError);
+            assertFalse(e.getMessage(), e instanceof AssertionError);
         }
     }
 

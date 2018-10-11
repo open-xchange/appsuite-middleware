@@ -153,7 +153,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
         String name = filename==null ? file.getName() : filename;
         InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, filesize, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset);
-        Assert.assertNull(uploadInfoItem.getError());
+        Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
         return uploadInfoItem.getData();
