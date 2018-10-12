@@ -78,6 +78,7 @@ import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
@@ -99,6 +100,11 @@ public class PushCalendarHandler implements CalendarHandler {
 
     private final PushNotificationService pushNotificationService;
 
+    /**
+     * Initializes a new {@link PushCalendarHandler}.
+     * 
+     * @param pushNotificationService A reference to the push notification service
+     */
     public PushCalendarHandler(PushNotificationService pushNotificationService) {
         super();
         this.pushNotificationService = pushNotificationService;
@@ -140,7 +146,6 @@ public class PushCalendarHandler implements CalendarHandler {
             .userId(userId)
             .sourceToken(pushToken)
             .topic("ox:calendar:updates")
-            //.topic("ox:mail:new") to test
             .messageData(messageData)
         .build();
     }
@@ -208,6 +213,18 @@ public class PushCalendarHandler implements CalendarHandler {
                     ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
                     EventID eventID = getUniqueEventID(update.getUpdate(), event.getAccountId(), attendeeUpdate.getUpdate().getEntity());
                     com.openexchange.tools.arrays.Collections.put(needsActionPerUser, I(attendeeUpdate.getUpdate().getEntity()), eventID);
+                }
+            }
+        }
+        for (DeleteResult deletion : event.getDeletions()) {
+            Event deletedEvent = deletion.getOriginal();
+            /*
+             * collect all internal user attendees whose participation status was 'needs action' for deleted events
+             */
+            for (Attendee userAttendee : filter(deletedEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                if (ParticipationStatus.NEEDS_ACTION.matches(userAttendee.getPartStat())) {
+                    EventID eventID = getUniqueEventID(deletedEvent, event.getAccountId(), userAttendee.getEntity());
+                    com.openexchange.tools.arrays.Collections.put(needsActionPerUser, I(userAttendee.getEntity()), eventID);
                 }
             }
         }
