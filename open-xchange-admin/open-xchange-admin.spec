@@ -44,13 +44,20 @@ Requires:      mysql-client >= 5.0.0
 %if 0%{?fedora_version} || 0%{?rhel_version}
 Requires:      mysql >= 5.0.0
 %endif
-Requires:      bzip2
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 Requires:      util-linux-ng
 %else
 Requires:      util-linux
 %endif
+Requires:      bzip2
+Requires:      coreutils
+Requires:      gawk
+Requires:      grep
+Requires:      gzip
 Requires:      file
+Requires:      findutils
+Requires:      sed
+Requires:      tar
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
