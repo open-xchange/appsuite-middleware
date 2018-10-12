@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast
 Bundle-SymbolicName: com.hazelcast
 Bundle-Description: Core Hazelcast Module
-Bundle-Version: 3.10.5
+Bundle-Version: 3.10.6
 Bundle-Vendor: Hazelcast
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
