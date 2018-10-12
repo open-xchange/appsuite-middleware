@@ -50,9 +50,7 @@
 package com.openexchange.websockets.grizzly.http;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,7 +69,6 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -106,7 +103,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     private static final ServletInputStream EMPTY_STREAM = new ServletInputStream() {
 
         @Override
-        public int read() throws IOException {
+        public int read() {
             return -1;
         }
 
@@ -172,7 +169,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+    public void setCharacterEncoding(String env) {
         requestPacket.setCharacterEncoding(env);
     }
 
@@ -187,7 +184,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public ServletInputStream getInputStream() throws IOException {
+    public ServletInputStream getInputStream() {
         return EMPTY_STREAM;
     }
 
@@ -250,7 +247,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public BufferedReader getReader() throws IOException {
+    public BufferedReader getReader() {
         return new BufferedReader(new InputStreamReader(getInputStream(), Charsets.UTF_8));
     }
 
@@ -755,32 +752,32 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+    public boolean authenticate(HttpServletResponse response) {
         return false;
     }
 
     @Override
-    public void login(String username, String password) throws ServletException {
+    public void login(String username, String password) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void logout() throws ServletException {
+    public void logout() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Collection<Part> getParts() throws IOException, ServletException {
+    public Collection<Part> getParts() {
         return Collections.emptyList();
     }
 
     @Override
-    public Part getPart(String name) throws IOException, ServletException {
+    public Part getPart(String name) {
         return null;
     }
 
     @Override
-    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) {
         throw new UnsupportedOperationException();
     }
 
