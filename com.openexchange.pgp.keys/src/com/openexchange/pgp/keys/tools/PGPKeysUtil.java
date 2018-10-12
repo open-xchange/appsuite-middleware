@@ -376,11 +376,14 @@ public final class PGPKeysUtil {
     public static PGPPublicKeyRing addUID(PGPPublicKeyRing publicKeyRing, PGPPrivateKey privateKey, String userId) throws PGPException {
         PGPPublicKey publicMasterKey = publicKeyRing.getPublicKey();
         PGPPublicKey newPublicMasterKey = addUID(publicMasterKey, privateKey, userId);
-        publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, publicMasterKey);
-        if (null != publicKeyRing) {
-            publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
+
+        ModifyingPGPPublicKeyRing modifyingPGPPublicKeyRing = new ModifyingPGPPublicKeyRing(publicKeyRing);
+        if(modifyingPGPPublicKeyRing.removePublicKey(publicMasterKey)) {
+            modifyingPGPPublicKeyRing.addPublicKey(newPublicMasterKey);
+            publicKeyRing = modifyingPGPPublicKeyRing.getRing();
+            return publicKeyRing;
         }
-        return publicKeyRing;
+        return null;
     }
 
     /**
