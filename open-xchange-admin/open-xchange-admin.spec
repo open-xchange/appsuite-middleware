@@ -50,6 +50,7 @@ Requires:      util-linux-ng
 %else
 Requires:      util-linux
 %endif
+Requires:      file
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
