@@ -64,6 +64,7 @@ import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.threadpool.AbstractTask;
@@ -95,7 +96,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
      * @param services The service look-up
      * @return The newly created (or existing) instance
      */
-    public static DefaultGrizzlyWebSocketApplication initializeGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+    public static DefaultGrizzlyWebSocketApplication initializeGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, GrizzlyConfig config, ServiceLookup services) {
         DefaultGrizzlyWebSocketApplication app;
         DefaultGrizzlyWebSocketApplication newApp;
         do {
@@ -103,7 +104,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
             if (null != app) {
                 return app;
             }
-            newApp = new DefaultGrizzlyWebSocketApplication(listenerRegistry, remoteDistributor, services);
+            newApp = new DefaultGrizzlyWebSocketApplication(listenerRegistry, remoteDistributor, config, services);
         } while (!APPLICATION_REFERENCE.compareAndSet(app, newApp));
         return newApp;
     }
@@ -129,13 +130,16 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
     private final WebSocketListenerRegistry listenerRegistry;
     private final RemoteWebSocketDistributor remoteDistributor;
 
+    private GrizzlyConfig config;
+
     /**
      * Initializes a new {@link DefaultGrizzlyWebSocketApplication}.
      */
-    private DefaultGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+    private DefaultGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, GrizzlyConfig config, ServiceLookup services) {
         super(services, DefaultSessionBoundWebSocket.class);
         this.listenerRegistry = listenerRegistry;
         this.remoteDistributor = remoteDistributor;
+        this.config = config;
     }
 
     /**
@@ -319,7 +323,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
 
         // Create & return new session-bound Web Socket
         String path = requestPacket.getRequestURI();
-        return new DefaultSessionBoundWebSocket(connectionId, path, parameters, handler, requestPacket, effectiveListeners);
+        return new DefaultSessionBoundWebSocket(connectionId, path, parameters, handler, requestPacket, config, effectiveListeners);
     }
 
     private static final int MAX_SIZE = 8;
