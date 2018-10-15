@@ -610,7 +610,7 @@ exclude_secret_entries() {
     local _exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
     local _separator='@SEPARATOR@'
     local _pattern='[[:blank:]]*(=|:)'
-    local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|^[[:blank:]]*#'
+    local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|secretSource|^[[:blank:]]*#'
     local _blacklist="pass(word|wd)*${_pattern}"
     local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
     local _blacklist="${_blacklist}|key${_pattern}"
