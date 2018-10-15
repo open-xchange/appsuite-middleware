@@ -47,62 +47,47 @@
  *
  */
 
-package com.openexchange.share;
+package com.openexchange.groupware.upgrade.osgi;
 
-import com.openexchange.config.lean.Property;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
+import com.openexchange.groupware.upgrade.impl.SegmentedUpdateServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ShareProperty}
+ * {@link SegmentedUpgradeActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum ShareProperty implements Property {
+public class SegmentedUpgradeActivator extends HousekeepingActivator {
 
     /**
-     * <p>Specifies the redirect URI/URL during cluster migration to which a client
-     * is redirected in case is landed on an unsuitable node (running incompatible
-     * application code).</p>
-     * <p>E.g. a user gets routed to a node running application code in version X,
-     * but that account has already been migrated to application code in version Y.</p>
-     * <p>No default value</p>
+     * Initialises a new {@link SegmentedUpgradeActivator}.
      */
-    migrationRedirectURL(ShareProperty.EMPTY),
-    ;
-
-    private static final String EMPTY = "";
-
-    private final Object defaultValue;
-
-    private static final String PREFIX = "com.openexchange.share.";
-
-    /**
-     * Initialises a new {@link ShareProperty}.
-     * 
-     * @param defaultValue The default value of the property
-     */
-    private ShareProperty(Object defaultValue) {
-        this.defaultValue = defaultValue;
+    public SegmentedUpgradeActivator() {
+        super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
-    public String getFQPropertyName() {
-        return PREFIX + name();
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
     @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    protected void startBundle() throws Exception {
+        registerService(SegmentedUpdateService.class, new SegmentedUpdateServiceImpl(this));
+        track(LeanConfigurationService.class);
+        openTrackers();
     }
 }
-

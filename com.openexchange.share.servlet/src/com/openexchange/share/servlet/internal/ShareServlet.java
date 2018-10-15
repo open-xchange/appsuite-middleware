@@ -55,9 +55,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.configuration.ServerProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
@@ -256,16 +258,23 @@ public class ShareServlet extends AbstractShareServlet {
         }
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.warn("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            LeanConfigurationService configService = ShareServiceLookup.getService(LeanConfigurationService.class);
-            String migrationRedirectURL = configService.getProperty(ShareProperty.migrationRedirectURL);
-            if (Strings.isEmpty(migrationRedirectURL)) {
-                LOG.error("Cannot redirect. The property '{}' is not set.", ShareProperty.migrationRedirectURL.getFQPropertyName());
+            SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
+            try {
+                String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
+                    LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+                    LoginLocationRegistry.getInstance().putAndRedirect(location, response);
+                    return;
+                }
+                response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
+                return;
+            } catch (OXException ex) {
+                LOG.error("Cannot redirect. An error was encountered while getting the migration URL property: {}", e.getMessage(), e);
                 LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return;
             }
-            response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
-            return;
         }
         if (SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.equals(e)) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
