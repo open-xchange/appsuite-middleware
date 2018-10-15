@@ -77,8 +77,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
-import org.glassfish.grizzly.http.server.OXRequest;
-import org.glassfish.grizzly.servlet.ServletUtils;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.dispatcher.Parameterizable;
 
@@ -130,11 +128,6 @@ public class WebsocketServletRequestWrapper implements HttpServletRequest, Param
         this.serverPort = serverPort;
         this.delegate = httpServletRequest;
         this.additionalParams = new ConcurrentHashMap<>(6, 0.9F, 1);
-
-        OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(httpServletRequest);
-        internalRequest.setXForwardPort(serverPort);
-        internalRequest.setXForwardProto(requestScheme);
-        internalRequest.setAttribute("com.openexchange.http.isForcedSecurity", Boolean.TRUE);
     }
 
     /**
