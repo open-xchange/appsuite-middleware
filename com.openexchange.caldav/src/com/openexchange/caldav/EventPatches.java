@@ -408,7 +408,7 @@ public class EventPatches {
                                 .considerUnset(true)
                                 .ignoreDefaults(true)
                             .build();
-                            if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
+                            if (false == eventUpdate.getAlarmUpdates().isEmpty() && eventUpdate.getUpdatedFields().size() == 1) {
                                 snoozedAlarm.setUid(originalAlarm.getUid());
                                 snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", originalAlarm.getUid()));
                                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(originalOccurrence.getAlarms().size());
