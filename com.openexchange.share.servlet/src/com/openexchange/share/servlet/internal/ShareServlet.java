@@ -257,7 +257,7 @@ public class ShareServlet extends AbstractShareServlet {
             return;
         }
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
-            LOG.warn("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            LOG.debug("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
             try {
                 String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
