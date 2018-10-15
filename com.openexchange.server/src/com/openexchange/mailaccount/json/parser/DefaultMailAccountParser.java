@@ -196,28 +196,28 @@ public class DefaultMailAccountParser extends DataParser {
         if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_PORT)) {
+            if (!account.isMailPortSet() && json.hasAndNotNull(MailAccountFields.MAIL_PORT)) {
                 final int mailPort = json.optInt(MailAccountFields.MAIL_PORT, -1);
                 if (mailPort > 0 && mailPort != account.getMailPort()) {
                     account.setMailPort(mailPort);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_PROTOCOL)) {
+            if (Strings.isEmpty(account.getMailProtocol()) && json.hasAndNotNull(MailAccountFields.MAIL_PROTOCOL)) {
                 final String mailProtocol = json.optString(MailAccountFields.MAIL_PROTOCOL, null);
                 if (Strings.isNotEmpty(mailProtocol) && !mailProtocol.equals(account.getMailProtocol())) {
                     account.setMailProtocol(mailProtocol);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_SERVER)) {
+            if (Strings.isEmpty(account.getMailServer()) && json.hasAndNotNull(MailAccountFields.MAIL_SERVER)) {
                 final String mailServer = json.optString(MailAccountFields.MAIL_SERVER, null);
                 if (Strings.isNotEmpty(mailServer) && !mailServer.equals(account.getMailServer())) {
                     account.setMailServer(mailServer);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_SECURE)) {
+            if (!account.isMailSecureSet() && json.hasAndNotNull(MailAccountFields.MAIL_SECURE)) {
                 final boolean mailSecure = json.optBoolean(MailAccountFields.MAIL_SECURE, account.isMailSecure());
                 if (mailSecure != account.isMailSecure()) {
                     account.setMailSecure(mailSecure);
@@ -259,28 +259,28 @@ public class DefaultMailAccountParser extends DataParser {
         if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {
             account.parseTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL).trim());
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PORT)) {
+            if (!account.isTransportPortSet() && json.hasAndNotNull(MailAccountFields.TRANSPORT_PORT)) {
                 final int transportPort = json.optInt(MailAccountFields.TRANSPORT_PORT, -1);
                 if (transportPort > 0 && transportPort != account.getTransportPort()) {
                     account.setTransportPort(transportPort);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PROTOCOL)) {
+            if (Strings.isEmpty(account.getTransportProtocol()) && json.hasAndNotNull(MailAccountFields.TRANSPORT_PROTOCOL)) {
                 final String transportProtocol = json.optString(MailAccountFields.TRANSPORT_PROTOCOL, null);
                 if (Strings.isNotEmpty(transportProtocol) && !transportProtocol.equals(account.getTransportProtocol())) {
                     account.setTransportProtocol(transportProtocol);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SERVER)) {
+            if (Strings.isEmpty(account.getTransportServer()) && json.hasAndNotNull(MailAccountFields.TRANSPORT_SERVER)) {
                 final String transportServer = json.optString(MailAccountFields.TRANSPORT_SERVER, null);
                 if (Strings.isNotEmpty(transportServer) && !transportServer.equals(account.getTransportServer())) {
                     account.setTransportServer(transportServer);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SECURE)) {
+            if (!account.isTransportSecureSet() && json.hasAndNotNull(MailAccountFields.TRANSPORT_SECURE)) {
                 final boolean transportSecure = json.optBoolean(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
                 if (transportSecure != account.isTransportSecure()) {
                     account.setTransportSecure(transportSecure);
