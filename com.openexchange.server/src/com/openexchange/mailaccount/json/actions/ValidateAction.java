@@ -93,8 +93,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ValidateAction extends AbstractMailAccountTreeAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ValidateAction.class);
-
     public static final String ACTION = AJAXServlet.ACTION_VALIDATE;
 
     /**
