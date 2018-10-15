@@ -47,73 +47,63 @@
  *
  */
 
-package com.openexchange.soap.cxf.staxutils;
+package com.openexchange.soap.cxf.interceptor;
 
+import java.io.InputStream;
+import java.util.Set;
 import javax.xml.namespace.QName;
-import org.apache.ws.commons.schema.XmlSchemaElement;
+import javax.xml.stream.XMLStreamReader;
+import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
+import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.message.Exchange;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.model.BindingOperationInfo;
+import org.apache.cxf.staxutils.transform.TransformUtils;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.soap.cxf.staxutils.DroppingXMLStreamReader;
 
 /**
- * {@link ReplacingElement} remembers all values when some XML tag needs to be replaced within the {@link ReplacingXMLStreamReader}.
+ * {@link DropDeprecatedElementsInterceptor}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-class ReplacingElement {
+public class DropDeprecatedElementsInterceptor extends AbstractInDatabindingInterceptor {
 
-    private final QName original;
-    private QName expected;
-    private XmlSchemaElement xmlSchema;
-    private int childPosition = 0;
-    private boolean onlyWithName = false;
+    private final Set<String> inDropSet;
+    private final boolean empty;
 
-    ReplacingElement(QName original) {
-        super();
-        this.original = original;
-    }
-
-    ReplacingElement(QName original, QName expected) {
-        super();
-        this.original = original;
-        this.expected = expected;
-    }
-
-    public QName getExpected() {
-        return expected;
-    }
-
-    public void setExpected(QName expected) {
-        this.expected = expected;
-    }
-
-    public XmlSchemaElement getXmlSchema() {
-        return xmlSchema;
-    }
-
-    public void setXmlSchema(XmlSchemaElement xmlSchema) {
-        this.xmlSchema = xmlSchema;
-    }
-
-    public void setChildPosition(int childPosition) {
-        this.childPosition = childPosition;
-    }
-
-    public int nextChildPosition() {
-        return childPosition++;
-    }
-
-    public void resetChildPosition() {
-        childPosition = 0;
-    }
-
-    public boolean isOnlyWithName() {
-        return onlyWithName;
-    }
-
-    public void setOnlyWithName() {
-        this.onlyWithName = true;
+    /**
+     * Initializes a new {@link DropDeprecatedElementsInterceptor}.
+     *
+     * @param inDropSet The set containing the elements to drop in incoming SOAP request
+     */
+    public DropDeprecatedElementsInterceptor(Set<String> inDropSet) {
+        super(Phase.UNMARSHAL);
+        this.inDropSet = null == inDropSet ? ImmutableSet.of() : ImmutableSet.copyOf(inDropSet);
+        empty = this.inDropSet.isEmpty();
+        addAfter(TransformGenericElementsInterceptor.class.getName());
     }
 
     @Override
-    public String toString() {
-        return "ReplacingElement \"" + original + "\" -> \"" + expected + "\"";
+    public void handleMessage(Message message) throws Fault {
+        if (empty) {
+            return;
+        }
+
+        XMLStreamReader reader = message.getContent(XMLStreamReader.class);
+        if (null != reader && reader.hasName()) {
+            QName name = reader.getName();
+            reader = TransformUtils.createNewReaderIfNeeded(reader, message.getContent(InputStream.class));
+            Exchange exchange = message.getExchange();
+            BindingOperationInfo bop = getBindingOperationInfo(exchange, name, isRequestor(message));
+            if (null != bop) {
+                // Create transforming reader
+                reader = new DroppingXMLStreamReader(reader, inDropSet);
+                message.setContent(XMLStreamReader.class, reader);
+                message.removeContent(InputStream.class);
+            }
+            // SOAP method is not found, so normal exception from CXF framework is sent.
+        }
     }
 }
