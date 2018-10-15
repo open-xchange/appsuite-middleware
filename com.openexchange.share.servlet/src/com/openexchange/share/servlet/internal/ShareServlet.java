@@ -53,10 +53,10 @@ import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
@@ -230,16 +230,23 @@ public class ShareServlet extends AbstractShareServlet {
 
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.warn("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-            String migrationRedirectURL = configService.getProperty("com.openexchange.share.migrationRedirectURL");
-            if (Strings.isEmpty(migrationRedirectURL)) {
-                LOG.error("Cannot redirect. The property 'com.openexchange.share.migrationRedirectURL' is not set.");
+            SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
+            try {
+                String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.warn("Cannot redirect. The property 'com.openexchange.share.migrationRedirectURL' is not set.");
+                    LoginLocation location = new LoginLocation().loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+                    LoginLocationRegistry.getInstance().putAndRedirect(location, response);
+                    return;
+                }
+                response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
+                return;
+            } catch (OXException ex) {
+                LOG.error("Cannot redirect. An error was encountered while getting the migration URL property: {}", e.getMessage(), e);
                 LoginLocation location = new LoginLocation().loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return;
             }
-            response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
-            return;
         }
 
         LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
