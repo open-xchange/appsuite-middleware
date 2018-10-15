@@ -1,0 +1,52 @@
+
+@Library('pipeline-library') _
+
+def myLabel = "dockerbuild-${UUID.randomUUID().toString()}"
+def image 
+
+pipeline {
+
+    agent {
+	kubernetes {
+		label myLabel
+		defaultContainer 'jnlp'
+		yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: jagregory/pandoc:latest
+    command:
+    - cat
+    tty: true
+"""
+}
+}
+    stages {
+        stage('Run Pandoc Docker') {
+            steps { 
+                container('docker') {
+			
+			sh 'cd /home/jenkins/workspace/buildManpages/documentation-clt; ./createmanpages.sh'
+ 			sh 'ls -l /home/jenkins/workspace/buildManpages/documentation-clt'
+			sh 'ls -l /home/jenkins/workspace/buildManpages/documentation-clt/output'	
+			
+		
+	
+        }	
+      }
+    }
+
+    stage('Archive manpages.gz') {
+  	
+	steps {
+ 
+	  archiveArtifacts artifacts: 'documentation-clt/output/*.gz'
+	
+	}          
+    }	
+  }
+}
+ 
+
