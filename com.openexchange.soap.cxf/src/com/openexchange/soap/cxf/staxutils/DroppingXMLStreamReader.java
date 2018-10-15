@@ -49,71 +49,69 @@
 
 package com.openexchange.soap.cxf.staxutils;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import javax.xml.namespace.QName;
-import org.apache.ws.commons.schema.XmlSchemaElement;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.util.StreamReaderDelegate;
 
 /**
- * {@link ReplacingElement} remembers all values when some XML tag needs to be replaced within the {@link ReplacingXMLStreamReader}.
+ * {@link DroppingXMLStreamReader}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-class ReplacingElement {
+public class DroppingXMLStreamReader extends StreamReaderDelegate {
 
-    private final QName original;
-    private QName expected;
-    private XmlSchemaElement xmlSchema;
-    private int childPosition = 0;
-    private boolean onlyWithName = false;
+    private final Set<String> inDropSet;
+    private int depth;
 
-    ReplacingElement(QName original) {
-        super();
-        this.original = original;
+    public DroppingXMLStreamReader(XMLStreamReader reader, Set<String> inDropSet) {
+        super(reader);
+        this.inDropSet = null == inDropSet ? null : ImmutableSet.copyOf(inDropSet);
     }
 
-    ReplacingElement(QName original, QName expected) {
-        super();
-        this.original = original;
-        this.expected = expected;
-    }
-
-    public QName getExpected() {
-        return expected;
-    }
-
-    public void setExpected(QName expected) {
-        this.expected = expected;
-    }
-
-    public XmlSchemaElement getXmlSchema() {
-        return xmlSchema;
-    }
-
-    public void setXmlSchema(XmlSchemaElement xmlSchema) {
-        this.xmlSchema = xmlSchema;
-    }
-
-    public void setChildPosition(int childPosition) {
-        this.childPosition = childPosition;
-    }
-
-    public int nextChildPosition() {
-        return childPosition++;
-    }
-
-    public void resetChildPosition() {
-        childPosition = 0;
-    }
-
-    public boolean isOnlyWithName() {
-        return onlyWithName;
-    }
-
-    public void setOnlyWithName() {
-        this.onlyWithName = true;
+    public int getDepth() {
+        return depth;
     }
 
     @Override
-    public String toString() {
-        return "ReplacingElement \"" + original + "\" -> \"" + expected + "\"";
+    public String getElementText() throws XMLStreamException {
+        XMLStreamReader reader = getParent();
+        String ret = reader.getElementText();
+        //workaround bugs in some readers that aren't properly advancing to
+        //the END_ELEMENT (*cough*jettison*cough*)
+        while (reader.getEventType() != XMLStreamConstants.END_ELEMENT) {
+            reader.next();
+        }
+        depth--;
+        return ret;
     }
+
+    @Override
+    public int next() throws XMLStreamException {
+        int event = super.next();
+        if (XMLStreamConstants.START_ELEMENT == event) {
+            depth++;
+            QName name = super.getName();
+            boolean dropped = inDropSet.contains(name.getLocalPart());
+            if (dropped) {
+                // skip the current element (deep drop)
+                handleDeepDrop();
+                event = next();
+            }
+        } else if (XMLStreamConstants.END_ELEMENT == event) {
+            depth--;
+        }
+        return event;
+    }
+
+    private void handleDeepDrop() throws XMLStreamException {
+        int depth = getDepth();
+        while (depth != getDepth() || super.next() != XMLStreamConstants.END_ELEMENT) {
+            // get to the matching end element event
+        }
+    }
+
 }
