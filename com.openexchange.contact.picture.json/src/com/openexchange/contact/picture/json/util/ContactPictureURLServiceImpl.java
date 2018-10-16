@@ -51,6 +51,8 @@ package com.openexchange.contact.picture.json.util;
 
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.GUEST_CONTEXT;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.GUEST_USER;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.USER;
 import java.net.URISyntaxException;
 import org.apache.http.client.utils.URIBuilder;
@@ -144,6 +146,14 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
 
         if (timestamp != null) {
             builder.addParameter("timestamp", String.valueOf(timestamp));
+        }
+        if (session.containsParameter(Session.PARAM_GUEST)) {
+            /*
+             * If we have a guest session, explicit set context and user.
+             * Thus we can support multiple session/shares cross-context
+             */
+            builder.setParameter(GUEST_USER.getParameter(), String.valueOf(session.getUserId()));
+            builder.setParameter(GUEST_CONTEXT.getParameter(), String.valueOf(session.getContextId()));
         }
 
         try {
