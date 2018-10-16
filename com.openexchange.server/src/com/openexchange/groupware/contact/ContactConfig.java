@@ -110,7 +110,7 @@ public class ContactConfig {
 
     /**
      * Gets the value of a property from the file.
-     * 
+     *
      * @param key name of the property.
      * @return the value of the property.
      */
@@ -121,7 +121,7 @@ public class ContactConfig {
 
     /**
      * Gets the value of a property from the file.
-     * 
+     *
      * @param key name of the property.
      * @return the value of the property.
      */
@@ -202,7 +202,7 @@ public class ContactConfig {
         /**
          * Defines the scale type
          */
-        SCALE_TYPE("com.openexchange.contact.image.scaleType", "2");
+        SCALE_TYPE("com.openexchange.contact.image.scaleType", "1");
 
         /**
          * Name of the property in the participant.properties file.
@@ -216,7 +216,7 @@ public class ContactConfig {
 
         /**
          * Default constructor.
-         * 
+         *
          * @param keyName Name of the property in the participant.properties
          *            file.
          * @param value Default value of the property.
