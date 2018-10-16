@@ -1668,6 +1668,39 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
+    public boolean existsInServer(Context ctx, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
+        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+        if (ctx == null) {
+            throw new InvalidDataException("Given context is invalid");
+        }
+
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    try {
+                        oxContextPlugin.existsInServer(ctx, auth);
+                    } catch (final PluginException e) {
+                        LOGGER.error("", e);
+                        throw StorageException.wrapForRMI(e);
+                    }
+                }
+            }
+        }
+
+        if (null != ctx.getId()) {
+            return tool.existsContextInServer(ctx);
+        } else if (null != ctx.getName()) {
+            return tool.existsContextNameInServer(ctx.getName());
+        } else {
+            throw new InvalidDataException("neither id or name is set in supplied context object");
+        }
+    }
+
+    @Override
     public boolean checkExists(final Context ctx, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, credentials);
     }
