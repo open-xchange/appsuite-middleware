@@ -1516,6 +1516,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         tmp = soapUser.getDriveUserFolderMode();
         if (tmp != null) {
             user.setDriveFolderMode(tmp);
+        } else {
+            tmp = soapUser.getDriveUserFolderModeAlt();
+            if (tmp != null) {
+                user.setDriveFolderMode(tmp);
+            }
         }
 
         tmp = soapUser.getDepartment();
@@ -2105,10 +2110,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setPrimaryAccountName(tmp);
         }
-        
+
         Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
-            user.setConvertDriveUserFolders(bool_tmp);
+            user.setConvertDriveUserFolders(bool_tmp.booleanValue());
         }
 
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
@@ -2167,6 +2172,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setCountryOther(user.getCountry_other());
         soapUser.setDefaultSenderAddress(user.getDefaultSenderAddress());
         soapUser.setDriveUserFolderMode(user.getDriveFolderMode());
+        soapUser.setDriveUserFolderModeAlt(user.getDriveFolderMode());
         soapUser.setDefaultGroup(group2Soap(user.getDefault_group()));
         soapUser.setDepartment(user.getDepartment());
         soapUser.setDisplayName(user.getDisplay_name());
