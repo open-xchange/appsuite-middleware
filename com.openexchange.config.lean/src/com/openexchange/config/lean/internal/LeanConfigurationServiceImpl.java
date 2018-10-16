@@ -305,12 +305,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             ConfigView view = factory.getView(userId, contextId);
 
             ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(optionals), coerceTo);
-            if (!p.isDefined()) {
-                defaultValue = property.getDefaultValue(coerceTo);
-                return defaultValue;
-            }
-
-            return p.get();
+            return p.isDefined() ? p.get() : property.getDefaultValue(coerceTo);
         } catch (Exception e) {
             defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, I(userId), I(contextId), defaultValue, e);
