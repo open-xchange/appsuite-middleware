@@ -53,12 +53,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link File}
+ * {@link LimitFile}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class File {
+public class LimitFile {
 
     private String name;
 

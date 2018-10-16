@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.type.TypeLimitChecker;
 import com.openexchange.session.Session;
 import com.openexchange.test.mock.MockUtils;
@@ -79,7 +79,7 @@ public class TypeLimitCheckerRegistryTest {
         }
 
         @Override
-        public List<OXException> check(Session session, String folderId, List<File> files) throws OXException {
+        public List<OXException> check(Session session, String folderId, List<LimitFile> files) throws OXException {
             return Collections.emptyList();
         }
     };
@@ -91,7 +91,7 @@ public class TypeLimitCheckerRegistryTest {
         }
 
         @Override
-        public List<OXException> check(Session session, String folderId, List<File> files) throws OXException {
+        public List<OXException> check(Session session, String folderId, List<LimitFile> files) throws OXException {
             return Collections.emptyList();
         }
     };
