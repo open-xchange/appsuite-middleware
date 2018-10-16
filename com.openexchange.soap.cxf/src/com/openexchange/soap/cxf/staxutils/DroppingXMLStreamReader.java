@@ -60,18 +60,29 @@ import javax.xml.stream.util.StreamReaderDelegate;
 /**
  * {@link DroppingXMLStreamReader}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DroppingXMLStreamReader extends StreamReaderDelegate {
 
     private final Set<String> inDropSet;
     private int depth;
 
+    /**
+     * Initializes a new {@link DroppingXMLStreamReader}.
+     *
+     * @param reader The XML stream reader to wrap
+     * @param inDropSet The set containing the elements to drop in incoming SOAP request
+     */
     public DroppingXMLStreamReader(XMLStreamReader reader, Set<String> inDropSet) {
         super(reader);
         this.inDropSet = null == inDropSet ? null : ImmutableSet.copyOf(inDropSet);
     }
 
+    /**
+     * Gets current element depth count
+     *
+     * @return The depth count
+     */
     public int getDepth() {
         return depth;
     }

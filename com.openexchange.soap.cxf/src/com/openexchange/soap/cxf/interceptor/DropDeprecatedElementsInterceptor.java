@@ -66,20 +66,31 @@ import com.openexchange.soap.cxf.staxutils.DroppingXMLStreamReader;
 /**
  * {@link DropDeprecatedElementsInterceptor}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DropDeprecatedElementsInterceptor extends AbstractInDatabindingInterceptor {
 
     private final Set<String> inDropSet;
+    private final boolean empty;
 
+    /**
+     * Initializes a new {@link DropDeprecatedElementsInterceptor}.
+     *
+     * @param inDropSet The set containing the elements to drop in incoming SOAP request
+     */
     public DropDeprecatedElementsInterceptor(Set<String> inDropSet) {
         super(Phase.UNMARSHAL);
         this.inDropSet = null == inDropSet ? ImmutableSet.of() : ImmutableSet.copyOf(inDropSet);
+        empty = this.inDropSet.isEmpty();
         addAfter(TransformGenericElementsInterceptor.class.getName());
     }
 
     @Override
     public void handleMessage(Message message) throws Fault {
+        if (empty) {
+            return;
+        }
+
         XMLStreamReader reader = message.getContent(XMLStreamReader.class);
         if (null != reader && reader.hasName()) {
             QName name = reader.getName();
