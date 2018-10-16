@@ -49,8 +49,11 @@
 
 package com.openexchange.chronos.alarm.json;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -74,6 +77,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class UpdateAlarmsAction extends ChronosAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_PUSH_TOKEN);
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
     /**
      * Initializes a new {@link UpdateAlarmsAction}.
