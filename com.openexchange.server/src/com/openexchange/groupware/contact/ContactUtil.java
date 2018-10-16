@@ -204,9 +204,9 @@ public class ContactUtil {
         ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
         if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
-                return service.getUserPictureUrl(con.getInternalUserId(), session, true);
+                return service.getUserPictureUrl(con.getInternalUserId(), session, con.getImageLastModified().getTime(), true);
             } else {
-                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, true);
+                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, con.getImageLastModified().getTime(), true);
             }
         }
         return null;
