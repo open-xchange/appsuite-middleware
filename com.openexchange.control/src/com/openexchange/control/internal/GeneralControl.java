@@ -60,7 +60,9 @@ import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import javax.management.StandardMBean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -77,7 +79,7 @@ import com.openexchange.version.Version;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
+public class GeneralControl extends StandardMBean implements GeneralControlMBean, MBeanRegistration {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GeneralControl.class);
 
@@ -90,9 +92,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
      * Initializes a new {@link GeneralControl}.
      *
      * @param bundleContext The associated bundle context
+     * @throws NotCompliantMBeanException
      */
-    public GeneralControl(final BundleContext bundleContext) {
-        super();
+    public GeneralControl(final BundleContext bundleContext) throws NotCompliantMBeanException {
+        super(GeneralControlMBean.class);
         this.bundleContext = bundleContext;
     }
 
