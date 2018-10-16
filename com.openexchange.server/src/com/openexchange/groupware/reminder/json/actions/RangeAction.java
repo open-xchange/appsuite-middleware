@@ -107,6 +107,7 @@ public final class RangeAction extends AbstractReminderAction {
             timeZone = null == timeZoneId ? tz : getTimeZone(timeZoneId);
         }
 
+
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         try {
             final ServerSession session = req.getSession();
@@ -116,7 +117,7 @@ public final class RangeAction extends AbstractReminderAction {
             final JSONArray jsonResponseArray = new JSONArray();
             for (ReminderObject reminder : reminders) {
                 try {
-                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                    if (isRequested(req, reminder) && hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
                         final JSONObject jsonReminderObj = new JSONObject(12);
                         reminderWriter.writeObject(reminder, jsonReminderObj);
                         jsonResponseArray.put(jsonReminderObj);

@@ -109,45 +109,45 @@ public final class UpdatesAction extends AbstractReminderAction {
         }
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         final JSONArray jsonResponseArray = new JSONArray();
-            final ServerSession session = req.getSession();
-            final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
+        final ServerSession session = req.getSession();
+        final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
 
-            List<ReminderObject> reminders = reminderService.listModifiedReminder(session, session.getUserId(), timestamp);
-            for(ReminderObject reminder: reminders){
-                try {
-                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
-                        final JSONObject jsonReminderObj = new JSONObject(12);
-                        reminderWriter.writeObject(reminder, jsonReminderObj);
-                        jsonResponseArray.put(jsonReminderObj);
-                    }
-                } catch (OXException e) {
-                    if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
-                        throw e;
-                    }
-                    LOG.warn("Cannot load target object of this reminder.", e);
-                    deleteReminderSafe(session, reminder, session.getUserId(), reminderService);
+        List<ReminderObject> reminders = reminderService.listModifiedReminder(session, session.getUserId(), timestamp);
+        for (ReminderObject reminder : reminders) {
+            try {
+                if (isRequested(req, reminder) && hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                    final JSONObject jsonReminderObj = new JSONObject(12);
+                    reminderWriter.writeObject(reminder, jsonReminderObj);
+                    jsonResponseArray.put(jsonReminderObj);
                 }
-            }
-
-            CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
-            CalendarSession calendarSession = calendarService.init(session);
-            calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
-            UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
-
-            List<AlarmTrigger> triggers = calendarService.getAlarmTriggers(calendarSession, Collections.singleton("DISPLAY"));
-            List<Integer> updatedAlarmIds = new ArrayList<>();
-            for(Event eve : updatedEventsOfUser.getNewAndModifiedEvents()){
-                for(Alarm alarm: eve.getAlarms()){
-                    updatedAlarmIds.add(alarm.getId());
+            } catch (OXException e) {
+                if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                    throw e;
                 }
+                LOG.warn("Cannot load target object of this reminder.", e);
+                deleteReminderSafe(session, reminder, session.getUserId(), reminderService);
             }
-            for (AlarmTrigger trigger: triggers) {
-                if (updatedAlarmIds.contains(trigger.getAlarm())) {
-                    convertAlarmTrigger2Reminder(calendarSession, trigger, reminderWriter, jsonResponseArray);
-                }
-            }
+        }
 
-            return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+        CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
+        CalendarSession calendarSession = calendarService.init(session);
+        calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
+        UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
+
+        List<AlarmTrigger> triggers = calendarService.getAlarmTriggers(calendarSession, Collections.singleton("DISPLAY"));
+        List<Integer> updatedAlarmIds = new ArrayList<>();
+        for (Event eve : updatedEventsOfUser.getNewAndModifiedEvents()) {
+            for (Alarm alarm : eve.getAlarms()) {
+                updatedAlarmIds.add(alarm.getId());
+            }
+        }
+        for (AlarmTrigger trigger : triggers) {
+            if (updatedAlarmIds.contains(trigger.getAlarm())) {
+                convertAlarmTrigger2Reminder(calendarSession, trigger, reminderWriter, jsonResponseArray);
+            }
+        }
+
+        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
     }
 
 }
