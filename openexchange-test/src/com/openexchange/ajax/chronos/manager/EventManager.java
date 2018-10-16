@@ -219,6 +219,19 @@ public class EventManager extends AbstractManager {
     public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
         return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
     }
+    
+    /**
+     * Update the specified event and attach the specified {@link Asset}. Notifies attendees of the event.
+     *
+     * @param eventData The event
+     * @param asset The {@link Asset} to attach
+     * @return The updated {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException On JSON errors
+     */
+    public JSONObject updateEventWithAttachmentAndNotification(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
+    }
 
     private String getFolder(EventData eventData) {
         return eventData.getFolder() == null ? defaultFolder : eventData.getFolder();
