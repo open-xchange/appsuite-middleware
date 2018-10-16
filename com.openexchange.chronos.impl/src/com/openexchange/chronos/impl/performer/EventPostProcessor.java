@@ -199,7 +199,7 @@ public class EventPostProcessor {
      */
     public EventPostProcessor process(Collection<Event> events, CalendarFolder inFolder) throws OXException {
         for (Event event : events) {
-            doProcess(event, inFolder);
+            doProcess(injectUserAttendeeData(event), inFolder);
             checkResultSizeNotExceeded();
         }
         return this;
@@ -222,7 +222,7 @@ public class EventPostProcessor {
      * @return A self reference
      */
     public EventPostProcessor process(Event event, CalendarFolder inFolder) throws OXException {
-        doProcess(event, inFolder);
+        doProcess(injectUserAttendeeData(event), inFolder);
         checkResultSizeNotExceeded();
         return this;
     }
@@ -247,7 +247,7 @@ public class EventPostProcessor {
      */
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
         for (Event event : events) {
-            doProcess(event, getFolder(session, getFolderView(event, forUser), false));
+            doProcess(event, getFolder(session, getFolderView(injectUserAttendeeData(event), forUser), false));
             checkResultSizeNotExceeded();
         }
         return this;
@@ -294,15 +294,6 @@ public class EventPostProcessor {
     }
 
     protected boolean doProcess(Event event, CalendarFolder folder) throws OXException {
-        if (null != userAttendeePerEventId) {
-            /*
-             * inject data for attendee of underlying calendar user
-             */
-            Attendee attendee = userAttendeePerEventId.get(event.getId());
-            if (null != attendee) {
-                event.setAttendees(Collections.singletonList(attendee));
-            }
-        }
         if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
             /*
              * excluded if classified as private for the session user
@@ -429,6 +420,25 @@ public class EventPostProcessor {
             }
         }
         return list;
+    }
+
+    /**
+     * Injects essential information about the calendar user attendee prior processing the event, in case it is available.
+     * 
+     * @param event The event to enrich with essential information about the calendar user attendee
+     * @return The event, enriched with data about the calendar user attendee if available
+     */
+    private Event injectUserAttendeeData(Event event) {
+        if (null != userAttendeePerEventId) {
+            /*
+             * inject data for attendee of underlying calendar user
+             */
+            Attendee attendee = userAttendeePerEventId.get(event.getId());
+            if (null != attendee) {
+                event.setAttendees(Collections.singletonList(attendee));
+            }
+        }
+        return event;
     }
 
 }
