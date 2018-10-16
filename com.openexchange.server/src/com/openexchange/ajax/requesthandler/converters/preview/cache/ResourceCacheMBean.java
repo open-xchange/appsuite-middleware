@@ -51,13 +51,14 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
 import javax.management.MBeanException;
 
-
 /**
  * {@link ResourceCacheMBean} - The Mbean for resource cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ResourceCacheMBean {
+
+    public static final String DOMAIN = "com.openexchange.preview.cache";
 
     /**
      * Clears all cache entries.
