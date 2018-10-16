@@ -130,7 +130,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        
+
         checkOwnerShipAndSetSid(ctx, auth);
 
         try {
@@ -145,7 +145,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        
+
         checkOwnerShipAndSetSid(ctx, auth);
 
         try {
@@ -160,7 +160,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
-        
+
         checkOwnerShipAndSetSid(ctx, auth);
 
         try {
@@ -464,6 +464,23 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     @Override
     public void exists(Context ctx, Credentials auth) throws PluginException {
+        if (cache.isMasterAdmin(auth)) {
+            return;
+        }
+        if (null == ctx.getId()) {
+            try {
+                ctx.setId(Integer.valueOf(OXToolStorageInterface.getInstance().getContextIDByContextname(ctx.getName())));
+            } catch (StorageException e) {
+                throw new PluginException(e);
+            } catch (NoSuchObjectException e) {
+                return;
+            }
+        }
+        checkOwnerShipAndSetSid(ctx, auth);
+    }
+
+    @Override
+    public void existsInServer(Context ctx, Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
             return;
         }

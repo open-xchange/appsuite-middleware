@@ -273,6 +273,14 @@ public interface OXContextPluginInterface {
     /**
      * @param ctx
      * @param auth
+     * @return
+     * @throws PluginException
+     */
+    public void existsInServer(Context ctx, Credentials auth) throws PluginException;
+
+    /**
+     * @param ctx
+     * @param auth
      * @throws PluginException
      */
     public void getAdminId(Context ctx, Credentials auth) throws PluginException;
