@@ -207,12 +207,12 @@ public class ContactConfig {
         /**
          * Name of the property in the participant.properties file.
          */
-        private String propertyName;
+        private final String propertyName;
 
         /**
          * Default value of the property.
          */
-        private String defaultValue;
+        private final String defaultValue;
 
         /**
          * Default constructor.
