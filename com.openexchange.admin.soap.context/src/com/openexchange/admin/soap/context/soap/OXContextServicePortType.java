@@ -296,6 +296,18 @@ public interface OXContextServicePortType {
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:existsInServer", output = "urn:existsInServerResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:existsInServerStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:existsInServerInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:existsInServerInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:existsInServerRemoteException")})
+    @RequestWrapper(localName = "existsInServer", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ExistsInServer")
+    @WebMethod(action = "urn:existsInServer")
+    @ResponseWrapper(localName = "existsInServerResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ExistsInServerResponse")
+    public java.lang.Boolean existsInServer(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.Context ctx,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:listByDatabase", output = "urn:listByDatabaseResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listByDatabaseStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByDatabaseInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByDatabaseInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listByDatabaseRemoteException"), @FaultAction(className = NoSuchDatabaseException_Exception.class, value = "urn:listByDatabaseNoSuchDatabaseException")})
     @RequestWrapper(localName = "listByDatabase", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ListByDatabase")
     @WebMethod(action = "urn:listByDatabase")

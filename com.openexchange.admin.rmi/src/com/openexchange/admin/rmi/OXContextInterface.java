@@ -636,6 +636,15 @@ public interface OXContextInterface extends Remote {
     public boolean exists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
 
     /**
+     * Determines whether a context exists in the registered server this provisioning node is running in.
+     *
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
+     * @param auth Credentials for authenticating against the server.
+     * @return Whether the given context exists in server or not
+     */
+    public boolean existsInServer(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
+
+    /**
      * Determines whether a context already exists.
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.

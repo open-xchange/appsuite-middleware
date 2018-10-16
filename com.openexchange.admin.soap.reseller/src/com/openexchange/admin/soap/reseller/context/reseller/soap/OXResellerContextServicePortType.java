@@ -220,6 +220,18 @@ public interface OXResellerContextServicePortType {
         com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
     ) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
+    @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+    @Action(input = "urn:existsInServer", output = "urn:existsInServerResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:existsInServerInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:existsInServerDuplicateExtensionException"), @FaultAction(className = StorageException_Exception.class, value = "urn:existsInServerStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:existsInServerRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:existsInServerInvalidDataException")})
+    @RequestWrapper(localName = "existsInServer", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ExistsInServer")
+    @WebMethod(action = "urn:existsInServer")
+    @ResponseWrapper(localName = "existsInServerResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ExistsInServerResponse")
+    public java.lang.Boolean existsInServer(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+    ) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
+
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:disableAll", output = "urn:disableAllResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:disableAllInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:disableAllDuplicateExtensionException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:disableAllNoSuchContextException"), @FaultAction(className = NoSuchReasonException_Exception.class, value = "urn:disableAllNoSuchReasonException"), @FaultAction(className = StorageException_Exception.class, value = "urn:disableAllStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:disableAllRemoteException"), @FaultAction(className = OXContextException_Exception.class, value = "urn:disableAllOXContextException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:disableAllInvalidDataException")})
     @WebMethod(action = "urn:disableAll")

@@ -181,6 +181,11 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
     }
 
     @Override
+    public void existsInServer(Context ctx, Credentials auth) throws PluginException {
+        // Nothing to do.
+    }
+
+    @Override
     public void getAdminId(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }

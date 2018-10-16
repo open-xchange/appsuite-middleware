@@ -81,6 +81,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
@@ -242,13 +243,67 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
+    @Override
+    public boolean existsContextInServer(Context ctx) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            return existsContextInServer(ctx, con);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if specified context does exist in the registered server this provisioning is running in.
+     * <p>
+     * Although this method accepts a context Object it will only look after the context identifier
+     *
+     * @param ctx The context providing the context identifier
+     * @param con The connection to use or <code>null</code>
+     * @return <code>true</code> if context exists in server; otherwise <code>false</code> (either non-existing at all or resides in another server)
+     * @throws StorageException If checks fails
+     */
+    public boolean existsContextInServer(Context ctx, Connection con) throws StorageException {
+        if (null == con) {
+            return existsContextInServer(ctx);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            int serverId = cache.getServerId();
+            stmt = con.prepareStatement("SELECT 1 FROM context AS c JOIN context_server2db_pool AS c2s ON c.cid=c2s.cid WHERE c2s.server_id=? AND c.cid=?");
+            stmt.setInt(1, serverId);
+            stmt.setInt(2, ctx.getId().intValue());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     /*
      * Check if any login mapping in the given context already exists in the system
      */
     @Override
     public boolean existsContextLoginMappings(final Context ctx) throws StorageException {
         Connection con = null;
-
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
             return existsContextLoginMappings(ctx, con);
@@ -2421,9 +2476,120 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public boolean existsContextNameInServer(Context ctx) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            return existsContextNameInServer(ctx, con);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks context existence in server and if there is no other context with the same name
+     * <p>
+     * Should be used in change method!
+     *
+     * @param ctx The context
+     * @param con The connection to use or <code>null</code>
+     * @return <code>true</code> if denoted context currently holds a different name, otherwise <code>false</code> if name is equal
+     * @throws StorageException If existence check fails
+     */
+    public boolean existsContextNameInServer(Context ctx, Connection con) throws StorageException {
+        if (null == con) {
+            return existsContextNameInServer(ctx);
+        }
+
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            int serverId = cache.getServerId();
+            prep_check = con.prepareStatement("SELECT c.cid FROM context AS c JOIN context_server2db_pool AS c2s ON c.cid=c2s.cid WHERE c2s.server_id=? AND c.name = ? AND c.cid !=?");
+            prep_check.setInt(1, serverId);
+            prep_check.setString(2, ctx.getName());
+            prep_check.setInt(3, ctx.getId().intValue());
+            rs = prep_check.executeQuery();
+            return rs.next();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+        }
+    }
+
+    @Override
     public boolean existsContextName(final String contextName) throws StorageException {
         final Context ctx = new Context(-1, contextName);
         return existsContextName(ctx);
+    }
+
+    @Override
+    public boolean existsContextNameInServer(String contextName) throws StorageException {
+        Context ctx = new Context(-1, contextName);
+        return existsContextNameInServer(ctx);
+    }
+
+    @Override
+    public boolean checkContextName(Context ctx) throws NoSuchContextException, InvalidDataException, StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            int contextId = ctx.getId().intValue();
+            String name = ctx.getName();
+            prep_check = con.prepareStatement("SELECT cid, name FROM context WHERE name=? OR cid=?");
+            prep_check.setString(1, name);
+            prep_check.setInt(2, contextId);
+            rs = prep_check.executeQuery();
+
+            String foundName = null;
+            while (rs.next()) {
+                int cid = rs.getInt(1);
+                if (cid != contextId) {
+                    throw new InvalidDataException("Context " + name + " already exists!");
+                }
+                foundName = rs.getString(2);
+            }
+
+            if (null == foundName) {
+                throw new NoSuchContextException();
+            }
+            return !name.equalsIgnoreCase(foundName);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
     }
 
     @Override
