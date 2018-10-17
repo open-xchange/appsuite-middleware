@@ -62,6 +62,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -146,7 +147,9 @@ public class BasicCommentTest extends AbstractChronosTest {
         eventData = eventManager.createEvent(eventData);
 
         // Update with attachment
-        eventManager.updateEventWithAttachmentAndNotification(eventData, assetManager.getRandomAsset(AssetType.pdf));
+        Asset attachment = assetManager.getRandomAsset(AssetType.pdf);
+        eventData.setAttachments(Collections.singletonList(EventFactory.createAttachment(attachment)));
+        eventManager.updateEventWithAttachmentAndNotification(eventData, attachment);
 
         validateMailInSecondUsersInbox("Appointment changed: " + summary, UPDATE);
     }
