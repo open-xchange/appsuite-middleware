@@ -128,7 +128,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         }
     }
 
-    private List<Integer> getModules(AJAXRequestData req) {
+    private List<Integer> getModules(AJAXRequestData req) throws OXException {
         String parameter = req.getParameter(MODULES_PARAMETER);
         if (Strings.isEmpty(parameter)) {
             return null;
@@ -136,9 +136,13 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         String[] splitByCommaNotInQuotes = Strings.splitByCommaNotInQuotes(parameter);
         List<Integer> result = new ArrayList<>(splitByCommaNotInQuotes.length);
         for (String str : splitByCommaNotInQuotes) {
-            int module = AJAXServlet.getModuleInteger(str);
-            if (module >= 0) {
-                result.add(module);
+            try {
+                int module = Integer.valueOf(str);
+                if (module >= 0) {
+                    result.add(module);
+                }
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MODULES_PARAMETER, parameter);
             }
         }
         return result.isEmpty() ? null : result;

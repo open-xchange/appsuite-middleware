@@ -65,6 +65,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -131,8 +132,9 @@ public final class RangeAction extends AbstractReminderAction {
                 }
             }
 
-
-            addEventReminder(session, jsonResponseArray, reminderWriter, end);
+            if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(Types.APPOINTMENT)) {
+                addEventReminder(session, jsonResponseArray, reminderWriter, end);
+            }
 
             return new AJAXRequestResult(jsonResponseArray, "json");
         } catch (final OXException e) {

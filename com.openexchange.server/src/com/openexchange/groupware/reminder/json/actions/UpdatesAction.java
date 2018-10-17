@@ -71,6 +71,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
@@ -128,22 +129,23 @@ public final class UpdatesAction extends AbstractReminderAction {
                 deleteReminderSafe(session, reminder, session.getUserId(), reminderService);
             }
         }
+        if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(Types.APPOINTMENT)) {
+            CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
+            CalendarSession calendarSession = calendarService.init(session);
+            calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
+            UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
 
-        CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
-        CalendarSession calendarSession = calendarService.init(session);
-        calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
-        UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
-
-        List<AlarmTrigger> triggers = calendarService.getAlarmTriggers(calendarSession, Collections.singleton("DISPLAY"));
-        List<Integer> updatedAlarmIds = new ArrayList<>();
-        for (Event eve : updatedEventsOfUser.getNewAndModifiedEvents()) {
-            for (Alarm alarm : eve.getAlarms()) {
-                updatedAlarmIds.add(alarm.getId());
+            List<AlarmTrigger> triggers = calendarService.getAlarmTriggers(calendarSession, Collections.singleton("DISPLAY"));
+            List<Integer> updatedAlarmIds = new ArrayList<>();
+            for (Event eve : updatedEventsOfUser.getNewAndModifiedEvents()) {
+                for (Alarm alarm : eve.getAlarms()) {
+                    updatedAlarmIds.add(alarm.getId());
+                }
             }
-        }
-        for (AlarmTrigger trigger : triggers) {
-            if (updatedAlarmIds.contains(trigger.getAlarm())) {
-                convertAlarmTrigger2Reminder(calendarSession, trigger, reminderWriter, jsonResponseArray);
+            for (AlarmTrigger trigger : triggers) {
+                if (updatedAlarmIds.contains(trigger.getAlarm())) {
+                    convertAlarmTrigger2Reminder(calendarSession, trigger, reminderWriter, jsonResponseArray);
+                }
             }
         }
 
