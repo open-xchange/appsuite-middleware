@@ -206,6 +206,27 @@ public class EventPostProcessor {
     }
 
     /**
+     * Post-processes a list of event tombstones prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
+     * <li>applying the folder identifier from the passed folder</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param inFolder The parent folder representing the view on the events
+     * @return A self reference
+     */
+    public EventPostProcessor processTombstones(Collection<Event> events, CalendarFolder inFolder) throws OXException {
+        for (Event event : events) {
+            doProcessTombstone(injectUserAttendeeData(event), inFolder.getId());
+            checkResultSizeNotExceeded();
+        }
+        return this;
+    }
+
+    /**
      * Post-processes an event prior returning it to the client. This includes
      * <ul>
      * <li>excluding or anonymizing events that are classified for the current user</li>
@@ -241,13 +262,43 @@ public class EventPostProcessor {
      *
      * @param events The events to post-process
      * @param forUser The identifier of the user to apply the parent folder identifier for
-     * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
-     * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return A self reference
      */
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
         for (Event event : events) {
             doProcess(event, getFolder(session, getFolderView(injectUserAttendeeData(event), forUser), false));
+            checkResultSizeNotExceeded();
+        }
+        return this;
+    }
+
+    /**
+     * Post-processes a list of event tombstones prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param forUser The identifier of the user to apply the parent folder identifier for
+     * @return A self reference
+     */
+    public EventPostProcessor processTombstones(Collection<Event> events, int forUser) throws OXException {
+        for (Event event : events) {
+            event = injectUserAttendeeData(event);
+            String folderId;
+            try {
+                folderId = getFolderView(injectUserAttendeeData(event), forUser);
+            } catch (OXException e) {
+                /*
+                 * orphaned folder information in tombstone event, add warning but continue
+                 */
+                session.addWarning(e);
+                continue;
+            }
+            doProcessTombstone(event, folderId);
             checkResultSizeNotExceeded();
         }
         return this;
@@ -293,7 +344,7 @@ public class EventPostProcessor {
         return maximumTimestamp;
     }
 
-    protected boolean doProcess(Event event, CalendarFolder folder) throws OXException {
+    private boolean doProcess(Event event, CalendarFolder folder) throws OXException {
         if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
             /*
              * excluded if classified as private for the session user
@@ -339,6 +390,30 @@ public class EventPostProcessor {
             return events.add(event);
         }
         if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+            /*
+             * excluded if not in requested range
+             */
+            return false;
+        }
+        return events.add(event);
+    }
+
+    private boolean doProcessTombstone(Event event, String folderId) throws OXException {
+        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
+            /*
+             * excluded if classified as private for the session user
+             */
+            return false;
+        }
+        event.setFolderId(folderId);
+        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+        event = anonymizeIfNeeded(session, event);
+        if (isSeriesMaster(event) && false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+            /*
+             * exclude series master event if there are no occurrences in requested range
+             */
+            return false;
+        } else if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             /*
              * excluded if not in requested range
              */
