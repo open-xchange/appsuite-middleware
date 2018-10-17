@@ -451,7 +451,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
          * @return The mail folder
          */
         public String getMailFolder() {
-            return mails[0].getFolder();
+            return mails.length == 0 ? null : mails[0].getFolder();
         }
 
         /**
