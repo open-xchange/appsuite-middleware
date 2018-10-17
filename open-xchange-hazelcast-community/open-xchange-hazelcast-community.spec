@@ -12,6 +12,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
+BuildRequires: open-xchange-osgi >= @OXVERSION@
 Version:       @OXVERSION@
 %define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -22,6 +23,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Community implementation of open-xchange-hazelcast
 Autoreqprov:   no
+Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-hazelcast
 Conflicts:     open-xchange-hazelcast-enterprise
 Conflicts:     open-xchange-core < 7.10.1
