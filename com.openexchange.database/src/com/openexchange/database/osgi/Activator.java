@@ -65,6 +65,7 @@ import com.openexchange.database.internal.CreateReplicationTable;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.lock.LockService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
 
@@ -94,6 +95,7 @@ public class Activator implements BundleActivator {
         trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
         trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
         trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<LockService, LockService>(context, LockService.class, new LockServiceTracker(context)));
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
