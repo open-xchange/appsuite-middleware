@@ -439,12 +439,37 @@ public class RdbContextStorage extends ContextStorage {
 
     @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
-        if (null == contextIds || contextIds.isEmpty()) {
+        if (null == contextIds) {
+            return Collections.emptyMap();
+        }
+
+        int size = contextIds.size();
+        if (size <= 0) {
             return Collections.emptyMap();
         }
 
         Connection con = DBPool.pickup();
         try {
+            if (size == 1) {
+                // Only one context identifier given
+                Integer contextId = contextIds.get(0);
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    stmt = con.prepareStatement("SELECT write_db_pool_id, db_schema FROM context_server2db_pool WHERE cid=?");
+                    stmt.setInt(1, contextId.intValue());
+                    result = stmt.executeQuery();
+                    if (false == result.next()) {
+                        return Collections.emptyMap();
+                    }
+
+                    PoolAndSchema pas = new PoolAndSchema(result.getInt(2)/*write_db_pool_id*/, result.getString(3)/*db_schema*/);
+                    return Collections.singletonMap(pas, Collections.singletonList(contextId));
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+            }
+
             // Use a map to group by database schema association
             Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>(contextIds.size() >> 1, 0.9F);
             for (Set<Integer> chunk : Sets.partition(new LinkedHashSet<>(contextIds), Databases.IN_LIMIT)) {
