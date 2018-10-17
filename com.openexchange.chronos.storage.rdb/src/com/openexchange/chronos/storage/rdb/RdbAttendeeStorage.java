@@ -161,7 +161,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAttendees(connection, eventIds, null, false, null);
+            return selectAttendees(connection, eventIds, null, true, null);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
