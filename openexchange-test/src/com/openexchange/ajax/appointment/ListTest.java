@@ -305,7 +305,9 @@ public class ListTest extends AppointmentTest {
     @After
     public void tearDown() throws Exception {
         try {
-            ftm.cleanUp();
+            if (ftm != null) {
+                ftm.cleanUp();
+            }
         } finally {
             super.tearDown();
         }
