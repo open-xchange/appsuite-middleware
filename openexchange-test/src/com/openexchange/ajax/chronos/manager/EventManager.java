@@ -76,6 +76,7 @@ import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
+import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
@@ -107,7 +108,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Initializes a new {@link EventManager}.
-     * 
+     *
      * @param userApi The {@link UserApi}
      * @param defaultFolder The default Folder
      */
@@ -219,7 +220,7 @@ public class EventManager extends AbstractManager {
     public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
         return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
     }
-    
+
     /**
      * Update the specified event and attach the specified {@link Asset}. Notifies attendees of the event.
      *
@@ -230,6 +231,15 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException On JSON errors
      */
     public JSONObject updateEventWithAttachmentAndNotification(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+        if (eventData.getAttachments() == null || eventData.getAttachments().isEmpty()) {
+            List<ChronosAttachment> attachments = new ArrayList<>();
+            ChronosAttachment attachment = new ChronosAttachment();
+            attachment.setFilename(asset.getFilename());
+            attachment.setFmtType(asset.getAssetType().name());
+            attachment.setUri("cid:file_0");
+            attachments.add(attachment);
+            eventData.setAttachments(attachments);
+        }
         return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
     }
 
