@@ -13,7 +13,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 17
+%define         ox_release 18
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -52,6 +52,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Oct 08 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-10-15 (4918)
 * Tue Sep 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-10-01 (4897)
 * Mon Sep 24 2018 Marcus Klein <marcus.klein@open-xchange.com>

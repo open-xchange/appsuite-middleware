@@ -80,7 +80,9 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
+import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -497,18 +499,23 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         for (EventUpdate eventUpdate : diff.getUpdatedItems()) {
             Event persistedEvent = eventUpdate.getOriginal();
             Event updatedEvent = eventUpdate.getUpdate();
-
-            updatedEvent.setId(persistedEvent.getId());
-            calendarStorage.getEventStorage().updateEvent(updatedEvent);
+            /*
+             * update via special 'delta' event so that identifying properties are still available for the storage
+             */
+            Set<EventField> updatedFields = eventUpdate.getUpdatedFields();
+            Event deltaEvent = EventMapper.getInstance().copy(persistedEvent, null, (EventField[]) null);
+            deltaEvent = EventMapper.getInstance().copy(updatedEvent, deltaEvent, updatedFields.toArray(new EventField[updatedFields.size()]));
+            deltaEvent = new DeltaEvent(deltaEvent, updatedFields);
+            calendarStorage.getEventStorage().updateEvent(deltaEvent);
 
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
             if (!attendeeUpdates.isEmpty()) {
-                updateAttendees(calendarStorage, updatedEvent.getId(), attendeeUpdates);
+                updateAttendees(calendarStorage, deltaEvent.getId(), attendeeUpdates);
             }
 
             CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
             if (!alarmUpdates.isEmpty()) {
-                updateAlarms(calendarStorage, updatedEvent, alarmUpdates);
+                updateAlarms(calendarStorage, deltaEvent, alarmUpdates);
             }
         }
     }

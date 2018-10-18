@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,58 @@
  *
  */
 
-package com.openexchange.database.internal.change.utf8mb4.globaldb;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import com.openexchange.database.internal.change.utf8mb4.AbstractSingleTableChange;
+import java.util.function.BiConsumer;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.data.extensions.FamilyName;
+import com.google.gdata.data.extensions.GivenName;
+import com.google.gdata.data.extensions.Name;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * 
- * {@link AdvertisementConfigCustomTaskChange}
+ * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
+ * along with their yomi representations if available.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class GuestToUtf8mb4Change extends AbstractSingleTableChange {
+public class NameConsumer implements BiConsumer<ContactEntry, Contact> {
 
-    @Override
-    protected String tableToConvert() {
-        return "guest";
+    /**
+     * Initialises a new {@link NameConsumer}.
+     */
+    public NameConsumer() {
+        super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
     @Override
-    protected String getDefaultSchemaName() {
-        throw new UnsupportedOperationException();
+    public void accept(ContactEntry t, Contact u) {
+        if (!t.hasName()) {
+            return;
+        }
+        Name name = t.getName();
+        if (name.hasGivenName()) {
+            GivenName given = name.getGivenName();
+            u.setGivenName(t.getName().getGivenName().getValue());
+            if (given.hasYomi()) {
+                u.setYomiFirstName(given.getYomi());
+            }
+        }
+        if (name.hasFamilyName()) {
+            FamilyName familyName = name.getFamilyName();
+            u.setSurName(familyName.getValue());
+            if (familyName.hasYomi()) {
+                u.setYomiLastName(familyName.getYomi());
+            }
+        }
+        if (name.hasFullName()) {
+            u.setDisplayName(name.getFullName().getValue());
+        }
     }
-
 }

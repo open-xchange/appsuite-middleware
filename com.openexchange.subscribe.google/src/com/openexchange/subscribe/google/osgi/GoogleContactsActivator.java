@@ -47,27 +47,36 @@
  *
  */
 
-package com.openexchange.database.internal.change.utf8mb4.globaldb;
+package com.openexchange.subscribe.google.osgi;
 
-import com.openexchange.database.internal.change.utf8mb4.AbstractSingleTableChange;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.context.ContextService;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * 
- * {@link AdvertisementConfigCustomTaskChange}
+ * {@link GoogleContactsActivator}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
-public class OAuthClientUriToUtf8mb4Change extends AbstractSingleTableChange {
+public class GoogleContactsActivator extends HousekeepingActivator {
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     */
     @Override
-    protected String tableToConvert() {
-        return "oauth_client_uri";
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class };
     }
 
     @Override
-    protected String getDefaultSchemaName() {
-        throw new UnsupportedOperationException();
+    protected void startBundle() throws Exception {
+        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
+        openTrackers();
     }
 
 }

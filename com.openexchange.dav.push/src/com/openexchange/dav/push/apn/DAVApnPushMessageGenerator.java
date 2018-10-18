@@ -59,6 +59,7 @@ import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
 import javapns.notification.Payload;
+import javapns.notification.PushNotificationBigPayload;
 import javapns.notification.PushNotificationPayload;
 
 /**
@@ -92,7 +93,7 @@ public class DAVApnPushMessageGenerator implements PushMessageGenerator {
             /*
              * build APN payload as expected by client
              */
-            final PushNotificationPayload payload = new PushNotificationPayload();
+            final PushNotificationPayload payload = new PushNotificationBigPayload();
             Map<String, Object> messageData = notification.getMessageData();
             try {
                 if (null != messageData) {

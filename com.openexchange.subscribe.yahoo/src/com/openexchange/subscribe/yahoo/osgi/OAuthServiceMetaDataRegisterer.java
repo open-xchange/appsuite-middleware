@@ -51,23 +51,28 @@ package com.openexchange.subscribe.yahoo.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.OAuthServiceMetaData;
-
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.yahoo.YahooSubscribeService;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData,OAuthServiceMetaData> {
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
 
     private final BundleContext context;
-    private final Activator activator;
+    private final ServiceLookup services;
+    private volatile ServiceRegistration<SubscribeService> serviceRegistration;
 
-    public OAuthServiceMetaDataRegisterer(final BundleContext context, final Activator activator){
+    public OAuthServiceMetaDataRegisterer(final BundleContext context, ServiceLookup services) {
         this.context = context;
-        this.activator = activator;
+        this.services = services;
     }
 
     @Override
@@ -75,23 +80,29 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
         // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
         if ("com.openexchange.oauth.yahoo".equals(oAuthServiceMetaData.getId())) {
-            activator.setOAuthServiceMetaData(oAuthServiceMetaData);
-            activator.registerSubscribeService();
+            if (null == serviceRegistration) {
+                serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
+                org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
+            }
         }
         return oAuthServiceMetaData;
     }
 
     @Override
     public void modifiedService(final ServiceReference<OAuthServiceMetaData> arg0, final OAuthServiceMetaData arg1) {
-      //nothing to do here
+        //nothing to do here
     }
 
     @Override
     public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData arg1) {
         final OAuthServiceMetaData oAuthServiceMetaData = arg1;
         if ("com.openexchange.oauth.yahoo".equals(oAuthServiceMetaData.getId())) {
-            activator.setOAuthServiceMetaData(null);
-            activator.unregisterSubscribeService();
+            ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                this.serviceRegistration = null;
+                org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was stopped");
+            }
         }
         context.ungetService(reference);
     }

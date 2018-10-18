@@ -281,6 +281,24 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return getFileStorage().getFile(fileID);
     }
 
+    @Override
+    public String resolveAttachmentId(int managedId) throws OXException {
+        String eventId;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            eventId = selectEventID(connection, context.getContextId(), managedId);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+        if (null == eventId) {
+            throw AttachmentExceptionCodes.ATTACHMENT_NOT_FOUND.create();
+        }
+        return eventId;
+    }
+
     private QuotaFileStorage getFileStorage() throws OXException, OXException {
         QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
         if (null == storageService) {
@@ -312,7 +330,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             for (String objectID : objectIDs) {
                 stmt.setInt(parameterIndex++, asInt(objectID));
             }
-            stmt.setInt(parameterIndex++, com.openexchange.groupware.Types.APPOINTMENT);
+            stmt.setInt(parameterIndex++, MODULE_ID);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     Attachment attachment = new Attachment();
@@ -354,11 +372,23 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     private static String selectFileID(Connection connection, int contextID, int attachmentID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT file_id FROM prg_attachment WHERE cid=? AND id=?;")) {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT file_id FROM prg_attachment WHERE cid=? AND id=? AND module=?;")) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, attachmentID);
+            stmt.setInt(3, MODULE_ID);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 return resultSet.next() ? resultSet.getString(1) : null;
+            }
+        }
+    }
+
+    private static String selectEventID(Connection connection, int contextID, int attachmentID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT attached FROM prg_attachment WHERE cid=? AND id=? AND module=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, attachmentID);
+            stmt.setInt(3, MODULE_ID);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? String.valueOf(resultSet.getInt(1)) : null;
             }
         }
     }
