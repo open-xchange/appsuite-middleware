@@ -16,7 +16,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.permission.MailPermission;
@@ -62,14 +61,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
                 }
                 t++;
             }
-        }
-        return retval;
-    }
-
-    private static long fac(final long l) {
-        long retval = 1;
-        for (long i = 1; i < l; i++) {
-            retval *= i;
         }
         return retval;
     }
@@ -200,26 +191,26 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     /**
      * @param session
-     * @param mailAccess
+     * @param mailAcc
      * @return The name of the temporary folder which is created
      * @throws OXException
      */
-    protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAccess) throws OXException {
-        return createTemporaryFolderAndGetFullname(session, mailAccess, "TemporaryFolder");
+    protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAcc) throws OXException {
+        return createTemporaryFolderAndGetFullname(session, mailAcc, "TemporaryFolder");
     }
 
     /**
      * Creates a folder with tempFolderName under the inbox
      *
      * @param session
-     * @param mailAccess
+     * @param mailAcc
      * @param tempFolderName
      * @return
      * @throws OXException
      */
-    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, final String tempFolderName) throws OXException {
+    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAcc, final String tempFolderName) throws OXException {
         final String fullname;
-        final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+        final MailFolder inbox = mailAcc.getFolderStorage().getFolder("INBOX");
         final String parentFullname;
         if (inbox.isHoldsFolders()) {
             fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(tempFolderName).toString();
@@ -236,18 +227,19 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         mfd.setName(tempFolderName);
 
         mfd.addPermission(getPermission(session));
-        mailAccess.getFolderStorage().createFolder(mfd);
+        mailAcc.getFolderStorage().createFolder(mfd);
         return fullname;
     }
 
     protected MailAccess<?, ?> getMailAccess() throws OXException {
         final SessionObject session = getSession();
 
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-        mailAccess.connect();
-        return mailAccess;
+        final MailAccess<?, ?> mailAcc = MailAccess.getInstance(session);
+        mailAcc.connect();
+        return mailAcc;
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -255,24 +247,11 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         this.mailAccess = getMailAccess();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         super.tearDown();
         mailAccess.close(false);
-    }
-
-    private void check(final String string, final HeaderCollection value1, final HeaderCollection value2, final String mail1name, final String mail2name) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        sb.append(" of ");
-        sb.append(mail1name);
-        sb.append(": ``");
-        sb.append(value1);
-        sb.append("'' is not equal with ");
-        sb.append(mail2name);
-        sb.append(": ``");
-        sb.append(value2).append("''");
-        assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
     }
 
     private void check(final String string, final int value1, final int value2, final String mail1name, final String mail2name) {
@@ -324,21 +303,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             }
         }
         return true;
-    }
-
-    private void check(final String string, final long value1, final long value2, final String mail1name, final String mail2name) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        sb.append(" of ");
-        sb.append(mail1name);
-        sb.append(": ``");
-        sb.append(value1);
-        sb.append("'' are not equal with ");
-        sb.append(mail2name);
-        sb.append(": ``");
-        sb.append(value2);
-        sb.append("''");
-        assertTrue(sb.toString(), value1 == value2);
     }
 
     private void check(final String string, final Object value1, final Object value2, final String mail1name, final String mail2name) {
@@ -485,43 +449,18 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         // }
     }
 
-    private boolean equalsCheckWithNull(final HeaderCollection a, final HeaderCollection b) {
-        if (null == a) {
-            return null == b;
-        } else {
-            // Here we have to remove the X-OX-Marker header because this is only used internally and should
-            // not be included in the test
-            // Because the HeaderCollection of the mails is read-only, we have to duplicate the collections
-            // in order to remove this headers...
-            final HeaderCollection headerCollectiona = new HeaderCollection(a);
-            final HeaderCollection headerCollectionb = new HeaderCollection(b);
-            if (a.containsHeader("X-OX-Marker")) {
-                headerCollectiona.removeHeader("X-OX-Marker");
-            } else if (b.containsHeader("X-OX-Marker")) {
-                headerCollectionb.removeHeader("X-OX-Marker");
-            }
-            return headerCollectiona.equals(headerCollectionb);
-        }
-    }
-
     private boolean equalsCheckWithNull(final Object a, final Object b) {
         if (null == a) {
             return null == b;
-        } else {
-            return a.equals(b);
         }
+        return a.equals(b);
     }
 
     private boolean equalsCheckWithNull(final String a, final String b) {
         if (null == a) {
             return null == b;
-        } else {
-            return a.trim().equals(b.trim());
         }
-    }
-
-    private String getFullFolderName(final MailFolder inbox, final String tempFolderName) {
-        return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(tempFolderName).toString();
+        return a.trim().equals(b.trim());
     }
 
     private MailPermission getPermission(final SessionObject session) throws OXException {
