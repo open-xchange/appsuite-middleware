@@ -47,54 +47,70 @@
  *
  */
 
-package com.openexchange.clientinfo.impl.osgi;
+package com.openexchange.clientinfo.impl;
 
-import com.openexchange.clientinfo.ClientInfoProvider;
-import com.openexchange.clientinfo.ClientInfoService;
-import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
-import com.openexchange.clientinfo.impl.MailAppClientInfoProvider;
-import com.openexchange.clientinfo.impl.USMEASClientInfoProvider;
-import com.openexchange.clientinfo.impl.WebClientInfoProvider;
-import com.openexchange.clientinfo.impl.WebDAVClientInfoProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.uadetector.UserAgentParser;
+import java.util.Locale;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.i18n.tools.StringHelper;
 
 
 /**
- * {@link ClientInfoActivator}
+ * {@link WebDAVClientInfo}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class ClientInfoActivator extends HousekeepingActivator {
+public class WebDAVClientInfo implements ClientInfo {
+
+    private final String client;
+    private final String osFamily;
+
+    // --------------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link ClientInfoActivator}.
+     * Initializes a new {@link WebDAVClientInfo}.
      */
-    public ClientInfoActivator() {
+    public WebDAVClientInfo(String client, String osFamily) {
         super();
+        this.client = client;
+        this.osFamily = osFamily;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, SessiondService.class, ServerConfigService.class };
+    public ClientInfoType getType() {
+        return ClientInfoType.DAV;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<ClientInfoProvider> infoProviderTracker = new RankingAwareNearRegistryServiceTracker<>(context, ClientInfoProvider.class);
-        rememberTracker(infoProviderTracker);
-        openTrackers();
+    public String getDisplayName(Locale locale) {
+        return StringHelper.valueOf(locale).getString(client);
+    }
 
-        ClientInfoService service = new ClientInfoServiceImpl(infoProviderTracker);
-        registerService(ClientInfoService.class, service);
-        registerService(ClientInfoProvider.class, new USMEASClientInfoProvider(), 15);
-        registerService(ClientInfoProvider.class, new WebDAVClientInfoProvider(), 15);
-        registerService(ClientInfoProvider.class, new WebClientInfoProvider(this), 20);
-        registerService(ClientInfoProvider.class, new MailAppClientInfoProvider(this), 25);
+    @Override
+    public String getOSFamily() {
+        return osFamily;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return null;
+    }
+
+    @Override
+    public String getClientName() {
+        return client;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return null;
+    }
+
+    @Override
+    public String getClientFamily() {
+        return "webdav";
     }
 
 }
