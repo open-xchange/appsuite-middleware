@@ -1,3 +1,9 @@
+open-xchange-cassandra (7.10.2-0) unstable; urgency=medium
+
+  * prepare for 7.10.2 release
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Thu, 18 Oct 2018 10:39:16 +0200
+
 open-xchange-cassandra (7.10.1-1) stable; urgency=medium
 
   * First candidate for 7.10.1 release

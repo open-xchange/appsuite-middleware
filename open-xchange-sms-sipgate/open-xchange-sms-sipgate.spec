@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,6 +59,8 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
+* Thu Oct 18 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.10.2 release
 * Thu Oct 11 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First candidate for 7.10.1 release
 * Thu Sep 06 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>

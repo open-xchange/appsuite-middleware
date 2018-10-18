@@ -1,3 +1,9 @@
+open-xchange-hostname-ldap (7.10.2-0) unstable; urgency=medium
+
+  * prepare for 7.10.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 18 Oct 2018 10:39:28 +0200
+
 open-xchange-hostname-ldap (7.10.1-1) stable; urgency=medium
 
   * First candidate for 7.10.1 release
