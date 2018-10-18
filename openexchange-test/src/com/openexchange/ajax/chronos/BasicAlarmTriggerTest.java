@@ -339,17 +339,18 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testFloatingEventAlarmTriggerTime() throws Exception {
+        int currentTriggers = getAlarmTriggers().size();
         try {
-            TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
-            changeTimezone(timeZone);
+            TimeZone tmpTimeZone = TimeZone.getTimeZone("Europe/Berlin");
+            changeTimezone(tmpTimeZone);
             // Create an event tomorrow 12 o clock
 
             // Set floating date one day after the summer time change
             int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-            Calendar cal = DateTimeUtil.getDaylightSavingDate(timeZone, currentYear + 1);
+            Calendar cal = DateTimeUtil.getDaylightSavingDate(tmpTimeZone, currentYear + 1);
             cal.add(Calendar.DAY_OF_MONTH, 3);
 
-            long offset = timeZone.getOffset(cal.getTimeInMillis());
+            long offset = tmpTimeZone.getOffset(cal.getTimeInMillis());
 
             // Create an floating event with an alarm 3 days earlier
             DateTimeData startDate = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
@@ -364,19 +365,21 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             from.setTimeInMillis(cal.getTimeInMillis());
             from.add(Calendar.DAY_OF_MONTH, -5);
 
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1 + currentTriggers);
             Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
             instance.setTime(cal.getTime());
             instance.add(Calendar.DAY_OF_MONTH, -3);
 
             long triggerTime = instance.getTimeInMillis();
-            checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
+            AlarmTrigger trigger = findTrigger(event.getId(), triggers);
+            checkAlarmTime(trigger, event.getId(), triggerTime);
 
             // change timezone
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
-            AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
-            Date parse = DateTimeUtil.parseZuluDateTime(triggers2.get(0).getTime());
+            AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1 + currentTriggers);
+            AlarmTrigger trigger2 = findTrigger(event.getId(), triggers2);
+            Date parse = DateTimeUtil.parseZuluDateTime(trigger2.getTime());
             assertNotEquals(triggerTime, parse.getTime());
 
             int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(cal.getTimeInMillis());
