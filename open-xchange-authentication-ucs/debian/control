@@ -9,7 +9,7 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-authentication-ucs
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, open-xchange-authentication-ucs-common (>= @OXVERSION@)
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-imap, open-xchange-authentication-ldap
 Provides: open-xchange-authentication
 Description: Module for authenticating users on a Univention Corporate Server installation
