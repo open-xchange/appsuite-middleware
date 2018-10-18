@@ -67,6 +67,7 @@ import javax.mail.Store;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
@@ -495,7 +496,8 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                        appendInfo(getInfo(skipTag(nextException.getMessage())), folder),
+                        getDisplayName(mailConfig));
                 }
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
@@ -515,7 +517,8 @@ public class MimeMailException extends OXException {
                             mailConfig.getLogin(),
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()),
-                            appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                            appendInfo(getInfo(skipTag(nextException.getMessage())), folder),
+                            getDisplayName(mailConfig));
                     }
                     return MimeMailExceptionCode.QUOTA_EXCEEDED.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
@@ -587,7 +590,7 @@ public class MimeMailException extends OXException {
             return MimeMailExceptionCode.MESSAGING_ERROR.create(e, appendInfo(e.getMessage(), folder));
         }
     }
-
+    
     /**
      * Handles specified IMAP protocol exception by its possibly available <a href="https://tools.ietf.org/html/rfc5530">response code</a>.<br>
      * If no such response code is present, <code>null</code> is returned.
@@ -664,7 +667,8 @@ public class MimeMailException extends OXException {
                             mailConfig.getLogin(),
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()),
-                            appendInfo(getInfo(skipTag(pe.getMessage())), folder));
+                            appendInfo(getInfo(skipTag(pe.getMessage())), folder),
+                            getDisplayName(mailConfig));
                     }
                     return MimeMailExceptionCode.QUOTA_EXCEEDED.create(pe, appendInfo(getInfo(skipTag(pe.getMessage())), folder));
                 }
@@ -1141,5 +1145,23 @@ public class MimeMailException extends OXException {
         }
         return builder.toString();
     }
-
+    
+    /**
+     * Retrieves the display name from the specified {@link MailConfig}.
+     * If no {@link Account} is attached to the {@link MailConfig} or
+     * no display name is present, then the login name is returned.
+     * 
+     * @param mailConfig The {@link MailConfig}
+     * @return The display name
+     */
+    private static String getDisplayName(MailConfig mailConfig) {
+        if (null == mailConfig.getAccount()) {
+            return mailConfig.getLogin();
+        }
+        Account account = mailConfig.getAccount();
+        if (Strings.isEmpty(account.getName())) {
+            return mailConfig.getLogin();
+        }
+        return mailConfig.getAccount().getName();
+    }
 }

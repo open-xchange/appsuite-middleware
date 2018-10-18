@@ -1062,50 +1062,56 @@ public class MimeMessageFiller {
     }
 
     private Multipart appendVCard(ComposedMailMessage mail, Multipart primaryMultipart, MimeMessage mimeMessage) throws OXException, MessagingException, UnsupportedEncodingException {
-        final String charset = MailProperties.getInstance().getDefaultMimeCharset();
-        final String fileName = compositionParameters.getUserVCardFileName();
-        AppendVCard: if (mail.isAppendVCard() && fileName != null) {
-            final String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
-            for (int i = 0; i < mail.getEnclosedCount(); i++) {
-                final MailPart part = mail.getEnclosedMailPart(i);
-                if (encodedFileName.equalsIgnoreCase(part.getFileName())) {
-                    /*
-                     * VCard already attached in (former draft) message
-                     */
-                    break AppendVCard;
-                }
+        if (!mail.isAppendVCard()) {
+            // vCard is not supposed to be added
+            return primaryMultipart;
+        }
+
+        String fileName = compositionParameters.getUserVCardFileName();
+        if (fileName == null) {
+            // No vCard file name
+            return primaryMultipart;
+        }
+
+        String charset = MailProperties.getInstance().getDefaultMimeCharset();
+        String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
+        int numberOfParts = mail.getEnclosedCount();
+        for (int i = numberOfParts; i-- > 0;) {
+            MailPart part = mail.getEnclosedMailPart(i);
+            String partFileName = part.getFileName();
+            if (null != partFileName && encodedFileName.equalsIgnoreCase(MimeUtility.encodeText(partFileName, charset, "Q"))) {
+                // vCard already attached in (former draft) message
+                return primaryMultipart;
             }
-            try {
-                /*
-                 * Create a body part for vcard
-                 */
-                final MimeBodyPart vcardPart = new MimeBodyPart();
-                /*
-                 * Define content
-                 */
-                final ContentType ct = new ContentType(MimeTypes.MIME_TEXT_VCARD);
-                ct.setCharsetParameter(charset);
-                vcardPart.setDataHandler(new DataHandler(new MessageDataSource(compositionParameters.getUserVCard(), ct.toString())));
-                if (!ct.containsNameParameter()) {
-                    ct.setNameParameter(encodedFileName);
-                }
-                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
-                vcardPart.setHeader(HDR_MIME_VERSION, VERSION_1_0);
-                final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
-                cd.setFilenameParameter(encodedFileName);
-                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
-                /*
-                 * Append body part
-                 */
-                Multipart mp = null == primaryMultipart ? new MimeMultipart() : primaryMultipart;
-                mp.addBodyPart(vcardPart);
-                if (mail.isDraft()) {
-                    mimeMessage.setHeader(MessageHeaders.HDR_X_OX_VCARD, "true");
-                }
-                return mp;
-            } catch (final OXException e) {
-                LOG.error(VCARD_ERROR, e);
+        }
+
+        // No vCard attached so far...
+        try {
+            // Create a body part for vCard
+            MimeBodyPart vcardPart = new MimeBodyPart();
+
+            // Define content
+            ContentType ct = new ContentType(MimeTypes.MIME_TEXT_VCARD);
+            ct.setCharsetParameter(charset);
+            vcardPart.setDataHandler(new DataHandler(new MessageDataSource(compositionParameters.getUserVCard(), ct.toString())));
+            if (!ct.containsNameParameter()) {
+                ct.setNameParameter(encodedFileName);
             }
+            vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
+            vcardPart.setHeader(HDR_MIME_VERSION, VERSION_1_0);
+            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+            cd.setFilenameParameter(encodedFileName);
+            vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
+
+            // Append body part
+            Multipart mp = null == primaryMultipart ? new MimeMultipart() : primaryMultipart;
+            mp.addBodyPart(vcardPart);
+            if (mail.isDraft()) {
+                mimeMessage.setHeader(MessageHeaders.HDR_X_OX_VCARD, "true");
+            }
+            return mp;
+        } catch (final OXException e) {
+            LOG.error(VCARD_ERROR, e);
         }
         return primaryMultipart;
     }

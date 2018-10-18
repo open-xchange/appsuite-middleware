@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 43
+%define        ox_release 44
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -124,6 +124,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
+* Mon Oct 08 2018 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2018-10-15 (4917)
 * Tue Sep 25 2018 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2018-10-01 (4896)
 * Mon Sep 10 2018 Carsten Hoeger <choeger@open-xchange.com>

@@ -172,8 +172,6 @@ MailHeadersResponse:
   $ref: ./mail/MailHeadersResponse.yaml
 MailSourceResponse:
   $ref: ./mail/MailSourceResponse.yaml
-SendMailData:
-  $ref: ./mail/SendMailData.yaml
 MailImportResponse:
   $ref: ./mail/MailImportResponse.yaml
 MailReplyData:
@@ -598,7 +596,9 @@ GuardSignatureResult:
   $ref: ./guard/GuardSignatureResult.yaml
 GuardSendSecurity:
   $ref: ./guard/GuardSendSecurity.yaml
-
+# Module: openid
+InitResponse:
+  $ref: ./openid/InitResponse.yaml
 
 
 
