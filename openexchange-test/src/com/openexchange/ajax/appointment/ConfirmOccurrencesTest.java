@@ -136,7 +136,9 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         try {
-            ctm2.cleanUp();
+            if (ctm2 != null) {
+                ctm2.cleanUp();
+            }
         } finally {
             super.tearDown();
         }
