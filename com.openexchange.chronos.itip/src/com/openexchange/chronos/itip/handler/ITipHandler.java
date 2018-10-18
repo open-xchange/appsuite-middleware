@@ -67,6 +67,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.ITipNotificationMailGeneratorFactory;
@@ -82,6 +83,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -221,7 +223,9 @@ public class ITipHandler implements CalendarHandler {
             List<CreateResult> group = creations.stream().filter(c -> master.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).collect(Collectors.toList());
             // Handle as update
             for (CreateResult c : group) {
-                handle(event, State.Type.NEW, master.getOriginal(), c.getCreatedEvent(), null);
+                if (false == isIgnorableException(master, c)) {
+                    handle(event, State.Type.NEW, master.getOriginal(), c.getCreatedEvent(), null);
+                }
             }
             // Remove master to avoid additional mail
             updates.remove(master);
@@ -379,5 +383,20 @@ public class ITipHandler implements CalendarHandler {
             return updates.stream().filter(u -> CalendarUtils.isSeriesMaster(u.getUpdate()) && create.getCreatedEvent().getSeriesId().equals(u.getUpdate().getId()) && u.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE)).findAny().orElse(null);
         }
         return null;
+    }
+
+    private boolean isIgnorableException(UpdateResult master, CreateResult created) throws OXException {
+        EventUpdate eventUpdate = DefaultEventUpdate.builder() //@formatter:off
+            .originalEvent(master.getUpdate())
+            .updatedEvent(created.getCreatedEvent())
+            .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.START_DATE, EventField.END_DATE, EventField.CREATED, EventField.RECURRENCE_RULE,
+                                EventField.RECURRENCE_ID, EventField.ALARMS, EventField.EXTENDED_PROPERTIES, EventField.CHANGE_EXCEPTION_DATES, EventField.ID)
+            .considerUnset(true)
+            .ignoreDefaults(true)
+            .build(); //@formatter:on
+        /*
+         * Exception was created to add/change/remove an alarm without changing anything else. So ignore it 
+         */
+        return eventUpdate.isEmpty();
     }
 }
