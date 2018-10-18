@@ -251,7 +251,9 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     @After
     public void tearDown() throws Exception {
         super.tearDown();
-        mailAccess.close(false);
+        if (mailAccess != null) {
+            mailAccess.close(false);
+        }
     }
 
     private void check(final String string, final int value1, final int value2, final String mail1name, final String mail2name) {
