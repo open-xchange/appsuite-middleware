@@ -57,7 +57,6 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -257,9 +256,6 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 broadcastEvent(fid, true, ServerServiceRegistry.getInstance().getService(EventAdmin.class));
                 if (FolderQueryCacheManager.isInitialized()) {
                     FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
-                }
-                if (CalendarCache.isInitialized()) {
-                    CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
             } catch (final OXException e) {
                 LOG.error("", e);
