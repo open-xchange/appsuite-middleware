@@ -54,16 +54,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.Lists;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -145,41 +142,36 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
                 return;
             }
 
-            Map<ContextAttribute, List<String>> affectedAttributes = new HashMap<>();
+            List<ContextAttribute> affectedAttributes = new ArrayList<ContextAttribute>();
             {
                 do {
                     int cid = rs.getInt(1);
                     String name = rs.getString(2);
-                    affectedAttributes.put(new ContextAttribute(cid, name), Lists.newArrayList());
+                    affectedAttributes.add(new ContextAttribute(cid, name));
                 } while (rs.next());
             }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
-            {
-                for (Map.Entry<ContextAttribute, List<String>> entry : affectedAttributes.entrySet()) {
-                    ContextAttribute contextAttribute = entry.getKey();
-                    stmt = con.prepareStatement("SELECT value FROM contextAttribute WHERE cid=? and name=?");
-                    int pos = 1;
-                    stmt.setInt(pos++, contextAttribute.contextId);
-                    stmt.setString(pos++, contextAttribute.name);
-                    rs = stmt.executeQuery();
-                    while (rs.next()) {
-                        String value = rs.getString(1);
-                        entry.getValue().add(value);
-                    }
-                    Databases.closeSQLStuff(rs, stmt);
-                    rs = null;
-                    stmt = null;
+            for (ContextAttribute contextAttribute : affectedAttributes) {
+                List<String> dupValues = new ArrayList<String>();
+                stmt = con.prepareStatement("SELECT value FROM contextAttribute WHERE cid=? and name=?");
+                int pos = 1;
+                stmt.setInt(pos++, contextAttribute.contextId);
+                stmt.setString(pos++, contextAttribute.name);
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    String value = rs.getString(1);
+                    dupValues.add(value);
                 }
-            }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
 
-            // Handle multiple values associated with the same name for a context
-            for (Map.Entry<ContextAttribute, List<String>> entry : affectedAttributes.entrySet()) {
-                List<String> dupValues = entry.getValue();
+                // Handle multiple values associated with the same name for a context
                 if (dupValues.size() > 1) { // just to double-check
-                    handleDuplicateValues(entry.getKey(), dupValues, con);
+                    handleDuplicateValues(contextAttribute, dupValues, con);
                 }
             }
         } finally {
@@ -201,13 +193,13 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
                     }
                 }
             }
-            cleanUp(attribute, values, con);
+            deleteAllButLast(attribute, values, con);
 
             String newValue = taxonomies.stream().collect(Collectors.joining(","));
             update(attribute, newValue, con);
             LOGGER.warn("Found multiple values for 'taxonomy/types' in context {}. The values found {} will be merged to '{}'.", attribute.contextId, Strings.concat(";", dupValues), newValue);
         } else {
-            String newValue = cleanUp(attribute, values, con);
+            String newValue = deleteAllButLast(attribute, values, con);
             if (attribute.name.startsWith("config/")) {
                 LOGGER.warn("Found duplicate configuration for config '{}' in context {}. Will keep value '{}'.", attribute.name, attribute.contextId, newValue);
                 return;
@@ -216,13 +208,13 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
         }
     }
 
-    private String cleanUp(ContextAttribute attribute, List<String> values, Connection con) throws SQLException {
+    private String deleteAllButLast(ContextAttribute attribute, List<String> values, Connection con) throws SQLException {
         // remove the last element
-        values.remove(values.size() - 1);
+        String lastValue = values.remove(values.size() - 1);
         // Delete rest
         delete(attribute, values, con);
 
-        return values.get(0);
+        return lastValue;
     }
 
     private void delete(ContextAttribute attribute, List<String> values, Connection con) throws SQLException {
