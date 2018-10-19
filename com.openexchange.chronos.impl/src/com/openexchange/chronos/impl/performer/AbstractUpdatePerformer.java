@@ -824,6 +824,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
     protected void requireWritePermissions(Event originalEvent, ItemUpdate<Attendee, AttendeeField> attendeeUpdate, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (roles.contains(Role.ORGANIZER)) {
+            return;
+        }
         /*
          * check general write permissions for attendee
          */        
