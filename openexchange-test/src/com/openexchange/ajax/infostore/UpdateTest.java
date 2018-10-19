@@ -129,7 +129,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse("Expected no error but has one: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         final String id2 = itm.createFileOnServer(folderId, "otherFile", "text/javascript").getId();
 
