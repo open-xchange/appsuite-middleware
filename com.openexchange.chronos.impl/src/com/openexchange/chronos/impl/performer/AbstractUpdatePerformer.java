@@ -220,8 +220,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceID The recurrence identifier of the occurrence to add
+     * @param incrementSequence <code>true</code> to increment sequence number of the master event
      */
-    protected void addChangeExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
+    protected void addChangeExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID, boolean incrementSequence) throws OXException {
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         if (null != originalMasterEvent.getChangeExceptionDates()) {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
@@ -232,7 +233,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
         eventUpdate.setChangeExceptionDates(changeExceptionDates);
-        eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+        if (incrementSequence) {
+            eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+        }
         Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
         storage.getEventStorage().updateEvent(eventUpdate);
     }
@@ -395,7 +398,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
         resultTracker.trackCreation(updatedExceptionEvent, originalSeriesMaster);
         resultTracker.rememberOriginalEvent(originalSeriesMaster);
-        addChangeExceptionDate(originalSeriesMaster, recurrenceId);
+        addChangeExceptionDate(originalSeriesMaster, recurrenceId, false);
         Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
         resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
         /*
