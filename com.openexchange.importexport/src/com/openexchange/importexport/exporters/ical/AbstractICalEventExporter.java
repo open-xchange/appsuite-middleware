@@ -51,7 +51,6 @@ package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -174,9 +173,11 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
      * @return The prepared event as {@link List}
      */
     protected static List<Event> prepareForExport(List<Event> events) {
-        List<Event> copied = new LinkedList<>();
-        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-            copied.add(prepareForExport(iterator.next()));
+        List<Event> copied = new LinkedList<Event>();
+        for (Event event : events) {
+            if (null != event) {
+                copied.add(prepareForExport(event));
+            }
         }
         return copied;
     }
