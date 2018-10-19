@@ -61,6 +61,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +72,7 @@ import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.configuration.asset.Asset;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
@@ -218,6 +220,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException On JSON errors
      */
     public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+        prepareEventAttachment(eventData, asset);
         return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
     }
 
@@ -226,21 +229,35 @@ public class EventManager extends AbstractManager {
      *
      * @param eventData The event
      * @param asset The {@link Asset} to attach
+     * @param comment The comment to set in the notification mail
      * @return The updated {@link EventData}
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException On JSON errors
      */
-    public JSONObject updateEventWithAttachmentAndNotification(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+    public JSONObject updateEventWithAttachmentAndNotification(EventData eventData, Asset asset, String comment) throws ApiException, ChronosApiException {
+        prepareEventAttachment(eventData, asset);
+        StringBuilder sb = new StringBuilder();
+        if (Strings.isNotEmpty(comment)) {
+            sb.append("{\"events\":");
+            sb.append(eventData.toJson());
+            sb.append(", ");
+            sb.append("\"comment\":");
+            sb.append("\"").append(comment).append("\"");
+            sb.append("}");
+        } else {
+            sb.append(eventData.toJson());
+        }
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), sb.toString(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
+    }
+    
+    private void prepareEventAttachment(EventData eventData, Asset asset) {
         if (eventData.getAttachments() == null || eventData.getAttachments().isEmpty()) {
-            List<ChronosAttachment> attachments = new ArrayList<>();
             ChronosAttachment attachment = new ChronosAttachment();
             attachment.setFilename(asset.getFilename());
             attachment.setFmtType(asset.getAssetType().name());
             attachment.setUri("cid:file_0");
-            attachments.add(attachment);
-            eventData.setAttachments(attachments);
+            eventData.setAttachments(Collections.singletonList(attachment));
         }
-        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
     }
 
     private String getFolder(EventData eventData) {
