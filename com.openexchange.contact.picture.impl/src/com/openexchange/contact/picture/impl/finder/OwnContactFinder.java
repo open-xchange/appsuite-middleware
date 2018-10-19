@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -73,7 +74,9 @@ public class OwnContactFinder extends AbstractContactFinder {
     /**
      * Initializes a new {@link OwnContactFinder}.
      * 
-     * @param contactService
+     * @param contactService The {@link ContactService}
+     * @param userService The {@link UserService}
+     * @param contactUserStorage The {@link ContactUserStorage}
      */
     public OwnContactFinder(ContactService contactService, UserService userService, ContactUserStorage contactUserStorage) {
         super(contactService);
@@ -104,15 +107,12 @@ public class OwnContactFinder extends AbstractContactFinder {
      * @return true if it is applicable, false otherwise
      */
     private boolean isSearched(User user, PictureSearchData data) {
-        if (data.getUserId() != null && user.getId() == data.getUserId()) {
+        if (data.getUserId() != null && user.getId() == data.getUserId().intValue()) {
             return true;
         }
         for (String mail : data.getEmails()) {
-            if (user.getMail().equals(mail)) {
+            if (UserAliasUtility.isAlias(mail, user.getAliases())) {
                 return true;
-            }
-            for (String alias : user.getAliases()) {
-                alias.equalsIgnoreCase(mail);
             }
         }
 
