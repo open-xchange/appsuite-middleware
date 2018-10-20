@@ -149,7 +149,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         // Update with attachment
         Asset attachment = assetManager.getRandomAsset(AssetType.pdf);
         eventData.setAttachments(Collections.singletonList(EventFactory.createAttachment(attachment)));
-        eventManager.updateEventWithAttachmentAndNotification(eventData, attachment);
+        eventManager.updateEventWithAttachmentAndNotification(eventData, attachment, UPDATE);
 
         validateMailInSecondUsersInbox("Appointment changed: " + summary, UPDATE);
     }

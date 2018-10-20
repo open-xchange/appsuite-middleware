@@ -56,7 +56,9 @@ import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
 import com.openexchange.contact.picture.impl.finder.ContactIDFinder;
 import com.openexchange.contact.picture.impl.finder.ContactMailFinder;
 import com.openexchange.contact.picture.impl.finder.ContactUserFinder;
+import com.openexchange.contact.picture.impl.finder.OwnContactFinder;
 import com.openexchange.contact.picture.impl.finder.UserPictureFinder;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -78,7 +80,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, UserService.class };
+        return new Class<?>[] { ContactService.class, UserService.class, ContactUserStorage.class };
     }
 
     @Override
@@ -108,6 +110,9 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         registerService(ContactPictureFinder.class, new ContactUserFinder(contactService));
         registerService(ContactPictureFinder.class, new ContactIDFinder(contactService));
         registerService(ContactPictureFinder.class, new ContactMailFinder(contactService));
+
+        ContactUserStorage contactUserStorage = getServiceSafe(ContactUserStorage.class);
+        registerService(ContactPictureFinder.class, new OwnContactFinder(contactService, userService, contactUserStorage));
 
     }
 

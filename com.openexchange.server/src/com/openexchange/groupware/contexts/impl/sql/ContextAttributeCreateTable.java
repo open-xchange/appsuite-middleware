@@ -64,7 +64,7 @@ public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
         + " `cid` INT4 unsigned NOT NULL,"
         + " `name` varchar(128) collate utf8mb4_unicode_ci NOT NULL,"
         + " `value` TEXT collate utf8mb4_unicode_ci NOT NULL,"
-        + " PRIMARY KEY `cid` (`cid`,`name`,`value`(20))"
+        + " PRIMARY KEY `cid` (`cid`,`name`)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
 
     @Override

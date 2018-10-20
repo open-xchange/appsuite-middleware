@@ -781,7 +781,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected void requireWritePermissions(Event originalEvent, Attendee updatedAttendee, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (false == matches(updatedAttendee, calendarUserId)) {
             /*
-             * always require permissions for whole event in case an attendee different from the calendar user updated
+             * always require permissions for whole event in case an attendee different from the calendar user is updated
              */
             requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
         }
@@ -798,6 +798,50 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
     }
 
+    /**
+     * Checks that data of a specific attendee of an event can be updated by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The original event being updated
+     * @param attendeeUpdate The attendee update
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION},
+     *             {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NOT_ORGANIZER},
+     *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
+    protected void requireWritePermissions(Event originalEvent, ItemUpdate<Attendee, AttendeeField> attendeeUpdate) throws OXException {
+        requireWritePermissions(originalEvent, attendeeUpdate, false);
+    }
+
+    /**
+     * Checks that data of a specific attendee of an event can be updated by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The original event being updated
+     * @param attendeeUpdate The attendee update
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION},
+     *             {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NOT_ORGANIZER},
+     *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
+    protected void requireWritePermissions(Event originalEvent, ItemUpdate<Attendee, AttendeeField> attendeeUpdate, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (roles.contains(Role.ORGANIZER)) {
+            return;
+        }
+        /*
+         * check general write permissions for attendee
+         */        
+        Attendee originalAttendee = attendeeUpdate.getOriginal();
+        requireWritePermissions(originalEvent, originalAttendee, assumeExternalOrganizerUpdate);
+        /*
+         * deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
+         */
+        if (false == matches(originalAttendee, calendarUserId) && 
+            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) &&
+            false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
+            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.PARTSTAT);
+        }
+    }
+    
     /**
      * Checks that data of one or more attendees of an event can be updated by the current session's user under the perspective of the
      * current folder.
