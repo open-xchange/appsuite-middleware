@@ -49,65 +49,32 @@
 
 package com.openexchange.password.mechanism.impl.mech;
 
-import java.security.NoSuchAlgorithmException;
-import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordDetails;
-import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
-import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
+import com.openexchange.password.mechanism.osgi.Services;
 
 /**
- * {@link SHAMech}
+ * 
+ * {@link ConfigAwarePasswordMech}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class SHAMech extends ConfigAwarePasswordMech {
+public abstract class ConfigAwarePasswordMech extends AbstractPasswordMech {
 
-    private final SHACrypt crypt;
+    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
+    private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED = "com.openexchange.password.mechanism.salt.enabled";
 
-    /**
-     * Initializes a new {@link SHAMech}.
-     * 
-     * @param crypt The {@link SHACrypt} to use
-     */
-    public SHAMech(SHACrypt crypt) {
-        super(crypt.getIdentifier(), getHashLength(crypt));
-        this.crypt = crypt;
+    public ConfigAwarePasswordMech(String mechIdentifier, int hashSize) {
+        super(mechIdentifier, hashSize);
     }
 
-    @Override
-    public PasswordDetails encode(String str) throws OXException {
-        try {
-            if (doSalt()) {
-                byte[] salt = getSalt();
-                return new PasswordDetails(str, crypt.makeSHAPasswd(str, salt), getIdentifier(), salt);
-            }
-            return new PasswordDetails(str, crypt.makeSHAPasswd(str), getIdentifier(), null);
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Error encrypting password according to SHA mechanism", e);
-            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
+    protected boolean doSalt() {
+        ConfigurationService configService = Services.optService(ConfigurationService.class);
+        if (configService == null) {
+            return false;
         }
-    }
-
-    @Override
-    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
-        try {
-            if (salt == null) {
-                return crypt.makeSHAPasswd(candidate).equals(encoded);
-            }
-            return crypt.makeSHAPasswd(candidate, salt).equals(encoded);
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Error checking password according to SHA mechanism", e);
-            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        }
-    }
-
-    private static int getHashLength(SHACrypt crypt) {
-        if (crypt == SHACrypt.SHA1) {
-            return 32;
-        } else if (crypt == SHACrypt.SHA256) {
-            return 64;
-        }
-        return 128;
+        return configService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED, false);
     }
 }

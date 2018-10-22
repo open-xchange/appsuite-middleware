@@ -57,7 +57,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
@@ -158,7 +158,7 @@ public class GenericChecks {
 
     /**
      * Authenticate the clear text password against the encrypted string using the
-     * specified {@link IPasswordMech}
+     * specified {@link PasswordMech}
      *
      * @param crypted The encrypted password
      * @param clear The password in clear text
@@ -172,7 +172,7 @@ public class GenericChecks {
         }
         try {
             PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
-            IPasswordMech passwordMech = mechFactory.get(mech);
+            PasswordMech passwordMech = mechFactory.get(mech);
             if (null != passwordMech) {
                 return passwordMech.check(clear, crypted, salt);
             }

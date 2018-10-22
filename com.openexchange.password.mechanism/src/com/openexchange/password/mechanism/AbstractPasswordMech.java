@@ -49,7 +49,6 @@
 
 package com.openexchange.password.mechanism;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,15 +62,22 @@ import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public abstract class AbstractPasswordMech implements IPasswordMech {
+public abstract class AbstractPasswordMech implements PasswordMech {
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractPasswordMech.class);
+    protected final static Logger LOG = LoggerFactory.getLogger(AbstractPasswordMech.class);
+
+    private final static SecureRandom SECURE_RANDOM = initSecureRandom();
 
     private final String mechIdentifier;
 
-    private SecureRandom instance;
+    private final int hashSize;
 
-    private int hashSize;
+    static SecureRandom initSecureRandom() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] generateSeed = secureRandom.generateSeed(20); // use same number of bytes as guard uses 
+        secureRandom.setSeed(generateSeed);
+        return secureRandom;
+    }
 
     /**
      * Initializes a new {@link AbstractPasswordMech}.
@@ -82,17 +88,30 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
      */
     public AbstractPasswordMech(String mechIdentifier, int hashSize) {
         this.mechIdentifier = mechIdentifier;
-        try {
-            this.instance = SecureRandom.getInstance("SHA1PRNG");
-            this.instance.setSeed(hashSize);
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Error retrieving SecureRandom instance", e);
-        }
         this.hashSize = hashSize;
     }
 
     @Override
-    public boolean check(String toCheck, String encoded, byte[] salt) throws OXException {
+    public PasswordDetails encode(String password) throws OXException {
+        if (Strings.isEmpty(password)) {
+            return new PasswordDetails(password, null, getIdentifier(), null);
+        }
+        return encodePassword(password);
+    }
+
+    /**
+     * Encodes the given plain password
+     * 
+     * Note: Empty strings will not be validated by the underlying {@link PasswordMech} so these checks have to be done before (see {@link #encode(String)})
+     * 
+     * @param password The password to encode
+     * @return {@link PasswordDetails} containing information about the password encoding
+     * @throws OXException In case of error
+     */
+    public abstract PasswordDetails encodePassword(String password) throws OXException;
+
+    @Override
+    public final boolean check(String toCheck, String encoded, byte[] salt) throws OXException {
         if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
             return true;
         } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
@@ -104,10 +123,12 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
     }
 
     /**
-     * Checks the password candidate against the encoded password
+     * Checks the password candidate against the encoded password.
      * 
-     * @param candidate The plain text candidate
-     * @param encoded The encoded password
+     * Note: Empty strings will not be validated by the underlying {@link PasswordMech} so these checks have to be done before (see {@link #check(String, String, byte[])})
+     * 
+     * @param candidate The plain text candidate (non-empty)
+     * @param encoded The encoded password (non-empty)
      * @param salt The salt used while password hashing
      * @return <code>true</code> if the password match
      * @throws OXException In case of error
@@ -131,7 +152,7 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
 
     protected byte[] getSalt() {
         byte[] salt = new byte[this.hashSize];
-        instance.nextBytes(salt);
+        SECURE_RANDOM.nextBytes(salt);
         return salt;
     }
 }

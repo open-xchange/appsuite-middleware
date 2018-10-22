@@ -47,64 +47,47 @@
  *
  */
 
-package com.openexchange.admin.storage.fileStorage;
+package com.openexchange.password.mechanism.osgi;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
 
 /**
- * Default file implementation for admin auth.
+ * {@link PasswordMechServiceTrackerCustomizer}
  *
- * @author choeger
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-public class OXAuthFileStorage extends OXAuthStorageInterface {
+public class PasswordMechServiceTrackerCustomizer implements ServiceTrackerCustomizer<PasswordMech, PasswordMech> {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthFileStorage.class);
+    private PasswordMechRegistryImpl passwordMechRegistry;
+    private BundleContext context;
 
-    /** */
-    public OXAuthFileStorage() {
-        super();
-    }
-
-    /**
-     * Authenticates against a textfile
-     */
-    @Override
-    public boolean authenticate(final Credentials authdata) {
-        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if(master != null && authdata != null &&
-           master.getLogin() != null && authdata.getLogin() != null &&
-           master.getPassword() != null && authdata.getPassword() != null &&
-           master.getLogin().equals(authdata.getLogin())) {
-            try {
-                PasswordMechRegistry factory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
-                if (factory != null) {
-                    PasswordMech passwordMech = factory.get(master.getPasswordMech());
-                    return passwordMech.check(authdata.getPassword(), master.getPassword(), master.getSalt());
-                }
-            } catch (OXException e) {
-                log.error("", e);
-                return false;
-            }
-        }
-        return false;
+    public PasswordMechServiceTrackerCustomizer(BundleContext context, PasswordMechRegistryImpl passwordMechRegistry) {
+        this.context = context;
+        this.passwordMechRegistry = passwordMechRegistry;
     }
 
     @Override
-    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
-        return false;
+    public PasswordMech addingService(ServiceReference<PasswordMech> reference) {
+        PasswordMech passwordMech = context.getService(reference);
+        passwordMechRegistry.register(passwordMech);
+        return passwordMech;
     }
 
     @Override
-    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
-        return false;
+    public void modifiedService(ServiceReference<PasswordMech> reference, PasswordMech service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<PasswordMech> reference, PasswordMech service) {
+        PasswordMech passwordMech = context.getService(reference);
+        passwordMechRegistry.unregister(passwordMech);
+
     }
 
 }

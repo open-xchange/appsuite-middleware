@@ -47,64 +47,25 @@
  *
  */
 
-package com.openexchange.admin.storage.fileStorage;
+package com.openexchange.password.mechanism;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
-import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.password.mechanism.PasswordMechRegistry;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechTests;
+
 
 /**
- * Default file implementation for admin auth.
+ * 
+ * {@link UnitTests}
  *
- * @author choeger
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-public class OXAuthFileStorage extends OXAuthStorageInterface {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthFileStorage.class);
-
-    /** */
-    public OXAuthFileStorage() {
-        super();
-    }
-
-    /**
-     * Authenticates against a textfile
-     */
-    @Override
-    public boolean authenticate(final Credentials authdata) {
-        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if(master != null && authdata != null &&
-           master.getLogin() != null && authdata.getLogin() != null &&
-           master.getPassword() != null && authdata.getPassword() != null &&
-           master.getLogin().equals(authdata.getLogin())) {
-            try {
-                PasswordMechRegistry factory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
-                if (factory != null) {
-                    PasswordMech passwordMech = factory.get(master.getPasswordMech());
-                    return passwordMech.check(authdata.getPassword(), master.getPassword(), master.getSalt());
-                }
-            } catch (OXException e) {
-                log.error("", e);
-                return false;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
-        return false;
-    }
-
-    @Override
-    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
-        return false;
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    PasswordMechTests.class,
+})
+public class UnitTests {
 
 }

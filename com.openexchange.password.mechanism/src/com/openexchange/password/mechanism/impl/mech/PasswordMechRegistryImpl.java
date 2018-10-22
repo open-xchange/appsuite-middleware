@@ -60,10 +60,9 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
-import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
-import com.openexchange.password.mechanism.impl.osgi.Services;
+import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 
 /**
  * {@link PasswordMechRegistryImpl}
@@ -75,38 +74,32 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
 
     private final static Logger LOG = LoggerFactory.getLogger(PasswordMechRegistryImpl.class);
 
-    private final Map<String, IPasswordMech> registeredPasswordMechs = new ConcurrentSkipListMap<String, IPasswordMech>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, PasswordMech> registeredPasswordMechs = new ConcurrentSkipListMap<String, PasswordMech>(String.CASE_INSENSITIVE_ORDER);
 
     private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_ENHANCED_ENABLED = "com.openexchange.password.mechanism.enhanced.enabled";
 
     // -----------------------------------------------------------------------------------
 
-    // Dirty hack to keep 'GenerateMasterPasswordCLT' working
-
-    private final static PasswordMechRegistryImpl INSTANCE = new PasswordMechRegistryImpl();
-
-    public static PasswordMechRegistry getInstance() {
-        return INSTANCE;
-    }
-
-    private PasswordMechRegistryImpl() {
+    public PasswordMechRegistryImpl(ConfigurationService configurationService) {
         super();
-        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        register(
+            StockPasswordMechs.BCRYPT.getPasswordMech(),
+            StockPasswordMechs.CRYPT.getPasswordMech(),
+            StockPasswordMechs.SHA1.getPasswordMech()
+        );
         if (configurationService != null) {
             if (configurationService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_ENHANCED_ENABLED, false)) {
-                register(new SHAMech(SHACrypt.SHA256), defaultMech, new SHAMech(SHACrypt.SHA512), new BCryptMech(), new CryptMech());
+                register(
+                    StockPasswordMechs.SHA256.getPasswordMech(),
+                    StockPasswordMechs.SHA512.getPasswordMech()
+                );
                 return;
             }
         }
-        register(defaultMech, new BCryptMech(), new CryptMech());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void register(IPasswordMech... passwordMech) {
-        for (IPasswordMech mech : passwordMech) {
+    public void register(PasswordMech... passwordMech) {
+        for (PasswordMech mech : passwordMech) {
             String id = adaptIdentifier(mech.getIdentifier());
             registeredPasswordMechs.put(id, mech);
         }
@@ -116,28 +109,28 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
      * {@inheritDoc}
      */
     @Override
-    public IPasswordMech get(String identifier) {
+    public PasswordMech get(String identifier) {
         String id = adaptIdentifier(identifier);
         return registeredPasswordMechs.get(id);
     }
 
-    private IPasswordMech defaultMech = new SHAMech(SHACrypt.SHA1);
+    private volatile PasswordMech defaultMech = StockPasswordMechs.SHA1.getPasswordMech();
 
     @Override
-    public IPasswordMech getDefault() {
+    public PasswordMech getDefault() {
         return defaultMech;
     }
 
     public void setDefaultMech(String identifier) {
         if (Strings.isNotEmpty(identifier)) {
             String mech = adaptIdentifier(identifier);
-            if (registeredPasswordMechs.containsKey(mech)) {
-                defaultMech = registeredPasswordMechs.get(mech);
+            defaultMech = registeredPasswordMechs.get(mech);
+            if (defaultMech != null) {
                 return;
             }
         }
         LOG.warn("Unable to find a registered implementation for the provided password mechanism '{}'. Will use the default {}. Available password mechanisms are: {}", identifier, defaultMech.getIdentifier(), String.join(",", getIdentifiers()));
-        defaultMech = new SHAMech(SHACrypt.SHA256);
+        defaultMech = StockPasswordMechs.SHA1.getPasswordMech();
     }
 
     /**
@@ -176,8 +169,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
         return registeredPasswordMechs.entrySet().stream().filter(x -> x.getValue().expose()).map(x -> x.getKey()).collect(Collectors.toList());
     }
 
-    @Override
-    public void unregister(IPasswordMech passwordMech) {
+    public void unregister(PasswordMech passwordMech) {
         String id = adaptIdentifier(passwordMech.getIdentifier());
         registeredPasswordMechs.remove(id);
     }

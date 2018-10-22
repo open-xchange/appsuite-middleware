@@ -118,7 +118,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 
@@ -1281,7 +1281,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final String mech = cache.getAdminAuthMech(ctx);
             try {
                 PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
-                IPasswordMech passwordMech = mechFactory.get(mech);
+                PasswordMech passwordMech = mechFactory.get(mech);
                 if (null != passwordMech) {
                     PasswordDetails passwordDetails = passwordMech.encode(usrdata.getPassword());
                     cauth.setPassword(passwordDetails.getEncodedPassword());

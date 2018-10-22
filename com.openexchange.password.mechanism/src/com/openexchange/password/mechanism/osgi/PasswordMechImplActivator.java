@@ -47,52 +47,46 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl.mech;
+package com.openexchange.password.mechanism.osgi;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordDetails;
-import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
-import com.openexchange.password.mechanism.impl.algorithm.UnixCrypt;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
 
 /**
- * {@link CryptMech}
+ * {@link PasswordMechImplActivator}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from c.o.global
  * @since v7.10.1
  */
-public class CryptMech extends ConfigAwarePasswordMech {
+public class PasswordMechImplActivator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link CryptMech}.
-     */
-    public CryptMech() {
-        super("{CRYPT}", 32);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
-    public PasswordDetails encode(String str) throws OXException {
-        try {
-            if (doSalt()) {
-                byte[] salt = getSalt();
-                String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
-                return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), salt);
-            }
-            return new PasswordDetails(str, UnixCrypt.crypt(str), getIdentifier(), null);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Error encrypting password according to CRYPT mechanism", e);
-            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        }
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+
+        PasswordMechRegistryImpl passwordMechRegistryImpl = new PasswordMechRegistryImpl(getService(ConfigurationService.class));
+
+        track(PasswordMech.class, new PasswordMechServiceTrackerCustomizer(context, passwordMechRegistryImpl));
+        openTrackers();
+
+        registerService(PasswordMechRegistry.class, passwordMechRegistryImpl, null);
+        registerService(Reloadable.class, passwordMechRegistryImpl);
     }
 
     @Override
-    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
-        try {
-            return UnixCrypt.matches(encoded, candidate);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Error checking password according to CRYPT mechanism", e);
-            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        }
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+
+        super.stopBundle();
     }
+
 }

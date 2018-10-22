@@ -73,9 +73,9 @@ import com.openexchange.cli.AbstractCLI;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
-import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
+import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 
 /**
  * {@link GenerateMasterPasswordCLT}
@@ -295,7 +295,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
      * @throws IllegalArgumentException if the request encryption algorithm string is either <code>null</code>, or empty, or unknown
      */
     private PasswordDetails encryptPassword(final String encryption, final String password) throws OXException {
-        IPasswordMech pm = getPasswordMechFor(encryption);
+        PasswordMech pm = getPasswordMechFor(encryption);
         return pm.encode(password);
     }
 
@@ -326,7 +326,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
      * @return The password mechanism
      * @throws IllegalArgumentException if the identifier is either <code>null</code>, or empty, or unknown
      */
-    private IPasswordMech getPasswordMechFor(String identifier) {
+    private PasswordMech getPasswordMechFor(String identifier) {
         if (Strings.isEmpty(identifier)) {
             throw new IllegalArgumentException("The identifier for the password mechanism can neither be 'null' nor empty.");
         }
@@ -338,9 +338,10 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
         }
 
-        IPasswordMech mech = PasswordMechRegistryImpl.getInstance().get(id);
-        if (null != mech) {
-            return mech;
+        for (StockPasswordMechs value : StockPasswordMechs.values()) {
+            if (id.equals(value.getIdentifier())) {
+                return value.getPasswordMech();
+            }
         }
         throw new IllegalArgumentException("The identifier '" + identifier + "' for the password mechanism is unknown.");
     }

@@ -87,7 +87,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -564,7 +564,7 @@ public class RdbUserStorage extends UserStorage {
                             user.setFileStorageQuota(quotaMax);
                         }
                         {
-                            byte[] salt = trim(result.getBytes(pos++));
+                            byte[] salt = result.getBytes(pos++);
                             user.setSalt(salt);
                         }
 
@@ -600,18 +600,6 @@ public class RdbUserStorage extends UserStorage {
             retval[i] = users.get(userIds[i]);
         }
         return retval;
-    }
-
-    private static byte[] trim(byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        }
-        int i = bytes.length - 1;
-        while (i >= 0 && bytes[i] == 0) {
-            --i;
-        }
-
-        return java.util.Arrays.copyOf(bytes, i + 1);
     }
 
     @Override
@@ -937,7 +925,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
@@ -948,7 +936,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         if (connection == null) {
             updatePasswordInternal(context, userId, mech, password, salt);
             return;

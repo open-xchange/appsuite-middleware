@@ -75,6 +75,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
@@ -148,9 +149,8 @@ public class ShareActivator extends HousekeepingActivator {
                 String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
 
-                PasswordMechRegistry passwordMechRegistry = getService(PasswordMechRegistry.class);
                 SharePasswordMech sharePasswordMech = new SharePasswordMech(service, cryptKey);
-                passwordMechRegistry.register(sharePasswordMech);
+                context.registerService(PasswordMech.class, sharePasswordMech, null);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
             }

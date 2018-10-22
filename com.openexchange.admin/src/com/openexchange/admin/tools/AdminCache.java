@@ -91,7 +91,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.tools.sql.DBUtils;
@@ -638,7 +638,7 @@ public class AdminCache {
      * @throws StorageException If encoding fails
      */
     public PasswordDetails encryptPassword(PasswordMechObject user) throws StorageException {
-        IPasswordMech passwordMech = getPasswordMechanism(user);
+        PasswordMech passwordMech = getPasswordMechanism(user);
         try {
             return passwordMech.encode(user.getPassword());
         } catch (OXException e) {
@@ -654,21 +654,21 @@ public class AdminCache {
      *         the {@link PasswordMechRegistry#getDefault()} mechanism is returned.
      * @throws StorageException If password mechanism is unknown
      */
-    public IPasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
-        String passwordMech = user.getPasswordMech();
-        if (Strings.isEmpty(passwordMech) || "null".equals(Strings.toLowerCase(passwordMech))) {
-            passwordMech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+    public PasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
+        String passwordMechIdentifier = user.getPasswordMech();
+        if (Strings.isEmpty(passwordMechIdentifier) || "null".equals(Strings.toLowerCase(passwordMechIdentifier))) {
+            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
         }
 
         try {
             PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
-            IPasswordMech iPasswordMech = mechFactory.get(passwordMech);
-            if (iPasswordMech == null) {
-                iPasswordMech = mechFactory.getDefault();
-                log.warn("Unknown password mechanism defined: '{}'. Will use default: '{}'", passwordMech, iPasswordMech.getIdentifier());
+            PasswordMech passwordMech = mechFactory.get(passwordMechIdentifier);
+            if (passwordMech == null) {
+                passwordMech = mechFactory.getDefault();
+                log.warn("Unknown password mechanism defined: '{}'. Will use default: '{}'", passwordMechIdentifier, passwordMech.getIdentifier());
             }
-            user.setPasswordMech(iPasswordMech.getIdentifier());
-            return iPasswordMech;
+            user.setPasswordMech(passwordMech.getIdentifier());
+            return passwordMech;
         } catch (OXException e) {
             log.error("Unable to get password mechanism.", e);
             throw new StorageException("Unable to get password mechanism.", e);

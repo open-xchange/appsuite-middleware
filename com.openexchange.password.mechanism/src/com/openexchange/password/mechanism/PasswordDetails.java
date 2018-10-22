@@ -53,32 +53,33 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
- * {@link PasswordDetails}
+ * {@link PasswordDetails} - Container for password related data
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
 public class PasswordDetails {
-    /**
-     * The plain password
-     */
+
+    /** The plain password */
     private final String plainPassword;
 
-    /**
-     * The password mechanism identifier the password was encrypted with
-     */
+    /** The password mechanism identifier the password was encrypted with */
     private final String passwordMech;
 
-    /**
-     * The salt that was used while encrypting
-     */
+    /** The salt that was used while encrypting */
     private final byte[] salt;
 
-    /*
-     * The encrypted password
-     */
+    /* The encrypted password */
     private final String encodedPassword;
 
+    /**
+     * Initializes a new {@link PasswordDetails}.
+     * 
+     * @param plainPassword The password in plain text (unencoded)
+     * @param encodedPassword The encoded password
+     * @param passwordMech The password mechanism used to encode the password
+     * @param salt The salt used while encoding the password
+     */
     public PasswordDetails(String plainPassword, String encodedPassword, String passwordMech, byte[] salt) {
         this.plainPassword = plainPassword;
         this.encodedPassword = encodedPassword;
@@ -86,18 +87,38 @@ public class PasswordDetails {
         this.salt = salt;
     }
 
+    /**
+     * Returns the salt
+     * 
+     * @return byte[] The salt used to encode the password
+     */
     public byte[] getSalt() {
         return salt;
     }
 
+    /**
+     * Returns the encoded password
+     * 
+     * @return String The encoded password
+     */
     public String getEncodedPassword() {
         return encodedPassword;
     }
 
+    /**
+     * Returns the plain password
+     * 
+     * @return String The plain (unencoded) password
+     */
     public String getPlainPassword() {
         return plainPassword;
     }
 
+    /**
+     * Returns the identifier of the password mechanism used to encode the password
+     * 
+     * @return String The password mechanism used to encode the password
+     */
     public String getPasswordMech() {
         return passwordMech;
     }

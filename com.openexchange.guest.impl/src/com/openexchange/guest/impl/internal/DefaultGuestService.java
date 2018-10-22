@@ -70,7 +70,7 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.guest.impl.storage.GuestStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.user.UserService;
 
@@ -127,8 +127,8 @@ public class DefaultGuestService implements GuestService {
         if (user.isGuest()) {
             User alignedUser = alignUserWithGuest(user, contextId);
 
-            IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-            return iPasswordMech.check(password, alignedUser.getUserPassword(), alignedUser.getSalt());
+            PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+            return passwordMech.check(password, alignedUser.getUserPassword(), alignedUser.getSalt());
         }
         return false;
     }

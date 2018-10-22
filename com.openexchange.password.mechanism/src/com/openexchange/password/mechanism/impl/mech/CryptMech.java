@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.admin.storage.fileStorage;
+package com.openexchange.password.mechanism.impl.mech;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
+import com.openexchange.password.mechanism.impl.algorithm.UnixCrypt;
 
 /**
- * Default file implementation for admin auth.
+ * {@link CryptMech}
  *
- * @author choeger
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
+ * @since v7.10.1
  */
-public class OXAuthFileStorage extends OXAuthStorageInterface {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthFileStorage.class);
-
-    /** */
-    public OXAuthFileStorage() {
-        super();
-    }
+public class CryptMech extends ConfigAwarePasswordMech {
 
     /**
-     * Authenticates against a textfile
+     * Initializes a new {@link CryptMech}.
      */
+    public CryptMech() {
+        super("{CRYPT}", 32);
+    }
+
     @Override
-    public boolean authenticate(final Credentials authdata) {
-        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if(master != null && authdata != null &&
-           master.getLogin() != null && authdata.getLogin() != null &&
-           master.getPassword() != null && authdata.getPassword() != null &&
-           master.getLogin().equals(authdata.getLogin())) {
-            try {
-                PasswordMechRegistry factory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
-                if (factory != null) {
-                    PasswordMech passwordMech = factory.get(master.getPasswordMech());
-                    return passwordMech.check(authdata.getPassword(), master.getPassword(), master.getSalt());
-                }
-            } catch (OXException e) {
-                log.error("", e);
-                return false;
+    public PasswordDetails encodePassword(String str) throws OXException {
+        try {
+            if (doSalt()) {
+                byte[] salt = getSalt();
+                String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
+                return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), salt);
             }
+            return new PasswordDetails(str, UnixCrypt.crypt(str), getIdentifier(), null);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Error encrypting password according to CRYPT mechanism", e);
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
-        return false;
     }
 
     @Override
-    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
-        return false;
+    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
+        try {
+            return UnixCrypt.matches(encoded, candidate);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Error checking password according to CRYPT mechanism", e);
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+        }
     }
-
-    @Override
-    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
-        return false;
-    }
-
 }

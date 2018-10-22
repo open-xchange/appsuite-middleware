@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -153,8 +153,8 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
             throw ServiceExceptionCode.absentService(PasswordMechRegistry.class);
         }
 
-        IPasswordMech iPasswordMech = factory.get(user.getPasswordMech());
-        if (!iPasswordMech.check(loginInfo.getPassword(), user.getUserPassword(), user.getSalt())) {
+        PasswordMech passwordMech = factory.get(user.getPasswordMech());
+        if (!passwordMech.check(loginInfo.getPassword(), user.getUserPassword(), user.getSalt())) {
             throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
         }
     }

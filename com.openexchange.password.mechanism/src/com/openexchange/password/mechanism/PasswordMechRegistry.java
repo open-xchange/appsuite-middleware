@@ -52,7 +52,7 @@ package com.openexchange.password.mechanism;
 import java.util.List;
 
 /**
- * Factory to register available {@link IPasswordMech} implementations that can be retrieved via com.openexchange.passwordmechs.PasswordMechFactory.get(String) by giving the crypt mechanism identifier.
+ * Factory to register available {@link PasswordMech} implementations that can be retrieved via com.openexchange.passwordmechs.PasswordMechFactory.get(String) by giving the crypt mechanism identifier.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -60,39 +60,25 @@ import java.util.List;
 public interface PasswordMechRegistry {
 
     /**
-     * Register additional {@link IPasswordMech} implementations that can be used for password validation after retrieving it via com.openexchange.passwordmechs.PasswordMechFactory.get(String)
-     *
-     * @param passwordMech The {@link IPasswordMech} to register
-     */
-    public void register(IPasswordMech... passwordMech);
-
-    /**
-     * Unregister provided {@link IPasswordMech}
-     * 
-     * @param passwordMech The {@link IPasswordMech} to unregister
-     */
-    public void unregister(IPasswordMech passwordMech);
-
-    /**
      * Returns the password mechanism related to given identifier or <code>null</code> if no password mechanism is registered for the given identifier.
      *
      * @param identifier The identifier for the password mechanism
-     * @return {@link IPasswordMech} associated to given identifier or <code>null</code> if no password mechanism is registered for the given identifier
+     * @return {@link PasswordMech} associated to given identifier or <code>null</code> if no password mechanism is registered for the given identifier
      */
-    public IPasswordMech get(String identifier);
+    public PasswordMech get(String identifier);
 
     /**
-     * Returns the main identifiers of the registered {@link IPasswordMech}s which might be used.
+     * Returns the main identifiers of the registered {@link PasswordMech}s which might be used.
      * 
-     * @return {@link List} containing the main identifiers of the registered {@link IPasswordMech}.
+     * @return {@link List} containing the main identifiers of the registered {@link PasswordMech}.
      */
     public List<String> getIdentifiers();
 
     /**
      * Returns the password mechanism that is configured to be the standard mechanism.
      *
-     * @return {@link IPasswordMech} associated and never <code>null</code>.
+     * @return {@link PasswordMech} associated and never <code>null</code>.
      */
-    public IPasswordMech getDefault();
+    public PasswordMech getDefault();
 
 }

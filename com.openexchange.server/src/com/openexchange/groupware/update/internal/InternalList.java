@@ -711,6 +711,12 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipalTableTask());
         list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkageTableTask());
 
+
+        // +++++++++++++++++++++++++++++++++ Version 7.10.1 starts here. +++++++++++++++++++++++++++++++++
+        
+        // Adds the 'salt' column to 'user' and 'del_user' table in preparation for usage in the following release
+        list.add(new com.openexchange.groupware.update.tasks.AddUserSaltColumnTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

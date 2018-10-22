@@ -47,59 +47,57 @@
  *
  */
 
-package com.openexchange.password.mechanism;
+package com.openexchange.groupware.update.tasks;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link IPasswordMech}
+ * {@link AddUserSaltColumnTask} Adds the column <code>salt</code> to the <code>user</code> table
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-public interface IPasswordMech {
+public class AddUserSaltColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * Returns the origin string representation of the password mechanism identifier
-     *
-     * @return The identifier
-     */
-    String getIdentifier();
+    private final static String USER_TABLE_NAME = "user";
+    private final static String DEL_USER_TABLE_NAME = "del_user";
 
-    /**
-     * Returns if the password mechanism should be exposed or just used internally.
-     * 
-     * @return <code>true</code> if the password mechanism should be exposed. Otherwise <code>false</code>
-     */
-    boolean expose();
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
 
-    /**
-     * Encodes the given string according to this password mechanism and returns the encoded string.
-     *
-     * @param password The password to encode
-     * @return {@link PasswordDetails} containing details about the generation result
-     * @throws OXException
-     */
-    PasswordDetails encode(String password) throws OXException;
+            Column saltColumn = new Column("salt", "binary(128) DEFAULT NULL");
+            Tools.checkAndAddColumns(con, USER_TABLE_NAME, saltColumn);
+            Tools.checkAndAddColumns(con, DEL_USER_TABLE_NAME, saltColumn);
 
-    /**
-     * Decodes the given string according to its password mechanism and returns the decoded string.
-     *
-     * @param password The password to decode
-     * @param salt The salt used for encoding or <code>null</code> if no salt was used while encoding
-     * @return The decoded string
-     * @throws OXException
-     */
-    String decode(String encodedPassword, byte[] salt) throws OXException;
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
+    }
 
-    /**
-     * Checks if given password matches the encoded string according to this password mechanism.
-     *
-     * @param toCheck The password to check
-     * @param encoded The encoded string to check against
-     * @param salt The salt used for encoding or <code>null</code> if no salt was used while encoding
-     * @return <code>true</code> if string matches; otherwise <code>false</code>
-     * @throws OXException
-     */
-    boolean check(String toCheck, String encoded, byte[] salt) throws OXException;
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
 }

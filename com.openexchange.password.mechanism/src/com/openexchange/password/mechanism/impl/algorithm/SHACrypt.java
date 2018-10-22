@@ -51,7 +51,7 @@ package com.openexchange.password.mechanism.impl.algorithm;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.openexchange.tools.encoding.Base64;
+import com.openexchange.java.Charsets;
 
 /**
  * 
@@ -60,7 +60,7 @@ import com.openexchange.tools.encoding.Base64;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from global & update to new versions
  * @since v7.10.1
  */
-public final class SHACrypt {
+public enum SHACrypt {
 
     // -------------------------------------------------------------------
 
@@ -70,12 +70,12 @@ public final class SHACrypt {
      * @deprecated Use SHA256 to generate new password instead
      */
     @Deprecated
-    public static final SHACrypt SHA1 = new SHACrypt("{SHA}");
+    SHA1("{SHA}"),
 
     /**
      * SHA-256 algorithm
      */
-    public static final SHACrypt SHA256 = new SHACrypt("{SHA256}");
+    SHA256("{SHA-256}"),
 
     /**
      * SHA-512 algorithm.
@@ -84,14 +84,14 @@ public final class SHACrypt {
      * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
      * 
      */
-    public static final SHACrypt SHA512 = new SHACrypt("{SHA512}");
+    SHA512("{SHA-512}");
+    ;
 
     private final String identifier;
 
     // -------------------------------------------------------------------
 
     private SHACrypt(String lIdentifier) {
-        super();
         this.identifier = lIdentifier;
     }
 
@@ -121,7 +121,7 @@ public final class SHACrypt {
 
         final byte[] hash = sha.digest();
 
-        return Base64.encode(hash);
+        return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(hash));
     }
 
     /**

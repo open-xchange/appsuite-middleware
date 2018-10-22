@@ -55,9 +55,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
@@ -116,11 +117,11 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             updatedUser.setSalt(null);
         } else {
             PasswordMechRegistry passwordMechFactory = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
-            IPasswordMech iPasswordMech = passwordMechFactory.getDefault();
-            if (Strings.isNotEmpty(user.getPasswordMech())) {
-                iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
+            PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+            if (passwordMech == null) {
+                passwordMech = StockPasswordMechs.BCRYPT.getPasswordMech();
             }
-            PasswordDetails passwordDetails = iPasswordMech.encode(event.getNewPassword());
+            PasswordDetails passwordDetails = passwordMech.encode(event.getNewPassword());
             updatedUser.setPasswordMech(passwordDetails.getPasswordMech());
             updatedUser.setUserPassword(passwordDetails.getEncodedPassword());
             updatedUser.setSalt(passwordDetails.getSalt());

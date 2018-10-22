@@ -84,7 +84,7 @@ import javax.security.auth.Subject;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementExceptionCode;
 import com.openexchange.management.services.ManagementServiceRegistry;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
@@ -166,12 +166,12 @@ public abstract class AbstractAgent {
             String hashAlgorithm = creds.length > 2 ? creds[2] : "SHA";
 
             PasswordMechRegistry passwordMechFactory = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
-            IPasswordMech iPasswordMech = passwordMechFactory.get(hashAlgorithm);
-            if (iPasswordMech == null) {
+            PasswordMech passwordMech = passwordMechFactory.get(hashAlgorithm);
+            if (passwordMech == null) {
                 throw new IllegalArgumentException("The identifier '" + hashAlgorithm + "' for the password hash mechanism is unknown.");
             }
             try {
-                if ((this.credentials[0].equals(username)) && iPasswordMech.check(password, this.credentials[1], null)) {
+                if ((this.credentials[0].equals(username)) && passwordMech.check(password, this.credentials[1], null)) {
                     return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
                 }
             } catch (OXException e) {

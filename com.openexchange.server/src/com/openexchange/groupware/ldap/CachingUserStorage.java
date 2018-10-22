@@ -68,7 +68,7 @@ import com.openexchange.groupware.ldap.RdbUserStorage.ValuePair;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.lock.LockService;
 import com.openexchange.log.LogProperties;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.map.TIntObjectMap;
@@ -652,7 +652,7 @@ public class CachingUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, byte[] salt) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         delegate.updatePasswordInternal(connection, context, userId, mech, password, salt);
     }
 }

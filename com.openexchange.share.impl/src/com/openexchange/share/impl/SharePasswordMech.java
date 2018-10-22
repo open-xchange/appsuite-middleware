@@ -51,8 +51,7 @@ package com.openexchange.share.impl;
 
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.share.core.ShareConstants;
 
@@ -62,7 +61,7 @@ import com.openexchange.share.core.ShareConstants;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class SharePasswordMech implements IPasswordMech {
+public class SharePasswordMech extends AbstractPasswordMech {
 
     private final CryptoService cryptoService;
     private final String cryptKey;
@@ -74,7 +73,7 @@ public class SharePasswordMech implements IPasswordMech {
      * @param cryptKey The key use to encrypt / decrypt data
      */
     public SharePasswordMech(CryptoService cryptoService, String cryptKey) {
-        super();
+        super(ShareConstants.PASSWORD_MECH_ID, 11); //FIXME
         this.cryptoService = cryptoService;
         this.cryptKey = cryptKey;
     }
@@ -85,26 +84,9 @@ public class SharePasswordMech implements IPasswordMech {
     }
 
     @Override
-    public PasswordDetails encode(String str) throws OXException {
+    public PasswordDetails encodePassword(String str) throws OXException {
         String encrypt = cryptoService.encrypt(str, cryptKey);
         return new PasswordDetails(str, encrypt, ShareConstants.PASSWORD_MECH_ID, null);
-    }
-
-    @Override
-    public boolean check(String toCheck, String encoded, byte[] salt) throws OXException {
-        if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
-            return true;
-        } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
-            return false;
-        } else if ((Strings.isNotEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
-            return false;
-        }
-
-        String decoded = decode(encoded, null);
-        if (toCheck.equals(decoded)) {
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -114,6 +96,15 @@ public class SharePasswordMech implements IPasswordMech {
 
     @Override
     public boolean expose() {
+        return false;
+    }
+
+    @Override
+    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
+        String decoded = decode(encoded, null);
+        if (candidate.equals(decoded)) {
+            return true;
+        }
         return false;
     }
 }

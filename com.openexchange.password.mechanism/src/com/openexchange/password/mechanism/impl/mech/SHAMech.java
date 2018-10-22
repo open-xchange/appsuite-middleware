@@ -49,35 +49,65 @@
 
 package com.openexchange.password.mechanism.impl.mech;
 
-import com.damienmiller.BCrypt;
+import java.security.NoSuchAlgorithmException;
+import com.openexchange.exception.OXException;
 import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
+import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
 
 /**
- * {@link BCryptMech}
+ * {@link SHAMech}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
  * @since v7.10.1
  */
-public class BCryptMech extends ConfigAwarePasswordMech {
+public class SHAMech extends ConfigAwarePasswordMech {
+
+    private final SHACrypt crypt;
 
     /**
-     * Initializes a new {@link BCryptMech}.
+     * Initializes a new {@link SHAMech}.
+     * 
+     * @param crypt The {@link SHACrypt} to use
      */
-    public BCryptMech() {
-        super("{BCRYPT}", 64);
+    public SHAMech(SHACrypt crypt) {
+        super(crypt.getIdentifier(), getHashLength(crypt));
+        this.crypt = crypt;
     }
 
     @Override
-    public PasswordDetails encode(String str) {
-        String salt = BCrypt.gensalt();
-        if (doSalt()) {
-            return new PasswordDetails(str, BCrypt.hashpw(str, salt), this.getIdentifier(), salt.getBytes());
+    public PasswordDetails encodePassword(String str) throws OXException {
+        try {
+            if (doSalt()) {
+                byte[] salt = getSalt();
+                return new PasswordDetails(str, crypt.makeSHAPasswd(str, salt), getIdentifier(), salt);
+            }
+            return new PasswordDetails(str, crypt.makeSHAPasswd(str), getIdentifier(), null);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error encrypting password according to SHA mechanism", e);
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
-        return new PasswordDetails(str, BCrypt.hashpw(str, salt), this.getIdentifier(), null);
     }
 
     @Override
-    public boolean checkPassword(String candidate, String encoded, byte[] salt) {
-        return BCrypt.checkpw(candidate, encoded);
+    public boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException {
+        try {
+            if (salt == null) {
+                return crypt.makeSHAPasswd(candidate).equals(encoded);
+            }
+            return crypt.makeSHAPasswd(candidate, salt).equals(encoded);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error checking password according to SHA mechanism", e);
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+        }
+    }
+
+    private static int getHashLength(SHACrypt crypt) {
+        if (crypt == SHACrypt.SHA1) {
+            return 32;
+        } else if (crypt == SHACrypt.SHA256) {
+            return 64;
+        }
+        return 128;
     }
 }

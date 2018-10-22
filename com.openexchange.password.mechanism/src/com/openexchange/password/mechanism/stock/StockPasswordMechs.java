@@ -47,34 +47,44 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl.mech;
+package com.openexchange.password.mechanism.stock;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.password.mechanism.AbstractPasswordMech;
-import com.openexchange.password.mechanism.impl.osgi.Services;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
+import com.openexchange.password.mechanism.impl.mech.BCryptMech;
+import com.openexchange.password.mechanism.impl.mech.CryptMech;
+import com.openexchange.password.mechanism.impl.mech.SHAMech;
 
 /**
- * 
- * {@link ConfigAwarePasswordMech}
+ * {@link StockPasswordMechs}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public abstract class ConfigAwarePasswordMech extends AbstractPasswordMech {
+public enum StockPasswordMechs {
 
-    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
-    private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED = "com.openexchange.password.mechanism.salt.enabled";
+    SHA1(new SHAMech(SHACrypt.SHA1)),
 
-    public ConfigAwarePasswordMech(String mechIdentifier, int hashSize) {
-        super(mechIdentifier, hashSize);
+    SHA256(new SHAMech(SHACrypt.SHA256)),
+
+    SHA512(new SHAMech(SHACrypt.SHA512)),
+
+    BCRYPT(new BCryptMech()),
+
+    CRYPT(new CryptMech()),
+    ;
+
+    private PasswordMech passwordMech;
+
+    private StockPasswordMechs(PasswordMech passwordMech) {
+        this.passwordMech = passwordMech;
     }
 
-    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
-    protected boolean doSalt() {
-        ConfigurationService configService = Services.optService(ConfigurationService.class);
-        if (configService == null) {
-            return false;
-        }
-        return configService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED, false);
+    public String getIdentifier() {
+        return this.passwordMech.getIdentifier();
+    }
+
+    public PasswordMech getPasswordMech() {
+        return this.passwordMech;
     }
 }
