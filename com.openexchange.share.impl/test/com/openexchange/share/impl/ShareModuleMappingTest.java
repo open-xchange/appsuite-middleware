@@ -53,7 +53,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -88,7 +88,7 @@ public class ShareModuleMappingTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         this.configService = PowerMockito.mock(ConfigurationService.class);
-        PowerMockito.when(configService.getProperty(Matchers.anyString())).thenReturn("");
+        PowerMockito.when(configService.getProperty(ArgumentMatchers.anyString())).thenReturn("");
         PowerMockito.when(configService.getProperty("com.openexchange.share.modulemapping")).thenReturn(MAPPING);
         ShareModuleMapping.init(configService);
     }

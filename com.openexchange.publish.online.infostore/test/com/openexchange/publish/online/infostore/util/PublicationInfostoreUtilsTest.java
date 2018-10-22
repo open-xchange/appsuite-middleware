@@ -53,7 +53,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
@@ -115,7 +115,7 @@ public class PublicationInfostoreUtilsTest {
 
     @Test
     public void testLoadDocumentMetadata_NoFileAccess_ReturndfdNull() throws OXException {
-        PowerMockito.when(this.fileAccessFactory.createAccess((com.openexchange.session.Session) Matchers.any())).thenReturn(this.fileAccess);
+        PowerMockito.when(this.fileAccessFactory.createAccess((com.openexchange.session.Session) ArgumentMatchers.any())).thenReturn(this.fileAccess);
 
         DocumentMetadata loadDocumentMetadata = InfostorePublicationUtils.loadDocumentMetadata(this.publication, this.fileAccessFactory);
 

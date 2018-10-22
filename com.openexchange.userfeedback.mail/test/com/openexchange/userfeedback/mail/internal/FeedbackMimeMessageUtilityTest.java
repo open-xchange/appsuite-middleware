@@ -147,7 +147,7 @@ public class FeedbackMimeMessageUtilityTest {
     @Test
     public void extractRecipientsForPgpTest_failedPGPAddress() throws OXException, IOException {
         
-        PowerMockito.when(pgpKeyRingParser.parse(org.mockito.Matchers.any(InputStream.class))).thenReturn(keyRingParserResult);
+        PowerMockito.when(pgpKeyRingParser.parse(org.mockito.ArgumentMatchers.any(InputStream.class))).thenReturn(keyRingParserResult);
         PowerMockito.when(keyRingParserResult.toEncryptionKey()).thenReturn(null);
         
         HashMap<String, String> recipients = new HashMap<>();
@@ -167,7 +167,7 @@ public class FeedbackMimeMessageUtilityTest {
     public void extractRecipientsForPgpTest_validPGPAddress() throws OXException, IOException, PGPException {
         PGPPublicKey pgpPublicKey = PowerMockito.mock(PGPPublicKey.class);
         
-        PowerMockito.when(pgpKeyRingParser.parse(org.mockito.Matchers.any(InputStream.class))).thenReturn(keyRingParserResult);
+        PowerMockito.when(pgpKeyRingParser.parse(org.mockito.ArgumentMatchers.any(InputStream.class))).thenReturn(keyRingParserResult);
         PowerMockito.when(keyRingParserResult.toEncryptionKey()).thenReturn(pgpPublicKey);
         
         HashMap<String, String> recipients = new HashMap<>();

@@ -55,7 +55,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.Event;
@@ -146,7 +146,7 @@ public class AuditEventHandlerTest {
         userService = PowerMockito.mock(UserService.class);
         User user = PowerMockito.mock(com.openexchange.groupware.ldap.User.class);
         PowerMockito.when(user.getDisplayName()).thenReturn(this.objectTitle);
-        PowerMockito.when(userService.getUser(Matchers.anyInt(), (Context) Matchers.any())).thenReturn(user);
+        PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any())).thenReturn(user);
 
         this.contact = PowerMockito.mock(Contact.class);
         this.event = PowerMockito.mock(Event.class);
@@ -665,7 +665,7 @@ public class AuditEventHandlerTest {
 
         PowerMockito.when(event.getTopic()).thenReturn(this.objectTitle);
         Session session = PowerMockito.mock(Session.class);
-        PowerMockito.when(session.getParameter(Matchers.anyString())).thenReturn(Boolean.FALSE);
+        PowerMockito.when(session.getParameter(ArgumentMatchers.anyString())).thenReturn(Boolean.FALSE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);
@@ -687,7 +687,7 @@ public class AuditEventHandlerTest {
 
         PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.UPDATE_TOPIC);
         Session session = PowerMockito.mock(Session.class);
-        PowerMockito.when(session.getParameter(Matchers.anyString())).thenReturn(Boolean.TRUE);
+        PowerMockito.when(session.getParameter(ArgumentMatchers.anyString())).thenReturn(Boolean.TRUE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);
@@ -709,7 +709,7 @@ public class AuditEventHandlerTest {
 
         PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.ACCESS_TOPIC);
         Session session = PowerMockito.mock(Session.class);
-        PowerMockito.when(session.getParameter(Matchers.anyString())).thenReturn(Boolean.TRUE);
+        PowerMockito.when(session.getParameter(ArgumentMatchers.anyString())).thenReturn(Boolean.TRUE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);

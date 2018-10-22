@@ -59,8 +59,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -105,7 +105,7 @@ public class DefaultVCardStorageServiceTest {
 
         PowerMockito.mockStatic(FileStorages.class);
         PowerMockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(quotaFileStorageService);
-        PowerMockito.when(quotaFileStorageService.getQuotaFileStorage(Matchers.anyInt(), (Info) Matchers.anyObject())).thenReturn(quotaFileStorage);
+        PowerMockito.when(quotaFileStorageService.getQuotaFileStorage(ArgumentMatchers.anyInt(), (Info) ArgumentMatchers.anyObject())).thenReturn(quotaFileStorage);
     }
 
     @Test(expected = OXException.class)
@@ -119,7 +119,7 @@ public class DefaultVCardStorageServiceTest {
     public void testSaveVCard_happyFlow_returnVCardId() throws OXException {
         DefaultVCardStorageService tempVCardStorageService = Mockito.spy(new DefaultVCardStorageService());
         SaveFileAction saveFileAction = Mockito.mock(SaveFileAction.class);
-        Mockito.doReturn(saveFileAction).when(tempVCardStorageService).createFileAction((InputStream) Matchers.any(), Matchers.anyInt());
+        Mockito.doReturn(saveFileAction).when(tempVCardStorageService).createFileAction((InputStream) ArgumentMatchers.any(), ArgumentMatchers.anyInt());
         Mockito.when(saveFileAction.getFileStorageID()).thenReturn(FILE_STORAGE_ID);
 
         String vCardId = tempVCardStorageService.saveVCard(IOUtils.toInputStream(vCard), CONTEXT_ID);
@@ -139,7 +139,7 @@ public class DefaultVCardStorageServiceTest {
 
     @Test
     public void testDeleteVCard_fileStorageReturnsFalse_returnFalse() throws OXException {
-        Mockito.doReturn(false).when(quotaFileStorage).deleteFile(Matchers.anyString());
+        Mockito.doReturn(false).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
 
         boolean deleteVCard = service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
         assertFalse(deleteVCard);
@@ -147,7 +147,7 @@ public class DefaultVCardStorageServiceTest {
 
     @Test
     public void testDeleteVCard_fileStorageReturnsTrue_returnTrue() throws OXException {
-        Mockito.doReturn(true).when(quotaFileStorage).deleteFile(Matchers.anyString());
+        Mockito.doReturn(true).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
 
         boolean deleteVCard = service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
         assertTrue(deleteVCard);
@@ -155,7 +155,7 @@ public class DefaultVCardStorageServiceTest {
 
     @Test(expected = OXException.class)
     public void testDeleteVCard_fileStorageThrowsException_rethrow() throws OXException {
-        Mockito.doThrow(new OXException(77)).when(quotaFileStorage).deleteFile(Matchers.anyString());
+        Mockito.doThrow(new OXException(77)).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
 
         service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
     }
@@ -168,14 +168,14 @@ public class DefaultVCardStorageServiceTest {
 
     @Test
     public void testGetVCard_fileStorageReturnsNull_returnNull() throws OXException {
-        Mockito.doReturn(null).when(quotaFileStorage).getFile(Matchers.anyString());
+        Mockito.doReturn(null).when(quotaFileStorage).getFile(ArgumentMatchers.anyString());
         InputStream lVCard = service.getVCard(FILE_STORAGE_ID, CONTEXT_ID);
         assertNull(lVCard);
     }
 
     @Test(expected = OXException.class)
     public void testGetVCard_fileStorageThrowsException_rethrow() throws OXException {
-        Mockito.doThrow(new OXException(77)).when(quotaFileStorage).getFile(Matchers.anyString());
+        Mockito.doThrow(new OXException(77)).when(quotaFileStorage).getFile(ArgumentMatchers.anyString());
 
         service.getVCard(FILE_STORAGE_ID, CONTEXT_ID);
     }
@@ -183,7 +183,7 @@ public class DefaultVCardStorageServiceTest {
     @Test
     public void testGetVCard_happyFlow_returnInputStream() throws OXException {
         InputStream mock = Mockito.mock(InputStream.class);
-        Mockito.doReturn(mock).when(quotaFileStorage).getFile(Matchers.anyString());
+        Mockito.doReturn(mock).when(quotaFileStorage).getFile(ArgumentMatchers.anyString());
 
         InputStream lVCard = service.getVCard(FILE_STORAGE_ID, CONTEXT_ID);
         assertNotNull(lVCard);

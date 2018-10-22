@@ -63,7 +63,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -278,7 +278,7 @@ public class TokenLoginServiceImplTest {
 
     @Test
     public void testRedeemToken_EverythingFine_ReturnSession() throws OXException {
-        PowerMockito.when(this.sessiondService.getSession(Matchers.anyString())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.getSession(ArgumentMatchers.anyString())).thenReturn(this.session);
         PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);

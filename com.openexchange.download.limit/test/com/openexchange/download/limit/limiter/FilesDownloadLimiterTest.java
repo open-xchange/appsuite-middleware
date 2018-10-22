@@ -62,7 +62,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -192,23 +192,23 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testDropObsoleteAccesses_isLink_usedConfigCascadeAndCommitedConnection() throws OXException, SQLException {
-        Mockito.when(configView.opt(Matchers.anyString(), Matchers.<Class<Integer>> any(), Matchers.<Integer> any())).thenReturn(DEFAULT_TIME_FRAME_LINKS);
+        Mockito.when(configView.opt(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<Integer>> any(), ArgumentMatchers.<Integer> any())).thenReturn(DEFAULT_TIME_FRAME_LINKS);
 
         limiter.dropObsoleteAccesses(linkUser, CONTEXT_ID);
 
         Mockito.verify(configView, Mockito.times(1)).opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, DEFAULT_TIME_FRAME_LINKS);
-        Mockito.verify(fileAccessStorage, Mockito.times(1)).removeAccesses(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyLong(), (Connection) Matchers.any());
+        Mockito.verify(fileAccessStorage, Mockito.times(1)).removeAccesses(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
         Mockito.verify(connection, Mockito.times(1)).commit();
     }
 
     @Test
     public void testDropObsoleteAccesses_isGuest_usedConfigCascadeAndCommitedConnection() throws OXException, SQLException {
-        Mockito.when(configView.opt(Matchers.anyString(), Matchers.<Class<Integer>> any(), Matchers.<Integer> any())).thenReturn(DEFAULT_TIME_FRAME_LINKS);
+        Mockito.when(configView.opt(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<Integer>> any(), ArgumentMatchers.<Integer> any())).thenReturn(DEFAULT_TIME_FRAME_LINKS);
 
         limiter.dropObsoleteAccesses(guest, CONTEXT_ID);
 
         Mockito.verify(configView, Mockito.times(1)).opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, DEFAULT_TIME_FRAME_LINKS);
-        Mockito.verify(fileAccessStorage, Mockito.times(1)).removeAccesses(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyLong(), (Connection) Matchers.any());
+        Mockito.verify(fileAccessStorage, Mockito.times(1)).removeAccesses(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
         Mockito.verify(connection, Mockito.times(1)).commit();
     }
 
@@ -217,7 +217,7 @@ public class FilesDownloadLimiterTest {
         limiter.dropObsoleteAccesses(internal, CONTEXT_ID);
 
         Mockito.verify(configView, Mockito.never()).opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, DEFAULT_TIME_FRAME_LINKS);
-        Mockito.verify(fileAccessStorage, Mockito.never()).removeAccesses(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyLong(), (Connection) Matchers.any());
+        Mockito.verify(fileAccessStorage, Mockito.never()).removeAccesses(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
         Mockito.verify(connection, Mockito.never()).commit();
     }
 
@@ -576,7 +576,7 @@ public class FilesDownloadLimiterTest {
 
         limiter.onRequestPerformed(requestData, null, null);
 
-        Mockito.verify(fileAccessStorage, Mockito.never()).addAccess(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyLong(), (Connection) Matchers.any());
+        Mockito.verify(fileAccessStorage, Mockito.never()).addAccess(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
     }
 
     @Test
@@ -593,7 +593,7 @@ public class FilesDownloadLimiterTest {
 
         limiter.onRequestPerformed(requestData, null, null);
 
-        Mockito.verify(fileAccessStorage, Mockito.never()).addAccess(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyLong(), (Connection) Matchers.any());
+        Mockito.verify(fileAccessStorage, Mockito.never()).addAccess(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
     }
 
     @Test

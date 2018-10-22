@@ -56,9 +56,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -644,7 +644,7 @@ public class DBRESTServiceTest {
     @Test
     public void versionNegotiationFails() throws OXException {
         when(dbs.getWritable(ctxId)).thenReturn(con);
-        when(versionChecker.isUpToDate(anyObject(), eq(con), eq("com.openexchange.myModule"), eq("2"))).thenReturn("1");
+        when(versionChecker.isUpToDate(any(Object.class), eq(con), eq("com.openexchange.myModule"), eq("2"))).thenReturn("1");
 
         String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
         header("x-ox-db-module", "com.openexchange.myModule");

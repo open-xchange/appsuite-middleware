@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -105,8 +105,8 @@ public class DefaultVCardStorageFactoryTest {
         Mockito.when(trueProperty.get()).thenReturn(Boolean.TRUE);
         Mockito.when(falseProperty.get()).thenReturn(Boolean.FALSE);
 
-        Mockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(configView);
-        Mockito.when(configView.property(Matchers.anyString(), (Class)Matchers.any())).thenReturn(trueProperty);
+        Mockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(configView);
+        Mockito.when(configView.property(ArgumentMatchers.anyString(), (Class)ArgumentMatchers.any())).thenReturn(trueProperty);
     }
 
      @Test
@@ -136,7 +136,7 @@ public class DefaultVCardStorageFactoryTest {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
         capabilities.add("mich.gibts.nicht");
 
-        Mockito.when(configView.property(Matchers.anyString(), (Class)Matchers.any())).thenReturn(trueProperty, falseProperty);
+        Mockito.when(configView.property(ArgumentMatchers.anyString(), (Class)ArgumentMatchers.any())).thenReturn(trueProperty, falseProperty);
 
         VCardStorageService returnedService = factory.getVCardStorageService(configViewFactory, CONTEXT_ID);
 
@@ -146,7 +146,7 @@ public class DefaultVCardStorageFactoryTest {
      @Test
      public void testGetVCardStorageService_onlyCapNotAvailable_returnnull() throws OXException {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
-        Mockito.when(configView.property(Matchers.anyString(), (Class)Matchers.any())).thenReturn(falseProperty);
+        Mockito.when(configView.property(ArgumentMatchers.anyString(), (Class)ArgumentMatchers.any())).thenReturn(falseProperty);
 
         VCardStorageService returnedService = factory.getVCardStorageService(configViewFactory, CONTEXT_ID);
 
@@ -159,7 +159,7 @@ public class DefaultVCardStorageFactoryTest {
         capabilities.add("mich.gibts.nicht");
         capabilities.add("mich.schon.aber.da.kommen.wir.nicht.hin");
 
-        Mockito.when(configView.property(Matchers.anyString(), (Class)Matchers.any())).thenReturn(trueProperty, falseProperty, trueProperty);
+        Mockito.when(configView.property(ArgumentMatchers.anyString(), (Class)ArgumentMatchers.any())).thenReturn(trueProperty, falseProperty, trueProperty);
 
         VCardStorageService returnedService = factory.getVCardStorageService(configViewFactory, CONTEXT_ID);
 
@@ -170,7 +170,7 @@ public class DefaultVCardStorageFactoryTest {
      public void testGetVCardStorageService_configViewThrowsException_returnNull() throws OXException {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
 
-        Mockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenThrow(new OXException());
+        Mockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenThrow(new OXException());
 
         VCardStorageService returnedService = factory.getVCardStorageService(configViewFactory, CONTEXT_ID);
 
