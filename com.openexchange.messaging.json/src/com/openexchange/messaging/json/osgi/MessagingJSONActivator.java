@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.java.Charsets;
 import com.openexchange.messaging.json.Enabled;
 import com.openexchange.messaging.json.GUI;
 import com.openexchange.messaging.json.ManagedFileInputStreamRegistry;
@@ -194,7 +195,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
                 "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" +
                 "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
                 "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" +
-                "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+                "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes(Charsets.ISO_8859_1);
             cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
         }
         return cacheService.getCache(regionName);
