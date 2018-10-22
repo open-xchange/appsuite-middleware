@@ -72,6 +72,6 @@ public interface FileLimitService {
      * @return A listing of exceptions indicating possible limitation constraint violations or an empty list
      * @throws OXException If the check fails.
      */
-    List<OXException> checkLimits(Session session, String folderId, List<File> files, String type) throws OXException;
+    List<OXException> checkLimits(Session session, String folderId, List<LimitFile> files, String type) throws OXException;
 
 }

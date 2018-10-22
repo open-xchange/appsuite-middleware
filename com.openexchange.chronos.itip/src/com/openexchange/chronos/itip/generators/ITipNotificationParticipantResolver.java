@@ -126,18 +126,16 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         List<Attendee> attendees = update.getAttendees();
         if (attendees != null) {
             for (final Attendee attendee : attendees) {
-                if (!attendee.isHidden()) {
-                    if (CalendarUtils.isInternalUser(attendee)) {
-                        userIds.put(I(attendee.getEntity()), attendee);
-                    } else if (CalendarUtils.isExternalUser(attendee)) {
-                        String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
-                        if (!externalGuardian.contains(mail)) {
-                            externalParticipants.add(attendee);
-                            externalGuardian.add(mail);
-                        }
-                    } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType())) {
-                        resourceIds.add(I(attendee.getEntity()));
+                if (CalendarUtils.isInternalUser(attendee)) {
+                    userIds.put(I(attendee.getEntity()), attendee);
+                } else if (CalendarUtils.isExternalUser(attendee)) {
+                    String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
+                    if (!externalGuardian.contains(mail)) {
+                        externalParticipants.add(attendee);
+                        externalGuardian.add(mail);
                     }
+                } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType())) {
+                    resourceIds.add(I(attendee.getEntity()));
                 }
             }
         }
@@ -146,17 +144,15 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             attendees = original.getAttendees();
             if (attendees != null) {
                 for (Attendee attendee : attendees) {
-                    if (!attendee.isHidden()) {
-                        if (CalendarUtils.isInternalUser(attendee)) {
-                            if (!userIds.containsKey(I(attendee.getEntity()))) {
-                                userIds.put(I(attendee.getEntity()), attendee);
-                            }
-                        } else if (CalendarUtils.isExternalUser(attendee)) {
-                            String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
-                            if (!externalGuardian.contains(mail)) {
-                                externalParticipants.add(attendee);
-                                externalGuardian.add(mail);
-                            }
+                    if (CalendarUtils.isInternalUser(attendee)) {
+                        if (!userIds.containsKey(I(attendee.getEntity()))) {
+                            userIds.put(I(attendee.getEntity()), attendee);
+                        }
+                    } else if (CalendarUtils.isExternalUser(attendee)) {
+                        String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
+                        if (!externalGuardian.contains(mail)) {
+                            externalParticipants.add(attendee);
+                            externalGuardian.add(mail);
                         }
                     }
                 }
@@ -205,6 +201,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
                 participant.setDisplayName(userParticipant.getCn());
                 participant.setConfirmStatus(userParticipant.getPartStat());
                 participant.setComment(userParticipant.getComment());
+                participant.setHidden(userParticipant.isHidden());
             }
             participant.setUser(u);
             participant.setContext(ctx);

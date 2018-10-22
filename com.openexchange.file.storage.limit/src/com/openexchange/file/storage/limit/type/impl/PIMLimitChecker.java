@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.exceptions.FileLimitExceptionCodes;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
@@ -78,10 +78,10 @@ public class PIMLimitChecker extends AbstractCombinedTypeLimitChecker {
     }
 
     @Override
-    public List<OXException> check(Session session, String folderId, List<File> files) throws OXException {
+    public List<OXException> check(Session session, String folderId, List<LimitFile> files) throws OXException {
         List<OXException> exceededLimits = new ArrayList<>();
 
-        long fileTotalSize = files.stream().collect(Collectors.summingLong(File::getSize));
+        long fileTotalSize = files.stream().collect(Collectors.summingLong(LimitFile::getSize));
         QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
         if (fileStorage != null) {
             long quota = fileStorage.getQuota();

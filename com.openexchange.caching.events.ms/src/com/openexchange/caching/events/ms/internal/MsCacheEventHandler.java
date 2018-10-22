@@ -50,8 +50,8 @@
 package com.openexchange.caching.events.ms.internal;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
@@ -70,7 +70,7 @@ import com.openexchange.ms.Topic;
  */
 public final class MsCacheEventHandler implements CacheListener {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
 
     private static final String TOPIC_PREFIX = "cacheEvents-3-";
 
@@ -96,29 +96,28 @@ public final class MsCacheEventHandler implements CacheListener {
         this.topicCount = topicCount;
         cacheEvents.addListener(this);
 
-        listeners = new ArrayList<>(topicCount);
-
-        int i = 0;
-        do {
-            Topic<PortableCacheEvent> topic = getTopic(i++);
+        ImmutableList.Builder<MessageListener<PortableCacheEvent>> listeners = ImmutableList.builderWithExpectedSize(topicCount);
+        for (int i = 0; i < topicCount; i++) {
+            Topic<PortableCacheEvent> topic = getTopic(i);
             MessageListener<PortableCacheEvent> listener = new CacheEventMessageListener(cacheEvents);
             topic.addMessageListener(listener);
             listeners.add(listener);
-        } while (i < topicCount);
+        }
+        this.listeners = listeners.build();
     }
 
+    /**
+     * Stops this instance.
+     */
     public void stop() {
         cacheEvents.removeListener(this);
-        int i = 0;
-        do {
+        for (int i = 0; i < topicCount; i++) {
             try {
                 getTopic(i).removeMessageListener(listeners.get(i));
-                listeners.remove(i);
-                i++;
             } catch (RuntimeException e) {
-                LOG.warn("Error removing message listener " + i++, e);
+                LOG.warn("Error removing message listener " + i, e);
             }
-        } while (i < topicCount);
+        }
     }
 
     @Override
@@ -157,11 +156,9 @@ public final class MsCacheEventHandler implements CacheListener {
 
     private static class CacheEventMessageListener implements MessageListener<PortableCacheEvent> {
 
-        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventMessageListener.class);
-
         private final CacheEventService cacheEvents;
 
-        public CacheEventMessageListener(CacheEventService cacheEvents) {
+        CacheEventMessageListener(CacheEventService cacheEvents) {
             super();
             this.cacheEvents = cacheEvents;
         }

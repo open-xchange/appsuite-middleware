@@ -72,12 +72,14 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
@@ -99,6 +101,11 @@ public class PushCalendarHandler implements CalendarHandler {
 
     private final PushNotificationService pushNotificationService;
 
+    /**
+     * Initializes a new {@link PushCalendarHandler}.
+     * 
+     * @param pushNotificationService A reference to the push notification service
+     */
     public PushCalendarHandler(PushNotificationService pushNotificationService) {
         super();
         this.pushNotificationService = pushNotificationService;
@@ -140,7 +147,6 @@ public class PushCalendarHandler implements CalendarHandler {
             .userId(userId)
             .sourceToken(pushToken)
             .topic("ox:calendar:updates")
-            //.topic("ox:mail:new") to test
             .messageData(messageData)
         .build();
     }
@@ -162,9 +168,46 @@ public class PushCalendarHandler implements CalendarHandler {
         }
         Map<Integer, List<String>> uniqueAffectedFoldersPerUser = new HashMap<Integer, List<String>>(affectedFoldersPerUser.size());
         for (Entry<Integer, List<String>> entry : affectedFoldersPerUser.entrySet()) {
-            uniqueAffectedFoldersPerUser.put(entry.getKey(), getUniqueFolderIds(event.getAccountId(), entry.getValue()));
+            if (0 < event.getCreations().size() || 0 < event.getDeletions().size() || containsSignificantChanges(event.getUpdates(), i(entry.getKey()), entry.getValue())) {
+                uniqueAffectedFoldersPerUser.put(entry.getKey(), getUniqueFolderIds(event.getAccountId(), entry.getValue()));
+            }
         }
         return uniqueAffectedFoldersPerUser;
+    }
+
+    /**
+     * Gets a value indicating whether at least one of the supplied update results denotes <i>significant</i> changes, i.e. changes that
+     * would directly be visible in the client. Currently, this is only the case whenever the event's sequence number is bumped.
+     * 
+     * @param updates The update results as indicated by the calendar event
+     * @param userId The user to indicate the changes for
+     * @param folderIds The affected folder identifiers visible to the user to indicate the changes for
+     * @return <code>true</code> if there a re significant changes, <code>false</code>, otherwise
+     */
+    private static boolean containsSignificantChanges(List<UpdateResult> updates, int userId, List<String> folderIds) {
+        for (UpdateResult update : updates) {
+            if (update.getUpdatedFields().contains(EventField.SEQUENCE)) {
+                /*
+                 * sequence number has changed, so assume a "significant" change implicitly
+                 */
+                return true;
+            }
+            for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : update.getAttendeeUpdates().getUpdatedItems()) {
+                if (attendeeUpdate.getOriginal().getEntity() == userId) {
+                    /*
+                     * user's own attendee modified, assume "significant" change
+                     */
+                    return true;
+                }
+                if (folderIds.contains(attendeeUpdate.getOriginal().getFolderId()) || folderIds.contains(attendeeUpdate.getUpdate().getFolderId())) {
+                    /*
+                     * attendee modified whose folder view is visible to user, assume "significant" change
+                     */
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -208,6 +251,18 @@ public class PushCalendarHandler implements CalendarHandler {
                     ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
                     EventID eventID = getUniqueEventID(update.getUpdate(), event.getAccountId(), attendeeUpdate.getUpdate().getEntity());
                     com.openexchange.tools.arrays.Collections.put(needsActionPerUser, I(attendeeUpdate.getUpdate().getEntity()), eventID);
+                }
+            }
+        }
+        for (DeleteResult deletion : event.getDeletions()) {
+            Event deletedEvent = deletion.getOriginal();
+            /*
+             * collect all internal user attendees whose participation status was 'needs action' for deleted events
+             */
+            for (Attendee userAttendee : filter(deletedEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                if (ParticipationStatus.NEEDS_ACTION.matches(userAttendee.getPartStat())) {
+                    EventID eventID = getUniqueEventID(deletedEvent, event.getAccountId(), userAttendee.getEntity());
+                    com.openexchange.tools.arrays.Collections.put(needsActionPerUser, I(userAttendee.getEntity()), eventID);
                 }
             }
         }

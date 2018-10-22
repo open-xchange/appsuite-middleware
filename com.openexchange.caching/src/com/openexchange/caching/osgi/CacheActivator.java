@@ -51,13 +51,10 @@ package com.openexchange.caching.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
@@ -68,6 +65,7 @@ import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -130,35 +128,7 @@ public final class CacheActivator extends HousekeepingActivator {
             registerService(CacheService.class, jcsCacheService, dictionary);
         }
 
-        final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
-
-            private final BundleContext bundleContext;
-
-            public ServiceTrackerCustomizerImpl(final BundleContext bundleContext) {
-                super();
-                this.bundleContext = bundleContext;
-            }
-
-            @Override
-            public ManagementService addingService(final ServiceReference<ManagementService> reference) {
-                final ManagementService management = bundleContext.getService(reference);
-                registerCacheMBean(jcsCacheService, management);
-                return management;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
-                // Nothing to do.
-            }
-
-            @Override
-            public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
-                final ManagementService management = service;
-                unregisterCacheMBean(management);
-                bundleContext.ungetService(reference);
-            }
-        }
-        track(ManagementService.class, new ServiceTrackerCustomizerImpl(context));
+        track(ManagementService.class, new HousekeepingManagementTracker(context, JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN, new JCSCacheInformation(jcsCacheService)));
         track(EventAdmin.class, new SimpleRegistryListener<EventAdmin>() {
 
             @Override
@@ -186,45 +156,4 @@ public final class CacheActivator extends HousekeepingActivator {
         }
         JCSCacheServiceInit.releaseInstance();
     }
-
-    synchronized void registerCacheMBean(JCSCacheService jcsCacheService, ManagementService management) {
-        ObjectName objectName = this.objectName;
-        if (objectName == null) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheActivator.class);
-            try {
-                objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
-                this.objectName = objectName;
-                management.registerMBean(objectName, new JCSCacheInformation(jcsCacheService));
-            } catch (Exception e) {
-                logger.error("", e);
-            }
-        }
-    }
-
-    synchronized void unregisterCacheMBean(ManagementService management) {
-        final ObjectName objectName = this.objectName;
-        if (objectName != null) {
-            this.objectName = null;
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheActivator.class);
-            try {
-                management.unregisterMBean(objectName);
-            } catch (Exception e) {
-                logger.error("", e);
-            }
-        }
-    }
-
-    /**
-     * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     *
-     * @param className The class name to use as object name
-     * @param domain The domain name
-     * @return An appropriate instance of {@link ObjectName}
-     * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
-     */
-    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
-        int pos = className.lastIndexOf('.');
-        return new ObjectName(domain, "name", pos < 0 ? className : className.substring(pos + 1));
-    }
-
 }

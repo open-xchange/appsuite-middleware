@@ -351,10 +351,10 @@ public class DatabaseFolder extends AbstractFolder {
     }
     
     /**
-     * Checks if the current user has visibility permissions granted through system
-     * permissions for this folder. Group permissions are considered also.
+     * Checks if the current user has visibility permissions granted through at least one system
+     * permission for this folder. Group permissions are considered also.
      * 
-     * @return true, if the user has system granted visibility permissions, false otherwise
+     * @return true, if at least one permission has the system flag and is visible. false otherwise
      */
     public boolean isVisibleThroughSystemPermissions() {
         try {
@@ -363,7 +363,7 @@ public class DatabaseFolder extends AbstractFolder {
                 List<Integer> entities = Arrays.stream(session.getUser().getGroups()).boxed().collect(Collectors.toList());
                 entities.add(session.getUserId());
                 for (OCLPermission permission : folderObject.getPermissions()) {
-                    if (entities.contains(permission.getEntity()) && permission.isFolderVisible() && permission.isSystem()) {
+                    if (entities.contains(Integer.valueOf(permission.getEntity())) && permission.isFolderVisible() && permission.isSystem()) {
                         return true;
                     }
                 }

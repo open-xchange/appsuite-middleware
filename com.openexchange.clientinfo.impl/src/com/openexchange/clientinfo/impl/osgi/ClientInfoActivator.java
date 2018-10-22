@@ -55,6 +55,7 @@ import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
 import com.openexchange.clientinfo.impl.MailAppClientInfoProvider;
 import com.openexchange.clientinfo.impl.USMEASClientInfoProvider;
 import com.openexchange.clientinfo.impl.WebClientInfoProvider;
+import com.openexchange.clientinfo.impl.WebDAVClientInfoProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -91,6 +92,7 @@ public class ClientInfoActivator extends HousekeepingActivator {
         ClientInfoService service = new ClientInfoServiceImpl(infoProviderTracker);
         registerService(ClientInfoService.class, service);
         registerService(ClientInfoProvider.class, new USMEASClientInfoProvider(), 15);
+        registerService(ClientInfoProvider.class, new WebDAVClientInfoProvider(), 15);
         registerService(ClientInfoProvider.class, new WebClientInfoProvider(this), 20);
         registerService(ClientInfoProvider.class, new MailAppClientInfoProvider(this), 25);
     }

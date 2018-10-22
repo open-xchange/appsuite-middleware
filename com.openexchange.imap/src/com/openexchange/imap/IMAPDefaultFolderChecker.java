@@ -590,14 +590,14 @@ public class IMAPDefaultFolderChecker {
         String[] fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, isSpamOptionEnabled);
         String[] names = Arrays.copyOfRange(imapConfig.getStandardNames(), 0, isSpamOptionEnabled ? 6 : 4);
         UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
-        String[] defaultNames = defaultFolderNamesProvider.getDefaultFolderNames(usm.getStdTrashName(), usm.getStdSentName(), usm.getStdDraftsName(), usm.getStdSpamName(), usm.getConfirmedSpam(), usm.getConfirmedHam(), isSpamOptionEnabled);
         SpamHandler spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
 
         // Collect SPECIAL-USE information
         TIntObjectMap<String> specialUseInfo = getSpecialUseInfo(names, fullNames);
-        boolean checkSpecialUseFolder = false;
+
         // Check if it is the first connect attempt for primary mail account
         if (MailAccount.DEFAULT_ID == accountId) {
+            boolean checkSpecialUseFolder = false;
 
             ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
             if (viewFactory != null) {
@@ -610,13 +610,14 @@ public class IMAPDefaultFolderChecker {
                     prop.set(null);
                 }
             }
-        }
 
-        if (checkSpecialUseFolder) {
-            // Check for special use default folders on first connection attempt for primary mail account
-            sanitizeAgainstMailAccount(names, fullNames, defaultNames, namespace, sep, specialUseInfo, accountChanged);
-        } else {
-            sanitizeAgainstMailAccount(names, fullNames, defaultNames, namespace, sep, null, accountChanged);
+            String[] defaultNames = defaultFolderNamesProvider.getDefaultFolderNames(usm.getStdTrashName(), usm.getStdSentName(), usm.getStdDraftsName(), usm.getStdSpamName(), usm.getConfirmedSpam(), usm.getConfirmedHam(), isSpamOptionEnabled);
+            if (checkSpecialUseFolder) {
+                // Check for special use default folders on first connection attempt for primary mail account
+                sanitizeAgainstPrimaryMailAccount(names, fullNames, defaultNames, sep, specialUseInfo, accountChanged);
+            } else {
+                sanitizeAgainstPrimaryMailAccount(names, fullNames, defaultNames, sep, null, accountChanged);
+            }
         }
 
         // Check folders
@@ -682,23 +683,20 @@ public class IMAPDefaultFolderChecker {
     }
 
     /**
-     * Sanitizes given names and full-names against mail account settings.
+     * Sanitizes given names and full-names against primary mail account settings.
      *
      * @param names The names for standard folders
      * @param fullNames The full-names for standard folders
      * @param defaultNames The fallback names
-     * @param namespace The user's namespace; e.g. <code>"INBOX/"</code>
      * @param sep The separator character; e.g. <code>'/'</code>
      * @param specialUseInfo The optional full-names announced by the imap server
      * @param accountChanged The boolean reference to signal whether mail account has been changed
      */
-    protected void sanitizeAgainstMailAccount(String[] names, String[] fullNames, String[] defaultNames, String namespace, char sep, TIntObjectMap<String> specialUseInfo, BoolReference accountChanged) {
-        if (MailAccount.DEFAULT_ID == accountId) {
-            sanitizeAgainstPrimaryMailAccount(names, fullNames, defaultNames, namespace, sep, specialUseInfo, accountChanged);
+    protected void sanitizeAgainstPrimaryMailAccount(String[] names, String[] fullNames, String[] defaultNames, char sep, TIntObjectMap<String> specialUseInfo, BoolReference accountChanged) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            return;
         }
-    }
 
-    private void sanitizeAgainstPrimaryMailAccount(String[] names, String[] fullNames, String[] defaultNames, String namespace, char sep, TIntObjectMap<String> specialUseInfo, BoolReference accountChanged) {
         TIntObjectMap<String> namesToSet = new TIntObjectHashMap<>(6);
         TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<>(6);
         for (int i = 0; i < fullNames.length; i++) {
@@ -735,7 +733,7 @@ public class IMAPDefaultFolderChecker {
                 if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
                     String expectedName = fullName.substring(fullName.lastIndexOf(sep) + 1);
                         if (!expectedName.equals(names[i])) {
-                        // Adapt configured name to configured full-name.
+                            // Adapt configured name to configured full-name.
                             LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                             names[i] = expectedName;
                             namesToSet.put(i, expectedName);
@@ -895,30 +893,16 @@ public class IMAPDefaultFolderChecker {
         // No such folder -- Probably need to create it if no appropriate candidate can be found
         IMAPFolder f = (IMAPFolder) imapStore.getFolder(desiredFullName);
         boolean checkSpecialUse = true;
-        if (isEmpty(namespace)) {
-            if (desiredFullName.indexOf(sep) > 0) {
-                // Standard folder is NOT supposed to be created within personal namespace
-                IMAPFolder probableCandidate = lookupFolder(getNamespaceFolder(namespace, sep), f.getName());
-                if (null != probableCandidate) {
-                    checkSubscriptionStatus(subscribe, probableCandidate, checkSpecialUse, namespace, index, modified);
-                    String fullName = probableCandidate.getFullName();
-                    LOG.info("Standard {} folder set to \"{}\" for account {} (user={}, context={})", getFallbackName(index), fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                    return fullName;
-                }
-                LOG.warn("Standard {} folder \"{}\" is NOT supposed to be created within personal namespace \"\" for account {} (user={}, context={})", getFallbackName(index), desiredFullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+        if (isEmpty(namespace) ? (desiredFullName.indexOf(sep) > 0) : (!isFullNameLocatedInNamespace(desiredFullName, namespace, sep))) {
+            // Standard folder is NOT supposed to be created within personal namespace
+            IMAPFolder probableCandidate = lookupFolder(getNamespaceFolder(namespace, sep), f.getName());
+            if (null != probableCandidate) {
+                checkSubscriptionStatus(subscribe, probableCandidate, checkSpecialUse, namespace, index, modified);
+                String fullName = probableCandidate.getFullName();
+                LOG.info("Standard {} folder set to \"{}\" for account {} (user={}, context={})", getFallbackName(index), fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                return fullName;
             }
-        } else {
-            if (!isFullNameLocatedInNamespace(desiredFullName, namespace, sep)) {
-                // Standard folder is NOT supposed to be created within personal namespace
-                IMAPFolder probableCandidate = lookupFolder(getNamespaceFolder(namespace, sep), f.getName());
-                if (null != probableCandidate) {
-                    checkSubscriptionStatus(subscribe, probableCandidate, checkSpecialUse, namespace, index, modified);
-                    String fullName = probableCandidate.getFullName();
-                    LOG.info("Standard {} folder set to \"{}\" for account {} (user={}, context={})", getFallbackName(index), fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                    return fullName;
-                }
-                LOG.warn("Standard {} folder \"{}\" is NOT supposed to be created within personal namespace \"{}\" for account {} (user={}, context={})", getFallbackName(index), desiredFullName, namespace, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-            }
+            LOG.warn("Standard {} folder \"{}\" is NOT supposed to be created within personal namespace \"{}\" for account {} (user={}, context={})", getFallbackName(index), desiredFullName, namespace, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
         // Go ahead
         if (!f.exists()) {

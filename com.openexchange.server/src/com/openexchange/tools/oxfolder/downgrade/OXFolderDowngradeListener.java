@@ -65,7 +65,6 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
-import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
@@ -163,9 +162,6 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
         try {
             if (FolderQueryCacheManager.isInitialized()) {
                 FolderQueryCacheManager.getInstance().invalidateContextQueries(event.getContext().getContextId());
-            }
-            if (CalendarCache.isInitialized()) {
-                CalendarCache.getInstance().invalidateGroup(event.getContext().getContextId());
             }
         } catch (final Exception e) {
             LOG.error("", e);

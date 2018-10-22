@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Univention Server Authentication
 Bundle-SymbolicName: com.openexchange.authentication.ucs
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.authentication.ucs.osgi.UCSAuthActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.authentication,
+ com.openexchange.authentication.ucs.common,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.exception,
@@ -17,6 +18,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.sessiond,
  com.openexchange.sessiond.event,
  com.openexchange.tools.ssl,

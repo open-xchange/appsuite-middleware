@@ -70,9 +70,11 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.OutOfMemoryHandler;
 import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.hazelcast.HazelcastMBean;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.Tools;
 
@@ -194,7 +196,7 @@ public class HazelcastActivator implements BundleActivator {
         /*
          * track ManagementService
          */
-        ServiceTracker<ManagementService, ManagementService> managementTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
+        ServiceTracker<ManagementService, ManagementService> managementTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new HousekeepingManagementTracker(context, HazelcastMBean.NAME, HazelcastMBean.DOMAIN, new HazelcastMBeanImpl()));
         this.managementTracker = managementTracker;
         managementTracker.open();
     }

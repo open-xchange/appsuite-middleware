@@ -509,9 +509,9 @@ public final class Tools {
         }
         String filename = null;
 
-        if (detector.isMSIE()) {
+        if (null != detector && detector.isMSIE()) {
             filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
-        } else if (detector.isSafari5()) {
+        } else if (null != detector && detector.isSafari5()) {
             /*-
              * On socket layer characters are casted to byte values.
              *

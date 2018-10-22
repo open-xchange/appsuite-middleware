@@ -88,7 +88,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXContextGroupStorageInterface#deleteContextGroup(java.lang.String)
      */
     @Override
@@ -128,7 +128,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
     /**
      * Get a list of all tables in the globaldb.
-     * 
+     *
      * @param connection The connection to the globaldb
      * @return A list with tables
      * @throws SQLException If an error occurs
@@ -177,7 +177,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
     /**
      * Find any foreign key references among the specified tables and update the list.
-     * 
+     *
      * @param tableObjects The list with the table objects
      * @param connection The connection to the globaldb.
      * @throws SQLException
@@ -210,7 +210,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
     /**
      * Retains all tables that have a 'gid' column or have cross references to other global db tables.
-     * 
+     *
      * @param tableObjects
      */
     private void retainRelevantTables(List<TableObject> tableObjects) {
@@ -218,7 +218,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         boolean hasGidColumn = false;
         for (TableObject tableObject : tmp) {
             for (TableColumnObject column : tableObject.getColumns()) {
-                if (column.getName().equals("gid")) {
+                if ("gid".equals(column.getName())) {
                     hasGidColumn = true;
                     break;
                 }
@@ -233,7 +233,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
     /**
      * Sort the specified tables according to their foreign key references.
      * The <a href="http://en.wikipedia.org/wiki/Topological_sorting">topological sorting</a> algorithm is used.
-     * 
+     *
      * @param tableObjects The list with the table objects to sort
      * @return A sorted list with table objects
      */
@@ -258,7 +258,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
     /**
      * Perform the actual purge operation on the specified tables.
-     * 
+     *
      * @param contextGroupId The context group identifier
      * @param tables The tables to purge.
      * @param connection The writable connection to the globaldb.

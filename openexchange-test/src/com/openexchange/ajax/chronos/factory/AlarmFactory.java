@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.activation.MimetypesFileTypeMap;
 import com.openexchange.testing.httpclient.models.Alarm;
-import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.Trigger;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
@@ -106,29 +105,15 @@ public final class AlarmFactory {
      * Creates an e-mail alarm with the specified duration, description and summary
      *
      * @param duration The duration of the {@link Alarm}
-     * @param mailAddress The e-mail address to send the notification
      * @param description The description of the alarm (used as the body of the mail notification)
      * @param summary The summary of the alarm (used as the subject in the email notification)
      * @return the new {@link Alarm}
      */
-    public static Alarm createMailAlarm(String duration, String mailAddress, String description, String summary) {
-
-
+    public static Alarm createMailAlarm(String duration, String description, String summary) {
         Alarm mailAlarm = createAlarm(duration, AlarmAction.EMAIL);
         mailAlarm.setDescription(description);
         mailAlarm.setSummary(summary);
-
-        if (mailAddress != null) {
-            List<Attendee> attendees = new ArrayList<>(1);
-            Attendee attendee = new Attendee();
-            attendee.setUri("mailto:" + mailAddress);
-            attendee.setEmail(mailAddress);
-            attendees.add(attendee);
-            mailAlarm.setAttendees(attendees);
-        } else {
-            mailAlarm.setAttendees(null);
-        }
-
+        mailAlarm.setAttendees(null);
         return mailAlarm;
     }
 

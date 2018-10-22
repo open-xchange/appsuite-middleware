@@ -61,6 +61,7 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.Tools;
@@ -115,7 +116,17 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        HzRemoteWebSocketDistributor remoteDistributor = new HzRemoteWebSocketDistributor(getService(TimerService.class), getService(ConfigurationService.class));
+        ConfigurationService configurationService = getServiceSafe(ConfigurationService.class);
+        HzRemoteWebSocketDistributor remoteDistributor = new HzRemoteWebSocketDistributor(getServiceSafe(TimerService.class), configurationService);
+
+        // Initialize Grizzly configuration
+        GrizzlyConfig grizzlyConfig;
+        {
+            GrizzlyConfig.Builder builder = GrizzlyConfig.builder();
+            builder.initializeFrom(configurationService);
+            grizzlyConfig = builder.build();
+        }
+
         this.remoteDistributor = remoteDistributor;
 
         WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
@@ -131,14 +142,14 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         DefaultGrizzlyWebSocketApplication app = this.app;
         if (null == app) {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
-            app = DefaultGrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
+            app = DefaultGrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, grizzlyConfig, this);
             listenerTracker.setApplication(app);
             webApplicationService.registerWebSocketApplication("", "/socket.io/*", app, null);
             webApplicationService.registerWebSocketApplication("", "/ws/*", app, null);
             registerService(WebSocketService.class, new WebSocketServiceImpl(app, remoteDistributor));
             this.app = app;
 
-            long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
+            long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(configurationService);
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher<DefaultSessionBoundWebSocket>(app), period, period);
 
             eventHandler.addApp(app);

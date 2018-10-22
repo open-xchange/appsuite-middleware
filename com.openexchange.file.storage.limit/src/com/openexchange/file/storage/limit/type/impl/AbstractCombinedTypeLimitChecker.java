@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.exceptions.FileLimitExceptionCodes;
 import com.openexchange.file.storage.limit.type.TypeLimitChecker;
 import com.openexchange.groupware.upload.impl.UploadUtility;
@@ -75,7 +75,7 @@ public abstract class AbstractCombinedTypeLimitChecker implements TypeLimitCheck
      * @param files The files to check
      * @return {@link List} containing already exceeded limits.
      */
-    protected List<OXException> checkMaxUploadSizePerFile(List<File> files) {
+    protected List<OXException> checkMaxUploadSizePerFile(List<LimitFile> files) {
         if (files == null || files.isEmpty()) {
             return Collections.emptyList();
         }

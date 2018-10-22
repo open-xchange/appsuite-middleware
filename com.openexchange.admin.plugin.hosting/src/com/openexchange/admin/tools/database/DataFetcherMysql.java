@@ -54,7 +54,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.database.Databases;
 
 /**
@@ -71,15 +72,20 @@ public class DataFetcherMysql implements DataFetcher {
     private int criteriaType = -1;
     private Object criteriaMatch = null;
     private String catalogname = null;
-    private Vector<TableObject> tableObjects = null;
+    private List<TableObject> tableObjects = null;
     private DatabaseMetaData dbmetadata = null;
+
+    /**
+     * Initializes a new {@link DataFetcherMysql}.
+     */
+    public DataFetcherMysql() {
+        super();
+    }
 
     @Override
     public String getCatalogName() {
         return this.catalogname;
     }
-
-    public DataFetcherMysql() {}
 
     @Override
     public Connection getDbConnection() {
@@ -121,25 +127,24 @@ public class DataFetcherMysql implements DataFetcher {
 
     @Override
     public TableObject getDataForTable(TableObject to) throws SQLException {
-
-        Vector<TableColumnObject> column_objects = to.getColumns();
+        List<TableColumnObject> column_objects = to.getColumns();
         // build the statement string
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
-        for (int a = 0; a < column_objects.size(); a++) {
-            TableColumnObject tco = column_objects.get(a);
-            sb.append("" + tco.getName() + ",");
+        for (TableColumnObject tco : column_objects) {
+            sb.append(tco.getName()).append(',');
         }
         sb.delete(sb.length() - 1, sb.length());
-        sb.append(" FROM " + to.getName() + " WHERE " + getMatchingColumn() + " = ?");
+        sb.append(" FROM ").append(to.getName()).append(" WHERE ").append(getMatchingColumn()).append(" = ?");
 
         // fetch data from table
         PreparedStatement prep = null;
+        ResultSet rs = null;
         try {
             prep = this.dbConnection.prepareStatement(sb.toString());
             prep.setObject(1, getColumnMatchObject(), getColumnMatchType());
             log.debug("######## {}", sb);
-            ResultSet rs = prep.executeQuery();
+            rs = prep.executeQuery();
             while (rs.next()) {
                 TableRowObject tro = new TableRowObject();
                 for (int b = 0; b < column_objects.size(); b++) {
@@ -156,30 +161,16 @@ public class DataFetcherMysql implements DataFetcher {
                 }
                 to.setDataRow(tro);
             }
-            rs.close();
-            prep.close();
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (Exception e) {
-                log.error("Error closing statement", e);
-            }
+            Databases.closeSQLStuff(rs, prep);
         }
 
         return to;
-
-        //        if(to.getDataRowCount()>0){
-        //            tableObjects.add(to);
-        //            //log.debug("{} {}", to.getName(), to.getDataRowCount());
-        //        }
-
     }
 
     @Override
-    public Vector<TableObject> fetchTableObjects() throws SQLException {
-        tableObjects = new Vector<TableObject>();
+    public List<TableObject> fetchTableObjects() throws SQLException {
+        tableObjects = new ArrayList<TableObject>();
 
         dbmetadata = dbConnection.getMetaData();
         // get the tables to check
@@ -252,7 +243,7 @@ public class DataFetcherMysql implements DataFetcher {
     //    }
 
     @Override
-    public Vector<TableObject> sortTableObjects() throws SQLException {
+    public List<TableObject> sortTableObjects() throws SQLException {
 
         findReferences();
         // thx http://de.wikipedia.org/wiki/Topologische_Sortierung :)
@@ -264,8 +255,7 @@ public class DataFetcherMysql implements DataFetcher {
      * Finds references for each table
      */
     private void findReferences() throws SQLException {
-        for (int v = 0; v < tableObjects.size(); v++) {
-            TableObject to = tableObjects.get(v);
+        for (TableObject to : tableObjects) {
             // get references from this table to another
             String table_name = to.getName();
             //ResultSet table_references = dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
@@ -292,7 +282,7 @@ public class DataFetcherMysql implements DataFetcher {
     }
 
     /**
-     * Returns -1 if not found else the position in the Vector where the object is located.
+     * Returns <code>-1</code> if not found; else the position in the list where the object is located.
      */
     private int tableListContainsObject(String table_name) {
         int found_at_position = -1;
@@ -305,10 +295,10 @@ public class DataFetcherMysql implements DataFetcher {
         return found_at_position;
     }
 
-    private Vector<TableObject> sortTablesByForeignKey() {
-        Vector<TableObject> nasty_order = new Vector<TableObject>();
+    private List<TableObject> sortTablesByForeignKey() {
+        List<TableObject> nasty_order = new ArrayList<TableObject>();
 
-        Vector<TableObject> unsorted = new Vector<TableObject>();
+        List<TableObject> unsorted = new ArrayList<TableObject>();
         unsorted.addAll(tableObjects);
 
         // now sort the table with a topological sort mech :)
@@ -335,7 +325,7 @@ public class DataFetcherMysql implements DataFetcher {
      * remove no more needed element from list and remove the reference to removed element
      * so that a new element exists which has now references.
      */
-    private void removeAndSortNew(Vector<TableObject> v, TableObject to) {
+    private void removeAndSortNew(List<TableObject> v, TableObject to) {
         v.remove(to);
         for (int i = 0; i < v.size(); i++) {
             TableObject tob = v.get(i);

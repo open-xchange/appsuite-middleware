@@ -15,6 +15,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
@@ -22,14 +23,14 @@ public class SaveAsTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        FolderObject newFolder = ftm.createNewFolderObject("test", Module.INFOSTORE.getFolderConstant(), FolderObject.PRIVATE, getClient().getValues().getUserId(), folderId);
+        FolderObject newFolder = FolderTestManager.createNewFolderObject("test", Module.INFOSTORE.getFolderConstant(), FolderObject.PRIVATE, getClient().getValues().getUserId(), folderId);
         final AttachmentMetadata attachment = new AttachmentImpl();
         attachment.setFolderId(folderId);
         attachment.setAttachedId(newFolder.getObjectID());
         attachment.setModuleId(Module.INFOSTORE.getFolderConstant());
         File testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), "text/plain");
+        atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), "text/plain");
 
         final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
 
@@ -59,22 +60,22 @@ public class SaveAsTest extends InfostoreAJAXTest {
     //Bug 4269
     @Test
     public void testVirtualFolder() throws Exception {
-        for (int folderId : virtualFolders) {
-            virtualFolder(folderId);
+        for (int fid : virtualFolders) {
+            virtualFolder(fid);
         }
     }
 
     //Bug 4269
-    public void virtualFolder(int folderId) throws Exception {
-        FolderObject newFolder = ftm.createNewFolderObject("test", Module.INFOSTORE.getFolderConstant(), FolderObject.PRIVATE, getClient().getValues().getUserId(), folderId);
+    public void virtualFolder(int fid) throws Exception {
+        FolderObject newFolder = FolderTestManager.createNewFolderObject("test", Module.INFOSTORE.getFolderConstant(), FolderObject.PRIVATE, getClient().getValues().getUserId(), fid);
         final AttachmentMetadata attachment = new AttachmentImpl();
-        attachment.setFolderId(folderId);
+        attachment.setFolderId(fid);
         attachment.setAttachedId(newFolder.getObjectID());
         attachment.setModuleId(Module.INFOSTORE.getFolderConstant());
         File testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), "text/plain");
-        final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
+        atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), "text/plain");
+        itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + fid, "title", "My Attachment", "description", "An attachment cum InfoItem"));
         assertTrue(itm.getLastResponse().hasError());
     }
 

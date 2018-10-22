@@ -13,6 +13,11 @@
         format: int64
         description: The end date of the reminder range.
         required: false
+      - in: query
+        name: modules
+        type: string
+        description: A comma separated list of module ids to retrieve (e.g. "1,4" for tasks and appointments). If the parameter is missing or empty then all modules are retrieved.
+        required: false
     responses:
       200:
         description: |

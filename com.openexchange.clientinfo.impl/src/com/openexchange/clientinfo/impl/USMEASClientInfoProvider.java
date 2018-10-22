@@ -49,6 +49,7 @@
 
 package com.openexchange.clientinfo.impl;
 
+import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.java.Strings;
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
  */
 public class USMEASClientInfoProvider implements ClientInfoProvider {
 
-    private static final String USMEAS_CLIENT_ID = "USM-EAS";
+    private static final String USMEAS_CLIENT_ID = Client.USM_EAS.getClientId();
 
     /**
      * Initializes a new {@link USMEASClientInfoProvider}.
@@ -76,7 +77,7 @@ public class USMEASClientInfoProvider implements ClientInfoProvider {
         if (null != session) {
             String client = session.getClient();
             if (Strings.isNotEmpty(client) && USMEAS_CLIENT_ID.equals(client)) {
-                return new USMEASClientInfo();
+                return USMEASClientInfo.getInstance();
             }
         }
         return null;
@@ -85,7 +86,7 @@ public class USMEASClientInfoProvider implements ClientInfoProvider {
     @Override
     public ClientInfo getClientInfo(String clientId) {
         if (Strings.isNotEmpty(clientId) && USMEAS_CLIENT_ID.equals(clientId)) {
-            return new USMEASClientInfo();
+            return USMEASClientInfo.getInstance();
         }
         return null;
     }

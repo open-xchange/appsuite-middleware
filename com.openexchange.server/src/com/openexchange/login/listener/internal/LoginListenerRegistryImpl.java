@@ -49,10 +49,12 @@
 
 package com.openexchange.login.listener.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.login.listener.LoginListener;
+import com.openexchange.osgi.util.RankedService;
 
 /**
  * {@link LoginListenerRegistryImpl} - A registry for login listeners.
@@ -99,25 +101,32 @@ public class LoginListenerRegistryImpl implements LoginListenerRegistry {
 
     // -------------------------------------------------------------------------------------------------------------
 
-    private final List<LoginListener> listeners;
+    private final SortableConcurrentList<RankedService<LoginListener>> listeners;
+    private volatile boolean empty;
 
     /**
      * Initializes a new {@link LoginListenerRegistryImpl}.
      */
     private LoginListenerRegistryImpl() {
         super();
-        listeners = new CopyOnWriteArrayList<LoginListener>();
+        listeners = new SortableConcurrentList<>();
+        empty = true; // Initially empty
     }
 
     /**
      * Adds specified login listener.
      *
      * @param loginListener The login listener to add
+     * @param ranking The ranking to pay respect to
      * @return <code>true</code> if login listener could be successfully added; otherwise <code>false</code>
      */
-    public boolean addLoginListener(LoginListener loginListener) {
-        listeners.add(loginListener);
-        return true;
+    public synchronized boolean addLoginListener(LoginListener loginListener, int ranking) {
+        RankedService<LoginListener> rankedService = new RankedService<LoginListener>(loginListener, ranking);
+        if (listeners.addAndSort(rankedService)) {
+            empty = false;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -125,13 +134,23 @@ public class LoginListenerRegistryImpl implements LoginListenerRegistry {
      *
      * @param loginListener The login listener to remove
      */
-    public void removeLoginListener(LoginListener loginListener) {
-        listeners.remove(loginListener);
+    public synchronized void removeLoginListener(LoginListener loginListener) {
+        listeners.remove(new RankedService<LoginListener>(loginListener, 0));
+        empty = listeners.isEmpty();
     }
 
     @Override
     public List<LoginListener> getLoginListeners() {
-        return Collections.unmodifiableList(listeners);
+        if (empty) {
+            return Collections.emptyList();
+        }
+
+        List<RankedService<LoginListener>> snapshot = listeners.getSnapshot();
+        List<LoginListener> ret = new ArrayList<LoginListener>(snapshot.size());
+        for (RankedService<LoginListener> rs : snapshot) {
+            ret.add(rs.service);
+        }
+        return ret;
     }
 
 }

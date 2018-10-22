@@ -147,9 +147,9 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
         /**
-         * Initializes the Attachment Calendar Listener
+         * Further inits
          */
-        new com.openexchange.groupware.attach.AttachmentInit(), new com.openexchange.mailaccount.internal.MailAccountStorageInit(), new com.openexchange.multiple.internal.MultipleHandlerInit(), new com.openexchange.groupware.impl.id.IDGeneratorInit() };
+        new com.openexchange.mailaccount.internal.MailAccountStorageInit(), new com.openexchange.multiple.internal.MultipleHandlerInit(), new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Starter.class);
 

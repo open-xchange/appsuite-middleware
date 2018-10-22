@@ -59,6 +59,9 @@ import javax.management.MBeanException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface GeneralControlMBean {
+    
+    public static final String DOMAIN = "com.openexchange.control";
+    public static final String MBEAN_NAME = "Control";
 
     /**
      * Lists all active bundles while mapping bundle name to the bundle's current state which is one of UNINSTALLED, INSTALLED, RESOLVED,

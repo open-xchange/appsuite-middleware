@@ -56,10 +56,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Alarm;
@@ -344,7 +345,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException {
+    public Set<String> hasTriggers(int userId, String[] eventIds) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
@@ -356,12 +357,15 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
-    private Map<String, Boolean> selectHasTriggers(Connection connection, int userId, String[] eventIds) throws SQLException {
+    private Set<String> selectHasTriggers(Connection connection, int userId, String[] eventIds) throws SQLException {
         if (null == eventIds || 0 == eventIds.length) {
-            return Collections.emptyMap();
+            return Collections.emptySet();
         }
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT DISTINCT(eventId) FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId").append(getPlaceholders(eventIds.length)).append(';');
-        Map<String, Boolean> triggersById = new HashMap<String, Boolean>();
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT(eventId) FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId")
+            .append(getPlaceholders(eventIds.length)).append(';')
+        ;
+        Set<String> eventIdsWithTrigger = new HashSet<String>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -372,10 +376,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    triggersById.put(String.valueOf(resultSet.getString("eventId")), Boolean.TRUE);
+                    eventIdsWithTrigger.add(resultSet.getString("eventId"));
                 }
             }
-            return triggersById;
+            return eventIdsWithTrigger;
         }
     }
 

@@ -188,23 +188,6 @@ jcs.region.OXDBPoolCache.elementattributes.IsSpool=false
 jcs.region.OXDBPoolCache.elementattributes.IsRemote=false
 jcs.region.OXDBPoolCache.elementattributes.IsLateral=false
 
-# Pre-defined region for Calendar metadata
-jcs.region.CalendarCache=
-jcs.region.CalendarCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.CalendarCache.cacheattributes.MaxObjects=100000
-jcs.region.CalendarCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds=300
-jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds=60
-jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun=500
-jcs.region.CalendarCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.CalendarCache.elementattributes.IsEternal=false
-jcs.region.CalendarCache.elementattributes.MaxLifeSeconds=600
-jcs.region.CalendarCache.elementattributes.IdleTime=300
-jcs.region.CalendarCache.elementattributes.IsSpool=false
-jcs.region.CalendarCache.elementattributes.IsRemote=false
-jcs.region.CalendarCache.elementattributes.IsLateral=false
-
 # Pre-defined cache region for mail account
 jcs.region.MailAccount=LTCP
 jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes

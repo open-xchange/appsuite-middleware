@@ -57,7 +57,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.exceptions.FileLimitExceptionCodes;
 import com.openexchange.file.storage.limit.osgi.Services;
 import com.openexchange.groupware.infostore.InfostoreConfig;
@@ -78,7 +78,7 @@ public class FileStorageLimitChecker extends AbstractCombinedTypeLimitChecker {
     }
 
     @Override
-    public List<OXException> check(Session session, String folderId, List<File> files) throws OXException {
+    public List<OXException> check(Session session, String folderId, List<LimitFile> files) throws OXException {
         IDBasedFolderAccessFactory folderFactory = Services.getService(IDBasedFolderAccessFactory.class, true);
         IDBasedFolderAccess folderAccess = folderFactory.createAccess(session);
         if (!folderAccess.exists(folderId)) {
@@ -88,7 +88,7 @@ public class FileStorageLimitChecker extends AbstractCombinedTypeLimitChecker {
         return getExceededLimits(folderId, files, folderAccess);
     }
 
-    private List<OXException> getExceededLimits(String folderId, List<File> files, IDBasedFolderAccess folderAccess) throws OXException {
+    private List<OXException> getExceededLimits(String folderId, List<LimitFile> files, IDBasedFolderAccess folderAccess) throws OXException {
         List<OXException> exceededLimits = new ArrayList<>();
         Quota fileQuota = folderAccess.getFileQuota(folderId);
         if (fileQuota != null && fileQuota.getLimit() >= 0 && fileQuota.getUsage() + files.size() > fileQuota.getLimit()) {
@@ -96,7 +96,7 @@ public class FileStorageLimitChecker extends AbstractCombinedTypeLimitChecker {
         }
 
         Quota storageQuota = folderAccess.getStorageQuota(folderId);
-        long fileTotalSize = files.stream().collect(Collectors.summingLong(File::getSize));
+        long fileTotalSize = files.stream().collect(Collectors.summingLong(LimitFile::getSize));
         if (storageQuota != null) {
             if (storageQuota.getLimit() == 0) {
                 exceededLimits.add(FileLimitExceptionCodes.NOT_ALLOWED.create(folderId));

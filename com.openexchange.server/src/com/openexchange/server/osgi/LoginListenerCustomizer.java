@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import static com.openexchange.osgi.util.RankedService.getRanking;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -57,7 +58,7 @@ import com.openexchange.login.listener.LoginListener;
 import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 
 /**
- * {@link LoginListenerCustomizer} - Registers/unregisters a login handler in/from {@link LoginListenerRegistryImpl}.
+ * {@link LoginListenerCustomizer} - Registers/unregisters a login listener to/from {@link LoginListenerRegistryImpl}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
@@ -80,7 +81,8 @@ public class LoginListenerCustomizer implements ServiceTrackerCustomizer<Object,
     public Object addingService(ServiceReference<Object> serviceReference) {
         Object service = context.getService(serviceReference);
         if ((service instanceof LoginListener) || (service instanceof AutoLoginAwareLoginListener)) {
-            if (LoginListenerRegistryImpl.getInstance().addLoginListener((LoginListener) service)) {
+            int ranking = getRanking(service, serviceReference, 0);
+            if (LoginListenerRegistryImpl.getInstance().addLoginListener((LoginListener) service, ranking)) {
                 return service;
             }
         }

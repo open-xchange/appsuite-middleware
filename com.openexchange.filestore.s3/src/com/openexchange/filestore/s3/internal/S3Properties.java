@@ -76,9 +76,9 @@ public enum S3Properties implements Property {
     public static final String OPTIONAL_NAME = "filestoreID";
     private static final String PREFIX = "com.openexchange.filestore.s3.[" + OPTIONAL_NAME + "].";
 
-    private Object defaultValue;
-    private String propName;
-    private String prefix;
+    private final Object defaultValue;
+    private final String propName;
+    private final String prefix;
 
     /**
      * Initializes a new {@link S3Properties}.

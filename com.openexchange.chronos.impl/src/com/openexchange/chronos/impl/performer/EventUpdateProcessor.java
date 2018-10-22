@@ -568,6 +568,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
+     * @see com.openexchange.chronos.impl.performer.AbstractUpdatePerformer 
      */
     private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) throws OXException {
         EventField[] relevantFields = new EventField[] {

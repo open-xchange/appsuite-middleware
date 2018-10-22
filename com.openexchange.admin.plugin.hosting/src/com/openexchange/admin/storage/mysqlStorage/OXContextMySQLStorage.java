@@ -81,7 +81,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -2306,16 +2305,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private TableObject getDataForTable(final TableObject to, final Connection ox_db_connection, final Object criteriaMatch) throws SQLException {
-        final Vector<TableColumnObject> column_objects = to.getColumns();
+        final List<TableColumnObject> column_objects = to.getColumns();
         // build the statement string
         final StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
-        for (int a = 0; a < column_objects.size(); a++) {
-            final TableColumnObject tco = column_objects.get(a);
-            sb.append("`" + tco.getName() + "`,");
+        for (TableColumnObject tco : column_objects) {
+            sb.append(tco.getName()).append(',');
         }
         sb.delete(sb.length() - 1, sb.length());
-        sb.append(" FROM " + to.getName() + " WHERE " + this.selectionCriteria + " = ?");
+        sb.append(" FROM ").append(to.getName()).append(" WHERE ").append(this.selectionCriteria).append(" = ?");
 
         // fetch data from table
         PreparedStatement prep = null;

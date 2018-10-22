@@ -74,7 +74,6 @@ import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -950,7 +949,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             if (isTask) {
                 isFulltime = true;
             } else {
-                isFulltime = ((Appointment) newObj).getFullTime();
+                isFulltime = false;
             }
             final Date start = newObj.getStartDate();
             renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));

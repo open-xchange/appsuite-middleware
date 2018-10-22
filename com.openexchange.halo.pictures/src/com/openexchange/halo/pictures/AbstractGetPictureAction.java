@@ -86,6 +86,13 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ContactPicture picture = getPicture(requestData, session);
+        if (picture == null) {
+            // 404 - Not Found
+            AJAXRequestResult result = new AJAXRequestResult();
+            result.setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND);
+            return result;
+        }
+
         IFileHolder fileHolder = picture.getFileHolder();
         if (fileHolder == null) {
             // 404 - Not Found
@@ -102,13 +109,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
         String pictureETag = getPictureETag(request, session);
-        if (pictureETag == null) {
-            return false;
-        }
-        if (pictureETag.equals(clientETag)) {
-            return true;
-        }
-        return false;
+        return pictureETag == null ? false : pictureETag.equals(clientETag);
     }
 
     @Override
@@ -129,7 +130,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
 
     /**
      * Returns the actual picture resource
-     * 
+     *
      * @param req The {@link AJAXRequestData}
      * @param session The groupware {@link Session}
      * @param eTagOnly whether the eTag should be considered

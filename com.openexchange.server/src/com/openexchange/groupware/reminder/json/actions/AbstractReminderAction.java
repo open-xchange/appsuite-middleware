@@ -50,6 +50,7 @@
 package com.openexchange.groupware.reminder.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -89,6 +91,8 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractReminderAction implements AJAXActionService {
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
+
+    private static final String MODULES_PARAMETER = "modules";
 
     private final ServiceLookup services;
 
@@ -113,7 +117,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final ReminderAJAXRequest reminderRequest = new ReminderAJAXRequest(requestData, session);
+            final ReminderAJAXRequest reminderRequest = new ReminderAJAXRequest(requestData, session, getModules(requestData));
             final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             if (null != sTimeZone) {
                 reminderRequest.setTimeZone(getTimeZone(sTimeZone));
@@ -122,6 +126,26 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private List<Integer> getModules(AJAXRequestData req) throws OXException {
+        String parameter = req.getParameter(MODULES_PARAMETER);
+        if (Strings.isEmpty(parameter)) {
+            return null;
+        }
+        String[] splitByCommaNotInQuotes = Strings.splitByCommaNotInQuotes(parameter);
+        List<Integer> result = new ArrayList<>(splitByCommaNotInQuotes.length);
+        for (String str : splitByCommaNotInQuotes) {
+            try {
+                int module = Integer.valueOf(str);
+                if (module >= 0) {
+                    result.add(module);
+                }
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MODULES_PARAMETER, parameter);
+            }
+        }
+        return result.isEmpty() ? null : result;
     }
 
     /**
@@ -239,6 +263,24 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         JSONObject jsonReminderObj = new JSONObject(12);
         reminderWriter.writeObject(reminder, jsonReminderObj);
         jsonResponseArray.put(jsonReminderObj);
+    }
+
+    /**
+     * @param req The {@link ReminderAJAXRequest}
+     * @param reminder The {@link ReminderObject}
+     * @return true if the reminder type is requested, false otherwise
+     */
+    protected boolean isRequested(ReminderAJAXRequest req, ReminderObject reminder) {
+        List<Integer> optModules = req.getOptModules();
+        if (optModules == null || optModules.isEmpty()) {
+            return true;
+        }
+        for (int module : optModules) {
+            if (reminder.getModule() == module) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

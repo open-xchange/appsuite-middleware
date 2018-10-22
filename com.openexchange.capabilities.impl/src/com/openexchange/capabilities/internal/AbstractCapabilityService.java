@@ -233,7 +233,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      *
      * @param registry that provides the services for the registered JSON bundles
      */
-    public AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
+    protected AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
         super();
         this.services = services;
         declaredCapabilities = new ConcurrentHashMap<String, Object>(32, 0.9f, 1);

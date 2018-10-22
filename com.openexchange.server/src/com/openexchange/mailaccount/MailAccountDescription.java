@@ -121,6 +121,11 @@ public final class MailAccountDescription implements Serializable {
     private boolean mailDisabled;
     private boolean transportDisabled;
 
+    private boolean mailPortIsSet = false;
+    private boolean mailSecureSet = false;
+    private boolean transportPortSet = false;
+    private boolean transportSecureSet = false;
+
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
@@ -310,6 +315,16 @@ public final class MailAccountDescription implements Serializable {
     public void setMailPort(final int mailPort) {
         mailServerUrl = null;
         this.mailPort = mailPort;
+        this.mailPortIsSet = true;
+    }
+
+    /**
+     * Checks if the mail port is set
+     *
+     * @return true if the mail port is set, false otherwise
+     */
+    public boolean isMailPortSet() {
+        return mailPortIsSet;
     }
 
     /**
@@ -330,6 +345,16 @@ public final class MailAccountDescription implements Serializable {
     public void setMailSecure(final boolean mailSecure) {
         mailServerUrl = null;
         this.mailSecure = mailSecure;
+        this.mailSecureSet = true;
+    }
+
+    /**
+     * Checks whether the mail secure flag is set or not.
+     *
+     * @return true if the mail secure flag is set, false otherwise
+     */
+    public boolean isMailSecureSet() {
+        return mailSecureSet;
     }
 
     /**
@@ -425,6 +450,16 @@ public final class MailAccountDescription implements Serializable {
     public void setTransportPort(final int transportPort) {
         transportUrl = null;
         this.transportPort = checkTransportPort(transportPort);
+        this.transportPortSet = true;
+    }
+
+    /**
+     * Checks whether the transportPort is set or not
+     *
+     * @return true if the transport port is set, false otherwise
+     */
+    public boolean isTransportPortSet() {
+        return transportPortSet;
     }
 
     /**
@@ -445,6 +480,16 @@ public final class MailAccountDescription implements Serializable {
     public void setTransportSecure(final boolean transportSecure) {
         transportUrl = null;
         this.transportSecure = transportSecure;
+        this.transportSecureSet = true;
+    }
+
+    /**
+     * Checks whether the transport secure flag is set or not
+     *
+     * @return true if the transport secure flag is set, false otherwise
+     */
+    public boolean isTransportSecureSet() {
+        return transportSecureSet;
     }
 
     /**

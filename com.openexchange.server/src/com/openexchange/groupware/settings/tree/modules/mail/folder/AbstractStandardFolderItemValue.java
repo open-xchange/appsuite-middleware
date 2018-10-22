@@ -61,6 +61,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Reference;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -148,33 +149,17 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
 
     @Override
     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-        if (false == needsConnectedMailAccess()) {
-            getValue(setting, null);
-            return;
-        }
-
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        Store messageStore = null;
-        int prevReadTimeout = -1;
+        Reference<MailAccessAndStorage> mailAccessReference = new Reference<>();
         try {
-            // Establish mail connection
-            mailAccess = MailAccess.getInstance(session, MailAccount.DEFAULT_ID);
-            mailAccess.connect();
-
-            // Lower read timeout (if possible)
-            IMailStoreAware storeAware = mailAccess.supports(IMailStoreAware.class);
-            if (null != storeAware && storeAware.isStoreSupported()) {
-                Store store = storeAware.getStore();
-                if (store.isSetAndGetReadTimeoutSupported() && (prevReadTimeout = trySetReadTimeout(3500, store)) >= 0) {
-                    messageStore = store;
-                }
-            }
-
             // Get setting
-            getValue(setting, mailAccess);
+            getValue(setting, mailAccessReference, session);
 
             // Check for possible warnings
-            addWarnings(mailAccess.getWarnings());
+            MailAccessAndStorage accessAndStorage = mailAccessReference.getValue();
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null == accessAndStorage ? null : accessAndStorage.primaryMailAccess;
+            if (null != mailAccess) {
+                addWarnings(mailAccess.getWarnings());
+            }
         } catch (OXException e) {
             if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
                 // Admin/user has no mail access
@@ -197,6 +182,65 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             LOGGER.warn("Could not determine mail setting", rte);
             setting.setSingleValue(null);
         } finally {
+            MailAccessAndStorage accessAndStorage = mailAccessReference.getValue();
+            if (null != accessAndStorage) {
+                // Restore previous read timeout
+                Store messageStore = accessAndStorage.messageStore;
+                int prevReadTimeout = accessAndStorage.prevReadTimeout;
+                if (null != messageStore) {
+                    trySetReadTimeout(prevReadTimeout, messageStore);
+                }
+
+                // Close mail access
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = accessAndStorage.primaryMailAccess;
+                if (null != mailAccess) {
+                    try {
+                        mailAccess.close(true);
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to close MailAccess instance", e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if a connected instance of <code>MailAccess</code> is needed.
+     *
+     * @param session The session
+     * @param mailAccessReference The mail access reference
+     * @return The connected mail access
+     * @throws OXException If connect attempt fails
+     */
+    protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getConnectedMailAccess(Session session, Reference<MailAccessAndStorage> mailAccessReference) throws OXException {
+        MailAccessAndStorage accessAndStorage = mailAccessReference.getValue();
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null == accessAndStorage ? null : accessAndStorage.primaryMailAccess;
+        if (null != mailAccess) {
+            return mailAccess;
+        }
+
+        Store messageStore = null;
+        int prevReadTimeout = -1;
+        try {
+            mailAccess = MailAccess.getInstance(session, MailAccount.DEFAULT_ID);
+            mailAccess.connect();
+
+            // Lower read timeout (if possible)
+            IMailStoreAware storeAware = mailAccess.supports(IMailStoreAware.class);
+            if (null != storeAware && storeAware.isStoreSupported()) {
+                Store store = storeAware.getStore();
+                if (store.isSetAndGetReadTimeoutSupported() && (prevReadTimeout = trySetReadTimeout(3500, store)) >= 0) {
+                    messageStore = store;
+                }
+            }
+
+            mailAccessReference.setValue(new MailAccessAndStorage(mailAccess, messageStore, prevReadTimeout));
+
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> toReturn = mailAccess;
+            mailAccess = null;
+            messageStore = null;
+            return toReturn;
+        } finally {
             // Restore previous read timeout
             if (null != messageStore) {
                 trySetReadTimeout(prevReadTimeout, messageStore);
@@ -214,21 +258,29 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
     }
 
     /**
-     * Checks if a connected instance of <code>MailAccess</code> is needed.
-     *
-     * @return <code>true</code> if a connected instance of <code>MailAccess</code> is needed; otherwise <code>false</code>
-     */
-    protected boolean needsConnectedMailAccess() {
-        return true;
-    }
-
-    /**
      * Determines the value and applies it to given setting.
      *
      * @param setting The setting to apply to
-     * @param primaryMailAccess The connected mail access to use
+     * @param mailAccessReference The mail access reference
+     * @param session The session
      * @throws OXException If operation fails
      */
-    protected abstract void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException;
+    protected abstract void getValue(Setting setting, Reference<MailAccessAndStorage> mailAccessReference, Session session) throws OXException;
 
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    static class MailAccessAndStorage {
+
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess;
+        final Store messageStore;
+        final int prevReadTimeout;
+
+        MailAccessAndStorage(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess, Store messageStore, int prevReadTimeout) {
+            super();
+            this.primaryMailAccess = primaryMailAccess;
+            this.messageStore = messageStore;
+            this.prevReadTimeout = prevReadTimeout;
+        }
+
+    }
 }

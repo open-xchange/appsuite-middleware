@@ -29,36 +29,41 @@ public class Bug4409Test extends AbstractContactTest {
         Contact contact = createContactObject(UUID.randomUUID().toString());
         contact.setImage1(image);
         contact.setImageContentType(CONTENT_TYPE);
+        contact.setEmail1("Bug4409Test@example.org");
         contact = cotm.newAction(contact);
-        /*
-         * get & check contact image via url
-         */
-        GetResponse getResponse = getClient().execute(new GetRequest(contact, tz));
-        String imageUrl = getResponse.getImageUrl();
-        assertNotNull(imageUrl);
-        byte[] imageData = loadImageByURL(getClient(), imageUrl);
-        OXTestToolkit.assertImageBytesEqualsAndNotNull("Image data wrong", image, imageData);
-        /*
-         * remove contact image
-         */
-        contact.setImage1(null);
-        contact.setImageContentType(null);
-        contact = cotm.updateAction(contact);
-        /*
-         * get & check contact image via url
-         */
-        getResponse = getClient().execute(new GetRequest(contact, tz));
-        assertNull(getResponse.getImageUrl());
-
-        Thread.sleep(2000); // give some time for the resource cache invalidation
-        /*
-         * try to access previous image location
-         */
         try {
-            imageData = loadImageByURL(getClient(), imageUrl);
-            assertTrue("Image data still present", null == imageData || 0 == imageData.length);
-        } catch (Exception e) {
-            // also okay
+            /*
+             * get & check contact image via url
+             */
+            GetResponse getResponse = getClient().execute(new GetRequest(contact, tz));
+            String imageUrl = getResponse.getImageUrl();
+            assertNotNull(imageUrl);
+            byte[] imageData = loadImageByURL(getClient(), imageUrl);
+            OXTestToolkit.assertImageBytesEqualsAndNotNull("Image data wrong", image, imageData);
+            /*
+             * remove contact image
+             */
+            contact.setImage1(null);
+            contact.setImageContentType(null);
+            contact = cotm.updateAction(contact);
+            /*
+             * get & check contact image via url
+             */
+            getResponse = getClient().execute(new GetRequest(contact, tz));
+            assertNull(getResponse.getImageUrl());
+
+            Thread.sleep(2000); // give some time for the resource cache invalidation
+            /*
+             * try to access previous image location
+             */
+            try {
+                imageData = loadImageByURL(getClient(), imageUrl, true);
+                assertTrue("Image data still present", null == imageData || 0 == imageData.length);
+            } catch (Exception e) {
+                // also okay
+            }
+        } finally {
+            cotm.deleteAction(contact);
         }
     }
 }
