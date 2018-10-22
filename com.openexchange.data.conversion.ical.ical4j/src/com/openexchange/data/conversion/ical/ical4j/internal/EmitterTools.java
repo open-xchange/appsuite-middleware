@@ -52,12 +52,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.data.conversion.ical.ZoneInfo;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionUtils;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import net.fortuna.ical4j.model.DateTime;
@@ -71,8 +65,6 @@ import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class EmitterTools {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EmitterTools.class);
 
     private final TimeZoneRegistry registry;
 
@@ -170,33 +162,6 @@ public final class EmitterTools {
             getFormat().setTimeZone(TimeZone.getTimeZone(tzid));
             setTime(time);
         }
-    }
-
-    public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
-        java.util.Date retval = exception;
-        try {
-            final RecurringResultsInterface rrs = CalendarCollectionUtils.calculateRecurring(
-                appointment,
-                normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
-                normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
-                0,
-                CalendarCollectionUtils.MAX_OCCURRENCESE,
-                true);
-            final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
-            if (recurrencePosition > 0) {
-                RecurringResultInterface result = rrs.getRecurringResultByPosition(recurrencePosition);
-                if (result != null) {
-                    retval = new java.util.Date(result.getStart());
-                }
-            }
-        } catch (final OXException e) {
-            LOG.warn("", e);
-        }
-        return retval;
-    }
-
-    private static long normalizeLong(final long millis) {
-        return millis - (millis % Constants.MILLI_DAY);
     }
 
     public TimeZoneRegistry getTimeZoneRegistry() {

@@ -9,6 +9,7 @@
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosPushToken"
       - in: query
         name: alarmId
         type: integer

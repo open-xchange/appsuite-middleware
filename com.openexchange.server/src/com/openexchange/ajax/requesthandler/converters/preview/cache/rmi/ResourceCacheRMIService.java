@@ -63,6 +63,8 @@ public interface ResourceCacheRMIService extends Remote {
 
     public static final String RMI_NAME = "ResourceCacheRMIService";
 
+    public static final String DOMAIN = "com.openexchange.preview.cache";
+
     /**
      * Clears all cache entries.
      *

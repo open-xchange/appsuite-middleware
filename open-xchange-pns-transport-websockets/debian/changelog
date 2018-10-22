@@ -1,3 +1,15 @@
+open-xchange-pns-transport-websockets (7.10.2-0) unstable; urgency=medium
+
+  * prepare for 7.10.2 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 18 Oct 2018 10:39:36 +0200
+
+open-xchange-pns-transport-websockets (7.10.1-1) stable; urgency=medium
+
+  * First candidate for 7.10.1 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 11 Oct 2018 12:13:03 +0200
+
 open-xchange-pns-transport-websockets (7.10.1-0) unstable; urgency=medium
 
   * prepare for 7.10.1 release

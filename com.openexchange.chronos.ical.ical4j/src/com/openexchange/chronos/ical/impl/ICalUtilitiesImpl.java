@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
@@ -83,6 +85,8 @@ import net.fortuna.ical4j.model.component.VTimeZone;
  * @since v7.10.0
  */
 public class ICalUtilitiesImpl implements ICalUtilities {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(ICalUtilitiesImpl.class);
 
     private final ICalMapper mapper;
 
@@ -233,10 +237,19 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         ArrayList<OXException> warnings = new ArrayList<OXException>();
         for (T d : data) {
             Component component = exporter.export(d, parameters, warnings);
-            ICalUtils.removeProperties(component, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
-            components.add(component);
+            if (null != component) {
+                ICalUtils.removeProperties(component, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+                components.add(component);
+            }
         }
+        logWarning(warnings);
         return components;
+    }
+    
+    private void logWarning(List<OXException> warnings) {
+        for (OXException e : warnings) {
+            LOGGER.trace("", e);
+        }
     }
 
     @FunctionalInterface

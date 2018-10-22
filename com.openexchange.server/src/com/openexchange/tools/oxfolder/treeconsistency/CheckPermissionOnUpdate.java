@@ -56,7 +56,6 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
-import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
@@ -149,9 +148,6 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
                         broadcastEvent(folderId, true, ServerServiceRegistry.getInstance().getService(EventAdmin.class));
                         if (FolderQueryCacheManager.isInitialized()) {
                             FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
-                        }
-                        if (CalendarCache.isInitialized()) {
-                            CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                         }
                     } catch (final OXException e) {
                         LOG.error("", e);

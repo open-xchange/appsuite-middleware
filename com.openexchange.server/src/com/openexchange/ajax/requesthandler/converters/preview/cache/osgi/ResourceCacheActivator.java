@@ -152,14 +152,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
          */
         registerService(CreateTableService.class, new PreviewCacheCreateTableService());
         registerService(CreateTableService.class, new PreviewCacheCreateDataTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-            new PreviewCacheCreateTableTask(),
-            new AddRefIdForPreviewCacheTable(),
-            new PreviewCacheCreateDataTableTask(),
-            new DropDataFromPreviewCacheTable(),
-            new ChangeFileNameAndTypeLength(),
-            new ChangeDataToLongblob(),
-            new PreviewTableUtf8Mb4UpdateTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask(), new AddRefIdForPreviewCacheTable(), new PreviewCacheCreateDataTableTask(), new DropDataFromPreviewCacheTable(), new ChangeFileNameAndTypeLength(), new ChangeDataToLongblob(), new PreviewTableUtf8Mb4UpdateTask()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 

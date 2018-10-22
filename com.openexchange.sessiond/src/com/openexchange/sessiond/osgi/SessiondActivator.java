@@ -302,7 +302,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             }
 
             // Initialize service instance
-            final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
+            final SessiondService serviceImpl = /* new InvalidatedAwareSessiondService */(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
@@ -312,7 +312,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
             registerService(Remote.class, new SessiondRMIServiceImpl());
-            
+
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new HousekeepingManagementTracker(context, SessiondMBean.MBEAN_NAME, SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));

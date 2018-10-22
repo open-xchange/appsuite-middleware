@@ -51,14 +51,12 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.canCreateSubfolder;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
 import javax.mail.Store;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPProperties;
@@ -76,7 +74,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class RootSubfoldersEnabledCache {
 
-    private static volatile ConcurrentMap<String, Future<Boolean>> MAP;
+    private static volatile Cache<String, Boolean> CACHE;
 
     /**
      * Initializes a new {@link RootSubfoldersEnabledCache}.
@@ -89,10 +87,10 @@ public final class RootSubfoldersEnabledCache {
      * Initializes this cache.
      */
     public static void init() {
-        if (MAP == null) {
+        if (CACHE == null) {
             synchronized (RootSubfoldersEnabledCache.class) {
-                if (MAP == null) {
-                    MAP = new NonBlockingHashMap<String, Future<Boolean>>();
+                if (CACHE == null) {
+                    CACHE = CacheBuilder.newBuilder().expireAfterAccess(2, TimeUnit.DAYS).build();
                 }
             }
         }
@@ -102,12 +100,12 @@ public final class RootSubfoldersEnabledCache {
      * Tear-down for this cache.
      */
     public static void tearDown() {
-        if (MAP != null) {
+        if (CACHE != null) {
             synchronized (RootSubfoldersEnabledCache.class) {
-                ConcurrentMap<String, Future<Boolean>> map = MAP;
-                if (map != null) {
-                    clear(map);
-                    MAP = null;
+                Cache<String, Boolean> cache = CACHE;
+                if (cache != null) {
+                    clear(cache);
+                    CACHE = null;
                 }
             }
         }
@@ -116,15 +114,15 @@ public final class RootSubfoldersEnabledCache {
     /**
      * Clears this cache.
      */
-    private static void clear(ConcurrentMap<String, Future<Boolean>> map) {
-        map.clear();
+    private static void clear(Cache<String, Boolean> map) {
+        map.invalidateAll();
     }
 
     private static String getKeyFor(Store store, IMAPConfig imapConfig, boolean namespacePerUser) {
         if (namespacePerUser) {
             return store.getURLName().toString();
         }
-        return new StringBuilder(24).append(imapConfig.isSecure() ? "imaps://" : "imap://").append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
+        return new StringBuilder(48).append(imapConfig.isSecure() ? "imaps://" : "imap://").append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
     }
 
     /**
@@ -177,26 +175,17 @@ public final class RootSubfoldersEnabledCache {
      * Checks if root sub-folders capability is enabled for given IMAP account.
      */
     private static boolean isRootSubfoldersEnabled0(String key, IMAPConfig imapConfig, DefaultFolder imapDefaultFolder, boolean namespacePerUser) throws OXException {
-        final ConcurrentMap<String, Future<Boolean>> map = MAP;
-        Future<Boolean> f = map.get(key);
-        if (null == f) {
-            final FutureTask<Boolean> ft = new FutureTask<Boolean>(new RootSubfoldersEnabledCallable(imapDefaultFolder, namespacePerUser));
-            f = map.putIfAbsent(key, ft);
-            if (null == f) {
-                f = ft;
-                ft.run();
-            }
+        Cache<String, Boolean> cache = CACHE;
+        Boolean rootSubfoldersEnabled = cache.getIfPresent(key);
+        if (null != rootSubfoldersEnabled) {
+            return rootSubfoldersEnabled.booleanValue();
         }
+
         try {
-            return f.get().booleanValue();
-        } catch (final InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-        } catch (final CancellationException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
+            rootSubfoldersEnabled = cache.get(key, new RootSubfoldersEnabledCallable(imapDefaultFolder, namespacePerUser));
+            return rootSubfoldersEnabled.booleanValue();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
                 throw MimeMailException.handleMessagingException((MessagingException) cause, imapConfig);
             }

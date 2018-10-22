@@ -60,7 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.FileLimitService;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.java.Strings;
@@ -98,9 +98,9 @@ public class CheckLimitsAction extends AbstractFolderAction {
         return new AJAXRequestResult(jsonObject, new Date(), "json");
     }
 
-    private List<File> getFiles(AJAXRequestData request) throws OXException {
+    private List<LimitFile> getFiles(AJAXRequestData request) throws OXException {
         final JSONObject body = getBodyAsJSONObject(request);
-        List<File> quotaCheckFiles;
+        List<LimitFile> quotaCheckFiles;
         if (body.hasAndNotNull("files")) {
             quotaCheckFiles = getParsedFiles(body);
         } else {
@@ -109,8 +109,8 @@ public class CheckLimitsAction extends AbstractFolderAction {
         return quotaCheckFiles;
     }
 
-    private List<File> getParsedFiles(final JSONObject body) throws OXException {
-        List<File> quotaCheckFiles = new ArrayList<>();
+    private List<LimitFile> getParsedFiles(final JSONObject body) throws OXException {
+        List<LimitFile> quotaCheckFiles = new ArrayList<>();
         try {
             JSONArray files = new JSONArray(body.getString("files"));
             for (int i = 0; i < files.length(); i++) {
@@ -138,8 +138,8 @@ public class CheckLimitsAction extends AbstractFolderAction {
         return (JSONObject) data;
     }
 
-    private File parse(final JSONObject object) throws OXException {
-        final File file = new File();
+    private LimitFile parse(final JSONObject object) throws OXException {
+        final LimitFile file = new LimitFile();
         if (object.hasAndNotNull("size")) {
             try {
                 file.setSize(object.getLong("size"));

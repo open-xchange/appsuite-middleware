@@ -120,12 +120,7 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class,
-            DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
-            ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
-            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, UserAliasStorage.class, SessiondService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, UserAliasStorage.class, SessiondService.class };
     }
 
     @Override

@@ -66,20 +66,22 @@ public interface ContactPictureURLService {
      * @param contactId The contact id.
      * @param folderId The folder of the contact id. Must not be null in case the contact id is set.
      * @param session The users session
+     * @param timestamp An optional timestamp value to add to the url
      * @param preferRelativeUrl Whether a relative URL is preferred or not.
      * @return The URL to the picture.
      * @throws OXException If user or folder ID is missing or DispatcherPrefixService is absent
      */
-    public String getContactPictureUrl(int contactId, int folderId, final Session session, final boolean preferRelativeUrl) throws OXException;
+    public String getContactPictureUrl(int contactId, int folderId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException;
 
     /**
      * Provides a URL to the picture of an internal user.
      *
      * @param userId The user id.
      * @param session The session
+     * @param timestamp An optional timestamp value to add to the url
      * @param preferRelativeUrl Whether a relative URL is preferred or not.
      * @return The URL to the picture.
      * @throws OXException If user ID is missing or DispatcherPrefixService is absent
      */
-    public String getUserPictureUrl(int userId, final Session session, final boolean preferRelativeUrl) throws OXException;
+    public String getUserPictureUrl(int userId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException;
 }

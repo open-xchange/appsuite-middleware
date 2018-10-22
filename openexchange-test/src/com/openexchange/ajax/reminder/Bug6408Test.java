@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
@@ -54,7 +55,7 @@ public class Bug6408Test extends ReminderTest {
         reminderObj.setFolder(folderId);
         reminderObj.setDate(new Date(startTime - (alarmMinutes * 60 * 1000)));
 
-        final RangeRequest request = new RangeRequest(c.getTime());
+        final RangeRequest request = new RangeRequest(new Date(c.getTime().getTime() + TimeUnit.MINUTES.toMillis(1)));
         RangeResponse response = Executor.execute(getClient(), request);
         ReminderObject[] reminderArray = response.getReminder(timeZone);
 

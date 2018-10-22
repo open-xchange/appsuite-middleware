@@ -65,10 +65,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.custom.CXFOsgiServlet;
+import com.openexchange.soap.cxf.interceptor.DropDeprecatedElementsInterceptor;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 
 /**
@@ -214,6 +216,7 @@ public class CXFActivator extends HousekeepingActivator {
                              * Add interceptors here
                              */
                             bus.getInInterceptors().add(new TransformGenericElementsInterceptor());
+                            bus.getInInterceptors().add(new DropDeprecatedElementsInterceptor(ImmutableSet.of("clusterWeight")));
                             bus.setExtension(new ServletDestinationFactory(), HttpDestinationFactory.class);
                             /*
                              * Apply as default bus

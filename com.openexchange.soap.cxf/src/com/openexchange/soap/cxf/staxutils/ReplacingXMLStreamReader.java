@@ -51,7 +51,6 @@ package com.openexchange.soap.cxf.staxutils;
 
 import java.util.List;
 import java.util.Stack;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -92,9 +91,10 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         int event = super.next();
         if (XMLStreamConstants.START_ELEMENT == event) {
             final QName name = super.getName();
+
             ReplacingElement element = new ReplacingElement(name);
             stack.push(element);
-            final QName expected;
+
             final XmlSchemaElement schema;
             if (isGeneric(name)) {
                 String typeName = findType();
@@ -104,6 +104,8 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
             } else {
                 schema = null;
             }
+
+            final QName expected;
             if (null != schema) {
                 element.setXmlSchema(schema);
                 expected = schema.getQName();
@@ -228,12 +230,8 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
     private static final Pattern GENERIC_PATTERN = Pattern.compile("(?:c-gensym|param)\\d+");
 
     private static boolean isGeneric(final QName name) {
-        final String localPart = name.getLocalPart();
-        if (null == localPart) {
-            return false;
-        }
-        Matcher matcher = GENERIC_PATTERN.matcher(localPart);
-        return matcher.matches();
+        String localPart = name.getLocalPart();
+        return null == localPart ? false : GENERIC_PATTERN.matcher(localPart).matches();
     }
 
     private static boolean isEmptyURI(QName name) {

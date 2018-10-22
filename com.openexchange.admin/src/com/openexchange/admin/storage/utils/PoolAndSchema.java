@@ -108,7 +108,6 @@ public class PoolAndSchema {
      * <p>
      * More or less the same as {@link #determinePoolsAndSchemas(int, Connection)}, but returning fully filled instances of {@link Database}.
      *
-     * @param serverId The server identifier
      * @param configDbCon The connection to configDb
      * @return The available schemas
      * @throws StorageException If schemas cannot be returned
@@ -158,7 +157,6 @@ public class PoolAndSchema {
      * Lists all available schemas for specified database.
      *
      * @param databaseId The database identifier
-     * @param serverId The server identifier
      * @param configDbCon The connection to configDb
      * @return The available schemas
      * @throws StorageException If schemas cannot be returned

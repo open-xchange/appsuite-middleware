@@ -52,6 +52,7 @@ package com.openexchange.config.lean.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -93,6 +94,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
         // Load parsers
         ImmutableMap.Builder<Class<?>, PropertyValueParser<?>> vps = ImmutableMap.builder();
+        Function<String, Integer> f = t -> Integer.valueOf(t);
         vps.put(Integer.class, new IntegerPropertyValueParser());
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
@@ -273,6 +275,11 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             }
 
             PropertyValueParser<?> propertyValueParser = valueParsers.get(coerceTo);
+            if (propertyValueParser == null) {
+                defaultValue = property.getDefaultValue(coerceTo);
+                LOGGER.debug("Cannot find an appropriate value parser for '{}'. Returning default value '{}' instead.", coerceTo, defaultValue);
+                return defaultValue;
+            }
 
             return (T) propertyValueParser.parse(value);
         } catch (Exception e) {
@@ -298,12 +305,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             ConfigView view = factory.getView(userId, contextId);
 
             ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(optionals), coerceTo);
-            if (!p.isDefined()) {
-                defaultValue = property.getDefaultValue(coerceTo);
-                return defaultValue;
-            }
-
-            return p.get();
+            return p.isDefined() ? p.get() : property.getDefaultValue(coerceTo);
         } catch (Exception e) {
             defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, I(userId), I(contextId), defaultValue, e);

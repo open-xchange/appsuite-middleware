@@ -70,6 +70,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
     private static final long FILE_SIZE_MEDIUM = 31457280L; // 30MB
     private static final long FILE_SIZE_LARGE = 115343360L;
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_noLimitExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_SMALL));
@@ -78,6 +79,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         assertEquals(0, checkLimits.getData().getErrors().size());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_maxUploadExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
@@ -113,22 +115,24 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = new ArrayList<>();
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_SMALL));
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
+        checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
 
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_LARGE));
-        checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
+        checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
         System.out.println();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_unknownType_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
         FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "bla");
 
-        assertEquals("UPL-LIM-4001", checkLimits.getCode());
+        assertEquals("FILE-LIMIT-4001", checkLimits.getCode());
         assertNull(checkLimits.getData());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_unknownFolder_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));

@@ -51,7 +51,7 @@ package com.openexchange.file.storage.limit.type;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.session.Session;
 
 /**
@@ -78,6 +78,6 @@ public interface TypeLimitChecker {
      * @return A {@link List} of {@link OXException}s containing exceeded limits for the given folder/list of files combination
      * @throws OXException In case an error occurred while checking the limits
      */
-    List<OXException> check(Session session, String folderId, List<File> files) throws OXException;
+    List<OXException> check(Session session, String folderId, List<LimitFile> files) throws OXException;
 
 }

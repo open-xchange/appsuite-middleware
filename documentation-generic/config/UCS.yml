@@ -9,7 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.baseDn
       description: |
@@ -20,7 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.ldapUrl
       description: |
@@ -31,7 +31,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP", "Host"]
     - key: com.openexchange.authentication.ucs.mailAttribute
       description: |
@@ -42,7 +42,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "Mail"]
     - key: com.openexchange.authentication.ucs.loginAttribute
       description: |
@@ -53,7 +53,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.contextIdAttribute
       description: |
@@ -66,7 +66,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.mailAttribute
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication"]
     - key: com.openexchange.authentication.ucs.searchFilter
       description: |
@@ -78,7 +78,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.passwordChangeURL
       description: |
@@ -89,7 +89,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication"]
     - key: com.openexchange.authentication.ucs.bindDn
       description: |
@@ -100,7 +100,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.bindPassword
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.bindPassword
       description: |
@@ -111,5 +111,139 @@ properties:
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.bindDn
       file: authplugin.properties
-      packageName: open-xchange-authentication-ucs
+      packageName: open-xchange-authentication-ucs-common
       tags: ["Univention", "Authentication", "LDAP", "Credential"]
+    - key: com.openexchange.saml.ucs.enabled
+      description: |
+        If UCS SAMLBackend is enabled
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.id
+      description: |
+        The id inside the saml authnResponse which holds the userinformation
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.logoutRedirectUrl
+      description: |
+        URL of where the users are redirected after logout
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.failureRedirect
+      description: |
+        The URL to redirect to in case the SAML back-end fails to look up the authenticated user.
+        When left empty or not set, an HTTP 500 error page is sent instead.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.logoutFailureRedirect
+      description: |
+        The URL to redirect to in case the SAML back-end has an error, when the user logs out.
+        When left empty or not set, the value of com.openexchange.saml.ucs.failure.redirect is used.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.keyStore
+      description: |
+        The full path to a Java keyStore containing the IdPs certificate.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.keyStorePass
+      description: |
+        Password to open the keyStore.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.saml.ucs.certAlias", "com.openexchange.saml.ucs.signingKeyAlias", "com.openexchange.saml.ucs.signingKeyPassword", "com.openexchange.saml.ucs.decryptionKeyAlias", "com.openexchange.saml.ucs.decryptionKeyPassword"]
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.certAlias
+      description: |
+        The alias of the IdP certificate entry within the keyStore.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.saml.ucs.keyStore"]
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.signingKeyAlias
+      description: |
+        The alias of the signingKey entry within the keyStore.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.saml.ucs.keyStore","com.openexchange.saml.ucs.signingKeyPassword"]
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.signingKeyPassword
+      description: |
+        The password of the signingKey entry within the keyStore.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.saml.ucs.keyStore","com.openexchange.saml.ucs.signingKeyAlias"]
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.decryptionKeyAlias
+      description: |
+        The alias of the decryptionKey entry within the keyStore.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.saml.ucs.keyStore","com.openexchange.saml.ucs.decryptionKeyPassword"]
+      file: authplugin.properties      
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]
+    - key: com.openexchange.saml.ucs.decryptionKeyPassword
+      description: |
+        The password of the decryptionKey entry within the keystore.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: ["com.openexchange.saml.ucs.keyStore","com.openexchange.saml.ucs.decryptionKeyAlias"]
+      file: authplugin.properties
+      packageName: open-xchange-saml-ucs
+      tags: ["Univention" , "SAML"]

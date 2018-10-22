@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Recurrence Service Bundle
 Bundle-SymbolicName: com.openexchange.chronos.recurrence
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.chronos.recurrence.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -61,7 +61,6 @@ import com.openexchange.management.MBeanMethodAnnotation;
 public interface SessiondMBean {
 
     public static final String MBEAN_NAME = "SessionD Toolkit";
-
     public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
 
     /**

@@ -75,6 +75,7 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -163,11 +164,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 change = new ITipChange();
                 change.setNewEvent(ensureAttendees(matchingException, exception));
                 change.setCurrentEvent(matchingException);
-
                 change.setType(Type.UPDATE);
-                describeDiff(change, wrapper, session, message);
-
-                analysis.addChange(change);
             } else {
                 if (isDeleteException(original, exception)) {
                     analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT, locale));
@@ -178,9 +175,9 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 change.setCurrentEvent(original);
                 change.setNewEvent(ensureAttendees(original, exception));
                 change.setType(Type.CREATE);
-                describeDiff(change, wrapper, session, message);
-                analysis.addChange(change);
             }
+            describeDiff(change, wrapper, session, message);
+            analysis.addChange(change);
         }
         if (containsPartyCrasher(analysis)) {
             analysis.recommendAction(ITipAction.ACCEPT_PARTY_CRASHER);
@@ -230,7 +227,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private boolean containsChangesForUpdate(ITipAnalysis analysis) throws OXException {
-        if (analysis.getChanges() == null || analysis.getChanges().size() == 0) {
+        if (analysis.getChanges().size() == 0) {
             return false;
         }
 
@@ -252,10 +249,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
     private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
         for (ITipChange change : analysis.getChanges()) { 
-            if (null != change.getDiff() 
-                && null != change.getDiff().getAttendeeUpdates() 
-                && null != change.getDiff().getAttendeeUpdates().getAddedItems() 
-                && false == change.getDiff().getAttendeeUpdates().getAddedItems().isEmpty()) {
+            ITipEventUpdate eventUpdate = change.getDiff();
+            if (null != eventUpdate 
+                && null != eventUpdate.getAttendeeUpdates() 
+                && null != eventUpdate.getAttendeeUpdates().getAddedItems() 
+                && false == eventUpdate.getAttendeeUpdates().getAddedItems().isEmpty()) {
                 return true;
             }
         }

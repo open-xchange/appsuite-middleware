@@ -141,7 +141,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-            deletedEvents = postProcessor().process(events, session.getUserId()).getEvents();
+            deletedEvents = postProcessor().processTombstones(events, session.getUserId()).getEvents();
         }
         return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
@@ -179,13 +179,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, searchOptions, fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-            Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
-            try {
-                session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-                deletedEvents = postProcessor().process(events, folder).getEvents();
-            } finally {
-                session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
-            }
+            deletedEvents = postProcessor().processTombstones(events, folder).getEvents();
         }
         if (isNullOrEmpty(deletedEvents) && isNullOrEmpty(newAndModifiedEvents)) {
             /*

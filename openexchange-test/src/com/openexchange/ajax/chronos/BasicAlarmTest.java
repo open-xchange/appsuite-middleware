@@ -56,6 +56,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -161,7 +162,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
 
         // Test mail alarm
         {
-            Alarm alarm = AlarmFactory.createMailAlarm("-PT30M", "test@domain.wrong", "This is the mail message!", "This is the mail subject");
+            Alarm alarm = AlarmFactory.createMailAlarm("-PT30M", "This is the mail message!", "This is the mail subject");
 
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
@@ -174,7 +175,12 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
+
+            Assert.assertNotNull(changedAlarm.getAttendees());
+            Assert.assertEquals(1, changedAlarm.getAttendees().size());
+            Assert.assertEquals(testUser.getLogin(), changedAlarm.getAttendees().get(0).getEmail());
             alarm.setUid(changedAlarm.getUid());
+            alarm.setAttendees(changedAlarm.getAttendees());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 

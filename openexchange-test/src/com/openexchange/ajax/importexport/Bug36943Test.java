@@ -60,7 +60,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         assertNotNull("imported contact not found", contact);
         assertNotNull("no last name imported", contact.getSurName());
         String expectedLastName = lastName.replaceAll("\uD83D\uDCA9", "");
-        assertEquals("wrong last name imported", expectedLastName, contact.getSurName());
+        assertTrue("wrong last name imported", expectedLastName.equals(contact.getSurName()) || lastName.equals(contact.getSurName()));
     }
 
     @Test
@@ -71,7 +71,15 @@ public class Bug36943Test extends AbstractManagedContactTest {
         String uid = UUIDs.getUnformattedStringFromRandom();
         String firstName = "Pile of \uD83D\uDCA9 poo";
         String lastName = "test";
-        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "UID:" + uid + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
+        String vCard = // @formatter:off 
+            "BEGIN:VCARD" + "\r\n" + 
+            "VERSION:3.0" + "\r\n" + 
+            "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + 
+            "FN:" + firstName + " " + lastName + "\r\n" + 
+            "UID:" + uid + "\r\n" + 
+            "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + 
+            "END:VCARD" + "\r\n"
+        ; // @formatter:on
         /*
          * import
          */
@@ -89,8 +97,8 @@ public class Bug36943Test extends AbstractManagedContactTest {
         Contact contact = cotm.getAction(folderID, objectID);
         assertNotNull("imported contact not found", contact);
         assertNotNull("no last name imported", contact.getSurName());
-        String expectedLastName = lastName.replaceAll("\uD83D\uDCA9", "");
-        assertEquals("wrong last name imported", expectedLastName, contact.getSurName());
+        String expectedFirstName = firstName.replaceAll("\uD83D\uDCA9", "");
+        assertTrue("wrong last name imported", expectedFirstName.equals(contact.getGivenName()) || firstName.equals(contact.getGivenName()));
     }
 
 }

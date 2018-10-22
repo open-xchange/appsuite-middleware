@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -203,10 +204,11 @@ public class ContactUtil {
     public static String generateImageUrl(Session session, Contact con) throws OXException {
         ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
         if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
+            Date lastModified = con.getImageLastModified();
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
-                return service.getUserPictureUrl(con.getInternalUserId(), session, true);
+                return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : lastModified.getTime(), true);
             } else {
-                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, true);
+                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, lastModified == null ? null : lastModified.getTime(), true);
             }
         }
         return null;

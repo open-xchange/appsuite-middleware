@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +66,6 @@ import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
@@ -131,11 +131,24 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException {
+    public Map<String, Integer> loadAttendeeCounts(String[] eventIds, Boolean internal) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectPartStats(connection, eventIds, attendee);
+            return selectAttendeeCounts(connection, eventIds, internal, false);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public Map<String, Attendee> loadAttendee(String[] eventIds, Attendee attendee, AttendeeField[] fields) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAttendee(connection, eventIds, attendee, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -148,7 +161,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAttendees(connection, eventIds, null, false, null);
+            return selectAttendees(connection, eventIds, null, true, null);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -444,6 +457,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private Map<String, List<Attendee>> selectAttendees(Connection connection, String[] eventIds, Boolean internal, boolean tombstones, AttendeeField[] fields) throws SQLException, OXException {
+        if (null == eventIds || 0 == eventIds.length) {
+            return java.util.Collections.emptyMap();
+        }
         AttendeeField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
@@ -472,16 +488,47 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return attendeesByEventId;
     }
 
-    private Map<String, ParticipationStatus> selectPartStats(Connection connection, String[] eventIds, Attendee attendee) throws SQLException {
+    private Map<String, Integer> selectAttendeeCounts(Connection connection, String[] eventIds, Boolean internal, boolean tombstones) throws SQLException, OXException {
         if (null == eventIds || 0 == eventIds.length) {
             return java.util.Collections.emptyMap();
         }
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT event,partStat FROM calendar_attendee WHERE cid=? AND account=? AND ")
+            .append("SELECT event,COUNT(*) FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
+            .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
+        ;
+        if (null != internal) {
+            stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
+        }
+        stringBuilder.append(" GROUP BY event;");
+        Map<String, Integer> attendeeCountsByEventId = new HashMap<String, Integer>(eventIds.length);
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (String eventId : eventIds) {
+                stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    attendeeCountsByEventId.put(resultSet.getString(1), I(resultSet.getInt(2)));
+                }
+            }
+        }
+        return attendeeCountsByEventId;
+    }
+
+    private Map<String, Attendee> selectAttendee(Connection connection, String[] eventIds, Attendee attendee, AttendeeField[] fields) throws SQLException, OXException {
+        if (null == eventIds || 0 == eventIds.length) {
+            return java.util.Collections.emptyMap();
+        }
+        AttendeeField[] mappedFields = MAPPER.getMappedFields(fields);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
+            .append(" FROM calendar_attendee WHERE cid=? AND account=? AND ")
             .append(isInternal(attendee) ? "entity" : "uri").append("=?")
             .append(" AND event").append(getPlaceholders(eventIds.length)).append(';')
         ;
-        Map<String, ParticipationStatus> statusByEventId = new HashMap<String, ParticipationStatus>(eventIds.length);
+        Map<String, Attendee> attendeeByEventId = new HashMap<String, Attendee>(eventIds.length);
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -497,14 +544,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     String eventId = resultSet.getString(1);
-                    String value = resultSet.getString(2);
-                    statusByEventId.put(eventId, null == value ? null : new ParticipationStatus(value));
+                    attendeeByEventId.put(eventId, readAttendee(eventId, resultSet, mappedFields));
                 }
             }
         }
-        return statusByEventId;
+        return attendeeByEventId;
     }
-
+    
     private Attendee readAttendee(String eventId, ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {
         Attendee attendee = MAPPER.fromResultSet(resultSet, fields);
         try {

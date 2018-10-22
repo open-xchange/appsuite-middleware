@@ -56,10 +56,32 @@ package com.openexchange.contact.picture.json;
  * @since v7.10.1
  */
 public enum PictureRequestParameter {
+
+    /** Parameter name for the contact ID */
     CONTACT("contact_id"),
+
+    /** Parameter name for the folder ID */
     CONTACT_FOLDER("folder_id"),
+
+    /** Parameter name for mail addresses */
     MAIL("email"),
-    USER("user_id");
+
+    /** Parameter name for the user ID */
+    USER("user_id"),
+
+    /**
+     * Parameter name for a guest user
+     * <p>
+     * Used for identification in share scenarios
+     */
+    GUEST_USER("user"),
+
+    /**
+     * Parameter name for a guest user in a specific context
+     * <p>
+     * Used for identification in share scenarios
+     */
+    GUEST_CONTEXT("context");
 
     private final String parameter;
 

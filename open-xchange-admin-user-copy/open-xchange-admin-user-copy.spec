@@ -70,6 +70,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Thu Oct 18 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.10.2 release
+* Thu Oct 11 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First candidate for 7.10.1 release
 * Thu Sep 06 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 prepare for 7.10.1 release
 * Fri Jun 29 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>

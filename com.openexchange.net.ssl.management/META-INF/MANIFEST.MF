@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Net SSL Management Bundle
 Bundle-SymbolicName: com.openexchange.net.ssl.management
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.net.ssl.management,

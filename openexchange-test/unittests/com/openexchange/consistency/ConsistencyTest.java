@@ -171,7 +171,7 @@ public class ConsistencyTest {
         simulateBrokenContext(ctx3);
 
         ServiceLookup services = PowerMockito.mock(ServiceLookup.class);
-        
+
         consistency = PowerMockito.spy(new ConsistencyServiceImpl(services));
         PowerMockito.doReturn(ctx).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(1);
         PowerMockito.doReturn(ctx2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(2);

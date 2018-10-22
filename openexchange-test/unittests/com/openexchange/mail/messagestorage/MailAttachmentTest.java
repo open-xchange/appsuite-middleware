@@ -193,19 +193,19 @@ public final class MailAttachmentTest extends MessageStorageTest {
     @Test
 	public void testMailAttachment() {
 		try {
-			final MailAccess<?, ?> mailAccess = getMailAccess();
+			final MailAccess<?, ?> mailAcc = getMailAccess();
 
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAcc.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
-				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
+				MailMessage[] fetchedMails = mailAcc.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
 				}
 
 				final Set<String> hasAttachmentSet = new HashSet<String>(uids.length);
-				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
+				fetchedMails = mailAcc.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -221,8 +221,8 @@ public final class MailAttachmentTest extends MessageStorageTest {
 				}
 
 				for (final String id : hasAttachmentSet) {
-					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id, true);
-					final MailPath mailPath = new MailPath(mailAccess.getAccountId(), mail.getFolder(), mail.getMailId());
+					final MailMessage mail = mailAcc.getMessageStorage().getMessage("INBOX", id, true);
+					final MailPath mailPath = new MailPath(mailAcc.getAccountId(), mail.getFolder(), mail.getMailId());
 
 					final SessionObject session = getSession();
 					final JsonMessageHandler messageHandler = new JsonMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
@@ -237,7 +237,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 								len > 0);
 						for (int i = 0; i < len; i++) {
 							final String sequenceId = jArray.getJSONObject(i).getString(MailListField.ID.getKey());
-							final MailPart part = mailAccess.getMessageStorage().getAttachment("INBOX", id,
+							final MailPart part = mailAcc.getMessageStorage().getAttachment("INBOX", id,
 									sequenceId);
 							assertFalse("No mail part found for sequence ID: " + sequenceId, null == part);
 						}
@@ -248,12 +248,12 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 			} finally {
 
-				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+				mailAcc.getMessageStorage().deleteMessages("INBOX", uids, true);
 
 				/*
 				 * close
 				 */
-				mailAccess.close(false);
+				mailAcc.close(false);
 			}
 
 		} catch (final Exception e) {

@@ -51,11 +51,9 @@
 
 package com.openexchange.authentication.ucs.osgi;
 
-import java.util.Properties;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.ucs.common.UCSLookup;
 import com.openexchange.authentication.ucs.impl.UCSAuthentication;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -73,19 +71,21 @@ public class UCSAuthActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { UCSLookup.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.authentication.ucs");
 
-        ConfigurationService config = getService(ConfigurationService.class);
-        Properties props = config.getFile(UCSAuthentication.CONFIGFILE);
-        UCSAuthentication impl = new UCSAuthentication(props);
-        registerService(AuthenticationService.class, impl, null);
-        registerService(Reloadable.class, impl, null);
+        UCSAuthentication impl = new UCSAuthentication(getServiceSafe(UCSLookup.class));
+        registerService(AuthenticationService.class, impl);
     }
 
     @Override

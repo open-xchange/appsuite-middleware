@@ -73,7 +73,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -223,15 +222,24 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException {
-        Map<String, ParticipationStatus> statusPerEventId = new HashMap<String, ParticipationStatus>(eventIds.length);
+    public Map<String, Integer> loadAttendeeCounts(String[] eventIds, Boolean internal) throws OXException {
+        Map<String, Integer> attendeeCountsByEventId = new HashMap<String, Integer>(eventIds.length);
+        for (Entry<String, List<Attendee>> entry : loadAttendees(eventIds, internal).entrySet()) {
+            attendeeCountsByEventId.put(entry.getKey(), I(entry.getValue().size()));
+        }
+        return attendeeCountsByEventId;
+    }
+
+    @Override
+    public Map<String, Attendee> loadAttendee(String[] eventIds, Attendee attendee, AttendeeField[] fields) throws OXException {
+        Map<String, Attendee> attendeePerEventId = new HashMap<String, Attendee>(eventIds.length);
         for (Entry<String, List<Attendee>> entry : loadAttendees(eventIds, null).entrySet()) {
             Attendee matchingAttendee = find(entry.getValue(), attendee);
             if (null != matchingAttendee) {
-                statusPerEventId.put(entry.getKey(), matchingAttendee.getPartStat());
+                attendeePerEventId.put(entry.getKey(), matchingAttendee);
             }
         }
-        return statusPerEventId;
+        return attendeePerEventId;
     }
 
     @Override

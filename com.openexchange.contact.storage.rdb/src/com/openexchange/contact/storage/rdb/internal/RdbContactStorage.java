@@ -1304,6 +1304,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (null == contact.getImage1()) {
                 // delete previous image if exists
                 executor.deleteSingle(connection, Table.IMAGES, contextID, objectID, maxLastModified);
+                contact.setNumberOfImages(0);
             } else {
                 checkImageSize(contact);
                 if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { ContactField.OBJECT_ID })) {
@@ -1319,6 +1320,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                     imageData.setImage1(contact.getImage1());
                     imageData.setImageContentType(contact.getImageContentType());
                     imageData.setImageLastModified(contact.getImageLastModified());
+                    imageData.setNumberOfImages(1);
                     executor.insert(connection, Table.IMAGES, imageData, Fields.IMAGE_DATABASE_ARRAY);
                 }
             }

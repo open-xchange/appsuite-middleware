@@ -51,6 +51,8 @@ package com.openexchange.contact.picture.json.util;
 
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.CONTACT_FOLDER;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.GUEST_CONTEXT;
+import static com.openexchange.contact.picture.json.PictureRequestParameter.GUEST_USER;
 import static com.openexchange.contact.picture.json.PictureRequestParameter.USER;
 import java.net.URISyntaxException;
 import org.apache.http.client.utils.URIBuilder;
@@ -79,7 +81,7 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
 
     /**
      * Initializes a new {@link ContactPictureURLServiceImpl}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public ContactPictureURLServiceImpl(ServiceLookup serviceLookup) {
@@ -87,22 +89,22 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
     }
 
     @Override
-    public String getContactPictureUrl(int contactId, int folderId, Session session, boolean preferRelativeUrl) throws OXException {
+    public String getContactPictureUrl(int contactId, int folderId, Session session, Long timestamp, boolean preferRelativeUrl) throws OXException {
         if (contactId < 0 || folderId < 0) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The contactId and the folderId must be set!");
         }
-        return getPictureUrl(contactId, folderId, -1, session, preferRelativeUrl);
+        return getPictureUrl(contactId, folderId, -1, session, timestamp, preferRelativeUrl);
     }
 
     @Override
-    public String getUserPictureUrl(int userId, Session session, boolean preferRelativeUrl) throws OXException {
+    public String getUserPictureUrl(int userId, Session session, Long timestamp, boolean preferRelativeUrl) throws OXException {
         if (userId < 0) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The userId must be set!");
         }
-        return getPictureUrl(-1, -1, userId, session, preferRelativeUrl);
+        return getPictureUrl(-1, -1, userId, session, timestamp, preferRelativeUrl);
     }
 
-    private String getPictureUrl(int contactId, int folderId, int userId, final Session session, final boolean preferRelativeUrl) throws OXException {
+    private String getPictureUrl(int contactId, int folderId, int userId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException {
         URIBuilder builder = new URIBuilder();
         if (false == preferRelativeUrl) {
             final HostData hostData;
@@ -140,6 +142,18 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
             builder.setParameter(CONTACT_FOLDER.getParameter(), String.valueOf(folderId));
         } else {
             builder.setParameter(USER.getParameter(), String.valueOf(userId));
+        }
+
+        if (timestamp != null) {
+            builder.addParameter("timestamp", String.valueOf(timestamp));
+        }
+        if (session.containsParameter(Session.PARAM_GUEST)) {
+            /*
+             * If we have a guest session, explicit set context and user.
+             * Thus we can support multiple session/shares cross-context
+             */
+            builder.setParameter(GUEST_USER.getParameter(), String.valueOf(session.getUserId()));
+            builder.setParameter(GUEST_CONTEXT.getParameter(), String.valueOf(session.getContextId()));
         }
 
         try {

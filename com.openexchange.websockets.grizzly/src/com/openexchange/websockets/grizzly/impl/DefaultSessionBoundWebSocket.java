@@ -59,6 +59,7 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.MessageTranscoder;
 import com.openexchange.websockets.SendControl;
@@ -85,8 +86,8 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
     /**
      * Initializes a new {@link DefaultSessionBoundWebSocket}.
      */
-    public DefaultSessionBoundWebSocket(ConnectionId connectionId, String path, Parameters parameters, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
-        super(connectionId, path, protocolHandler, request, listeners);
+    public DefaultSessionBoundWebSocket(ConnectionId connectionId, String path, Parameters parameters, ProtocolHandler protocolHandler, HttpRequestPacket request, GrizzlyConfig config, WebSocketListener... listeners) {
+        super(connectionId, path, protocolHandler, request, config, listeners);
         this.parameters = parameters;
         webSocketSession = new WebSocketSessionImpl();
     }
