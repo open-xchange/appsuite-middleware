@@ -52,18 +52,21 @@ package com.openexchange.ajax.mail.filter.tests.api;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.testing.httpclient.models.MailFilterConfigDatav2;
+import com.openexchange.testing.httpclient.models.MailFilterConfigResponsev2;
+import com.openexchange.testing.httpclient.modules.MailfilterApi;
 
 /**
  * {@link ConfigTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class ConfigTest extends AbstractMailFilterTest {
+public class ConfigTest extends AbstractAPIClientSession {
 
     /**
-     * Initialises a new {@link ConfigTest}.
+     * Initializes a new {@link ConfigTest}.
      * 
      * @param name The test case's name
      */
@@ -72,17 +75,20 @@ public class ConfigTest extends AbstractMailFilterTest {
     }
 
     /**
-     * Test the GET /ajax/mailfilter?action=config API call
+     * Test the GET /ajax/mailfilter/v2?action=config API call
      */
     @Test
     public void testConfig() throws Exception {
-        MailFilterConfiguration mailFilterConfiguration = mailFilterAPI.getConfiguration();
+        MailfilterApi api = new MailfilterApi(getApiClient());
+        MailFilterConfigResponsev2 response = api.getConfig_0(getSessionId(), null);
 
-        assertNotNull("The mail filter configuration is null", mailFilterConfiguration);
-        assertNotNull("The 'tests' list is null", mailFilterConfiguration.getTests());
-        assertNotNull("The 'actionCommands' list is null", mailFilterConfiguration.getActionCommands());
+        assertNotNull("The mail filter configuration response is null", response);
+        assertNotNull("The mail filter configuration data is null", response.getData());
+        MailFilterConfigDatav2 config = response.getData();
+        assertNotNull("The 'tests' list is null", config.getTests());
+        assertNotNull("The 'actionCommands' list is null", config.getActioncmds());
 
-        assertFalse("The 'tests' list is empty", mailFilterConfiguration.getTests().isEmpty());
-        assertFalse("The 'actionCommands list is empty", mailFilterConfiguration.getActionCommands().isEmpty());
+        assertFalse("The 'tests' list is empty", config.getTests().isEmpty());
+        assertFalse("The 'actionCommands list is empty", config.getActioncmds().isEmpty());
     }
 }

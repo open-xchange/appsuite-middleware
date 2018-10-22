@@ -78,6 +78,10 @@ fi
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
+* Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>

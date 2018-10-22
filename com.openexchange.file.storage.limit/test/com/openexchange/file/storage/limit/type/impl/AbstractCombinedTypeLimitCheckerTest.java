@@ -56,7 +56,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.exceptions.FileLimitExceptionCodes;
 
 /**
@@ -75,9 +75,9 @@ public class AbstractCombinedTypeLimitCheckerTest {
         };
     };
 
-    private List<File> files = new ArrayList<>();
+    private List<LimitFile> files = new ArrayList<>();
 
-    private File file = new File();
+    private LimitFile file = new LimitFile();
 
     @Before
     public void setUp() throws Exception {
@@ -102,8 +102,8 @@ public class AbstractCombinedTypeLimitCheckerTest {
 
     @Test
     public void testCheckMaxUploadSizePerFile_fileExceedsLimit_addException() {
-        List<File> lFiles = new ArrayList<>();
-        File file1 = new File();
+        List<LimitFile> lFiles = new ArrayList<>();
+        LimitFile file1 = new LimitFile();
         file1.setName("Good to know");
         file1.setSize(3);
         lFiles.add(file1);
@@ -115,12 +115,12 @@ public class AbstractCombinedTypeLimitCheckerTest {
 
     @Test
     public void testCheckMaxUploadSizePerFile_multiplefFileExceedsLimit_addExceptions() {
-        List<File> lFiles = new ArrayList<>();
-        File file1 = new File();
+        List<LimitFile> lFiles = new ArrayList<>();
+        LimitFile file1 = new LimitFile();
         file1.setName("Good to know");
         file1.setSize(3);
         lFiles.add(file1);
-        File file2 = new File();
+        LimitFile file2 = new LimitFile();
         file2.setName("Blaaa");
         file2.setSize(7);
         lFiles.add(file2);

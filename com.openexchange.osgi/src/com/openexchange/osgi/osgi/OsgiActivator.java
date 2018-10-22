@@ -49,11 +49,14 @@
 
 package com.openexchange.osgi.osgi;
 
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.console.ServiceStateLookup;
 import com.openexchange.osgi.console.osgi.ConsoleActivator;
+import com.openexchange.osgi.mbean.DeferredActivatorMBean;
+import com.openexchange.osgi.mbean.DeferredActivatorMBeanImpl;
 
 /**
  * {@link OsgiActivator} - Activator for OSGi-Bundle
@@ -82,7 +85,8 @@ public class OsgiActivator extends HousekeepingActivator {
         logger.info("starting bundle: com.openexchange.osgi");
         try {
             registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            track(ManagementService.class, new ManagementRegisterer(context));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN, new DeferredActivatorMBeanImpl()));
+            //track(ManagementService.class, new ManagementRegisterer(context));
             openTrackers();
             final ConsoleActivator consoleActivator = new ConsoleActivator();
             consoleActivator.start(context);

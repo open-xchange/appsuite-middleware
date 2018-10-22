@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.cascade.ConfigView;
@@ -83,6 +84,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.0
  */
 public abstract class AbstractICalExporter implements ICalExport {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class);
 
     public AbstractICalExporter() {
         super();
@@ -151,7 +154,12 @@ public abstract class AbstractICalExporter implements ICalExport {
 
     @Override
     public ThresholdFileHolder getExportDataSource(ServerSession session, OutputStream out) throws OXException {
-        return isBatchExport() ? exportBatchData(session, out) : exportFolderData(session, out);
+        try {
+            return isBatchExport() ? exportBatchData(session, out) : exportFolderData(session, out);
+        } catch (Exception e) {
+            LOGGER.debug("Unable to export data.", e);
+            throw e;
+        }
     }
 
     private boolean isBatchExport() {
@@ -185,7 +193,7 @@ public abstract class AbstractICalExporter implements ICalExport {
                     name += " (" + ownerName + ')';
                 }
             } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).debug("Error getting display name for folder owner", e);
+                LOGGER.debug("Error getting display name for folder owner", e);
             }
         }
         return name;
@@ -202,7 +210,7 @@ public abstract class AbstractICalExporter implements ICalExport {
         try {
             return extractName(ImportExportServices.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, folderId, session, null));
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).debug("Error extracting name from folder", e);
+            LOGGER.debug("Error extracting name from folder", e);
         }
         return null;
     }
@@ -219,7 +227,7 @@ public abstract class AbstractICalExporter implements ICalExport {
             ConfigView view = requireService(ConfigViewFactory.class, ImportExportServices.LOOKUP.get()).getView(session.getUserId(), session.getContextId());
             return i(view.opt("com.openexchange.export.ical.limit", Integer.class, defaultValue));
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).debug("Error getting configured export limit, falling back to {}", defaultValue, e);
+            LOGGER.debug("Error getting configured export limit, falling back to {}", defaultValue, e);
         }
         return i(defaultValue);
     }

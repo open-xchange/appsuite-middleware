@@ -79,6 +79,8 @@ import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationU
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.database.impl.InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.mbean.FileChecksumsMBean;
+import com.openexchange.groupware.infostore.mbean.FileChecksumsMBeanImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
@@ -89,6 +91,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.services.SharedInfostoreJSlob;
 
@@ -220,7 +223,7 @@ public class InfostoreActivator implements BundleActivator {
             this.qfsTracker = qfsTracker;
             qfsTracker.open();
 
-            ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementTracker(context));
+            ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new HousekeepingManagementTracker(context, FileChecksumsMBean.class.getName(), FileChecksumsMBean.DOMAIN, new FileChecksumsMBeanImpl()));
             this.mgmtTracker = mgmtTracker;
             mgmtTracker.open();
 

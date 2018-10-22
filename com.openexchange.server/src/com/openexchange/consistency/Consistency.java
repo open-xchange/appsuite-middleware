@@ -64,6 +64,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
@@ -103,15 +105,16 @@ import com.openexchange.snippet.QuotaAwareSnippetService;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
  */
-public abstract class Consistency implements ConsistencyMBean {
+public abstract class Consistency extends StandardMBean implements ConsistencyMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Consistency.class);
 
     /**
      * Initialises a new {@link Consistency}.
+     * @throws NotCompliantMBeanException 
      */
-    protected Consistency() {
-        super();
+    protected Consistency() throws NotCompliantMBeanException {
+        super(ConsistencyMBean.class);
     }
 
     @Override

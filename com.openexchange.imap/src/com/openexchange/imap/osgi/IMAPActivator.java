@@ -209,7 +209,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 ConversationCache.initInstance(this);
             }
             /*
-             * Register reloadbale
+             * Register reloadable
              */
             registerService(Reloadable.class, IMAPReloadable.getInstance());
             /*
@@ -394,19 +394,14 @@ public final class IMAPActivator extends HousekeepingActivator {
         }
     }
 
-    /**
-     *
-     * {@link IMAPPropertiesReloader} reloads the imap properties
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.0
-     */
+    // ----------------------------------------------------- Helper classes ----------------------------------------------------------------
+
     private static final class IMAPPropertiesReloader implements ForcedReloadable {
 
         /**
          * Initializes a new {@link IMAPPropertiesReloader}.
          */
-        public IMAPPropertiesReloader() {
+        IMAPPropertiesReloader() {
             super();
         }
 

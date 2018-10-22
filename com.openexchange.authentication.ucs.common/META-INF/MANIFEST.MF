@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Univention Server Authentication common Bundle
+Bundle-SymbolicName: com.openexchange.authentication.ucs
+Bundle-Version: 7.10.2
+Bundle-Activator: com.openexchange.authentication.ucs.common.osgi.UCSLookupActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.authentication,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.sessiond,
+ com.openexchange.sessiond.event,
+ com.openexchange.tools.ssl,
+ javax.naming,
+ javax.naming.directory,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.authentication.ucs.common

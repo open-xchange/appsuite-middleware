@@ -69,6 +69,7 @@ import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationS
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 import gnu.trove.iterator.TIntObjectIterator;
@@ -219,28 +220,32 @@ public class InfostoreAutodeletePerformer {
          * query versions
          */
         InfostoreIterator iterator = InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.file_store_location IS NOT NULL", Metadata.VALUES_ARRAY, infostoreFacade, session.getContext());
-        List<DocumentMetadata> versionsOfDocument = iterator.asList();
-        /*
-         * delete oldest version until max. number of versions is satisfied
-         */
-        int numberOfVersionsToDelete = versionsOfDocument.size() - maxVersions;
-        if (numberOfVersionsToDelete > 0) {
-            Collections.sort(versionsOfDocument, new Comparator<DocumentMetadata>() {
+        try {
+            List<DocumentMetadata> versionsOfDocument = iterator.asList();
+            /*
+             * delete oldest version until max. number of versions is satisfied
+             */
+            int numberOfVersionsToDelete = versionsOfDocument.size() - maxVersions;
+            if (numberOfVersionsToDelete > 0) {
+                Collections.sort(versionsOfDocument, new Comparator<DocumentMetadata>() {
 
-                @Override
-                public int compare(DocumentMetadata d1, DocumentMetadata d2) {
-                    int x = d1.getVersion();
-                    int y = d2.getVersion();
-                    return (x < y) ? -1 : ((x == y) ? 0 : 1);
+                    @Override
+                    public int compare(DocumentMetadata d1, DocumentMetadata d2) {
+                        int x = d1.getVersion();
+                        int y = d2.getVersion();
+                        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+                    }
+                });
+
+                TIntList versionsToDelete = new TIntArrayList(numberOfVersionsToDelete);
+                Iterator<DocumentMetadata> versionsOfDocumentIter = versionsOfDocument.iterator();
+                for (int i = numberOfVersionsToDelete; i-- > 0;) {
+                    versionsToDelete.add(versionsOfDocumentIter.next().getVersion());
                 }
-            });
-
-            TIntList versionsToDelete = new TIntArrayList(numberOfVersionsToDelete);
-            Iterator<DocumentMetadata> versionsOfDocumentIter = versionsOfDocument.iterator();
-            for (int i = numberOfVersionsToDelete; i-- > 0;) {
-                versionsToDelete.add(versionsOfDocumentIter.next().getVersion());
+                infostoreFacade.removeVersion(id, versionsToDelete.toArray(), session);
             }
-            infostoreFacade.removeVersion(id, versionsToDelete.toArray(), session);
+        } finally {
+            SearchIterators.close(iterator);
         }
     }
 

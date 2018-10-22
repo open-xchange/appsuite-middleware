@@ -62,6 +62,9 @@ import com.openexchange.exception.OXException;
  */
 public interface ConsistencyMBean {
 
+    public static final String MBEAN_DOMAIN = "com.openexchange.consistency.Consistency";
+    public static final String MBEAN_NAME = "FilestoreConsistency";
+
     List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException;
 
     // List

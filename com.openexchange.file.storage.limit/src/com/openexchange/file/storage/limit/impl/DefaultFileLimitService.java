@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.LimitFile;
 import com.openexchange.file.storage.limit.FileLimitService;
 import com.openexchange.file.storage.limit.type.TypeLimitChecker;
 import com.openexchange.file.storage.limit.type.impl.TypeLimitCheckerRegistry;
@@ -80,7 +80,7 @@ public class DefaultFileLimitService implements FileLimitService {
     }
 
     @Override
-    public List<OXException> checkLimits(Session session, String folderId, List<File> files, String type) throws OXException {
+    public List<OXException> checkLimits(Session session, String folderId, List<LimitFile> files, String type) throws OXException {
         List<OXException> exceptions = null;
 
         List<TypeLimitChecker> typeLimitCheckers = this.typeLimitCheckerRegistry.get(type);
@@ -90,7 +90,7 @@ public class DefaultFileLimitService implements FileLimitService {
                 if (null == exceptions) {
                     exceptions = new ArrayList<>(checked);
                 } else {
-                    exceptions.addAll(exceptions);
+                    exceptions.addAll(checked);
                 }
             }
         }

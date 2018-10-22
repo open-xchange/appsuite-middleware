@@ -63,18 +63,23 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.processing.ProcessorService;
 import com.openexchange.processing.internal.ProcessorServiceImpl;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
+import com.openexchange.sessionCount.SessionThreadCountMBean;
+import com.openexchange.sessionCount.SessionThreadCountMBeanImpl;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.startup.CloseableControlService;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolInformationMBean;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.threadpool.internal.ThreadPoolInformation;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.timer.TimerService;
@@ -124,7 +129,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Service trackers
              */
-            track(ManagementService.class, new ManagementServiceTrackerCustomizer(context, threadPool));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, ThreadPoolInformation.class.getName(), ThreadPoolInformationMBean.THREAD_POOL_DOMAIN, new ThreadPoolInformation(threadPool)));
             track(CloseableControlService.class, new ServiceTrackerCustomizer<CloseableControlService, CloseableControlService>() {
 
                 @Override
@@ -183,7 +188,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessionThreadCounter.EVENT_TOPIC);
                 registerService(EventHandler.class, handler, dict);
-                track(ManagementService.class, new ManagementServiceTrackerCustomizer2(context, counterImpl, handler));
+                track(ManagementService.class, new HousekeepingManagementTracker(context, SessionThreadCountMBeanImpl.class.getName(), SessionThreadCountMBean.SESSION_THREAD_COUNT_DOMAIN, new SessionThreadCountMBeanImpl(counterImpl, handler)));
             }
             /*
              * Event handler for session events

@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.management.NotCompliantMBeanException;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
@@ -98,8 +99,9 @@ public class OsgiOXConsistency extends Consistency {
 
     /**
      * Initialises a new {@link OsgiOXConsistency}.
+     * @throws NotCompliantMBeanException 
      */
-    public OsgiOXConsistency() {
+    public OsgiOXConsistency() throws NotCompliantMBeanException {
         super();
     }
 

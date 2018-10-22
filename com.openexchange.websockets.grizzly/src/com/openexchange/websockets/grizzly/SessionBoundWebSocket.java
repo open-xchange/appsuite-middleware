@@ -56,8 +56,13 @@ import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.http.grizzly.GrizzlyConfig;
+import com.openexchange.net.IPTools;
 import com.openexchange.session.Session;
 import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.grizzly.http.WebsocketServletRequestWrapper;
 
 /**
  * {@link SessionBoundWebSocket} - The Web Socket bound to a certain session.
@@ -67,18 +72,24 @@ import com.openexchange.websockets.ConnectionId;
  */
 public class SessionBoundWebSocket extends DefaultWebSocket {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SessionBoundWebSocket.class);
+
     private final AtomicReference<SessionInfo> sessionInfoReference;
     private final ConnectionId connectionId;
     private final String path;
+    private final HttpServletRequest wrappedRequest;
+    private final GrizzlyConfig config;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
      */
-    public SessionBoundWebSocket(ConnectionId connectionId, String path, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+    public SessionBoundWebSocket(ConnectionId connectionId, String path, ProtocolHandler protocolHandler, HttpRequestPacket request, GrizzlyConfig config, WebSocketListener... listeners) {
         super(protocolHandler, request, listeners);
         this.sessionInfoReference = new AtomicReference<SessionInfo>(null);
         this.connectionId = connectionId;
         this.path = path;
+        this.config = config;
+        this.wrappedRequest = buildHttpServletRequestWrapper(this.servletRequest);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -98,7 +109,35 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      * @return The HTTP request
      */
     public HttpServletRequest getHttpRequest() {
-        return servletRequest;
+        return wrappedRequest;
+    }
+
+
+    private WebsocketServletRequestWrapper buildHttpServletRequestWrapper(HttpServletRequest httpRequest) {
+        if (!config.isConsiderXForwards()) {
+            return new WebsocketServletRequestWrapper(httpRequest);
+        }
+
+        // Determine remote IP address
+        String forHeaderValue = httpRequest.getHeader(config.getForHeader());
+        String remoteAddress = IPTools.getRemoteIP(forHeaderValue, config.getKnownProxies());
+        if (null == remoteAddress) {
+            LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", config.getForHeader(), forHeaderValue == null ? "" : forHeaderValue);
+            remoteAddress = httpRequest.getRemoteAddr();
+        }
+
+        // Determine protocol/scheme of the incoming request
+        String protocol = httpRequest.getHeader(config.getProtocolHeader());
+        if (!isValidProtocol(protocol)) {
+            LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
+            protocol = httpRequest.getScheme();
+        }
+
+        return new WebsocketServletRequestWrapper(protocol, remoteAddress, httpRequest.getServerPort(), httpRequest);
+    }
+
+    private boolean isValidProtocol(String protocolHeaderValue) {
+        return WebsocketServletRequestWrapper.WS_SCHEME.equals(protocolHeaderValue) || WebsocketServletRequestWrapper.WSS_SCHEME.equals(protocolHeaderValue);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

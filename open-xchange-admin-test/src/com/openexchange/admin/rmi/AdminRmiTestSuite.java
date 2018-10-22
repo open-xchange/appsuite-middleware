@@ -66,11 +66,11 @@ import org.junit.runners.Suite.SuiteClasses;
     Bug16865Test.class,
     Bug19379Test.class,
     Bug27065Test.class,
+//    UserTest.class, is invoked by GroupTest
     ContextTest.class,
     GroupTest.class,
     ResourceTest.class,
 //    TaskMgmtTest.class,
-    UserTest.class,
     UtilTest.class,
     UtilDatabaseTest.class
     //@formatter:on
