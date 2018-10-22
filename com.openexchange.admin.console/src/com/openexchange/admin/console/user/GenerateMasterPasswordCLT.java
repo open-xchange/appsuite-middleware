@@ -54,11 +54,13 @@ import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,6 +70,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.cli.AbstractCLI;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.passwordmechs.PasswordMech;
@@ -261,12 +264,30 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         }
     }
 
-    private void writePasswordFile(File file, List<String> lines) throws FileNotFoundException {
-        try (PrintWriter writer = new PrintWriter(file)) {
+    /**
+     * Writes the specified lines to the specified file
+     * 
+     * @param file The file to write to
+     * @param lines The lines to write to the file
+     */
+    private void writePasswordFile(File file, List<String> lines) {
+        boolean error = true;
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));) {
             for (String line : lines) {
-                writer.println(line);
+                writer.append(line);
             }
             writer.flush();
+            error = false;
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Unsupported encoding: 'UTF-8'");
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: '" + file.getAbsolutePath() + "'");
+        } catch (IOException e) {
+            System.err.println("I/O error occurred: '" + e.getMessage() + "'");
+        } finally {
+            if (error) {
+                System.exit(-1);
+            }
         }
     }
 
