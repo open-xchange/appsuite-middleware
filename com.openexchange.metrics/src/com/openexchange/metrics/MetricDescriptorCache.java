@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,16 @@
  *
  */
 
-package com.openexchange.filestore.s3.metrics;
+package com.openexchange.metrics;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
 
 /**
  * {@link MetricDescriptorCache}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
 public class MetricDescriptorCache {
 
@@ -77,12 +75,15 @@ public class MetricDescriptorCache {
     }
 
     /**
-     * Retrieves the metric descriptor for the specified HTTP method
+     * Retrieves the metric descriptor for the metric type
      * 
+     * @param metricType The {@link MetricType}
      * @param name the method name
-     * @return The {@link MetricDescriptor} for the specified HTTP method
+     * @param description The metric's description
+     * @param unit The metric's unit
+     * @return The {@link MetricDescriptor} for the specified metric
      */
-    MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
+    public MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
         MetricDescriptor metricDescriptor = metricDescriptors.get(name);
         if (metricDescriptor != null) {
             return metricDescriptor;
@@ -99,7 +100,7 @@ public class MetricDescriptorCache {
     /**
      * Unregisters all metrics and clears the cache
      */
-    void clear() {
+    public void clear() {
         for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
             metricService.removeMetric(metricDescriptor);
         }
