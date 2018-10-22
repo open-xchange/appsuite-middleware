@@ -53,9 +53,9 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -242,8 +242,17 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     ///////////////////////////////////// HELPERS ////////////////////////////////
 
+    /**
+     * Reads the specified password file
+     * 
+     * @param file The file to read
+     * @param context a map with the command line values for adminuser, encryption and adminpass
+     * @return A {@link List} with the lines of the file
+     * @throws FileNotFoundException If the file is not found
+     * @throws IOException if an I/O error is occurred
+     */
     private List<String> readPasswordFile(File file, Map<Parameter, String> context) throws FileNotFoundException, IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.UTF_8))) {
             List<String> lines = new LinkedList<String>();
             boolean updated = false;
             StringBuilder builder = new StringBuilder(96);
