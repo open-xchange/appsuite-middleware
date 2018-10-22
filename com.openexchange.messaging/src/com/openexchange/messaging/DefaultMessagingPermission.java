@@ -57,6 +57,8 @@ package com.openexchange.messaging;
  */
 public class DefaultMessagingPermission implements MessagingPermission {
 
+    private static final long serialVersionUID = -7004880825414752511L;
+
     /**
      * Creates a new instance of {@link DefaultMessagingPermission} with {@link #setMaxPermissions()} invoked.
      *
