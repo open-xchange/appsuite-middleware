@@ -5,7 +5,7 @@ properties:
     description: The uid of the alarm.
   id:
     type: integer
-    format: int64
+    format: int32
     description: The id of the alarm.
   action:
     type: string
