@@ -70,6 +70,8 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
 
+    private Thread jmxStarter;
+
     /**
      * Initializes a new {@link ManagementActivator}
      */
@@ -138,13 +140,20 @@ public final class ManagementActivator extends HousekeepingActivator {
                 }
             }
         };
-        new Thread(jmxStart, "Open-Xchange JMX Starter").start();
+        Thread jmxStarter = new Thread(jmxStart, "Open-Xchange JMX Starter");
+        this.jmxStarter = jmxStarter;
+        jmxStarter.start();
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.management");
         super.stopBundle();
+        Thread jmxStarter = this.jmxStarter;
+        if (null != jmxStarter) {
+            this.jmxStarter = null;
+            jmxStarter.interrupt();
+        }
         stopInternal();
         /*
          * Clear service registry
