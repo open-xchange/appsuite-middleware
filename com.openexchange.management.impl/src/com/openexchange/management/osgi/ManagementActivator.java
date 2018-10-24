@@ -53,6 +53,7 @@ import static com.openexchange.management.services.ManagementServiceRegistry.get
 import java.lang.management.ThreadMXBean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
@@ -67,7 +68,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class ManagementActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
 
     /**
      * Initializes a new {@link ManagementActivator}
@@ -122,7 +123,22 @@ public final class ManagementActivator extends HousekeepingActivator {
                 }
             }
         }
-        startInternal();
+        /*
+         * Schedule JMX server start
+         */
+        Runnable jmxStart = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    startInternal();
+                } catch (Exception e) {
+                    String ls = Strings.getLineSeparator();
+                    LOG.warn("{}{}\tFailed to start JMX server. MBeans will not be accessible on this node.{}", ls, ls, ls, e);
+                }
+            }
+        };
+        new Thread(jmxStart, "Open-Xchange JMX Starter").start();
     }
 
     @Override
@@ -136,7 +152,7 @@ public final class ManagementActivator extends HousekeepingActivator {
         getServiceRegistry().clearRegistry();
     }
 
-    private void startInternal() throws OXException {
+    void startInternal() throws OXException {
         ManagementInit.getInstance().start();
         /*
          * Register management service
