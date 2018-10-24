@@ -66,9 +66,13 @@ public final class ManagementInit implements Initialization {
     private static final ManagementInit singleton = new ManagementInit();
 
     /**
-     * Logger.
+     * @return the singleton instance.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementInit.class);
+    public static ManagementInit getInstance() {
+        return singleton;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Prevent instantiation.
@@ -78,19 +82,13 @@ public final class ManagementInit implements Initialization {
     }
 
     /**
-     * @return the singleton instance.
-     */
-    public static ManagementInit getInstance() {
-        return singleton;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public void start() throws OXException {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementInit.class);
         if (started.get()) {
-            LOG.error("{} already started", ManagementInit.class.getName());
+            logger.error("{} already started", ManagementInit.class.getName());
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
@@ -126,7 +124,7 @@ public final class ManagementInit implements Initialization {
          * Run
          */
         agent.run();
-        LOG.info("JMX server successfully initialized.");
+        logger.info("JMX server successfully initialized.");
         started.set(true);
     }
 
@@ -135,12 +133,14 @@ public final class ManagementInit implements Initialization {
      */
     @Override
     public void stop() throws OXException {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementInit.class);
         if (!started.get()) {
-            LOG.error("{} has not been started", ManagementInit.class.getName());
+            logger.error("{} has not been started", ManagementInit.class.getName());
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
         agent.stop();
+        logger.info("JMX server successfully stopped.");
         started.set(false);
     }
 

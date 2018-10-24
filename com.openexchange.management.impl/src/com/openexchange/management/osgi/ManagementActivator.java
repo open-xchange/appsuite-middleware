@@ -53,7 +53,6 @@ import static com.openexchange.management.services.ManagementServiceRegistry.get
 import java.lang.management.ThreadMXBean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
@@ -67,10 +66,6 @@ import com.openexchange.osgi.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementActivator extends HousekeepingActivator {
-
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
-
-    private Thread jmxStarter;
 
     /**
      * Initializes a new {@link ManagementActivator}
@@ -86,7 +81,8 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+        logger.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         /*
          * TODO: Should the management bundle be restarted due to re-available configuration service?
@@ -101,7 +97,8 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void handleUnavailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+        logger.info("Re-available service: {}", clazz.getName());
         /*
          * Just remove absent service from service registry but do not stop management bundle
          */
@@ -110,7 +107,8 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.management");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+        logger.info("starting bundle: com.openexchange.management");
         /*
          * Fill service registry
          */
@@ -125,35 +123,14 @@ public final class ManagementActivator extends HousekeepingActivator {
                 }
             }
         }
-        /*
-         * Schedule JMX server start
-         */
-        Runnable jmxStart = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    startInternal();
-                } catch (Exception e) {
-                    String ls = Strings.getLineSeparator();
-                    LOG.warn("{}{}\tFailed to start JMX server. MBeans will not be accessible on this node.{}", ls, ls, ls, e);
-                }
-            }
-        };
-        Thread jmxStarter = new Thread(jmxStart, "Open-Xchange JMX Starter");
-        this.jmxStarter = jmxStarter;
-        jmxStarter.start();
+        startInternal();
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.management");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+        logger.info("stopping bundle: com.openexchange.management");
         super.stopBundle();
-        Thread jmxStarter = this.jmxStarter;
-        if (null != jmxStarter) {
-            this.jmxStarter = null;
-            jmxStarter.interrupt();
-        }
         stopInternal();
         /*
          * Clear service registry
@@ -161,7 +138,7 @@ public final class ManagementActivator extends HousekeepingActivator {
         getServiceRegistry().clearRegistry();
     }
 
-    void startInternal() throws OXException {
+    private void startInternal() throws OXException {
         ManagementInit.getInstance().start();
         /*
          * Register management service
