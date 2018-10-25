@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.config.IPRange.isWhitelistedFromRateLimit;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,7 +79,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
-
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
@@ -88,11 +86,9 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.slf4j.Logger;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -116,8 +112,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
@@ -169,7 +163,6 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailMessageComparator;
@@ -1160,95 +1153,33 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 1; sameAccount && i < length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
-        TransportProperties transportProperties = TransportProperties.getInstance();
-        MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
-        long maxPerMsg = checker.getFileQuotaMax();
-        long max = checker.getQuotaMax();
         if (sameAccount) {
             initConnection(accountId);
             MailMessage[] originalMails = new MailMessage[folders.length];
-            int mlength = length - 1;
-            if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
+            {
                 for (int i = 0; i < length; i++) {
                     String fullName = arguments[i].getFullname();
                     MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
                     }
-                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
-                        origMail.loadContent();
-                    }
-                    originalMails[i] = origMail;
-                }
-            } else {
-                long total = 0;
-                for (int i = 0; i < length; i++) {
-                    String fullName = arguments[i].getFullname();
-                    MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
-                    if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
-                    }
-                    long size = origMail.getSize();
-                    if (size <= 0) {
-                        size = 2048; // Avg size
-                    }
-                    if (maxPerMsg > 0 && size > maxPerMsg) {
-                        String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(maxPerMsg), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-                    }
-                    total += size;
-                    if (max > 0 && total > max) {
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(max));
-                    }
-                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
-                        origMail.loadContent();
-                    }
+                    origMail.loadContent();
                     originalMails[i] = origMail;
                 }
             }
             return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, setFrom);
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
-        if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-            for (int i = 0; i < length && sameAccount; i++) {
+        {
+            for (int i = 0; i < length; i++) {
                 MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
                     }
-                    originalMails[i] = origMail;
                     origMail.loadContent();
-                } finally {
-                    ma.close(true);
-                }
-            }
-        } else {
-            long total = 0;
-            for (int i = 0; i < length && sameAccount; i++) {
-                MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
-                try {
-                    MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
-                    if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
-                    }
-                    long size = origMail.getSize();
-                    if (size <= 0) {
-                        size = 2048; // Avg size
-                    }
-                    if (maxPerMsg > 0 && size > maxPerMsg) {
-                        String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
-                            Long.valueOf(maxPerMsg),
-                            null == fileName ? "" : fileName,
-                                Long.valueOf(size));
-                    }
-                    total += size;
-                    if (max > 0 && total > max) {
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(max));
-                    }
                     originalMails[i] = origMail;
-                    origMail.loadContent();
                 } finally {
                     ma.close(true);
                 }
