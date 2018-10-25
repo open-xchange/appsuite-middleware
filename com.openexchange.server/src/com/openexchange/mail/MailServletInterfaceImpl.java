@@ -109,8 +109,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
@@ -1336,31 +1334,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 1; sameAccount && i < length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
-        MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
-        long maxPerMsg = checker.getFileQuotaMax();
-        long max = checker.getQuotaMax();
         if (sameAccount) {
             initConnection(accountId);
             MailMessage[] originalMails = new MailMessage[folders.length];
             {
-                long total = 0;
                 for (int i = 0; i < length; i++) {
                     String fullName = arguments[i].getFullname();
                     MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
-                    }
-                    long size = origMail.getSize();
-                    if (size <= 0) {
-                        size = 2048; // Avg size
-                    }
-                    if (maxPerMsg > 0 && size > maxPerMsg) {
-                        String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(maxPerMsg), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-                    }
-                    total += size;
-                    if (max > 0 && total > max) {
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(max));
                     }
                     origMail.loadContent();
                     originalMails[i] = origMail;
@@ -1370,25 +1352,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
         {
-            long total = 0;
             for (int i = 0; i < length; i++) {
                 MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
-                    }
-                    long size = origMail.getSize();
-                    if (size <= 0) {
-                        size = 2048; // Avg size
-                    }
-                    if (maxPerMsg > 0 && size > maxPerMsg) {
-                        String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(Long.valueOf(maxPerMsg), null == fileName ? "" : fileName, Long.valueOf(size));
-                    }
-                    total += size;
-                    if (max > 0 && total > max) {
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(max));
                     }
                     origMail.loadContent();
                     originalMails[i] = origMail;
