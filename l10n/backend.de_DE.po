@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-10-04 12:04+0200\n"
+"PO-Revision-Date: 2018-10-25 13:33+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.1.1\n"
 "X-POOTLE-MTIME: 1409745551.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -3084,7 +3084,9 @@ msgstr "Fehlende Client-Funktionen"
 
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
+#. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
 msgid "%1$s"
 msgstr "%1$s"
 
@@ -3126,6 +3128,11 @@ msgstr "Falsches Passwort."
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:116
 msgid "Login denied."
 msgstr "Anmeldung verweigert."
+
+#. Used in case there were too many failed login attempts for an account within a certain timeframe.
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:122
+msgid "Too many login attempts. Please try again later."
+msgstr "Zu viele Anmeldeversuche. Versuchen Sie es später noch einmal."
 
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
@@ -9327,11 +9334,13 @@ msgid "The allowed quota on mail server exceeded."
 msgstr "Die zulässige Quota auf dem Mailserver wurde überschritten."
 
 #. *
-#. * The allowed quota on mail server "%1$s" exceeded.
+#. * The allowed storage limit for your account \"%6$s\" was exceeded.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-msgid "The allowed quota on mail server \"%1$s\" exceeded."
-msgstr "Die zulässige Quota auf dem Mailserver \"%1$s\" wurde überschritten."
+msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
+msgstr ""
+"Die zulässigen Speicherbegrenzung für Ihren Account \"%6$s\" wurde "
+"überschritten."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -13512,6 +13521,10 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The allowed quota on mail server \"%1$s\" exceeded."
+#~ msgstr ""
+#~ "Die zulässige Quota auf dem Mailserver \"%1$s\" wurde überschritten."
 
 #~ msgid "Sequence number is outdated."
 #~ msgstr "Sequenznummer ist veraltet."
