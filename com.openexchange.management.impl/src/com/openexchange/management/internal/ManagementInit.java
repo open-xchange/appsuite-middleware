@@ -53,6 +53,7 @@ import static com.openexchange.management.services.ManagementServiceRegistry.get
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -124,7 +125,8 @@ public final class ManagementInit implements Initialization {
          * Run
          */
         agent.run();
-        logger.info("JMX server successfully initialized.");
+        String ls = Strings.getLineSeparator();
+        logger.info("{}{}\tJMX server successfully initialized.{}", ls, ls, ls);
         started.set(true);
     }
 
