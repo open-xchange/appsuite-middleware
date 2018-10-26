@@ -49,7 +49,7 @@
 
 package com.openexchange.database.internal.wrapping;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -192,23 +192,28 @@ public class UpdateFlagTest {
             super(pools, monitor, assign, delegate, noTimeout, write, usedAsRead);
         }
 
+        @Override
         public void setSchema(String schema) {
             // TODO Auto-generated method stub
         }
 
+        @Override
         public String getSchema() throws SQLException {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public void abort(Executor executor) throws SQLException {
             // TODO Auto-generated method stub
         }
 
+        @Override
         public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
             // TODO Auto-generated method stub
         }
 
+        @Override
         public int getNetworkTimeout() throws SQLException {
             // TODO Auto-generated method stub
             return 0;

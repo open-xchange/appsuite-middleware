@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentMap;
  * {@link MetricDescriptorCache}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.10.2
+ * @since 7.10.1
  */
 public class MetricDescriptorCache {
 
@@ -83,7 +83,7 @@ public class MetricDescriptorCache {
      * @param unit The metric's unit
      * @return The {@link MetricDescriptor} for the specified metric
      */
-    MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
+    public MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
         MetricDescriptor metricDescriptor = metricDescriptors.get(name);
         if (metricDescriptor != null) {
             return metricDescriptor;
@@ -100,7 +100,7 @@ public class MetricDescriptorCache {
     /**
      * Unregisters all metrics and clears the cache
      */
-    void clear() {
+    public void clear() {
         for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
             metricService.removeMetric(metricDescriptor);
         }

@@ -50,9 +50,9 @@
 package com.openexchange.realtime.json.impl;
 
 import static com.openexchange.realtime.packet.StanzaMatcher.isStanza;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
@@ -63,9 +63,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.RTProtocol;
-import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -168,7 +166,7 @@ public class ProtocolHandlerTest {
     public void passesARegularMessage() throws OXException, JSONException {
         String message = "{element: 'message', payloads: [{namespace: 'test', element: 'number', data: 23}], to: 'test@1', from: 'test@1'}";
         handle(message);
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 23)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 23)), eq(gate), isNull(), eq(false), isNull());
     }
     
     @Test
@@ -177,9 +175,9 @@ public class ProtocolHandlerTest {
         stanzas.add(0, nextSequence);
         handle(stanzas);
         verify(protocol).nextSequence(id, 0, gate, null);
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(), eq(false), isNull());
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(), eq(false), isNull());
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(), eq(false), isNull());
     }
 
     @Test
@@ -188,9 +186,9 @@ public class ProtocolHandlerTest {
         stanzas.add(0, ping);
         handle(stanzas);
         verify(protocol).ping(id, false, null, null);
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(), eq(false), isNull());
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(), eq(false), isNull());
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(), eq(false), isNull());
     }
 
     @Test
@@ -199,9 +197,9 @@ public class ProtocolHandlerTest {
         stanzas.add(0, ack);
         handle(stanzas);
         verify(protocol).acknowledgementReceived(12L, null);
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
-        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(), eq(false), isNull());
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(), eq(false), isNull());
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(), eq(false), isNull());
     }
 
     private void handle(String message) throws OXException, JSONException {

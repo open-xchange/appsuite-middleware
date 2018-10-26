@@ -59,7 +59,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -112,8 +112,8 @@ public class FeedbackMailServiceSMTPTest {
         PowerMockito.when(Services.getService(FeedbackService.class)).thenReturn(feedbackService);
         PowerMockito.when(Services.getService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
 
-        Mockito.when(configService.getProperty(org.mockito.Matchers.anyString(), org.mockito.Matchers.anyString())).thenReturn("");
-        Mockito.when(configService.getIntProperty(org.mockito.Matchers.anyString(), org.mockito.Matchers.anyInt())).thenReturn(1);
+        Mockito.when(configService.getProperty(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn("");
+        Mockito.when(configService.getIntProperty(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt())).thenReturn(1);
 
         ExportResultConverter value = new ExportResultConverter() {
 
@@ -145,7 +145,7 @@ public class FeedbackMailServiceSMTPTest {
         FeedbackMailServiceSMTP serviceSpy = PowerMockito.spy(service);
 
         PowerMockito.whenNew(Transport.class).withAnyArguments().thenReturn(transport);
-        PowerMockito.doNothing().when(transport).connect(Matchers.any(String.class), Matchers.any(Integer.class), Matchers.any(String.class), Matchers.any(String.class));
+        PowerMockito.doNothing().when(transport).connect(ArgumentMatchers.any(String.class), ArgumentMatchers.any(Integer.class), ArgumentMatchers.any(String.class), ArgumentMatchers.any(String.class));
 
         PowerMockito.doReturn(properties).when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSMTPProperties")).withArguments(leanConfigurationService);
         filter.getRecipients().put("dsfa", "");

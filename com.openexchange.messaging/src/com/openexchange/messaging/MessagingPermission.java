@@ -49,13 +49,15 @@
 
 package com.openexchange.messaging;
 
+import java.io.Serializable;
+
 /**
  * {@link MessagingPermission} - Represents a messaging permission.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface MessagingPermission extends Cloneable {
+public interface MessagingPermission extends Cloneable, Serializable {
 
     /**
      * The constant for no permission at all.

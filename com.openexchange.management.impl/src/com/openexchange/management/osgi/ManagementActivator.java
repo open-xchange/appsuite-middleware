@@ -51,8 +51,14 @@ package com.openexchange.management.osgi;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import java.lang.management.ThreadMXBean;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
@@ -67,7 +73,10 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class ManagementActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
+
+    Thread jmxStarter;
+    Thread jmxStartPoller;
 
     /**
      * Initializes a new {@link ManagementActivator}
@@ -122,13 +131,83 @@ public final class ManagementActivator extends HousekeepingActivator {
                 }
             }
         }
-        startInternal();
+        /*
+         * Check if JMX server should be started asynchronously
+         */
+        boolean async = getService(ConfigurationService.class).getBoolProperty("com.openexchange.management.asyncStartUp", false);
+        if (async) {
+            /*
+             * Schedule JMX server start
+             */
+            final Object monitor = this;
+            final FutureTask<Void> jmxStart = new FutureTask<Void>(new Callable<Void>() {
+
+                @Override
+                public Void call() throws OXException {
+                    startInternal();
+                    synchronized (monitor) {
+                        ManagementActivator.this.jmxStarter = null;
+                    }
+                    return null;
+                }
+            });
+            Thread jmxStarter = new Thread(jmxStart, "Open-Xchange JMX Starter");
+            this.jmxStarter = jmxStarter;
+            jmxStarter.start();
+            /*
+             * Poll for finished JMX server start-up
+             */
+            Runnable poll = new Runnable() {
+
+                @Override
+                public void run() {
+                    boolean keepOn = true;
+                    while (keepOn) {
+                        keepOn = false;
+                        try {
+                            jmxStart.get(5, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            // Interrupted
+                            LOG.trace("Polling has been interrupted", e);
+                        } catch (ExecutionException e) {
+                            String ls = Strings.getLineSeparator();
+                            LOG.warn("{}{}\tFailed to start JMX server. MBeans will not be accessible on this node.{}", ls, ls, ls, e.getCause());
+                        } catch (TimeoutException e) {
+                            // Not started in time
+                            String ls = Strings.getLineSeparator();
+                            LOG.warn("{}{}\tJMX server still not started. MBeans will not yet be accessible on this node.{}", ls, ls, ls, e.getCause());
+                            keepOn = true;
+                        };
+                    }
+                    synchronized (monitor) {
+                        ManagementActivator.this.jmxStartPoller = null;
+                    }
+                }
+            };
+            Thread jmxStartPoller = new Thread(poll, "Open-Xchange JMX Start Poller");
+            this.jmxStartPoller = jmxStartPoller;
+            jmxStartPoller.start();
+        } else {
+            startInternal();
+        }
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.management");
         super.stopBundle();
+        Thread jmxStartPoller = this.jmxStartPoller;
+        if (null != jmxStartPoller) {
+            // Interrupt thread and wait
+            this.jmxStartPoller = null;
+            jmxStartPoller.interrupt();
+        }
+        Thread jmxStarter = this.jmxStarter;
+        if (null != jmxStarter) {
+            // Interrupt thread and wait
+            this.jmxStarter = null;
+            jmxStarter.interrupt();
+        }
         stopInternal();
         /*
          * Clear service registry
@@ -136,13 +215,15 @@ public final class ManagementActivator extends HousekeepingActivator {
         getServiceRegistry().clearRegistry();
     }
 
-    private void startInternal() throws OXException {
+    void startInternal() throws OXException {
         ManagementInit.getInstance().start();
-        /*
-         * Register management service
-         */
-        registerService(ManagementService.class, ManagementAgentImpl.getInstance(), null);
-        registerService(ThreadMXBean.class, ManagementAgentImpl.getInstance().getThreadMXBean(), null);
+        if (ManagementInit.getInstance().isStarted()) {
+            /*
+             * Register management service
+             */
+            registerService(ManagementService.class, ManagementAgentImpl.getInstance(), null);
+            registerService(ThreadMXBean.class, ManagementAgentImpl.getInstance().getThreadMXBean(), null);
+        }
     }
 
     private void stopInternal() throws OXException {

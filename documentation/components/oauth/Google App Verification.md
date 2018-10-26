@@ -58,6 +58,9 @@ Also, you need to provide an explanation why your instance of OX App Suite requi
    their Google Drive and manage files and folders. They also can select Google
    Drive files as attachments for eMails that are composed with our webmail
    module.
+ - The scope https://www.googleapis.com/auth/userinfo.profile is used to request
+   the user's unique identifier to distinguish multiple Google accounts of the same
+   user and offer the ability to add those in our web application.
 ```
 
 It might happen that despite submitting the verification request, you get no positive answer even after weeks. In that case please answer to the submit confirmation mail 

@@ -53,7 +53,7 @@ import java.sql.Connection;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -109,7 +109,7 @@ public class GuestDeleteListenerImplTest {
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
 
-        Mockito.verify(guestService, Mockito.never()).removeGuest(Matchers.anyInt(), Matchers.anyInt());
+        Mockito.verify(guestService, Mockito.never()).removeGuest(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
     }
 
      @Test
@@ -127,7 +127,7 @@ public class GuestDeleteListenerImplTest {
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
 
-        Mockito.verify(guestService, Mockito.never()).removeGuests(Matchers.anyInt());
+        Mockito.verify(guestService, Mockito.never()).removeGuests(ArgumentMatchers.anyInt());
     }
 
      @Test

@@ -58,6 +58,7 @@ import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
 import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricDescriptorCache;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.types.Timer;

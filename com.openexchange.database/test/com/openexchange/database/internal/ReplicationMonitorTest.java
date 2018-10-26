@@ -57,7 +57,7 @@ import java.sql.PreparedStatement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import com.openexchange.osgi.ServiceListings;
@@ -101,7 +101,7 @@ public class ReplicationMonitorTest {
                 fail(Connection.class.getName() + ".setAutoCommit() should not be called if replication monitor is disabled.");
                 return null;
             }
-        }).when(con).setAutoCommit(Matchers.anyBoolean());
+        }).when(con).setAutoCommit(ArgumentMatchers.anyBoolean());
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) {
@@ -122,7 +122,7 @@ public class ReplicationMonitorTest {
                 fail(Connection.class.getName() + ".prepareStatement() should not be called if replication monitor is disabled.");
                 return null;
             }
-        }).when(con).prepareStatement(Matchers.anyString());
+        }).when(con).prepareStatement(ArgumentMatchers.anyString());
         monitor.increaseTransactionCounter(assignment, con);
     }
 }

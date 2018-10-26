@@ -280,7 +280,7 @@ public class GlobalDbInit {
             if (groupName.length() > maxGroupNameLength) {
                 throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group name \'" + groupName + "\' has more character than the allowed " + maxGroupNameLength + " one.");
             }
-            if (!CharMatcher.ASCII.matchesAllOf(groupName)) {
+            if (!CharMatcher.ascii().matchesAllOf(groupName)) {
                 throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group name \'" + groupName + "\' does contain non ascii characters.");
             }
         }

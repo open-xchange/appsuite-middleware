@@ -53,7 +53,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -100,7 +100,7 @@ public class Bug22838Test {
             }
         };
 
-        Mockito.when(registry.getConfigFor(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
+        Mockito.when(registry.getConfigFor(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(sessiondConfigInterface);
 
         SessionHandler.init(new SessiondConfigImpl(new SimConfigurationService()), registry);
     }

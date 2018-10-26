@@ -645,7 +645,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData acknowledgeAlarm(String eventId, int alarmId, String folderId) throws ApiException {
-        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), Boolean.FALSE);
+        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), Boolean.FALSE, null);
         CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getCategories(), acknowledgeAlarm.getData());
         assertEquals(1, checkResponse.getUpdated().size());
         EventData updated = checkResponse.getUpdated().get(0);
@@ -666,7 +666,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData snoozeAlarm(String eventId, int alarmId, long snoozeTime, String folderId) throws ApiException {
-        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), L(snoozeTime), Boolean.FALSE);
+        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), L(snoozeTime), Boolean.FALSE, null);
         CalendarResult snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getCategories(), snoozeResponse.getData());
         assertEquals(1, snoozeResult.getUpdated().size());
         EventData updatedEvent = snoozeResult.getUpdated().get(0);

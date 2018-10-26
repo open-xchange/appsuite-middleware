@@ -56,7 +56,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -150,7 +150,7 @@ public class SMSBucketHZTest {
             }
         });
         //        PowerMockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(factory);
-        PowerMockito.when(factory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(view);
+        PowerMockito.when(factory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(view);
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class)).thenReturn(true);
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, String.class)).thenReturn("2");
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class)).thenReturn("3");

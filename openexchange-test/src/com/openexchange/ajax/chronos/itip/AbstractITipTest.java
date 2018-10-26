@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.chronos.itip;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.jdom2.IllegalDataException;
+import org.junit.Assert;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.ICalFacotry;
@@ -183,35 +187,49 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#accept(String,String, String, ConversionDataSource)}
      */
     protected ActionResponse accept(ConversionDataSource body) throws ApiException {
-        return chronosApi.accept(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.accept(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        validateActionResponse(response);
+        return response;
     }
 
     /**
      * @See {@link ChronosApi#acceptAndIgnoreConflicts(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse acceptAndIgnoreConflicts(ConversionDataSource body) throws ApiException {
-        return chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        validateActionResponse(response);
+        return response;
     }
 
     /**
      * @See {@link ChronosApi#tentative(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse tentative(ConversionDataSource body) throws ApiException {
-        return chronosApi.tentative(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.tentative(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        validateActionResponse(response);
+        return response;
     }
 
     /**
      * @See {@link ChronosApi#decline(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse decline(ConversionDataSource body) throws ApiException {
-        return chronosApi.decline(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.decline(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        validateActionResponse(response);
+        return response;
     }
 
     /**
      * @See {@link ChronosApi#update(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse update(ConversionDataSource body) throws ApiException {
-        return chronosApi.update(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.update(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        validateActionResponse(response);
+        return response;
+    }
+    
+    private void validateActionResponse(ActionResponse response) {
+        Assert.assertThat("Excpected analyze-data", response.getData(), is(not(empty())));
     }
 
     /**

@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -48,7 +48,7 @@ public class MailUploadQuotaCheckerTest {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerConfig.class);
-        PowerMockito.when(ServerConfig.getLong((Property) Matchers.any())).thenReturn(quotaFromFile);
+        PowerMockito.when(ServerConfig.getLong((Property) ArgumentMatchers.any())).thenReturn(quotaFromFile);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class MailUploadQuotaCheckerTest {
      @Test
      public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativAndServerConfigException_setUploadQuotaToZero() throws OXException {
         Mockito.when(userSettingMail.getUploadQuota()).thenReturn(-1L);
-        PowerMockito.when(ServerConfig.getLong((Property) Matchers.any())).thenThrow(new OXException());
+        PowerMockito.when(ServerConfig.getLong((Property) ArgumentMatchers.any())).thenThrow(new OXException());
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 

@@ -54,6 +54,7 @@ import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import com.amazonaws.metrics.ThroughputMetricType;
 import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricDescriptorCache;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.types.Meter;
