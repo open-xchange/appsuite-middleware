@@ -51,6 +51,7 @@ package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.getMailerInfo;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import javax.activation.DataHandler;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessageRemovedException;
