@@ -49,6 +49,8 @@
 
 package com.openexchange.password.mechanism.osgi;
 
+import static java.lang.System.currentTimeMillis;
+import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -71,6 +73,9 @@ public class PasswordMechImplActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        long before = currentTimeMillis();
+        getLogger(PasswordMechImplActivator.class).info("Starting bundle {}", context.getBundle().getSymbolicName());
+
         Services.setServiceLookup(this);
 
         PasswordMechRegistryImpl passwordMechRegistryImpl = new PasswordMechRegistryImpl(getService(ConfigurationService.class));
@@ -80,13 +85,21 @@ public class PasswordMechImplActivator extends HousekeepingActivator {
 
         registerService(PasswordMechRegistry.class, passwordMechRegistryImpl, null);
         registerService(Reloadable.class, passwordMechRegistryImpl);
+        long after = currentTimeMillis();
+        long duration = after - before;
+        if (duration > 20000) {
+            getLogger(PasswordMechImplActivator.class).warn("STARTING BUNDLE {} TOOK {}ms! PLEASE MAKE SURE TO HAVE AN APPROPRIATE LEVEL OF ENTROPY ON THE SYSTEM!", context.getBundle().getSymbolicName(), duration);
+        } else {
+            getLogger(PasswordMechImplActivator.class).info("Starting bundle {} took {}ms", context.getBundle().getSymbolicName(), duration);
+        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        getLogger(PasswordMechImplActivator.class).info("Stopping bundle {}", context.getBundle().getSymbolicName());
+
         Services.setServiceLookup(null);
 
         super.stopBundle();
     }
-
 }
