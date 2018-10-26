@@ -290,6 +290,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal, boolean tombstones) throws OXException {
+        if (null == eventIds || 0 == eventIds.length) {
+            return java.util.Collections.emptyMap();
+        }
         Map<String, List<Attendee>> attendeesById = new HashMap<String, List<Attendee>>(eventIds.length);
         Connection connection = null;
         try {
@@ -719,6 +722,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException {
+        if (null == objectIDs || 0 == objectIDs.length) {
+            return java.util.Collections.emptyMap();
+        }
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT object_id,id,type,ma,dn FROM ")
@@ -752,6 +758,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private static Map<String, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException, OXException {
+        if (null == objectIDs || 0 == objectIDs.length) {
+            return java.util.Collections.emptyMap();
+        }
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
         AttendeeField[] mappedFields = mapper.getMappedFields();
@@ -781,6 +790,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private static Map<String, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException {
+        if (null == objectIDs || 0 == objectIDs.length) {
+            return java.util.Collections.emptyMap();
+        }
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         String sql;
         if (1 == objectIDs.length) {
