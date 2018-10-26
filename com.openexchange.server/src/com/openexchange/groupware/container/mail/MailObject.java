@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.container.mail;
 
+import static com.openexchange.mail.mime.filler.MimeMessageFiller.getMailerInfo;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +60,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
 import javax.activation.DataHandler;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessageRemovedException;
@@ -97,7 +96,6 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.version.Version;
 
 /**
  * MailObject
@@ -403,7 +401,7 @@ public class MailObject {
 
     private final static String HEADER_XOXREMINDER = "X-OX-Reminder";
 
-    private final static String VALUE_PRIORITYNROM = "3 (normal)";
+    private final static String VALUE_PRIORITYNORM = "3 (normal)";
 
     private final static String HEADER_ORGANIZATION = "Organization";
 
@@ -541,11 +539,11 @@ public class MailObject {
             /*
              * Set priority
              */
-            msg.setHeader(HEADER_XPRIORITY, VALUE_PRIORITYNROM);
+            msg.setHeader(HEADER_XPRIORITY, VALUE_PRIORITYNORM);
             /*
-             * Set mailer TODO: Read in mailer from file
+             * Set mailer
              */
-            msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
+            msg.setHeader(HEADER_X_MAILER, getMailerInfo());
             /*
              * Set organization
              */
