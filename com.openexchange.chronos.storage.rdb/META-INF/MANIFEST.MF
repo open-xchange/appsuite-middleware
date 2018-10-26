@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.github.mangstadt.vinnie,
  com.github.mangstadt.vinnie.io,
+ com.google.common.cache;version="25.0.0",
  com.google.common.collect,
  com.google.common.io,
  com.google.json,

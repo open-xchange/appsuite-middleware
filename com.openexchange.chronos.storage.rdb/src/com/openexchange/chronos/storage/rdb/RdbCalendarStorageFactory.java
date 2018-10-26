@@ -49,7 +49,13 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.EntityResolver;
@@ -62,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -73,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
 public class RdbCalendarStorageFactory implements CalendarStorageFactory {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbCalendarStorageFactory.class);
+    private static final Cache<Integer, Long> WARNINGS_LOGGED_PER_CONTEXT = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
 
     private final ServiceLookup services;
     private final DBProvider defaultDbProvider;
@@ -102,12 +110,12 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
              */
             ConfigurationService configService = requireService(ConfigurationService.class, services);
             if (configService.getBoolProperty("com.openexchange.calendar.useLegacyStorage", false)) {
-                LOG.debug("Using 'legacy' calendar storage for default account '0' (overridden via configuration).");
+                logLegacyStorageWarning(context.getContextId(), "Using 'legacy' calendar storage for default account '0' (overridden via configuration).");
                 return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
             }
             UpdateStatus updateStatus = Updater.getInstance().getStatus(context.getContextId());
             if (false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
-                LOG.debug("ChronosStorageMigrationTask not executed successfully, falling back to 'legacy' calendar storage for account '0'.");
+                logLegacyStorageWarning(context.getContextId(), "ChronosStorageMigrationTask not executed successfully, falling back to 'legacy' calendar storage for account '0'.");
                 return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
             }
             if (updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStoragePurgeLegacyDataTask")) {
@@ -127,6 +135,25 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
     @Override
     public CalendarStorage makeResilient(CalendarStorage storage) {
         return new com.openexchange.chronos.storage.rdb.resilient.RdbCalendarStorage(services, storage, true, true, ProblemSeverity.MAJOR);
+    }
+
+    /**
+     * Logs a warning related to the usage of the legacy storage (at level WARN from time to time), ensuring that not too many log events
+     * are generated for the same context.
+     * 
+     * @param contextId The identifier of the context for which the legacy storage is initialized for
+     * @param message The message to log
+     */
+    private static void logLegacyStorageWarning(int contextId, String message) {
+        long now = System.currentTimeMillis();
+        Long lastLogged = WARNINGS_LOGGED_PER_CONTEXT.getIfPresent(I(contextId));
+        if (null == lastLogged || now - l(lastLogged) > TimeUnit.HOURS.toMillis(1L)) {
+            LOG.warn("{}{}{}  This mode is deprecated and will be removed in a future release. Please perform the calendar migration for context {} now!{}", 
+                message, Strings.getLineSeparator(), Strings.getLineSeparator(), I(contextId), Strings.getLineSeparator());
+            WARNINGS_LOGGED_PER_CONTEXT.put(I(contextId), L(now));
+        } else {
+            LOG.debug(message);
+        }
     }
 
 }
