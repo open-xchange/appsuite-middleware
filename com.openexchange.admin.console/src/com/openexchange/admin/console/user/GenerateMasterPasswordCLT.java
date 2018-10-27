@@ -283,7 +283,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         boolean error = true;
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));) {
             for (String line : lines) {
-                writer.append(line);
+                writer.append(line).append(Strings.getLineSeparator());
             }
             writer.flush();
             error = false;
