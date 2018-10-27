@@ -620,7 +620,7 @@ public class Utils {
      * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
      */
     public static boolean isInFolder(Event event, CalendarFolder folder) {
-        if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event)) {
+        if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event) && null != event.getFolderId()) {
             return folder.getId().equals(event.getFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
