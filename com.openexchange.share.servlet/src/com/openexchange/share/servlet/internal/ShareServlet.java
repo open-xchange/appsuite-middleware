@@ -239,10 +239,10 @@ public class ShareServlet extends AbstractShareServlet {
         }
         return false;
     }
-    
+
     /**
      * Handles the specified OXException
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @param response The {@link HttpServletResponse}
      * @param translator The {@link Translator} for translating the error message
@@ -256,8 +256,8 @@ public class ShareServlet extends AbstractShareServlet {
         }
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.debug("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
             try {
+                SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class, true);
                 String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
                 if (Strings.isEmpty(migrationRedirectURL)) {
                     LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
