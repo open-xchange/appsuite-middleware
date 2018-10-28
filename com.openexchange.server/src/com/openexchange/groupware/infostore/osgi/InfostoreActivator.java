@@ -91,8 +91,8 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.server.services.SharedInfostoreJSlob;
 
 /**

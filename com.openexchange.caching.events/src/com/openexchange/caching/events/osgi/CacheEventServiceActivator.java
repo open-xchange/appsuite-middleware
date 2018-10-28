@@ -57,8 +57,8 @@ import com.openexchange.caching.events.monitoring.CacheEventMBean;
 import com.openexchange.caching.events.monitoring.CacheEventMBeanImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 

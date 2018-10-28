@@ -470,6 +470,9 @@ public final class TaskLogic {
             return;
         }
         final RecurringResultInterface result = results.getRecurringResult(0);
+        if (null == result) {
+            return;
+        }
         if (!new Date(result.getStart()).equals(task.getStartDate())) {
             task.setStartDate(new Date(result.getStart()));
         }
