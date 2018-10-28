@@ -74,8 +74,8 @@ import com.openexchange.hazelcast.HazelcastMBean;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.Tools;
 
 /**

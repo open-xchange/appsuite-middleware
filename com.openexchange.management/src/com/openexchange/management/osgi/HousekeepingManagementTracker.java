@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.management;
+package com.openexchange.management.osgi;
 
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
@@ -56,10 +56,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.management.ManagementService;
+import com.openexchange.management.Managements;
 
 /**
  * {@link HousekeepingManagementTracker} - Helper class for tracking the {@link ManagementService}
- * and registering an MBean
+ * and registering an MBean.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
@@ -75,11 +77,11 @@ public class HousekeepingManagementTracker implements ServiceTrackerCustomizer<M
 
     /**
      * Initialises a new {@link HousekeepingManagementTracker}.
-     * 
+     *
      * @param context The bundle context
      * @param mbeaName The name of the MBean
      * @param domainName The name of the domain
-     * @param mbean The mbean instance
+     * @param mbean The MBean instance
      */
     public HousekeepingManagementTracker(BundleContext context, String mbeanName, String domainName, StandardMBean mbean) {
         super();
@@ -89,11 +91,6 @@ public class HousekeepingManagementTracker implements ServiceTrackerCustomizer<M
         this.mbean = mbean;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public ManagementService addingService(ServiceReference<ManagementService> reference) {
         ManagementService managementService = context.getService(reference);
@@ -114,21 +111,11 @@ public class HousekeepingManagementTracker implements ServiceTrackerCustomizer<M
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
         // nothing to modify
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<ManagementService> reference, ManagementService managementService) {
         if (null == managementService) {
@@ -142,4 +129,5 @@ public class HousekeepingManagementTracker implements ServiceTrackerCustomizer<M
         }
         context.ungetService(reference);
     }
+
 }
