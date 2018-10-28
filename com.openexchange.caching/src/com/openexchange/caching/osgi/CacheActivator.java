@@ -51,7 +51,6 @@ package com.openexchange.caching.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.management.ObjectName;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
@@ -77,8 +76,6 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheActivator extends HousekeepingActivator {
-
-    private ObjectName objectName;
 
     /**
      * Initializes a new {@link CacheActivator}.
