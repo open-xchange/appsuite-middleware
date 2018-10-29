@@ -60,7 +60,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -119,12 +119,12 @@ public class BasicCachingCalendarAccessTest {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerSessionAdapter.class);
-        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(serverSession);
+        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) ArgumentMatchers.any())).thenReturn(serverSession);
 
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(CalendarStorageFactory.class)).thenReturn(calendarStorageFactory);
         PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
-        PowerMockito.when(databaseService.getWritable((Context) Matchers.any())).thenReturn(connection);
+        PowerMockito.when(databaseService.getWritable((Context) ArgumentMatchers.any())).thenReturn(connection);
 
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
     }

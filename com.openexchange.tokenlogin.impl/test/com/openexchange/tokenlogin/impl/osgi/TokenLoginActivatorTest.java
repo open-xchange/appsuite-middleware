@@ -57,8 +57,8 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -136,9 +136,9 @@ public class TokenLoginActivatorTest {
         MockitoAnnotations.initMocks(this);
 
         // SERVICES
-        PowerMockito.when(this.configurationService.getProperty(Matchers.anyString())).thenReturn("theStringPropertyValue");
+        PowerMockito.when(this.configurationService.getProperty(ArgumentMatchers.anyString())).thenReturn("theStringPropertyValue");
         PowerMockito.when(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true)).thenReturn(true);
-        PowerMockito.when(this.configurationService.getPropertiesInFolder(Matchers.anyString())).thenReturn(this.properties);
+        PowerMockito.when(this.configurationService.getPropertiesInFolder(ArgumentMatchers.anyString())).thenReturn(this.properties);
         PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
         PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
 

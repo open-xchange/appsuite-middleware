@@ -97,7 +97,7 @@ public class RateLimiterByLogin implements LoginListener {
             SimpleInMemoryRateLimiter rateLimiter = limiters.getIfPresent(login);
             if (null != rateLimiter && !rateLimiter.canAcquire()) {
                 // Rate limit is already exhausted
-                throw LoginExceptionCodes.LOGIN_DENIED.create();
+                throw LoginExceptionCodes.TOO_MANY_LOGIN_ATTEMPTS.create();
             }
         }
     }

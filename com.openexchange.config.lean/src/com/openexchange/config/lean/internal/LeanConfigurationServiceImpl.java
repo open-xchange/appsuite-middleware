@@ -52,7 +52,6 @@ package com.openexchange.config.lean.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -94,7 +93,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
         // Load parsers
         ImmutableMap.Builder<Class<?>, PropertyValueParser<?>> vps = ImmutableMap.builder();
-        Function<String, Integer> f = t -> Integer.valueOf(t);
+        // Function<String, Integer> f = t -> Integer.valueOf(t);
         vps.put(Integer.class, new IntegerPropertyValueParser());
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
@@ -262,6 +261,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the {@link ConfigurationService} or the default value
      */
+    @SuppressWarnings("unchecked")
     private <T> T getProperty(Property property, Class<T> coerceTo, Map<String, String> optionals) {
         T defaultValue = null;
         String value = null;

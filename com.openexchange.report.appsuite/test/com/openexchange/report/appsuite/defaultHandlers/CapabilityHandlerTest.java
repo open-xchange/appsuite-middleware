@@ -35,7 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -246,7 +246,7 @@ public class CapabilityHandlerTest {
         Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
         PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
         poolContextMap.put(poolAndSchema, Arrays.asList(15));
-        PowerMockito.when(contextService.getSchemaAssociationsFor(Matchers.anyList())).thenReturn(poolContextMap);
+        PowerMockito.when(contextService.getSchemaAssociationsFor(ArgumentMatchers.anyList())).thenReturn(poolContextMap);
         
         this.initReport("extended");
         initTenantMapForReport();
@@ -349,7 +349,7 @@ public class CapabilityHandlerTest {
         Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
         PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
         poolContextMap.put(poolAndSchema, Arrays.asList(15, 20));
-        PowerMockito.when(contextService.getSchemaAssociationsFor(Matchers.anyList())).thenReturn(poolContextMap);
+        PowerMockito.when(contextService.getSchemaAssociationsFor(ArgumentMatchers.anyList())).thenReturn(poolContextMap);
         
         this.initReport("extended");
         initTenantMapForReport();

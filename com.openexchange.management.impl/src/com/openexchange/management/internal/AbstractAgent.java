@@ -366,20 +366,7 @@ public abstract class AbstractAgent {
             if (initialized.compareAndSet(false, true)) {
                 rmiSocketFactory = new AbstractAgentSocketFactory(0, bindAddr);
             }
-            Registry registry = null;
-            try {
-                /*
-                 * If following calls succeed, a RMI registry has already been created that listens on this port
-                 */
-                registry = LocateRegistry.getRegistry(port);
-                registry.list();
-            } catch (final RemoteException e) {
-                    LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", port, e);
-                /*
-                 * Create a new one
-                 */
-                registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
-            }
+            Registry registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
             registries.put(Integer.valueOf(port), registry);
             LOG.info("RMI registry created on port {} and bind address {}", port, bindAddr);
         } catch (final UnknownHostException e) {

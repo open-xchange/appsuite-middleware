@@ -62,7 +62,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -416,15 +416,15 @@ public class CSSMatcherTest {
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(threadPoolService);
         Future future = Mockito.mock(Future.class);
-        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
-        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
         FilterMaps.loadWhitelist();
 
         CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, false);
 
-        Mockito.verify(threadPoolService, Mockito.times(1)).submit((Task<Boolean>) Matchers.any());
+        Mockito.verify(threadPoolService, Mockito.times(1)).submit((Task<Boolean>) ArgumentMatchers.any());
     }
 
      @Test
@@ -433,15 +433,15 @@ public class CSSMatcherTest {
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(threadPoolService);
         Future future = Mockito.mock(Future.class);
-        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
-        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
         FilterMaps.loadWhitelist();
 
         CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, true);
 
-        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
+        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) ArgumentMatchers.any());
     }
 
      @Test
@@ -450,15 +450,15 @@ public class CSSMatcherTest {
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(null);
         Future future = Mockito.mock(Future.class);
-        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
-        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
         FilterMaps.loadWhitelist();
 
         CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, false);
 
-        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
+        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) ArgumentMatchers.any());
     }
 
      @Test
@@ -467,14 +467,14 @@ public class CSSMatcherTest {
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(null);
         Future future = Mockito.mock(Future.class);
-        PowerMockito.when(threadPoolService.submit((Task<Boolean>) Matchers.any())).thenReturn(future);
-        PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
+        PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
+        PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
         FilterMaps.loadWhitelist();
 
         CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, true);
 
-        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
+        Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) ArgumentMatchers.any());
     }
 }

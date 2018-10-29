@@ -55,8 +55,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
@@ -106,7 +106,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("de", config2);
         newConfig.put("fr", config3);
         newConfig.put("es", config4);
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -121,7 +121,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("de", config2);
         newConfig.put("fr", config3);
         newConfig.put("es", config4);
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -140,7 +140,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("de", config2);
         newConfig.put("fr", config3);
         newConfig.put("es", config4);
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -159,7 +159,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("de", config2);
         newConfig.put("fr", config3);
         newConfig.put("es", config4);
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -178,7 +178,7 @@ public class GlobalDatabaseServiceImplTest {
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         newConfig.put("default", config1);
         newConfig.put("es", config4);
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig =  globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -197,7 +197,7 @@ public class GlobalDatabaseServiceImplTest {
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         newConfig.put("default", config1);
         newConfig.put("es", config4);
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -214,7 +214,7 @@ public class GlobalDatabaseServiceImplTest {
         MockUtils.injectValueIntoPrivateField(globalDatabaseServiceImpl, "globalDbConfigs", existingConfig);
 
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
@@ -231,7 +231,7 @@ public class GlobalDatabaseServiceImplTest {
         MockUtils.injectValueIntoPrivateField(globalDatabaseServiceImpl, "globalDbConfigs", existingConfig);
 
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
-        PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
+        PowerMockito.when(GlobalDbInit.init((ConfigurationService) ArgumentMatchers.any(), (ConfigDatabaseServiceImpl) ArgumentMatchers.any(), (Pools) ArgumentMatchers.any(), (ReplicationMonitor) ArgumentMatchers.any())).thenReturn(newConfig);
 
         Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 

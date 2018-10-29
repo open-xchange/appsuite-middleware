@@ -53,7 +53,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -235,7 +235,7 @@ public class UserAwareSSLConfigurationImplTest {
         };
         this.userAwareSSLConfigurationService.setTrustAll(0, context, true);
 
-        Mockito.verify(this.userService, Mockito.never()).setUserAttribute(Matchers.anyString(), Matchers.anyString(), Matchers.anyInt(), (Context) Matchers.any());
+        Mockito.verify(this.userService, Mockito.never()).setUserAttribute(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
     }
 
     @Test
@@ -249,7 +249,7 @@ public class UserAwareSSLConfigurationImplTest {
         };
         this.userAwareSSLConfigurationService.setTrustAll(userId, null, true);
 
-        Mockito.verify(this.userService, Mockito.never()).setUserAttribute(Matchers.anyString(), Matchers.anyString(), Matchers.anyInt(), (Context) Matchers.any());
+        Mockito.verify(this.userService, Mockito.never()).setUserAttribute(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
     }
 
     @Test
@@ -264,6 +264,6 @@ public class UserAwareSSLConfigurationImplTest {
 
         this.userAwareSSLConfigurationService.setTrustAll(userId, context, true);
 
-        Mockito.verify(this.userService, Mockito.times(1)).setUserAttribute(Matchers.anyString(), Matchers.anyString(), Matchers.anyInt(), (Context) Matchers.any());
+        Mockito.verify(this.userService, Mockito.times(1)).setUserAttribute(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
     }
 }
