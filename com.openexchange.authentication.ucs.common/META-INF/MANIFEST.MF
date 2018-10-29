@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Univention Server Authentication common Bundle
-Bundle-SymbolicName: com.openexchange.authentication.ucs
+Bundle-SymbolicName: com.openexchange.authentication.ucs.common
 Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.authentication.ucs.common.osgi.UCSLookupActivator
 Bundle-Vendor: OX Software GmbH

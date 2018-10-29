@@ -300,7 +300,7 @@ public class MimeMessageFiller {
         /*
          * Set mailer
          */
-        mimeMessage.setHeader(HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
+        mimeMessage.setHeader(HDR_X_MAILER, getMailerInfo());
         /*
          * Set organization to context-admin's company field setting
          */
@@ -335,6 +335,18 @@ public class MimeMessageFiller {
                 }
             }
         }
+    }
+
+    /**
+     * Gets the value for the <code>X-Mailer</code> header.
+     *
+     * @return The value for the <code>X-Mailer</code> header
+     */
+    public static String getMailerInfo() {
+        if (MailProperties.getInstance().isAppendVersionToMailerHeader()) {
+            return new StringBuilder("Open-Xchange Mailer v").append(Version.getInstance().getVersionString()).toString();
+        }
+        return "Open-Xchange Mailer";
     }
 
     /**

@@ -55,7 +55,9 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.session.Session;
 /**
  * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link OXException} on exceeded quota
@@ -83,7 +85,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
     @Override
     public void addAttachment(final MailPart attachment) throws OXException {
-        if (doAction) {
+        if (doAction && isFileMailPart(attachment)) {
             final long size = attachment.getSize();
             if (size <= 0) {
                 LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
@@ -101,6 +103,10 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
             }
         }
         attachments.add(attachment);
+    }
+
+    private boolean isFileMailPart(MailPart attachment) {
+        return (attachment instanceof ComposedMailPart) && ((ComposedMailPart) attachment).getType() == ComposedPartType.FILE;
     }
 
     @Override

@@ -50,7 +50,7 @@
 package com.openexchange.chronos.itip;
 
 import java.util.Collections;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import com.openexchange.chronos.Event;
@@ -97,7 +97,7 @@ public final class ITipMockFactory {
 
     public static CalendarUtilities mockUtilities() throws OXException {
         CalendarUtilities utilities = Mockito.mock(CalendarUtilities.class);
-        Mockito.when(utilities.copyEvent(Matchers.any(), Matchers.any())).then((i) -> {
+        Mockito.when(utilities.copyEvent(ArgumentMatchers.any(), ArgumentMatchers.any())).then((i) -> {
             return EventMapper.getInstance().copy(i.getArgument(0), new Event(), (EventField[]) i.getArguments()[1]);
         });
         return utilities;
@@ -105,7 +105,7 @@ public final class ITipMockFactory {
 
     public static ITipIntegrationUtility mockUtil(final Event original) throws OXException {
         ITipIntegrationUtility util = Mockito.mock(ITipIntegrationUtility.class);
-        Mockito.when(util.resolveUid(Matchers.any(), Matchers.any())).thenReturn(original);
+        Mockito.when(util.resolveUid(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(original);
         return util;
     }
 

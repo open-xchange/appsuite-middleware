@@ -60,8 +60,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -107,8 +107,8 @@ public class RdbGuestStorageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        Mockito.when(connection.prepareStatement(Matchers.anyString())).thenReturn(preparedStatement);
-        Mockito.when(connection.prepareStatement(Matchers.anyString(), Matchers.anyInt())).thenReturn(preparedStatement);
+        Mockito.when(connection.prepareStatement(ArgumentMatchers.anyString())).thenReturn(preparedStatement);
+        Mockito.when(connection.prepareStatement(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(preparedStatement);
         Mockito.when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
     }
 
@@ -116,7 +116,7 @@ public class RdbGuestStorageTest {
     public void testAddGuest_guestAdded_returnNewGuestId() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
         Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(ArgumentMatchers.anyInt())).thenReturn(GUEST_ID);
 
         long addGuest = rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, connection);
 
@@ -322,7 +322,7 @@ public class RdbGuestStorageTest {
 
         rdbGuestStorage.removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
 
-        Mockito.verify(log, Mockito.times(1)).error(Matchers.anyString());
+        Mockito.verify(log, Mockito.times(1)).error(ArgumentMatchers.anyString());
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST_ASSIGNMENT);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
     }
@@ -345,7 +345,7 @@ public class RdbGuestStorageTest {
     public void testResolveGuests_notYetImplemented() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(ArgumentMatchers.anyInt())).thenReturn(GUEST_ID);
 
         List<Long> resolveGuestAssignments = rdbGuestStorage.resolveGuestAssignments(CONTEXT_ID, connection);
 
@@ -356,7 +356,7 @@ public class RdbGuestStorageTest {
     public void testUpdateGuestAssignment_connectionNull_throwException() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
         Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(ArgumentMatchers.anyInt())).thenReturn(GUEST_ID);
 
         rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), null);
     }
@@ -365,7 +365,7 @@ public class RdbGuestStorageTest {
     public void testUpdateGuestAssignment_updateGuest_fine() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
         Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(ArgumentMatchers.anyInt())).thenReturn(GUEST_ID);
 
         rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), connection);
 

@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -101,8 +102,20 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
             // ignore
             return;
         }
-        AdministrativeCalendarAccountService accountService = requireService(AdministrativeCalendarAccountService.class, services);
-        List<CalendarAccount> accounts = accountService.getAccounts(context.getContextId(), user.getId());
+        List<CalendarAccount> accounts;
+        try {
+            AdministrativeCalendarAccountService accountService = requireService(AdministrativeCalendarAccountService.class, services);
+            accounts = accountService.getAccounts(context.getContextId(), user.getId());
+        } catch (OXException e) {
+            LoggerFactory.getLogger(AlarmTriggerServiceInterceptor.class).warn(
+                "Unable to list calendar accounts for user {} in context {}, skipping re-calculation of floating alarm triggers.", 
+                Integer.valueOf(user.getId()), Integer.valueOf(context.getContextId())
+            );
+            return;
+        }
+        if (null == accounts || accounts.isEmpty()) {
+            return;
+        }
 
         CalendarStorageFactory factory = requireService(CalendarStorageFactory.class, services);
         DBProvider dbProvider = requireService(DBProvider.class, services);

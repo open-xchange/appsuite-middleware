@@ -67,8 +67,8 @@ import com.openexchange.config.mbean.ConfigReloadMBean;
 import com.openexchange.config.mbean.ConfigReloadMBeanImpl;
 import com.openexchange.config.rmi.RemoteConfigurationService;
 import com.openexchange.config.rmi.impl.RemoteConfigurationServiceImpl;
-import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

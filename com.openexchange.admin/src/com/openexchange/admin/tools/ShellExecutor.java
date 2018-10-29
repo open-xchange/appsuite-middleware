@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import com.openexchange.java.Charsets;
 
 public class ShellExecutor {
 
@@ -92,8 +93,8 @@ public class ShellExecutor {
     private final ArrayOutput getoutputs(final Process proc) throws IOException {
         final InputStream err = proc.getErrorStream();
         final InputStream is = proc.getInputStream();
-        final BufferedReader buf = new BufferedReader(new InputStreamReader(is));
-        final BufferedReader errbuf = new BufferedReader(new InputStreamReader(err));
+        final BufferedReader buf = new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
+        final BufferedReader errbuf = new BufferedReader(new InputStreamReader(err, Charsets.UTF_8));
         String readBuffer = null;
         String errreadBuffer = null;
         final ArrayOutput retval = new ArrayOutput();

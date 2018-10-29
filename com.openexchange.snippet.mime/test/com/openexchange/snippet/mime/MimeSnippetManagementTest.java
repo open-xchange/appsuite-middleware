@@ -65,7 +65,7 @@ import javax.mail.internet.MimeMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -119,13 +119,13 @@ public class MimeSnippetManagementTest {
 
         bodypart = new MimeBodyPart();
 
-        Mockito.when(multipart.getBodyPart(Matchers.anyInt())).thenReturn(bodypart);
+        Mockito.when(multipart.getBodyPart(ArgumentMatchers.anyInt())).thenReturn(bodypart);
 
         PowerMockito.mockStatic(MimeMessageUtility.class);
-        PowerMockito.when(MimeMessageUtility.getMultipartContentFrom((Part) Matchers.any())).thenReturn(multipart);
-        PowerMockito.when(MimeMessageUtility.decodeMultiEncodedHeader(Matchers.anyString())).thenReturn("0");
+        PowerMockito.when(MimeMessageUtility.getMultipartContentFrom((Part) ArgumentMatchers.any())).thenReturn(multipart);
+        PowerMockito.when(MimeMessageUtility.decodeMultiEncodedHeader(ArgumentMatchers.anyString())).thenReturn("0");
         PowerMockito.mockStatic(MessageUtility.class);
-        PowerMockito.when(MessageUtility.readMimePart((Part) Matchers.any(), (ContentType) Matchers.any())).thenReturn("MyContent");
+        PowerMockito.when(MessageUtility.readMimePart((Part) ArgumentMatchers.any(), (ContentType) ArgumentMatchers.any())).thenReturn("MyContent");
     }
 
     @Test

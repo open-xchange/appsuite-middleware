@@ -661,6 +661,10 @@ public class SearchAdapter {
             return Collections.<String, DbMapping<? extends Object, ?>>singletonMap(prefixEvents, mapping);
         }
         if (AttendeeField.class.isInstance(value)) {
+            if (AttendeeField.HIDDEN.equals(value)) {
+                // workaround to have a pseudo mapping for the "hidden" field in legacy storage
+                value = AttendeeField.ENTITY;
+            }
             DbMapping<? extends Object, Attendee> internalAttendeeMapping = InternalAttendeeMapper.getInstance().opt((AttendeeField) value);
             DbMapping<? extends Object, Attendee> externalAttendeeMapping = ExternalAttendeeMapper.getInstance().opt((AttendeeField) value);
             if (null == internalAttendeeMapping && null == externalAttendeeMapping) {

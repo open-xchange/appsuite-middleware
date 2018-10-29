@@ -56,7 +56,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -118,7 +118,7 @@ public class Bug33891Test {
                 retval.setImapServer("oldValue");
                 return retval;
             }
-        }).when(mockedCache).get((Serializable) Matchers.any());
+        }).when(mockedCache).get((Serializable) ArgumentMatchers.any());
         mockedCacheService = mock(CacheService.class);
         doAnswer(new Answer<Cache>() {
             @Override

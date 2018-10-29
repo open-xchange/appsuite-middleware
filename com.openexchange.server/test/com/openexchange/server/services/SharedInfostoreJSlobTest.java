@@ -7,8 +7,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -75,7 +75,7 @@ public class SharedInfostoreJSlobTest {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerSessionAdapter.class);
-        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(session);
+        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) ArgumentMatchers.any())).thenReturn(session);
 
         PowerMockito.when(session.getContext()).thenReturn(context);
         PowerMockito.when(session.getUserPermissionBits()).thenReturn(permissionBits);
@@ -84,7 +84,7 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.when(permissionBits.hasWebMail()).thenReturn(true);
 
         PowerMockito.mockStatic(ServerConfig.class);
-        PowerMockito.when(ServerConfig.getInt((Property) Matchers.any())).thenReturn(this.maxBodySize);
+        PowerMockito.when(ServerConfig.getInt((Property) ArgumentMatchers.any())).thenReturn(this.maxBodySize);
 
         PowerMockito.mockStatic(InfostoreConfig.class);
         PowerMockito.when(InfostoreConfig.getMaxUploadSize()).thenReturn(infostoreMaxUploadSize);
@@ -93,10 +93,10 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.when(AttachmentConfig.getMaxUploadSize()).thenReturn(attachmentMaxUploadSize);
 
         PowerMockito.mockStatic(FilestoreStorage.class);
-        PowerMockito.when(FilestoreStorage.createURI(Matchers.eq(context))).thenReturn(new URI(""));
+        PowerMockito.when(FilestoreStorage.createURI(ArgumentMatchers.eq(context))).thenReturn(new URI(""));
 
         QuotaFileStorageService qfsService = PowerMockito.mock(QuotaFileStorageService.class);
-        Mockito.when(qfsService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt(), Matchers.any(Info.class))).thenReturn(quotaFileStorage);
+        Mockito.when(qfsService.getQuotaFileStorage(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any(Info.class))).thenReturn(quotaFileStorage);
 
         PowerMockito.mockStatic(FileStorages.class);
         Mockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(qfsService);
@@ -109,7 +109,7 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.when(UserSettingMailStorage.getInstance()).thenReturn(userSettingMailStorage);
 
         UserSettingMail userSettingMail = Mockito.mock(UserSettingMail.class);
-        PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(userSettingMail);
+        PowerMockito.when(userSettingMailStorage.getUserSettingMail(ArgumentMatchers.anyInt(), ArgumentMatchers.eq(ArgumentMatchers.eq(context)))).thenReturn(userSettingMail);
     }
 
     @Test

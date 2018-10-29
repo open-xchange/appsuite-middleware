@@ -115,11 +115,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         return this.trustManager.getAcceptedIssuers();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
@@ -134,11 +129,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         Set<String> hosts = new HashSet<String>();
@@ -169,11 +159,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(engine.getSession().getPeerHost())) {
@@ -590,7 +575,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws IllegalArgumentException If the specified byte array is <code>null</code>
      */
     private static String toHex(byte[] bytes) {
-        if (bytes.length == 0 || bytes == null) {
+        if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("The specified byte array can neither be empty nor null");
         }
         char[] hexChars = new char[bytes.length << 1];

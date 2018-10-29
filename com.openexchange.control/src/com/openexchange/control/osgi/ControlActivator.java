@@ -53,8 +53,8 @@ import static com.openexchange.control.internal.GeneralControl.shutdown;
 import org.osgi.framework.BundleContext;
 import com.openexchange.control.internal.GeneralControl;
 import com.openexchange.control.internal.GeneralControlMBean;
-import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
