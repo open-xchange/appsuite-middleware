@@ -50,7 +50,7 @@
 package com.openexchange.mailaccount;
 
 /**
- * {@link Constants}
+ * {@link Constants} - Constants for mail account module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -67,5 +67,15 @@ public class Constants {
     public static String getModule() {
         return MODULE;
     }
+
+    /**
+     * The special mail protocol name for a Guard guest account.
+     */
+    public static final String MAIL_PROTOCOL_GUARD_GUEST = "guardguest";
+
+    /**
+     * The special account name for a Guard guest account.
+     */
+    public static final String NAME_GUARD_GUEST = "GuardMail";
 
 }
