@@ -148,12 +148,12 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
     @Override
     protected void authenticateUser(LoginInfo loginInfo, User user, Context context) throws OXException {
         // Get needed service
-        PasswordMechRegistry factory = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
-        if (null == factory) {
+        PasswordMechRegistry registry = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
+        if (null == registry) {
             throw ServiceExceptionCode.absentService(PasswordMechRegistry.class);
         }
 
-        PasswordMech passwordMech = factory.get(user.getPasswordMech());
+        PasswordMech passwordMech = registry.get(user.getPasswordMech());
         if (!passwordMech.check(loginInfo.getPassword(), user.getUserPassword(), user.getSalt())) {
             throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
         }

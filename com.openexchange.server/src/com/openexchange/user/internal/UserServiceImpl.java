@@ -84,15 +84,15 @@ public final class UserServiceImpl implements UserService {
 
     private final UserServiceInterceptorRegistry interceptorRegistry;
 
-    private final PasswordMechRegistry passwordMechFactory;
+    private final PasswordMechRegistry passwordMechRegistry;
 
     /**
      * Initializes a new {@link UserServiceImpl}
      */
-    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechRegistry factory) {
+    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechRegistry registry) {
         super();
         this.interceptorRegistry = interceptorRegistry;
-        this.passwordMechFactory = factory;
+        this.passwordMechRegistry = registry;
 
     }
 
@@ -299,7 +299,7 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
-        PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         if (passwordMech == null) {
             throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), user.getId());
         }
@@ -424,7 +424,7 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public void updatePassword(User user, Context context) throws OXException {
-        PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         UserStorage.getInstance().updatePassword(null, context, user.getId(), passwordMech, user.getUserPassword(), user.getSalt());
     }
 
@@ -433,7 +433,7 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public void updatePassword(Connection connection, User user, Context context) throws OXException {
-        PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         UserStorage.getInstance().updatePassword(connection, context, user.getId(), passwordMech, user.getUserPassword(), user.getSalt());
     }
 }

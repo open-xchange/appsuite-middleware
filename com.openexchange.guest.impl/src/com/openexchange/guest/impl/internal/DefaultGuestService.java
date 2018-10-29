@@ -92,7 +92,7 @@ public class DefaultGuestService implements GuestService {
 
     private final ConfigViewFactory configViewFactory;
 
-    private final PasswordMechRegistry passwordMechFactory;
+    private final PasswordMechRegistry passwordMechRegistry;
 
     /**
      * Initializes a new {@link DefaultGuestService}.
@@ -108,7 +108,7 @@ public class DefaultGuestService implements GuestService {
         this.contextService = contextService;
         this.contactUserStorage = contactUserStorage;
         this.configViewFactory = configViewFactory;
-        this.passwordMechFactory = passwordMechFactory;
+        this.passwordMechRegistry = passwordMechFactory;
     }
 
     /**
@@ -127,7 +127,7 @@ public class DefaultGuestService implements GuestService {
         if (user.isGuest()) {
             User alignedUser = alignUserWithGuest(user, contextId);
 
-            PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+            PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
             return passwordMech.check(password, alignedUser.getUserPassword(), alignedUser.getSalt());
         }
         return false;

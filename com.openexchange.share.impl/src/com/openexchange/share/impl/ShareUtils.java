@@ -206,8 +206,8 @@ public class ShareUtils {
             guestUser.setPreferredLanguage(recipient.getPreferredLanguage());
         }
         if (Strings.isNotEmpty(recipient.getPassword())) {
-            PasswordMechRegistry passwordMechFactory = services.getService(PasswordMechRegistry.class);
-            PasswordMech passwordMech = passwordMechFactory.get(guestUser.getPasswordMech());
+            PasswordMechRegistry passwordMechRegistry = services.getService(PasswordMechRegistry.class);
+            PasswordMech passwordMech = passwordMechRegistry.get(guestUser.getPasswordMech());
             if (passwordMech == null) {
                 passwordMech = StockPasswordMechs.BCRYPT.getPasswordMech();
             }

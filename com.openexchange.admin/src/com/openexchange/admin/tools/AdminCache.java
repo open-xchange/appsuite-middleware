@@ -661,10 +661,10 @@ public class AdminCache {
         }
 
         try {
-            PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
-            PasswordMech passwordMech = mechFactory.get(passwordMechIdentifier);
+            PasswordMechRegistry mechRegistry = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+            PasswordMech passwordMech = mechRegistry.get(passwordMechIdentifier);
             if (passwordMech == null) {
-                passwordMech = mechFactory.getDefault();
+                passwordMech = mechRegistry.getDefault();
                 log.warn("Unknown password mechanism defined: '{}'. Will use default: '{}'", passwordMechIdentifier, passwordMech.getIdentifier());
             }
             user.setPasswordMech(passwordMech.getIdentifier());

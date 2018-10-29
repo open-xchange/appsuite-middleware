@@ -52,7 +52,7 @@ package com.openexchange.password.mechanism;
 import java.util.List;
 
 /**
- * Factory to register available {@link PasswordMech} implementations that can be retrieved via com.openexchange.passwordmechs.PasswordMechFactory.get(String) by giving the crypt mechanism identifier.
+ * Registry for available {@link PasswordMech} implementations that can be retrieved via {@link PasswordMechRegistry#get(String)} by giving the crypt mechanism identifier.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -69,7 +69,7 @@ public interface PasswordMechRegistry {
 
     /**
      * Returns the main identifiers of the registered {@link PasswordMech}s which might be used.
-     * 
+     *
      * @return {@link List} containing the main identifiers of the registered {@link PasswordMech}.
      */
     public List<String> getIdentifiers();

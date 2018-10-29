@@ -165,8 +165,8 @@ public abstract class AbstractAgent {
             final String password = creds[1];
             String hashAlgorithm = creds.length > 2 ? creds[2] : "SHA";
 
-            PasswordMechRegistry passwordMechFactory = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
-            PasswordMech passwordMech = passwordMechFactory.get(hashAlgorithm);
+            PasswordMechRegistry passwordMechRegistry = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
+            PasswordMech passwordMech = passwordMechRegistry.get(hashAlgorithm);
             if (passwordMech == null) {
                 throw new IllegalArgumentException("The identifier '" + hashAlgorithm + "' for the password hash mechanism is unknown.");
             }

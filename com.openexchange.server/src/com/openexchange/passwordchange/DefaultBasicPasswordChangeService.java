@@ -116,8 +116,8 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             updatedUser.setUserPassword(null);
             updatedUser.setSalt(null);
         } else {
-            PasswordMechRegistry passwordMechFactory = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
-            PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+            PasswordMechRegistry passwordMechRegistry = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
+            PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
             if (passwordMech == null) {
                 passwordMech = StockPasswordMechs.BCRYPT.getPasswordMech();
             }

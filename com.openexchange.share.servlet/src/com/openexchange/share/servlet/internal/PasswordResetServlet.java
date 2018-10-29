@@ -288,8 +288,8 @@ public class PasswordResetServlet extends AbstractShareServlet {
         User guest = userService.getUser(userId, context);
         UserImpl user = new UserImpl(guest);
 
-        PasswordMechRegistry passwordMechFactory = ShareServiceLookup.getService(PasswordMechRegistry.class, true);
-        PasswordMech passwordMech = passwordMechFactory.get(user.getPasswordMech());
+        PasswordMechRegistry passwordMechRegistry = ShareServiceLookup.getService(PasswordMechRegistry.class, true);
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         if (passwordMech == null) {
             passwordMech = StockPasswordMechs.BCRYPT.getPasswordMech();
         }
