@@ -50,11 +50,14 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -114,15 +117,15 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * Retrieves alarm triggers from the given time until two days and checks if the response contains the correct amount of alarm trigger objects
      *
      * @param until The upper limit of the request
-     * @param expected The amount of expected alarm trigger objects
+     * @param min The minimum amount of expected alarm trigger objects
      * @param api The api client to use
      * @param session The session of the user
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(long until, int expected, ChronosApi api, String session) throws ApiException {
+    AlarmTriggerData getAndCheckAlarmTrigger(long until, int min, ChronosApi api, String session) throws ApiException {
         AlarmTriggerData triggers = eventManager.getAlarmTrigger(until);
-        assertEquals(expected, triggers.size());
+        assertTrue(min <= triggers.size());
         return triggers;
     }
 
@@ -130,12 +133,12 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * Retrieves alarm triggers until two days and checks if the response contains the correct amount of alarm trigger objects
      *
      * @param from The lower limit of the request
-     * @param expected The amount of expected alarm trigger objects
+     * @param min The minimum amount of expected alarm trigger objects
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(int expected) throws ApiException {
-        return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), expected, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
+    AlarmTriggerData getAndCheckAlarmTrigger(int min) throws ApiException {
+        return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), min, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
     }
 
     /**
@@ -160,6 +163,37 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         assertEquals(eventId, trigger.getEventId());
         Date parsedTime = DateTimeUtil.parseZuluDateTime(trigger.getTime());
         assertEquals(expectedTime, parsedTime.getTime());
+    }
+
+    protected boolean containsAlarm(AlarmTriggerData data, String folder, String alarmId, String eventId) {
+        for (AlarmTrigger trigger : data) {
+            if ((folder == null || trigger.getFolder() == folder) &&
+                (alarmId == null || trigger.getAlarmId() == alarmId) &&
+                (eventId == null || trigger.getEventId() == eventId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected AlarmTrigger findTrigger(String eventId, List<AlarmTrigger> triggers) {
+        for (AlarmTrigger trigger : triggers) {
+            if (trigger.getEventId().equals(eventId)) {
+                return trigger;
+            }
+        }
+        Assert.fail("Alarm trigger not found.");
+        return null;
+    }
+
+    protected AlarmTrigger findTriggerByAlarm(Integer alarmId, List<AlarmTrigger> triggers) {
+        for (AlarmTrigger trigger : triggers) {
+            if (trigger.getAlarmId().equals(String.valueOf(alarmId))) {
+                return trigger;
+            }
+        }
+        Assert.fail("Alarm trigger not found.");
+        return null;
     }
 
 }

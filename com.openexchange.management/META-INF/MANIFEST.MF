@@ -24,4 +24,5 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.management
+Export-Package: com.openexchange.management,
+ com.openexchange.management.osgi

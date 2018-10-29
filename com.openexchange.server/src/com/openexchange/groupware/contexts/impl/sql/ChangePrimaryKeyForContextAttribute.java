@@ -135,7 +135,7 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
         ResultSet rs = null;
         try {
             // Extract affected context identifiers
-            stmt = con.prepareStatement("select cid,name from contextattribute group by cid,name having count(*)>1;");
+            stmt = con.prepareStatement("select cid,name from contextAttribute group by cid,name having count(*)>1;");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No rows available in connection-associated schema

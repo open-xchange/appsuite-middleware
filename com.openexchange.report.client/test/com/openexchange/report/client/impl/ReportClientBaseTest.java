@@ -76,7 +76,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -321,7 +321,7 @@ public class ReportClientBaseTest {
         reportClientBase.start(new Builder().addDisplay().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint();
-        Mockito.verify(transportHandler, Mockito.never()).sendReport(Matchers.anyList(), Matchers.anyList(), Matchers.anyList(), Matchers.anyMap(), (String[]) Matchers.any(), (ClientLoginCount) Matchers.any(), (ClientLoginCount) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendReport(ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyMap(), (String[]) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
      @Test
@@ -480,7 +480,7 @@ public class ReportClientBaseTest {
         reportClientBase.start(new Builder().addDisplay().addAdvancedReport().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint(true);
-        Mockito.verify(transportHandler, Mockito.never()).sendReport(Matchers.anyList(), Matchers.anyList(), Matchers.anyList(), Matchers.anyMap(), (String[]) Matchers.any(), (ClientLoginCount) Matchers.any(), (ClientLoginCount) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendReport(ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyMap(), (String[]) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
      @Test
@@ -501,7 +501,7 @@ public class ReportClientBaseTest {
         reportClientBase.start(new Builder().addDisplay().addAdvancedReport().addCSV().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrintCSV(true);
-        Mockito.verify(transportHandler, Mockito.never()).sendReport(Matchers.anyList(), Matchers.anyList(), Matchers.anyList(), Matchers.anyMap(), (String[]) Matchers.any(), (ClientLoginCount) Matchers.any(), (ClientLoginCount) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendReport(ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyMap(), (String[]) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
      @Test
@@ -518,14 +518,14 @@ public class ReportClientBaseTest {
 
         validateNotPrint();
         validateNotPrintCSV();
-        Mockito.verify(transportHandler, Mockito.never()).sendReport(Matchers.anyList(), Matchers.anyList(), Matchers.anyList(), Matchers.anyMap(), (String[]) Matchers.any(), (ClientLoginCount) Matchers.any(), (ClientLoginCount) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendReport(ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyList(), ArgumentMatchers.anyMap(), (String[]) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), (ClientLoginCount) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
     //------------------------------------ APPSUITE REPORT ---------------------------------------------------------
 
      @Test
      public void testStart_getAppsuiteReport_noReportGeneratedOutputNotFound() throws IOException, InstanceNotFoundException, MBeanException, ReflectionException {
-        Mockito.when(serverConnection.invoke((ObjectName) Matchers.any(), Matchers.anyString(), (Object[]) Matchers.any(), (String[]) Matchers.any())).thenReturn(null);
+        Mockito.when(serverConnection.invoke((ObjectName) ArgumentMatchers.any(), ArgumentMatchers.anyString(), (Object[]) ArgumentMatchers.any(), (String[]) ArgumentMatchers.any())).thenReturn(null);
 
         reportClientBase.start(new Builder().addGetAppsuiteReport().build(), REPORT);
 
@@ -560,7 +560,7 @@ public class ReportClientBaseTest {
      public void testStart_getAppsuiteReportAndDisplay_displayReport() throws Exception {
         reportClientBase.start(new Builder().addGetAppsuiteReport().addDisplay().build(), REPORT);
 
-        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
         validatePrint(APPSUITE_REPORT);
     }
 
@@ -573,7 +573,7 @@ public class ReportClientBaseTest {
 
         reportClientBase.start(builder.build(), REPORT);
 
-        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
         validatePrint(APPSUITE_REPORT);
     }
 
@@ -594,7 +594,7 @@ public class ReportClientBaseTest {
         //No longer valid test since the method expects a distinct instance of ReportConfigs.
         //Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { any(ReportConfigs.class) }, new String[] { CompositeData.class.getCanonicalName() });
         Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "retrievePendingReports", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
-        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
+        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
         validateAppsuiteDiagnosticsPrint();
     }
 

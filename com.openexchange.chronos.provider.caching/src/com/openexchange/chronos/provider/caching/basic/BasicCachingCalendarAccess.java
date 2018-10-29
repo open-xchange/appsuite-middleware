@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching.basic;
 
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import static com.openexchange.java.Autoboxing.I;
@@ -57,14 +58,18 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
@@ -375,15 +380,15 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
             diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
         } else {
-            List<Event> externalEvents = externalCalendarResult.getEvents();
-            cleanupEvents(externalEvents);
-
-            boolean containsUID = containsUid(externalEvents);
-            if (containsUID) {
-                diff = generateEventDiff(existingEvents, externalEvents);
+            Map<String, List<Event>> externalEvents = prepareExternalEvents(externalCalendarResult.getEvents());
+            List<Event> updatedEvents = externalEvents.values().stream().flatMap(List::stream).collect(Collectors.toList());
+            if (externalEvents.containsKey(null)) {
+                /*
+                 * event source contains events without UID, use a replacing event update as fallback
+                 */
+                diff = new EmptyUidUpdates(existingEvents, updatedEvents);
             } else {
-                //FIXME generate reproducible UID for upcoming refreshes
-                diff = new EmptyUidUpdates(existingEvents, externalEvents);
+                diff = generateEventDiff(existingEvents, updatedEvents);
             }
         }
 
@@ -394,7 +399,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             throw CalendarExceptionCodes.DB_NOT_MODIFIED.create();
         }
         delete(storage, diff);
-        create(storage, diff);
+        create(storage, diff, existingEvents);
         update(storage, diff);
     }
 
@@ -409,21 +414,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             }
 
         }.executeQuery();
-    }
-
-    /**
-     * Returns if all provided {@link Event}s do contain a UID
-     *
-     * @param events A list of {@link Event}s to check for the UID
-     * @return <code>true</code> if all {@link Event}s do have a UID; <code>false</code> if at least one {@link Event} is missing the UID field
-     */
-    private boolean containsUid(List<Event> events) {
-        for (Event event : events) {
-            if (!event.containsUid()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static final EventField[] FIELDS_TO_IGNORE = new EventField[] { EventField.CREATED_BY, EventField.FOLDER_ID, EventField.ID, EventField.CALENDAR_USER, EventField.CREATED, EventField.MODIFIED_BY, EventField.EXTENDED_PROPERTIES, EventField.TIMESTAMP };
@@ -484,11 +474,11 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return calendarStorage.getUtilities().loadAdditionalEventData(session.getUserId(), exceptions, getFields());
     }
 
-    private void create(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void create(CalendarStorage calendarStorage, EventUpdates diff, List<Event> originalEvents) throws OXException {
         if (diff.getAddedItems().isEmpty()) {
             return;
         }
-        create(calendarStorage, diff.getAddedItems());
+        create(calendarStorage, diff.getAddedItems(), originalEvents);
     }
 
     private void update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
@@ -677,18 +667,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    private void cleanupEvents(List<Event> externalEvents) {
-        List<Event> addedItems = new ArrayList<Event>(externalEvents);
-        for (Event event : addedItems) {
-            try {
-                Check.mandatoryFields(event, EventField.START_DATE);
-            } catch (OXException e) {
-                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
-                externalEvents.remove(event);
-            }
-        }
-    }
-
     private void handleInternally(OXException e) {
         OXException copy = new OXException(e);
         long retryAfterErrorInterval = getRetryAfterErrorInterval(copy);
@@ -774,35 +752,33 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return new SyncHandler(session, account, parameters).resolveResources(resourceNames);
     }
 
-    protected void create(CalendarStorage calendarStorage, List<Event> externalEvents) throws OXException {
+    protected void create(CalendarStorage calendarStorage, List<Event> externalEvents, List<Event> originalEvents) throws OXException {
         if (!externalEvents.isEmpty()) {
+            Map<String, List<Event>> originalEventsByUID = CalendarUtils.getEventsByUID(originalEvents, false);
+            Date now = new Date();
             Map<String, List<Event>> extEventsByUID = getEventsByUID(externalEvents, true);
-            for (Entry<String, List<Event>> event : extEventsByUID.entrySet()) {
-                create(calendarStorage, event);
+            for (Entry<String, List<Event>> entry : extEventsByUID.entrySet()) {
+                List<Event> originalEventGroup = sortSeriesMasterFirst(originalEventsByUID.get(entry.getKey()));
+                if (null != originalEventGroup && 0 < originalEventGroup.size() && isSeriesMaster(originalEventGroup.get(0))) {
+                    insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), originalEventGroup.get(0));
+                } else {
+                    insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), null);
+                }
             }
         }
     }
 
-    protected void create(CalendarStorage calendarStorage, Entry<String, List<Event>> entry) throws OXException {
-        Date now = new Date();
-        List<Event> events = sortSeriesMasterFirst(entry.getValue());
-
-        insertEvents(calendarStorage, now, events.toArray(new Event[events.size()]));
-    }
-
-    protected void insertEvents(CalendarStorage calendarStorage, Date now, Event... lEvents) throws OXException {
-        if (null == lEvents || 0 == lEvents.length) {
+    protected void insertEvents(CalendarStorage calendarStorage, Date now, List<Event> events, Event originalSeriesMaster) throws OXException {
+        if (null == events || 0 == events.size()) {
             return;
         }
-        List<Event> events = Arrays.asList(lEvents);
 
         String id = calendarStorage.getEventStorage().nextId();
         Event importedEvent = applyDefaults(events.get(0), now);
         importedEvent.setId(id);
         importedEvent.setCalendarUser(getCalendarUser());
-        if (Strings.isNotEmpty(importedEvent.getRecurrenceRule())) {
-            importedEvent.setSeriesId(id);
-        }
+        String seriesId = Strings.isNotEmpty(importedEvent.getRecurrenceRule()) ? id : null != originalSeriesMaster ? originalSeriesMaster.getSeriesId() : null;
+        importedEvent.setSeriesId(id);
         calendarStorage.getEventStorage().insertEvent(importedEvent);
         List<Attendee> attendees = importedEvent.getAttendees();
 
@@ -817,22 +793,20 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             calendarStorage.getAlarmStorage().insertAlarms(importedEvent, session.getUserId(), importedEvent.getAlarms());
         }
 
-        if (1 < events.size()) {
-            for (int i = 1; i < events.size(); i++) {
-                Event importedChangeException = applyDefaults(events.get(i), now);
-                importedChangeException.setSeriesId(id);
-                importedChangeException.setId(calendarStorage.getEventStorage().nextId());
-                calendarStorage.getEventStorage().insertEvent(importedChangeException);
-                List<Attendee> changeExceptionAttendees = importedChangeException.getAttendees();
-                if (null != changeExceptionAttendees && !changeExceptionAttendees.isEmpty()) {
-                    calendarStorage.getAttendeeStorage().insertAttendees(importedChangeException.getId(), changeExceptionAttendees);
+        for (int i = 1; i < events.size(); i++) {
+            Event importedChangeException = applyDefaults(events.get(i), now);
+            importedChangeException.setSeriesId(seriesId);
+            importedChangeException.setId(calendarStorage.getEventStorage().nextId());
+            calendarStorage.getEventStorage().insertEvent(importedChangeException);
+            List<Attendee> changeExceptionAttendees = importedChangeException.getAttendees();
+            if (null != changeExceptionAttendees && !changeExceptionAttendees.isEmpty()) {
+                calendarStorage.getAttendeeStorage().insertAttendees(importedChangeException.getId(), changeExceptionAttendees);
+            }
+            if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
+                for (Alarm alarm : importedChangeException.getAlarms()) {
+                    alarm.setId(calendarStorage.getAlarmStorage().nextId());
                 }
-                if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
-                    for (Alarm alarm : importedChangeException.getAlarms()) {
-                        alarm.setId(calendarStorage.getAlarmStorage().nextId());
-                    }
-                    calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, session.getUserId(), importedChangeException.getAlarms());
-                }
+                calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, session.getUserId(), importedChangeException.getAlarms());
             }
         }
     }
@@ -840,6 +814,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     private Event applyDefaults(Event importedEvent, Date now) {
         importedEvent.setCalendarUser(getCalendarUser());
         importedEvent.setTimestamp(now.getTime());
+        if (null != importedEvent.getRecurrenceId()) {
+            importedEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(importedEvent.getRecurrenceId())));
+        }
         return importedEvent;
     }
 
@@ -881,4 +858,52 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
         return null;
     }
+
+    /**
+     * Prepares the list of events from the external calendar source for further processing. This includes:
+     * <ul>
+     * <li>remove events that cannot be stored due to missing mandatory fields</li>
+     * <li>map events by their UID property (events without UID are mapped to <code>null</code>)</li>
+     * <li>event lists are sorted so that the series master event will be the first element</li>
+     * <li>the change exception field of series master events will be set based on the actual overridden instances</li>
+     * </ul>
+     *
+     * @param events The events to prepare
+     * @return The prepared events, mapped by their unique identifier (events without UID are mapped to <code>null</code>)
+     */
+    private static Map<String, List<Event>> prepareExternalEvents(List<Event> events) {
+        if (null == events) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
+        for (Event event : events) {
+            /*
+             * ignore events lacking mandatory fields
+             */
+            try {
+                Check.mandatoryFields(event, EventField.START_DATE);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
+                continue;
+            }
+            /*
+             * map events by UID
+             */
+            com.openexchange.tools.arrays.Collections.put(eventsByUID, event.getUid(), event);
+        }
+        for (List<Event> eventGroup : eventsByUID.values()) {
+            if (1 >= eventGroup.size()) {
+                continue;
+            }
+            /*
+             * sort series master first, then assign change exception dates
+             */
+            eventGroup = sortSeriesMasterFirst(eventGroup);
+            if (null != eventGroup.get(0).getRecurrenceRule()) {
+                eventGroup.get(0).setChangeExceptionDates(getRecurrenceIds(eventGroup.subList(1, eventGroup.size())));
+            }
+        }
+        return eventsByUID;
+    }
+
 }

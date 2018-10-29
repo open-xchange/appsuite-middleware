@@ -68,7 +68,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.packethandling.AddRecipientPacketProcessorHandler;
 import com.openexchange.pgp.core.packethandling.PacketProcessor;
@@ -137,9 +137,9 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         identity3 = new Identity(TEST_IDENTITY_3, getPublicKeyFromGenerator(keyGenerator3), getSecretKeyFromGenerator(keyGenerator3), TEST_PASSWORD_3);
         //Setting up a strategy for key retrieving, this is used when decrypting data
         keyRetrievalStrategy = mock(PGPKeyRetrievalStrategy.class);
-        when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity.getSecretKey().getKeyID()), Matchers.eq(identity.getIdentity()), Matchers.eq(identity.getPassword()))).thenReturn(decodePrivateKey(identity.getSecretKey(), identity.getPassword()));
-        when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity2.getSecretKey().getKeyID()), Matchers.eq(identity2.getIdentity()), Matchers.eq(identity2.getPassword()))).thenReturn(decodePrivateKey(identity2.getSecretKey(), identity2.getPassword()));
-        when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity3.getSecretKey().getKeyID()), Matchers.eq(identity3.getIdentity()), Matchers.eq(identity3.getPassword()))).thenReturn(decodePrivateKey(identity3.getSecretKey(), identity3.getPassword()));
+        when(keyRetrievalStrategy.getSecretKey(ArgumentMatchers.eq(identity.getSecretKey().getKeyID()), ArgumentMatchers.eq(identity.getIdentity()), ArgumentMatchers.eq(identity.getPassword()))).thenReturn(decodePrivateKey(identity.getSecretKey(), identity.getPassword()));
+        when(keyRetrievalStrategy.getSecretKey(ArgumentMatchers.eq(identity2.getSecretKey().getKeyID()), ArgumentMatchers.eq(identity2.getIdentity()), ArgumentMatchers.eq(identity2.getPassword()))).thenReturn(decodePrivateKey(identity2.getSecretKey(), identity2.getPassword()));
+        when(keyRetrievalStrategy.getSecretKey(ArgumentMatchers.eq(identity3.getSecretKey().getKeyID()), ArgumentMatchers.eq(identity3.getIdentity()), ArgumentMatchers.eq(identity3.getPassword()))).thenReturn(decodePrivateKey(identity3.getSecretKey(), identity3.getPassword()));
     }
 
 

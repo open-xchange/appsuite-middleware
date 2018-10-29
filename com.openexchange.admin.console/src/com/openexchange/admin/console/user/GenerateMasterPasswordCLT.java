@@ -53,12 +53,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,6 +70,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.cli.AbstractCLI;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.passwordmechs.PasswordMech;
@@ -239,8 +242,17 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     ///////////////////////////////////// HELPERS ////////////////////////////////
 
+    /**
+     * Reads the specified password file
+     * 
+     * @param file The file to read
+     * @param context a map with the command line values for adminuser, encryption and adminpass
+     * @return A {@link List} with the lines of the file
+     * @throws FileNotFoundException If the file is not found
+     * @throws IOException if an I/O error is occurred
+     */
     private List<String> readPasswordFile(File file, Map<Parameter, String> context) throws FileNotFoundException, IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.UTF_8))) {
             List<String> lines = new LinkedList<String>();
             boolean updated = false;
             StringBuilder builder = new StringBuilder(96);
@@ -261,12 +273,30 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         }
     }
 
-    private void writePasswordFile(File file, List<String> lines) throws FileNotFoundException {
-        try (PrintWriter writer = new PrintWriter(file)) {
+    /**
+     * Writes the specified lines to the specified file
+     * 
+     * @param file The file to write to
+     * @param lines The lines to write to the file
+     */
+    private void writePasswordFile(File file, List<String> lines) {
+        boolean error = true;
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));) {
             for (String line : lines) {
-                writer.println(line);
+                writer.append(line).append(Strings.getLineSeparator());
             }
             writer.flush();
+            error = false;
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Unsupported encoding: 'UTF-8'");
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: '" + file.getAbsolutePath() + "'");
+        } catch (IOException e) {
+            System.err.println("I/O error occurred: '" + e.getMessage() + "'");
+        } finally {
+            if (error) {
+                System.exit(-1);
+            }
         }
     }
 

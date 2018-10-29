@@ -95,7 +95,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     }
 
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {
-        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, timestamp, body, recurrenceId, false);
+        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, timestamp, body, recurrenceId, false, null);
         List<EventData> updates = calendarResult.getData().getUpdated();
         assertTrue(updates.size() == 1);
         return updates.get(0);

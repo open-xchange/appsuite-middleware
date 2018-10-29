@@ -118,7 +118,7 @@ public class EnhancedApiClient extends ApiClient {
 
     /**
      * Create a {@link Map} with the attachments (if any)
-     * 
+     *
      * @param formParams The form parameters with the attachments
      * @return A {@link Map} with the attachment name and contentId
      * @throws ApiException if an API error is occurred
@@ -133,9 +133,17 @@ public class EnhancedApiClient extends ApiClient {
             } catch (final JSONException e) {
                 throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject. " + json0);
             }
-            final JSONArray attachments = json.optJSONArray("attachments");
+            JSONArray attachments = json.optJSONArray("attachments");
             if (attachments == null || attachments.isEmpty()) {
-                throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
+                JSONObject optJSONObject = json.optJSONObject("events");
+                if (optJSONObject != null) {
+                    attachments = optJSONObject.optJSONArray("attachments");
+                    if (attachments == null || attachments.isEmpty()) {
+                        throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
+                    }
+                } else {
+                    throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
+                }
             }
 
             try {

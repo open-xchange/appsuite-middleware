@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -114,7 +114,7 @@ public class CachingUserSettingMailStorageTest {
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
         PowerMockito.when(serverServiceRegistry.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
         PowerMockito.when(serverServiceRegistry.getService(CacheService.class, true)).thenReturn(cacheService);
-        PowerMockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(configView);
+        PowerMockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(configView);
         PowerMockito.when(configView.property(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(composedConfigProperty);
         PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.FALSE);
     }
@@ -126,17 +126,17 @@ public class CachingUserSettingMailStorageTest {
 
         storage.applyConfigCascadeSettings(userSettingMail, user.getId(), context);
 
-        Mockito.verify(configViewFactory, Mockito.never()).getView(Matchers.anyInt(), Matchers.anyInt());
+        Mockito.verify(configViewFactory, Mockito.never()).getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
     }
 
     @Test
     public void testApplyConfigCascadeSettings_configViewNotAvailable_doNothing() throws OXException {
         CachingUserSettingMailStorage storage = new CachingUserSettingMailStorage();
-        PowerMockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(null);
+        PowerMockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(null);
 
         storage.applyConfigCascadeSettings(userSettingMail, user.getId(), context);
 
-        Mockito.verify(configViewFactory, Mockito.times(1)).getView(Matchers.anyInt(), Matchers.anyInt());
+        Mockito.verify(configViewFactory, Mockito.times(1)).getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
         Mockito.verify(configView, Mockito.never()).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
         Mockito.verify(configView, Mockito.never()).property(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
     }
@@ -171,7 +171,7 @@ public class CachingUserSettingMailStorageTest {
         PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.FALSE);
 
-        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
+        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(true);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
@@ -185,7 +185,7 @@ public class CachingUserSettingMailStorageTest {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
         PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.TRUE);
-        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
+        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(false);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
@@ -197,7 +197,7 @@ public class CachingUserSettingMailStorageTest {
     @Test
     public void testUpdateSpamSetting_newValueEqual_doNotUpdate() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
+        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(false);
         PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.FALSE);
@@ -212,7 +212,7 @@ public class CachingUserSettingMailStorageTest {
     @Test
     public void testUpdateSpamSetting_newValueEqual_doNotUpdate2() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
+        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(true);
         PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.TRUE);

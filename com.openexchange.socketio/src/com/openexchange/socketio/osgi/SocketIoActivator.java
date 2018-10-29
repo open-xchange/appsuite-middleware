@@ -53,8 +53,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.management.HousekeepingManagementTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.socketio.monitoring.SocketIOMBean;
 import com.openexchange.socketio.monitoring.impl.SocketIOMBeanImpl;
@@ -111,8 +111,10 @@ public class SocketIoActivator extends HousekeepingActivator {
         getService(HttpService.class).registerServlet("/socket.io", servlet, initParams, null);
 
         SocketIOManager socketIOManager = servlet.getSocketIOManager();
-        track(ManagementService.class, new HousekeepingManagementTracker(context, SocketIOMBean.class.getName(), SocketIOMBean.DOMAIN, new SocketIOMBeanImpl(socketIOManager, connectionRegistry)));
-        openTrackers();
+        HousekeepingManagementTracker managementTracker = new HousekeepingManagementTracker(context, SocketIOMBean.class.getName(), SocketIOMBean.DOMAIN, new SocketIOMBeanImpl(socketIOManager, connectionRegistry));
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<>(context, ManagementService.class, managementTracker);
+        mgmtTracker.open();
+        this.mgmtTracker = mgmtTracker;
     }
 
     @Override

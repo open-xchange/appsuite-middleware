@@ -57,8 +57,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.tika.io.IOUtils;
 import com.google.common.base.Throwables;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -132,8 +132,7 @@ public class TransformImageClientAction extends TransformImageAction {
 
             try (final InputStream inputStm = repetitiveFile.getStream()) {
                 if (null != inputStm) {
-                    try (CheckedInputStream checkedInputStm = new CheckedInputStream(inputStm, crcImage);
-                         OutputStream nullSink = new NullOutputStream()) {
+                    try (CheckedInputStream checkedInputStm = new CheckedInputStream(inputStm, crcImage); OutputStream nullSink = new NullOutputStream()) {
                         IOUtils.copy(checkedInputStm, nullSink);
                     }
                 }
@@ -216,7 +215,7 @@ public class TransformImageClientAction extends TransformImageAction {
 					} catch (ImageConverterException e) {
 						throw OXException.general("Communication with Image Converter failed", e);
 					}
-					
+
                     if (null != resultImageStm) {
                         try {
                             ThresholdFileHolder imageData = new ThresholdFileHolder();
