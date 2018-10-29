@@ -50,13 +50,10 @@
 package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ServerProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
@@ -70,7 +67,6 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareExceptionMessages;
-import com.openexchange.share.ShareProperty;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
