@@ -118,6 +118,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAccountDescription;
 import com.openexchange.mailaccount.TransportAuth;
@@ -1294,7 +1295,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 break;
         }
 
-        switch(MailProperties.getInstance().getMailServerSource(userId, contextId)){
+        switch(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
@@ -1318,7 +1319,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         }
 
-        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId)){
+        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getTransportServer(userId, contextId);
