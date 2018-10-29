@@ -50,17 +50,11 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
-import org.slf4j.Logger;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPoolExtension.class);
-    }
 
     public OXAdminPoolDBPoolExtension() {
         super();
