@@ -52,11 +52,14 @@ package com.openexchange.sessiond.mbean;
 import java.util.Set;
 import javax.management.MBeanException;
 import com.openexchange.management.MBeanMethodAnnotation;
+import com.openexchange.sessiond.rest.SessiondRESTService;
+import com.openexchange.sessiond.rmi.SessiondRMIService;
 
 /**
  * {@link SessiondMBean} - The MBean for sessiond
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use {@link SessiondRMIService} or {@link SessiondRESTService} instead.
  */
 public interface SessiondMBean {
 
