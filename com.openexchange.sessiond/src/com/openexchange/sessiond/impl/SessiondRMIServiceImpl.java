@@ -51,10 +51,12 @@ package com.openexchange.sessiond.impl;
 
 import java.rmi.RemoteException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.rmi.SessiondRMIService;
@@ -75,6 +77,36 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
      */
     public SessiondRMIServiceImpl() {
         super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSession(java.lang.String)
+     */
+    @Override
+    public boolean clearUserSession(String sessionId) throws RemoteException {
+        return clearUserSession(sessionId, false);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSessions(java.lang.String, boolean)
+     */
+    @Override
+    public boolean clearUserSession(String sessionId, boolean global) throws RemoteException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("(&(").append(SessionFilter.SESSION_ID).append("=").append(sessionId).append("))");
+        List<String> removedSessions = SessionHandler.removeLocalSessions(SessionFilter.create(sb.toString()));
+        if (global) {
+            try {
+                SessionHandler.removeRemoteSessions(SessionFilter.create(sb.toString()));
+            } catch (IllegalArgumentException | OXException e) {
+                throw new RemoteException(e.getMessage(), e);
+            }
+        }
+        return false == removedSessions.isEmpty();
     }
 
     /*

@@ -65,6 +65,25 @@ public interface SessiondRMIService extends Remote {
     public static final String RMI_NAME = "SessiondRMIService";
 
     /**
+     * Clears the session with the specified identifier
+     * 
+     * @param sessionId The session identifier
+     * @return <code>true</code> if the sessions was successfully removed; <code>false</code> otherwise
+     * @throws RemoteException if the operation fails or any other error is occurred
+     */
+    boolean clearUserSession(String sessionId) throws RemoteException;
+
+    /**
+     * Clears the session with the specified identifier
+     * 
+     * @param sessionId The session identifier
+     * @param global <code>true</code> if the sessions should be cleared globally
+     * @return <code>true</code> if the sessions was successfully removed; <code>false</code> otherwise
+     * @throws RemoteException if the operation fails or any other error is occurred
+     */
+    boolean clearUserSession(String sessionId, boolean global) throws RemoteException;
+
+    /**
      * Clears all sessions belonging to the user identified by given user ID in specified context
      *
      * @param userId The user ID
