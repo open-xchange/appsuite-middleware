@@ -112,6 +112,9 @@ public class ClientInfoStrings implements LocalizableStrings {
     // E.g. OX Mail App on Android
     public final static String MAILAPP_WITH_PLATFORM = "%1$s on %2$s";
 
+    // Unknown client
+    public final static String UNKNOWN_CLIENT = "Unknown client";
+
     private ClientInfoStrings() {
         super();
     }
