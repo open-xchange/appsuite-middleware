@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
@@ -91,12 +92,14 @@ public final class SendTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient(), false);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -128,6 +131,7 @@ public final class SendTest extends AbstractMailTest {
          * Perform send request
          */
         final SendResponse response = Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+        assertNull(response.getErrorMessage(), response.getErrorMessage());
         assertNotNull(response.getFolderAndID());
         assertTrue("No mail in the sent folder", response.getFolderAndID().length > 0);
         /*
