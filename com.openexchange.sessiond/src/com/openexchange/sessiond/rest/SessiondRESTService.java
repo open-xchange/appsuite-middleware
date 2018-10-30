@@ -114,6 +114,8 @@ public class SessiondRESTService extends JAXRSService {
             return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.SESSION_IDS), SessionFilterType.SESSION));
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            return Response.status(500).entity(e.getMessage()).build();
         }
     }
 
@@ -140,6 +142,8 @@ public class SessiondRESTService extends JAXRSService {
             return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.CONTEXT_IDS), SessionFilterType.CONTEXT));
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            return Response.status(500).entity(e.getMessage()).build();
         }
     }
 
@@ -166,6 +170,8 @@ public class SessiondRESTService extends JAXRSService {
             return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.USERS), SessionFilterType.USER));
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            return Response.status(500).entity(e.getMessage()).build();
         }
     }
 
