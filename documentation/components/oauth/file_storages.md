@@ -147,6 +147,7 @@ metadata_expire=0m
 ```
 
 ### CentOS 7
+
 Start a console and create a software repository file if not already present:
 
 ```
@@ -204,7 +205,7 @@ In addition you have to configure the following properties in file `/opt/open-xc
 
 You can define them system-wide or via the config cascade mechanism.
 
-## Install on OX App Suite
+## Install on OX AppSuite
 
 Refer to [OS Repositories](#os-repositories) on how to configure the software repository of your operating system.
 
