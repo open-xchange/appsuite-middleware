@@ -51,11 +51,14 @@ package com.openexchange.clientinfo.impl;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoService;
+import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 
@@ -72,6 +75,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientInfoServiceImpl.class);
 
     private final ServiceListing<ClientInfoProvider> providers;
+    private final ClientInfo defaultClientInfo = new DefaultClientInfo();
 
     /**
      * Initializes a new {@link ClientInfoServiceImpl}.
@@ -94,7 +98,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
             }
             LOG.debug("Unknown client found. Client identifier: {} User-Agent: {}", session.getClient(), session.getParameter(Session.PARAM_USER_AGENT));
         }
-        return null;
+        return defaultClientInfo;
     }
 
     @Override
@@ -108,7 +112,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
             }
             LOG.debug("Unknown client found. Client identifier: {}", clientId);
         }
-        return null;
+        return defaultClientInfo;
     }
 
     @Override
@@ -121,6 +125,47 @@ public class ClientInfoServiceImpl implements ClientInfoService {
             }
         }
         return map;
+    }
+
+    private class DefaultClientInfo implements ClientInfo {
+
+        private final static String UNKNOWN = "unknown";
+
+        @Override
+        public ClientInfoType getType() {
+            return ClientInfoType.OTHER;
+        }
+
+        @Override
+        public String getDisplayName(Locale locale) {
+            return StringHelper.valueOf(locale).getString(ClientInfoStrings.UNKNOWN_CLIENT);
+        }
+
+        @Override
+        public String getOSFamily() {
+            return UNKNOWN;
+        }
+
+        @Override
+        public String getOSVersion() {
+            return UNKNOWN;
+        }
+
+        @Override
+        public String getClientName() {
+            return UNKNOWN;
+        }
+
+        @Override
+        public String getClientVersion() {
+            return UNKNOWN;
+        }
+
+        @Override
+        public String getClientFamily() {
+            return UNKNOWN;
+        }
+
     }
 
 }

@@ -104,7 +104,12 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 DAVUserAgent userAgent = DAVUserAgent.parse(sUserAgent);
                 String clientFamily = getClientFamily(userAgent);
                 ReadableUserAgent readableUserAgent = userAgentParser.parse(sUserAgent);
-                if (null == readableUserAgent) {
+                if (null == readableUserAgent || UNKNOWN.equalsIgnoreCase(readableUserAgent.getName())) {
+                    // Maybe iOS accountsd?
+                    if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("iOS") && sUserAgent.contains("accountsd")) {
+                        return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, UNKNOWN, null, "ios_calendar/addressbook", ClientInfoType.DAV);
+                    }
+
                     // Unknown User-Agent
                     return new DAVClientInfo(userAgent.getReadableName(), clientFamily);
                 }
@@ -166,7 +171,8 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         }
 
         try {
-            return clientInfoCache.get(sUserAgent);
+            DAVClientInfo davClientInfo = clientInfoCache.get(sUserAgent);
+            return UNKNOWN.equals(davClientInfo.getClientFamily()) ? null : davClientInfo;
         } catch (ExecutionException e) {
             LOG.error("Failed to determine client info for User-Agent {}", sUserAgent, e.getCause());
             return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName(), getClientFamily(DAVUserAgent.UNKNOWN));
