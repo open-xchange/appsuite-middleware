@@ -1,5 +1,5 @@
 ---
-title: Google app verification
+title: Google App Verification
 ---
 
 # Problem
