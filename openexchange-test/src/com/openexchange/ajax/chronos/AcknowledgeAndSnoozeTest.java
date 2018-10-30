@@ -180,9 +180,9 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         assertEquals(2, alarms2.size());
         Integer snoozeId2 = null;
         if (alarms2.get(0).getId().toString().equals(alarmTrigger.getAlarmId())) {
-            snoozeId2 = alarms.get(1).getId();
+            snoozeId2 = alarms2.get(1).getId();
         } else {
-            snoozeId2 = alarms.get(0).getId();
+            snoozeId2 = alarms2.get(0).getId();
         }
 
         triggerData = getAndCheckAlarmTrigger(2);
