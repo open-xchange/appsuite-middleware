@@ -102,6 +102,7 @@ public class SessiondRESTService extends JAXRSService {
      *         <li><b>400</b>: if the client issued a bad request</li>
      *         <li><b>401</b>: if the client was not authenticated</li>
      *         <li><b>403</b>: if the client was not authorised</li>
+     *         <li><b>500</b>: if any server side error is occurred</li>
      *         </ul>
      */
     @POST
@@ -127,6 +128,7 @@ public class SessiondRESTService extends JAXRSService {
      *         <li><b>400</b>: if the client issued a bad request</li>
      *         <li><b>401</b>: if the client was not authenticated</li>
      *         <li><b>403</b>: if the client was not authorised</li>
+     *         <li><b>500</b>: if any server side error is occurred</li>
      *         </ul>
      */
     @POST
@@ -152,6 +154,7 @@ public class SessiondRESTService extends JAXRSService {
      *         <li><b>400</b>: if the client issued a bad request</li>
      *         <li><b>401</b>: if the client was not authenticated</li>
      *         <li><b>403</b>: if the client was not authorised</li>
+     *         <li><b>500</b>: if any server side error is occurred</li>
      *         </ul>
      */
     @POST
