@@ -205,7 +205,7 @@ In addition you have to configure the following properties in file `/opt/open-xc
 
 You can define them system-wide or via the config cascade mechanism.
 
-## Install on OX AppSuite
+## Install on OX App Suite
 
 Refer to [OS Repositories](#os-repositories) on how to configure the software repository of your operating system.
 
