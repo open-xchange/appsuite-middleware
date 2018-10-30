@@ -92,7 +92,7 @@ public abstract class AbstractPasswordMech implements PasswordMech {
     }
 
     @Override
-    public PasswordDetails encode(String password) throws OXException {
+    public final PasswordDetails encode(String password) throws OXException {
         if (Strings.isEmpty(password)) {
             return new PasswordDetails(password, null, getIdentifier(), null);
         }
@@ -108,7 +108,7 @@ public abstract class AbstractPasswordMech implements PasswordMech {
      * @return {@link PasswordDetails} containing information about the password encoding
      * @throws OXException In case of error
      */
-    public abstract PasswordDetails encodePassword(String password) throws OXException;
+    protected abstract PasswordDetails encodePassword(String password) throws OXException;
 
     @Override
     public final boolean check(String toCheck, String encoded, byte[] salt) throws OXException {
@@ -133,7 +133,7 @@ public abstract class AbstractPasswordMech implements PasswordMech {
      * @return <code>true</code> if the password match
      * @throws OXException In case of error
      */
-    public abstract boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException;
+    protected abstract boolean checkPassword(String candidate, String encoded, byte[] salt) throws OXException;
 
     @Override
     public String decode(String encodedPassword, byte[] salt) throws OXException {
@@ -146,7 +146,7 @@ public abstract class AbstractPasswordMech implements PasswordMech {
     }
 
     @Override
-    public boolean expose() {
+    public boolean isExposed() {
         return true;
     }
 

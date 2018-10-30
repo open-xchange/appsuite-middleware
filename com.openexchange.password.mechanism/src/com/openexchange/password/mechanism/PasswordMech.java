@@ -71,7 +71,7 @@ public interface PasswordMech {
      * 
      * @return <code>true</code> if the password mechanism should be exposed. Otherwise <code>false</code>
      */
-    boolean expose();
+    boolean isExposed();
 
     /**
      * Encodes the given string according to this password mechanism and returns the encoded string.

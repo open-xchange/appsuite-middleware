@@ -95,7 +95,7 @@ public class SharePasswordMech extends AbstractPasswordMech {
     }
 
     @Override
-    public boolean expose() {
+    public boolean isExposed() {
         return false;
     }
 
