@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.47.jar" sourcepath="lib/source/mysql-connector-java-5.1.47-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsoup-1.11.3.jar" sourcepath="lib/source/jsoup-1.11.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.22.jar" sourcepath="lib/source/nekohtml-1.9.22-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.46.jar" sourcepath="lib/source/mysql-connector-java-5.1.46-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cache-api-1.1.0.jar" sourcepath="lib/source/cache-api-1.1.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jericho-html-3.4.jar" sourcepath="lib/jericho-html-3.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdo2-api-2.3-eb.jar" sourcepath="lib/source/jdo2-api-2.3-eb-sources.jar"/>
