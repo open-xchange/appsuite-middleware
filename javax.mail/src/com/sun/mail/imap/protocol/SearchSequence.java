@@ -67,6 +67,7 @@ import javax.mail.search.SentDateTerm;
 import javax.mail.search.SizeTerm;
 import javax.mail.search.StringTerm;
 import javax.mail.search.SubjectTerm;
+import javax.mail.search.XMailboxTerm;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.imap.ModifiedSinceTerm;
 import com.sun.mail.imap.OlderTerm;
@@ -167,8 +168,10 @@ public class SearchSequence {
 	    return messageid((MessageIDTerm)term, charset);
 	else if (term instanceof ModifiedSinceTerm)	// RFC 4551 MODSEQ
 	    return modifiedSince((ModifiedSinceTerm)term);
-   else if (term instanceof javax.mail.search.FileNameTerm) // SEARCH=MIMEPART Extension
+    else if (term instanceof javax.mail.search.FileNameTerm) // SEARCH=MIMEPART Extension
         return fileName((javax.mail.search.FileNameTerm)term, charset);
+    else if (term instanceof XMailboxTerm)    // X-MAIBOX
+        return xMailbox((XMailboxTerm)term, charset);
 	else
 	    throw new SearchException("Search too complex");
     }
@@ -580,6 +583,15 @@ public class SearchSequence {
     result.writeAtom("MIMEPART");
     result.writeAtom("FILENAME");
     result.writeAtom("CONTAINS");
+    result.writeString(term.getPattern(), charset);
+    return result;
+    }
+
+    protected Argument xMailbox(javax.mail.search.XMailboxTerm term, String charset) 
+        throws SearchException, IOException {
+    Argument result = new Argument();
+    
+    result.writeAtom("X-MAILBOX");
     result.writeString(term.getPattern(), charset);
     return result;
     }

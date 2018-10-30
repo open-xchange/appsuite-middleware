@@ -176,4 +176,10 @@ public interface SearchTermVisitor {
      */
     public void visit(FileNameTerm term);
 
+    /**
+     * Calls this visitor with specified X-MAILBOX term.
+     *
+     * @param term The X-MAILBOX term
+     */
+    public void visit(XMailboxTerm term);
 }

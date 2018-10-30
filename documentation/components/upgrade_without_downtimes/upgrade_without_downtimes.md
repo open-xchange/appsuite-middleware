@@ -20,7 +20,7 @@ Also, starting with 7.10.0 a new property was introduced for the migration/upgra
 With that being said please note that we do **NOT** support multi-version setups and operations.
 
 Now, in a nutshell, the upgrade process consists out of the following steps. The initial step is to set the value of the migration property to all nodes with the old version in the cluster. The purpose of that URL is to redirect users 
-to the correct node (see [Q & A](#Q-&-A) section). Then, one node is taken out of the main load balancer and upgraded as [usual](http://oxpedia.org/wiki/index.php?title=Running_a_cluster#Updating_a_Cluster). 
+to the correct node (see [Q and A](#q-and-a) section). Then, one node is taken out of the main load balancer and upgraded as [usual](http://oxpedia.org/wiki/index.php?title=Running_a_cluster#Updating_a_Cluster). 
 After that, the first database schema is manually disabled and the update tasks of the new version are executed on that particular schema. And here's where the second LB comes into play. 
 Instead of registering/activating the upgraded node back to the main LB, it is registered to the second one. Now, consider the case where a user is landed on a node with the old version after the context for that user was already upgraded 
 to the new version. The node with the old version won't be able to resolve the context and this is where the migration URL kicks in. No black magic is involved here. If the context exists, then the middleware will resolve its server identifier 
@@ -187,7 +187,7 @@ The flags `-m`, `-k` and `-f` can be combined. In that case it would mean that t
 upgradeschemata -A oxadminmaster -P secret -n oxserver-xyz -f -m oxdatabase_3 -k oxdatabase_81,oxdatabase_44,oxdatabase_51
 ```
 
-# Q & A
+# Q and A
 
 **Q**: What happens if a user is landed on a 7.10.0 node after the context was moved to the x.y.z server?
 

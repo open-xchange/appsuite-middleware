@@ -118,6 +118,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAccountDescription;
 import com.openexchange.mailaccount.TransportAuth;
@@ -1294,7 +1295,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 break;
         }
 
-        switch(MailProperties.getInstance().getMailServerSource(userId, contextId)){
+        switch(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
@@ -1318,7 +1319,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         }
 
-        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId)){
+        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getTransportServer(userId, contextId);
@@ -4072,7 +4073,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final int userId = session.getUserId();
         try {
             con = Database.get(contextId, false);
-            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1");
+            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND id > 0 AND primary_addr NOT LIKE '%@unifiedinbox.com' LIMIT 1");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -4081,7 +4082,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             Databases.closeSQLStuff(rs, stmt);
 
-            stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1");
+            stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 AND send_addr NOT LIKE '%@unifiedinbox.com' LIMIT 1");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
