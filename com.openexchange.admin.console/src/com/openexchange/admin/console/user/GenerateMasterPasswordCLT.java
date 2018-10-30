@@ -133,8 +133,8 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("A", "adminuser", true, "Account name of superadmin (Default: oxadminmaster)", false));
-        options.addOption(createOption("P", "adminpass", true, "Password of superadmin", false));
+        options.addOption(createOption("A", "adminuser", true, "master Admin user name (Default: oxadminmaster)", false));
+        options.addOption(createOption("P", "adminpass", true, "master Admin password", false));
         options.addOption(createOption("f", "mpasswdfile", true, "Path to mpasswd (Default: /opt/open-xchange/etc/mpasswd)", false));
         options.addOption(createOption("e", "encryption", true, "Encryption algorithm to use for the password (Default: bcrypt)", false));
         options.addOption(createOption("h", "help", false, "Prints this help text", false));
