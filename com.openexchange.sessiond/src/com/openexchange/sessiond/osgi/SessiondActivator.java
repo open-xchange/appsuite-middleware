@@ -95,6 +95,7 @@ import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
 import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
+import com.openexchange.sessiond.rest.SessiondRESTService;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleanerFactory;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplierFactory;
 import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactory;
@@ -312,6 +313,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
             registerService(Remote.class, new SessiondRMIServiceImpl());
+            registerService(SessiondRESTService.class, new SessiondRESTService(this));
 
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new HousekeepingManagementTracker(context, SessiondMBean.MBEAN_NAME, SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));
