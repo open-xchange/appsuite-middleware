@@ -51,12 +51,13 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 import javax.mail.FetchProfile;
-import javax.mail.Folder;
 import javax.mail.Message;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
+import com.sun.mail.imap.IMAPMessage;
 
 /**
  * {@link XMailboxTerm}
@@ -96,20 +97,24 @@ public final class XMailboxTerm extends SearchTerm<String> {
 
     @Override
     public boolean matches(final MailMessage mailMessage) {
-        String fullName = mailMessage.getFolder();
+        FullnameArgument originalFolder = mailMessage.getOriginalFolder();
+        if (originalFolder == null) {
+            return false;
+        }
+
+        String fullName = originalFolder.getFullName();
         return null != fullName && fullName.regionMatches(true, 0, this.fullName, 0, this.fullName.length());
     }
 
     @Override
     public boolean matches(final Message msg) throws OXException {
         try {
-            Folder folder = msg.getFolder();
-            if (null == folder) {
+            if (!(msg instanceof IMAPMessage)) {
                 return false;
             }
 
-            String fullName = folder.getFullName();
-            return null != fullName && fullName.regionMatches(true, 0, this.fullName, 0, this.fullName.length());
+            String xMailbox = (String) ((IMAPMessage) msg).getItem("X-MAILBOX");
+            return null != xMailbox && xMailbox.regionMatches(true, 0, this.fullName, 0, this.fullName.length());
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(XMailboxTerm.class).warn("Error during search.", e);
             return false;

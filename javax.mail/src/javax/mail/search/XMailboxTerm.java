@@ -40,8 +40,8 @@
 
 package javax.mail.search;
 
-import javax.mail.Folder;
 import javax.mail.Message;
+import com.sun.mail.imap.IMAPMessage;
 
 /**
  * This class implements comparisons for the X-MAILBOX key.
@@ -72,13 +72,12 @@ public final class XMailboxTerm extends StringTerm {
     @Override
     public boolean match(Message msg) {
         try {
-            Folder folder = msg.getFolder();
-            if (null == folder) {
+            if (!(msg instanceof IMAPMessage)) {
                 return false;
             }
 
-            String fullName = folder.getFullName();
-            return null == fullName ? false : super.match(fullName);
+            String xMailbox = (String) ((IMAPMessage) msg).getItem("X-MAILBOX");
+            return null != xMailbox && super.match(xMailbox);
         } catch (Exception e) {
             return false;
         }
