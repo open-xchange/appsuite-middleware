@@ -563,6 +563,20 @@ EOF
       ox_set_property ${width_k} "600" ${pfile}
       ox_set_property ${height_k} "800" ${pfile}
     fi
+
+    # SoftwareChange_Request-287
+    pfile=/opt/open-xchange/etc/contact.properties
+    scale_k=com.openexchange.contact.image.scaleType
+    scale_v=$(ox_read_property ${scale_k} ${pfile})
+    if [ -n "${scale_v}" ]
+    then
+      if [ "2" == "${scale_v}" ]
+      then
+        ox_set_property ${scale_k} "1" ${pfile}
+      else
+        ox_set_property ${scale_k} ${scale_v} ${pfile}
+      fi
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
