@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos.schedjoules;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.sql.Date;
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
 
     /**
      * Initialises a new {@link BasicSchedJoulesSearchAwareTest}.
-     * 
+     *
      * @param providerId
      */
     public BasicSchedJoulesSearchAwareTest() {
@@ -90,6 +91,7 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
 
         FindApi findApi = defaultUserApi.getFindApi();
         FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, DEFAULT_COLUMNS, null);
+        assertNull(response.getErrorDesc(), response.getError());
         FindQueryResponseData responseData = response.getData();
         assertNotNull(responseData);
         assertTrue("No results found", responseData.getSize() > 0);
@@ -107,6 +109,7 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
 
         FindApi findApi = defaultUserApi.getFindApi();
         FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, "400", null);
+        assertNull(response.getErrorDesc(), response.getError());
         FindQueryResponseData responseData = response.getData();
         assertNotNull(responseData);
         assertTrue("No results found", responseData.getSize() > 0);

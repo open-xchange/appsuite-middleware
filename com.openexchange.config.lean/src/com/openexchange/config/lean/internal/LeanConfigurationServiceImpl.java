@@ -93,7 +93,6 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
         // Load parsers
         ImmutableMap.Builder<Class<?>, PropertyValueParser<?>> vps = ImmutableMap.builder();
-        // Function<String, Integer> f = t -> Integer.valueOf(t);
         vps.put(Integer.class, new IntegerPropertyValueParser());
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
