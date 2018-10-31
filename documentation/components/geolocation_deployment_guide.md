@@ -1,10 +1,11 @@
 ---
 title: Deployment Guide for the OX Geolocation Service and Country IP Check
+classes: toc
 ---
 
-## Installation on OX App Suite
+# Installation on OX App Suite
 
-### Debian GNU/Linux 8.0
+## Debian GNU/Linux 8.0
 
 Add the following entry to /etc/apt/sources.list.d/open-xchange.list if not already present:
 
@@ -24,7 +25,7 @@ $ apt-get update
 $ apt-get install open-xchange-geoip
 ```
 
-### SUSE Linux Enterprise Server 12
+## SUSE Linux Enterprise Server 12
 
 Add the package repository using zypper if not already present:
 
@@ -45,7 +46,7 @@ $ zypper ref
 $ zypper in open-xchange-geoip
 ```
 
-### RedHat Enterprise Linux 6 / CentOS 6
+## RedHat Enterprise Linux 6 / CentOS 6
 
 Start a console and create a software repository file if not already present:
 
@@ -79,7 +80,7 @@ $ yum update
 $ yum install open-xchange-geoip
 ```
 
-### RedHat Enterprise Linux 7 / CentOS 7
+## RedHat Enterprise Linux 7 / CentOS 7
 
 Start a console and create a software repository file if not already present:
 
@@ -113,7 +114,7 @@ $ yum update
 $ yum install open-xchange-geoip
 ```
 
-## Configuration
+# Configuration
 
 To enable the OX Geolocation Service and the country code check for IP changes the following properties must be set:
 
@@ -132,7 +133,7 @@ com.openexchange.geolocation.maxmind.databasePath=/path/of/geolite2-city.mmdb
 ```
 Defines the source of the [GeoLite2 City MaxMind GeoDB](http://dev.maxmind.com/geoip/geoip2/geolite2/).
 
-## Monitoring
+# Monitoring
 There are different metrics captured during the operation of the Country Code IP Checker Service. Two graphs are generated over a 5 minute interval, plotting the amount of accepted and denied IP changes. Each graph plots different metrics regarding the reason of accepted/denied IP changes.
 
 The "Accepted IP Changes" graph plots the total amount of:
@@ -146,7 +147,7 @@ The "Denied IP Changes" graph plots the total amount of:
  * Denied IP changes due to country change
  * Denied IP changes due to an exception
 
-## Logging
+# Logging
 Different levels of logging are involved in the CountryCodeIPChecker Service's logger `com.openexchange.ipcheck.countrycode`.
 
 If the IP change of a session is either accepted or kicked due to any number of reasons, then there will be a log entry in DEBUG level indicating that. If any error happens during the acquisition of the GeoInformation of any IP, then that error is logged in ERROR level (the session will be kicked in that case).
