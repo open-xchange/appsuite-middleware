@@ -549,6 +549,13 @@ EOF
         ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
     fi
 
+    # SoftwareChange_Request-236
+    PFILE=/opt/open-xchange/etc/cache.ccf
+    NAMES=( jcs.region.CalendarCache jcs.region.CalendarCache.cacheattributes jcs.region.CalendarCache.cacheattributes.MaxObjects jcs.region.CalendarCache.cacheattributes.MemoryCacheName jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun jcs.region.CalendarCache.elementattributes jcs.region.CalendarCache.elementattributes.IsEternal jcs.region.CalendarCache.elementattributes.MaxLifeSeconds jcs.region.CalendarCache.elementattributes.IdleTime jcs.region.CalendarCache.elementattributes.IsSpool jcs.region.CalendarCache.elementattributes.IsRemote jcs.region.CalendarCache.elementattributes.IsLateral )
+    for I in $(seq 1 ${#NAMES[@]}); do
+      ox_remove_property ${NAMES[$I-1]} $PFILE
+    done
+
     # SoftwareChange_Request-240
     pfile=/opt/open-xchange/etc/contact.properties
     image_k=com.openexchange.contact.scaleVCardImages
