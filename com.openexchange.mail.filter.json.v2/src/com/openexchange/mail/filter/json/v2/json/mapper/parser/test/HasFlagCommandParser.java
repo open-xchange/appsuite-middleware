@@ -98,15 +98,14 @@ public class HasFlagCommandParser extends AbstractSimplifiedMatcherAwareCommandP
                 flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));
             }
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>()));
-        } else {
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
-                handleSimplifiedMatcher(matcher, flagArgList, jsonObject);
-            } else {
-                flagArgList.add(ArgumentUtil.createTagArgument(matcher));
-                flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));
-            }
-            return new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>());
         }
+        if (StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)) {
+            handleSimplifiedMatcher(matcher, flagArgList, jsonObject);
+        } else {
+            flagArgList.add(ArgumentUtil.createTagArgument(matcher));
+            flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));
+        }
+        return new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>());
     }
 
     @Override
@@ -118,7 +117,7 @@ public class HasFlagCommandParser extends AbstractSimplifiedMatcherAwareCommandP
 
     @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         String matchType = command.getMatchType();
         List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size());

@@ -107,13 +107,12 @@ public class FileSystemResourceLoader extends AbstractResourceLoader implements 
     }
 
     @Override
-    public synchronized boolean exists(String name) throws IOException {
+    public synchronized boolean exists(String name) {
         File f = new File(parentDir, name).getAbsoluteFile();
         if (f.exists()) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

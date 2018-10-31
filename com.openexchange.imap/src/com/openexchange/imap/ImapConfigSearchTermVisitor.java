@@ -97,8 +97,7 @@ public class ImapConfigSearchTermVisitor extends AbstractSearchTermVisitor{
         if (needsSourroundingAndTerm) {
             FlagTerm secondTerm = new FlagTerm(MailMessage.FLAG_DELETED, false);
             return new ANDTerm(currentTerm, secondTerm);
-        } else {
-            return currentTerm;
         }
+        return currentTerm;
     }
 }

@@ -49,10 +49,8 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -72,7 +70,7 @@ public class UnreadRequest extends AbstractMailCategoriesRequest<UnreadResponse>
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(PARAMETER_ACTION, ACTION_UNREAD));
         return list.toArray(new Parameter[list.size()]);
@@ -90,7 +88,7 @@ public class UnreadRequest extends AbstractMailCategoriesRequest<UnreadResponse>
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return null;
     }
 

@@ -288,9 +288,8 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
             if (events.getNextSyncToken() != null) {
                 account.getInternalConfiguration().put(GoogleCalendarConfigField.SYNC_TOKEN, events.getNextSyncToken());
                 return new GoogleEventsPage(result, null);
-            } else {
-                return new GoogleEventsPage(result, events.getNextPageToken());
             }
+            return new GoogleEventsPage(result, events.getNextPageToken());
         } catch (IOException e) {
             throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {
@@ -327,7 +326,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected long getRefreshInterval() throws OXException {
+    protected long getRefreshInterval() {
         return refreshInterval;
     }
 

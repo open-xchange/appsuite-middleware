@@ -141,6 +141,7 @@ public class ConversationResponse extends AbstractAJAXResponse {
                         break;
                     case COLOR_LABEL:
                         message.setColorLabel((int) messageMap.get(key));
+                        break;
                     case DELETED:
                         message.setFlag(MailMessage.FLAG_DELETED, true);
                         break;
@@ -236,7 +237,7 @@ public class ConversationResponse extends AbstractAJAXResponse {
         return result;
     }
 
-    private void handleInnerArrays(List<List<String>> innerArray, MimeMailMessage message, String type) throws JSONException, AddressException {
+    private void handleInnerArrays(List<List<String>> innerArray, MimeMailMessage message, String type) throws AddressException {
         for (int a = 0; a < innerArray.size(); a++) {
             List<String> secondInnerArray = innerArray.get(a);
             for (int x = 0; x < secondInnerArray.size(); x++) {

@@ -51,8 +51,6 @@ package com.openexchange.mailaccount.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.mail.internet.idn.IDNA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +87,6 @@ public class TransportAccountImpl implements TransportAccount {
     private String transportLogin;
     private String transportPassword;
     private int transportPort;
-    private Map<String, String> transportProperties;
     private String transportProtocol;
     private boolean transportSecure;
     private String transportServer;
@@ -103,7 +100,6 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public TransportAccountImpl() {
         super();
-        transportProperties = new HashMap<>(4);
         transportAuth = TransportAuth.MAIL;
         transportPort = 25;
         transportProtocol = "smtp";
@@ -315,19 +311,6 @@ public class TransportAccountImpl implements TransportAccount {
     public void setTransportPort(final int transportPort) {
         transportServerUrl = null;
         this.transportPort = transportPort;
-    }
-
-    /**
-     * Sets the transport properties
-     *
-     * @param properties The transport properties to set
-     */
-    public void setTransportProperties(final Map<String, String> transportProperties) {
-        if (null == transportProperties) {
-            this.transportProperties = new HashMap<>(4);
-        } else {
-            this.transportProperties = transportProperties;
-        }
     }
 
     /**

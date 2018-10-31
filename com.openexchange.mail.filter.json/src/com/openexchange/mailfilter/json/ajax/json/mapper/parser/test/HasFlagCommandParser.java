@@ -87,10 +87,10 @@ public class HasFlagCommandParser implements CommandParser<TestCommand> {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         jsonObject.put(Fields.comparison.name(), command.getMatchType().substring(1));
-        jsonObject.put(Fields.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(Fields.values.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
 
     }
 

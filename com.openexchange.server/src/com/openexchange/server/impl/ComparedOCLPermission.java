@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link ComparedOCLPermission}
@@ -69,7 +68,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public abstract class ComparedOCLPermission<P, GP extends P> {
+public abstract class ComparedOCLPermission<P> {
 
     private Collection<P> newPermissions;
     private Collection<P> originalPermissions;
@@ -84,9 +83,8 @@ public abstract class ComparedOCLPermission<P, GP extends P> {
      *
      * @param newPermissions The new permissions or <code>null</code>
      * @param originalPermissions The original permissions or <code>null</code>
-     * @throws OXException
      */
-    protected ComparedOCLPermission(P[] newPermissions, P[] originalPermissions) throws OXException {
+    protected ComparedOCLPermission(P[] newPermissions, P[] originalPermissions) {
         this(newPermissions == null ? null : Arrays.asList(newPermissions), originalPermissions == null ? null : Arrays.asList(originalPermissions));
     }
 
@@ -95,9 +93,8 @@ public abstract class ComparedOCLPermission<P, GP extends P> {
      *
      * @param newPermissions The new permissions or <code>null</code>
      * @param originalPermissions The original permissions or <code>null</code>
-     * @throws OXException
      */
-    protected ComparedOCLPermission(Collection<P> newPermissions, Collection<P> originalPermissions) throws OXException {
+    protected ComparedOCLPermission(Collection<P> newPermissions, Collection<P> originalPermissions) {
         super();
         this.newPermissions = newPermissions;
         this.originalPermissions = originalPermissions;
@@ -119,12 +116,12 @@ public abstract class ComparedOCLPermission<P, GP extends P> {
             modifiedUsers = Collections.emptyList();
             hasChanges = false;
             return;
-        } else {
-            addedUsers = new LinkedHashMap<>();
-            addedGroups = new LinkedList<>();
-            removedUsers = new LinkedList<>();
-            modifiedUsers = new LinkedList<>();
         }
+
+        addedUsers = new LinkedHashMap<>();
+        addedGroups = new LinkedList<>();
+        removedUsers = new LinkedList<>();
+        modifiedUsers = new LinkedList<>();
 
         /*
          * Calculate added permissions

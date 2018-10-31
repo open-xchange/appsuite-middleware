@@ -531,8 +531,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null != sTransAuth) {
                     transportAccount.setTransportAuth(TransportAuth.transportAuthFor(sTransAuth));
                 }
-                transportAccount.setTransportProperties(properties);
-
             }
         } finally {
             closeSQLStuff(rs, stmt);
