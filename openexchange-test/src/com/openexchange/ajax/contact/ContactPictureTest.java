@@ -230,20 +230,20 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         return contactsApi.getContactPicture(getSessionId(), userID, contactId, contactFolderID, mail, null, null, null, null, null, null, null, null, null);
     }
     
-    private void assertThatPictureIsMissing(String userID, String contactId, String mail) throws ApiException {
+    private void assertThatPictureIsMissing(String userID, String contactId, String mail) {
         assertThatPictureIsMissing(userID, contactId, mail, contactFolderId);
     }
     
-    private void assertThatPictureIsMissing(String userID, String contactId, String mail, String contactFolderID) throws ApiException, IllegalStateException {
+    private void assertThatPictureIsMissing(String userID, String contactId, String mail, String contactFolderID) throws IllegalStateException {
         try {
             getContactPicture(userID, contactId, mail, contactFolderID);
         } catch (ApiException e) {
             if (e.getCode() == 404) {
                 return;
             }
-            throw e;
+            Assert.fail("Expected a 404 error but received a " + e.getCode() + " with message: " + e.getMessage());
         }
-        throw new IllegalStateException("Client should have received a 404");
+        Assert.fail("Client should have received a 404");
     }
 
     private void setImage(final ContactData contactObj) {
