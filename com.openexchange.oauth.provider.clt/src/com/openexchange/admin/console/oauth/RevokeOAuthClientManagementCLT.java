@@ -151,6 +151,7 @@ public class RevokeOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     fis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 
@@ -158,6 +159,7 @@ public class RevokeOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     bis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 

@@ -168,6 +168,7 @@ public class ListOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     fis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 
@@ -175,6 +176,7 @@ public class ListOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     bis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 

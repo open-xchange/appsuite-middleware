@@ -68,5 +68,5 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ThreadedMailCategoriesTest.class,
 })
 public class MailCategoriesTestSuite  {
-
+    // empty
 }

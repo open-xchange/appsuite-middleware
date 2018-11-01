@@ -236,10 +236,9 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                     if(Math.abs(sentDate - expectedSentDate) <= delta){
                         matchAnySentDate = true;
                         break;
-                    } else {
-                        if(closest==0 || closest > Math.abs(sentDate - expectedSentDate)) {
-                            closest = Math.abs(sentDate - expectedSentDate);
-                        }
+                    }
+                    if (closest == 0 || closest > Math.abs(sentDate - expectedSentDate)) {
+                        closest = Math.abs(sentDate - expectedSentDate);
                     }
                 }
                 Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+closest, matchAnySentDate);

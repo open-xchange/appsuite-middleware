@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
@@ -77,7 +76,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
     private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
 
     @Override
-    public void call(IDataWrapper data) throws IOException, FileResponseRendererActionException {
+    public void call(IDataWrapper data) throws FileResponseRendererActionException {
         // Check certain parameters
         data.setDelivery(AJAXUtility.sanitizeParam(data.getRequest().getParameter(DELIVERY)));
         if (data.getDelivery() == null) {

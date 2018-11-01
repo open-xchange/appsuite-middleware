@@ -93,7 +93,7 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         // The exists test command only applies to 'header'
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.HEADER.getCommandName());
         jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());

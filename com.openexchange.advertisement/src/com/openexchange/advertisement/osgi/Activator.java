@@ -63,7 +63,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.session.Session;
@@ -100,7 +99,7 @@ public class Activator extends HousekeepingActivator {
             registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
 
                 @Override
-                public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session session) throws OXException {
+                public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session session) {
                     if (sCapability.equals(capability)) {
                         AdvertisementConfigService confService = packageService.getScheme(session.getContextId());
                         if (confService == null) {

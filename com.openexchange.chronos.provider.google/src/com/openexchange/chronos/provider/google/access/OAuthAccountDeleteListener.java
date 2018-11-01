@@ -82,7 +82,7 @@ public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthA
     }
 
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) {
         // nothing to do
     }
 

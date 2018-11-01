@@ -107,7 +107,7 @@ public class StringTestCommandParser extends AbstractSimplifiedMatcherAwareComma
 
     @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size() + 1);
         String matchType = command.getMatchType();

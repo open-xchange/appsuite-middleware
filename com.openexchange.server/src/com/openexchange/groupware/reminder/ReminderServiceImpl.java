@@ -83,9 +83,8 @@ public class ReminderServiceImpl implements ReminderService{
         if(reminder.getUser() != session.getUserId()){
             if(write){
                 throw ReminderExceptionCode.NO_PERMISSION_MODIFY.create();
-            } else {
-                throw ReminderExceptionCode.NO_PERMISSION_READ.create();
             }
+            throw ReminderExceptionCode.NO_PERMISSION_READ.create();
         }
     }
 

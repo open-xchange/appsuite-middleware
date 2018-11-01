@@ -159,7 +159,7 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 
             @Override
             public Integer get(Attendee attendee) {
-                return null == attendee.getPartStat() ? null : I(Event2Appointment.getConfirm(attendee.getPartStat()));
+                return null == attendee.getPartStat() ? 0 : I(Event2Appointment.getConfirm(attendee.getPartStat()));
             }
 
             @Override

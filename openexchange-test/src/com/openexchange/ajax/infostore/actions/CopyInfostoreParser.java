@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -71,7 +70,7 @@ public class CopyInfostoreParser extends AbstractAJAXParser<CopyInfostoreRespons
     }
 
     @Override
-    protected CopyInfostoreResponse createResponse(Response response) throws JSONException {
+    protected CopyInfostoreResponse createResponse(Response response) {
         return new CopyInfostoreResponse(response);
     }
 }

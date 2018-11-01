@@ -49,8 +49,6 @@
 
 package com.openexchange.server.impl;
 
-import com.openexchange.exception.OXException;
-
 /**
  *
  * {@link ComparedOCLFolderPermissions} is a helper class to calculate a diff of the ocl folder permissions on an update request.
@@ -58,7 +56,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ComparedOCLFolderPermissions extends ComparedOCLPermission<OCLPermission, OCLPermission> {
+public class ComparedOCLFolderPermissions extends ComparedOCLPermission<OCLPermission> {
 
     /**
      * Initializes a new {@link ComparedOCLFolderPermissions}.
@@ -66,7 +64,7 @@ public class ComparedOCLFolderPermissions extends ComparedOCLPermission<OCLPermi
      * @param newPermissions The new permissions
      * @param originalPermissions The original permissions
      */
-    public ComparedOCLFolderPermissions(OCLPermission[] newPermissions, OCLPermission[] originalPermissions) throws OXException {
+    public ComparedOCLFolderPermissions(OCLPermission[] newPermissions, OCLPermission[] originalPermissions) {
         super(newPermissions, originalPermissions);
         calc();
     }

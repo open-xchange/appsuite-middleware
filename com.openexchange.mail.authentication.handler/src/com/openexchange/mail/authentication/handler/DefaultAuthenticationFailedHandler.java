@@ -79,7 +79,7 @@ public class DefaultAuthenticationFailedHandler implements AuthenticationFailedH
     }
 
     @Override
-    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
+    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) {
         if (AuthType.isOAuthType(mailConfig.getAuthType())) {
             sessiondService.removeSession(session.getSessionID());
             return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(failedAuth, new Object[0]));
