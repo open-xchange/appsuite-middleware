@@ -79,6 +79,11 @@ public enum DriveClientType {
     IOS("OpenXchange.iosClient.OXDrive", false),
 
     /**
+     * The iOS Drive 3.0 client
+     */
+    IOS_DRIVE3("iOS.Drive", false),
+
+    /**
      * The Android mobile client
      */
     ANDROID("OpenXchange.Android.OXDrive", false),
