@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: open-xchange-core >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,8 +56,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/com.openexchange.advertisement.clt.jar
 
 %changelog
-* Fri Nov 02 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Second preview for 7.10.1 release
 * Thu Oct 11 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 First candidate for 7.10.1 release
 * Thu Sep 06 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
