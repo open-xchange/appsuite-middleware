@@ -349,10 +349,14 @@ public class RdbContextStorage extends ContextStorage {
         try {
             stmt = con.prepareStatement("SELECT cid FROM context");
             result = stmt.executeQuery();
-            List<Integer> retval = new ArrayList<Integer>();
-            while (result.next()) {
-                retval.add(Integer.valueOf(result.getInt(1)));
+            if (!result.next()) {
+                return Collections.emptyList();
             }
+
+            List<Integer> retval = new ArrayList<Integer>();
+            do {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            } while (result.next());
             return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -516,10 +520,14 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id = ?");
             stmt.setInt(1, filestoreId);
             result = stmt.executeQuery();
-            List<Integer> retval = new ArrayList<Integer>();
-            while (result.next()) {
-                retval.add(Integer.valueOf(result.getInt(1)));
+            if (!result.next()) {
+                return Collections.emptyList();
             }
+
+            List<Integer> retval = new ArrayList<Integer>();
+            do {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            } while (result.next());
             return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
