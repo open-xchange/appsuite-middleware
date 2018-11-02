@@ -1,3 +1,9 @@
+open-xchange-client-onboarding (7.10.1-2) stable; urgency=medium
+
+  * Second preview for 7.10.1 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 02 Nov 2018 14:02:18 +0100
+
 open-xchange-client-onboarding (7.10.1-1) stable; urgency=medium
 
   * First candidate for 7.10.1 release
