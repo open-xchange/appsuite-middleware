@@ -75,7 +75,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientInfoServiceImpl.class);
 
     private final ServiceListing<ClientInfoProvider> providers;
-    private final ClientInfo defaultClientInfo = new DefaultClientInfo();
+    private final ClientInfo defaultClientInfo;
 
     /**
      * Initializes a new {@link ClientInfoServiceImpl}.
@@ -85,6 +85,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
     public ClientInfoServiceImpl(ServiceListing<ClientInfoProvider> providers) {
         super();
         this.providers = providers;
+        defaultClientInfo = new DefaultClientInfo();
     }
 
     @Override
@@ -127,9 +128,18 @@ public class ClientInfoServiceImpl implements ClientInfoService {
         return map;
     }
 
-    private class DefaultClientInfo implements ClientInfo {
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
-        private final static String UNKNOWN = "unknown";
+    private static class DefaultClientInfo implements ClientInfo {
+
+        private final String unknown = "unknown";
+
+        /**
+         * Initializes a new {@link ClientInfoServiceImpl.DefaultClientInfo}.
+         */
+        DefaultClientInfo() {
+            super();
+        }
 
         @Override
         public ClientInfoType getType() {
@@ -143,29 +153,28 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 
         @Override
         public String getOSFamily() {
-            return UNKNOWN;
+            return unknown;
         }
 
         @Override
         public String getOSVersion() {
-            return UNKNOWN;
+            return unknown;
         }
 
         @Override
         public String getClientName() {
-            return UNKNOWN;
+            return unknown;
         }
 
         @Override
         public String getClientVersion() {
-            return UNKNOWN;
+            return unknown;
         }
 
         @Override
         public String getClientFamily() {
-            return UNKNOWN;
+            return unknown;
         }
-
-    }
+    } // End of class DefaultClientInfo
 
 }
