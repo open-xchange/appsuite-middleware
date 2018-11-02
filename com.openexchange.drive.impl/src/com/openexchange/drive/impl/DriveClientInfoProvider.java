@@ -85,6 +85,8 @@ public class DriveClientInfoProvider implements ClientInfoProvider {
                     return new DriveClientInfo("Android", null, null, "android");
                 case IOS:
                     return new DriveClientInfo("iOS", null, null, "ios");
+                case IOS_DRIVE3:
+                    return new DriveClientInfo("iOS", null, "3", "ios");
                 case MAC_OS:
                     return new DriveClientInfo("Mac OS", null, null, "macos");
                 case WINDOWS:
