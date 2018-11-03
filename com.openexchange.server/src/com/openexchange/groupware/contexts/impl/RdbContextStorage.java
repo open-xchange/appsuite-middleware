@@ -467,7 +467,7 @@ public class RdbContextStorage extends ContextStorage {
                         return Collections.emptyMap();
                     }
 
-                    PoolAndSchema pas = new PoolAndSchema(result.getInt(2)/*write_db_pool_id*/, result.getString(3)/*db_schema*/);
+                    PoolAndSchema pas = new PoolAndSchema(result.getInt(1)/*write_db_pool_id*/, result.getString(2)/*db_schema*/);
                     return Collections.singletonMap(pas, Collections.singletonList(contextId));
                 } finally {
                     closeSQLStuff(result, stmt);
