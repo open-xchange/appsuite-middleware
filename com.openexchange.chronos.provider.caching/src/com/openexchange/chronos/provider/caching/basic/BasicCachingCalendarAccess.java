@@ -778,7 +778,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         importedEvent.setId(id);
         importedEvent.setCalendarUser(getCalendarUser());
         String seriesId = Strings.isNotEmpty(importedEvent.getRecurrenceRule()) ? id : null != originalSeriesMaster ? originalSeriesMaster.getSeriesId() : null;
-        importedEvent.setSeriesId(id);
+        importedEvent.setSeriesId(seriesId);
         calendarStorage.getEventStorage().insertEvent(importedEvent);
         List<Attendee> attendees = importedEvent.getAttendees();
 

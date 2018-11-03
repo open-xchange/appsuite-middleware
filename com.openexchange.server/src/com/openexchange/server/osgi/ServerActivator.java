@@ -60,9 +60,9 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.json.FileBackedJSONStringProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -912,7 +912,6 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);

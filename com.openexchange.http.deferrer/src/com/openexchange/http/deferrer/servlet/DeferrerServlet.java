@@ -142,7 +142,7 @@ public class DeferrerServlet extends HttpServlet {
             String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
-            builder.append(name).append('=').append(encodeUrl(parameter, true, true));
+            builder.append(name).append('=').append(encodeUrl(parameter, true, false));
         }
         resp.sendRedirect(builder.toString());
     }
