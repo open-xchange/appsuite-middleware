@@ -49,7 +49,7 @@
 
 package com.openexchange.clientinfo.impl;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -118,7 +118,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 
     @Override
     public Map<String, ClientInfo> getClientInfos(List<Session> sessions) {
-        Map<String, ClientInfo> map = new HashMap<>(sessions.size());
+        Map<String, ClientInfo> map = new LinkedHashMap<>(sessions.size());
         for (Session session : sessions) {
             ClientInfo info = getClientInfo(session);
             if (null != info) {
@@ -132,7 +132,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 
     private static class DefaultClientInfo implements ClientInfo {
 
-        private final String unknown = "unknown";
+        private static final String UNKNOWN = "unknown";
 
         /**
          * Initializes a new {@link ClientInfoServiceImpl.DefaultClientInfo}.
@@ -153,27 +153,27 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 
         @Override
         public String getOSFamily() {
-            return unknown;
+            return UNKNOWN;
         }
 
         @Override
         public String getOSVersion() {
-            return unknown;
+            return UNKNOWN;
         }
 
         @Override
         public String getClientName() {
-            return unknown;
+            return UNKNOWN;
         }
 
         @Override
         public String getClientVersion() {
-            return unknown;
+            return UNKNOWN;
         }
 
         @Override
         public String getClientFamily() {
-            return unknown;
+            return UNKNOWN;
         }
     } // End of class DefaultClientInfo
 
