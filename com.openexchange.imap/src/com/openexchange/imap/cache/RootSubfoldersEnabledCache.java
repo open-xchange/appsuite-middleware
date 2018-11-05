@@ -74,6 +74,8 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class RootSubfoldersEnabledCache {
 
+    private static final String ROOT_FULL_NAME = "";
+
     private static volatile Cache<String, Boolean> CACHE;
 
     /**
@@ -144,8 +146,8 @@ public final class RootSubfoldersEnabledCache {
 
         try {
             // Check for personal namespace
-            String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, imapConfig.getAccountId());
-            if (null != personalNamespaces && personalNamespaces.length > 0 && "".equals(personalNamespaces[0])) {
+            String personalNamespace = NamespaceFoldersCache.getPersonalNamespace(imapStore, true, session, imapConfig.getAccountId());
+            if (ROOT_FULL_NAME.equals(personalNamespace)) {
                 // Root level is signaled as personal namespace, thus creating folder there SHOULD be possible...
                 return true;
             }
@@ -177,8 +179,8 @@ public final class RootSubfoldersEnabledCache {
         IMAPStore store = (IMAPStore) imapDefaultFolder.getStore();
         try {
             // Check for personal namespace
-            String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(store, true, session, imapConfig.getAccountId());
-            if (null != personalNamespaces && personalNamespaces.length > 0 && "".equals(personalNamespaces[0])) {
+            String personalNamespace = NamespaceFoldersCache.getPersonalNamespace(store, true, session, imapConfig.getAccountId());
+            if (ROOT_FULL_NAME.equals(personalNamespace)) {
                 // Root level is signaled as personal namespace, thus creating folder there SHOULD be possible...
                 return true;
             }
