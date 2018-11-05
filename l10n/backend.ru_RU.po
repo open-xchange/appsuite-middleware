@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-07-16 13:34+0200\n"
+"PO-Revision-Date: 2018-10-04 12:02+0200\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: ru_RU\n"
@@ -5524,8 +5524,8 @@ msgstr ""
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
-msgstr "Порядковый номер устарел."
+msgid "This appointment already exists in your calendar."
+msgstr "Эта встреча уже есть в календаре."
 
 #. *
 #. * The calendar is currently under maintenance. Please try again later.
@@ -12894,6 +12894,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Зулу"
+
+#~ msgid "Sequence number is outdated."
+#~ msgstr "Порядковый номер устарел."
 
 #~ msgid "????????? 1 month"
 #~ msgstr "????????? 1 месяц"

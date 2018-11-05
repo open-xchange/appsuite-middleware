@@ -115,6 +115,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.upload.osgi.UploadActivator(),
         new com.openexchange.net.ssl.management.osgi.SSLCertificateManagementActivator(),
         new com.openexchange.net.ssl.management.json.osgi.SSLCertificateManagementJSONActivator(),
+        new com.openexchange.groupware.upgrade.osgi.SegmentedUpgradeActivator()
     };
 
     public ServerCompositeActivator() {

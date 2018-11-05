@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-07-16 13:32+0200\n"
+"PO-Revision-Date: 2018-10-06 22:48+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.0.5\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -231,44 +231,44 @@ msgstr "Päivä"
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
-msgstr "maanantai"
+msgstr "Maanantai"
 
 #. Tuesday
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:86
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
-msgstr "tiistai"
+msgstr "Tiistai"
 
 #. Wednesday
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:88
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
-msgstr "keskiviikko"
+msgstr "Keskiviikko"
 
 #. Thursday
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:90
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
-msgstr "torstai"
+msgstr "Torstai"
 
 #. Friday
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:92
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
-msgstr "perjantai"
+msgstr "Perjantai"
 
 #. Saturday
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:94
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
-msgstr "lauantai"
+msgstr "Lauantai"
 
 #. Sunday
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:96
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
-msgstr "sunnuntai"
+msgstr "Sunnuntai"
 
 #. -
 #. * Months
@@ -277,73 +277,73 @@ msgstr "sunnuntai"
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:98
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:851
 msgid "January"
-msgstr "tammikuu"
+msgstr "Tammikuu"
 
 #. February
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:100
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:854
 msgid "February"
-msgstr "helmikuu"
+msgstr "Helmikuu"
 
 #. March
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:102
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:857
 msgid "March"
-msgstr "maaliskuu"
+msgstr "Maaliskuu"
 
 #. April
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:104
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:860
 msgid "April"
-msgstr "huhtikuu"
+msgstr "Huhtikuu"
 
 #. May
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:106
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:863
 msgid "May"
-msgstr "toukokuu"
+msgstr "Toukokuu"
 
 #. June
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:108
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:866
 msgid "June"
-msgstr "kesäkuu"
+msgstr "Kesäkuu"
 
 #. July
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:110
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:869
 msgid "July"
-msgstr "heinäkuu"
+msgstr "Heinäkuu"
 
 #. August
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:112
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:872
 msgid "August"
-msgstr "elokuu"
+msgstr "Elokuu"
 
 #. September
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:114
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:875
 msgid "September"
-msgstr "syyskuu"
+msgstr "Syyskuu"
 
 #. October
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:116
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:878
 msgid "October"
-msgstr "lokakuu"
+msgstr "Lokakuu"
 
 #. November
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:118
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:881
 msgid "November"
-msgstr "marraskuu"
+msgstr "Marraskuu"
 
 #. December
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:120
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:884
 msgid "December"
-msgstr "joulukuu"
+msgstr "Joulukuu"
 
 #. -
 #. * Monthly1 constants
@@ -501,11 +501,11 @@ msgstr ""
 
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
-msgstr "Tapaamisen liitteitä on muutettu."
+msgstr "Tapaamisen liitteitä on muutettu"
 
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:84
 msgid "One or more other fields have been updated"
-msgstr "Yhtä tai useampaa kenttää on päivitetty."
+msgstr "Yhtä tai useampaa kenttää on päivitetty"
 
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:86
 msgid "Reserved"
@@ -752,7 +752,7 @@ msgstr "%1$s on poistettu tapaamisesta."
 #.
 #: com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:233
 msgid "%1$s has %2$s the appointment."
-msgstr "%1$s on %2$s tapaamisen"
+msgstr "%1$s on %2$s tapaamisen."
 
 #. public static final String ACCEPTED = "accepted";
 #.
@@ -904,12 +904,12 @@ msgstr "Synkronoi osoitekirjasi ja yhteystietosi."
 #. Your selection is not supported.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
 msgid "Your selection is not supported."
-msgstr "Valintaasi ei tueta"
+msgstr "Valintaasi ei tueta."
 
 #. The chosen configuration is not supported.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:73
 msgid "The chosen configuration is not supported."
-msgstr "Valittua konfiguraatiota ei tueta"
+msgstr "Valittua konfiguraatiota ei tueta."
 
 #. The execution has been denied. Please choose another option.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:76
@@ -1002,7 +1002,7 @@ msgstr "Tekstiviestin lähettäminen onnistui"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
 msgid "To set up your device, click following link: "
-msgstr "Tee laitteeseesi asetukset seuraamalla seuraavaa linkkiä:"
+msgstr "Tee laitteeseesi asetukset seuraamalla seuraavaa linkkiä: "
 
 #. The user salutation; e.g. "Dear John Doe,"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
@@ -1015,7 +1015,7 @@ msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile."
 msgstr ""
-"Konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
+"konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
 "oleva konfiguraatioprofiili."
 
 #. The content of the E-Mail providing the profile attachment
@@ -1024,7 +1024,7 @@ msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile \"%1$s\"."
 msgstr ""
-"Konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
+"konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
 "oleva konfiguraatioprofiili \"%1$s\"."
 
 #. The subject of the E-Mail providing the profile attachment
@@ -1498,7 +1498,7 @@ msgstr ""
 
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:63
 msgid "Validation failed for property \"%1$s\": %2$s"
-msgstr "Ominaisuuden  \"%1$s\": %2$s validointi epäonnistui."
+msgstr "Ominaisuuden  \"%1$s\": %2$s validointi epäonnistui"
 
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:65
 msgid "Error reading vCard: %1$s"
@@ -1522,7 +1522,7 @@ msgstr "Ei pääsyä tiedostotaltioon."
 #. - ...
 #: com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your contacts."
-msgstr "Lue kaikki yhteystietosi"
+msgstr "Lue kaikki yhteystietosi."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
@@ -1565,7 +1565,7 @@ msgstr "Ei yhteyttä tietokantaan %1$d"
 
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
 msgid "Schema can not be set on database connection"
-msgstr "Tietokantayhteydelle ei voitu asettaa kaaviota."
+msgstr "Tietokantayhteydelle ei voitu asettaa kaaviota"
 
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
 msgid "Null is returned to connection pool."
@@ -1670,7 +1670,7 @@ msgstr ""
 #. %1$s is replaced with more details about the invalid configuration
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:133
 msgid "Invalid configuration for global databases: %1$s"
-msgstr "Yleisten tietokantojen kelpaamaton konfiguraatio:   %1$s."
+msgstr "Yleisten tietokantojen kelpaamaton konfiguraatio: %1$s"
 
 #. %1$s is replaced with the context group name
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:136
@@ -1693,12 +1693,12 @@ msgstr ""
 #. Invalid DoveAdm URL: %1$s
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
 msgid "The provided DoveAdm URL: %1$s is invalid"
-msgstr "Aneetu DoveAdm-osoite %1$s ei kelpaa."
+msgstr "Annettu DoveAdm-osoite %1$s ei kelpaa"
 
 #. The DoveAdm resource does not exist: %1$s
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:71
 msgid "The provided DoveAdm resource does not exist: %1$s"
-msgstr "Annettua DoveAdm-resurssia ei ole olemassa: %1$s "
+msgstr "Annettua DoveAdm-resurssia ei ole olemassa: %1$s"
 
 #. An I/O error occurred: %1$s
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
@@ -2090,7 +2090,7 @@ msgstr ""
 #. ZIP archive exceeds max. allowed size of %1$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:89
 msgid "ZIP archive exceeds max. allowed size of %1$s"
-msgstr "ZIP-arkisto ylittää enimmäiskoon  %1$s."
+msgstr "ZIP-arkisto ylittää enimmäiskoon %1$s"
 
 #. The file storage account is currently not accessible.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:92
@@ -2178,7 +2178,7 @@ msgstr "URL  %1$s ei viittaa tiedostoon %1$s"
 #. The %1$s URL does not denote a directory: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
 msgid "The %1$s URL does not denote a directory: %2$s"
-msgstr " URL %1$s ei viittaa hakemistoon  %2$s"
+msgstr "URL %1$s ei viittaa hakemistoon %2$s"
 
 #. Missing file name.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
@@ -2189,19 +2189,19 @@ msgstr "Tiedostonimi puuttuu."
 #. Update denied for %1$s resource: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
 msgid "Update denied for \"%1$s\" resource: %2$s"
-msgstr " \"%1$s\"-resurssin %2$s päivitys on estetty."
+msgstr "\"%1$s\"-resurssin %2$s päivitys on estetty"
 
 #. Delete denied for \"%1$s\" resource: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
 msgid "Delete denied for \"%1$s\" resource: %2$s"
-msgstr " \"%1$s\"-resurssin %2$s poistaminen on estetty."
+msgstr "\"%1$s\"-resurssin %2$s poistaminen on estetty"
 
 #. Missing configuration for %1$s account "%2$s".
 #. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
 #. E.g. 'Missing configuration for boxcom account "3".'
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "Missing configuration for %1$s account \"%2$s\"."
-msgstr " Tilin %1$s konfiguraatio \"%2$s\" puuttuu."
+msgstr "Tilin %1$s konfiguraatio \"%2$s\" puuttuu"
 
 #. The provided %1$s resource does not exist: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
@@ -2481,7 +2481,7 @@ msgstr ""
 #: com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
 #: com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:64
 msgid "No such document: %1$s"
-msgstr "Ei asiakirjaa %1$s."
+msgstr "Ei asiakirjaa %1$s"
 
 #. No such chunk: %1$s
 #: com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:66
@@ -2944,7 +2944,7 @@ msgstr "Vapaa/varattu tieto kohteelle \"%1$s\" ei ole saatavilla."
 #. The uwa widget with the id %1$s could not be found
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 msgid "The uwa widget with the id %1$s could not be found"
-msgstr "Ei löytynyt uwa-agenttia tunnisteella %1$s."
+msgstr "Ei löytynyt uwa-agenttia tunnisteella %1$s"
 
 #. The widget with the id %1$s is protected and only positional information can be updated
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:66
@@ -2953,7 +2953,7 @@ msgid ""
 "be updated"
 msgstr ""
 "Widget tunnisteella %1$s on suojattu. Ainoastaan sen sijaintitietoja voi "
-"päivittää."
+"päivittää"
 
 #. The string cannot be parsed to a valid URL.
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
@@ -3010,7 +3010,7 @@ msgstr ""
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:87
 msgid "Method \"%1$s\" in HTTP header authorization is not supported."
 msgstr ""
-"Metodi \"%1$s\" ei ole tuettu HTTP-otsakkeita käyttävässä tunnistautumisessa"
+"Metodi \"%1$s\" ei ole tuettu HTTP-otsakkeita käyttävässä tunnistautumisessa."
 
 #. Missing client capabilities.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:90
@@ -3132,7 +3132,7 @@ msgstr "Dataa ei voida tallentaa tietokantaan, koska se on liian iso"
 #. The request sent by the client was syntactically incorrect
 #: com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
 msgid "The request sent by the client was syntactically incorrect"
-msgstr "Asiakasohjelmiston lähettämä pyynto oli syntaktisesti epäkelpo."
+msgstr "Asiakasohjelmiston lähettämä pyynto oli syntaktisesti väärin"
 
 #. *
 #. * File not found: %1$s
@@ -3233,7 +3233,7 @@ msgstr "Annettua Guard-resurssia ei ole olemassa: %1$s"
 #. The Guard resource does not exist
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
-msgstr "Guard-resurssia ei ole olemassa."
+msgstr "Guard-resurssia ei ole olemassa"
 
 #. No Linked-In account available.
 #: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
@@ -3717,7 +3717,7 @@ msgid ""
 "%2$s in folder %3$s"
 msgstr ""
 "Käyttäjätunnuksen %1$s yhteystieto on liian samankaltainen aiemman kansiossa "
-"%3$s sijaitsevan käyttäjätunnuksen %2$s kanssa. "
+"%3$s sijaitsevan käyttäjätunnuksen %2$s kanssa."
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
 msgid "Could not create a proper name for the export file."
@@ -3733,7 +3733,7 @@ msgid ""
 "imported due to a configured limitation"
 msgstr ""
 "%1$sd varoitusta tiedostoa tuotaessa eikä kaikkia kohteita pystytty tuomaan "
-"laitteelle konfiguroidun rajoitteen vuoksi."
+"laitteelle konfiguroidun rajoitteen vuoksi"
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
@@ -3795,7 +3795,7 @@ msgstr "Uudelleenohjauksen osoite \"%1$s\" on hylätty."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
-msgstr "Epäkelpo SIEVE-sääntö. Ole hyvä ja tarkista postin suodatussääntösi."
+msgstr "Epäkelpo SIEVE-sääntö. Ole hyvä ja tarkista postin suodatussääntösi"
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
 msgid ""
@@ -3912,8 +3912,8 @@ msgid ""
 "The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in "
 "context '%3$s'"
 msgstr ""
-"SSL-varmennetta sormenjäljellä  '%1$s' ei löytynyt käyttäjälle '%2$s' "
-"asiayhteydessä  '%3$s'."
+"SSL-varmennetta sormenjäljellä '%1$s' ei löytynyt käyttäjälle '%2$s' "
+"asiayhteydessä '%3$s'"
 
 #. The certificate for domain "%1$s" is untrusted.
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
@@ -3935,13 +3935,13 @@ msgid ""
 "The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in "
 "context '%3$s'"
 msgstr ""
-"Käyttäjä '%2$s' asiayhteydessä '%3$s' ei luota varmenteeseen sormenjäljellä  "
-"'%1$s'."
+"Käyttäjä '%2$s' asiayhteydessä '%3$s' ei luota varmenteeseen sormenjäljellä "
+"'%1$s'"
 
 #. The root certificate issued by '%1$s' is not trusted
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:73
 msgid "The root certificate issued by '%1$s' is not trusted"
-msgstr " '%1$s':n julkaisema juurivarmenteeseen ei luoteta"
+msgstr "'%1$s':n julkaisemaan juurivarmenteeseen ei luoteta"
 
 #. The certificate is self-signed
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:76
@@ -3991,7 +3991,7 @@ msgstr "%1$s %2$s"
 #. Successfully connected ExampleApp with your account
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:64
 msgid "Successfully connected %1$s with your account"
-msgstr " %1$s on onnistuneesti yhdistetty tiliisi."
+msgstr "%1$s on onnistuneesti yhdistetty tiliisi"
 
 #. Salutation with name: "Hello Peter,"
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:67
@@ -4025,8 +4025,7 @@ msgstr "Sovellus  %1$s haluaisi olla yhteydessä tiliisi"
 #. Sign in to OX App Suite to connect example.com with your account
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:66
 msgid "Sign in to %1$s to connect %2$s with your account"
-msgstr ""
-"Kirjaudu sisään sovellukseen  %1$s yhdistääksesi example.comin tiliisi."
+msgstr "Kirjaudu sisään sovellukseen %1$s yhdistääksesi %2$s tiliisi"
 
 #. The application example.com would like to access your account, and is requesting following permissions:
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:69
@@ -4210,7 +4209,7 @@ msgstr ""
 #. You need to explicitly authorise %1$s to subscribe to %2$s
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
-msgstr " %1$s täytyy erityisesti valtuuttaa tilaamaan %2$s"
+msgstr "%1$s täytyy erityisesti valtuuttaa tilaamaan %2$s"
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
@@ -4429,7 +4428,7 @@ msgid ""
 "based sorting"
 msgstr ""
 "POP3-lajittelu epäonnistui (syystä: \"%1$s\"). Käytetään ohjelman "
-"lajittelutoimintoa."
+"lajittelutoimintoa"
 
 #. *
 #. * Unknown search field: %1$s
@@ -4620,7 +4619,7 @@ msgid ""
 "The POP3 storage is missing for user %1$s. Please provide one and try again"
 msgstr ""
 "Käyttäjältä %1$s puuttuu POP3 taltio. Anna sellainen ja yritä uudelleen, ole "
-"hyvä."
+"hyvä"
 
 #. *
 #. * POP3 default folder %1$s must not be moved.
@@ -4721,7 +4720,7 @@ msgid ""
 "again"
 msgstr ""
 "Seuraava kenttä tai seuraavat kentät ovat liian pitkiä: %1$s. Ole hyvä ja "
-"lyhennä arvoja ja yritä uudelleen."
+"lyhennä arvoja ja yritä uudelleen"
 
 #: com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:64
 msgid "The data you provided (%1$s) cannot be changed."
@@ -4921,7 +4920,7 @@ msgid ""
 "delete some signatures in order to create new ones."
 msgstr ""
 "Allekirjoitusten kiintiö on ylitetty. Kiintiö: %2$s. Käytetty kiintiö: %1$s. "
-"Poista joitakin allekirjoituksia tehdäksesi tilaa uusille. "
+"Poista joitakin allekirjoituksia tehdäksesi tilaa uusille."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
 msgid ""
@@ -5001,17 +5000,17 @@ msgstr "Lukeminen RSS-syötteestä aikakatkaistiin. URL: %1$s"
 #. Failed to read RSS feed from URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
 msgid "Failed to read RSS feed from URL: %1$s"
-msgstr "RSS-syötteen lukeminen osoitteesta  %1$s epäonnistui."
+msgstr "RSS-syötteen lukeminen osoitteesta %1$s epäonnistui"
 
 #. Failed to read RSS feed from URL: %2$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:75
 msgid "Failed to read RSS feed from URL: %2$s"
-msgstr "RSS-syötteen lukeminen osoitteesta  %2$s epäonnistui."
+msgstr "RSS-syötteen lukeminen osoitteesta %2$s epäonnistui"
 
 #. The RSS feed is exceeding the maximum allowed size of '%1$s'
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
 msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
-msgstr "RSS-syöte ylittää sallitun enimmäiskoon '%1$s'."
+msgstr "RSS-syöte ylittää sallitun enimmäiskoon '%1$s'"
 
 #. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
@@ -5054,7 +5053,7 @@ msgstr "%2$s annettu arvo ei ole oikein."
 #.
 #: com.openexchange.server/src/com/openexchange/ajax/helper/ParamContainerExceptionMessage.java:76
 msgid "Please add a value for %1$s"
-msgstr "Lisää arvo parametrille %1$s, ole hyvä."
+msgstr "Lisää arvo parametrille %1$s, ole hyvä"
 
 #. No user-associated job found
 #: com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
@@ -5177,7 +5176,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
 msgid "The object could not be stored due to a configured limitation"
-msgstr "Kohdetta ei voitu tallentaa konfiguroidun rajoitteen vuoksi."
+msgstr "Kohdetta ei voitu tallentaa konfiguroidun rajoitteen vuoksi"
 
 #. You do not have a valid session. Please login again.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5239,7 +5238,7 @@ msgstr ""
 #. Failed to delete all folders
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:98
 msgid "Failed to delete all folders"
-msgstr "Kaikkia kansioita ei voity poistaa."
+msgstr "Kaikkia kansioita ei voity poistaa"
 
 #. The folder was not updated due to possible data loss. Please review the warnings for details.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
@@ -5590,7 +5589,7 @@ msgstr "Lipuketta 'yksityinen' ei voi käyttää epäyksityisessä kansiossa."
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
 msgid "Invalid characters (%2$s) in field %1$s."
-msgstr "Kelpaamattomia merkkejä (%2$s) kentässä %1$s. "
+msgstr "Kelpaamattomia merkkejä (%2$s) kentässä %1$s."
 
 #. *
 #. * Series end is before start date.
@@ -5641,8 +5640,8 @@ msgstr ""
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
-msgstr "Sarjanumero on vanhentunut."
+msgid "This appointment already exists in your calendar."
+msgstr "Tämä tapaaminen on jo olemassa kalenterissasi."
 
 #. *
 #. * The calendar is currently under maintenance. Please try again later.
@@ -5677,7 +5676,7 @@ msgstr "Kuvaa ei voida pienentää."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "This feature has not been enabled"
-msgstr "Tätä ominaisuutta ei ole kytketty päälle."
+msgstr "Tätä ominaisuutta ei ole kytketty päälle"
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:73
 msgid ""
@@ -5788,7 +5787,7 @@ msgstr "Välttämätöntä arvoa \"sukunimi\" ei annettu."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
 msgid "You are not allowed to modify that contact"
-msgstr "Sinulla ei ole valtuuksia muokata yhteystietoa."
+msgstr "Sinulla ei ole valtuuksia muokata yhteystietoa"
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
@@ -6067,7 +6066,7 @@ msgstr "Vahvistettu posti"
 #. The alternative internationalized name for the confirmed-spam mail folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
-msgstr "Vahvistettu-posti"
+msgstr "vahvistettu-posti"
 
 #. The internationalized subject for a read acknowledgement
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
@@ -7150,7 +7149,7 @@ msgstr "alustava"
 #. external
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:708
 msgid "external"
-msgstr "Ulkoinen"
+msgstr "ulkoinen"
 
 #. -
 #. * Line patterns
@@ -7375,7 +7374,7 @@ msgstr "Asiakirjoja ei voitu ladata. Yritä uudelleen."
 #. The folder %1$s you requested is not an Infostore folder.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr "Pyytämäsi kansio %1$s ei ole Infostore-kansio"
+msgstr "Pyytämäsi kansio %1$s ei ole Infostore-kansio."
 
 #. You do not have the appropriate permissions to read the document.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
@@ -7408,7 +7407,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia tämän version poistamiseen."
 #. The document is already locked. Please try again later.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
 msgid "The document is currently locked. Please try again later."
-msgstr "Asiakirja on juuri nyt lukittu. Yritä myöhemmin uudelleen. "
+msgstr "Asiakirja on juuri nyt lukittu. Yritä myöhemmin uudelleen."
 
 #. You do not have the appropriate permissions to unlock the document.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
@@ -7731,7 +7730,7 @@ msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
 msgstr ""
-"Nykyinen salasana puuttuu. Anna nykyinen salasanasi ja yritä uudelleen. "
+"Nykyinen salasana puuttuu. Anna nykyinen salasanasi ja yritä uudelleen."
 
 #. *
 #. * The new password is missing. Please enter your new password and try again.
@@ -8000,8 +7999,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder."
 msgstr ""
-"Yksityisellä lipulla merkittyjä tehtäviä ei voida siirtää julkiseen "
-"kansioon. "
+"Yksityisellä lipulla merkittyjä tehtäviä ei voida siirtää julkiseen kansioon."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -8410,9 +8408,9 @@ msgid ""
 "folders. Consequently, the mail module is not usable at the moment. Please "
 "delete other folders first in order to re-use the mail module again"
 msgstr ""
-"Oletuskansioita ei voida luoda,  koska postijärjestelmä estää uusien "
+"Oletuskansioita ei voida luoda, koska postijärjestelmä estää uusien "
 "kansioiden luomisen. Postimoduuli ei siten ole käytettävissä tällä hetkellä. "
-"Poista ensin muut kansiot, jotta voit käyttää postimoduulia uudelleen."
+"Poista ensin muut kansiot, jotta voit käyttää postimoduulia uudelleen"
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "The types of specified data source are not supported."
@@ -8581,7 +8579,7 @@ msgstr ""
 #. The client request is not permitted.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:194
 msgid "The client request is not permitted."
-msgstr "Asiakaspyyntöä ei sallittu. "
+msgstr "Asiakaspyyntöä ei sallittu."
 
 #. Sending the message denied.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:197
@@ -8591,12 +8589,12 @@ msgstr "Viestin lähettäminen estetty."
 #. Denied to rename a standard/default folder like Trash
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:200
 msgid "Default folder must not be renamed"
-msgstr "Oletuskansiota ei voi nimetä uudelleen."
+msgstr "Oletuskansiota ei voi nimetä uudelleen"
 
 #. Denied to delete a standard/default folder like Trash
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
 msgid "Default folder must not be deleted"
-msgstr "Oletuskansiota ei voi tuhota."
+msgstr "Oletuskansiota ei voi tuhota"
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:205
 msgid "Archive folder does not allow subfolders."
@@ -8643,7 +8641,7 @@ msgstr ""
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "You are not allowed to compose a message containing share links"
-msgstr "Et saa kirjoittaa jakolinkkejä sisältävää viestiä."
+msgstr "Et saa kirjoittaa jakolinkkejä sisältävää viestiä"
 
 #. User wants to compose a share message but does not specify an expiration date which is required
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
@@ -8652,12 +8650,12 @@ msgid ""
 "share links"
 msgstr ""
 "Määritä vanhenemispäivämäärä, jotta voit kirjoittaa jakolinkkejä sisältävän "
-"viestin."
+"viestin"
 
 #. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
 msgid "The selected authentication type is not supported by server %2$s"
-msgstr "Palvelin %2$s ei tue valittua varmennustapaa."
+msgstr "Palvelin %2$s ei tue valittua varmennustapaa"
 
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
@@ -8697,7 +8695,7 @@ msgid ""
 msgstr ""
 "Sähköpostitilisi %2$s on kytketty pois päältä kelpaamattomien pääsytietojen "
 "vuoksi. Muokkaa tiliä ja anna oikeat pääsytiedot, jotta se voidaan taas "
-"kytkeä päälle."
+"kytkeä päälle"
 
 #. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:255
@@ -8716,7 +8714,7 @@ msgid ""
 msgstr ""
 "Sähköpostisi siirto tilillä %2$s on kytketty pois päältä kelpaamattomien "
 "pääsytietojen vuoksi. Muokkaa tiliä ja anna oikeat pääsytiedot, jotta se "
-"voidaan taas kytkeä päälle."
+"voidaan taas kytkeä päälle"
 
 #. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
@@ -8787,7 +8785,7 @@ msgid ""
 "authentication to be active."
 msgstr ""
 "Lähetä RFC822 -tiedot käyttäen ensisijaisen tilin siirtoa. Päävarmennuksen "
-"täytyy olla aktiivinen. "
+"täytyy olla kytkettynä päälle."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8820,7 +8818,7 @@ msgid ""
 "correct them."
 msgstr ""
 "Annetut sisäänkirjautumistiedot postipalvelimelle %1$s näyttävät olevan "
-"virheelliset. Korjaa tiedot. "
+"virheelliset. Korjaa tiedot."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -8935,7 +8933,7 @@ msgstr "Viestiä ei voitu lähettää seuraaville vastaanottajille: %1$s(%2$s)"
 msgid ""
 "Message could not be sent. Error message from mail transport server: %1$s"
 msgstr ""
-"Viestiä ei voitu lähettää. Virheviesti seuraavalta postipalvelimelta: %1$s."
+"Viestiä ei voitu lähettää. Virheviesti seuraavalta postipalvelimelta: %1$s"
 
 #. *
 #. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
@@ -9305,7 +9303,7 @@ msgstr ""
 #. The selected resource \"%1$s\" has been changed in the meantime.
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:93
 msgid "The selected resource \"%1$s\" has been changed in the meantime."
-msgstr "Valittua resurssia \"%1$s\" on sillä välin muutettu"
+msgstr "Valittua resurssia \"%1$s\" on sillä välin muutettu."
 
 #. Missing mandatory field(s) in given resource.
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:96
@@ -9348,7 +9346,7 @@ msgstr "Kansio on oletuskansio eikä sitä voi nimetä uudelleen."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
 msgid "The folder already contains a folder with such a name."
-msgstr "Kansio sisältää jo samannimisen kansion.l"
+msgstr "Kansio sisältää jo samannimisen kansion."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
 msgid "Folders of type \"%2$s\" can't be created below this folder."
@@ -9471,8 +9469,7 @@ msgstr "Sinulla ei ole asiaankuuluvia lupia kansion jakamiseen."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
 msgid "It is not possible to apply the changes due to limited permissions"
-msgstr ""
-"Ei ole mahdollista toteuttaa muutoksia rajoitettujen oikeuksien vuoksi."
+msgstr "Ei ole mahdollista toteuttaa muutoksia rajoitettujen oikeuksien vuoksi"
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
@@ -9561,14 +9558,14 @@ msgstr "Anna kansion nimi."
 #. You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:130
 msgid "You are not allowed to share the folder to \"%2$s\""
-msgstr "Kansion jakaminen käyttäjälle \"%2$s\" ei ole sallittu."
+msgstr "Kansion jakaminen käyttäjälle \"%2$s\" ei ole sallittu"
 
 #. You are not allowed to change the permissions of the trash folder or any of its subfolders
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:133
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
-msgstr "Et voi muuttaa roskakorin tai sen alakansioiden oikeuksia."
+msgstr "Et voi muuttaa roskakorin tai sen alakansioiden oikeuksia"
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -9618,7 +9615,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Invalid JSON data received from client"
-msgstr "Asiakkaalta on vastaanotettu kelpaamatonta JSON-dataa."
+msgstr "Asiakkaalta on vastaanotettu kelpaamatonta JSON-dataa"
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
 msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
@@ -9693,7 +9690,8 @@ msgstr "kansio"
 #. John Doe has shared the folder "Photos" with you. Please log in to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr "%1$s on jakanut kanssasi %2$s \"%3$s\". Kirjaudu sisään katsellaksesi."
+msgstr ""
+"%1$s on jakanut kanssasi %2$s \"%3$s\". Kirjaudu sisään katsellaksesi. "
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -9778,7 +9776,7 @@ msgid ""
 "owner if you want access again."
 msgstr ""
 "Etsimäsi jaettu aineisto ei ole saatavilla. Ota yhteyttä omistajaan jos "
-"haluat saada sen uudelleen käyttöösi. "
+"haluat saada sen uudelleen käyttöösi."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
@@ -10085,8 +10083,8 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle tiedoston \"%3$s\". Napauta allaolevaa "
-"nappia katsellaksesi tiedostoa. "
+"%1$s (%2$s) on jakanut sinulle tiedoston \"%3$s\". Napauta allaolevaa nappia "
+"katsellaksesi tiedostoa."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:117
@@ -10094,8 +10092,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle %3$s tiedostoa. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle %3$s tiedostoa. Napauta allaolevaa nappia "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:120
@@ -10103,8 +10101,8 @@ msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) on jakanut sinulle kuvan  \"%3$s\". Napauta allaolevaa "
-"katsellaksesi sitä. "
+"%1$s (%2$s) on jakanut sinulle kuvan \"%3$s\". Napauta allaolevaa "
+"katsellaksesi sitä."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
@@ -10112,8 +10110,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle %3$s kuvaa. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle %3$s kuvaa. Napauta allaolevaa nappia "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
@@ -10121,8 +10119,8 @@ msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle kohteen  \"%3$s\". Napauta allaolevaa nappia "
-"katsellaksesi sitä. "
+"%1$s (%2$s) on jakanut sinulle kohteen \"%3$s\". Napauta allaolevaa nappia "
+"katsellaksesi sitä."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
@@ -10130,8 +10128,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
 msgstr ""
-" %1$s (%2$s)  on jakanut sinulle %3$s kohdetta. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s)  on jakanut sinulle %3$s kohdetta. Napauta allaolevaa nappia "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
@@ -10140,7 +10138,7 @@ msgid ""
 "below to view it."
 msgstr ""
 "%1$s (%2$s)  on jakanut sinulle kansion \"%3$s\". Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
@@ -10148,8 +10146,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
 "to view them."
 msgstr ""
-" %1$s (%2$s)  on jakanut sinulle %3$s kansiota. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle %3$s kansiota. Napauta allaolevaa nappia "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
@@ -10405,13 +10403,13 @@ msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
 msgstr ""
-"Saimme tietää Sinun unohtaneen salasanasi. Voit asettaa uuden salasanan "
+"saimme tietää Sinun unohtaneen salasanasi. Voit asettaa uuden salasanan "
 "täällä:"
 
 #. * Set password
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:256
 msgid "Set password"
-msgstr "Aseta salasana."
+msgstr "Aseta salasana"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:259
@@ -10475,7 +10473,7 @@ msgid ""
 "%1$s hours"
 msgstr ""
 "Olet ylittänyt suurimman sallitun sms-viestien määrän. Yritä uudelleen %1$s "
-"tunnin kuluttua."
+"tunnin kuluttua"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
@@ -10488,7 +10486,7 @@ msgstr ""
 #. Could not parse phone number %1$s
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
 msgid "Could not parse phone number %1$s"
-msgstr "Puhelinnumeroa  %1$s ei voitu jäsentää."
+msgstr "Puhelinnumeroa %1$s ei voitu jäsentää"
 
 #. Unknown country tag: %1$s
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:67
@@ -10523,7 +10521,7 @@ msgstr ""
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71
 msgid "Invalid or harmful image data detected"
-msgstr "Kelpaamatonta tai haitallista kuvadataa havaittu."
+msgstr "Kelpaamatonta tai haitallista kuvadataa havaittu"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
@@ -10600,7 +10598,7 @@ msgstr "Pyydettyä tilausta ei löydy."
 #. The message displayed if the server is not able to access the 3rd party service with the given credentials.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:65
 msgid "The login/password combination you entered is wrong."
-msgstr "Syöttämäsi tunnus tai salasana on väärin"
+msgstr "Syöttämäsi tunnus tai salasana on väärin."
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:68
@@ -10946,7 +10944,7 @@ msgid ""
 "order to perform the requested action"
 msgstr ""
 "Käyttämälläsi XING-sovelluksella ei ole oikeutta suorittaa pyydettyä "
-"toimintoa."
+"toimintoa"
 
 #. No XING OAuth access available for user %1$s in context %2$s.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
@@ -13084,6 +13082,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Sequence number is outdated."
+#~ msgstr "Sarjanumero on vanhentunut."
 
 #~ msgid "????????? 1 month"
 #~ msgstr "????????? 1 kuukausi"

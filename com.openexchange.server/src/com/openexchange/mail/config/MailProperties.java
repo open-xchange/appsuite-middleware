@@ -620,6 +620,8 @@ public final class MailProperties implements IMailProperties {
 
     private boolean addClientIPAddress;
 
+    private boolean appendVersionToMailerHeader;
+
     private IpAddressRenderer ipAddressRenderer;
 
     private boolean rateLimitPrimaryOnly;
@@ -651,6 +653,7 @@ public final class MailProperties implements IMailProperties {
         loaded = new AtomicBoolean();
         defaultSeparator = '/';
         ranges = HostList.EMPTY;
+        appendVersionToMailerHeader = true;
     }
 
     /**
@@ -730,6 +733,7 @@ public final class MailProperties implements IMailProperties {
         mailAccessCacheShrinkerSeconds = 0;
         mailAccessCacheIdleSeconds = 0;
         addClientIPAddress = false;
+        appendVersionToMailerHeader = true;
         ipAddressRenderer = IpAddressRenderer.simpleRenderer();
         rateLimitPrimaryOnly = true;
         rateLimit = 0;
@@ -950,6 +954,12 @@ public final class MailProperties implements IMailProperties {
             final String supSubsStr = configuration.getProperty("com.openexchange.mail.supportSubscription", "true").trim();
             supportSubscription = Boolean.parseBoolean(supSubsStr);
             logBuilder.append("\tSupport Subscription: ").append(supportSubscription).append('\n');
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.mail.appendVersionToMailerHeader", "true").trim();
+            appendVersionToMailerHeader = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tAppend Version To Mailer Header:: ").append(appendVersionToMailerHeader).append('\n');
         }
 
         {
@@ -1388,6 +1398,15 @@ public final class MailProperties implements IMailProperties {
      */
     public boolean isAddClientIPAddress() {
         return addClientIPAddress;
+    }
+
+    /**
+     * Checks whether the version string is supposed to be appended to <code>"X-Mailer"</code> header.
+     *
+     * @return <code>true</code> to append version string to <code>"X-Mailer"</code> header; otherwise <code>false</code>
+     */
+    public boolean isAppendVersionToMailerHeader() {
+        return appendVersionToMailerHeader;
     }
 
     /**

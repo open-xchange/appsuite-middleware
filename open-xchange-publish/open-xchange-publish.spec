@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 45
+%define        ox_release 46
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -71,6 +71,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc microf
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Tue Oct 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-11-05 (4932)
 * Fri Oct 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-10-19 (4927)
 * Mon Oct 08 2018 Marcus Klein <marcus.klein@open-xchange.com>

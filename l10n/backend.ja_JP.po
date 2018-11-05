@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-07-16 13:33+0200\n"
+"PO-Revision-Date: 2018-10-04 12:04+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -5630,8 +5630,8 @@ msgstr "仕事を作成できません。特有の識別子を持つ仕事がす
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
-msgstr "シーケンス番号は無効です。"
+msgid "This appointment already exists in your calendar."
+msgstr "この予定はすでに予定表に登録されています。"
 
 #. *
 #. * The calendar is currently under maintenance. Please try again later.
@@ -13078,6 +13078,9 @@ msgstr "UTC (協定世界時)"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "Sequence number is outdated."
+#~ msgstr "シーケンス番号は無効です。"
 
 #~ msgid "????????? 1 month"
 #~ msgstr "????????? 1か月"

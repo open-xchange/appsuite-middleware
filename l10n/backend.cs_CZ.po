@@ -1,20 +1,20 @@
 # Robert Krátký <robert@bureau-cornavin.com>, 2011, 2012, 2013, 2014, 2015.
 # Antje Faber, 2011, 2012.
-# Robert Kratky <kratky@rob.cz>, 2016, 2017.
+# Robert Kratky <kratky@rob.cz>, 2016, 2017, 2018.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-07-16 13:32+0200\n"
-"Last-Translator: Robert Kratky <kratky@rob.cz>\n"
+"PO-Revision-Date: 2018-10-10 09:40+0100\n"
+"Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Lokalize 2.0\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Lokalize 1.4\n"
 
@@ -5613,8 +5613,8 @@ msgstr ""
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
-msgid "Sequence number is outdated."
-msgstr "Číslo sekvence je zastaralé."
+msgid "This appointment already exists in your calendar."
+msgstr "Tato schůzka již ve vašem kalendáři je."
 
 #. *
 #. * The calendar is currently under maintenance. Please try again later.
@@ -13036,6 +13036,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Sequence number is outdated."
+#~ msgstr "Číslo sekvence je zastaralé."
 
 #~ msgid "????????? 1 month"
 #~ msgstr "????????? 1 měsíc"
