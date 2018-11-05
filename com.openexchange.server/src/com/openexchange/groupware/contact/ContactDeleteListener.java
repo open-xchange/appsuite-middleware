@@ -522,13 +522,12 @@ public final class ContactDeleteListener implements DeleteListener {
     }
 
     /**
-     * Deletes the supplied contacts. This includes all affected entries in tables 'prg_dlist', 'prg_contacts_linkage',
+     * Deletes the supplied contacts. This includes all affected entries in tables 'prg_dlist',
      * 'prg_contacts_image' and 'prg_contacts'.
      *
      * @param writeConnection The connection to use
      * @param contextID The context ID
      * @param contacts The contacts to delete
-     * @param newCreatedBy The new created by ID
      * @return The number of updated rows
      * @throws OXException
      */
@@ -554,21 +553,6 @@ public final class ContactDeleteListener implements DeleteListener {
                 stmt.setInt(1, contextID);
                 for (int i = 0; i < contacts.size(); i++) {
                     stmt.setInt(i + 2, contacts.get(i).getObjectID());
-                }
-                stmt.executeUpdate();
-            } finally {
-                Databases.closeSQLStuff(stmt);
-            }
-            /*
-             * prg_contacts_linkage (obsoloete?)
-             */
-            try {
-                stmt = writeConnection.prepareStatement(
-                    "DELETE FROM prg_contacts_linkage WHERE cid=? AND (intfield01" + inClause + " OR intfield02" + inClause + ");");
-                stmt.setInt(1, contextID);
-                for (int i = 0; i < contacts.size(); i++) {
-                    stmt.setInt(i + 2, contacts.get(i).getObjectID());
-                    stmt.setInt(i + 2 + contacts.size(), contacts.get(i).getObjectID());
                 }
                 stmt.executeUpdate();
             } finally {
