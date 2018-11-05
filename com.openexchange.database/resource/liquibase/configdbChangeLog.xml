@@ -284,4 +284,9 @@
         <customChange class="com.openexchange.database.internal.change.custom.RemoveParametersFromPoolConnectionUrlCustomTaskChange" />
     </changeSet-->
 
+	<changeSet id="7.10.1:filestore2user:changePrimaryKey" author="thorben.betten@open-xchange.com">
+		<comment>This changeset executes a custom task which cares about correcting the PRIMARY KEY of the filestore2user table.</comment>
+		<customChange class="com.openexchange.database.internal.change.custom.ChangeFilestore2UserPrimaryKeyCustomTaskChange" />
+	</changeSet>
+
 </databaseChangeLog>
