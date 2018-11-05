@@ -701,6 +701,15 @@ public final class InternalList {
 
         // Drops the unused "Shared address book" from database
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
+        
+        // +++++++++++++++++++++++++++++++++ Version 7.10.2 starts here. +++++++++++++++++++++++++++++++++
+
+        // Drop unused tables, see MW-1092
+        list.add(new com.openexchange.groupware.update.tasks.DropICalIDs());
+        list.add(new com.openexchange.groupware.update.tasks.DropICalPrincipal());
+        list.add(new com.openexchange.groupware.update.tasks.DropVCardIDs());
+        list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipal());
+        list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkage());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
