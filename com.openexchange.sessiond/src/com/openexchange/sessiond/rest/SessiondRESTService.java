@@ -190,7 +190,7 @@ public class SessiondRESTService extends JAXRSService {
         checkPayload(payload);
         JSONArray array = payload.optJSONArray(restField.getFieldName());
         if (array == null || array.isEmpty()) {
-            throw new IllegalArgumentException("Missing values array: either sessionIds, contextIds, or context/user id tuples must be specified.");
+            throw new IllegalArgumentException("Missing values array: '" + restField.getFieldName() + "'.");
         }
         return array;
     }
