@@ -51,17 +51,17 @@ package com.openexchange.groupware.update.tasks;
 
 
 /**
- * {@link DropVCardPrincipal}
+ * {@link DropVCardPrincipalTableTask} - Drops the unused table "vcard_principal"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class DropVCardPrincipal extends AbstractDropTableTask {
+public class DropVCardPrincipalTableTask extends AbstractDropTableTask {
 
     /**
-     * Initializes a new {@link DropVCardPrincipal}.
+     * Initializes a new {@link DropVCardPrincipalTableTask}.
      */
-    public DropVCardPrincipal() {
+    public DropVCardPrincipalTableTask() {
         super("vcard_principal");
     }
 

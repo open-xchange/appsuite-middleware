@@ -51,17 +51,17 @@ package com.openexchange.groupware.update.tasks;
 
 
 /**
- * {@link DropICalIDs}
+ * {@link DropICalIDsTableTask} - Drops the unused table "ical_ids"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class DropICalIDs extends AbstractDropTableTask {
+public class DropICalIDsTableTask extends AbstractDropTableTask {
 
     /**
-     * Initializes a new {@link DropICalIDs}.
+     * Initializes a new {@link DropICalIDsTableTask}.
      */
-    public DropICalIDs() {
+    public DropICalIDsTableTask() {
         super("ical_ids");
     }
 

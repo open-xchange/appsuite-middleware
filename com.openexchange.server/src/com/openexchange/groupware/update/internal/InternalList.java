@@ -705,11 +705,11 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 7.10.2 starts here. +++++++++++++++++++++++++++++++++
 
         // Drop unused tables, see MW-1092
-        list.add(new com.openexchange.groupware.update.tasks.DropICalIDs());
-        list.add(new com.openexchange.groupware.update.tasks.DropICalPrincipal());
-        list.add(new com.openexchange.groupware.update.tasks.DropVCardIDs());
-        list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipal());
-        list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkage());
+        list.add(new com.openexchange.groupware.update.tasks.DropICalIDsTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropICalPrincipalTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropVCardIDsTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipalTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkageTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

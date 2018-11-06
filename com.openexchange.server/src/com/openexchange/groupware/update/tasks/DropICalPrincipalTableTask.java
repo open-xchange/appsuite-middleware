@@ -51,18 +51,18 @@ package com.openexchange.groupware.update.tasks;
 
 
 /**
- * {@link DropPrgContactsLinkage}
+ * {@link DropICalPrincipalTableTask} - Drops the unused table "ical_principal"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class DropPrgContactsLinkage extends AbstractDropTableTask {
+public class DropICalPrincipalTableTask extends AbstractDropTableTask {
 
     /**
-     * Initializes a new {@link DropPrgContactsLinkage}.
+     * Initializes a new {@link DropICalPrincipalTableTask}.
      */
-    public DropPrgContactsLinkage() {
-        super("prg_contacts_linkage");
+    public DropICalPrincipalTableTask() {
+        super("ical_principal");
     }
 
 }

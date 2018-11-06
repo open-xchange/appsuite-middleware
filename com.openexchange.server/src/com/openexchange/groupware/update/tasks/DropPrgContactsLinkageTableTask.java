@@ -51,18 +51,18 @@ package com.openexchange.groupware.update.tasks;
 
 
 /**
- * {@link DropVCardIDs}
+ * {@link DropPrgContactsLinkageTableTask} - Drops the unused table "prg_contacts_linkage"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class DropVCardIDs extends AbstractDropTableTask {
+public class DropPrgContactsLinkageTableTask extends AbstractDropTableTask {
 
     /**
-     * Initializes a new {@link DropVCardIDs}.
+     * Initializes a new {@link DropPrgContactsLinkageTableTask}.
      */
-    public DropVCardIDs() {
-        super("vcard_ids");
+    public DropPrgContactsLinkageTableTask() {
+        super("prg_contacts_linkage");
     }
 
 }
