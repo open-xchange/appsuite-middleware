@@ -192,6 +192,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
                         authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
                         return;
+                    case MASTER_ADMIN_AUTHENTICATED:
+                        LOG.warn("Master admin authentication not implemented yet");
+                        deny(requestContext);
+                        return;
                     default:
                         // Role unknown...
                         LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
