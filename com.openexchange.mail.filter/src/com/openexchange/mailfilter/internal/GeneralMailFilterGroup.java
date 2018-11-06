@@ -51,7 +51,6 @@ package com.openexchange.mailfilter.internal;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 
 /**
@@ -74,7 +73,7 @@ public class GeneralMailFilterGroup implements MailFilterGroup {
     }
 
     @Override
-    public List<Rule> getOrderedRules(List<Rule> rules) throws OXException {
+    public List<Rule> getOrderedRules(List<Rule> rules) {
         List<Rule> result = new LinkedList<Rule>(rules);
         rules.clear();
         for (int i = 0; i < userOrder.length; i++) {

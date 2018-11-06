@@ -56,3 +56,4 @@ deploy documentation:
     - develop
     - master
     - /^master-.*$/
+    - /^release-.*$/

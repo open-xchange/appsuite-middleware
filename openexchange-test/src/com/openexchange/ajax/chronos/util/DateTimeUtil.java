@@ -96,17 +96,6 @@ public final class DateTimeUtil {
     };
     
     /**
-     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
-     */
-    private static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-        }
-    };
-
-    /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} in ZULU format
      *
      * @param millis The millisecond timestamp
@@ -287,7 +276,7 @@ public final class DateTimeUtil {
         return cal;
     }
     
-    public static DateTimeData getDateTimeData(String timestamp, String timezoneId) throws ParseException {
+    public static DateTimeData getDateTimeData(String timestamp, String timezoneId) {
         DateTimeData result = new DateTimeData();
         result.setTzid(timezoneId);
         result.setValue(timestamp);

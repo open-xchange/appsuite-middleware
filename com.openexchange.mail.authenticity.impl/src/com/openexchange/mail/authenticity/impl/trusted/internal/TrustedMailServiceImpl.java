@@ -134,10 +134,8 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
 
     /**
      * Initializes a new {@link TrustedMailServiceImpl}.
-     *
-     * @throws OXException
      */
-    public TrustedMailServiceImpl(ServiceLookup services) throws OXException {
+    public TrustedMailServiceImpl(ServiceLookup services) {
         super();
         this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>(4);
         this.fallbackTenant = new CopyOnWriteArrayList<>();

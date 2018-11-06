@@ -124,7 +124,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         }
 
         @Override
-        public InputStream newStream() throws OXException, IOException {
+        public InputStream newStream() throws OXException {
             return m_transformedImage.getImageStream();
         }
 
@@ -182,7 +182,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
         if (null == ret) {
             // closing of internal resources will be handled by returned FileHolder
-            final ThresholdFileHolder tmpThresholdFileHolder = new ThresholdFileHolder(fileHolder);
+            @SuppressWarnings("resource") final ThresholdFileHolder tmpThresholdFileHolder = new ThresholdFileHolder(fileHolder);
 
             fileHolder.close();
             ret = tmpThresholdFileHolder;
@@ -240,7 +240,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
                 if (null == inputStm) {
                     // closing of internal resouces is handled by FileHolder, no closing needed for ByteArrayFileHolder
-                    final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
+                    @SuppressWarnings("resource") final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
 
                     responseFileHolder.setContentType(cachedMimeType);
                     responseFileHolder.setName(cachedResource.getFileName());

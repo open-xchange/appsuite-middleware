@@ -642,7 +642,8 @@ final class ListLsubCollection implements Serializable {
          */
         for (Map.Entry<String, ListLsubEntryImpl> entry : new TreeMap<String, ListLsubEntryImpl>(lsubMap).entrySet()) {
             String fullName = entry.getKey();
-            if (!listMap.containsKey(fullName)) {
+            ListLsubEntryImpl listEntry = listMap.get(fullName);
+            if (null == listEntry) {
                 /*-
                  * An LSUB entry is not contained in LISTed ones...
                  *
@@ -665,6 +666,19 @@ final class ListLsubCollection implements Serializable {
                      */
                     final ListLsubEntryImpl lle = entry.getValue();
                     dropEntryFrom(lle, lsubMap);
+                }
+            } else if (listEntry.isDummy()) {
+                /*-
+                 * Corresponding LIST entry has been artificially added
+                 *
+                 * Check if it is a namespace folder w/o any subscribed child folders, if so remove it
+                 */
+                if (isNamespace(fullName)) {
+                    final ListLsubEntryImpl lle = entry.getValue();
+                    if (lle.emptyChildren()) {
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                        dropEntryFrom(lle, lsubMap);
+                    }
                 }
             }
         }

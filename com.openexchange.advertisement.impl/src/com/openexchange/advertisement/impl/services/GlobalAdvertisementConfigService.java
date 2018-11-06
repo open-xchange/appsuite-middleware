@@ -50,7 +50,6 @@
 package com.openexchange.advertisement.impl.services;
 
 import com.openexchange.advertisement.AdvertisementConfigService;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -82,12 +81,12 @@ public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfi
     }
 
     @Override
-    protected String getReseller(int contextId) throws OXException {
+    protected String getReseller(int contextId) {
         return RESELLER_ALL;
     }
 
     @Override
-    protected String getPackage(Session session) throws OXException {
+    protected String getPackage(Session session) {
         return PACKAGE_ALL;
     }
 

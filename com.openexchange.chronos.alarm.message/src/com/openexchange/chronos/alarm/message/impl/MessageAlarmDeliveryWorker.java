@@ -185,7 +185,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             return this;
         }
 
-        public MessageAlarmDeliveryWorker build() throws OXException {
+        public MessageAlarmDeliveryWorker build() {
             return new MessageAlarmDeliveryWorker( storage,
                                                 calendarStorageFactory,
                                                 dbService,
@@ -234,7 +234,6 @@ public class MessageAlarmDeliveryWorker implements Runnable {
      * @param administrativeCalendarAccountService The {@link AdministrativeCalendarAccountService}
      * @param lookAhead The time value in minutes the worker is looking ahead.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
-     * @throws OXException If not administrative storage could be created.
      */
     protected MessageAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
                                     CalendarStorageFactory factory,
@@ -247,7 +246,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                     AdministrativeCalendarAccountService administrativeCalendarAccountService,
                                     RateLimiterFactory rateLimitFactory,
                                     int lookAhead,
-                                    int overdueWaitTime) throws OXException {
+                                    int overdueWaitTime) {
         this.storage = storage;
         this.dbservice = dbservice;
         this.ctxService = ctxService;

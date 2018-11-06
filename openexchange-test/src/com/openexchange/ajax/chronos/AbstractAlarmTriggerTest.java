@@ -162,7 +162,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     protected void checkAlarmTime(AlarmTrigger trigger, String eventId, long expectedTime) throws ParseException {
         assertEquals(eventId, trigger.getEventId());
         Date parsedTime = DateTimeUtil.parseZuluDateTime(trigger.getTime());
-        assertEquals(expectedTime, parsedTime.getTime());
+        assertEquals("The alarm trigger time is different than expected.", expectedTime, parsedTime.getTime());
     }
 
     protected boolean containsAlarm(AlarmTriggerData data, String folder, String alarmId, String eventId) {

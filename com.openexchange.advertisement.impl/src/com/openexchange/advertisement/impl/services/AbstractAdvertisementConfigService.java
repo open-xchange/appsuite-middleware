@@ -535,7 +535,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     @Override
-    public List<ConfigResult> setConfig(String reseller, Map<String, String> configs) throws OXException {
+    public List<ConfigResult> setConfig(String reseller, Map<String, String> configs) {
         List<ConfigResult> resultList = new ArrayList<>();
         for (Map.Entry<String, String> entry : configs.entrySet()) {
             try {

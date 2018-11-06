@@ -66,6 +66,7 @@ public abstract class ExistsCore extends ContextAbstraction {
 
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
+        setInServerOption(parser, NeededQuadState.eitheror);
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
@@ -81,6 +82,7 @@ public abstract class ExistsCore extends ContextAbstraction {
 
                 // context name
                 parseAndSetContextName(parser, ctx);
+                parseAndSetInServer(parser);
 
                 auth = credentialsparsing(parser);
 
@@ -96,11 +98,11 @@ public abstract class ExistsCore extends ContextAbstraction {
             } else {
                 ctxident = ctx.getName();
             }
-            if( maincall(parser, ctx, auth) ) {
-                System.out.println("Context " + ctxident + " exists");
+            if( maincall(parser, ctx, inServer, auth) ) {
+                System.out.println("Context " + ctxident + " exists" + (inServer ? " in server" : ""));
                 sysexit(0);
             } else {
-                System.out.println("Context " + ctxident + " does not exist");
+                System.out.println("Context " + ctxident + " does not exist" + (inServer ? " in server" : ""));
                 sysexit(1);
             }
         } catch (final Exception e) {
@@ -115,5 +117,5 @@ public abstract class ExistsCore extends ContextAbstraction {
         }
     }
 
-    protected abstract boolean maincall(final AdminParser parser, final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException;
+    protected abstract boolean maincall(AdminParser parser, Context ctx, boolean inServer, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException;
 }

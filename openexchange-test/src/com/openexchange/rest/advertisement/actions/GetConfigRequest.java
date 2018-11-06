@@ -49,8 +49,6 @@
 
 package com.openexchange.rest.advertisement.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -75,7 +73,7 @@ public class GetConfigRequest implements AJAXRequest<GetConfigResponse> {
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[] { new URLParameter("action", "get") };
     }
 
@@ -85,7 +83,7 @@ public class GetConfigRequest implements AJAXRequest<GetConfigResponse> {
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return null;
     }
 
@@ -106,7 +104,7 @@ public class GetConfigRequest implements AJAXRequest<GetConfigResponse> {
         }
 
         @Override
-        protected GetConfigResponse createResponse(Response response) throws JSONException {
+        protected GetConfigResponse createResponse(Response response) {
             return new GetConfigResponse(response);
         }
     }

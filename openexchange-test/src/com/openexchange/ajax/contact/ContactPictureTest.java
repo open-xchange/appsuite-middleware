@@ -222,28 +222,28 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     // ---------------------------------------------------------------------------------------------
 
-    private byte[] getContactPicture(String userId, String contactId, String mail) throws ApiException {
-        return getContactPicture(userId, contactId, mail, contactFolderId);
+    private byte[] getContactPicture(String userID, String contactId, String mail) throws ApiException {
+        return getContactPicture(userID, contactId, mail, contactFolderId);
     }
 
-    private byte[] getContactPicture(String userId, String contactId, String mail, String contactFolderId) throws ApiException {
-        return contactsApi.getContactPicture(getSessionId(), userId, contactId, contactFolderId, mail, null, null, null, null, null, null, null, null, null);
+    private byte[] getContactPicture(String userID, String contactId, String mail, String contactFolderID) throws ApiException {
+        return contactsApi.getContactPicture(getSessionId(), userID, contactId, contactFolderID, mail, null, null, null, null, null, null, null, null, null);
     }
     
-    private void assertThatPictureIsMissing(String userId, String contactId, String mail) throws ApiException {
-        assertThatPictureIsMissing(userId, contactId, mail, contactFolderId);
+    private void assertThatPictureIsMissing(String userID, String contactId, String mail) {
+        assertThatPictureIsMissing(userID, contactId, mail, contactFolderId);
     }
     
-    private void assertThatPictureIsMissing(String userId, String contactId, String mail, String contactFolderId) throws ApiException, IllegalStateException {
+    private void assertThatPictureIsMissing(String userID, String contactId, String mail, String contactFolderID) throws IllegalStateException {
         try {
-            getContactPicture(userId, contactId, mail, contactFolderId);
+            getContactPicture(userID, contactId, mail, contactFolderID);
         } catch (ApiException e) {
             if (e.getCode() == 404) {
                 return;
             }
-            throw e;
+            Assert.fail("Expected a 404 error but received a " + e.getCode() + " with message: " + e.getMessage());
         }
-        throw new IllegalStateException("Client should have received a 404");
+        Assert.fail("Client should have received a 404");
     }
 
     private void setImage(final ContactData contactObj) {

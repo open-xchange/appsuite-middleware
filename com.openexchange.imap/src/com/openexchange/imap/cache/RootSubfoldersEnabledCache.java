@@ -74,6 +74,8 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class RootSubfoldersEnabledCache {
 
+    private static final String ROOT_FULL_NAME = "";
+
     private static volatile Cache<String, Boolean> CACHE;
 
     /**
@@ -143,6 +145,13 @@ public final class RootSubfoldersEnabledCache {
         }
 
         try {
+            // Check for personal namespace
+            String personalNamespace = NamespaceFoldersCache.getPersonalNamespace(imapStore, true, session, imapConfig.getAccountId());
+            if (ROOT_FULL_NAME.equals(personalNamespace)) {
+                // Root level is signaled as personal namespace, thus creating folder there SHOULD be possible...
+                return true;
+            }
+
             boolean namespacePerUser =  IMAPProperties.getInstance().isNamespacePerUser(session.getUserId(), session.getContextId());
             return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig, namespacePerUser), imapConfig, (DefaultFolder) imapStore.getDefaultFolder(), namespacePerUser);
         } catch (final MessagingException e) {
@@ -167,8 +176,20 @@ public final class RootSubfoldersEnabledCache {
             }
         }
 
+        IMAPStore store = (IMAPStore) imapDefaultFolder.getStore();
+        try {
+            // Check for personal namespace
+            String personalNamespace = NamespaceFoldersCache.getPersonalNamespace(store, true, session, imapConfig.getAccountId());
+            if (ROOT_FULL_NAME.equals(personalNamespace)) {
+                // Root level is signaled as personal namespace, thus creating folder there SHOULD be possible...
+                return true;
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, imapConfig);
+        }
+
         boolean namespacePerUser = IMAPProperties.getInstance().isNamespacePerUser(session.getUserId(), session.getContextId());
-        return isRootSubfoldersEnabled0(getKeyFor(imapDefaultFolder.getStore(), imapConfig, namespacePerUser), imapConfig, imapDefaultFolder, namespacePerUser);
+        return isRootSubfoldersEnabled0(getKeyFor(store, imapConfig, namespacePerUser), imapConfig, imapDefaultFolder, namespacePerUser);
     }
 
     /**

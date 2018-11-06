@@ -159,6 +159,24 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         return uploadInfoItem.getData();
     }
 
+    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment) throws ApiException, FileNotFoundException, IOException {
+        byte[] bytes = IOTools.getBytes(new FileInputStream(file));
+        return uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, null);
+    }
+
+    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, String filename) throws ApiException, FileNotFoundException, IOException {
+        byte[] bytes = IOTools.getBytes(new FileInputStream(file));
+        return uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, filename);
+    }
+
+    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
+        String name = filename == null ? file.getName() : filename;
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, filesize, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset);
+        Assert.assertNotNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
+        timestamp = uploadInfoItem.getTimestamp();
+        return uploadInfoItem;
+    }
+
     protected void rememberFile(String id, String folder) {
         InfoItemListElement element = new InfoItemListElement();
         element.setId(id);
@@ -205,7 +223,11 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
             ConfigApi configApi = new ConfigApi(getApiClient());
             ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getApiClient().getSession());
             Object data = checkResponse(configNode);
-            privateInfostoreFolder = String.valueOf(data);
+            if (data != null && !data.toString().equalsIgnoreCase("null")) {
+                privateInfostoreFolder = String.valueOf(data);
+            } else {
+                Assert.fail("It seems that the user doesn't support drive.");
+            }
 
         }
         return privateInfostoreFolder;

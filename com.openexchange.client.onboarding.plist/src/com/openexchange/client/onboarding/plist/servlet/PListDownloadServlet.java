@@ -56,7 +56,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -116,8 +115,9 @@ public class PListDownloadServlet extends WebDavServlet {
 
     }
 
+    @SuppressWarnings("resource")
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         InputStream filestream = null;
         ThresholdFileHolder fileHolder = null;
         try {
@@ -253,12 +253,12 @@ public class PListDownloadServlet extends WebDavServlet {
         Scenario scenario = new Scenario() {
 
             @Override
-            public boolean isEnabled(int userId, int contextId) throws OXException {
+            public boolean isEnabled(int userId, int contextId) {
                 return true;
             }
 
             @Override
-            public boolean isEnabled(Session session) throws OXException {
+            public boolean isEnabled(Session session) {
                 return true;
             }
 
@@ -268,22 +268,22 @@ public class PListDownloadServlet extends WebDavServlet {
             }
 
             @Override
-            public Icon getIcon(Session session) throws OXException {
+            public Icon getIcon(Session session) {
                 return null;
             }
 
             @Override
-            public String getDisplayName(Session session) throws OXException {
+            public String getDisplayName(Session session) {
                 return scenarioId;
             }
 
             @Override
-            public String getDisplayName(int userId, int contextId) throws OXException {
+            public String getDisplayName(int userId, int contextId) {
                 return scenarioId;
             }
 
             @Override
-            public String getDescription(Session session) throws OXException {
+            public String getDescription(Session session) {
                 return null;
             }
 

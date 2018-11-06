@@ -68,6 +68,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AccountResponseGenerator}
@@ -98,7 +99,7 @@ public class AccountResponseGenerator extends ResponseGenerator {
                 List<Event> allEvents = new ArrayList<>();
                 for (Event event : enhancedEvents) {
                     event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                    if (isSeriesMaster(event)) {
+                    if (isSeriesMaster(event) && Strings.isNotEmpty(event.getRecurrenceRule())) {
                         RecurrenceIterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until);
                         if (isResolveOccurrences(parameters)) {
                             allEvents.addAll(Lists.newArrayList(iterator));

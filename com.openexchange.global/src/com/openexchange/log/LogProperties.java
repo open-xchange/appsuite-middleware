@@ -272,6 +272,13 @@ public final class LogProperties {
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),
         /**
+         * com.openexchange.database.ignoreServerAssociation
+         * <p>
+         * A special log property that influences behavior of the <code>ContextDatabaseAssignmentService</code> whether it pays respect to
+         * server association or not. Intended to be used in provisioning code.
+         */
+        DATABASE_IGNORE_SERVER_ASSOCIATION("com.openexchange.database.ignoreServerAssociation"),
+        /**
          * com.openexchange.login.login
          */
         LOGIN_LOGIN("com.openexchange.login.login"),

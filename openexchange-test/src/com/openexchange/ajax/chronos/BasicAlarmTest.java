@@ -157,6 +157,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
+            alarm.setId(changedAlarm.getId());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 
@@ -180,6 +181,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             Assert.assertEquals(1, changedAlarm.getAttendees().size());
             Assert.assertEquals(testUser.getLogin(), changedAlarm.getAttendees().get(0).getEmail());
             alarm.setUid(changedAlarm.getUid());
+            alarm.setId(changedAlarm.getId());
             alarm.setAttendees(changedAlarm.getAttendees());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
@@ -199,6 +201,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
+            alarm.setId(changedAlarm.getId());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
     }

@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -94,7 +93,7 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
+    public AJAXActionService createActionService(final String action) {
         return actions.get(action);
     }
 
