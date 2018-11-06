@@ -174,7 +174,7 @@ public class CalendarUtils {
     /** A collection of identifying meta fields */
     private static final Set<EventField> IDENTIFYING_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.UID, EventField.FILENAME,
-        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY
+        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE
     )));
 
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
@@ -785,10 +785,13 @@ public class CalendarUtils {
      * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date, or <code>null</code> for no limit
      * @param until The upper exclusive limit of the range, i.e. the event should end before this date, or <code>null</code> for no limit
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
-     * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
+     * @return <code>true</code> if the event falls into the time range or has no start-date set, <code>false</code>, otherwise
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.9">RFC 4791, section 9.9</a>
      */
     public static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
+        if (null == event.getStartDate()) {
+            return true;
+        }
         /*
          * determine effective timestamps for check
          */

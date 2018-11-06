@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -62,30 +63,33 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty<T> {
-    private ComposedConfigProperty<String> delegate;
-    private StringParser stringParser;
+
+    private final AtomicReference<ComposedConfigProperty<String>> delegate;
+    private final StringParser stringParser;
     private final Class<T> coerceTo;
 
     public CoercingComposedConfigProperty(final Class<T> coerceTo, final ComposedConfigProperty<String> delegate, final StringParser stringParser) {
+        super();
+        this.delegate = new AtomicReference<ComposedConfigProperty<String>>(null);
         this.stringParser = stringParser;
         this.coerceTo = coerceTo;
-        this.stringParser = stringParser;
         initDelegate(delegate);
-
     }
 
     private void initDelegate(final ComposedConfigProperty<String> d) {
-        this.delegate = d;
+        this.delegate.set(d);
     }
 
     @Override
     public ComposedConfigProperty<T> precedence(final String... scopes) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         initDelegate(delegate.precedence(scopes));
         return this;
     }
 
     @Override
     public T get() throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         final String value = delegate.get();
         return parse(value, coerceTo);
     }
@@ -104,43 +108,51 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
 
     @Override
     public String get(final String metadataName) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         return delegate.get(metadataName);
     }
 
     @Override
     public <M> M get(final String metadataName, final Class<M> m) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         return parse(delegate.get(metadataName), m);
     }
 
     @Override
     public boolean isDefined() throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         return delegate.isDefined();
     }
 
     @Override
     public CoercingComposedConfigProperty<T> set(final T value) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         delegate.set(null == value ? null : value.toString()); // We assume good toString methods that allow reparsing
         return this;
     }
 
     @Override
     public <M> CoercingComposedConfigProperty<T> set(final String metadataName, final M value) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         delegate.set(metadataName, value);
         return this;
     }
 
     @Override
     public <M> ComposedConfigProperty<M> to(final Class<M> otherType) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         return delegate.to(otherType);
     }
 
     @Override
     public List<String> getMetadataNames() throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
         return delegate.getMetadataNames();
     }
-    
+
     @Override
     public String getScope() throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
     	return delegate.getScope();
     }
 

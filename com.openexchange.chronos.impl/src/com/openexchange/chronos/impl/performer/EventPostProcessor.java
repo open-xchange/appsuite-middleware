@@ -146,6 +146,27 @@ public class EventPostProcessor {
     }
 
     /**
+     * Post-processes a list of event tombstones prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
+     * <li>applying the folder identifier from the passed folder</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param inFolder The parent folder representing the view on the events
+     * @return A self reference
+     */
+    public EventPostProcessor processTombstones(Collection<Event> events, CalendarFolder inFolder) throws OXException {
+        for (Event event : events) {
+            processTombstone(event, inFolder.getId());
+            checkResultSizeNotExceeded();
+        }
+        return this;
+    }
+
+    /**
      * Post-processes an event prior returning it to the client. This includes
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
@@ -187,6 +208,37 @@ public class EventPostProcessor {
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
         for (Event event : events) {
             process(event, getFolderView(event, forUser), forUser);
+            checkResultSizeNotExceeded();
+        }
+        return this;
+    }
+
+    /**
+     * Post-processes a list of event tombstones prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param forUser The identifier of the user to apply the parent folder identifier for
+     * @return A self reference
+     */
+    public EventPostProcessor processTombstones(Collection<Event> events, int forUser) throws OXException {
+        for (Event event : events) {
+            String folderId;
+            try {
+                folderId = getFolderView(event, forUser);
+            } catch (OXException e) {
+                /*
+                 * orphaned folder information in tombstone event, add warning but continue
+                 */
+                session.addWarning(e);
+                continue;
+            }
+            processTombstone(event, folderId);
             checkResultSizeNotExceeded();
         }
         return this;
@@ -253,7 +305,31 @@ public class EventPostProcessor {
             }
             return events.add(event);
         }
-        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+        if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+            /*
+             * excluded if not in requested range
+             */
+            return false;
+        }
+        return events.add(event);
+    }
+
+    private boolean processTombstone(Event event, String folderId) throws OXException {
+        if (isClassifiedFor(event, session.getUserId())) {
+            if (skipClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
+                // only include 'confidential' events if requested
+                return false;
+            }
+        }
+        event.setFolderId(folderId);
+        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+        event = anonymizeIfNeeded(session, event);
+        if (isSeriesMaster(event) && false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+            /*
+             * exclude series master event if there are no occurrences in requested range
+             */
+            return false;
+        } else if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             /*
              * excluded if not in requested range
              */

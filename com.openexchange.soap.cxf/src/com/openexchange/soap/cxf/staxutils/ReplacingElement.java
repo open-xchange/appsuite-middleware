@@ -65,12 +65,12 @@ class ReplacingElement {
     private int childPosition = 0;
     private boolean onlyWithName = false;
 
-    public ReplacingElement(QName original) {
+    ReplacingElement(QName original) {
         super();
         this.original = original;
     }
 
-    public ReplacingElement(QName original, QName expected) {
+    ReplacingElement(QName original, QName expected) {
         super();
         this.original = original;
         this.expected = expected;

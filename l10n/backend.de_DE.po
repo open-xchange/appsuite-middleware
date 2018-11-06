@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-06-29 09:34+0200\n"
+"PO-Revision-Date: 2018-10-25 13:52+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.1.1\n"
 "X-POOTLE-MTIME: 1409745551.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -1000,6 +1000,15 @@ msgstr ""
 "Sie erhalten diese E-Mail, da der Termin die Ressource %1$s enthält, die Sie "
 "verwalten."
 
+#. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:308
+msgid ""
+"You have received an E-Mail containing a reply to an appointment that you "
+"didn't organize. Best ignore it."
+msgstr ""
+"Sie haben eine E-Mail mit einer Antwort auf einen Termin erhalten, den Sie "
+"nicht organisiert haben. Ignorieren Sie sie am besten."
+
 #. *
 #. * The event %s couldn't be deleted: %s
 #.
@@ -1069,7 +1078,7 @@ msgstr ""
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
 msgid "🎂 %1$s"
-msgstr ""
+msgstr "🎂 %1$s"
 
 #. *
 #. * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
@@ -1086,7 +1095,7 @@ msgstr "* %1$s"
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
 msgid "🎂 %1$s (%2$d. birthday)"
-msgstr ""
+msgstr "🎂 %1$s (%2$d. Geburtstag)"
 
 #: com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
 msgid ""
@@ -2524,8 +2533,10 @@ msgstr "%1$s %2$s"
 #. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
+#. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
 msgid "%1$s"
 msgstr "%1$s"
 
@@ -2742,6 +2753,7 @@ msgstr ""
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
+#: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "Zu verwendender OAuth-Account"
 
@@ -3866,6 +3878,11 @@ msgstr "Falsches Passwort."
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:116
 msgid "Login denied."
 msgstr "Anmeldung verweigert."
+
+#. Used in case there were too many failed login attempts for an account within a certain timeframe.
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:122
+msgid "Too many login attempts. Please try again later."
+msgstr "Zu viele Anmeldeversuche. Versuchen Sie es später noch einmal."
 
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
@@ -10095,11 +10112,13 @@ msgid "The allowed quota on mail server exceeded."
 msgstr "Die zulässige Quota auf dem Mailserver wurde überschritten."
 
 #. *
-#. * The allowed quota on mail server "%1$s" exceeded.
+#. * The allowed storage limit for your account \"%6$s\" was exceeded.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-msgid "The allowed quota on mail server \"%1$s\" exceeded."
-msgstr "Die zulässige Quota auf dem Mailserver \"%1$s\" wurde überschritten."
+msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
+msgstr ""
+"Die zulässigen Speicherbegrenzung für Ihren Account \"%6$s\" wurde "
+"überschritten."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -14425,6 +14444,10 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The allowed quota on mail server \"%1$s\" exceeded."
+#~ msgstr ""
+#~ "Die zulässige Quota auf dem Mailserver \"%1$s\" wurde überschritten."
 
 #~ msgid "???? %1$s"
 #~ msgstr "???? %1$s"

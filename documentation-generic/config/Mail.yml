@@ -872,3 +872,14 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.appendVersionToMailerHeader
+      description: |
+        This option specifies whether the version string is supposed to be appended to the X-Mailer header value or not
+      defaultValue: true
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

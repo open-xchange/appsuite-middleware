@@ -42,6 +42,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="driveUserFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="driveUserFolderModeAlt" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
  *         &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="display_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
@@ -183,6 +184,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "countryHome",
     "countryOther",
     "driveUserFolderMode",
+    "driveUserFolderModeAlt",
     "defaultSenderAddress",
     "defaultGroup",
     "department",
@@ -339,6 +341,8 @@ public class User {
     protected String countryOther;
     @XmlElement(name = "drive_user_folder_mode", nillable = true)
     protected String driveUserFolderMode;
+    @XmlElement(name = "drive_folder_mode", nillable = true)
+    protected String driveUserFolderModeAlt;
     @XmlElement(nillable = true)
     protected String defaultSenderAddress;
     @XmlElement(name = "default_group", nillable = true)
@@ -1024,7 +1028,6 @@ public class User {
         this.defaultSenderAddress = value;
     }
 
-
     /**
      * Get driveUserFolderMode value.
      *
@@ -1046,6 +1049,29 @@ public class User {
      */
     public void setDriveUserFolderMode(String value) {
         this.driveUserFolderMode = value;
+    }
+
+    /**
+     * Get driveUserFolderModeAlt value.
+     *
+     * @return
+     *      possible object is
+     *     {@link String }
+     */
+    public String getDriveUserFolderModeAlt() {
+        return driveUserFolderModeAlt;
+    }
+
+    /**
+     * Set driveUserFolderModeAlt value..
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setDriveUserFolderModeAlt(String value) {
+        this.driveUserFolderModeAlt = value;
     }
 
     /**

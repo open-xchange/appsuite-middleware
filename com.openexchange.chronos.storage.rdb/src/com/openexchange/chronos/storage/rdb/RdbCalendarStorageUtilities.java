@@ -179,7 +179,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
     @Override
     public List<Event> loadAdditionalEventTombstoneData(List<Event> events, EventField[] fields) throws OXException {
         if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES))) {
-            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
+            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendeeTombstones(getObjectIDs(events));
             for (Event event : events) {
                 event.setAttendees(attendeesById.get(event.getId()));
             }

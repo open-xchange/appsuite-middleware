@@ -54,10 +54,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.configuration.ServerProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.share.GuestInfo;
@@ -213,23 +217,7 @@ public class ShareServlet extends AbstractShareServlet {
         } catch (RateLimitedException e) {
             e.send(response);
         } catch (OXException e) {
-            if (ShareExceptionCodes.INVALID_TOKEN.equals(e) || ShareExceptionCodes.UNKNOWN_SHARE.equals(e)) {
-                sendNotFound(request, response, translator);
-            } else if (SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.equals(e)){
-                LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-                LoginLocation location = new LoginLocation()
-                    .status("internal_error")
-                    .loginType(LoginType.MESSAGE)
-                    .message(MessageType.ERROR, translator.translate(ShareExceptionMessages.SHARE_NOT_AVAILABLE_MSG));
-                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
-            } else {
-                LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-                LoginLocation location = new LoginLocation()
-                    .status("internal_error")
-                    .loginType(LoginType.MESSAGE)
-                    .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
-                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
-            }
+            handleException(request, response, translator, e);
         }
     }
 
@@ -237,7 +225,7 @@ public class ShareServlet extends AbstractShareServlet {
      * Passes the resolved share to the most appropriate handler and lets him serve the request.
      *
      * @param shareRequest The share request
-     * isn't existing or accessible.
+     *            isn't existing or accessible.
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
@@ -250,6 +238,51 @@ public class ShareServlet extends AbstractShareServlet {
             }
         }
         return false;
+    }
+
+    /**
+     * Handles the specified OXException
+     * 
+     * @param request The {@link HttpServletRequest}
+     * @param response The {@link HttpServletResponse}
+     * @param translator The {@link Translator} for translating the error message
+     * @param e The {@link OXException} to handle
+     * @throws IOException if an I/O error is occurred
+     */
+    private void handleException(HttpServletRequest request, HttpServletResponse response, Translator translator, OXException e) throws IOException {
+        if (ShareExceptionCodes.INVALID_TOKEN.equals(e) || ShareExceptionCodes.UNKNOWN_SHARE.equals(e)) {
+            sendNotFound(request, response, translator);
+            return;
+        }
+        if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
+            LOG.debug("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
+            try {
+                String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
+                    LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+                    LoginLocationRegistry.getInstance().putAndRedirect(location, response);
+                    return;
+                }
+                response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
+                return;
+            } catch (OXException ex) {
+                LOG.error("Cannot redirect. An error was encountered while getting the migration URL property: {}", e.getMessage(), e);
+                LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
+                return;
+            }
+        }
+        if (SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.equals(e)) {
+            LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(ShareExceptionMessages.SHARE_NOT_AVAILABLE_MSG));
+            LoginLocationRegistry.getInstance().putAndRedirect(location, response);
+            return;
+        }
+        LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+        LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+        LoginLocationRegistry.getInstance().putAndRedirect(location, response);
     }
 
     /**
@@ -284,11 +317,7 @@ public class ShareServlet extends AbstractShareServlet {
         /*
          * send generic "not found" (via web interface) by default
          */
-        LoginLocation location = new LoginLocation()
-            .status(status)
-            .parameter("status", status)
-            .loginType(LoginType.MESSAGE)
-            .message(MessageType.ERROR, translator.translate(displayMessage));
+        LoginLocation location = new LoginLocation().status(status).parameter("status", status).loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(displayMessage));
         LoginLocationRegistry.getInstance().putAndRedirect(location, response);
     }
 

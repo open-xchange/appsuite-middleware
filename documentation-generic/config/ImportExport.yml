@@ -1,6 +1,6 @@
-feature_name: Import
+feature_name: Import/Export
 feature_description: |
-  Import configuration - settings for import of CSV, iCal or vCard files 
+  Import & export configuration - settings for import and export of CSV, iCal or vCard files 
 properties:
     - key: com.openexchange.import.mapper.path
       description: |
@@ -28,6 +28,18 @@ properties:
       file: import.properties
       packageName: open-xchange-core
       tags: ["Import", "Limit"]
+    - key: com.openexchange.export.ical.limit
+      description: |
+        Sets a limit on how many entries a single export of ical data may contain.
+        <code>-1</code> means unlimited.
+      defaultValue: 10000
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: export.properties
+      packageName: open-xchange-core
+      tags: ["Export", "Limit"]
     - key: com.openexchange.import.contacts.limit
       description: |
         Sets the limit on how many contacts can be imported at once.

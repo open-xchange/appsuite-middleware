@@ -60,6 +60,7 @@ import com.openexchange.context.mbean.ContextMBean;
 import com.openexchange.context.mbean.ContextMBeanImpl;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.contexts.impl.sql.ChangePrimaryKeyForContextAttribute;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -94,12 +95,13 @@ public class ContextActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, createTable);
 
         final ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
+        ChangePrimaryKeyForContextAttribute changePrimaryKeyForContextAttribute = new ChangePrimaryKeyForContextAttribute();
 
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
             public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(updateTask);
+                return Arrays.asList(updateTask, changePrimaryKeyForContextAttribute);
             }
 
         });

@@ -57,6 +57,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -75,6 +76,7 @@ import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
@@ -447,6 +449,22 @@ public class Check {
         }
         selfProtection.checkEventCollection(events, requestedFields);
         return events;
+    }
+
+    /**
+     * Checks that the size of an event collection does not exceed the maximum allowed size.
+     *
+     * @param selfProtection A reference to the self protection helper
+     * @param eventsResults The event results map to check
+     * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
+     * @return The passed event result map, after the size was checked
+     */
+    public static <K> Map<K, ? extends EventsResult> resultSizeNotExceeded(SelfProtection selfProtection, Map<K, ? extends EventsResult> eventsResults, EventField[] requestedFields) throws OXException {
+        if (null == eventsResults) {
+            return null;
+        }
+        selfProtection.checkEventResults(eventsResults, requestedFields);
+        return eventsResults;
     }
 
 }
