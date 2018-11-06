@@ -76,7 +76,7 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-@RoleAllowed(Role.BASIC_AUTHENTICATED)
+@RoleAllowed(Role.MASTER_ADMIN_AUTHENTICATED)
 @Path("/admin/v1/close-sessions")
 public class SessiondRESTService extends JAXRSService {
 
@@ -115,7 +115,8 @@ public class SessiondRESTService extends JAXRSService {
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity(e.getMessage()).build();
         } catch (Exception e) {
-            return Response.status(500).entity(e.getMessage()).build();
+            LOGGER.debug("", e);
+            return Response.status(500).build();
         }
     }
 
@@ -143,7 +144,8 @@ public class SessiondRESTService extends JAXRSService {
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity(e.getMessage()).build();
         } catch (Exception e) {
-            return Response.status(500).entity(e.getMessage()).build();
+            LOGGER.debug("", e);
+            return Response.status(500).build();
         }
     }
 
@@ -171,7 +173,8 @@ public class SessiondRESTService extends JAXRSService {
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity(e.getMessage()).build();
         } catch (Exception e) {
-            return Response.status(500).entity(e.getMessage()).build();
+            LOGGER.debug("", e);
+            return Response.status(500).build();
         }
     }
 
