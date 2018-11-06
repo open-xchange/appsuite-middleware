@@ -77,7 +77,6 @@ import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
-
 /**
  * <p>The {@link AuthenticationFilter} sets the requests {@link SecurityContext}
  * based on the provided authentication information. Requests that arent't authenticated
@@ -179,26 +178,26 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             RoleAllowed roleAllowed = getAnnotation(RoleAllowed.class);
             if (null != roleAllowed) {
                 Role role = roleAllowed.value();
-                if (Role.BASIC_AUTHENTICATED == role) {
-                    basicAuth(requestContext);
-                    return;
-                }
-                if (Role.INDIVIDUAL_BASIC_AUTHENTICATED == role) {
-                    EndpointAuthenticator authenticator = acquireAuthenticator();
-                    if (null == authenticator) {
-                        LOG.warn("Detected role '{}' in class {}, but that end-point does not implement interface {}", Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), resourceInfo.getResourceClass().getName(), EndpointAuthenticator.class.getName());
+                switch (role) {
+                    case BASIC_AUTHENTICATED:
+                        basicAuth(requestContext);
+                        return;
+                    case INDIVIDUAL_BASIC_AUTHENTICATED:
+                        EndpointAuthenticator authenticator = acquireAuthenticator();
+                        if (null == authenticator) {
+                            LOG.warn("Detected role '{}' in class {}, but that end-point does not implement interface {}", Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), resourceInfo.getResourceClass().getName(), EndpointAuthenticator.class.getName());
+                            deny(requestContext);
+                            return;
+                        }
+
+                        authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
+                        return;
+                    default:
+                        // Role unknown...
+                        LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
                         deny(requestContext);
                         return;
-                    }
-
-                    authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
-                    return;
                 }
-
-                // Role unknown...
-                LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
-                deny(requestContext);
-                return;
             }
         }
 
@@ -246,11 +245,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private void basicAuth(ContainerRequestContext requestContext) {
         if (doFail) {
-            LOG.error(
-                "Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " +
-                "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " +
-                "'com.openexchange.rest.services.basic-auth.password' appropriately.",
-                new Throwable("Denied request to REST interface"));
+            LOG.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " + "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " + "'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
             deny(requestContext);
         } else {
             authenticatorAuth(defaultAuthenticator, requestContext, null);
@@ -281,9 +276,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
             requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
         } else {
-            requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
-                .header(HttpHeaders.WWW_AUTHENTICATE, new StringBuilder(32).append("Basic realm=\"").append(realm).append("\", encoding=\"UTF-8\"").toString())
-                .build());
+            requestContext.abortWith(Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, new StringBuilder(32).append("Basic realm=\"").append(realm).append("\", encoding=\"UTF-8\"").toString()).build());
         }
     }
 
