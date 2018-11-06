@@ -101,7 +101,7 @@ public class LoginNameRecorder implements LoginHandlerService, NonTransient {
     }
 
     @Override
-    public void handleLogout(LoginResult logout) throws OXException {
+    public void handleLogout(LoginResult logout) {
         // nothing to do
     }
 

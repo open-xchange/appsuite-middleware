@@ -548,10 +548,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         for(Alarm alarm: insertAlarms) {
             toAdd.add(alarm.getId());
         }
-        Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
+        List<Alarm> loadAlarms = storage.getAlarmStorage().loadAlarms(event, userId);
         storage.getAlarmTriggerStorage().deleteTriggersById(toDelete);
-        if (loadAlarms.containsKey(userId)) {
-            Iterator<Alarm> iterator = loadAlarms.get(userId).iterator();
+        if (null != loadAlarms && 0 < loadAlarms.size()) {
+            loadAlarms = new ArrayList<Alarm>(loadAlarms);
+            Iterator<Alarm> iterator = loadAlarms.iterator();
             while (iterator.hasNext()) {
                 if (!toAdd.contains(iterator.next().getId())) {
                     iterator.remove();
@@ -559,7 +560,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             }
         }
         // only insert the filtered alarms of the current user
-        storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(userId, loadAlarms.get(userId)));
+        storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(userId, loadAlarms));
 
         return true;
     }

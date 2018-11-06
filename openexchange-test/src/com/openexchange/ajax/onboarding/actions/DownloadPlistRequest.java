@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.onboarding.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -84,7 +82,7 @@ public class DownloadPlistRequest implements AJAXRequest<OnboardingTestResponse>
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Params().toArray();
     }
 
@@ -94,7 +92,7 @@ public class DownloadPlistRequest implements AJAXRequest<OnboardingTestResponse>
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return null;
     }
 
@@ -110,7 +108,7 @@ public class DownloadPlistRequest implements AJAXRequest<OnboardingTestResponse>
         }
 
         @Override
-        protected OnboardingTestResponse createResponse(Response response) throws JSONException {
+        protected OnboardingTestResponse createResponse(Response response) {
             return new OnboardingTestResponse(response);
         }
 

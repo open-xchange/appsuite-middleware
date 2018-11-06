@@ -84,7 +84,7 @@ public class MailCategoriesLoginHandler implements LoginHandlerService {
     }
 
     @Override
-    public void handleLogout(LoginResult logout) throws OXException {
+    public void handleLogout(LoginResult logout) {
         // nothing to do
     }
 

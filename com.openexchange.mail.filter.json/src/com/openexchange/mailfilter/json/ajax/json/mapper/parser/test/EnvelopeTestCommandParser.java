@@ -95,7 +95,7 @@ public class EnvelopeTestCommandParser implements CommandParser<TestCommand> {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         if (command.getMatchType() == null) {
             jsonObject.put(EnvelopeTestField.comparison.name(), "is");

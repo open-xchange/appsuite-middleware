@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.BodyParser;
 import com.openexchange.ajax.requesthandler.HTTPRequestInputStreamProvider;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link UploadActionBodyParser}
@@ -66,7 +65,7 @@ public class UploadActionBodyParser implements BodyParser{
     private static final UploadActionBodyParser INSTANCE = new UploadActionBodyParser();
 
     @Override
-    public void setBody(AJAXRequestData requestData, HttpServletRequest req) throws OXException {
+    public void setBody(AJAXRequestData requestData, HttpServletRequest req) {
         requestData.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
     }
 

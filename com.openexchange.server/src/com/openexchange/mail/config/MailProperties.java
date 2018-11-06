@@ -1581,10 +1581,14 @@ public final class MailProperties implements IMailProperties {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param isGuest If this is a guest account
      * @return The mail server source
      */
-    public ServerSource getMailServerSource(int userId, int contextId) {
+    public ServerSource getMailServerSource(int userId, int contextId, boolean isGuest) {
         try {
+            if (isGuest) {
+                return ServerSource.USER;   // For moment, all guests are going to return as user to avoid conflict with Guard
+            }
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.mailServerSource;
         } catch (Exception e) {
@@ -1598,10 +1602,14 @@ public final class MailProperties implements IMailProperties {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param isGuest If this is a guest account
      * @return The transport server source
      */
-    public ServerSource getTransportServerSource(int userId, int contextId) {
+    public ServerSource getTransportServerSource(int userId, int contextId, boolean isGuest) {
         try {
+            if (isGuest) {
+                return ServerSource.USER;   // For moment, all guests are going to return as user to avoid conflict with Guard
+            }
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.transportServerSource;
         } catch (Exception e) {

@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 
 /**
@@ -90,7 +89,7 @@ public class PredefinedSystemCategoriesMailFilterGroup implements MailFilterGrou
     }
 
     @Override
-    public List<Rule> getOrderedRules(List<Rule> rules) throws OXException {
+    public List<Rule> getOrderedRules(List<Rule> rules) {
         Iterator<Rule> iterator = rules.iterator();
         List<Rule> result = new ArrayList<Rule>(rules.size());
         while (iterator.hasNext()) {

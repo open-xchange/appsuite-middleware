@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.framework.config.util;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -71,7 +70,7 @@ public class ChangePropertiesParser extends AbstractAJAXParser<ChangePropertiesR
     }
 
     @Override
-    protected ChangePropertiesResponse createResponse(Response response) throws JSONException {
+    protected ChangePropertiesResponse createResponse(Response response) {
         return new ChangePropertiesResponse(response);
     }
 

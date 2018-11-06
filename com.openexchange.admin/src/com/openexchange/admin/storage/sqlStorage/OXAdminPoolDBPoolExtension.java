@@ -51,82 +51,104 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
 import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPoolExtension.class);
 
     public OXAdminPoolDBPoolExtension() {
         super();
     }
 
     @Override
-    public int getDBPoolIdForContextId(int contextId) throws PoolException {
-        try {
-            return getService().getWritablePool(contextId);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+    public int getDBPoolIdForContextId(final int contextId) throws PoolException {
+        return new DatabaseServiceCallable<Integer>() {
+
+            @Override
+            protected Integer doPerform(DatabaseService databaseService) throws OXException {
+                return Integer.valueOf(databaseService.getWritablePool(contextId));
+            }
+        }.perform(getService()).intValue();
     }
 
     @Override
-    public Connection getWRITEConnectionForPoolId(int poolId, String schema) throws PoolException {
-        try {
-            return getService().get(poolId, schema);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+    public Connection getWRITEConnectionForPoolId(final int poolId, final String schema) throws PoolException {
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.get(poolId, schema);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public void pushWRITEConnectionForPoolId(int poolId, Connection con) {
-        try {
-            getService().back(poolId, con);
-        } catch (PoolException e) {
-            LOG.error("", e);
-        }
+    public void pushWRITEConnectionForPoolId(final int poolId, final Connection con) throws PoolException {
+        new DatabaseServiceCallable<Void>() {
+
+            @Override
+            protected Void doPerform(DatabaseService databaseService) throws OXException {
+                databaseService.back(poolId, con);
+                return null;
+            }
+        }.perform(getService());
     }
 
     @Override
     public Connection getWRITENoTimeoutConnectionForPoolId(final int poolId, final String schema) throws PoolException {
-        try {
-            return getService().getNoTimeout(poolId, schema);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getNoTimeout(poolId, schema);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public void pushWRITENoTimeoutConnectionForPoolId(int poolId, Connection con) {
-        try {
-            getService().backNoTimeoout(poolId, con);
-        } catch (PoolException e) {
-            LOG.error("", e);
-        }
+    public void pushWRITENoTimeoutConnectionForPoolId(final int poolId, final Connection con) throws PoolException {
+        new DatabaseServiceCallable<Void>() {
+
+            @Override
+            protected Void doPerform(DatabaseService databaseService) throws OXException {
+                databaseService.backNoTimeoout(poolId, con);
+                return null;
+            }
+        }.perform(getService());
     }
 
     @Override
-    public void resetPoolMappingForContext(int contextId) throws PoolException {
-        getService().invalidate(contextId);
+    public void resetPoolMappingForContext(final int contextId) throws PoolException {
+        new DatabaseServiceCallable<Void>() {
+
+            @Override
+            protected Void doPerform(DatabaseService databaseService) throws OXException {
+                databaseService.invalidate(contextId);
+                return null;
+            }
+        }.perform(getService());
     }
 
     @Override
     public String getSchemeForContextId(final int contextId) throws PoolException {
-        try {
-            return getService().getSchemaName(contextId);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+        return new DatabaseServiceCallable<String>() {
+
+            @Override
+            protected String doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getSchemaName(contextId);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public SchemaInfo getSchemaInfoForContextId(int context_id) throws PoolException {
-        try {
-            return getService().getSchemaInfo(context_id);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+    public SchemaInfo getSchemaInfoForContextId(final int context_id) throws PoolException {
+        return new DatabaseServiceCallable<SchemaInfo>() {
+
+            @Override
+            protected SchemaInfo doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getSchemaInfo(context_id);
+            }
+        }.perform(getService());
     }
 }

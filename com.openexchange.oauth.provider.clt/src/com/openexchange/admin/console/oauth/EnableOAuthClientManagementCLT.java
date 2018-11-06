@@ -149,6 +149,7 @@ public class EnableOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     fis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 
@@ -156,6 +157,7 @@ public class EnableOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     bis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 

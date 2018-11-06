@@ -437,7 +437,7 @@ public abstract class OXServlet extends WebDavServlet {
             /*
              * try to get session indirectly from store
              */
-            return WebDAVSessionStore.getInstance().getSession(loginRequest);
+            return WebDAVSessionStore.getInstance().getSession(loginRequest, req);
         } else {
             /*
              * login as usual
@@ -552,7 +552,7 @@ public abstract class OXServlet extends WebDavServlet {
                     /*
                      * try to get session indirectly from store
                      */
-                    session = WebDAVSessionStore.getInstance().getSession(loginRequest);
+                    session = WebDAVSessionStore.getInstance().getSession(loginRequest, req);
                 } else {
                     /*
                      * login as usual

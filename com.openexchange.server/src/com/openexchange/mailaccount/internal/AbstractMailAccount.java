@@ -60,6 +60,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;

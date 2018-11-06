@@ -468,7 +468,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String allowFolderCachesStr = configuration.getProperty("com.openexchange.imap.allowFolderCaches", "true").trim();
             allowFolderCaches = "true".equalsIgnoreCase(allowFolderCachesStr);
             logBuilder.append("    IMAP allow folder caches: {}{}");
-            args.add(allowFolderCaches);
+            args.add(Boolean.valueOf(allowFolderCaches));
             args.add(lineSeparator);
         }
 
@@ -476,7 +476,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String str = configuration.getProperty("com.openexchange.imap.allowFetchSingleHeaders", "true").trim();
             allowFetchSingleHeaders = "true".equalsIgnoreCase(str);
             logBuilder.append("    IMAP allow FETCH single headers: {}{}");
-            args.add(allowFetchSingleHeaders);
+            args.add(Boolean.valueOf(allowFetchSingleHeaders));
             args.add(lineSeparator);
         }
 
@@ -484,7 +484,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application").trim();
             imapSort = "imap".equalsIgnoreCase(imapSortStr);
             logBuilder.append("    IMAP-Sort: {}{}");
-            args.add(imapSort);
+            args.add(Boolean.valueOf(imapSort));
             args.add(lineSeparator);
         }
 
@@ -493,7 +493,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             forceImapSearch = "force-imap".equalsIgnoreCase(imapSearchStr);
             imapSearch = forceImapSearch || "imap".equalsIgnoreCase(imapSearchStr);
             logBuilder.append("    IMAP-Search: {}{}{}");
-            args.add(imapSearch);
+            args.add(Boolean.valueOf(imapSearch));
             args.add(forceImapSearch ? " (forced)" : "");
             args.add(lineSeparator);
 
@@ -503,7 +503,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String fastFetchStr = configuration.getProperty("com.openexchange.imap.imapFastFetch", STR_TRUE).trim();
             fastFetch = Boolean.parseBoolean(fastFetchStr);
             logBuilder.append("    Fast Fetch Enabled: {}{}");
-            args.add(fastFetch);
+            args.add(Boolean.valueOf(fastFetch));
             args.add(lineSeparator);
         }
 
@@ -511,7 +511,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.imap.propagateClientIPAddress", STR_FALSE).trim();
             propagateClientIPAddress = Boolean.parseBoolean(tmp);
             logBuilder.append("    Propagate Client IP Address: {}{}");
-            args.add(propagateClientIPAddress);
+            args.add(Boolean.valueOf(propagateClientIPAddress));
             args.add(lineSeparator);
         }
 
@@ -519,7 +519,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.imap.enableTls", STR_TRUE).trim();
             enableTls = Boolean.parseBoolean(tmp);
             logBuilder.append("    Enable TLS: {}{}");
-            args.add(enableTls);
+            args.add(Boolean.valueOf(enableTls));
             args.add(lineSeparator);
         }
 
@@ -527,7 +527,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             String tmp = configuration.getProperty("com.openexchange.imap.auditLog.enabled", STR_FALSE).trim();
             auditLogEnabled = Boolean.parseBoolean(tmp);
             logBuilder.append("    Audit Log Enabled: {}{}");
-            args.add(auditLogEnabled);
+            args.add(Boolean.valueOf(auditLogEnabled));
             args.add(lineSeparator);
         }
 
@@ -535,7 +535,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             String tmp = configuration.getProperty("com.openexchange.imap.overwritePreLoginCapabilities", STR_FALSE).trim();
             overwritePreLoginCapabilities = Boolean.parseBoolean(tmp);
             logBuilder.append("    Overwrite Pre-Login Capabilities: {}{}");
-            args.add(overwritePreLoginCapabilities);
+            args.add(Boolean.valueOf(overwritePreLoginCapabilities));
             args.add(lineSeparator);
         }
 
@@ -561,66 +561,64 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             final String imapTimeoutStr = configuration.getProperty("com.openexchange.imap.imapTimeout", "0").trim();
-            try {
-                imapTimeout = Integer.parseInt(imapTimeoutStr);
-                logBuilder.append("    IMAP Timeout: {}{}");
-                args.add(imapTimeout);
-                args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            imapTimeout = parsePositiveInt(imapTimeoutStr);
+            if (imapTimeout < 0) {
                 imapTimeout = 0;
                 logBuilder.append("    IMAP Timeout: Invalid value \"{}\". Setting to fallback: {}{}");
                 args.add(imapTimeoutStr);
-                args.add(imapTimeout);
+                args.add(Integer.valueOf(imapTimeout));
+                args.add(lineSeparator);
+            } else {
+                logBuilder.append("    IMAP Timeout: {}{}");
+                args.add(Integer.valueOf(imapTimeout));
                 args.add(lineSeparator);
             }
         }
 
         {
             final String imapConTimeoutStr = configuration.getProperty("com.openexchange.imap.imapConnectionTimeout", "0").trim();
-            try {
-                imapConnectionTimeout = Integer.parseInt(imapConTimeoutStr);
-                logBuilder.append("    IMAP Connection Timeout: {}{}");
-                args.add(imapConnectionTimeout);
-                args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            imapConnectionTimeout = parsePositiveInt(imapConTimeoutStr);
+            if (imapConnectionTimeout < 0) {
                 imapConnectionTimeout = 0;
                 logBuilder.append("    IMAP Connection Timeout: Invalid value \"{}\". Setting to fallback: {}{}");
                 args.add(imapConTimeoutStr);
-                args.add(imapConnectionTimeout);
+                args.add(Integer.valueOf(imapConnectionTimeout));
                 args.add(lineSeparator);
-
+            } else {
+                logBuilder.append("    IMAP Connection Timeout: {}{}");
+                args.add(Integer.valueOf(imapConnectionTimeout));
+                args.add(lineSeparator);
             }
         }
 
         {
             final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0").trim();
-            try {
-                imapTemporaryDown = Integer.parseInt(imapTempDownStr);
-                logBuilder.append("    IMAP Temporary Down: {}{}");
-                args.add(imapTemporaryDown);
-                args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            imapTemporaryDown = parsePositiveInt(imapTempDownStr);
+            if (imapTemporaryDown < 0) {
                 imapTemporaryDown = 0;
                 logBuilder.append("    IMAP Temporary Down: Invalid value \"{}\". Setting to fallback: {}{}");
                 args.add(imapTempDownStr);
-                args.add(imapTemporaryDown);
+                args.add(Integer.valueOf(imapTemporaryDown));
                 args.add(lineSeparator);
-
+            } else {
+                logBuilder.append("    IMAP Temporary Down: {}{}");
+                args.add(Integer.valueOf(imapTemporaryDown));
+                args.add(lineSeparator);
             }
         }
 
         {
             final String imapFailedAuthTimeoutStr = configuration.getProperty("com.openexchange.imap.failedAuthTimeout", "10000").trim();
-            try {
-                imapFailedAuthTimeout = Integer.parseInt(imapFailedAuthTimeoutStr);
-                logBuilder.append("    IMAP Failed Auth Timeout: {}{}");
-                args.add(imapFailedAuthTimeout);
-                args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            imapFailedAuthTimeout = parsePositiveInt(imapFailedAuthTimeoutStr);
+            if (imapFailedAuthTimeout < 0) {
                 imapFailedAuthTimeout = 10000;
                 logBuilder.append("    IMAP Failed Auth Timeout: Invalid value \"{}\". Setting to fallback: {}{}");
                 args.add(imapFailedAuthTimeoutStr);
-                args.add(imapFailedAuthTimeout);
+                args.add(Integer.valueOf(imapFailedAuthTimeout));
+                args.add(lineSeparator);
+            } else {
+                logBuilder.append("    IMAP Failed Auth Timeout: {}{}");
+                args.add(Integer.valueOf(imapFailedAuthTimeout));
                 args.add(lineSeparator);
             }
         }
@@ -651,16 +649,16 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             final String blockSizeStr = configuration.getProperty("com.openexchange.imap.blockSize", "1000").trim();
-            try {
-                blockSize = Integer.parseInt(blockSizeStr);
-                logBuilder.append("    Block Size: {}{}");
-                args.add(blockSize);
-                args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            blockSize = parsePositiveInt(blockSizeStr);
+            if (blockSize < 0) {
                 blockSize = 1000;
                 logBuilder.append("    Block Size: Invalid value \"{}\". Setting to fallback: {}{}");
                 args.add(blockSizeStr);
-                args.add(blockSize);
+                args.add(Integer.valueOf(blockSize));
+                args.add(lineSeparator);
+            } else {
+                logBuilder.append("    Block Size: {}{}");
+                args.add(Integer.valueOf(blockSize));
                 args.add(lineSeparator);
             }
         }
@@ -701,7 +699,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             }
                             logBuilder.append("{}");
                             args.add(lineSeparator);
-                        } catch (final Exception e) {
+                        } catch (@SuppressWarnings("unused") final Exception e) {
                             IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("    Max. Number of External Connections: Invalid value \"{}\". Setting to fallback: No restrictions{}");
                             args.add(tmp);
@@ -710,14 +708,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     }
                 } else {
                     // Expect a single integer value
-                    try {
-                        IMAPProtocol.getInstance().setOverallExternalMaxCount(Integer.parseInt(tmp));
-                        logBuilder.append("    Max. Number of External Connections: {} (applied to all external IMAP accounts){}");
-                        args.add(tmp);
-                        args.add(lineSeparator);
-                    } catch (final NumberFormatException e) {
+                    int maxCount = parsePositiveInt(tmp);
+                    if (maxCount < 0) {
                         IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                         logBuilder.append("    Max. Number of External Connections: Invalid value \"{}\". Setting to fallback: No restrictions{}");
+                        args.add(tmp);
+                        args.add(lineSeparator);
+                    } else {
+                        IMAPProtocol.getInstance().setOverallExternalMaxCount(maxCount);
+                        logBuilder.append("    Max. Number of External Connections: {} (applied to all external IMAP accounts){}");
                         args.add(tmp);
                         args.add(lineSeparator);
                     }
@@ -727,20 +726,20 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             final String tmp = configuration.getProperty("com.openexchange.imap.maxNumConnections", "-1").trim();
-            try {
-                maxNumConnection = Integer.parseInt(tmp);
+            maxNumConnection = parsePositiveInt(tmp);
+            if (maxNumConnection < 0) {
+                maxNumConnection = -1;
+                logBuilder.append("    Max. Number of connections: Invalid value \"{}\". Setting to fallback: {}{}");
+                args.add(tmp);
+                args.add(Integer.valueOf(maxNumConnection));
+                args.add(lineSeparator);
+            } else {
                 logBuilder.append("    Max. Number of connections: {}{}");
-                args.add(maxNumConnection);
+                args.add(Integer.valueOf(maxNumConnection));
                 args.add(lineSeparator);
                 if (maxNumConnection > 0) {
                     IMAPProtocol.getInstance().setMaxCount(maxNumConnection);
                 }
-            } catch (final NumberFormatException e) {
-                maxNumConnection = -1;
-                logBuilder.append("    Max. Number of connections: Invalid value \"{}\". Setting to fallback: {}{}");
-                args.add(tmp);
-                args.add(maxNumConnection);
-                args.add(lineSeparator);
             }
         }
 
@@ -780,7 +779,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     logBuilder.append("    Host name regular expression: {}{}");
                     args.add(tmp);
                     args.add(lineSeparator);
-                } catch (PatternSyntaxException e) {
+                } catch (@SuppressWarnings("unused") PatternSyntaxException e) {
                     logBuilder.append("    Host name regular expression: Invalid value \"{}\". Using no host name extraction{}");
                     args.add(tmp);
                     args.add(lineSeparator);
@@ -792,7 +791,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             String tmp = configuration.getProperty("com.openexchange.imap.attachmentMarker.enabled", STR_FALSE).trim();
             enableAttachmentSearch = Boolean.parseBoolean(tmp);
             logBuilder.append("    Enable attachment search: {}{}");
-            args.add(enableAttachmentSearch);
+            args.add(Boolean.valueOf(enableAttachmentSearch));
             args.add(lineSeparator);
         }
 
@@ -827,7 +826,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         }
                         try {
                             percent = Integer.parseInt(sPercent.trim());
-                        } catch (NumberFormatException e) {
+                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
                             LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
                             continue NextName;
                         }
@@ -843,7 +842,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         }
                         try {
                             windowMillis = Long.parseLong(sWindowMillis.trim());
-                        } catch (NumberFormatException e) {
+                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
                             LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
                             continue NextName;
                         }
@@ -858,7 +857,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         for (String sPort : Strings.splitByComma(ports)) {
                             try {
                                 portSet.add(Integer.valueOf(sPort.trim()));
-                            } catch (NumberFormatException e) {
+                            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                                 LOG.warn("Invalid value for port. Not a number. Skipping breaker configuration for {}", name);
                                 continue NextName;
                             }
@@ -1334,6 +1333,16 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isAttachmentMarkerEnabled() {
         return isUserFlagsEnabled() ? enableAttachmentSearch : false;
+    }
+
+    private static int parsePositiveInt(String s) {
+        try {
+            int i = Integer.parseInt(s);
+            return i < 0 ? -1 : i;
+        } catch (NumberFormatException e) {
+            LOG.trace("", e);
+            return -1;
+        }
     }
 
 }

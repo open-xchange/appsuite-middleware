@@ -147,6 +147,7 @@ metadata_expire=0m
 ```
 
 ### CentOS 7
+
 Start a console and create a software repository file if not already present:
 
 ```

@@ -295,11 +295,10 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
-        } else {
-            for (ArrayList<?> folder : privateList) {
-                if ((Boolean) folder.get(1)) {
-                    return (String) folder.get(0);
-                }
+        }
+        for (ArrayList<?> folder : privateList) {
+            if ((Boolean) folder.get(1)) {
+                return (String) folder.get(0);
             }
         }
         throw new Exception("Unable to find default calendar folder!");

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,7 +104,7 @@ public class TrainRequest extends AbstractMailCategoriesRequest<TrainResponse> {
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(PARAMETER_ACTION, ACTION_TRAIN));
         list.add(new Parameter(PARAMETER_CATEGORY_ID, categoryId));
@@ -126,7 +125,7 @@ public class TrainRequest extends AbstractMailCategoriesRequest<TrainResponse> {
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() throws JSONException {
         JSONObject obj = new JSONObject(1);
         JSONArray array = new JSONArray(mails);
         obj.put("from", array);

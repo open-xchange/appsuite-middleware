@@ -134,6 +134,12 @@ public class JSONResponseVisitor implements DocumentVisitor {
 
     @Override
     public void visit(MailDocument mailDocument) {
+        MailMessage mailMessage = mailDocument.getMailMessage();
+        if (null == mailMessage) {
+            // No mail available...
+            return;
+        }
+
         if (mailFieldWriters == null) {
             String[] columns = queryResult.getSearchRequest().getColumns().getOriginalColumns();
             if (columns == null || columns.length == 0) {
@@ -151,7 +157,6 @@ public class JSONResponseVisitor implements DocumentVisitor {
             }
         }
 
-        final MailMessage mailMessage = mailDocument.getMailMessage();
         try {
             JSONObject jsonMessage = new JSONObject(mailFieldWriters.size());
             int contextId = session.getContextId();

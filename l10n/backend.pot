@@ -1654,6 +1654,11 @@ msgstr ""
 msgid "%1$s on %2$s"
 msgstr ""
 
+#. Unknown client
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:116
+msgid "Unknown client"
+msgstr ""
+
 #: com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
