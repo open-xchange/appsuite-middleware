@@ -49,6 +49,8 @@
 
 package com.openexchange.database.internal.change.custom;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,22 +60,31 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import com.openexchange.context.PoolAndSchema;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
+import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
+import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -172,7 +183,7 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
     private void execute(Connection configDbCon, org.slf4j.Logger logger) throws CustomChangeException {
         try {
-            Map<PoolAndSchema, TIntObjectMap<TIntSet>> mapping = readInUsers(configDbCon, logger);
+            Map<SchemaInfo, TIntObjectMap<TIntSet>> mapping = readInUsers(configDbCon, logger);
             if (false == mapping.isEmpty()) {
                 Map<UserAndContext, Integer> user2filestore = determineFilestoreIdsFor(mapping, configDbCon, logger);
                 updateFilestoreAssociation(user2filestore, configDbCon, logger);
@@ -208,13 +219,16 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
                 Databases.closeSQLStuff(stmt);
                 stmt = null;
 
-                stmt = configDbCon.prepareStatement("INSERT INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?)");
-                stmt.setInt(1, user.contextId);
-                stmt.setInt(2, user.userId);
-                stmt.setInt(3, entry.getValue().intValue());
-                stmt.executeUpdate();
-                Databases.closeSQLStuff(stmt);
-                stmt = null;
+                int filestoreId = entry.getValue().intValue();
+                if (filestoreId > 0) {
+                    stmt = configDbCon.prepareStatement("INSERT INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?)");
+                    stmt.setInt(1, user.contextId);
+                    stmt.setInt(2, user.userId);
+                    stmt.setInt(3, filestoreId);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
             }
             logger.info("Finished updating \"filestore2user\" entries");
         } finally {
@@ -222,76 +236,224 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
         }
     }
 
-    private Map<UserAndContext, Integer> determineFilestoreIdsFor(Map<PoolAndSchema, TIntObjectMap<TIntSet>> mapping, Connection configDbCon, org.slf4j.Logger logger) throws SQLException, NoConnectionToDatabaseException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            logger.info("Reading users' file storage association by database schema...");
+    private Map<UserAndContext, Integer> determineFilestoreIdsFor(Map<SchemaInfo, TIntObjectMap<TIntSet>> mapping, Connection configDbCon, org.slf4j.Logger logger) throws SQLException, NoConnectionToDatabaseException {
+        logger.info("Reading users' file storage association by database schema...");
 
-            Map<DB, TIntObjectMap<TIntSet>> db2Contexts = new LinkedHashMap<>(mapping.size());
-            for (Map.Entry<PoolAndSchema, TIntObjectMap<TIntSet>> entry : mapping.entrySet()) {
-                PoolAndSchema pas = entry.getKey();
-
-                stmt = configDbCon.prepareStatement("SELECT db_pool_id, url, driver, login, password FROM db_pool WHERE db_pool_id=?");
-                stmt.setInt(1, pas.getPoolId());
+        TIntObjectMap<DatabaseHost> poolId2Host = new TIntObjectHashMap<DatabaseHost>(mapping.size());
+        for (Set<SchemaInfo> partiton : Sets.partition(mapping.keySet(), 100)) {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = configDbCon.prepareStatement(Databases.getIN("SELECT db_pool_id, url, driver, login, password, name FROM db_pool WHERE db_pool_id IN (", partiton.size()));
+                int pos = 1;
+                for (SchemaInfo schemaInfo : partiton) {
+                    stmt.setInt(pos++, schemaInfo.getPoolId());
+                }
                 rs = stmt.executeQuery();
-                if (rs.next()) {
-                    DB db = new DB(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), pas.getSchema());
-                    db2Contexts.put(db, entry.getValue());
+                while (rs.next()) {
+                    int poolId = rs.getInt(1);
+                    poolId2Host.put(poolId, new DatabaseHost(poolId, rs.getString(6), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5)));
                 }
+            } finally {
                 Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
             }
-            mapping.clear(); // Free some memory
+        }
 
-            Map<UserAndContext, Integer> map = new LinkedHashMap<>();
-            for (Map.Entry<DB, TIntObjectMap<TIntSet>> entry : db2Contexts.entrySet()) {
-                DB db = entry.getKey();
-                Connection con = getSimpleSQLConnectionFor(db.url, db.driver, db.login, db.password);
-                try {
-                    logger.info("Reading users' file storage association from \"{}\" database schema at host {}", db.schema, extractHostName(db.url));
-                    con.setCatalog(db.schema);
+        Map<DatabaseHost, Map<String, TIntObjectMap<TIntSet>>> host2Schemas = new LinkedHashMap<>(mapping.size());
+        for (Map.Entry<SchemaInfo, TIntObjectMap<TIntSet>> entry : mapping.entrySet()) {
+            SchemaInfo schemaInfo = entry.getKey();
+            DatabaseHost databaseHost = poolId2Host.get(schemaInfo.getPoolId());
 
-                    TIntObjectMap<TIntSet> context2users = entry.getValue();
-                    for (TIntObjectIterator<TIntSet> it = context2users.iterator(); it.hasNext();) {
-                        it.advance();
-                        int contextId = it.key();
-                        TIntSet userIds = it.value();
+            Map<String, TIntObjectMap<TIntSet>> schema2Contexts = host2Schemas.get(databaseHost);
+            if (null == schema2Contexts) {
+                schema2Contexts = new LinkedHashMap<String, TIntObjectMap<TIntSet>>();
+                host2Schemas.put(databaseHost, schema2Contexts);
+            }
 
-                        stmt = con.prepareStatement(Databases.getIN("SELECT id, filestore_id FROM user WHERE cid=? AND id IN (", userIds.size()));
-                        int pos = 1;
-                        stmt.setInt(pos++, contextId);
-                        for (TIntIterator it2 = userIds.iterator(); it2.hasNext();) {
-                            int userId = it2.next();
-                            stmt.setInt(pos++, userId);
+            schema2Contexts.put(schemaInfo.getSchema(), entry.getValue());
+        }
+
+        // Free some memory
+        mapping.clear();
+        poolId2Host = null;
+
+        int numberOfTasks = host2Schemas.size();
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(numberOfTasks);
+        final Map<Thread, Thread> executers = new ConcurrentHashMap<Thread, Thread>(numberOfTasks);
+
+        AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+        Map<UserAndContext, Integer> map = new ConcurrentHashMap<UserAndContext, Integer>();
+        for (Map.Entry<DatabaseHost, Map<String, TIntObjectMap<TIntSet>>> entry : host2Schemas.entrySet()) {
+            final DatabaseHost databaseHost = entry.getKey();
+            final Map<String, TIntObjectMap<TIntSet>> schema2Contexts = entry.getValue();
+            Runnable task = new Runnable() {
+
+                @Override
+                public void run() {
+                    int maxRunCount = 5;
+                    int runCount = 0;
+
+                    while (runCount < maxRunCount) {
+                        Connection con = null;
+                        PreparedStatement stmt = null;
+                        ResultSet rs = null;
+                        try {
+                            startLatch.await();
+
+                            con = getSimpleSQLConnectionFor(databaseHost.url, databaseHost.driver, databaseHost.login, databaseHost.password);
+                            NextSchema: for (Map.Entry<String, TIntObjectMap<TIntSet>> s2c : schema2Contexts.entrySet()) {
+                                if (Thread.interrupted()) {
+                                    throw new InterruptedException();
+                                }
+
+                                String schema = s2c.getKey();
+                                TIntObjectMap<TIntSet> context2users = s2c.getValue();
+
+                                // Set schema
+                                try {
+                                    con.setCatalog(schema);
+                                } catch (SQLException e) {
+                                    // Such a schema does not exist. Add dummy entries to result map.
+                                    logger.info("No such schema \"{}\" exists on database host {}. Pruning affected entries from \"filestore2user\" table.", schema, databaseHost, e);
+                                    for (TIntObjectIterator<TIntSet> it = context2users.iterator(); it.hasNext();) {
+                                        if (Thread.interrupted()) {
+                                            throw new InterruptedException();
+                                        }
+
+                                        it.advance();
+                                        int contextId = it.key();
+                                        TIntSet userIds = it.value();
+                                        Integer zero = Integer.valueOf(0);
+                                        for (TIntIterator it2 = userIds.iterator(); it2.hasNext();) {
+                                            int userId = it2.next();
+                                            map.put(new UserAndContext(userId, contextId), zero);
+                                        }
+                                    }
+                                    continue NextSchema;
+                                }
+
+                                // Schema is valid
+                                logger.info("Reading users' file storage association from \"{}\" database schema at host {}", schema, databaseHost);
+
+                                for (TIntObjectIterator<TIntSet> it = context2users.iterator(); it.hasNext();) {
+                                    if (Thread.interrupted()) {
+                                        throw new InterruptedException();
+                                    }
+
+                                    it.advance();
+                                    int contextId = it.key();
+                                    TIntSet userIds = it.value();
+
+                                    stmt = con.prepareStatement(Databases.getIN("SELECT id, filestore_id FROM user WHERE cid=? AND id IN (", userIds.size()));
+                                    int pos = 1;
+                                    stmt.setInt(pos++, contextId);
+                                    for (TIntIterator it2 = userIds.iterator(); it2.hasNext();) {
+                                        int userId = it2.next();
+                                        stmt.setInt(pos++, userId);
+                                    }
+                                    rs = stmt.executeQuery();
+                                    while (rs.next()) {
+                                        map.put(new UserAndContext(rs.getInt(1), contextId), Integer.valueOf(rs.getInt(2)));
+                                    }
+                                    Databases.closeSQLStuff(rs, stmt);
+                                    rs = null;
+                                    stmt = null;
+                                }
+                            }
+                            logger.info("Finished reading users' file storage association from database host {}", databaseHost);
+                        } catch (InterruptedException e) {
+                            logger.info("Interrupted reading users' file storage association from database host {}", databaseHost, e);
+                        } catch (SQLException sqle) {
+                            boolean doThrow = true;
+
+                            if (sqle instanceof SQLNonTransientConnectionException) {
+                                SQLNonTransientConnectionException connectionException = (SQLNonTransientConnectionException) sqle;
+                                if (isTooManyConnections(connectionException) && (++runCount < maxRunCount)) {
+                                    waitWithExponentialBackoff(runCount, 1000L);
+                                    doThrow = false;
+                                }
+                            }
+
+                            if (doThrow) {
+                                logger.info("Failed reading users' file storage association from database host {}", databaseHost, sqle);
+                                // Interrupt remaining threads & set exception reference
+                                for (Thread executer : executers.keySet()) {
+                                    if (executer != Thread.currentThread()) {
+                                        executer.interrupt();
+                                    }
+                                }
+                                errorRef.set(sqle);
+                            }
+                        } catch (Exception e) {
+                            logger.info("Failed reading users' file storage association from database host {}", databaseHost, e);
+                            // Interrupt remaining threads & set exception reference
+                            for (Thread executer : executers.keySet()) {
+                                if (executer != Thread.currentThread()) {
+                                    executer.interrupt();
+                                }
+                            }
+                            errorRef.set(e);
+                        } finally {
+                            Databases.closeSQLStuff(rs, stmt);
+                            if (null != con) {
+                                try {
+                                    con.close();
+                                } catch (Exception e) {
+                                    logger.warn("Failed to close connection to database host {}", databaseHost, e);
+                                }
+                            }
+                            completionLatch.countDown();
+                            executers.remove(Thread.currentThread());
                         }
-                        rs = stmt.executeQuery();
-                        while (rs.next()) {
-                            map.put(new UserAndContext(rs.getInt(1), contextId), Integer.valueOf(rs.getInt(2)));
-                        }
-                        Databases.closeSQLStuff(rs, stmt);
-                        rs = null;
-                        stmt = null;
-                    }
-                } finally {
-                    Databases.closeSQLStuff(rs, stmt);
-                    try {
-                        con.close();
-                    } catch (Exception e) {
-                        logger.warn("Failed to close connection to database host {}", db.url, e);
                     }
                 }
-            }
 
-            logger.info("Finished reading users' file storage association by database schema");
-            return map;
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
+                private boolean isTooManyConnections(SQLNonTransientConnectionException connectionException) {
+                    String message = connectionException.getMessage();
+                    return null != message && Strings.asciiLowerCase(message).indexOf("too many connections") >= 0;
+                }
+
+                private void waitWithExponentialBackoff(int retryCount, long baseMillis) {
+                    long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * baseMillis) + ((long) (Math.random() * baseMillis)), TimeUnit.MILLISECONDS);
+                    LockSupport.parkNanos(nanosToWait);
+                }
+
+            };
+            Thread executer = new Thread(task);
+            executers.put(executer, executer);
+            executer.start();
         }
+
+        try {
+            logger.info("Awaiting completion of reading users' file storage association by database schema");
+            startLatch.countDown();
+            completionLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Collections.emptyMap();
+        }
+
+        Exception exception = errorRef.get();
+        if (null != exception) {
+            // Handle exception instance
+            if (exception instanceof NoConnectionToDatabaseException) {
+                throw (NoConnectionToDatabaseException) exception;
+            }
+            if (exception instanceof SQLException) {
+                throw (SQLException) exception;
+            }
+            if (exception instanceof InterruptedException) {
+                // Ignore
+            }
+            throw new RuntimeException(exception);
+        }
+
+        logger.info("Finished reading users' file storage association by database schema");
+        return map;
     }
 
-    private Map<PoolAndSchema, TIntObjectMap<TIntSet>> readInUsers(Connection configDbCon, org.slf4j.Logger logger) throws SQLException {
+    private Map<SchemaInfo, TIntObjectMap<TIntSet>> readInUsers(Connection configDbCon, org.slf4j.Logger logger) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -302,9 +464,9 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
             }
 
             // Read all users kept in filestore2user table
-            Set<UserAndContext> users = new LinkedHashSet<>();
+            TIntIntMap cid2user = new TIntIntHashMap();
             do {
-                users.add(new UserAndContext(rs.getInt(2), rs.getInt(1)));
+                cid2user.put(rs.getInt(1), rs.getInt(2));
             } while (rs.next());
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
@@ -312,13 +474,15 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
             logger.info("Collected all entries from \"filestore2user\" table");
 
             // Group them by database schema association
+            TIntObjectMap<SchemaInfo> context2SchemaInfo = getSchemaAssociationsFor(cid2user.keys(), configDbCon);
             TIntSet nonExisting = null;
-            Map<PoolAndSchema, TIntObjectMap<TIntSet>> map = new LinkedHashMap<>();
-            for (UserAndContext user : users) {
-                int contextId = user.contextId;
-                int userId = user.userId;
+            Map<SchemaInfo, TIntObjectMap<TIntSet>> map = new LinkedHashMap<>();
+            for (TIntIntIterator it = cid2user.iterator(); it.hasNext();) {
+                it.advance();
+                int contextId = it.key();
+                int userId = it.value();
 
-                PoolAndSchema pas = getSchemaAssociationFor(contextId, configDbCon);
+                SchemaInfo pas = context2SchemaInfo.get(contextId);
                 if (null == pas) {
                     // No such context
                     if (null == nonExisting) {
@@ -362,20 +526,28 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
         }
     }
 
-    private PoolAndSchema getSchemaAssociationFor(int contextId, Connection configDbCon) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = configDbCon.prepareStatement("SELECT write_db_pool_id, db_schema FROM context_server2db_pool WHERE cid=?");
-            stmt.setInt(1, contextId);
-            result = stmt.executeQuery();
-            return result.next() ? new PoolAndSchema(result.getInt(1)/*write_db_pool_id*/, result.getString(2)/*db_schema*/) : null;
-        } finally {
-            closeSQLStuff(result, stmt);
+    private TIntObjectMap<SchemaInfo> getSchemaAssociationsFor(int[] contextIds, Connection configDbCon) throws SQLException {
+        TIntObjectMap<SchemaInfo> context2SchemaInfo = new TIntObjectHashMap<SchemaInfo>(contextIds.length);
+        for (int[] partition : partition(contextIds, 100)) {
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = configDbCon.prepareStatement(Databases.getIN("SELECT write_db_pool_id, db_schema, cid FROM context_server2db_pool WHERE cid IN (", partition.length));
+                for (int pos = 1; pos <= partition.length; pos++) {
+                    stmt.setInt(pos, partition[pos - 1]);
+                }
+                result = stmt.executeQuery();
+                while (result.next()) {
+                    context2SchemaInfo.put(result.getInt(3)/*cid*/, SchemaInfo.valueOf(result.getInt(1)/*write_db_pool_id*/, result.getString(2)/*db_schema*/));
+                }
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
         }
+        return context2SchemaInfo;
     }
 
-    private static Connection getSimpleSQLConnectionFor(String url, String driver, String login, String password) throws NoConnectionToDatabaseException {
+    static Connection getSimpleSQLConnectionFor(String url, String driver, String login, String password) throws NoConnectionToDatabaseException {
         String passwd = "";
         if (password != null) {
             passwd = password;
@@ -392,32 +564,32 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
             return DriverManager.getConnection(url, defaults);
         } catch (ClassNotFoundException e) {
-            throw new NoConnectionToDatabaseException("Database " + extractHostName(url) + " is not accessible: No such driver class: " + driver, e);
+            throw new NoConnectionToDatabaseException("Database host " + extractHostName(url) + " is not accessible: No such driver class: " + driver, e);
         } catch (SQLException e) {
-            throw new NoConnectionToDatabaseException("Database " + extractHostName(url) + " is not accessible: " + e.getMessage(), e);
+            throw new NoConnectionToDatabaseException("Database host " + extractHostName(url) + " is not accessible: " + e.getMessage(), e);
         }
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
-    private static final class DB {
+    private static final class DatabaseHost {
 
         final int dbId;
+        final String name;
         final String url;
         final String driver;
         final String login;
         final String password;
-        final String schema;
         int hash = 0;
 
-        DB(int dbId, String url, String driver, String login, String password, String schema) {
+        DatabaseHost(int dbId, String name, String url, String driver, String login, String password) {
             super();
             this.dbId = dbId;
+            this.name = name;
             this.url = url;
             this.driver = driver;
             this.login = login;
             this.password = password;
-            this.schema = schema;
         }
 
         @Override
@@ -435,14 +607,31 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof DB)) {
+            if (!(obj instanceof DatabaseHost)) {
                 return false;
             }
-            DB other = (DB) obj;
+            DatabaseHost other = (DatabaseHost) obj;
             if (dbId != other.dbId) {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(32);
+            if (name != null) {
+                sb.append(name).append('@');
+            }
+            if (url != null) {
+                sb.append(extractHostName(url));
+            }
+            if (sb.length() > 0) {
+                sb.append(" (id=").append(dbId).append(')');
+            } else {
+                sb.append(dbId);
+            }
+            return sb.toString();
         }
     }
 
@@ -504,7 +693,7 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
     }
 
-    private static String extractHostName(String jdbcUrl) {
+    static String extractHostName(String jdbcUrl) {
         if (null == jdbcUrl) {
             return null;
         }
@@ -617,4 +806,28 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
             closeSQLStuff(null, stmt);
         }
     }
+
+    private static List<int[]> partition(int[] original, int partitionSize) {
+        checkNotNull(original, "Array must not be null");
+        checkArgument(partitionSize > 0);
+        int total = original.length;
+        if (partitionSize >= total) {
+            return Collections.singletonList(original);
+        }
+
+        // Create a list of sets to return.
+        List<int[]> result = new ArrayList<>((total + partitionSize - 1) / partitionSize);
+
+        // Create each new array.
+        int stopIndex = 0;
+        for (int startIndex = 0; startIndex + partitionSize <= total; startIndex += partitionSize) {
+            stopIndex += partitionSize;
+            result.add(java.util.Arrays.copyOfRange(original, startIndex, stopIndex));
+        }
+        if (stopIndex < total) {
+            result.add(java.util.Arrays.copyOfRange(original, stopIndex, total));
+        }
+        return result;
+    }
+
 }
