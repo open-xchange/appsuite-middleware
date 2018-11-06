@@ -238,7 +238,7 @@ public class EventManager extends AbstractManager {
         prepareEventAttachment(eventData, asset);
         StringBuilder sb = new StringBuilder();
         if (Strings.isNotEmpty(comment)) {
-            sb.append("{\"events\":");
+            sb.append("{\"event\":");
             sb.append(eventData.toJson());
             sb.append(", ");
             sb.append("\"comment\":");
