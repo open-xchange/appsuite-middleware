@@ -55,14 +55,14 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for all task tests.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     TasksTest.class,
     TaskAttachmentTests.class,
-    
+
     // Now several single function tests.
     InsertTest.class,
     CharsetTest.class,
@@ -78,10 +78,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
     TaskDurationAndCostsTest.class,
     DeleteMultipleTaskTest.class,
     DateTimeTest.class,
-    
+
     // Nodes
     LastModifiedUTCTest.class,
-    
+
     // And finally bug tests.
     Bug6335Test.class,
     Bug7276Test.class,
@@ -121,7 +121,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug32044Test.class,
     Bug33258Test.class,
     Bug35992Test.class,
-    Bug36943Test.class,
     Bug37002Test.class,
     Bug37424Test.class,
     Bug37927Test.class,
