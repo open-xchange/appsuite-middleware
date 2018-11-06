@@ -70,7 +70,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
-%config(noreplace) /opt/open-xchange/etc/mslivesubscribe.properties
 %doc docs/
 
 %changelog
