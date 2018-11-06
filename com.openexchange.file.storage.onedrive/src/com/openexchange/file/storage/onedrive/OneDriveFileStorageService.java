@@ -55,7 +55,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.msliveconnect.MSLiveConnectOAuthScope;
+import com.openexchange.oauth.microsoft.graph.MicrosoftGraphOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -97,6 +97,6 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      */
     @Override
     protected OAuthScope getScope() {
-        return MSLiveConnectOAuthScope.drive;
+        return MicrosoftGraphOAuthScope.drive;
     }
 }
