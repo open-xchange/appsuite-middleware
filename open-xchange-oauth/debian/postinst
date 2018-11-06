@@ -59,7 +59,7 @@ postFix() {
 }
 
 setConfigFilePermissions() {
-    PROTECT="boxcomoauth.properties dropboxoauth.properties googleoauth.properties msliveconnectoauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="boxcomoauth.properties dropboxoauth.properties googleoauth.properties microsoftgraphoauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT
     do
         ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
