@@ -266,7 +266,7 @@ public class SessiondRESTService extends JAXRSService {
         /**
          * Applies the value of the specified object to the specified filter builder
          * 
-         * @param builder The filter builder
+         * @param filterBuilder The filter builder
          * @param object The object
          */
         abstract void apply(StringBuilder filterBuilder, Object object);
@@ -293,7 +293,7 @@ public class SessiondRESTService extends JAXRSService {
      * Closes the sessions (either globally or locally) that meet the criteria of the specified filter.
      * 
      * @param global Whether to close sessions on the entire cluster or on the local node.
-     * @param filter The {@link SessionFilter}
+     * @param sessionFilter The {@link SessionFilter}
      * @return The {@link Response} with the outcome, 200 if the operation succeeded, 500 if it failed.
      */
     private Response closeSessions(Boolean global, SessionFilter sessionFilter) {
@@ -302,8 +302,8 @@ public class SessiondRESTService extends JAXRSService {
                 global = Boolean.valueOf(true);
             }
             SessiondService sessionService = SessiondService.SERVICE_REFERENCE.get();
-            Collection<String> sessions = global ? sessionService.removeSessionsGlobally(sessionFilter) : sessionService.removeSessions(sessionFilter);
-            log(sessions, sessionFilter, global);
+            Collection<String> sessions = global.booleanValue() ? sessionService.removeSessionsGlobally(sessionFilter) : sessionService.removeSessions(sessionFilter);
+            log(sessions, sessionFilter, global.booleanValue());
         } catch (IllegalArgumentException | OXException e) {
             LOGGER.error("{}", e.getMessage(), e);
             return Response.status(500).build();
