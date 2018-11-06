@@ -47,53 +47,41 @@
  *
  */
 
-package com.openexchange.caldav.servlet;
+package com.openexchange.database.tombstone.cleanup.cleaners;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.caldav.Tools;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.DAVServlet;
+import static com.openexchange.java.Autoboxing.I;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
+ * {@link ResourceTombstoneCleaner}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public class CalDAV extends DAVServlet {
-
-	private static final long serialVersionUID = -7768308794451862636L;
-
-	/**
-	 * Initializes a new {@link CalDAV}.
-	 *
-	 * @param performer The CalDAV performer
-	 */
-	public CalDAV(CaldavPerformer performer) {
-	    super(performer, Interface.CALDAV);
-	}
+public class ResourceTombstoneCleaner extends AbstractTombstoneTableCleaner {
 
     @Override
-    protected boolean checkPermission(HttpServletRequest req, ServerSession session) {
-        try {
-            ComposedConfigProperty<Boolean> property = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
-                OAuthAccess oAuthAccess = (OAuthAccess) req.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-                if (oAuthAccess == null) {
-                    // basic auth took place
-                    return true;
-                }
-                return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
-            }
-        } catch (OXException e) {
-            //
+    public void checkTables(Connection connection) throws OXException, SQLException {
+        boolean tableExists = Databases.tableExists(connection, "del_resource");
+        if (!tableExists) {
+            throw TombstoneCleanupExceptionCode.TABLE_NOT_EXISTS_ERROR.create("del_resource");
         }
-        return false;
+        boolean columnExists = Databases.columnExists(connection, "del_resource", "lastModified");
+        if (!columnExists) {
+            throw TombstoneCleanupExceptionCode.COLUMN_NOT_EXISTS_ERROR.create("del_resource", "lastModified");
+        }
     }
 
+    @Override
+    public Map<String, Integer> cleanupSafe(Connection connection, long timestamp) throws SQLException {
+        String delete = "DELETE FROM del_resource WHERE lastModified < ?";
+        int deletedRows = delete(connection, timestamp, delete);
+
+        return Collections.singletonMap("del_resource", I(deletedRows));
+    }
 }

@@ -83,6 +83,7 @@ import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.AttendeeMapper;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -610,7 +611,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         };
         int updated = 0;
         for (String deleteStatement : deleteStatements) {
-            String sql = new StringBuilder().append(deleteStatement).append(getPlaceholders(objectIDs.size())).append(';').toString();
+            String sql = new StringBuilder().append(deleteStatement).append(Databases.getPlaceholders(objectIDs.size())).append(';').toString();
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, contextID);

@@ -47,53 +47,27 @@
  *
  */
 
-package com.openexchange.caldav.servlet;
+package com.openexchange.database.tombstone.cleanup.cleaners;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.caldav.Tools;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.DAVServlet;
-import com.openexchange.exception.OXException;
-import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.tools.session.ServerSession;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
 
 /**
- * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
+ * {@link TombstoneTableCleaner}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public class CalDAV extends DAVServlet {
+public interface TombstoneTableCleaner {
 
-	private static final long serialVersionUID = -7768308794451862636L;
-
-	/**
-	 * Initializes a new {@link CalDAV}.
-	 *
-	 * @param performer The CalDAV performer
-	 */
-	public CalDAV(CaldavPerformer performer) {
-	    super(performer, Interface.CALDAV);
-	}
-
-    @Override
-    protected boolean checkPermission(HttpServletRequest req, ServerSession session) {
-        try {
-            ComposedConfigProperty<Boolean> property = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
-                OAuthAccess oAuthAccess = (OAuthAccess) req.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-                if (oAuthAccess == null) {
-                    // basic auth took place
-                    return true;
-                }
-                return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
-            }
-        } catch (OXException e) {
-            //
-        }
-        return false;
-    }
-
+    /**
+     * Cleans up the associated table based on an already existing schema connection.
+     * 
+     * @param connection Write connection to the destination schema
+     * @param timestamp Timestamp defining the border of what will be removed which means older entries than the given timestamp will be removed
+     * @return {@link Map} Containing the number of items that have been deleted by the {@link TombstoneTableCleaner} mapped to the table
+     * @throws SQLException In case data can't be removed
+     */
+    Map<String, Integer> cleanup(Connection connection, long timestamp) throws SQLException;
 }

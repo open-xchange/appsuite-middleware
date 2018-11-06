@@ -71,6 +71,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -356,7 +357,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_attendee WHERE cid=? AND account=? AND event")
-            .append(getPlaceholders(eventIds.size())).append(';');
+            .append(Databases.getPlaceholders(eventIds.size())).append(';');
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -465,7 +466,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
-            .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
+            .append(" WHERE cid=? AND account=? AND event").append(Databases.getPlaceholders(eventIds.length))
         ;
         if (null != internal) {
             stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
@@ -495,7 +496,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,COUNT(*) FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
-            .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
+            .append(" WHERE cid=? AND account=? AND event").append(Databases.getPlaceholders(eventIds.length))
         ;
         if (null != internal) {
             stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
@@ -527,7 +528,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM calendar_attendee WHERE cid=? AND account=? AND ")
             .append(isInternal(attendee) ? "entity" : "uri").append("=?")
-            .append(" AND event").append(getPlaceholders(eventIds.length)).append(';')
+            .append(" AND event").append(Databases.getPlaceholders(eventIds.length)).append(';')
         ;
         Map<String, Attendee> attendeeByEventId = new HashMap<String, Attendee>(eventIds.length);
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {

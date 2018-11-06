@@ -82,6 +82,7 @@ import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -529,7 +530,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event")
-            .append(getPlaceholders(eventIds.size())).append(';');
+            .append(Databases.getPlaceholders(eventIds.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);

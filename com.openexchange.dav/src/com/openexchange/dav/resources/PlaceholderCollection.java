@@ -120,7 +120,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() {
         return null;
     }
 
@@ -216,17 +216,17 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() {
         return false;
     }
 
     @Override
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since) {
         SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
         if (since == null) {
             since = new Date(0l);
@@ -236,7 +236,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    protected Collection<T> getObjects() throws OXException {
+    protected Collection<T> getObjects() {
         return Collections.emptyList();
     }
 
@@ -246,7 +246,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    protected T getObject(String resourceName) throws OXException {
+    protected T getObject(String resourceName) {
         return null;
     }
 

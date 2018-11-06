@@ -69,6 +69,7 @@ import java.util.Set;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -356,7 +357,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         Set<String> eventIdsWithAttachment = new HashSet<String>();
         String sql = new StringBuilder()
             .append("SELECT DISTINCT(attached) FROM prg_attachment ")
-            .append("WHERE cid=? AND attached").append(getPlaceholders(eventIds.length)).append(';')
+            .append("WHERE cid=? AND attached").append(Databases.getPlaceholders(eventIds.length)).append(';')
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;

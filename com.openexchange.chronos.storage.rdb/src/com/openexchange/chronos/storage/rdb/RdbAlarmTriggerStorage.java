@@ -363,7 +363,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT DISTINCT(eventId) FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId")
-            .append(getPlaceholders(eventIds.length)).append(';')
+            .append(Databases.getPlaceholders(eventIds.length)).append(';')
         ;
         Set<String> eventIdsWithTrigger = new HashSet<String>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
@@ -397,7 +397,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == ids || 0 == ids.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId").append(getPlaceholders(ids.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId").append(Databases.getPlaceholders(ids.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -413,7 +413,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == alarmIds || 0 == alarmIds.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND alarm").append(getPlaceholders(alarmIds.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND alarm").append(Databases.getPlaceholders(alarmIds.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -429,7 +429,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == ids || 0 == ids.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId").append(getPlaceholders(ids.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId").append(Databases.getPlaceholders(ids.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());

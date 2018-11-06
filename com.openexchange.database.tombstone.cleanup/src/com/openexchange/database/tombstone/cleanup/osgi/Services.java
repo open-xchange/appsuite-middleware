@@ -47,53 +47,67 @@
  *
  */
 
-package com.openexchange.caldav.servlet;
+package com.openexchange.database.tombstone.cleanup.osgi;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.caldav.Tools;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.DAVServlet;
-import com.openexchange.exception.OXException;
-import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
+ * 
+ * {@link Services}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public class CalDAV extends DAVServlet {
+public final class Services {
 
-	private static final long serialVersionUID = -7768308794451862636L;
-
-	/**
-	 * Initializes a new {@link CalDAV}.
-	 *
-	 * @param performer The CalDAV performer
-	 */
-	public CalDAV(CaldavPerformer performer) {
-	    super(performer, Interface.CALDAV);
-	}
-
-    @Override
-    protected boolean checkPermission(HttpServletRequest req, ServerSession session) {
-        try {
-            ComposedConfigProperty<Boolean> property = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
-                OAuthAccess oAuthAccess = (OAuthAccess) req.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-                if (oAuthAccess == null) {
-                    // basic auth took place
-                    return true;
-                }
-                return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
-            }
-        } catch (OXException e) {
-            //
-        }
-        return false;
+    private Services() {
+        super();
     }
 
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
 }

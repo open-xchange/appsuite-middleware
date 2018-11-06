@@ -51,7 +51,6 @@ package com.openexchange.webdav.protocol.helpers;
 
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 
@@ -72,12 +71,12 @@ public abstract class SinglePropertyMixin implements PropertyMixin {
     }
 
     @Override
-    public List<WebdavProperty> getAllProperties() throws OXException {
+    public List<WebdavProperty> getAllProperties() {
         return Collections.emptyList();
     }
 
     @Override
-    public WebdavProperty getProperty(String namespace, String name) throws OXException {
+    public WebdavProperty getProperty(String namespace, String name) {
         if (this.namespace.equals(namespace) && this.name.equals(name)) {
             WebdavProperty property = new WebdavProperty(namespace, name);
             configureProperty(property);

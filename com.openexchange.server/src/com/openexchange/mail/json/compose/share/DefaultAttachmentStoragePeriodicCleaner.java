@@ -170,7 +170,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
                     }
                 }
             }
-        }  catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.warn("Interrupted during periodic cleanup task for shared mail attachments: {}", e.getMessage(), e);
         } catch (Exception e) {

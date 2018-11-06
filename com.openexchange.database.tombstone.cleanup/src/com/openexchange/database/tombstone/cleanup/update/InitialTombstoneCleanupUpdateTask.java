@@ -47,53 +47,46 @@
  *
  */
 
-package com.openexchange.caldav.servlet;
+package com.openexchange.database.tombstone.cleanup.update;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.caldav.Tools;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.DAVServlet;
+import java.sql.SQLException;
+import java.util.Map;
+import com.openexchange.database.tombstone.cleanup.SchemaTombstoneCleaner;
 import com.openexchange.exception.OXException;
-import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
+ * {@link InitialTombstoneCleanupUpdateTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public class CalDAV extends DAVServlet {
+public class InitialTombstoneCleanupUpdateTask extends UpdateTaskAdapter {
 
-	private static final long serialVersionUID = -7768308794451862636L;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InitialTombstoneCleanupUpdateTask.class);
 
-	/**
-	 * Initializes a new {@link CalDAV}.
-	 *
-	 * @param performer The CalDAV performer
-	 */
-	public CalDAV(CaldavPerformer performer) {
-	    super(performer, Interface.CALDAV);
-	}
+    private long timespan;
 
-    @Override
-    protected boolean checkPermission(HttpServletRequest req, ServerSession session) {
-        try {
-            ComposedConfigProperty<Boolean> property = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
-                OAuthAccess oAuthAccess = (OAuthAccess) req.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-                if (oAuthAccess == null) {
-                    // basic auth took place
-                    return true;
-                }
-                return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
-            }
-        } catch (OXException e) {
-            //
-        }
-        return false;
+    public InitialTombstoneCleanupUpdateTask(long timespan) {
+        this.timespan = timespan;
     }
 
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        long timestamp = System.currentTimeMillis() - timespan;
+
+        try {
+            SchemaTombstoneCleaner schemaCleaner = new SchemaTombstoneCleaner();
+            Map<String, Integer> cleanedTables = schemaCleaner.cleanup(params.getConnection(), timestamp);
+            schemaCleaner.logResults(params.getSchema().getSchema(), cleanedTables);
+        } catch (final SQLException e) {
+            LOG.error("Unable to clean up schema.", e);
+        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
 }

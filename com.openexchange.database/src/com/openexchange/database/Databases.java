@@ -58,6 +58,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +70,7 @@ import java.util.regex.Pattern;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.java.ConcurrentList;
 
 /**
  * Utilities for database resource handling.
@@ -338,6 +340,30 @@ public final class Databases {
     }
 
     /**
+     * Gets an SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
+     *
+     * @param count The number of placeholders to append
+     * @return The placeholder string
+     * @throws IllegalArgumentException if count is <code>0</code> or negative
+     */
+    public static String getPlaceholders(int count) {
+        if (0 >= count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            return "=?";
+        }
+        StringBuilder stringBuilder = new StringBuilder(6 + 2 * count);
+        stringBuilder.append(" IN (?");
+        for (int i = 1; i < count; i++) {
+            stringBuilder.append(",?");
+        }
+        stringBuilder.append(')');
+        return stringBuilder.toString();
+    }
+
+    /**
      * This method determines the size of a database column. For strings it gives the maximum allowed characters and for number it returns
      * the precision.
      *
@@ -546,6 +572,34 @@ public final class Databases {
             closeSQLStuff(rs);
         }
         return retval;
+    }
+
+    /**
+     * Checks if specified columns exist.
+     *
+     * @param con The connection
+     * @param table The table name
+     * @param columns Array of column names
+     * @return <code>true</code> if specified columns exist; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
+    public static boolean columnsExist(final Connection con, final String table, final String... columns) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        ConcurrentList<String> expectedColumns = new ConcurrentList<>(Arrays.asList(columns));
+        try {
+            rs = metaData.getColumns(null, null, table, null);
+            while (rs.next()) {
+                String string = rs.getString(4);
+                expectedColumns.removeIf(x -> x.contains(string));
+                if (expectedColumns.isEmpty()) {
+                    return true;
+                }
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return expectedColumns.isEmpty() ? true : false;
     }
 
     /**

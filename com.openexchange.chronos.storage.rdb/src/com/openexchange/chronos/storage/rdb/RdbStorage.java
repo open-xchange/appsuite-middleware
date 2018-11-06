@@ -395,30 +395,6 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
         return null == id ? null : id.toString();
     }
 
-    /**
-     * Gets an SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
-     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
-     *
-     * @param count The number of placeholders to append
-     * @return The placeholder string
-     * @throws IllegalArgumentException if count is <code>0</code> or negative
-     */
-    protected static String getPlaceholders(int count) {
-        if (0 >= count) {
-            throw new IllegalArgumentException("count");
-        }
-        if (1 == count) {
-            return "=?";
-        }
-        StringBuilder stringBuilder = new StringBuilder(6 + 2 * count);
-        stringBuilder.append(" IN (?");
-        for (int i = 1; i < count; i++) {
-            stringBuilder.append(",?");
-        }
-        stringBuilder.append(')');
-        return stringBuilder.toString();
-    }
-
     private <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {
         if (null != mapper && null != e) {
             E field = mapper.getMappedField(e.getColumn());

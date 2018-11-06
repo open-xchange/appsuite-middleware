@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: A Cleanup System
+Bundle-SymbolicName: com.openexchange.database.tombstone.cleanup
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.collect,
+ com.openexchange.cluster.timer,
+ com.openexchange.config,
+ com.openexchange.config.lean,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.update,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.timer,
+ org.apache.commons.lang,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.database.tombstone.cleanup.osgi.TombstoneCleanupActivator
