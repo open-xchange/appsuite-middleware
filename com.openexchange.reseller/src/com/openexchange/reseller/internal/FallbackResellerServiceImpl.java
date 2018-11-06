@@ -51,7 +51,6 @@ package com.openexchange.reseller.internal;
 
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 
@@ -69,12 +68,12 @@ public class FallbackResellerServiceImpl implements ResellerService {
     }
 
     @Override
-    public ResellerAdmin getReseller(int cid) throws OXException {
+    public ResellerAdmin getReseller(int cid) {
         return DEFAULT;
     }
 
     @Override
-    public List<ResellerAdmin> getAll() throws OXException {
+    public List<ResellerAdmin> getAll() {
         return Collections.singletonList(DEFAULT);
     }
 

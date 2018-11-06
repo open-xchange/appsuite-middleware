@@ -577,6 +577,7 @@ public class DefaultEntityResolver implements EntityResolver {
         attendee.setComment(resource.getDescription());
         attendee.setPartStat(ParticipationStatus.ACCEPTED);
         attendee.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
+        attendee.setEMail(resource.getMail());
         return attendee;
     }
 

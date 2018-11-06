@@ -85,7 +85,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
     }
 
     @Override
-    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws SieveException, OXException {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
@@ -116,7 +116,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
         jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());

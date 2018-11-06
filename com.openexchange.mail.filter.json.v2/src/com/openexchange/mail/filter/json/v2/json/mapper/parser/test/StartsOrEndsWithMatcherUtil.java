@@ -139,11 +139,7 @@ public class StartsOrEndsWithMatcherUtil {
             }
         }
 
-        if(endswith){
-            return MatchType.endswith;
-        } else {
-            return MatchType.startswith;
-        }
+        return endswith ? MatchType.endswith : MatchType.startswith;
     }
 
     /**

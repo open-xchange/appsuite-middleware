@@ -76,9 +76,9 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
+import com.openexchange.log.LogProperties;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster access.
@@ -89,13 +89,6 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     private static final Logger LOG = LoggerFactory.getLogger(ContextDatabaseAssignmentImpl.class);
 
-    private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
-    private static final String INSERT = "INSERT INTO context_server2db_pool (read_db_pool_id,write_db_pool_id,db_schema,server_id,cid) VALUES (?,?,?,?,?)";
-    private static final String UPDATE = "UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?";
-    private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
-    private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
-    private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
-
     private static final String CACHE_NAME = "OXDBPoolCache";
 
     private static class CacheLockHolder {
@@ -103,8 +96,9 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         static final CacheLock fallbackGlobalCacheLock = CacheLock.cacheLockFor(new ReentrantLock(true));
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final ConfigDatabaseService configDatabaseService;
-    private volatile CacheService cacheService;
     private volatile Cache cache;
     private final LockMech lockMech;
 
@@ -115,6 +109,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         super();
         this.configDatabaseService = configDatabaseService;
         this.lockMech = lockMech;
+    }
+
+    private boolean isIgnoreServerAssociation() {
+        return "true".equals(LogProperties.get(LogProperties.Name.DATABASE_IGNORE_SERVER_ASSOCIATION));
     }
 
     private CacheLock cacheLockFor(int contextId) throws OXException {
@@ -142,20 +140,25 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
      * @throws OXException If loading the assignment fails or no such assignment exists (if parameter <code>errorOnAbsence</code> has been set to <code>true</code>)
      */
     private AssignmentImpl getAssignment(Connection con, int contextId, boolean errorOnAbsence) throws OXException {
-        CacheService myCacheService = this.cacheService;
+        boolean ignoreServerAssociation = isIgnoreServerAssociation();
         Cache myCache = this.cache;
 
         // Check cache references
-        if (null == myCache || null == myCacheService) {
+        if (null == myCache) {
             // No cache available
-            return loadAssignment(con, contextId, errorOnAbsence);
+            return loadAssignment(con, contextId, errorOnAbsence, ignoreServerAssociation);
         }
 
         // Use that cache
-        CacheKey key = myCacheService.newCacheKey(contextId, Server.getServerId());
+        int serverId = Server.getServerId();
+        CacheKey key = myCache.newCacheKey(contextId);
         Object object = myCache.get(key);
         if (object instanceof AssignmentImpl) {
-            return (AssignmentImpl) object;
+            AssignmentImpl assignment = (AssignmentImpl) object;
+            if (!ignoreServerAssociation && serverId != assignment.getServerId()) {
+                throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(serverId));
+            }
+            return assignment;
         }
 
         // Need to load - synchronously!
@@ -165,10 +168,14 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             object = myCache.get(key);
             if (object instanceof AssignmentImpl) {
                 // Loaded meanwhile
-                return (AssignmentImpl) object;
+                AssignmentImpl assignment = (AssignmentImpl) object;
+                if (!ignoreServerAssociation && serverId != assignment.getServerId()) {
+                    throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(serverId));
+                }
+                return assignment;
             }
 
-            AssignmentImpl loaded = loadAssignment(con, contextId, errorOnAbsence);
+            AssignmentImpl loaded = loadAssignment(con, contextId, errorOnAbsence, ignoreServerAssociation);
             try {
                 myCache.putSafe(key, loaded);
             } catch (OXException e) {
@@ -180,21 +187,26 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
     }
 
-    private AssignmentImpl loadAssignment(Connection con, int contextId) throws OXException {
+    private AssignmentImpl loadAssignment(Connection con, int contextId, boolean ignoreServerAssociation) throws OXException {
+        int serverId = Server.getServerId();
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT);
-            stmt.setInt(1, Server.getServerId());
-            stmt.setInt(2, contextId);
+            if (ignoreServerAssociation) {
+                stmt = con.prepareStatement("SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE cid=?");
+                stmt.setInt(1, contextId);
+            } else {
+                stmt = con.prepareStatement("SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?");
+                stmt.setInt(1, serverId);
+                stmt.setInt(2, contextId);
+            }
             result = stmt.executeQuery();
-
             if (false == result.next()) {
                 return null;
             }
 
-            int pos = 1;
-            return new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++), result.getString(pos++));
+            return new AssignmentImpl(contextId, serverId, result.getInt(1), result.getInt(2), result.getString(3));
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -202,22 +214,21 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
     }
 
-    private AssignmentImpl loadAssignment(Connection conn, int contextId, boolean errorOnAbsence) throws OXException {
-        Connection con = conn;
-        if (null == con) {
-            con = configDatabaseService.getReadOnly();
-            try {
-                return loadAndCheck(con, contextId, errorOnAbsence);
-            } finally {
-                configDatabaseService.backReadOnly(con);
-            }
+    private AssignmentImpl loadAssignment(Connection conn, int contextId, boolean errorOnAbsence, boolean ignoreServerAssociation) throws OXException {
+        if (null != conn) {
+            return loadAndCheck(conn, contextId, errorOnAbsence, ignoreServerAssociation);
         }
 
-        return loadAndCheck(con, contextId, errorOnAbsence);
+        Connection con = configDatabaseService.getReadOnly();
+        try {
+            return loadAndCheck(con, contextId, errorOnAbsence, ignoreServerAssociation);
+        } finally {
+            configDatabaseService.backReadOnly(con);
+        }
     }
 
-    private AssignmentImpl loadAndCheck(Connection con, int contextId, boolean errorOnAbsence) throws OXException {
-        AssignmentImpl retval = loadAssignment(con, contextId);
+    private AssignmentImpl loadAndCheck(Connection con, int contextId, boolean errorOnAbsence, boolean ignoreServerAssociation) throws OXException {
+        AssignmentImpl retval = loadAssignment(con, contextId, ignoreServerAssociation);
         if (errorOnAbsence && null == retval) {
             throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
         }
@@ -227,7 +238,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private void writeNewAssignmentDB(Connection con, Assignment assign, boolean updateCounters) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(INSERT);
+            stmt = con.prepareStatement("INSERT INTO context_server2db_pool (read_db_pool_id,write_db_pool_id,db_schema,server_id,cid) VALUES (?,?,?,?,?)");
             int pos = 1;
             stmt.setInt(pos++, assign.getReadPoolId());
             stmt.setInt(pos++, assign.getWritePoolId());
@@ -239,6 +250,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 throw DBPoolingExceptionCodes.INSERT_FAILED.create(I(assign.getContextId()), I(assign.getServerId()));
             }
             Databases.closeSQLStuff(stmt);
+            stmt = null;
 
             if (updateCounters) {
                 updateCountTables(con, assign.getWritePoolId(), assign.getSchema(), true);
@@ -251,15 +263,24 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     private void writeExistingAssignmentDB(Connection con, Assignment assign, AssignmentImpl oldAssign, boolean updateCounters) throws OXException {
+        boolean ignoreServerAssociation = isIgnoreServerAssociation();
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(UPDATE);
             int pos = 1;
-            stmt.setInt(pos++, assign.getReadPoolId());
-            stmt.setInt(pos++, assign.getWritePoolId());
-            stmt.setString(pos++, assign.getSchema());
-            stmt.setInt(pos++, assign.getServerId());
-            stmt.setInt(pos++, assign.getContextId());
+            if (ignoreServerAssociation) {
+                stmt = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE cid=?");
+                stmt.setInt(pos++, assign.getReadPoolId());
+                stmt.setInt(pos++, assign.getWritePoolId());
+                stmt.setString(pos++, assign.getSchema());
+                stmt.setInt(pos++, assign.getContextId());
+            } else {
+                stmt = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?");
+                stmt.setInt(pos++, assign.getReadPoolId());
+                stmt.setInt(pos++, assign.getWritePoolId());
+                stmt.setString(pos++, assign.getSchema());
+                stmt.setInt(pos++, assign.getServerId());
+                stmt.setInt(pos++, assign.getContextId());
+            }
             int count = stmt.executeUpdate();
             if (1 != count) {
                 throw DBPoolingExceptionCodes.INSERT_FAILED.create(I(assign.getContextId()), I(assign.getServerId()));
@@ -331,7 +352,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         // Update cache
         Cache myCache = this.cache;
         if (null != myCache) {
-            final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
+            final CacheKey key = myCache.newCacheKey(assign.getContextId());
             CacheLock cacheLock = cacheLockFor(assign.getContextId());
             cacheLock.lock();
             try {
@@ -367,11 +388,17 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             return;
         }
 
+        boolean ignoreServerAssociation = isIgnoreServerAssociation();
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(DELETE);
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, Server.getServerId());
+            if (ignoreServerAssociation) {
+                stmt = con.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
+                stmt.setInt(1, contextId);
+            } else {
+                stmt = con.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, Server.getServerId());
+            }
             stmt.executeUpdate();
             closeSQLStuff(stmt);
 
@@ -388,11 +415,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         Cache myCache = this.cache;
         if (null != myCache) {
             try {
-                int serverId = Server.getServerId();
                 if (contextIds != null && contextIds.length > 0) {
-                    List<Serializable> keys = new ArrayList<Serializable>(contextIds.length);
+                    List<Serializable> keys = new ArrayList<Serializable>(contextIds.length << 1);
                     for (int contextId : contextIds) {
-                        keys.add(myCache.newCacheKey(contextId, serverId));
+                        keys.add(myCache.newCacheKey(contextId));
                     }
                     myCache.remove(keys);
                 }
@@ -410,15 +436,22 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public int[] getContextsFromSchema(Connection con, int writePoolId, String schema) throws OXException {
+        boolean ignoreServerAssociation = isIgnoreServerAssociation();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(CONTEXTS_IN_SCHEMA);
-            stmt.setInt(1, Server.getServerId());
-            stmt.setInt(2, writePoolId);
-            stmt.setString(3, schema);
+            if (ignoreServerAssociation) {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=? AND db_schema=?");
+                stmt.setInt(1, writePoolId);
+                stmt.setString(2, schema);
+            } else {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?");
+                stmt.setInt(1, Server.getServerId());
+                stmt.setInt(2, writePoolId);
+                stmt.setString(3, schema);
+            }
             rs = stmt.executeQuery();
-            final TIntList tmp = new TIntLinkedList();
+            TIntList tmp = new TIntArrayList();
             while (rs.next()) {
                 tmp.add(rs.getInt(1));
             }
@@ -501,7 +534,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(NOTFILLED);
+            stmt = con.prepareStatement("SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC");
             stmt.setInt(1, poolId);
             stmt.setInt(2, maxContexts);
             result = stmt.executeQuery();
@@ -529,7 +562,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(NOTFILLED);
+            stmt = con.prepareStatement("SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC");
             stmt.setInt(1, poolId);
             stmt.setInt(2, maxContexts);
             result = stmt.executeQuery();
@@ -604,16 +637,22 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
 
         // Iterate database clusters
-        int serverId = Server.getServerId();
+        boolean ignoreServerAssociation = isIgnoreServerAssociation();
+        int serverId = ignoreServerAssociation ? 0 /* unused */ : Server.getServerId();
         Map<String, Integer> allSchemas = new LinkedHashMap<>();
         for (Map.Entry<Integer, Integer> clusterEntry : clusters.entrySet()) {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
                 // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
-                stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=? AND server_id=? GROUP by db_schema");
-                stmt.setInt(1, clusterEntry.getKey().intValue());
-                stmt.setInt(2, serverId);
+                if (ignoreServerAssociation) {
+                    stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=? GROUP by db_schema");
+                    stmt.setInt(1, clusterEntry.getKey().intValue());
+                } else {
+                    stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=? AND server_id=? GROUP by db_schema");
+                    stmt.setInt(1, clusterEntry.getKey().intValue());
+                    stmt.setInt(2, serverId);
+                }
                 rs = stmt.executeQuery();
                 while (rs.next()) {
                     allSchemas.put(rs.getString(1), clusterEntry.getValue());
@@ -628,7 +667,6 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     void setCacheService(final CacheService service) {
-        this.cacheService = service;
         try {
             this.cache = service.getCache(CACHE_NAME);
         } catch (final OXException e) {
@@ -637,7 +675,6 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     void removeCacheService() {
-        this.cacheService = null;
         Cache myCache = this.cache;
         if (null != myCache) {
             try {
@@ -648,4 +685,5 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             this.cache = null;
         }
     }
+
 }

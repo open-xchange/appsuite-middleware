@@ -52,24 +52,82 @@ package com.openexchange.admin.storage.sqlStorage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogProperties.Name;
 
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPool.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPool.class);
+    }
 
-    private DatabaseService service;
+    /** The special log property to disable honoring server association */
+    protected static final Name DATABASE_IGNORE_SERVER_ASSOCIATION = LogProperties.Name.DATABASE_IGNORE_SERVER_ASSOCIATION;
+
+    /** Simple callable that sets and unsets the <code>"com.openexchange.database.ignoreServerAssociation"</code> log property */
+    public static abstract class DatabaseServiceCallable<T> {
+
+        /**
+         * Initializes a new {@link DatabaseServiceCallable}.
+         */
+        protected DatabaseServiceCallable() {
+            super();
+        }
+
+        /**
+         * Executes this callable using given database service
+         *
+         * @param databaseService The database service to use
+         * @return The result
+         * @throws PoolException If operation fails
+         */
+        public T perform(DatabaseService databaseService) throws PoolException {
+            LogProperties.put(DATABASE_IGNORE_SERVER_ASSOCIATION, "true");
+            try {
+                return doPerform(databaseService);
+            } catch (SQLException e) {
+                LoggerHolder.LOG.error("", e);
+                throw new PoolException(e.getMessage(), e);
+            } catch (OXException e) {
+                LoggerHolder.LOG.error("", e);
+                throw new PoolException(e.getMessage(), e);
+            } finally {
+                LogProperties.remove(DATABASE_IGNORE_SERVER_ASSOCIATION);
+            }
+        }
+
+        /**
+         * Actually performs the callable's operation.
+         *
+         * @param databaseService The database service to use
+         * @return The result
+         * @throws SQLException If an SQL error orccurs
+         * @throws OXException If operation fails
+         */
+        protected abstract T doPerform(DatabaseService databaseService) throws SQLException, OXException;
+
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<DatabaseService> service;
 
     public OXAdminPoolDBPool() {
         super();
+        service = new AtomicReference<DatabaseService>(null);
     }
 
     @Override
     public void setService(DatabaseService service) {
-        this.service = service;
+        this.service.set(service);
     }
 
     @Override
@@ -78,6 +136,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     public DatabaseService getService() throws PoolException {
+        DatabaseService service = this.service.get();
         if (null == service) {
             throw new PoolException("DatabaseService is missing.");
         }
@@ -86,328 +145,338 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public Connection getConnectionForConfigDB() throws PoolException {
-        try {
-            return getService().getWritable();
-        } catch (OXException e) {
-            log.error("Error pickup configdb database write connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getWritable();
+            }
+        }.perform(getService());
     }
 
     @Override
     public Connection getWriteConnectionForConfigDB() throws PoolException {
-        try {
-            return getService().getWritable();
-        } catch (OXException e) {
-            log.error("Error pickup configdb database write connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getWritable();
+            }
+        }.perform(getService());
     }
 
     @Override
     public Connection getReadConnectionForConfigDB() throws PoolException {
-        try {
-            return getService().getReadOnly();
-        } catch (OXException e) {
-            log.error("Error pickup configdb database read connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getReadOnly();
+            }
+        }.perform(getService());
     }
 
     @Override
     public Connection getWriteConnectionForConfigDBNoTimeout() throws PoolException {
-        try {
-            return getService().getForUpdateTask();
-        } catch (OXException e) {
-            log.error("Error pickup no-timeout configdb database write connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getForUpdateTask();
+            }
+        }.perform(getService());
     }
 
     @Override
-    public Connection getConnectionForContext(int contextId) throws PoolException {
-        try {
-            return getService().getWritable(contextId);
-        } catch (OXException e) {
-            log.error("Error pickup context database write connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public Connection getConnectionForContext(final int contextId) throws PoolException {
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getWritable(contextId);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public Connection getConnection(int poolId, String schema) throws PoolException {
-        try {
-            return getService().get(poolId, schema);
-        } catch (OXException e) {
-            log.error("Error pickup context database write connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public Connection getConnection(final int poolId, final String schema) throws PoolException {
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.get(poolId, schema);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
-        try {
-            return getService().getForUpdateTask(contextId);
-        } catch (OXException e) {
-            log.error("Error pickup context database write connection from pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public Connection getConnectionForContextNoTimeout(final int contextId) throws PoolException {
+        return new DatabaseServiceCallable<Connection>() {
+
+            @Override
+            protected Connection doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getForUpdateTask(contextId);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
+    public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
 
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws OXException {
+                Databases.autocommit(con);
+                databaseService.backWritable(con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing configdb write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backWritable(con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushReadConnectionForConfigDB(Connection con) throws PoolException {
+    public boolean pushReadConnectionForConfigDB(final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws OXException {
+                Databases.autocommit(con);
+                databaseService.backReadOnly(con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing configdb read connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backReadOnly(con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException {
+    public boolean pushWriteConnectionForConfigDB(final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws OXException {
+                Databases.autocommit(con);
+                databaseService.backWritable(con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing configdb write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backWritable(con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushWriteConnectionForConfigDBNoTimeout(Connection con) throws PoolException {
+    public boolean pushWriteConnectionForConfigDBNoTimeout(final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws OXException {
+                Databases.autocommit(con);
+                databaseService.backForUpdateTask(con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing no-timeout configdb write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backForUpdateTask(con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
+    public boolean pushConnectionForContext(final int contextId, final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws OXException {
+                Databases.autocommit(con);
+                databaseService.backWritable(contextId, con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing context database write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backWritable(contextId, con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException {
+    public boolean pushConnectionForContextAfterReading(final int contextId, final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws SQLException, OXException {
+                Databases.autocommit(con);
+                databaseService.backWritableAfterReading(contextId, con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing context database write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backWritableAfterReading(contextId, con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
+    public boolean pushConnectionForContextNoTimeout(final int contextId, final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws SQLException, OXException {
+                Databases.autocommit(con);
+                databaseService.backForUpdateTask(contextId, con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing context database write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().backForUpdateTask(contextId, con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
-    public boolean pushConnection(int poolId, Connection con) throws PoolException {
+    public boolean pushConnection(final int poolId, final Connection con) throws PoolException {
         if (null == con) {
             return false;
         }
-        try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
-                con.setAutoCommit(true);
+
+        return new DatabaseServiceCallable<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DatabaseService databaseService) throws OXException {
+                Databases.autocommit(con);
+                databaseService.back(poolId, con);
+                return Boolean.TRUE;
             }
-        } catch (SQLException e) {
-            log.error("Error pushing context database write connection to pool!", e);
-            throw new PoolException(e.getMessage(), e);
-        } finally {
-            getService().back(poolId, con);
-        }
-        return true;
+        }.perform(getService()).booleanValue();
     }
 
     @Override
     public int getServerId() throws PoolException {
-        final int serverId;
-        try {
-            serverId = getService().getServerId();
-        } catch (OXException e) {
-            log.error("Error getting the identifier of the server! This is normal until at least one server is configured.", e);
-            throw new PoolException(e.getMessage(), e);
-        }
-        return serverId;
+        return new DatabaseServiceCallable<Integer>() {
+
+            @Override
+            protected Integer doPerform(DatabaseService databaseService) throws OXException {
+                return Integer.valueOf(databaseService.getServerId());
+            }
+        }.perform(getService()).intValue();
     }
 
     @Override
-    public void writeAssignment(Connection con, Assignment assign) throws PoolException {
-        try {
-            getService().writeAssignment(con, assign);
-        } catch (OXException e) {
-            log.error("Error writing a context to database assigment.", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public void writeAssignment(final Connection con, final Assignment assign) throws PoolException {
+        new DatabaseServiceCallable<Void>() {
+
+            @Override
+            protected Void doPerform(DatabaseService databaseService) throws OXException {
+                databaseService.writeAssignment(con, assign);
+                return null;
+            }
+        }.perform(getService());
     }
 
     @Override
-    public void deleteAssignment(Connection con, int contextId) throws PoolException {
-        try {
-            getService().deleteAssignment(con, contextId);
-        } catch (OXException e) {
-            log.error("Error deleting a context to database assigment.", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public void deleteAssignment(final Connection con, final int contextId) throws PoolException {
+        new DatabaseServiceCallable<Void>() {
+
+            @Override
+            protected Void doPerform(DatabaseService databaseService) throws OXException {
+                databaseService.deleteAssignment(con, contextId);
+                return null;
+            }
+        }.perform(getService());
     }
 
     @Override
-    public int[] getContextInSameSchema(Connection con, int contextId) throws PoolException {
-        try {
-            return getService().getContextsInSameSchema(con, contextId);
-        } catch (OXException e) {
-            log.error("Error getting all contexts from the same schema.", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public int[] getContextInSameSchema(final Connection con, final int contextId) throws PoolException {
+        return new DatabaseServiceCallable<int[]>() {
+
+            @Override
+            protected int[] doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getContextsInSameSchema(con, contextId);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException {
-        try {
-            return getService().getContextsInSchema(con, poolId, schema);
-        } catch (OXException e) {
-            log.error("Error getting all contexts from the same schema.", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public int[] getContextInSchema(final Connection con, final int poolId, final String schema) throws PoolException {
+        return new DatabaseServiceCallable<int[]>() {
+
+            @Override
+            protected int[] doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getContextsInSchema(con, poolId, schema);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public int[] listContexts(int poolId, int offset, int length) throws PoolException {
-        try {
-            return getService().listContexts(poolId, offset, length);
-        } catch (OXException e) {
-            log.error("Error getting all contexts from the same schema.", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public int[] listContexts(final int poolId, final int offset, final int length) throws PoolException {
+        return new DatabaseServiceCallable<int[]>() {
+
+            @Override
+            protected int[] doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.listContexts(poolId, offset, length);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException {
-        try {
-            return getService().getUnfilledSchemas(con, poolId, maxContexts);
-        } catch (OXException e) {
-            log.error("Error getting unfilled schemas", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public String[] getUnfilledSchemas(final Connection con, final int poolId, final int maxContexts) throws PoolException {
+        return new DatabaseServiceCallable<String[]>() {
+
+            @Override
+            protected String[] doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getUnfilledSchemas(con, poolId, maxContexts);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException {
-        try {
-            return getService().getContextCountPerSchema(con, poolId, maxContexts);
-        } catch (OXException e) {
-            log.error("Error getting unfilled schemas", e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public Map<String, Integer> getContextCountPerSchema(final Connection con, final int poolId, final int maxContexts) throws PoolException {
+        return new DatabaseServiceCallable<Map<String, Integer>>() {
+
+            @Override
+            protected Map<String, Integer> doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getContextCountPerSchema(con, poolId, maxContexts);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public int getWritePool(int contextId) throws PoolException {
-        try {
-            return getService().getWritablePool(contextId);
-        } catch (OXException e) {
-            log.error("Error getting the write pool identifier for context {}.", contextId, e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public int getWritePool(final int contextId) throws PoolException {
+        return new DatabaseServiceCallable<Integer>() {
+
+            @Override
+            protected Integer doPerform(DatabaseService databaseService) throws OXException {
+                return Integer.valueOf(databaseService.getWritablePool(contextId));
+            }
+        }.perform(getService()).intValue();
     }
 
     @Override
-    public String getSchemaName(int contextId) throws PoolException {
-        try {
-            return getService().getSchemaName(contextId);
-        } catch (OXException e) {
-            log.error("Error getting the schema name for context {}.", contextId, e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public String getSchemaName(final int contextId) throws PoolException {
+        return new DatabaseServiceCallable<String>() {
+
+            @Override
+            protected String doPerform(DatabaseService databaseService) throws OXException {
+                return databaseService.getSchemaName(contextId);
+            }
+        }.perform(getService());
     }
 
     @Override
-    public void lock(Connection con, int writePoolId) throws PoolException {
-        try {
-            getService().lock(con, writePoolId);
-        } catch (OXException e) {
-            log.error("Error locking database pool {}", writePoolId, e);
-            throw new PoolException(e.getMessage(), e);
-        }
+    public void lock(final Connection con, final int writePoolId) throws PoolException {
+        new DatabaseServiceCallable<Void>() {
+
+            @Override
+            protected Void doPerform(DatabaseService databaseService) throws OXException {
+                databaseService.lock(con, writePoolId);
+                return null;
+            }
+        }.perform(getService());
     }
 }

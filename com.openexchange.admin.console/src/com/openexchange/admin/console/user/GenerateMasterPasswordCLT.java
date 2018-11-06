@@ -62,7 +62,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -96,20 +96,15 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         adminuser, adminpass, encryption, mpasswdfile
     }
 
-    private final Map<Parameter, String> parameters = new HashMap<Parameter, String>();
+    private final Map<Parameter, String> parameters = new EnumMap<>(GenerateMasterPasswordCLT.Parameter.class);
 
     /**
-     * Initialises a new {@link GenerateMasterPasswordCLT}.
+     * Initializes a new {@link GenerateMasterPasswordCLT}.
      */
     public GenerateMasterPasswordCLT() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
-     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, Map<Parameter, String> context) throws Exception {
         File file = new File(context.get(Parameter.mpasswdfile));
@@ -136,25 +131,15 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("A", "adminuser", true, "Account name of superadmin (Default: oxadminmaster)", false));
-        options.addOption(createOption("P", "adminpass", true, "Password of superadmin", false));
+        options.addOption(createOption("A", "adminuser", true, "master Admin user name (Default: oxadminmaster)", false));
+        options.addOption(createOption("P", "adminpass", true, "master Admin password", false));
         options.addOption(createOption("f", "mpasswdfile", true, "Path to mpasswd (Default: /opt/open-xchange/etc/mpasswd)", false));
         options.addOption(createOption("e", "encryption", true, "Encryption algorithm to use for the password (Default: bcrypt)", false));
         options.addOption(createOption("h", "help", false, "Prints this help text", false));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         initParameters();
@@ -210,31 +195,16 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return FOOTER;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected Map<Parameter, String> getContext() {
         return parameters;
@@ -244,7 +214,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /**
      * Reads the specified password file
-     * 
+     *
      * @param file The file to read
      * @param context a map with the command line values for adminuser, encryption and adminpass
      * @return A {@link List} with the lines of the file
@@ -275,7 +245,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /**
      * Writes the specified lines to the specified file
-     * 
+     *
      * @param file The file to write to
      * @param lines The lines to write to the file
      */

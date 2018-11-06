@@ -1208,9 +1208,7 @@ public final class IMAPCommandsCollection {
                 String command = COMMAND_SEARCH_UNSEEN_NOT_DELETED;
                 Response[] r = performCommand(protocol, command);
                 int unread = handleSearchResponses(r, protocol, command);
-                int result[] = new int[] { null == total ? 0 : total.intValue(), unread };
-                result[result.length - 1] = unread;
-                return result;
+                return new int[] { null == total ? 0 : total.intValue(), unread };
             }
 
             private int handleSearchResponses(final Response[] r, final IMAPProtocol protocol, String command) throws ProtocolException {

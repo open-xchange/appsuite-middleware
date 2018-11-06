@@ -130,7 +130,7 @@ public class GoogleEventConverter {
         result.put(EventField.ID, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 to.setFilename(from.getId());
             }
 
@@ -138,7 +138,7 @@ public class GoogleEventConverter {
         result.put(EventField.START_DATE, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getStart() != null) {
                     to.setStartDate(convert(from.getStart()));
                 }
@@ -148,7 +148,7 @@ public class GoogleEventConverter {
         result.put(EventField.END_DATE, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getEnd() != null) {
                     to.setEndDate(convert(from.getEnd()));
                 }
@@ -159,7 +159,7 @@ public class GoogleEventConverter {
         result.put(EventField.ALARMS, new GoogleItemMapping<EventReminder, Alarm>() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 Reminders reminders = from.getReminders();
                 if (reminders != null) {
                     List<Alarm> alarms = new ArrayList<>();
@@ -201,7 +201,7 @@ public class GoogleEventConverter {
         result.put(EventField.ATTENDEES, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
 
                 List<Attendee> attendees = new ArrayList<>();
                 if (from.getAttendees() != null) {
@@ -242,7 +242,7 @@ public class GoogleEventConverter {
         result.put(EventField.CALENDAR_USER, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getAttendees() != null) {
                     for (EventAttendee att : from.getAttendees()) {
                         if (att.getSelf() != null && att.getSelf()) {
@@ -255,7 +255,7 @@ public class GoogleEventConverter {
         result.put(EventField.ORGANIZER, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getAttendees() != null) {
                     for (EventAttendee att : from.getAttendees()) {
                         if (att.getOrganizer() != null && att.getOrganizer()) {
@@ -275,7 +275,7 @@ public class GoogleEventConverter {
         result.put(EventField.CATEGORIES, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -283,7 +283,7 @@ public class GoogleEventConverter {
         result.put(EventField.CLASSIFICATION, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -291,7 +291,7 @@ public class GoogleEventConverter {
         result.put(EventField.COLOR, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getColorId() != null) {
                     to.setColor(from.getColorId());
                 }
@@ -301,7 +301,7 @@ public class GoogleEventConverter {
         result.put(EventField.CREATED, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getCreated() != null) {
                     to.setCreated(new Date(from.getCreated().getValue()));
                 }
@@ -311,7 +311,7 @@ public class GoogleEventConverter {
         result.put(EventField.CREATED_BY, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 Creator creator = from.getCreator();
                 if (creator != null) {
                     CalendarUser result = new CalendarUser();
@@ -325,7 +325,7 @@ public class GoogleEventConverter {
         result.put(EventField.DELETE_EXCEPTION_DATES, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -333,7 +333,7 @@ public class GoogleEventConverter {
         result.put(EventField.DESCRIPTION, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getDescription() != null) {
                     to.setDescription(from.getDescription());
                 }
@@ -343,7 +343,7 @@ public class GoogleEventConverter {
         result.put(EventField.EXTENDED_PROPERTIES, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 com.google.api.services.calendar.model.Event.ExtendedProperties extendedProperties = from.getExtendedProperties();
                 if (extendedProperties != null) {
                     to.setExtendedProperties(convert(extendedProperties));
@@ -372,7 +372,7 @@ public class GoogleEventConverter {
         result.put(EventField.FILENAME, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -380,7 +380,7 @@ public class GoogleEventConverter {
         result.put(EventField.FOLDER_ID, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -388,7 +388,7 @@ public class GoogleEventConverter {
         result.put(EventField.GEO, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -396,7 +396,7 @@ public class GoogleEventConverter {
         result.put(EventField.LOCATION, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getLocation() != null) {
                     to.setLocation(from.getLocation());
                 }
@@ -406,7 +406,7 @@ public class GoogleEventConverter {
         result.put(EventField.LAST_MODIFIED, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getUpdated() != null) {
                     to.setLastModified(new Date(from.getUpdated().getValue()));
                 }
@@ -416,7 +416,7 @@ public class GoogleEventConverter {
         result.put(EventField.MODIFIED_BY, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 // There is no equivalent
             }
         });
@@ -424,7 +424,7 @@ public class GoogleEventConverter {
         result.put(EventField.RECURRENCE_ID, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getRecurringEventId() != null) {
 
                     String dateTimeStr = from.getId().substring(from.getRecurringEventId().length() + 1);
@@ -446,7 +446,7 @@ public class GoogleEventConverter {
         result.put(EventField.RECURRENCE_RULE, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getRecurrence() != null) {
                     for (String recurrence : from.getRecurrence()) {
                         if (recurrence.startsWith("RRULE:")) {
@@ -470,7 +470,7 @@ public class GoogleEventConverter {
         result.put(EventField.SEQUENCE, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getSequence() != null) {
                     to.setSequence(from.getSequence());
                 }
@@ -480,7 +480,7 @@ public class GoogleEventConverter {
         result.put(EventField.SERIES_ID, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getRecurringEventId() != null) {
                     // Add google id to identify delete exceptions
                     to.setSeriesId(from.getRecurringEventId());
@@ -491,7 +491,7 @@ public class GoogleEventConverter {
         result.put(EventField.STATUS, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getStatus() != null) {
                     to.setStatus(new EventStatus(from.getStatus().toUpperCase()));
                 }
@@ -501,7 +501,7 @@ public class GoogleEventConverter {
         result.put(EventField.SUMMARY, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getSummary() != null) {
                     to.setSummary(from.getSummary());
                 }
@@ -511,7 +511,7 @@ public class GoogleEventConverter {
         result.put(EventField.TIMESTAMP, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getCreated() != null) {
                     to.setTimestamp(from.getCreated().getValue());
                 }
@@ -521,7 +521,7 @@ public class GoogleEventConverter {
         result.put(EventField.TRANSP, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getTransparency() != null) {
                     to.setTransp(TimeTransparency.valueOf(from.getTransparency().toUpperCase()));
                 }
@@ -531,7 +531,7 @@ public class GoogleEventConverter {
         result.put(EventField.UID, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getICalUID() != null) {
                     to.setUid(from.getICalUID());
                 }
@@ -541,7 +541,7 @@ public class GoogleEventConverter {
         result.put(EventField.URL, new GoogleMapping() {
 
             @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getHtmlLink() != null) {
                     to.setUrl(from.getHtmlLink());
                 }

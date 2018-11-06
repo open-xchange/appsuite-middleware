@@ -283,9 +283,8 @@ public class EventManager extends AbstractManager {
         if (expectException) {
             assertNotNull("An error was expected", eventsResponse.getError());
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
-        } else {
-            assertNull(eventsResponse.getError());
         }
+        assertNull(eventsResponse.getError());
         setLastTimeStamp(eventsResponse.getTimestamp());
         return eventsResponse.getData();
     }
@@ -499,9 +498,8 @@ public class EventManager extends AbstractManager {
      *
      * @param eventId The {@link EventId}
      * @throws ApiException if an API error is occurred
-     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public void deleteEvent(EventId eventId) throws ApiException, ChronosApiException {
+    public void deleteEvent(EventId eventId) throws ApiException {
         deleteEvent(eventId, System.currentTimeMillis());
     }
 

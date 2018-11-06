@@ -50,7 +50,6 @@
 package com.openexchange.ajax.chronos;
 
 import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import java.io.IOException;
@@ -172,8 +171,6 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void validateMailInSecondUsersInbox(String mailSubject, String comment) throws OXException, ApiException, Exception {
-        Thread.sleep(3000);
-
         ApiClient apiClient2 = generateApiClient(testUser2);
         rememberClient(apiClient2);
         MailApi mailApi = new MailApi(apiClient2);
@@ -186,15 +183,22 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private String getMailId(ApiClient apiClient2, MailApi mailApi, String summary) throws Exception {
-        MailsResponse mailsResponse = mailApi.getAllMails(apiClient2.getSession(), INBOX, COLUMNS, null, Boolean.FALSE, Boolean.FALSE, "600", "desc", null, null, I(10), null);
-        List<List<String>> data = mailsResponse.getData();
-        Assert.assertThat("No mails found", I(data.size()), not(I(0)));
+        int max = 5;
         String mailId = null;
-        for (List<String> singleMailData : data) {
-            // Indices based on COLUMNS
-            if (summary.equals(singleMailData.get(3))) {
-                mailId = singleMailData.get(1);
-                break;
+        while (max > 0 && mailId == null) {
+            max--;
+            Thread.sleep(10000);
+            MailsResponse mailsResponse = mailApi.getAllMails(apiClient2.getSession(), INBOX, COLUMNS, null, Boolean.FALSE, Boolean.FALSE, "600", "desc", null, null, I(100), null);
+            List<List<String>> data = mailsResponse.getData();
+            if (data.size() == 0) {
+                continue;
+            }
+            for (List<String> singleMailData : data) {
+                // Indices based on COLUMNS
+                if (summary.equals(singleMailData.get(3))) {
+                    mailId = singleMailData.get(1);
+                    break;
+                }
             }
         }
         Assert.assertThat("No update/cancel mail found", mailId, notNullValue());

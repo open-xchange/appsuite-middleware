@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
@@ -75,12 +74,12 @@ public class FalseTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws SieveException {
         return new TestCommand(TestCommand.Commands.FALSE, new ArrayList<Object>(), new ArrayList<TestCommand>());
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.FALSE.getCommandName());
     }
 }

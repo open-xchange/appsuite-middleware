@@ -52,6 +52,7 @@ package com.openexchange.tools.webdav;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -60,7 +61,10 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -71,7 +75,7 @@ import com.openexchange.tools.encoding.Base64;
 public class WebDAVSessionStore {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebDAVSessionStore.class);
-
+    private static final String PARAMETER_WEBDAV_SESSION = "com.openexchange.webdav.session";
     private static final WebDAVSessionStore instance = new WebDAVSessionStore();
 
     /**
@@ -83,20 +87,20 @@ public class WebDAVSessionStore {
         return instance;
     }
 
-    private final Cache<String, Session> webdavSessions;
+    private final Cache<String, String> sessionIdsPerClient;
 
     /**
      * Initializes a new {@link WebDAVSessionStore}.
      */
     private WebDAVSessionStore() {
         super();
-        this.webdavSessions = CacheBuilder.newBuilder()
+        this.sessionIdsPerClient = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .expireAfterWrite(1, TimeUnit.HOURS)
-            .removalListener(new RemovalListener<String, Session>() {
+            .removalListener(new RemovalListener<String, String>() {
 
                 @Override
-                public void onRemoval(RemovalNotification<String, Session> notification) {
+                public void onRemoval(RemovalNotification<String, String> notification) {
                     logout(notification.getValue());
                 }
             })
@@ -107,17 +111,22 @@ public class WebDAVSessionStore {
      * Gets the session for the supplied login request, either from the cached sessions or by implicitly performing the login operation.
      *
      * @param loginRequest The login request
+     * @param httpRequest The underlying HTTP request, or <code>null</code> if not available
      * @return The session
-     * @throws OXException
      */
-    public Session getSession(final LoginRequest loginRequest) throws OXException {
+    public Session getSession(final LoginRequest loginRequest, HttpServletRequest httpRequest) throws OXException {
         String key = getKey(loginRequest);
+        String sessionId;
         try {
-            return webdavSessions.get(key, new Callable<Session>() {
+            sessionId = sessionIdsPerClient.get(key, new Callable<String>() {
 
                 @Override
-                public Session call() throws Exception {
-                    return login(loginRequest);
+                public String call() throws Exception {
+                    Session session = login(loginRequest);
+                    if (null != httpRequest) {
+                        httpRequest.setAttribute(PARAMETER_WEBDAV_SESSION, session);
+                    }
+                    return session.getSessionID();
                 }
             });
         } catch (ExecutionException e) {
@@ -127,6 +136,43 @@ public class WebDAVSessionStore {
             }
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }
+        Object sessionAttribute = httpRequest.getAttribute(PARAMETER_WEBDAV_SESSION);
+        if (null == sessionAttribute || false == Session.class.isInstance(sessionAttribute)) {
+            /*
+             * session identifier looked up successfully in cache; get & implicitly validate session from service
+             */
+            Session session = optSession(sessionId);
+            if (null == session) {
+                /*
+                 * invalidate & login again if no session could be looked up
+                 */
+                sessionIdsPerClient.asMap().remove(key, sessionId);
+                return getSession(loginRequest, httpRequest);
+            }
+            return session;
+        }
+        /*
+         * login was performed in this request, use session from parameter
+         */
+        httpRequest.removeAttribute(PARAMETER_WEBDAV_SESSION);
+        return (Session) sessionAttribute;
+    }
+
+    /**
+     * Optionally looks up a session by its identifier from the session service.
+     * 
+     * @param sessionId The identifier of the session to get
+     * @return The session, or <code>null</code> if not found
+     */
+    private static Session optSession(String sessionId) {
+        SessiondService sessiondService = ServerServiceRegistry.getServize(SessiondService.class);
+        if (null != sessiondService) {
+            if (SessiondServiceExtended.class.isInstance(sessiondService)) {
+                return ((SessiondServiceExtended) sessiondService).getSession(sessionId, false);
+            }
+            return sessiondService.getSession(sessionId);
+        }
+        return null;
     }
 
     /**
@@ -136,7 +182,7 @@ public class WebDAVSessionStore {
      * @return The associated session
      * @throws OXException If login attempt fails
      */
-    static Session login(LoginRequest loginRequest) throws OXException {
+    private static Session login(LoginRequest loginRequest) throws OXException {
         LOG.debug("WebDAV Login: {}...", loginRequest.getLogin());
         Session session = LoginPerformer.getInstance().doLogin(loginRequest).getSession();
         LOG.debug("Added WebDAV session {}", session);
@@ -148,14 +194,14 @@ public class WebDAVSessionStore {
      *
      * @param session The session to log-out
      */
-    static void logout(Session session) {
-        LOG.debug("WebDAV Logout: {}...", session);
+    private static void logout(String sessionId) {
+        LOG.debug("WebDAV Logout: {}...", sessionId);
         try {
-            Session removedSession = LoginPerformer.getInstance().doLogout(session.getSessionID());
+            Session removedSession = LoginPerformer.getInstance().doLogout(sessionId);
             if (null != removedSession) {
                 LOG.debug("Removed WebDAV session {}", removedSession);
             } else {
-                LOG.debug("WebDAV session {} not removed.", session);
+                LOG.debug("WebDAV session {} not removed.", sessionId);
             }
         } catch (OXException e) {
             LOG.warn("Error removing WebDAV session", e);

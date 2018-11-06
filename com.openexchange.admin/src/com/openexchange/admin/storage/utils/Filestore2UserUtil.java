@@ -950,10 +950,11 @@ public class Filestore2UserUtil {
     private static boolean replaceEntry(FilestoreEntry filestoreEntry, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("REPLACE INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE filestore_id=?");
             stmt.setInt(1, filestoreEntry.cid);
             stmt.setInt(2, filestoreEntry.user);
             stmt.setInt(3, filestoreEntry.filestoreId);
+            stmt.setInt(4, filestoreEntry.filestoreId);
             try {
                 stmt.executeUpdate();
                 return true;

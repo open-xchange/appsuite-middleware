@@ -49,7 +49,9 @@
 
 package com.openexchange.mailaccount;
 
+import static com.openexchange.mailaccount.Constants.MAIL_PROTOCOL_GUARD_GUEST;
 import java.util.Map;
+import com.openexchange.session.Session;
 
 
 /**
@@ -84,6 +86,36 @@ public final class MailAccounts {
         }
         TransportAuth transportAuth = TransportAuth.transportAuthFor(properties.get("transport.auth"));
         return null == transportAuth ? fallback : transportAuth;
+    }
+
+    /**
+     * Checks for a guest session
+     *
+     * @param session The session to check
+     * @return <code>true</code> for a guest session; otherwise <code>false</code>
+     */
+    public static boolean isGuest(Session session) {
+        return null != session && Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
+    }
+
+    /**
+     * Checks if account is a guest account
+     *
+     * @param account The mail account to check
+     * @return <code>true</code> for a guest account; otherwise <code>false</code>
+     */
+    public static boolean isGuestAccount(MailAccount account) {
+        return null == account ? false : MAIL_PROTOCOL_GUARD_GUEST.equals(account.getMailProtocol());
+    }
+
+    /**
+     * Checks if account is a guest account
+     *
+     * @param account The account to check
+     * @return <code>true</code> for a guest account; otherwise <code>false</code>
+     */
+    public static boolean isGuestAccount(Account account) {
+        return null == account ? false : Constants.NAME_GUARD_GUEST.equals(account.getName());
     }
 
 }

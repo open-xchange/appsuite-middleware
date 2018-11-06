@@ -126,17 +126,8 @@ public class WebDAVClientInfoProvider implements ClientInfoProvider {
             return new WebDAVClientInfo("DavFS2 (WebDAV)", OS_FAMILY_LINUX);
         }
 
-        // Default iOS
-        if (userAgent.contains("iOS") || userAgent.contains("iPhone") || userAgent.contains("iPad")) {
-            return new WebDAVClientInfo(ClientInfoStrings.WEBDAV_INFOSTORE, OS_FAMILY_IOS);
-        }
-
-        // Default Android
-        if (userAgent.contains("Android") || userAgent.contains("android")) {
-            return new WebDAVClientInfo(ClientInfoStrings.WEBDAV_INFOSTORE, OS_FAMILY_ANDROID);
-        }
-
-        return new WebDAVClientInfo(ClientInfoStrings.WEBDAV_INFOSTORE, null);
+        // Unknown WebDAV client or CalDAV/CardDAV client. Let next provider check...
+        return null;
     }
 
     @Override

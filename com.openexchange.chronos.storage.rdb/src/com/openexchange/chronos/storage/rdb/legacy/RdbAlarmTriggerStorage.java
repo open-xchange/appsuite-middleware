@@ -689,6 +689,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @return the number of changed items
      */
     private int deleteReminderTriggersById(Connection con, int contextId, List<Integer> alarmIds) throws SQLException {
+        if (null == alarmIds || 0 == alarmIds.size()) {
+            return 0;
+        }
         StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(getPlaceholders(alarmIds.size())).append(';');
         try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;

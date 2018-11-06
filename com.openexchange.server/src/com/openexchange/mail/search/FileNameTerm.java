@@ -113,7 +113,7 @@ public class FileNameTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(Message msg) throws OXException {
+    public boolean matches(Message msg) {
         try {
             return checkPart(msg);
         } catch (Exception e) {
@@ -169,7 +169,7 @@ public class FileNameTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(MailMessage mailMessage) throws OXException {
+    public boolean matches(MailMessage mailMessage) {
         try {
             return checkPart(mailMessage);
         } catch (Exception e) {
