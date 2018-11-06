@@ -66,7 +66,7 @@ CREATE TABLE filestore2user (
     cid INT4 UNSIGNED NOT NULL,
     user INT4 UNSIGNED NOT NULL,
     filestore_id INT4 UNSIGNED,
-    PRIMARY KEY (cid, user, filestore_id)
+    PRIMARY KEY (cid, user)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE server (
