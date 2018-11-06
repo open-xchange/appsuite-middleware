@@ -64,12 +64,12 @@ import com.openexchange.groupware.update.WorkingLevel;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AbstractDropTableTask}
+ * {@link AbstractDropTableTask} - Abstract class that wrapps the dropping of tables. 
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class AbstractDropTableTask implements UpdateTaskV2 {
+public abstract class AbstractDropTableTask implements UpdateTaskV2 {
 
     private final String[] tableNames;
 
