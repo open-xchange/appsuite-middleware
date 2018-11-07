@@ -127,9 +127,7 @@ public class Activator implements BundleActivator {
                 public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
                     ConfigurationService service = super.addingService(reference);
                     if (service != null && authRegistered.compareAndSet(false, true)) {
-                        String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
-                        String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
-                        context.registerService(AuthenticationFilter.class, new AuthenticationFilter(authLogin, authPassword), null);
+                        context.registerService(AuthenticationFilter.class, new AuthenticationFilter(service), null);
                     }
                     return service;
                 }

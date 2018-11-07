@@ -49,6 +49,9 @@
 
 package com.openexchange.rest.services.security;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -71,10 +74,13 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.rest.services.security.authenticator.DefaultEndpointAuthenticator;
+import com.openexchange.rest.services.security.authenticator.MasterAdminEndpointAuthenticator;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 /**
@@ -94,31 +100,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-    /** The authenticator using default credentials */
-    private static final class DefaultEndpointAuthenticator implements EndpointAuthenticator {
-
-        private final String authLogin;
-        private final String authPassword;
-
-        /**
-         * Initializes a new {@link EndpointAuthenticatorImplementation}.
-         */
-        DefaultEndpointAuthenticator(String authLogin, String authPassword) {
-            this.authLogin = authLogin;
-            this.authPassword = authPassword;
-        }
-
-        @Override
-        public String getRealmName() {
-            return "OX REST";
-        }
-
-        @Override
-        public boolean authenticate(String login, String password, Method invokedMethod) {
-            return authLogin.equals(login) && authPassword.equals(password);
-        }
-    }
-
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     @Context
@@ -127,18 +108,64 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceContext resourceContext;
 
-    private final boolean doFail;
     private final EndpointAuthenticator defaultAuthenticator;
+    private final EndpointAuthenticator masterAdminAuthenticator;
 
-    public AuthenticationFilter(String authLogin, String authPassword) {
-        super();
-        if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
-            doFail = true;
-            defaultAuthenticator = null;
-        } else {
-            doFail = false;
-            defaultAuthenticator = new DefaultEndpointAuthenticator(authLogin.trim(), authPassword.trim());
+    /**
+     * Initialises a new {@link AuthenticationFilter}.
+     * 
+     * @param configurationService The {@link ConfigurationService} instance
+     */
+    public AuthenticationFilter(ConfigurationService configurationService) {
+        defaultAuthenticator = initialiseDefaultAuthenticator(configurationService);
+        masterAdminAuthenticator = initialiseMasterAdminAuthenticator(configurationService);
+    }
+
+    /**
+     * @param configurationService
+     * @return
+     */
+    // Shamelessly copied from AdminCache. Maybe we need a MasterAdminAuthService?
+    private EndpointAuthenticator initialiseMasterAdminAuthenticator(ConfigurationService configurationService) {
+        File file = configurationService.getFileByName("mpasswd");
+        if (null == file) {
+            return null;
         }
+
+        try (BufferedReader bf = new BufferedReader(new FileReader(file), 2048)) {
+            String line = null;
+            while ((line = bf.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                if (line.indexOf(':') < 0) {
+                    continue;
+                }
+                // Ok seems to be a line with user:pass entry
+                String[] user_pass_combination = line.split(":");
+                if (user_pass_combination.length != 3) {
+                    LOG.warn("Invalid mpasswd format.");
+                }
+                return new MasterAdminEndpointAuthenticator();
+            }
+        } catch (IOException e) {
+            LOG.warn("Error processing master auth file: mpasswd", e);
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * @param configurationService
+     * @return
+     */
+    private EndpointAuthenticator initialiseDefaultAuthenticator(ConfigurationService configurationService) {
+        String authLogin = configurationService.getProperty("com.openexchange.rest.services.basic-auth.login");
+        String authPassword = configurationService.getProperty("com.openexchange.rest.services.basic-auth.password");
+        if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
+            return null;
+        }
+        return new DefaultEndpointAuthenticator(authLogin.trim(), authPassword.trim());
     }
 
     private <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
@@ -193,8 +220,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                         authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
                         return;
                     case MASTER_ADMIN_AUTHENTICATED:
-                        LOG.warn("Master admin authentication not implemented yet");
-                        deny(requestContext);
+                        if (null == masterAdminAuthenticator) {
+                            LOG.warn("Unable to perform master authentication");
+                            deny(requestContext);
+                            return;
+                        }
+                        masterAuth(requestContext, resourceInfo.getResourceMethod());
                         return;
                     default:
                         // Role unknown...
@@ -248,7 +279,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void basicAuth(ContainerRequestContext requestContext) {
-        if (doFail) {
+        if (defaultAuthenticator == null) {
             LOG.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " + "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " + "'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
             deny(requestContext);
         } else {
@@ -272,6 +303,20 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         boolean authenticated = authenticator.authenticate(credentials.getLogin(), credentials.getPassword(), invokedMethod);
         reflectAuthenticated(authenticated, authenticator.getRealmName(), requestContext);
         return;
+    }
+
+    /**
+     * 
+     * @param requestContext
+     * @param invokedMethod
+     */
+    private void masterAuth(ContainerRequestContext requestContext, Method invokedMethod) {
+        if (masterAdminAuthenticator == null) {
+            LOG.error("Denied incoming HTTP request to REST interface due to misconfigured master authentication. Please review the 'mpasswd' file.", new Throwable("Denied request to REST interface"));
+            deny(requestContext);
+        } else {
+            authenticatorAuth(masterAdminAuthenticator, requestContext, null);
+        }
     }
 
     private void reflectAuthenticated(boolean authenticated, String realm, ContainerRequestContext requestContext) {

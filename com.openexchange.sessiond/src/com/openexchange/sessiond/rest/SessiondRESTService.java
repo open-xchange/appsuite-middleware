@@ -113,6 +113,7 @@ public class SessiondRESTService extends JAXRSService {
         try {
             return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.SESSION_IDS), SessionFilterType.SESSION));
         } catch (IllegalArgumentException e) {
+            LOGGER.debug("", e);
             return Response.status(400).entity(e.getMessage()).build();
         } catch (Exception e) {
             LOGGER.debug("", e);
@@ -142,6 +143,7 @@ public class SessiondRESTService extends JAXRSService {
         try {
             return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.CONTEXT_IDS), SessionFilterType.CONTEXT));
         } catch (IllegalArgumentException e) {
+            LOGGER.debug("", e);
             return Response.status(400).entity(e.getMessage()).build();
         } catch (Exception e) {
             LOGGER.debug("", e);
@@ -171,6 +173,7 @@ public class SessiondRESTService extends JAXRSService {
         try {
             return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.USERS), SessionFilterType.USER));
         } catch (IllegalArgumentException e) {
+            LOGGER.debug("", e);
             return Response.status(400).entity(e.getMessage()).build();
         } catch (Exception e) {
             LOGGER.debug("", e);
