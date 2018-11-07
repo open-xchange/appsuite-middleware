@@ -58,36 +58,118 @@ import java.util.Properties;
 public class ConnectionData {
 
     /**
+     * Creates a new builder for an instance of <code>ConnectionData</code>
+     *
+     * @return The new builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** Builder for an instance of <code>ConnectionData</code> */
+    public static class Builder {
+
+        private String url;
+        private String driverClass;
+        private Properties props;
+        private boolean block;
+        private int max;
+        private int min;
+
+        /**
+         * Initializes a new {@link ConnectionData.Builder}.
+         */
+        Builder() {
+            super();
+        }
+
+        public Builder withUrl(String url) {
+            this.url = url;
+            return this;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public Builder withDriverClass(String driverClass) {
+            this.driverClass = driverClass;
+            return this;
+        }
+
+        public Builder withProps(Properties props) {
+            this.props = props;
+            return this;
+        }
+
+        public Builder withBlock(boolean block) {
+            this.block = block;
+            return this;
+        }
+
+        public Builder withMax(int max) {
+            this.max = max;
+            return this;
+        }
+
+        public Builder withMin(int min) {
+            this.min = min;
+            return this;
+        }
+
+        /**
+         * Creates the <code>ConnectionData</code> instance from this builder's arguments.
+         *
+         * @return The <code>ConnectionData</code> instance
+         */
+        public ConnectionData build() {
+            return new ConnectionData(url, driverClass, props, block, max, min);
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * The ASCII-only URL to database.
      */
-    String url;
+    final String url;
 
     /**
      * The driver class name.
      */
-    String driverClass;
+    final String driverClass;
 
     /**
      * The properties.
      */
-    Properties props;
+    final Properties props;
 
     /**
      * The block flag.
      */
-    boolean block;
+    final boolean block;
 
     /**
      * The max. limit.
      */
-    int max;
+    final int max;
 
     /**
-     * The min. li9mit
+     * The min. limit
      */
-    int min;
+    final int min;
 
-    public ConnectionData() {
+    /**
+     * Initializes a new {@link ConnectionData}.
+     */
+    ConnectionData(String url, String driverClass, Properties props, boolean block, int max, int min) {
         super();
+        this.url = url;
+        this.driverClass = driverClass;
+        this.props = props;
+        this.block = block;
+        this.max = max;
+        this.min = min;
     }
+
 }
