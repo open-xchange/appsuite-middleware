@@ -232,7 +232,7 @@ public class SearchAdapter {
             case "users":
                 appendUsers(queries);
                 break;
-            case "participant":
+            case "participants":
                 appendExternalParticipants(queries);
                 break;
             case "attachment":
