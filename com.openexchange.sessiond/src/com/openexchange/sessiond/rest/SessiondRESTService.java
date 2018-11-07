@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.rest;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -58,6 +59,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,15 +112,7 @@ public class SessiondRESTService extends JAXRSService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response closeSessionsById(@QueryParam("global") Boolean global, JSONObject payload) {
-        try {
-            return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.SESSION_IDS), SessionFilterType.SESSION));
-        } catch (IllegalArgumentException e) {
-            LOGGER.debug("", e);
-            return Response.status(400).entity(e.getMessage()).build();
-        } catch (Exception e) {
-            LOGGER.debug("", e);
-            return Response.status(500).build();
-        }
+        return perform(() -> closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.SESSION_IDS), SessionFilterType.SESSION)));
     }
 
     /**
@@ -140,15 +134,7 @@ public class SessiondRESTService extends JAXRSService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response closeSessionsByContextId(@QueryParam("global") Boolean global, JSONObject payload) {
-        try {
-            return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.CONTEXT_IDS), SessionFilterType.CONTEXT));
-        } catch (IllegalArgumentException e) {
-            LOGGER.debug("", e);
-            return Response.status(400).entity(e.getMessage()).build();
-        } catch (Exception e) {
-            LOGGER.debug("", e);
-            return Response.status(500).build();
-        }
+        return perform(() -> closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.CONTEXT_IDS), SessionFilterType.CONTEXT)));
     }
 
     /**
@@ -170,18 +156,35 @@ public class SessiondRESTService extends JAXRSService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response closeSessionsByUserId(@QueryParam("global") Boolean global, JSONObject payload) {
+        return perform(() -> closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.USERS), SessionFilterType.USER)));
+    }
+
+    /////////////////////////////////////////// HELPERS /////////////////////////////////////////////
+
+    /**
+     * Performs the action
+     * 
+     * @param supplier The {@link Supplier} to perform the action
+     * @return
+     *         <ul>
+     *         <li><b>200</b>: if the action was performed successfully</li>
+     *         <li><b>400</b>: if the client issued a bad request</li>
+     *         <li><b>401</b>: if the client was not authenticated</li>
+     *         <li><b>403</b>: if the client was not authorised</li>
+     *         <li><b>500</b>: if any server side error is occurred</li>
+     *         </ul>
+     */
+    private Response perform(Supplier<Response> supplier) {
         try {
-            return closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.USERS), SessionFilterType.USER));
+            return supplier.get();
         } catch (IllegalArgumentException e) {
             LOGGER.debug("", e);
-            return Response.status(400).entity(e.getMessage()).build();
+            return Response.status(400).entity(parse(e)).build();
         } catch (Exception e) {
             LOGGER.debug("", e);
             return Response.status(500).build();
         }
     }
-
-    /////////////////////////////////////////// HELPERS /////////////////////////////////////////////
 
     /**
      * Retrieves from the specified payload the requested values array.
@@ -210,6 +213,86 @@ public class SessiondRESTService extends JAXRSService {
     private void checkPayload(JSONObject payload) {
         if (payload == null || payload.isEmpty()) {
             throw new IllegalArgumentException("Missing request payload.");
+        }
+    }
+
+    /**
+     * Creates a {@link SessionFilter} of the specified {@link SessionFilterType}
+     * 
+     * @param array The array containing the values for the {@link SessionFilter}
+     * @param sessionFilterType The {@link SessionFilterType}
+     * @return The new {@link SessionFilter}
+     * @throws IllegalArgumentException If filter expression is invalid
+     */
+    private SessionFilter createFilter(JSONArray array, SessionFilterType sessionFilterType) {
+        StringBuilder filter = new StringBuilder(64);
+        filter.append("(|");
+        for (int index = 0; index < array.length(); index++) {
+            sessionFilterType.apply(filter, array.opt(index));
+        }
+        filter.append(")");
+        return SessionFilter.create(filter.toString());
+    }
+
+    /**
+     * Closes the sessions (either globally or locally) that meet the criteria of the specified filter.
+     * 
+     * @param global Whether to close sessions on the entire cluster or on the local node.
+     * @param sessionFilter The {@link SessionFilter}
+     * @return The {@link Response} with the outcome, 200 if the operation succeeded, 500 if it failed.
+     */
+    private Response closeSessions(Boolean global, SessionFilter sessionFilter) {
+        try {
+            if (global == null) {
+                global = Boolean.valueOf(true);
+            }
+            SessiondService sessionService = SessiondService.SERVICE_REFERENCE.get();
+            Collection<String> sessions = global.booleanValue() ? sessionService.removeSessionsGlobally(sessionFilter) : sessionService.removeSessions(sessionFilter);
+            log(sessions, sessionFilter, global.booleanValue());
+        } catch (OXException e) {
+            LOGGER.error("{}", e.getMessage(), e);
+            return Response.status(500).build();
+        }
+        return Response.ok().build();
+    }
+
+    /**
+     * Decides whether to log the filter used to clear the sessions as well as the cleared sessions
+     * 
+     * @param sessions The cleared sessions
+     * @param filter The filter use to clear the sessions
+     * @param global whether a global clear was invoked
+     */
+    private void log(Collection<String> sessions, SessionFilter filter, boolean global) {
+        if (false == LOGGER.isDebugEnabled()) {
+            return;
+        }
+        if (sessions.isEmpty()) {
+            LOGGER.debug("No sessions were cleared {} via REST invocation with filter '{}'.", global ? "globally" : "locally", filter.toString());
+            return;
+        }
+        StringBuilder b = new StringBuilder();
+        for (String s : sessions) {
+            b.append(s).append(",");
+        }
+        b.setLength(b.length() - 1);
+        LOGGER.debug("Cleared sessions {} via REST invocation with filter '{}', {}", global ? "globally" : "locally", filter.toString(), sessions);
+    }
+
+    /**
+     * Parses the specified {@link Exception} to a {@link JSONObject}
+     * 
+     * @param e The {@link Exception} to parse
+     * @return The {@link JSONObject} with the exception
+     */
+    private JSONObject parse(Exception e) {
+        try {
+            JSONObject j = new JSONObject();
+            j.put("error", e.getMessage());
+            return j;
+        } catch (JSONException x) {
+            LOGGER.error("", e);
+            return new JSONObject();
         }
     }
 
@@ -276,67 +359,5 @@ public class SessiondRESTService extends JAXRSService {
          * @param object The object
          */
         abstract void apply(StringBuilder filterBuilder, Object object);
-    }
-
-    /**
-     * Creates a {@link SessionFilter} of the specified {@link SessionFilterType}
-     * 
-     * @param array The array containing the values for the {@link SessionFilter}
-     * @param sessionFilterType The {@link SessionFilterType}
-     * @return The new {@link SessionFilter}
-     */
-    private SessionFilter createFilter(JSONArray array, SessionFilterType sessionFilterType) {
-        StringBuilder filter = new StringBuilder(64);
-        filter.append("(|");
-        for (int index = 0; index < array.length(); index++) {
-            sessionFilterType.apply(filter, array.opt(index));
-        }
-        filter.append(")");
-        return SessionFilter.create(filter.toString());
-    }
-
-    /**
-     * Closes the sessions (either globally or locally) that meet the criteria of the specified filter.
-     * 
-     * @param global Whether to close sessions on the entire cluster or on the local node.
-     * @param sessionFilter The {@link SessionFilter}
-     * @return The {@link Response} with the outcome, 200 if the operation succeeded, 500 if it failed.
-     */
-    private Response closeSessions(Boolean global, SessionFilter sessionFilter) {
-        try {
-            if (global == null) {
-                global = Boolean.valueOf(true);
-            }
-            SessiondService sessionService = SessiondService.SERVICE_REFERENCE.get();
-            Collection<String> sessions = global.booleanValue() ? sessionService.removeSessionsGlobally(sessionFilter) : sessionService.removeSessions(sessionFilter);
-            log(sessions, sessionFilter, global.booleanValue());
-        } catch (IllegalArgumentException | OXException e) {
-            LOGGER.error("{}", e.getMessage(), e);
-            return Response.status(500).build();
-        }
-        return Response.ok().build();
-    }
-
-    /**
-     * Decides whether to log the filter used to clear the sessions as well as the cleared sessions
-     * 
-     * @param sessions The cleared sessions
-     * @param filter The filter use to clear the sessions
-     * @param global whether a global clear was invoked
-     */
-    private void log(Collection<String> sessions, SessionFilter filter, boolean global) {
-        if (false == LOGGER.isDebugEnabled()) {
-            return;
-        }
-        if (sessions.isEmpty()) {
-            LOGGER.debug("No sessions were cleared {} via REST invocation with filter '{}'.", global ? "globally" : "locally", filter.toString());
-            return;
-        }
-        StringBuilder b = new StringBuilder();
-        for (String s : sessions) {
-            b.append(s).append(",");
-        }
-        b.setLength(b.length() - 1);
-        LOGGER.debug("Cleared sessions {} via REST invocation with filter '{}', {}", global ? "globally" : "locally", filter.toString(), sessions);
     }
 }
