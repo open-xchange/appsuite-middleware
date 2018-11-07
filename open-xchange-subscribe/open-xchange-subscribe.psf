@@ -10,7 +10,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.dav.gmx.de"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.dav.web.de"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microsoft.graph"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.google"/>

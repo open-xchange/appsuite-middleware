@@ -237,7 +237,6 @@ import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
@@ -570,9 +569,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // Attachment Plugins
         serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
         serviceTrackerList.add(new AttachmentListenerTracker(context));
-
-        // PublicationTargetDiscoveryService
-        track(PublicationTargetDiscoveryService.class, new PublicationTargetDiscoveryServiceTrackerCustomizer(context));
 
         // Folder Fields
         track(AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields()));

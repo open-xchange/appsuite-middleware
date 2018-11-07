@@ -215,6 +215,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessCollectemailaddresses(17, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES, false),
         accessMultiplemailaccounts(18, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS, false),
         accessSubscription(19, OPT_ACCESS_SUBSCRIPTION, false),
+        /**
+         * @deprecated Publication has been removed with v7.10.2
+         * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
+         */
         accessPublication(20, OPT_ACCESS_PUBLICATION, false),
         accessActiveSync(21, OPT_ACCESS_ACTIVE_SYNC, false),
         accessUsm(22, OPT_ACCESS_USM, false),
@@ -476,6 +480,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_COLLECT_EMAIL_ADDRESSES = "access-collect-email-addresses";
     protected static final String OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS = "access-multiple-mail-accounts";
     protected static final String OPT_ACCESS_SUBSCRIPTION = "access-subscription";
+    @Deprecated
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
     protected static final String OPT_ACCESS_USM = "access-usm";
@@ -664,6 +669,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessEditPasswordOption = null;
     protected CLIOption accessCollectEmailAddresses = null;
     protected CLIOption accessMultipleMailAccounts = null;
+    @Deprecated
     protected CLIOption accessPublication = null;
     protected CLIOption accessSubscription = null;
     protected CLIOption accessActiveSync = null;
@@ -2494,7 +2500,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES, "on/off", "Collect Email Addresses access (Default is off)", true, false, true);
         this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS, "on/off", "Multiple Mail Accounts access (Default is off)", true, false, true);
         this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION, "on/off", "Subscription access (Default is off)", true, false, true);
-        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION, "on/off", "Publication access (Default is off)", true, false, true);
+        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION, "on/off", "Publication access (Default is off ) [DEPRECATED]", true, false, true);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
         this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off) [DEPRECATED]", true, false, true);

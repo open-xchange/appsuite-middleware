@@ -32,8 +32,6 @@ In certain scenarios, specific update tasks may be forcibly excluded from being 
 
 The following list gives an overview about the known update tasks of the core Open-Xchange Middleware starting from v7.8.3.
 
-- ``com.openexchange.publish.database.PublicationsAddEntityIndex``  
-  Adds the index "entity (cid,module,entity)" to the table "publications".
 - ``com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks``  
   Removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
 - ``com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask``  
@@ -193,7 +191,6 @@ com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask              
 com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch            true       2009-12-23 10:43:51 CET
 com.openexchange.groupware.update.tasks.DelFolderTreeTableUpdateTask                   true       2009-12-23 10:43:51 CET
 com.openexchange.groupware.update.tasks.MALPollCreateTableTask                         true       2009-12-23 10:43:51 CET
-com.openexchange.groupware.update.tasks.CreatePublicationTablesTask                    true       2009-12-23 10:43:51 CET
  ...
 com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUsedColumnTask                true       2016-03-16 16:33:10 CET
 com.openexchange.drive.checksum.rdb.DirectoryChecksumsReIndexTaskV2                    true       2016-03-16 16:33:10 CET

@@ -2491,7 +2491,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setEditPassword(user.hasPermission(UserConfiguration.EDIT_PASSWORD));
             acc.setCollectEmailAddresses(user.hasPermission(UserConfiguration.COLLECT_EMAIL_ADDRESSES));
             acc.setMultipleMailAccounts(user.hasPermission(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS));
-            acc.setPublication(user.hasPermission(UserConfiguration.PUBLICATION));
             acc.setSubscription(user.hasPermission(UserConfiguration.SUBSCRIPTION));
             acc.setActiveSync(user.hasPermission(UserConfiguration.ACTIVE_SYNC));
             acc.setUSM(user.hasPermission(UserConfiguration.USM));
@@ -2702,7 +2701,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setCollectEmailAddresses(access.isCollectEmailAddresses());
             user.setMultipleMailAccounts(access.isMultipleMailAccounts());
             user.setSubscription(access.isSubscription());
-            user.setPublication(access.isPublication());
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
             user.setOLOX20(access.isOLOX20());

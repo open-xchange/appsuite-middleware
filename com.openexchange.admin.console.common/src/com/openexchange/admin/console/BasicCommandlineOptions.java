@@ -138,11 +138,6 @@ public abstract class BasicCommandlineOptions {
 
     public static final int SYSEXIT_UNABLE_TO_PARSE = 114;
 
-    /**
-     * Used when a publication does not exists
-     */
-    public static final int SYSEXIT_NO_SUCH_PUBLICATION = 115;
-
     protected static final int DEFAULT_CONTEXT = 1;
     protected static final char OPT_NAME_CONTEXT_SHORT = 'c';
     protected static final String OPT_NAME_CONTEXT_LONG = "contextid";

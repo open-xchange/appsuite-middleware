@@ -88,9 +88,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2464
     ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
 
-    # SoftwareChange_Request-2470
-    ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-
     # SoftwareChange_Request-2541
     VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
     if [ "5000" = "$VALUE" ]; then

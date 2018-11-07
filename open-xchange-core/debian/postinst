@@ -36,9 +36,6 @@ postFix() {
     # SoftwareChange_Request-2464
     ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
 
-    # SoftwareChange_Request-2470
-    ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-
     # SoftwareChange_Request-2541
     if dpkg --compare-versions "7.8.0-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)

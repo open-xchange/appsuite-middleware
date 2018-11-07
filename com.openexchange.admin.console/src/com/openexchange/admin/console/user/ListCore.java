@@ -60,8 +60,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -183,7 +183,6 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_COLLECT_EMAIL_ADDRESSES);
             columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
             columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
-            columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
             columnnames.add(UserAbstraction.OPT_ACCESS_OLOX20);
@@ -246,7 +245,6 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isCollectEmailAddresses()));
             datarow.add(String.valueOf(access.isMultipleMailAccounts()));
             datarow.add(String.valueOf(access.isSubscription()));
-            datarow.add(String.valueOf(access.isPublication()));
             datarow.add(String.valueOf(access.isActiveSync()));
             datarow.add(String.valueOf(access.isUSM()));
             datarow.add(String.valueOf(access.isOLOX20()));

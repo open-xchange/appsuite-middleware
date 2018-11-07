@@ -447,31 +447,6 @@ If set to <code>true</code> the guests email address is used to recognize if the
 * To handle user and contact data across contexts boundaries the feature has to be enabled before a guest receives the first share. Guests that receive shares before the activation cannot be considered within the alignment process. Only latter shares will be considered.
 * At the moment this feature does only sync user and contact related data (no shared content). If the user got two shares from different contexts he will only see shares related to the given link.
 
-# Publish/Subscribe vs. Sharing
-
-The upcoming sharing features are going to replace the previously used OXMF &quot;publications&quot;, allowing guest users to interact with the shared data in the same way as regular groupware users do. However, since the underlying concepts and their technical realization are completely different, a seamless migration between publications and shares is not possible without some drawbacks.
-
-The following list gives an overview of the main discrepancies:
-
-* Custom templates for OXMF publication targets<br />An adminsitrator/admin may have defined some custom publication targets that are using the published data in a special way. While shares would still make all the data available (mainly via the web interface), this would only be a drop-in replacement for the ordinary &quot;view the publication in a browser&quot; use case, but not for anything beyond that scope.
-* Subscribe of publications<br />Publications from one user can be added to another user's groupware using the &quot;subscribe&quot; functionality, making use of the embedded microformat data of publications (OXMF). For sharing, we will not have a similar feature in the first iteration, so migrating an existing publication to a share would also stop it from being subscribable.
-* Deep links to download files of publications<br />Files behind an infostore publication were accessible behind a static URL, which would theoretically allow them to be requested independently of the parent publication (e.g. images linked from an external website). While the entry URL to a publication would be mappable to a corresponding share URL, converting existing publications to shares would at least break such deep links.
-
-Because of the above points and the whole different concept, we do not migrate existing publications to shares. Instead, the default behavior will be:
-
-* No new OXMF publications or subscriptions can be created by default
-* The web client does no longer give the option to publish or subscribe in the OXMF format
-* Existing OXMF publications / subscriptions can't be updated
-* Existing OXMF publications continue to work as is, including associated subscriptions
-* Yet it's still possible to delete existing publications and subscriptions
-* Therefore, the menu section &quot;Publications and Subscriptions&quot; will still be available (if there's at least one publication or subscription)
-
-Exceptions to these rules cover special internal subscriptions to 3rd party services like addressbooks from LinkedIn (removed since 7.10.0) or Xing, as well as the auto-publish feature of mail attachments exceeding a specific size.
-
-### Administrator Notes:
-
-* The possibility to create/update OXMF publications via HTTP-API may be configured via <code>com.openexchange.publish.createModifyEnabled</code> in file <code>publications.properties</code>
-* The possibility to create/update OXMF subscriptions via HTTP-API may be configured via <code>com.openexchange.subscribe.microformats.createModifyEnabled</code> in file <code>microformatSubscription.properties</code>
 
 # Limit file accesses for named/anonymous guests (since 7.8.2)
 

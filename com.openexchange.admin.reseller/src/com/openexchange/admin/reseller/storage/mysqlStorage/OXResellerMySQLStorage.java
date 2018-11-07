@@ -1087,7 +1087,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             ubp.setCollectEmailAddresses(access.isCollectEmailAddresses());
             ubp.setMultipleMailAccounts(access.isMultipleMailAccounts());
             ubp.setSubscription(access.isSubscription());
-            ubp.setPublication(access.isPublication());
             ubp.setActiveSync(access.isActiveSync());
             ubp.setUSM(access.isUSM());
             ubp.setOLOX20(access.isOLOX20());

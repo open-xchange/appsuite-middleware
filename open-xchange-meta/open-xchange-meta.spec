@@ -50,7 +50,7 @@ Authors:
 %package -n     open-xchange-meta-pubsub
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for Publish and Subscribe
-Requires:       open-xchange-publish, open-xchange-subscribe
+Requires:       open-xchange-subscribe
 
 %description -n open-xchange-meta-pubsub
 The Open-Xchange Meta package for Publish and Subscribe

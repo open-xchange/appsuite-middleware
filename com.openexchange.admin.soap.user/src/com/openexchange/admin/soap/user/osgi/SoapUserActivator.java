@@ -53,10 +53,7 @@ import java.rmi.Remote;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.soap.user.soap.OXPublicationServicePortType;
-import com.openexchange.admin.soap.user.soap.OXPublicationServicePortTypeImpl;
 import com.openexchange.admin.soap.user.soap.OXUserServicePortType;
 import com.openexchange.admin.soap.user.soap.OXUserServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -91,10 +88,7 @@ public final class SoapUserActivator extends HousekeepingActivator {
                 if (service instanceof OXUserInterface) {
                     OXUserServicePortTypeImpl.RMI_REFERENCE.set(null);
                     context.ungetService(reference);
-                } else if (service instanceof OXPublicationInterface) {
-                    OXPublicationServicePortTypeImpl.RMI_REFERENCE.set(null);
-                    context.ungetService(reference);
-                }
+                } 
             }
 
             @Override
@@ -108,10 +102,7 @@ public final class SoapUserActivator extends HousekeepingActivator {
                 if (service instanceof OXUserInterface) {
                     OXUserServicePortTypeImpl.RMI_REFERENCE.set((OXUserInterface) service);
                     return service;
-                } else if (service instanceof OXPublicationInterface) {
-                    OXPublicationServicePortTypeImpl.RMI_REFERENCE.set((OXPublicationInterface) service);
-                    return service;
-                }
+                } 
                 context.ungetService(reference);
                 return null;
             }
@@ -121,9 +112,6 @@ public final class SoapUserActivator extends HousekeepingActivator {
 
         final OXUserServicePortTypeImpl soapService = new OXUserServicePortTypeImpl();
         registerService(OXUserServicePortType.class, soapService);
-
-        final OXPublicationServicePortTypeImpl anotherSoapService = new OXPublicationServicePortTypeImpl();
-        registerService(OXPublicationServicePortType.class, anotherSoapService);
     }
 
 }

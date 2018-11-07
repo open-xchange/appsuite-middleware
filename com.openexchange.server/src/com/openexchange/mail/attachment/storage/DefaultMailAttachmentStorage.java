@@ -72,7 +72,6 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
@@ -97,10 +96,6 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.DocumentDataSource;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.transport.config.TransportProperties;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationService;
-import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
@@ -125,19 +120,6 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultMailAttachmentStorage.class);
 
-    private static class PublicationRefs {
-
-        final PublicationTarget target;
-        final PublicationService publisher;
-
-        PublicationRefs(PublicationTarget target, PublicationService publisher) {
-            super();
-            this.target = target;
-            this.publisher = publisher;
-        }
-
-    }
-
     private final ServiceLookup serviceLookup;
 
     // ------------------------------------------------------------------------------------------------------------------------- //
@@ -148,20 +130,6 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     public DefaultMailAttachmentStorage(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
-    }
-
-    private PublicationRefs getPublicationRefs() throws OXException {
-        PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
-
-        PublicationTarget target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
-        if (null == target) {
-            LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
-            throw ServiceExceptionCode.absentService(PublicationTarget.class);
-        }
-
-        PublicationService publisher = target.getPublicationService();
-
-        return new PublicationRefs(target, publisher);
     }
 
     private Context getContext(Session session) throws OXException {
@@ -480,41 +448,9 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
     }
 
     @Override
-    public DownloadUri getDownloadUri(String id, Session session) throws OXException {
-        PublicationRefs publicationRefs = getPublicationRefs();
-
-        // Generate publication for current attachment
-        final Publication publication = new Publication();
-        publication.setModule("infostore/object");
-        publication.setEntityId(new FileID(id).getFileId());
-        publication.setContext(getContext(session));
-        publication.setUserId(session.getUserId());
-
-        // Set target
-        publication.setTarget(publicationRefs.target);
-
-        // ... and publish
-        publicationRefs.publisher.create(publication);
-
-        // Get associated URL
-        String url = (String) publication.getConfiguration().get("url");
-
-        // Return
-        return new DownloadUri(url, Integer.toString(publication.getId()));
-    }
-
-    @Override
     public void discard(String id, DownloadUri downloadUri, Session session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-        PublicationRefs publicationRefs = getPublicationRefs();
         long timestamp = System.currentTimeMillis();
-
-        // Delete publication
-        try {
-            publicationRefs.publisher.delete(getContext(session), Strings.parsePositiveInt(downloadUri.getDownloadInfo()));
-        } catch (final OXException e) {
-            LOG.error("Publication with ID \"{} could not be roll-backed.", downloadUri.getDownloadInfo(), e);
-        }
 
         // Delete file
         try {

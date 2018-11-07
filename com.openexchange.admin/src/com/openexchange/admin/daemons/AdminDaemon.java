@@ -71,7 +71,6 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
-import com.openexchange.admin.rmi.impl.OXPublication;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
@@ -169,8 +168,6 @@ public class AdminDaemon implements AdminDaemonService {
         set.add(regexHelper.literalPattern("com.openexchange.monitoring"));
         set.add(regexHelper.literalPattern("com.openexchange.oauth"));
         set.add(regexHelper.literalPattern("com.openexchange.proxy"));
-        set.add(regexHelper.literalPattern("com.openexchange.publish.basic"));
-        set.add(regexHelper.literalPattern("com.openexchange.publish"));
         set.add(regexHelper.literalPattern("com.openexchange.push"));
         set.add(regexHelper.literalPattern("com.openexchange.secret.recovery"));
         set.add(regexHelper.literalPattern("com.openexchange.secret"));
@@ -348,7 +345,6 @@ public class AdminDaemon implements AdminDaemonService {
             final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl();
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
-            final OXPublication oxpublication = new OXPublication();
 
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXUserInterface.RMI_NAME);
@@ -373,10 +369,6 @@ public class AdminDaemon implements AdminDaemonService {
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXTaskMgmtInterface.RMI_NAME);
             services.add(context.registerService(Remote.class, oxtaskmgmt, properties));
-
-            properties = new Hashtable<String, Object>(2);
-            properties.put("RMIName", com.openexchange.admin.rmi.OXPublicationInterface.RMI_NAME);
-            services.add(context.registerService(Remote.class, oxpublication, properties));
 
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXUtilInterface.RMI_NAME);

@@ -127,19 +127,6 @@ properties:
     file: Server.properties
     packageName: open-xchange-core
     tags: ["Server"] 
-  - key: PUBLISH_REVOKE
-    description: |
-      eMail address of a person that can be called if data has been published
-      and the actual owner of the data objects to the publication. If left empty or not defined, 
-      the eMail address of the context admin is used.
-    defaultValue: empty
-    version: 
-    reloadable: false
-    configcascadeAware: false
-    related: 
-    file: Server.properties
-    packageName: open-xchange-core
-    tags: ["Server"] 
   - key: com.openexchange.IPCheck
     description: |
       On session validation of every request the client IP address is compared with the client IP address used for the login request. If this

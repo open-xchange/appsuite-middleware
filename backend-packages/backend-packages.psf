@@ -81,7 +81,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-pns-impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-pns-mobile-api-facade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-pns-transport-websockets"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-dovecot"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-imapidle"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-mailnotify"/>

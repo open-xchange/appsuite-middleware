@@ -118,6 +118,7 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean publicFolderEditable;
     @XmlElement(nillable = true)
+    @Deprecated
     protected Boolean publication;
     @XmlElement(nillable = true)
     protected Boolean readCreateSharedFolders;
@@ -146,6 +147,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public Boolean isOLOX20() {
         return olox20;
     }
@@ -159,6 +161,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public void setOLOX20(Boolean value) {
         this.olox20 = value;
     }
@@ -539,10 +542,12 @@ public class UserModuleAccess {
      * Legt den Wert der publicFolderEditable-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
+     *            allowed object is
+     *            {@link Boolean }
+     * @deprecated Publication has been removed with v7.10.2
+     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
+    @Deprecated
     public void setPublicFolderEditable(Boolean value) {
         this.publicFolderEditable = value;
     }
@@ -551,10 +556,12 @@ public class UserModuleAccess {
      * Ruft den Wert der publication-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
+     *         possible object is
+     *         {@link Boolean }
+     * @deprecated Publication has been removed with v7.10.2
+     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
+    @Deprecated
     public Boolean isPublication() {
         return publication;
     }
@@ -563,10 +570,12 @@ public class UserModuleAccess {
      * Legt den Wert der publication-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
+     *            allowed object is
+     *            {@link Boolean }
+     * @deprecated Publication has been removed with v7.10.2
+     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
+    @Deprecated
     public void setPublication(Boolean value) {
         this.publication = value;
     }
@@ -724,6 +733,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public Boolean isWebdavXml() {
         return webdavXml;
     }
@@ -737,6 +747,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public void setWebdavXml(Boolean value) {
         this.webdavXml = value;
     }

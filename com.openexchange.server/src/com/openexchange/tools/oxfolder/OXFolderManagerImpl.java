@@ -1745,13 +1745,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     /**
-     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, shares) for the supplied folder ID.
      *
      * @param wcon A "write" connection to the database
      * @param folder The deleted folder. Must be fully initialized.
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
      *            otherwise
-     * @return The number of removed subscriptions and publications
+     * @return The number of removed subscriptions
      * @throws OXException
      */
     private void deleteDependentEntities(Connection wcon, FolderObject folder, boolean handDown) throws OXException {
@@ -1771,13 +1771,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     /**
-     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, shares) for the supplied folder ID.
      *
      * @param wcon A "write" connection to the database
      * @param folders The deleted folders. Must be fully initialized.
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
      *            otherwise
-     * @return The number of removed subscriptions and publications
+     * @return The number of removed subscriptions
      * @throws OXException
      */
     private void deleteDependentEntities(Connection wcon, Collection<FolderObject> folders, boolean handDown) throws OXException {
@@ -1979,7 +1979,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             }
             /*
-             * Subscriptions & Publications
+             * Subscriptions
              */
             deleteDependentEntities(wc, storageFolders, false);
             /*

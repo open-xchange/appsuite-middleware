@@ -56,7 +56,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mailaccount.internal.CustomMailAccount;
-import com.openexchange.publish.Publication;
 import com.openexchange.resource.Resource;
 import com.openexchange.subscribe.Subscription;
 
@@ -81,7 +80,6 @@ public class FixtureLoaderFactory {
         loader.addFixtureFactory(new ResourceFixtureFactory(loader), Resource.class);
         loader.addFixtureFactory(new EMailFixtureFactory(datapath, loader), MailMessage.class);
         loader.addFixtureFactory(new DocumentFixtureFactory(datapath, loader), Document.class);
-        loader.addFixtureFactory(new PublicationFixtureFactory(loader), Publication.class);
         loader.addFixtureFactory(new SubscriptionFixtureFactory(loader), Subscription.class);
         loader.addFixtureFactory(new MultiMailFixtureFactory(loader), CustomMailAccount.class);
         // TODO: configdata for selenium

@@ -118,6 +118,7 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean publicFolderEditable;
     @XmlElement(nillable = true)
+    @Deprecated
     protected Boolean publication;
     @XmlElement(nillable = true)
     protected Boolean readCreateSharedFolders;
@@ -146,6 +147,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public Boolean isOLOX20() {
         return olox20;
     }
@@ -159,6 +161,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public void setOLOX20(Boolean value) {
         this.olox20 = value;
     }
@@ -555,6 +558,7 @@ public class UserModuleAccess {
      *     {@link Boolean }
      *
      */
+    @Deprecated
     public Boolean isPublication() {
         return publication;
     }
@@ -567,10 +571,11 @@ public class UserModuleAccess {
      *     {@link Boolean }
      *
      */
+    @Deprecated
     public void setPublication(Boolean value) {
         this.publication = value;
     }
-
+    
     /**
      * Ruft den Wert der readCreateSharedFolders-Eigenschaft ab.
      *
@@ -724,6 +729,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public Boolean isWebdavXml() {
         return webdavXml;
     }
@@ -737,6 +743,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public void setWebdavXml(Boolean value) {
         this.webdavXml = value;
     }

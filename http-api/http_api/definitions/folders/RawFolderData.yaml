@@ -101,7 +101,7 @@ standard_folder_type:
     - 12 (trash)
 supported_capabilities:
   type: array
-  description: Can contain "permissions", "publication", "quota", "sort", "subscription".
+  description: Can contain "permissions", "quota", "sort", "subscription".
   readOnly: true
   items:
     type: string

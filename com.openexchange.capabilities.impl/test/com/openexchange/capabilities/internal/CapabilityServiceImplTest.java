@@ -71,7 +71,6 @@ public class CapabilityServiceImplTest {
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.INFOSTORE.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.EDIT_PASSWORD.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.SUBSCRIPTION.toString().toLowerCase()));
-        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.PUBLICATION.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.WEBMAIL.toString().toLowerCase()));
     }
 
@@ -102,13 +101,10 @@ public class CapabilityServiceImplTest {
         Mockito.when(jsonEditPassword.getRegisteredPermission()).thenReturn(Permission.EDIT_PASSWORD);
         PermissionAvailabilityService jsonSubscription = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonSubscription.getRegisteredPermission()).thenReturn(Permission.SUBSCRIPTION);
-        PermissionAvailabilityService jsonPublication = Mockito.mock(PermissionAvailabilityService.class);
-        Mockito.when(jsonPublication.getRegisteredPermission()).thenReturn(Permission.PUBLICATION);
 
         ConcurrentHashMap<Permission, PermissionAvailabilityService> registeredServices = new ConcurrentHashMap<Permission, PermissionAvailabilityService>();
         registeredServices.put(Permission.EDIT_PASSWORD, jsonEditPassword);
         registeredServices.put(Permission.SUBSCRIPTION, jsonSubscription);
-        registeredServices.put(Permission.PUBLICATION, jsonPublication);
 
         Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 

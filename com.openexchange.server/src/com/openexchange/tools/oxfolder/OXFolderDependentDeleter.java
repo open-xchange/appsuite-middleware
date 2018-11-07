@@ -66,7 +66,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
@@ -92,14 +91,14 @@ public class OXFolderDependentDeleter {
     private static final int DELETE_CHUNK_SIZE = 50;
 
     /**
-     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, shares) for the supplied folder ID.
      *
      * @param con A "write" connection to the database
      * @param session The affected session
      * @param folder The deleted folder
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
      *                 otherwise
-     * @return The number of removed subscriptions and publications
+     * @return The number of removed subscriptions
      * @throws OXException
      */
     public static void folderDeleted(Connection con, Session session, FolderObject folder, boolean handDown) throws OXException {
@@ -107,14 +106,14 @@ public class OXFolderDependentDeleter {
     }
 
     /**
-     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, shares) for the supplied folder ID.
      *
      * @param con A "write" connection to the database
      * @param session The affected session
      * @param folders The deleted folders
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
      *                 otherwise
-     * @return The number of removed subscriptions and publications
+     * @return The number of removed subscriptions 
      * @throws OXException
      */
     public static void foldersDeleted(Connection con, Session session, Collection<FolderObject> folders, boolean handDown) throws OXException {
@@ -179,7 +178,7 @@ public class OXFolderDependentDeleter {
             affectedEntities.addAll(getObjectPermissionEntities(con, context, module, fuids, false));
         }
         /*
-         * delete publications, subscriptions, and any adjacent object permissions
+         * delete subscriptions, and any adjacent object permissions
          */
         iterator = byModule.iterator();
         for (int i = byModule.size(); i-- > 0;) {
@@ -202,7 +201,7 @@ public class OXFolderDependentDeleter {
     }
 
     /**
-     * Deletes all publications, subscriptions and object permissions referencing one of the supplied folder identifiers.
+     * Deletes all subscriptions and object permissions referencing one of the supplied folder identifiers.
      *
      * @param con The (writable) database connection to use
      * @param cid The context identifier
@@ -219,7 +218,6 @@ public class OXFolderDependentDeleter {
             /*
              * delete chunk
              */
-            deletePublications(con, cid, Module.getModuleString(module, -1), chunk);
             deleteSubscriptions(con, cid, chunk);
             deleteObjectPermissions(con, cid, module, chunk);
             deleteFolderProperties(con, cid, chunk);
@@ -310,52 +308,6 @@ public class OXFolderDependentDeleter {
             Databases.closeSQLStuff(rs, stmt);
         }
         return new ArrayList<>(entityIDs);
-    }
-
-    private static int deletePublications(Connection connection, int cid, String module, List<Integer> entities) throws SQLException {
-        StringBuilder stringBuilder = new StringBuilder(96);
-        stringBuilder.append("SELECT id FROM publications WHERE cid=? AND module=? AND entity");
-        appendPlaceholdersForWhere(stringBuilder, entities.size());
-
-        TIntList ids;
-        {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                stmt = connection.prepareStatement(stringBuilder.toString());
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setString(pos++, module);
-                for (Integer entity : entities) {
-                    stmt.setInt(pos++, entity.intValue());
-                }
-                rs = stmt.executeQuery();
-                if (false == rs.next()) {
-                    return 0;
-                }
-
-                ids = new TIntLinkedList();
-                pos = 1;
-                do {
-                    ids.add(rs.getInt(pos));
-                } while (rs.next());
-            } finally {
-                Databases.closeSQLStuff(rs, stmt);
-            }
-        }
-
-        stringBuilder.setLength(0);
-        stringBuilder.append("DELETE FROM publications WHERE cid=? AND id");
-        appendPlaceholdersForWhere(stringBuilder, ids.size());
-        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, cid);
-            TIntIterator iterator = ids.iterator();
-            for (int j = ids.size(); j-- > 0;) {
-                stmt.setInt(parameterIndex++, iterator.next());
-            }
-            return stmt.executeUpdate();
-        }
     }
 
     private static int deleteSubscriptions(Connection connection, int cid, List<Integer> folderIDs) throws SQLException {

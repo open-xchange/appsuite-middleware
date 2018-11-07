@@ -141,7 +141,6 @@ import org.junit.runners.Suite;
     com.openexchange.webdav.infostore.integration.LockExpiryTest.class,
 
     com.openexchange.l10n.SuperCollatorTest.class,
-    com.openexchange.pubsub.TemplateTestSuite.class,
 
     // Slow Tests
     com.openexchange.webdav.protocol.ProtocolTestSuite.class,

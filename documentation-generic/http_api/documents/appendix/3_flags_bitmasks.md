@@ -66,7 +66,7 @@ Note: Capabilities describe the entire mailing system (mail account), not the sp
 |Name        | Description   |
 |:-----------|:--------------|
 |permissions | Folder storage supports permissions.|
-|publication | Folder storage supports folder publication.|
+|publication | Folder storage supports folder publication. Deprecated with v7.10.2!|
 |quota | Folder storage supports quota restrictions.|
 |sort | Folder storage supports sorting.|
 |subscription | Folder storage supports folder subscription.|

@@ -102,7 +102,6 @@ import com.openexchange.osgi.RankingAwareRegistryServiceTrackerCustomizer;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -146,7 +145,6 @@ public class AdminActivator extends HousekeepingActivator {
         });
 
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
-        track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         track(ConfigViewFactory.class, new RegistryServiceTrackerCustomizer<ConfigViewFactory>(context, AdminServiceRegistry.getInstance(), ConfigViewFactory.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
