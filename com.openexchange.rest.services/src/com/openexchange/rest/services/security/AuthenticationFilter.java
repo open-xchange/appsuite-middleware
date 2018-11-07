@@ -77,6 +77,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.EndpointAuthenticator;
+import com.openexchange.rest.services.RequestContext;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.rest.services.security.authenticator.DefaultEndpointAuthenticator;
@@ -122,8 +123,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     /**
-     * @param configurationService
-     * @return
+     * Initialises the master admin authenticator
+     * 
+     * @param configurationService The {@link ConfigurationService}
+     * @return The master admin {@link EndpointAuthenticator}
      */
     // Shamelessly copied from AdminCache. Maybe we need a MasterAdminAuthService?
     private EndpointAuthenticator initialiseMasterAdminAuthenticator(ConfigurationService configurationService) {
@@ -156,8 +159,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     /**
-     * @param configurationService
-     * @return
+     * Initialises the default {@link EndpointAuthenticator}
+     * 
+     * @param configurationService The {@link ConfigurationService}
+     * @return The default {@link EndpointAuthenticator}
      */
     private EndpointAuthenticator initialiseDefaultAuthenticator(ConfigurationService configurationService) {
         String authLogin = configurationService.getProperty("com.openexchange.rest.services.basic-auth.login");
@@ -168,6 +173,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return new DefaultEndpointAuthenticator(authLogin.trim(), authPassword.trim());
     }
 
+    /**
+     * Gets the {@link Annotation} from the specified class
+     * 
+     * @param annotationClass The class containing the annotation
+     * @return The {@link Annotation} {@link A}
+     */
     private <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         A annotation = resourceInfo.getResourceMethod().getAnnotation(annotationClass);
         if (null != annotation) {
@@ -180,6 +191,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return null;
     }
 
+    /**
+     * Acquires the {@link EndpointAuthenticator} from the {@link ResourceContext}
+     * 
+     * @return The {@link EndpointAuthenticator}
+     */
     private EndpointAuthenticator acquireAuthenticator() {
         Object resourceInstance = resourceContext.getResource(resourceInfo.getResourceClass());
         if (EndpointAuthenticator.class.isInstance(resourceInstance)) {
@@ -189,6 +205,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.ws.rs.container.ContainerRequestFilter#filter(javax.ws.rs.container.ContainerRequestContext)
+     */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // Check if all is permitted
@@ -278,6 +299,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         basicAuth(requestContext);
     }
 
+    /**
+     * Performs basic authentication with the default OX REST credentials
+     * 
+     * @param requestContext The {@link RequestContext}
+     */
     private void basicAuth(ContainerRequestContext requestContext) {
         if (defaultAuthenticator == null) {
             LOG.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " + "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " + "'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
@@ -287,6 +313,13 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
+    /**
+     * Performs the authentication with the specified {@link EndpointAuthenticator}
+     * 
+     * @param authenticator The {@link EndpointAuthenticator} to perform the authenticationw ith
+     * @param requestContext The {@link RequestContext}
+     * @param invokedMethod The invoked REST method
+     */
     private void authenticatorAuth(EndpointAuthenticator authenticator, ContainerRequestContext requestContext, Method invokedMethod) {
         if (authenticator.permitAll(invokedMethod)) {
             // Nothing to do
@@ -306,9 +339,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     /**
+     * Performs basic authentication with the OX master admin credentials
      * 
-     * @param requestContext
-     * @param invokedMethod
+     * @param requestContext The {@link RequestContext}
+     * @param invokedMethod The invoked REST method
      */
     private void masterAuth(ContainerRequestContext requestContext, Method invokedMethod) {
         if (masterAdminAuthenticator == null) {
@@ -319,31 +353,58 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
+    /**
+     * Reflects the authentication status to the specified {@link RequestContext}
+     * 
+     * @param authenticated whether the authentication was successful
+     * @param realm The realm of the authentication
+     * @param requestContext The {@link RequestContext}
+     */
     private void reflectAuthenticated(boolean authenticated, String realm, ContainerRequestContext requestContext) {
-        if (authenticated) {
-            boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
-            Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
-            requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
-        } else {
+        if (false == authenticated) {
             requestContext.abortWith(Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, new StringBuilder(32).append("Basic realm=\"").append(realm).append("\", encoding=\"UTF-8\"").toString()).build());
+            return;
         }
+
+        boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
+        Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
+        requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
     }
 
+    /**
+     * Denies the request due to failed or missing authentication
+     * 
+     * @param requestContext The {@link RequestContext}
+     */
     private void deny(ContainerRequestContext requestContext) {
         requestContext.abortWith(Response.status(Status.FORBIDDEN).build());
     }
 
+    /**
+     * Checks whether the specified {@link Role} is enlisted in the specified array of roles
+     * 
+     * @param roleToCheck The role to check
+     * @param roles The array of roles
+     * @return <code>true</code> if the role is enlised; <code>false</code> otherwise
+     */
     private boolean hasRole(String roleToCheck, String[] roles) {
-        if (null != roles) {
-            for (String role : roles) {
-                if (roleToCheck.equalsIgnoreCase(role)) {
-                    return true;
-                }
+        if (null == roles) {
+            return false;
+        }
+        for (String role : roles) {
+            if (roleToCheck.equalsIgnoreCase(role)) {
+                return true;
             }
         }
         return false;
     }
 
+    /**
+     * Extracts the credentials from the Authorization header
+     * 
+     * @param authHeader The authorization header
+     * @return The {@link Credentials}
+     */
     private Credentials acquireCredentialsFromAuthHeader(String authHeader) {
         if (null == authHeader) {
             // Authorization header missing
@@ -363,5 +424,4 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Unsupported auth scheme
         return null;
     }
-
 }
