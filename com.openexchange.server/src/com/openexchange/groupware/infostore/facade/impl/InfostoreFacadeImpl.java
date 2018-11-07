@@ -1538,7 +1538,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 /*
                  * perform document move
                  */
-                Metadata[] modified = null;
+                Metadata[] modified;
                 if (null == optOriginPaths) {
                     modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
                 } else {
