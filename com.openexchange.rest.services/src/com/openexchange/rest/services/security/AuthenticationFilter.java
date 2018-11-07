@@ -90,7 +90,8 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  * are aborted.</p>
  * <br>
  * <p>Currently authentication is only based on HTTP basic authentication with the
- * credentials defined via 'com.openexchange.rest.services.basic-auth' in server.properties.</p>
+ * credentials defined via 'com.openexchange.rest.services.basic-auth' in server.properties
+ * or via the OX master admin password defined in the <code>mpasswd</code> file.</p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
