@@ -218,19 +218,14 @@ public final class Configuration {
         }
 
         Map<String, Object> jdbcConfig = (Map<String, Object>) yaml;
-        if (!jdbcConfig.containsKey("com.mysql.jdbc")) {
+        Object obj = jdbcConfig.get("com.mysql.jdbc");
+        if (!Map.class.isInstance(obj)) {
             LOG.error("Can't parse connector configuration file: {}", JDBC_CONFIG);
             return Collections.emptyMap();
         }
-
-        if (!Map.class.isInstance(jdbcConfig.get("com.mysql.jdbc"))) {
-            LOG.error("Can't parse connector configuration file: {}", JDBC_CONFIG);
-            return Collections.emptyMap();
-        }
-
-        Map<String, Object> map = (Map<String, Object>) jdbcConfig.get("com.mysql.jdbc");
 
         // Enforce Strings
+        Map<String, Object> map = (Map<String, Object>) obj;
         return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
     }
 
