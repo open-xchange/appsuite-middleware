@@ -88,10 +88,6 @@ public class ConnectionData {
             return this;
         }
 
-        public String getUrl() {
-            return url;
-        }
-
         public Builder withDriverClass(String driverClass) {
             this.driverClass = driverClass;
             return this;
