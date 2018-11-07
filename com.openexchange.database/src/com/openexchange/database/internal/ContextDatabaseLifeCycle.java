@@ -61,6 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolConfig;
@@ -145,15 +146,6 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         return retval.build();
     }
 
-    private String removeParametersFromUrl(String url) {
-        if (null == url) {
-            return url;
-        }
-
-        int paramStart = url.indexOf('?');
-        return paramStart >= 0 ? url.substring(0, paramStart) : url;
-    }
-
     ConnectionData loadPoolData(int poolId, Properties jdbcProperties) throws OXException {
         Connection con = configDatabaseService.getReadOnly();
         try {
@@ -191,7 +183,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
             conDataBuilder.withMin(result.getInt(7));
 
             // Apply JDBC properties (and drop any parameters from JDBC URL)
-            url = removeParametersFromUrl(url);
+            url = JdbcProperties.removeParametersFromJdbcUrl(url);
             conDataBuilder.withUrl(url);
 
             defaults.putAll(jdbcProperties);

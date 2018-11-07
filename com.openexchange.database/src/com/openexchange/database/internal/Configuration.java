@@ -107,7 +107,12 @@ public final class Configuration {
         return configDbWriteProps;
     }
 
-    Properties getJdbcProps() {
+    /**
+     * Gets the JDBC properties this configuration is using
+     *
+     * @return The JDBC properties
+     */
+    public Properties getJdbcProps() {
         return jdbcPropsReference.get();
     }
 
