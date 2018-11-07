@@ -135,7 +135,7 @@ public class EnhancedApiClient extends ApiClient {
             }
             JSONArray attachments = json.optJSONArray("attachments");
             if (attachments == null || attachments.isEmpty()) {
-                JSONObject optJSONObject = json.optJSONObject("events");
+                JSONObject optJSONObject = json.optJSONObject("event");
                 if (optJSONObject != null) {
                     attachments = optJSONObject.optJSONArray("attachments");
                     if (attachments == null || attachments.isEmpty()) {
