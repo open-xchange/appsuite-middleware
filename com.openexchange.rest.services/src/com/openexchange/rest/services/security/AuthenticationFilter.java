@@ -93,6 +93,7 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  * credentials defined via 'com.openexchange.rest.services.basic-auth' in server.properties.</p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
 @Provider
@@ -275,6 +276,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     }
 
                     authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
+                    return;
+                }
+                if (hasRole(Role.MASTER_ADMIN_AUTHENTICATED.getId(), roles)) {
+                    if (null == masterAdminAuthenticator) {
+                        LOG.warn("Unable to perform master authentication");
+                        deny(requestContext);
+                        return;
+                    }
+                    masterAuth(requestContext, resourceInfo.getResourceMethod());
                     return;
                 }
 
