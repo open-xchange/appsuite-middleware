@@ -54,7 +54,7 @@ package com.openexchange.groupware.update.tasks;
  * {@link DropICalPrincipalTableTask} - Drops the unused table "ical_principal"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class DropICalPrincipalTableTask extends AbstractDropTableTask {
 

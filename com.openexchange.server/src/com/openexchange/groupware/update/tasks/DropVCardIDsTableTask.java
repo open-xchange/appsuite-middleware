@@ -54,7 +54,7 @@ package com.openexchange.groupware.update.tasks;
  * {@link DropVCardIDsTableTask} - Drops the unused table "vcard_ids"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class DropVCardIDsTableTask extends AbstractDropTableTask {
 
