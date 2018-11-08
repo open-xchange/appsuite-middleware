@@ -59,6 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.internal.AssignmentFactoryImpl;
 import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.DatabaseServiceImpl;
@@ -117,6 +118,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                 // Parse configuration
                 Configuration configuration = new Configuration();
                 configuration.readConfiguration(configService);
+                JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
                 ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
                 context.registerService(Reloadable.class, reloader, null);
                 databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners, configuration, reloader);
