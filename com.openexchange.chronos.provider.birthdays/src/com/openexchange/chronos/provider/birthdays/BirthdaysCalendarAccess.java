@@ -88,6 +88,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.common.AlarmHelper;
 import com.openexchange.chronos.provider.extensions.BasicCTagAware;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -273,7 +274,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     @Override
-    public List<Event> getChangeExceptions(String seriesId) throws OXException {
+    public List<Event> getChangeExceptions(String seriesId) {
         // no change exceptions possible
         return Collections.emptyList();
     }

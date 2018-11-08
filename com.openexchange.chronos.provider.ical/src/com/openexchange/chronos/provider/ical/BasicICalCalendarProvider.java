@@ -124,22 +124,22 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
     }
 
     @Override
-    public void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    public void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 

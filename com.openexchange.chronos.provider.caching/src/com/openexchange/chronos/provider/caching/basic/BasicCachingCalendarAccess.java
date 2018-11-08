@@ -222,14 +222,14 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     public abstract ExternalCalendarResult getAllEvents() throws OXException;
 
     @Override
-    public final Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
+    public Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
         updateCacheIfNeeded();
         containsError();
         return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
     }
 
     @Override
-    public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
+    public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
         updateCacheIfNeeded();
         containsError();
         return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
@@ -531,26 +531,30 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
 
         for (EventUpdate eventUpdate : diff.getUpdatedItems()) {
-            Event persistedEvent = eventUpdate.getOriginal();
-            Event updatedEvent = eventUpdate.getUpdate();
-            /*
-             * update via special 'delta' event so that identifying properties are still available for the storage
-             */
-            Set<EventField> updatedFields = eventUpdate.getUpdatedFields();
-            Event deltaEvent = EventMapper.getInstance().copy(persistedEvent, null, (EventField[]) null);
-            deltaEvent = EventMapper.getInstance().copy(updatedEvent, deltaEvent, updatedFields.toArray(new EventField[updatedFields.size()]));
-            deltaEvent = new DeltaEvent(deltaEvent, updatedFields);
-            calendarStorage.getEventStorage().updateEvent(deltaEvent);
+            update(calendarStorage, eventUpdate);
+        }
+    }
 
-            CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
-            if (!attendeeUpdates.isEmpty()) {
-                updateAttendees(calendarStorage, deltaEvent.getId(), attendeeUpdates);
-            }
+    protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate) throws OXException {
+        Event persistedEvent = eventUpdate.getOriginal();
+        Event updatedEvent = eventUpdate.getUpdate();
+        /*
+         * update via special 'delta' event so that identifying properties are still available for the storage
+         */
+        Set<EventField> updatedFields = eventUpdate.getUpdatedFields();
+        Event deltaEvent = EventMapper.getInstance().copy(persistedEvent, null, (EventField[]) null);
+        deltaEvent = EventMapper.getInstance().copy(updatedEvent, deltaEvent, updatedFields.toArray(new EventField[updatedFields.size()]));
+        deltaEvent = new DeltaEvent(deltaEvent, updatedFields);
+        calendarStorage.getEventStorage().updateEvent(deltaEvent);
 
-            CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
-            if (!alarmUpdates.isEmpty()) {
-                updateAlarms(calendarStorage, deltaEvent, alarmUpdates);
-            }
+        CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
+        if (!attendeeUpdates.isEmpty()) {
+            updateAttendees(calendarStorage, deltaEvent.getId(), attendeeUpdates);
+        }
+
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
+        if (!alarmUpdates.isEmpty()) {
+            updateAlarms(calendarStorage, deltaEvent, alarmUpdates);
         }
     }
 
@@ -710,6 +714,22 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                 return;
             }
             throw e;
+        }
+    }
+
+    private void cleanupEvents(List<Event> externalEvents) {
+        List<Event> addedItems = new ArrayList<Event>(externalEvents);
+        for (Event event : addedItems) {
+            try {
+                Check.mandatoryFields(event, EventField.START_DATE);
+                // Set folder id for not group scheduled events if missing
+                if ((event.getAttendees() == null || event.getAttendees().isEmpty()) && event.getFolderId() == null) {
+                    event.setFolderId(BasicCalendarAccess.FOLDER_ID);
+                }
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
+                externalEvents.remove(event);
+            }
         }
     }
 

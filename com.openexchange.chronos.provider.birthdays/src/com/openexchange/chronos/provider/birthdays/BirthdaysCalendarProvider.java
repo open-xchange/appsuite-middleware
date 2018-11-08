@@ -80,6 +80,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.common.AlarmHelper;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;

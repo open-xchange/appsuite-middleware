@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.chronos.provider.birthdays;
+package com.openexchange.chronos.provider.common;
 
-import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
@@ -61,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
@@ -84,7 +84,16 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * {@link AlarmHelper}
@@ -219,7 +228,7 @@ public class AlarmHelper {
      */
     public List<Alarm> getDefaultAlarms() {
         try {
-            UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), account.getUserConfiguration());
+            UserConfigWrapper configWrapper = new UserConfigWrapper(Tools.requireService(ConversionService.class, services), account.getUserConfiguration());
             return configWrapper.getDefaultAlarmDate();
         } catch (Exception e) {
             LOG.warn("Error getting default alarm from user configuration \"{}\": {}", account.getUserConfiguration(), e.getMessage(), e);
@@ -290,8 +299,7 @@ public class AlarmHelper {
                  * (re)-schedule any alarm triggers & return appropriate update result
                  */
                 List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
-                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(
-                    event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
                 if (null != originalAlarms && 0 < originalAlarms.size()) {
                     storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
                 }
