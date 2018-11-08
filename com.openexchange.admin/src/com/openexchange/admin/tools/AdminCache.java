@@ -69,6 +69,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -90,6 +91,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -216,7 +218,7 @@ public class AdminCache {
 
     /**
      * Initialises the available password mechanisms
-     * 
+     *
      * @return An unmodifiable {@link Set} with all available password mechanisms
      */
     private Set<String> initialisePasswordMechanisms() {
@@ -229,7 +231,7 @@ public class AdminCache {
 
     /**
      * Initialises the available encrypters
-     * 
+     *
      * @return An unmodifiable {@link Map} with all the available encrypters
      */
     private Map<String, Encrypter> initialiseEncrypters() {
@@ -242,7 +244,7 @@ public class AdminCache {
 
     /**
      * Initialises the cache
-     * 
+     *
      * @param service The {@link ConfigurationService}
      * @throws OXGenericException if an error is occurred
      */
@@ -306,7 +308,7 @@ public class AdminCache {
 
     /**
      * Gets the name for the specified access combination
-     * 
+     *
      * @param accessCombination The access combination
      * @return The name access combination, or <code>null</code> if none found
      */
@@ -564,14 +566,23 @@ public class AdminCache {
         Class.forName(driver);
         // give database some time to react (in seconds)
         DriverManager.setLoginTimeout(120);
-        java.util.Properties defaults = new java.util.Properties();
+
+        String urlToUse = url;
+        java.util.Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+        if (null == defaults) {
+            defaults = new java.util.Properties();
+            defaults.setProperty("useSSL", "false");
+        } else {
+            urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+        }
+
         if (user != null) {
             defaults.put("user", user);
         }
         if (password != null) {
             defaults.put("password", password);
         }
-        defaults.setProperty("useSSL", "false");
+
         return DriverManager.getConnection(url, defaults);
     }
 
@@ -580,31 +591,47 @@ public class AdminCache {
     public Connection getSimpleSQLConnectionWithoutTimeout(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
         Class.forName(driver);
         DriverManager.setLoginTimeout(120);
-        int paramStart = url.indexOf('?');
-        String newUrl;
-        Properties defaults = new Properties();
-        defaults.put("user", user);
-        defaults.put("password", password);
-        defaults.setProperty("useSSL", "false");
-        if (-1 != paramStart) {
-            Matcher matcher = pattern.matcher(url);
-            newUrl = url.substring(0, paramStart);
-            while (matcher.find()) {
-                String name = matcher.group(1);
-                String value = matcher.group(2);
-                if (name != null && name.length() > 0 && value != null && value.length() > 0 && !name.toLowerCase().endsWith("timeout")) {
-                    try {
-                        defaults.put(name, URLDecoder.decode(value, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        // Should not happen for UTF-8.
-                        log.error("", e);
+
+        String urlToUse = url;
+        Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+        if (null == defaults) {
+            defaults = new Properties();
+            defaults.setProperty("useSSL", "false");
+
+            int paramStart = urlToUse.indexOf('?');
+            if (paramStart >= 0) {
+                Matcher matcher = pattern.matcher(urlToUse);
+                urlToUse = urlToUse.substring(0, paramStart);
+                while (matcher.find()) {
+                    String name = matcher.group(1);
+                    String value = matcher.group(2);
+                    if (name != null && name.length() > 0 && value != null && value.length() > 0 && !Strings.asciiLowerCase(name).endsWith("timeout")) {
+                        try {
+                            defaults.put(name, URLDecoder.decode(value, "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            // Should not happen for UTF-8.
+                            log.error("", e);
+                        }
                     }
                 }
             }
         } else {
-            newUrl = url;
+            urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+
+            for (Iterator<Entry<Object, Object>> it = defaults.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<Object, Object> property = it.next();
+                String name = property.getKey().toString();
+                String value = property.getValue().toString();
+                if (name != null && name.length() > 0 && value != null && value.length() > 0 && !Strings.asciiLowerCase(name).endsWith("timeout")) {
+                    it.remove();
+                }
+            }
         }
-        return DriverManager.getConnection(newUrl, defaults);
+
+        defaults.put("user", user);
+        defaults.put("password", password);
+
+        return DriverManager.getConnection(urlToUse, defaults);
     }
 
     public void closeSimpleConnection(Connection con) {
@@ -660,7 +687,7 @@ public class AdminCache {
 
     /**
      * Gets the password mechanism.
-     * 
+     *
      * @param user The {@link PasswordMechObject}
      * @return The password mechanism. If the {@link PasswordMechObject} contains an unknown password mechanism, then
      *         the <code>{SHA}</code> mechanism is returned.
@@ -712,7 +739,7 @@ public class AdminCache {
 
     /**
      * Reads the master credentials
-     * 
+     *
      * @param service The {@link ConfigurationService} from which to read the master credentials file
      * @return The master {@link Credentials} or <code>null</code> if the file is not found
      * @throws OXGenericException if an invalid mpasswd format is detected
@@ -868,7 +895,7 @@ public class AdminCache {
 
     /**
      * Reloads the master {@link Credentials} from the specified {@link ConfigurationService}
-     * 
+     *
      * @param configService the {@link ConfigurationService}
      * @throws OXGenericException if no master credentials are defined
      */
@@ -904,7 +931,7 @@ public class AdminCache {
 
         /**
          * Encrypts the specified password and returns it
-         * 
+         *
          * @param password The password to encrypt
          * @return The encrypted password
          * @throws UnsupportedEncodingException

@@ -107,6 +107,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.ConnectionReloaderImpl;
 import com.openexchange.databaseold.Database;
@@ -787,6 +788,7 @@ public final class Init {
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configurationService);
+            JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
             ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
             final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null, ServiceListings.emptyList(), configuration, reloader);
             services.put(DatabaseService.class, dbService);

@@ -73,6 +73,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -83,6 +84,7 @@ import org.apache.commons.cli.PosixParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.yaml.snakeyaml.Yaml;
 import com.mysql.jdbc.MySQLConnection;
 import com.openexchange.java.Streams;
 
@@ -118,6 +120,8 @@ public class Datamining {
     private static String configDBUser = "";
 
     private static String configDBPassword = "";
+
+    private static Properties jdbcProperties = null;
 
     private static boolean verbose = false;
 
@@ -375,17 +379,66 @@ public class Datamining {
             Properties configdbProperties = new Properties();
             in = new FileInputStream("/opt/open-xchange/etc/configdb.properties");
             configdbProperties.load(in);
-            configDBURL = configdbProperties.getProperty("readUrl");
+            in.close();
+            in = null;
 
+            configDBURL = configdbProperties.getProperty("readUrl");
             configDBUser = configdbProperties.getProperty("readProperty.1").substring(5);
             configDBPassword = configdbProperties.getProperty("readProperty.2").substring(9);
+
             if (configDBURL != null && configDBUser != null && configDBPassword != null) {
                 System.out.println("All necessary parameters were found in /opt/open-xchange/etc/configdb.properties");
             }
         } catch (FileNotFoundException e) {
             System.out.println("File /opt/open-xchange/etc/configdb.properties is not available");
         } catch (IOException e) {
-            System.out.println("File /opt/open-xchange/etc/configdb.properties is not available");
+            System.out.println("File /opt/open-xchange/etc/configdb.properties is not readable");
+        } finally {
+            if (null != in) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+
+        // Try to read dbconnector.yaml
+        in = null;
+        try {
+            // Set defaults:
+            Properties jdbcProps = new Properties();
+            jdbcProps.setProperty("useUnicode", "true");
+            jdbcProps.setProperty("characterEncoding", "UTF-8");
+            jdbcProps.setProperty("autoReconnect", "false");
+            jdbcProps.setProperty("useServerPrepStmts", "false");
+            jdbcProps.setProperty("useTimezone", "true");
+            jdbcProps.setProperty("serverTimezone", "UTC");
+            jdbcProps.setProperty("connectTimeout", "15000");
+            jdbcProps.setProperty("socketTimeout", "15000");
+            jdbcProps.setProperty("useSSL", "false");
+
+            in = new FileInputStream("/opt/open-xchange/etc/dbconnector.yaml");
+            Yaml yaml = new Yaml();
+            Object yamlObj = yaml.load(in);
+            in.close();
+            in = null;
+
+            if (Map.class.isInstance(yamlObj)) {
+                Map<String, Object> jdbcConfig = (Map<String, Object>) yamlObj;
+                Object obj = jdbcConfig.get("com.mysql.jdbc");
+                if (Map.class.isInstance(obj)) {
+                    Map<String, String> args = ((Map<String, Object>) obj).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+                    jdbcProps.putAll(args);
+                    System.out.println("JDBC properties were successfully read from /opt/open-xchange/etc/dbconnector.yaml");
+                }
+            }
+
+            jdbcProperties = jdbcProps;
+        } catch (FileNotFoundException e) {
+            System.out.println("File /opt/open-xchange/etc/dbconnector.yaml is not available");
+        } catch (IOException e) {
+            System.out.println("File /opt/open-xchange/etc/dbconnector.yaml is not readable");
         } finally {
             if (null != in) {
                 try {
@@ -431,17 +484,20 @@ public class Datamining {
 
             // load mysql driver
             Class.forName("com.mysql.jdbc.Driver");
+            DriverManager.setLoginTimeout(5);
 
             // connect
-            DriverManager.setLoginTimeout(5);
-            java.util.Properties defaults = new java.util.Properties();
-            if (user != null) {
-                defaults.put("user", user);
+            String urlToUse = url;
+            Properties defaults = jdbcProperties;
+            if (null == defaults) {
+                defaults = new Properties();
+                defaults.setProperty("useSSL", "false");
+            } else {
+                urlToUse = removeParametersFromJdbcUrl(urlToUse);
             }
-            if (password != null) {
-                defaults.put("password", password);
-            }
-            defaults.setProperty("useSSL", "false");
+            defaults.put("user", user);
+            defaults.put("password", password);
+
             Connection conn = DriverManager.getConnection(url, defaults);
             return (MySQLConnection) conn;
         } catch (ClassNotFoundException e) {
@@ -452,6 +508,21 @@ public class Datamining {
             System.exit(1);
         }
         return null;
+    }
+
+    /**
+     * Removes possible parameters appended to specified JDBC URL and returns it.
+     *
+     * @param url The URL to remove possible parameters from
+     * @return The parameter-less JDBC URL
+     */
+    private static String removeParametersFromJdbcUrl(String url) {
+        if (null == url) {
+            return url;
+        }
+
+        int paramStart = url.indexOf('?');
+        return paramStart >= 0 ? url.substring(0, paramStart) : url;
     }
 
     private static void setReportFilename() {
