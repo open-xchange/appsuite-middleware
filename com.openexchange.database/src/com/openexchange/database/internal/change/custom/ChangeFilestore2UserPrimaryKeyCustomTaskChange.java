@@ -291,31 +291,58 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
                 @Override
                 public void run() {
-                    int maxRunCount = 5;
-                    int runCount = 0;
-
-                    while (runCount < maxRunCount) {
-                        Connection con = null;
-                        PreparedStatement stmt = null;
-                        ResultSet rs = null;
+                    try {
                         try {
                             startLatch.await();
+                        } catch (InterruptedException e) {
+                            logger.info("Interrupted reading users' file storage association from database host {}", databaseHost, e);
+                            return;
+                        }
 
-                            con = getSimpleSQLConnectionFor(databaseHost.url, databaseHost.driver, databaseHost.login, databaseHost.password);
-                            NextSchema: for (Map.Entry<String, TIntObjectMap<TIntSet>> s2c : schema2Contexts.entrySet()) {
-                                if (Thread.interrupted()) {
-                                    throw new InterruptedException();
-                                }
+                        boolean keepOn = true;
+                        int maxRunCount = 5;
+                        int runCount = 0;
+                        while (keepOn && runCount < maxRunCount) {
+                            keepOn = false;
+                            Connection con = null;
+                            PreparedStatement stmt = null;
+                            ResultSet rs = null;
+                            try {
+                                con = getSimpleSQLConnectionFor(databaseHost.url, databaseHost.driver, databaseHost.login, databaseHost.password);
+                                NextSchema: for (Map.Entry<String, TIntObjectMap<TIntSet>> s2c : schema2Contexts.entrySet()) {
+                                    if (Thread.interrupted()) {
+                                        throw new InterruptedException();
+                                    }
 
-                                String schema = s2c.getKey();
-                                TIntObjectMap<TIntSet> context2users = s2c.getValue();
+                                    String schema = s2c.getKey();
+                                    TIntObjectMap<TIntSet> context2users = s2c.getValue();
 
-                                // Set schema
-                                try {
-                                    con.setCatalog(schema);
-                                } catch (SQLException e) {
-                                    // Such a schema does not exist. Add dummy entries to result map.
-                                    logger.info("No such schema \"{}\" exists on database host {}. Pruning affected entries from \"filestore2user\" table.", schema, databaseHost, e);
+                                    // Set schema
+                                    try {
+                                        con.setCatalog(schema);
+                                    } catch (SQLException e) {
+                                        // Such a schema does not exist. Add dummy entries to result map.
+                                        logger.info("No such schema \"{}\" exists on database host {}. Pruning affected entries from \"filestore2user\" table.", schema, databaseHost, e);
+                                        for (TIntObjectIterator<TIntSet> it = context2users.iterator(); it.hasNext();) {
+                                            if (Thread.interrupted()) {
+                                                throw new InterruptedException();
+                                            }
+
+                                            it.advance();
+                                            int contextId = it.key();
+                                            TIntSet userIds = it.value();
+                                            Integer zero = Integer.valueOf(0);
+                                            for (TIntIterator it2 = userIds.iterator(); it2.hasNext();) {
+                                                int userId = it2.next();
+                                                map.put(new UserAndContext(userId, contextId), zero);
+                                            }
+                                        }
+                                        continue NextSchema;
+                                    }
+
+                                    // Schema is valid
+                                    logger.info("Reading users' file storage association from \"{}\" database schema at host {}", schema, databaseHost);
+
                                     for (TIntObjectIterator<TIntSet> it = context2users.iterator(); it.hasNext();) {
                                         if (Thread.interrupted()) {
                                             throw new InterruptedException();
@@ -324,88 +351,72 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
                                         it.advance();
                                         int contextId = it.key();
                                         TIntSet userIds = it.value();
-                                        Integer zero = Integer.valueOf(0);
+
+                                        stmt = con.prepareStatement(Databases.getIN("SELECT id, filestore_id FROM user WHERE cid=? AND id IN (", userIds.size()));
+                                        int pos = 1;
+                                        stmt.setInt(pos++, contextId);
                                         for (TIntIterator it2 = userIds.iterator(); it2.hasNext();) {
                                             int userId = it2.next();
-                                            map.put(new UserAndContext(userId, contextId), zero);
+                                            stmt.setInt(pos++, userId);
+                                        }
+                                        rs = stmt.executeQuery();
+                                        while (rs.next()) {
+                                            map.put(new UserAndContext(rs.getInt(1), contextId), Integer.valueOf(rs.getInt(2)));
+                                        }
+                                        Databases.closeSQLStuff(rs, stmt);
+                                        rs = null;
+                                        stmt = null;
+                                    }
+                                }
+                                logger.info("Finished reading users' file storage association from database host {}", databaseHost);
+                            } catch (InterruptedException e) {
+                                logger.info("Interrupted reading users' file storage association from database host {}", databaseHost, e);
+                            } catch (SQLException sqle) {
+                                boolean doThrow = true;
+
+                                if (sqle instanceof SQLNonTransientConnectionException) {
+                                    SQLNonTransientConnectionException connectionException = (SQLNonTransientConnectionException) sqle;
+                                    if (isTooManyConnections(connectionException) && (++runCount < maxRunCount)) {
+                                        waitWithExponentialBackoff(runCount, 1000L);
+                                        doThrow = false;
+                                        keepOn = true;
+                                    }
+                                }
+
+                                if (doThrow) {
+                                    logger.info("Failed reading users' file storage association from database host {}", databaseHost, sqle);
+                                    // Interrupt remaining threads & set exception reference
+                                    for (Thread executer : executers.keySet()) {
+                                        if (executer != Thread.currentThread()) {
+                                            executer.interrupt();
                                         }
                                     }
-                                    continue NextSchema;
+                                    errorRef.set(sqle);
                                 }
-
-                                // Schema is valid
-                                logger.info("Reading users' file storage association from \"{}\" database schema at host {}", schema, databaseHost);
-
-                                for (TIntObjectIterator<TIntSet> it = context2users.iterator(); it.hasNext();) {
-                                    if (Thread.interrupted()) {
-                                        throw new InterruptedException();
-                                    }
-
-                                    it.advance();
-                                    int contextId = it.key();
-                                    TIntSet userIds = it.value();
-
-                                    stmt = con.prepareStatement(Databases.getIN("SELECT id, filestore_id FROM user WHERE cid=? AND id IN (", userIds.size()));
-                                    int pos = 1;
-                                    stmt.setInt(pos++, contextId);
-                                    for (TIntIterator it2 = userIds.iterator(); it2.hasNext();) {
-                                        int userId = it2.next();
-                                        stmt.setInt(pos++, userId);
-                                    }
-                                    rs = stmt.executeQuery();
-                                    while (rs.next()) {
-                                        map.put(new UserAndContext(rs.getInt(1), contextId), Integer.valueOf(rs.getInt(2)));
-                                    }
-                                    Databases.closeSQLStuff(rs, stmt);
-                                    rs = null;
-                                    stmt = null;
-                                }
-                            }
-                            logger.info("Finished reading users' file storage association from database host {}", databaseHost);
-                        } catch (InterruptedException e) {
-                            logger.info("Interrupted reading users' file storage association from database host {}", databaseHost, e);
-                        } catch (SQLException sqle) {
-                            boolean doThrow = true;
-
-                            if (sqle instanceof SQLNonTransientConnectionException) {
-                                SQLNonTransientConnectionException connectionException = (SQLNonTransientConnectionException) sqle;
-                                if (isTooManyConnections(connectionException) && (++runCount < maxRunCount)) {
-                                    waitWithExponentialBackoff(runCount, 1000L);
-                                    doThrow = false;
-                                }
-                            }
-
-                            if (doThrow) {
-                                logger.info("Failed reading users' file storage association from database host {}", databaseHost, sqle);
+                            } catch (Exception e) {
+                                logger.info("Failed reading users' file storage association from database host {}", databaseHost, e);
                                 // Interrupt remaining threads & set exception reference
                                 for (Thread executer : executers.keySet()) {
                                     if (executer != Thread.currentThread()) {
                                         executer.interrupt();
                                     }
                                 }
-                                errorRef.set(sqle);
-                            }
-                        } catch (Exception e) {
-                            logger.info("Failed reading users' file storage association from database host {}", databaseHost, e);
-                            // Interrupt remaining threads & set exception reference
-                            for (Thread executer : executers.keySet()) {
-                                if (executer != Thread.currentThread()) {
-                                    executer.interrupt();
+                                errorRef.set(e);
+                            } finally {
+                                Databases.closeSQLStuff(rs, stmt);
+                                if (null != con) {
+                                    try {
+                                        con.close();
+                                    } catch (Exception e) {
+                                        logger.warn("Failed to close connection to database host {}", databaseHost, e);
+                                    }
                                 }
                             }
-                            errorRef.set(e);
-                        } finally {
-                            Databases.closeSQLStuff(rs, stmt);
-                            if (null != con) {
-                                try {
-                                    con.close();
-                                } catch (Exception e) {
-                                    logger.warn("Failed to close connection to database host {}", databaseHost, e);
-                                }
-                            }
-                            completionLatch.countDown();
-                            executers.remove(Thread.currentThread());
-                        }
+                        } // End of while loop
+                        // Leave run() method...
+                    } finally {
+                        completionLatch.countDown();
+                        executers.remove(Thread.currentThread());
                     }
                 }
 
