@@ -72,6 +72,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 import com.openexchange.database.Databases;
+import com.openexchange.database.JdbcProperties;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.change.custom.CustomTaskRollback;
 import liquibase.database.Database;
@@ -760,12 +761,18 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             Class.forName(driver);
             DriverManager.setLoginTimeout(120);
 
-            Properties defaults = new Properties();
+            String urlToUse = url;
+            Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+            if (null == defaults) {
+                defaults = new Properties();
+                defaults.setProperty("useSSL", "false");
+            } else {
+                urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+            }
             defaults.put("user", login);
             defaults.put("password", passwd);
-            defaults.setProperty("useSSL", "false");
 
-            return DriverManager.getConnection(url, defaults);
+            return DriverManager.getConnection(urlToUse, defaults);
         } catch (ClassNotFoundException e) {
             throw new NoConnectionToDatabaseException("Database " + extractHostName(url) + " is not accessible: No such driver class: " + driver, e);
         } catch (SQLException e) {
