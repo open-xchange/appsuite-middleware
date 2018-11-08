@@ -51,14 +51,23 @@ package com.openexchange.serverconfig.impl;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -90,6 +99,15 @@ public class ServerConfigServiceImpl implements ServerConfigService {
     private final ServiceLookup serviceLookup;
     private final ServerConfigServicesLookup serverConfigServicesLookup;
 
+    private static final Cache<Key, List<Map<String, Object>>> CACHE_HOST_CONFIGS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Clears the cache.
+     */
+    public static void invalidateCache() {
+        CACHE_HOST_CONFIGS.invalidateAll();
+    }
+
     /**
      * Initializes a new {@link ServerConfigServiceImpl}.
      */
@@ -97,6 +115,89 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         super();
         this.serviceLookup = serviceLookup;
         this.serverConfigServicesLookup = serverConfigServicesLookup;
+    }
+
+    @Override
+    public List<Map<String, Object>> getCustomHostConfigurations(final String hostName, final int userID, final int contextID) throws OXException {
+        Key key = new Key(contextID, userID, hostName);
+        List<Map<String, Object>> cachedConfigs = CACHE_HOST_CONFIGS.getIfPresent(key);
+        if (null != cachedConfigs) {
+            return cachedConfigs;
+        }
+
+        Callable<List<Map<String, Object>>> loader = new Callable<List<Map<String,Object>>>() {
+
+            @Override
+            public List<Map<String, Object>> call() throws Exception {
+                return calculateCustomHostConfigurations(hostName, userID, contextID);
+            }
+        };
+
+        try {
+            return CACHE_HOST_CONFIGS.get(key, loader);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw new OXException(cause);
+        }
+    }
+
+    List<Map<String, Object>> calculateCustomHostConfigurations(String hostName, int userID, int contextID) throws OXException {
+        // Get configured brands/server configurations
+        ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
+        Map<String, Object> configurations = (Map<String, Object>) configService.getYaml("as-config.yml");
+        if (configurations == null) {
+            return Collections.emptyList();
+        }
+
+        LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String, Object>>();
+        for (Map.Entry<String, Object> configEntry : configurations.entrySet()) {
+            Object value = configEntry.getValue();
+            if (null == value) {
+                LOG.debug("Empty configuration \"{}\" is not applicable", configEntry.getKey());
+            } else {
+                if (value instanceof Map) {
+                    Map<String, Object> possibleConfiguration = (Map<String, Object>) value;
+                    if (looksApplicable(possibleConfiguration, hostName)) {
+                        // ensure that "all"-host-wildcards are applied first
+                        if ("all".equals(possibleConfiguration.get("host"))) {
+                            applicableConfigs.addFirst(ImmutableMap.copyOf(possibleConfiguration));
+                        } else {
+                            applicableConfigs.add(ImmutableMap.copyOf(possibleConfiguration));
+                        }
+                    } else {
+                        String configName = configEntry.getKey();
+                        LOG.debug("Configuration \"{}\" is not applicable: {}", configName, prettyPrint(configName, possibleConfiguration));
+                    }
+                } else {
+                    LOG.warn("Ignore invalid entry in '{}' file for key {}.", "as-config.yml", configEntry.getKey());
+                }
+            }
+        }
+
+        // Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the applicableConfigs.
+        Map<String, Object> ccValues = new HashMap<String, Object>();
+        ConfigViewFactory configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
+        ConfigView configView = configViewFactory.getView(userID, contextID);
+
+        Map<String, ComposedConfigProperty<String>> allProperties = configView.all();
+        for (Map.Entry<String, ComposedConfigProperty<String>> entry : allProperties.entrySet()) {
+            String propName = entry.getKey();
+            for (String prefix : prefixes) {
+                if (propName.startsWith(prefix)) {
+                    String value = entry.getValue().get();
+                    // Allow to keep value from global config if specified as "<as-config>"
+                    if (null != value && !value.equals("<as-config>")) {
+                        ccValues.put(propName.substring(prefix.length()), value);
+                    }
+                }
+            }
+        }
+        applicableConfigs.add(ImmutableMap.copyOf(ccValues));
+
+        return ImmutableList.copyOf(applicableConfigs);
     }
 
     @Override
@@ -374,6 +475,59 @@ public class ServerConfigServiceImpl implements ServerConfigService {
     @Override
     public ServerConfigServicesLookup getServerConfigServicesLookup() {
         return this.serverConfigServicesLookup;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
+    private static class Key {
+
+        private final int contextId;
+        private final int userId;
+        private final String hostName;
+        private final int hash;
+
+        Key(int contextId, int userId, String hostName) {
+            super();
+            this.contextId = contextId;
+            this.userId = userId;
+            this.hostName = hostName;
+            int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((hostName == null) ? 0 : hostName.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            Key other = (Key) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            if (hostName == null) {
+                if (other.hostName != null) {
+                    return false;
+                }
+            } else if (!hostName.equals(other.hostName)) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }

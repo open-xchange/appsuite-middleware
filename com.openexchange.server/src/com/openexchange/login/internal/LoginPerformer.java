@@ -68,8 +68,7 @@ import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.configuration.ServerProperty;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -363,7 +362,7 @@ public final class LoginPerformer {
         if (serverConfigService != null && Strings.isNotEmpty(host)) {
             List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
             for (Map<String, Object> map : customHostConfigurations) {
-                Object object = map.get(ServerProperty.migrationRedirectURL.getFQPropertyName());
+                Object object = map.get("com.openexchange.server.migrationRedirectURL");
                 if (object != null && object instanceof String) {
                     migrationRedirectURL = (String) object;
                     LOG.debug("Found the following migrationRedirectURL config for host {} in as-config.yml: {}", host, migrationRedirectURL);
@@ -372,9 +371,9 @@ public final class LoginPerformer {
             }
         }
         if (Strings.isEmpty(migrationRedirectURL)) {
-            LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
-            if (leanConfigService != null) {
-                migrationRedirectURL = leanConfigService.getProperty(ServerProperty.migrationRedirectURL);
+            ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (configService != null) {
+                migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
                 LOG.debug("Use the following migrationRedirectURL taken from server configuration: {}", migrationRedirectURL);
             }
         }
