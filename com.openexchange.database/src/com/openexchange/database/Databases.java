@@ -575,7 +575,7 @@ public final class Databases {
 
     /**
      * Checks whether the specified {@link Connection} is in a transaction mode.
-     * 
+     *
      * @param connection The {@link Connection}
      * @return <code>true</code> if the {@link Connection} is in a transaction mode; <code>false</code> otherwise
      * @throws SQLException In case any SQL error occurs
@@ -591,4 +591,15 @@ public final class Databases {
         }
         return false == connection.getAutoCommit();
     }
+
+    /**
+     * Removes possible parameters appended to specified JDBC URL and returns it.
+     *
+     * @param url The URL to remove possible parameters from
+     * @return The parameter-less JDBC URL
+     */
+    public static String removeParametersFromJdbcUrl(String url) {
+        return JdbcProperties.removeParametersFromJdbcUrl(url);
+    }
+
 }

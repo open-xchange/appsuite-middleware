@@ -140,7 +140,7 @@ public class SearchAdapter {
                 return getContactFieldTerm(queries, CompositeOperation.AND, SUMMARY_FIELDS);
             case "users":
                 return getContactUserIdTerm(queries, CompositeOperation.AND);
-            case "participant":
+            case "participants":
                 return getContactEMailTerm(queries, CompositeOperation.AND);
             case "location":
             case "description":

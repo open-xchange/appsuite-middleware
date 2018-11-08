@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.exception.OXException;
@@ -158,6 +159,7 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
             // Check if key store was modified or configuration was changed and we need to notify
             boolean keyStoreUpdate = loadKeyStores(configuration);
             if (keyStoreUpdate || false == this.configuration.equals(configuration)) {
+                JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
                 notify(keyStoreUpdate, configuration);
                 this.configuration = configuration;
             }
