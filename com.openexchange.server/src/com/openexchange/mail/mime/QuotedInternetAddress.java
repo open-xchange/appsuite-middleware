@@ -376,7 +376,12 @@ public final class QuotedInternetAddress extends InternetAddress {
             emailAddressParserAddresses = null;
         } else {
             // Possible comments. Parse with EmailAddressParser to maintain CFWS personal names (if any)
-            emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.DEFAULT, true);
+            try {
+                emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.DEFAULT, true);
+            } catch (Exception e) {
+                LOG.warn("Failed to parse address listing with EmailAddress RFC2822: {}", s, e);
+                emailAddressParserAddresses = null;
+            }
         }
 
         int start, end, index, nesting;
