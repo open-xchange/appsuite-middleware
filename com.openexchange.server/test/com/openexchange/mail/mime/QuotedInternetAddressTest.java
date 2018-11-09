@@ -68,6 +68,14 @@ public class QuotedInternetAddressTest extends TestCase {
         super();
     }
 
+    public void testBug61107() throws Exception {
+        // "oxwebgppri Dennis-Sieben"" <oxweb-cpte13-i-gp.ndev.tb2@orange.fr>
+        QuotedInternetAddress addr = new QuotedInternetAddress("\"oxwebgppri Jane Doe\\\"\" <oxweb@domain.tld>");
+        String personal = addr.getPersonal();
+        assertNotNull(personal);
+        assertEquals("oxwebgppri Jane Doe\"", personal);
+    }
+
     public void testBug55360_2() throws Exception {
         try {
             QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?b?c2VydmljZUBwYXlwYWwuY29tKFBheVBhbClgYGA=?==?utf-8?Q?=0A=00?=@pwnsdx.pw", false);
