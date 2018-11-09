@@ -7,7 +7,7 @@ properties:
     items:
       type: string
       description: The name of a file.
-  folders:
+  directories:
     type: array
     description: An array of folder names.
     items:

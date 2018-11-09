@@ -42,6 +42,7 @@ package com.sun.mail.gimap.protocol;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.nio.charset.StandardCharsets;
 import com.sun.mail.gimap.GmailFolder.FetchProfileItem;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -196,11 +197,12 @@ public class GmailProtocol extends IMAPProtocol {
 	handleResult(r[r.length-1]);
     }
 
+    // XXX - assume Gmail always supports UTF-8
     private Argument createLabelList(String[] labels) {
 	Argument args = new Argument();	
 	Argument itemArgs = new Argument();
 	for (int i = 0, len = labels.length; i < len; i++)
-	    itemArgs.writeAtom(labels[i]);
+	    itemArgs.writeString(labels[i], StandardCharsets.UTF_8);
 	args.writeArgument(itemArgs);
 	return args;
     }

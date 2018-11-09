@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -85,6 +86,8 @@ import com.openexchange.pgp.mail.tools.PGPMimeMailCreator;
  */
 public class PGPMimeServiceImpl implements PGPMimeService {
 
+    private static final List<String> headerBlacklist = Arrays.asList("Autocrypt-Gossip");  // Headers that shouldn't be visible plaintext
+
     /**
      * Internal method to create a proper PGP/MIME message
      *
@@ -112,7 +115,9 @@ public class PGPMimeServiceImpl implements PGPMimeService {
         Enumeration<Header> headers = mimeMessage.getAllHeaders();
         while (headers.hasMoreElements()) {
             Header h = headers.nextElement();
-            ret.put(h.getName(), h.getValue());
+            if(!headerBlacklist.contains(h.getName())) {
+                ret.put(h.getName(), h.getValue());
+            }
         }
         return ret;
     }
