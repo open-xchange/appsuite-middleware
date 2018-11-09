@@ -1237,7 +1237,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     @Override
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
-        String n = init(Strings.unquote(name), true);
+        String n = init(name, true);
         personal = n;
         if (n != null) {
             if (charset == null) {
