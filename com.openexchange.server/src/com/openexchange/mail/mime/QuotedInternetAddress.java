@@ -60,6 +60,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
+import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
+import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -347,9 +349,38 @@ public final class QuotedInternetAddress extends InternetAddress {
      * this is not perfect. XXX - Deal with encoded Headers too.
      */
     private static InternetAddress[] parse(String str, boolean strict, boolean parseHdr, boolean decodeFirst) throws AddressException {
+        String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
+
+        /*-
+         * Parse with EmailAddressParser if address listing appears to contain a (comment) since EmailAddressParser allows to extract CFWS
+         * personal names:
+         *
+         * Regarding the parameter extractCfwsPersonalNames:
+         * It allows the not-totally-kosher-but-happens-in-the-real-world practice of:
+         *
+         *   <bob@example.com> (Bob Smith)
+         *
+         * In this case, "Bob Smith" is not technically the personal name, just a comment. If this is included, the methods will convert
+         * this into: Bob Smith <bob@example.com>
+         *
+         * This also happens somewhat more often and appropriately with
+         *
+         *   mailer-daemon@blah.com (Mail Delivery System)
+         *
+         * If a personal name appears to the left and CFWS appears to the right of an address, the methods will favor the personal name to
+         * the left. If the methods need to use the CFWS following the address, they will take the first comment token they find.
+         */
+        InternetAddress[] emailAddressParserAddresses;
+        if (s.indexOf('(') < 0) {
+            // Apparently no comments
+            emailAddressParserAddresses = null;
+        } else {
+            // Possible comments. Parse with EmailAddressParser to maintain CFWS personal names (if any)
+            emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.DEFAULT, true);
+        }
+
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
-        String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
         boolean ignoreErrors = parseHdr && !strict;
 
         s = dropComments(s, ignoreErrors);
@@ -802,7 +833,35 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
 
-        return list.toArray(new InternetAddress[list.size()]);
+        // Inject CFWS personal names
+        InternetAddress[] parsedAddresses = list.toArray(new InternetAddress[list.size()]);
+        list = null;
+        if ((null != emailAddressParserAddresses) && (parsedAddresses.length == emailAddressParserAddresses.length)) {
+            String defaultMimeCharset = null;
+            for (int i = parsedAddresses.length; i-- > 0;) {
+                InternetAddress parsedAddress = parsedAddresses[i];
+                if (null == parsedAddress.getPersonal()) {
+                    String possiblePersonal = emailAddressParserAddresses[i].getPersonal();
+                    if (null != possiblePersonal) {
+                        try {
+                            possiblePersonal = dropComments(possiblePersonal, true).trim();
+                            if (possiblePersonal.indexOf("=?") >= 0) {
+                                possiblePersonal = MimeUtility.decodeText(possiblePersonal);
+                            }
+                            if (null == defaultMimeCharset) {
+                                defaultMimeCharset = MailProperties.getInstance().getDefaultMimeCharset();
+                            }
+                            parsedAddress.setPersonal(possiblePersonal, defaultMimeCharset);
+                        } catch (UnsupportedEncodingException e) {
+                            // Ignore
+                            LOG.debug("Unsupported encoding", e);
+                        }
+                    }
+                }
+            }
+        }
+
+        return parsedAddresses;
     }
 
     /**
@@ -1173,7 +1232,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     @Override
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
-        String n = init(name, true);
+        String n = init(Strings.unquote(name), true);
         personal = n;
         if (n != null) {
             if (charset == null) {
