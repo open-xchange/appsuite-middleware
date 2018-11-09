@@ -166,11 +166,15 @@ public class QuotedInternetAddressTest {
 
     @Test
     public void testBug61107() throws Exception {
-        // "oxwebgppri Dennis-Sieben"" <oxweb-cpte13-i-gp.ndev.tb2@orange.fr>
         QuotedInternetAddress addr = new QuotedInternetAddress("\"oxwebgppri Jane Doe\\\"\" <oxweb@domain.tld>");
         String personal = addr.getPersonal();
         assertNotNull(personal);
         assertEquals("oxwebgppri Jane Doe\"", personal);
+
+        addr = new QuotedInternetAddress("oxweb@domain.tld", "\"oxwebgppri Jane Doe\"\"", "UTF-8");
+        personal = addr.getPersonal();
+        assertNotNull(personal);
+        assertEquals("\"oxwebgppri Jane Doe\"\"", personal);
     }
 
     @Test
