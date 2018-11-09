@@ -86,7 +86,7 @@ public class CachingCalendarUtils {
                     caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, newLastUpdateTimestamp);
                 }
             } catch (JSONException e) {
-                LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
+                LOG.error("Unable to retrieve caching information for calendar account '{}' with provider '{}': {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
             }
         }
     }
@@ -102,7 +102,7 @@ public class CachingCalendarUtils {
         DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.FALSE);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         if (null == leanConfigurationService) {
-            LOG.warn("Unable to access configuration service, assuming {} for {}.", property.getDefaultValue(), property.getFQPropertyName());
+            LOG.warn("Unable to access configuration service, assuming '{}' for '{}'.", property.getDefaultValue(), property.getFQPropertyName());
             return property.getDefaultValue(Boolean.class).booleanValue();
         }
         return leanConfigurationService.getBooleanProperty(session.getUserId(), session.getContextId(), property);

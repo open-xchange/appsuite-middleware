@@ -126,7 +126,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString(SchedJoulesFields.DESCRIPTION, null)));
         if (CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
+            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(SchedJoulesFields.USED_FOR_SYNC, false)), false));
         } else {
             extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         }
@@ -182,6 +182,11 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
     }
 
+    @Override
+    public List<OXException> getWarnings() {
+        return null;
+    }
+
     ///////////////////////////////////// HELPERS /////////////////////////////////
 
     /**
@@ -230,11 +235,5 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(account.getAccountId(), session.getUserId(), session.getContextId());
         }
         return key;
-    }
-
-    @Override
-    public List<OXException> getWarnings() {
-        // TODO Auto-generated method stub
-        return null;
     }
 }
