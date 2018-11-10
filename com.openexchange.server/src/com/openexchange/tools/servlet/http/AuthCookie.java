@@ -76,4 +76,18 @@ public final class AuthCookie implements com.openexchange.authentication.Cookie 
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32).append('[');
+        if (name != null) {
+            builder.append("name=").append(name).append(", ");
+        }
+        if (value != null) {
+            builder.append("value=").append(value);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
 }
