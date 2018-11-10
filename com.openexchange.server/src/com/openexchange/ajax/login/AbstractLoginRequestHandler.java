@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
@@ -88,6 +89,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.Key;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -377,6 +379,18 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Set cookies
             if (null == cookiesSetter) {
+                // Check for existent secret cookie if auto-login is disabled
+                if (false == conf.isSessiondAutoLogin()) {
+                    Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+                    String expectedSecretCookieName = LoginServlet.SECRET_PREFIX + session.getHash();
+                    Cookie cookie = cookies.get(expectedSecretCookieName);
+                    if (null != cookie && !session.getSecret().equals(cookie.getValue())) {
+                        // The same client already initiated a session, but performed another login. Drop the old session.
+                        SessionUtility.removeSessionBySecret(cookie.getValue(), session.getUserId(), session.getContextId());
+                    }
+                }
+
+                // Create/re-write secret cookie
                 LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             } else {
                 cookiesSetter.setLoginCookies(session, req, resp, conf);
