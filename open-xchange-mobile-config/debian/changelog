@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.10.0-20) stable; urgency=medium
+
+  * Build for patch 2018-11-19 (4966)
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 12 Nov 2018 15:02:28 +0100
+
 open-xchange-mobile-config (7.10.0-19) stable; urgency=medium
 
   * Build for patch 2018-11-05 (4933)

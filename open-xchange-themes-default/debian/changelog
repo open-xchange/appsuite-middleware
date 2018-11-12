@@ -1,3 +1,9 @@
+open-xchange-themes-default (7.10.0-20) stable; urgency=medium
+
+  * Build for patch 2018-11-19 (4966)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 12 Nov 2018 15:03:31 +0100
+
 open-xchange-themes-default (7.10.0-19) stable; urgency=medium
 
   * Build for patch 2018-11-05 (4933)
