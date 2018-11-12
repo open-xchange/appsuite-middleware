@@ -54,7 +54,6 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +65,6 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
@@ -114,16 +112,14 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
     @Override
     public CalendarSettings getSettings() {
         JSONObject internalConfig = account.getInternalConfiguration();
+
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
-        if (CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
-        } else {
-            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        }
+        extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
         extendedProperties.add(LAST_UPDATE(optLastUpdate()));
+
         CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
