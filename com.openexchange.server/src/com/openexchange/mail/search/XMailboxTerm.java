@@ -49,98 +49,98 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+import javax.mail.FetchProfile;
+import javax.mail.Message;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
+import com.sun.mail.imap.IMAPMessage;
 
 /**
- * {@link AbstractSearchTermVisitor}
+ * {@link XMailboxTerm}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
+public final class XMailboxTerm extends SearchTerm<String> {
+
+    private static final long serialVersionUID = -167353933722555256L;
+
+    private final String xMailboxValue;
 
     /**
-     * Initializes a new {@link AbstractSearchTermVisitor}.
+     * Initializes a new {@link XMailboxTerm}
      */
-    protected AbstractSearchTermVisitor() {
+    public XMailboxTerm(final String xMailboxValue) {
         super();
+        this.xMailboxValue = xMailboxValue;
     }
 
     @Override
-    public void visit(final ANDTerm term) {
-        // Nothing to do
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    /**
+     * Gets the header pattern: An array of {@link String} with length <code>2</code> with header name and header name-
+     *
+     * @return The header pattern
+     */
+    @Override
+    public String getPattern() {
+        return xMailboxValue;
     }
 
     @Override
-    public void visit(final BccTerm term) {
-        // Nothing to do
+    public void addMailField(final Collection<MailField> col) {
+        col.add(MailField.ORIGINAL_FOLDER_ID);
     }
 
     @Override
-    public void visit(final BodyTerm term) {
-        // Nothing to do
+    public boolean matches(final MailMessage mailMessage) {
+        // TODO: Requires support for 'com.openexchange.mail.dataobjects.MailMessage.getOriginalFolder()'
+        return true;
     }
 
     @Override
-    public void visit(final BooleanTerm term) {
-        // Nothing to do
+    public boolean matches(final Message msg) throws OXException {
+        try {
+            if (!(msg instanceof IMAPMessage)) {
+                return false;
+            }
+
+            String xMailbox = (String) ((IMAPMessage) msg).getItem("X-MAILBOX");
+            return null != xMailbox && xMailbox.regionMatches(true, 0, this.xMailboxValue, 0, this.xMailboxValue.length());
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(XMailboxTerm.class).warn("Error during search.", e);
+            return false;
+        }
     }
 
     @Override
-    public void visit(final CcTerm term) {
-        // Nothing to do
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        return new javax.mail.search.XMailboxTerm(xMailboxValue);
     }
 
     @Override
-    public void visit(final FlagTerm term) {
-        // Nothing to do
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        return new javax.mail.search.XMailboxTerm(getNonWildcardPart(xMailboxValue));
+    }
+
+
+    @Override
+    public boolean isAscii() {
+        return isAscii(xMailboxValue);
     }
 
     @Override
-    public void visit(final FromTerm term) {
-        // Nothing to do
+    public boolean containsWildcard() {
+        return null == xMailboxValue ? false :xMailboxValue.indexOf('*') >= 0 || xMailboxValue.indexOf('?') >= 0;
     }
 
     @Override
-    public void visit(final HeaderTerm term) {
-        // Nothing to do
+    public void contributeTo(FetchProfile fetchProfile) {
     }
 
-    @Override
-    public void visit(final NOTTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final ORTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final ReceivedDateTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final SentDateTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final SizeTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final SubjectTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final ToTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final XMailboxTerm term) {
-        // Nothing to do
-    }
 }
