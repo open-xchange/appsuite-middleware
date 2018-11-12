@@ -376,7 +376,12 @@ public final class QuotedInternetAddress extends InternetAddress {
             emailAddressParserAddresses = null;
         } else {
             // Possible comments. Parse with EmailAddressParser to maintain CFWS personal names (if any)
-            emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.DEFAULT, true);
+            try {
+                emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.DEFAULT, true);
+            } catch (Exception e) {
+                LOG.warn("Failed to parse address listing with EmailAddress RFC2822: {}", s, e);
+                emailAddressParserAddresses = null;
+            }
         }
 
         int start, end, index, nesting;
@@ -1232,7 +1237,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     @Override
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
-        String n = init(Strings.unquote(name), true);
+        String n = init(name, true);
         personal = n;
         if (n != null) {
             if (charset == null) {
