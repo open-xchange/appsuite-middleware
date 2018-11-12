@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -165,10 +166,27 @@ public abstract class BasicAlarmAwareCachingCalendarAccess extends BasicCachingC
         getAlarmHelper().insertDefaultAlarms(externalEvents);
     }
 
+    private static final Set<EventField> ALARM_CHANGE = new HashSet<>();
+
+    static {
+        ALARM_CHANGE.add(EventField.START_DATE);
+        ALARM_CHANGE.add(EventField.END_DATE);
+        ALARM_CHANGE.add(EventField.RECURRENCE_RULE);
+        ALARM_CHANGE.add(EventField.RECURRENCE_DATES);
+        ALARM_CHANGE.add(EventField.CHANGE_EXCEPTION_DATES);
+        ALARM_CHANGE.add(EventField.DELETE_EXCEPTION_DATES);
+    }
+
     @Override
     protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate) throws OXException {
-        super.update(calendarStorage, eventUpdate);
-        // TODO handle event updates
+        super.update(calendarStorage, eventUpdate, false);
+        if (!Collections.disjoint(eventUpdate.getUpdatedFields(), ALARM_CHANGE)) {
+            Event update = eventUpdate.getUpdate();
+            if (update.getId() == null) {
+                update.setId(eventUpdate.getOriginal().getId());
+            }
+            getAlarmHelper().updateAlarmTriggers(update);
+        }
     }
 
     public void onAccountUpdated() throws OXException {

@@ -536,6 +536,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate) throws OXException {
+        update(calendarStorage, eventUpdate, true);
+    }
+
+    protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate, boolean updateAlarms) throws OXException {
         Event persistedEvent = eventUpdate.getOriginal();
         Event updatedEvent = eventUpdate.getUpdate();
         /*
@@ -552,9 +556,11 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             updateAttendees(calendarStorage, deltaEvent.getId(), attendeeUpdates);
         }
 
-        CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
-        if (!alarmUpdates.isEmpty()) {
-            updateAlarms(calendarStorage, deltaEvent, alarmUpdates);
+        if (updateAlarms) {
+            CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
+            if (!alarmUpdates.isEmpty()) {
+                updateAlarms(calendarStorage, deltaEvent, alarmUpdates);
+            }
         }
     }
 
