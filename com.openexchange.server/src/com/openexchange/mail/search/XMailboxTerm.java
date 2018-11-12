@@ -55,7 +55,6 @@ import javax.mail.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.imap.IMAPMessage;
 
 /**
@@ -94,12 +93,12 @@ public final class XMailboxTerm extends SearchTerm<String> {
 
     @Override
     public void addMailField(final Collection<MailField> col) {
-        col.add(MailField.ORIGINAL_FOLDER_ID);
+        // Nothing to do
     }
 
     @Override
     public boolean matches(final MailMessage mailMessage) {
-        // TODO: Requires support for 'com.openexchange.mail.dataobjects.MailMessage.getOriginalFolder()'
+        // Requires support for 'com.openexchange.mail.dataobjects.MailMessage.getOriginalFolder()'
         return true;
     }
 

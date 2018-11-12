@@ -88,6 +88,7 @@ import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
+import com.openexchange.mail.search.XMailboxTerm;
 
 /**
  * {@link CustomLuceneTranslator}
@@ -232,6 +233,11 @@ public class CustomLuceneTranslator implements QueryTranslator {
         @Override
         public void visit(BodyTerm term) {
             constructQuery(MailIndexField.CONTENT, term);
+        }
+
+        @Override
+        public void visit(XMailboxTerm term) {
+            // Nothing to do
         }
 
         @Override

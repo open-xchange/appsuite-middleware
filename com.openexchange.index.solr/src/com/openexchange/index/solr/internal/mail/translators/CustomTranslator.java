@@ -78,10 +78,11 @@ import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
+import com.openexchange.mail.search.XMailboxTerm;
 
 /**
  * {@link CustomTranslator}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CustomTranslator implements QueryTranslator {
@@ -211,6 +212,11 @@ public class CustomTranslator implements QueryTranslator {
         @Override
         public void visit(BodyTerm term) {
             appendStringTerm(MailIndexField.CONTENT, term);
+        }
+
+        @Override
+        public void visit(XMailboxTerm term) {
+            // Nothing to do
         }
 
         @Override
@@ -372,18 +378,18 @@ public class CustomTranslator implements QueryTranslator {
             if (orig == null) {
                 return;
             }
-            
+
             orig = orig.trim();
             boolean isPhrase = false;
             if (orig.length() > 1 && orig.startsWith("\"") && orig.endsWith("\"")) {
                 orig = orig.substring(1, orig.length() - 1);
                 isPhrase = true;
             }
-            
+
             if (orig.length() == 0) {
                 return;
             }
-            
+
             String pattern = LuceneQueryTools.escapeButWildcards(orig);
             Iterator<String> it = solrFields.iterator();
             queryBuilder.append('(');
