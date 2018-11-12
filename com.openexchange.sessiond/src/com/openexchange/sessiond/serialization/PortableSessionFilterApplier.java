@@ -77,7 +77,7 @@ public class PortableSessionFilterApplier extends AbstractCustomPortable impleme
         private static final Map<Integer, Action> actionsByID = new TreeMap<Integer, Action>();
         static {
             for (Action action : Action.values()) {
-                actionsByID.put(action.getID(), action);
+                actionsByID.put(Integer.valueOf(action.getID()), action);
             }
         }
 
@@ -87,12 +87,12 @@ public class PortableSessionFilterApplier extends AbstractCustomPortable impleme
             this.id = id;
         }
 
-        private int getID() {
+        int getID() {
             return id;
         }
 
-        private static Action byID(int id) {
-            return actionsByID.get(id);
+        static Action byID(int id) {
+            return id < 0 ? null : actionsByID.get(Integer.valueOf(id));
         }
     }
 
