@@ -583,7 +583,7 @@ public class AdminCache {
             defaults.put("password", password);
         }
 
-        return DriverManager.getConnection(url, defaults);
+        return DriverManager.getConnection(urlToUse, defaults);
     }
 
     private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
