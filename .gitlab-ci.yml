@@ -35,6 +35,7 @@ build documentation:
     - develop
     - master
     - /^master-.*$/
+    - /^release-.*$/
 
 deploy documentation:
   stage: deploy
