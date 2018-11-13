@@ -69,6 +69,7 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
@@ -197,18 +198,26 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 subscriptionStorage.forgetSubscription(sub);
 
                 // Unsubscribe old folder for all users with permissions
-
-                UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
-                Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
-                int folderId = Integer.valueOf(sub.getFolderId());
-                for (Integer user : userFromPermissions) {
-                    String folderProperty = storage.getFolderProperty(ctxId, folderId, user, "cal/subscribed");
-                    if (folderProperty == null) {
-                        storage.insertFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
-                    } else if (Boolean.valueOf(folderProperty) == true) {
-                        storage.updateFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                try {
+                    UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
+                    Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
+                    int folderId = Integer.valueOf(sub.getFolderId());
+                    for (Integer user : userFromPermissions) {
+                        String folderProperty = storage.getFolderProperty(ctxId, folderId, user, "cal/subscribed");
+                        if (folderProperty == null) {
+                            storage.insertFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                        } else if (Boolean.valueOf(folderProperty) == true) {
+                            storage.updateFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                        }
                     }
+                } catch (OXException e) {
+                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                        // Ignore not visible subscriptions
+                        continue;
+                    }
+                    throw e;
                 }
+
             }
         }
     }
