@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
 Bundle-Version: 7.10.2
-Bundle-Activator: com.openexchange.admin.osgi.MainActivator
+Bundle-Activator: com.openexchange.admin.plugin.hosting.osgi.MainActivator
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
@@ -62,10 +62,10 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.admin.rmi.impl,
- com.openexchange.admin.schemamove,
- com.openexchange.admin.schemamove.mbean,
- com.openexchange.admin.storage.interfaces
+Export-Package: com.openexchange.admin.plugin.hosting.rmi.impl,
+ com.openexchange.admin.plugin.hosting.schemamove,
+ com.openexchange.admin.plugin.hosting.schemamove.mbean,
+ com.openexchange.admin.plugin.hosting.storage.interfaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Require-Bundle: com.openexchange.admin

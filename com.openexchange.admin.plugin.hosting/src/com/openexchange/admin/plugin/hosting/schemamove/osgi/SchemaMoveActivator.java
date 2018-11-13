@@ -47,25 +47,54 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.schemamove.osgi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.admin.daemons.AdminDaemonService;
+import com.openexchange.admin.plugin.hosting.schemamove.SchemaMoveService;
+import com.openexchange.admin.plugin.hosting.schemamove.internal.SchemaMoveImpl;
+import com.openexchange.admin.plugin.hosting.schemamove.internal.SchemaMoveRemoteImpl;
+import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link SchemaMoveActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class SchemaMoveActivator extends HousekeepingActivator {
 
-    public UnitTests() {
+    /**
+     * Initializes a new {@link SchemaMoveActivator}.
+     */
+    public SchemaMoveActivator() {
+        super();
     }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{ ConfigurationService.class, AdminDaemonService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        Logger logger = LoggerFactory.getLogger(SchemaMoveActivator.class);
+
+        SchemaMoveImpl schemaMoveImpl = new SchemaMoveImpl();
+        registerService(SchemaMoveService.class, schemaMoveImpl);
+
+        // Register RMI
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", SchemaMoveRemote.RMI_NAME);
+        registerService(Remote.class, new SchemaMoveRemoteImpl(this.context, schemaMoveImpl), serviceProperties);
+
+        logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
+    }
+
 }

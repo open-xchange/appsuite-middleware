@@ -49,23 +49,56 @@
 
 package com.openexchange.admin.plugin.hosting;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.admin.plugin.hosting.rmi.impl.OXContextGroup;
+import com.openexchange.admin.rmi.OXContextGroupInterface;
 
-/**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
- */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class PluginStarter {
 
-    public UnitTests() {
+    private BundleContext context;
+    private final List<ServiceRegistration<Remote>> services = new LinkedList<ServiceRegistration<Remote>>();
+
+    /**
+     * Initializes a new {@link PluginStarter}.
+     */
+    public PluginStarter() {
+        super();
     }
+
+    public void start(BundleContext context) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
+        try {
+            this.context = context;
+
+            // Create all OLD Objects and bind export them
+            com.openexchange.admin.plugin.hosting.rmi.impl.OXContext oxctx_v2 = new com.openexchange.admin.plugin.hosting.rmi.impl.OXContext(context);
+
+            // bind all NEW Objects to registry
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxctx_v2, properties));
+            
+            // Register RMI interface for ContextGroup
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", OXContextGroupInterface.RMI_NAME);
+            OXContextGroupInterface oxContextGroup = new OXContextGroup();
+            services.add(context.registerService(Remote.class, oxContextGroup, properties));
+        } catch (Exception e) {
+            logger.error("Error while creating one instance for RMI interface", e);
+            throw e;
+        }
+    }
+
+    public void stop() {
+        for (ServiceRegistration<Remote> registration : services) {
+            context.ungetService(registration.getReference());
+        }
+    }
+
 }

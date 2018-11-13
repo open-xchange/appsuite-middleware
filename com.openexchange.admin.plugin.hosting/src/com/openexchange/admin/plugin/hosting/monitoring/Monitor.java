@@ -47,25 +47,63 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.monitoring;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ *
+ * @author cutmasta
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public final class Monitor extends StandardMBean implements MonitorMBean {
 
-    public UnitTests() {
+    private final AtomicLong createResourceCalls = new AtomicLong(0);
+
+    private final AtomicLong createContextCalls = new AtomicLong(0);
+
+    private final AtomicLong createUserCalls = new AtomicLong(0);
+
+    private final AtomicLong createGroupCalls = new AtomicLong(0);
+
+    public Monitor() throws NotCompliantMBeanException {
+        super(MonitorMBean.class);
+    }
+
+    public void incrementNumberOfCreateResourceCalled() {
+        createResourceCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateContextCalled() {
+        createContextCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateUserCalled() {
+        createUserCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateGroupCalled() {
+        createGroupCalls.incrementAndGet();
+    }
+
+    @Override
+    public long getNumberOfCreateResourceCalled() {
+        return createResourceCalls.get();
+    }
+
+    @Override
+    public long getNumberOfCreateContextCalled() {
+        return createContextCalls.get();
+    }
+
+    @Override
+    public long getNumberOfCreateUserCalled() {
+        return createUserCalls.get();
+    }
+
+    @Override
+    public long getNumberOfCreateGroupCalled() {
+        return createGroupCalls.get();
     }
 }

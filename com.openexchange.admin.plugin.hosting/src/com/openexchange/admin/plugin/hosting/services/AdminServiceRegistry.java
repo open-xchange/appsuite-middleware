@@ -47,25 +47,24 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.services;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link AdminServiceRegistry} - A registry for services for <i>com.openexchange.admin.plugin.hosting</i> bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public final class AdminServiceRegistry extends AbstractServiceRegistry {
 
-    public UnitTests() {
+    private static final AdminServiceRegistry REGISTRY = new AdminServiceRegistry();
+
+    public static AdminServiceRegistry getInstance() {
+        return REGISTRY;
+    }
+
+    private AdminServiceRegistry() {
+        super();
     }
 }

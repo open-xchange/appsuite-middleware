@@ -139,7 +139,7 @@ public class FilestoreManager extends AbstractManager {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
+     * @see com.openexchange.admin.plugin.hosting.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
     void clean(Object object) throws Exception {

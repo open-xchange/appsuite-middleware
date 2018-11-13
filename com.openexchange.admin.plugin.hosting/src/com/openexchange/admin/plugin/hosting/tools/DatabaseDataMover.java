@@ -47,25 +47,50 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+package com.openexchange.admin.plugin.hosting.tools;
 
-/**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
- */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+import java.util.concurrent.Callable;
+import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
-    public UnitTests() {
+public class DatabaseDataMover implements Callable<Void> {
+
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatabaseDataMover.class);
+
+    private Context ctx = null;
+
+    private Database db = null;
+
+    private MaintenanceReason reason_id = null;
+
+    /**
+     *
+     */
+    public DatabaseDataMover(final Context ctx, final Database db, final MaintenanceReason reason) {
+        this.ctx = ctx;
+        this.db = db;
+        this.reason_id = reason;
     }
+
+    @Override
+    public Void call() throws StorageException {
+        try {
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.moveDatabaseContext(ctx, db, reason_id);
+        } catch (final StorageException e) {
+            log.error("", e);
+            // Because the client side only knows of the exceptions defined in the core we have
+            // to throw the trace as string
+            throw new StorageException(e.toString());
+        } catch (final RuntimeException e) {
+            log.error("", e);
+            throw e;
+        }
+        return null;
+    }
+
 }

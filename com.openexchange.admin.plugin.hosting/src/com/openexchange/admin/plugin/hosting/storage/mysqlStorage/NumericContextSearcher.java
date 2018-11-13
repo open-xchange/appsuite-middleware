@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,25 +47,27 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.storage.mysqlStorage;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import com.openexchange.admin.tools.AdminCacheExtended;
+
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link NumericContextSearcher}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class NumericContextSearcher extends ContextSearcher {
 
-    public UnitTests() {
+    /**
+     * Initializes a new {@link NumericContextSearcher}.
+     *
+     * @param cache The cache reference used to acquire/release a connection
+     * @param contextId The context identifier to look-for
+     */
+    public NumericContextSearcher(AdminCacheExtended cache, int contextId) {
+        super(cache, "SELECT cid FROM context WHERE cid = " + contextId, null);
     }
+
 }

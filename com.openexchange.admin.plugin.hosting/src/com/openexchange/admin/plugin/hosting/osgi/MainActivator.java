@@ -47,25 +47,32 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.osgi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
+
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link MainActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class MainActivator extends CompositeBundleActivator {
 
-    public UnitTests() {
+    /**
+     * Initializes a new {@link MainActivator}.
+     */
+    public MainActivator() {
+        super();
     }
+
+    @Override
+    protected BundleActivator[] getActivators() {
+        return new BundleActivator[] {
+            new com.openexchange.admin.plugin.hosting.osgi.PluginHostingActivator(),
+            new com.openexchange.admin.plugin.hosting.schemamove.osgi.SchemaMoveActivator(),
+        };
+    }
+
 }

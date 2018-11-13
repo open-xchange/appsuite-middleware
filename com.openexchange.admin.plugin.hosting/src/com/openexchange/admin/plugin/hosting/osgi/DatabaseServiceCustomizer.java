@@ -47,25 +47,51 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.osgi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.database.DatabaseService;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link DatabaseServiceCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    public UnitTests() {
+    private final BundleContext context;
+    private final OXAdminPoolInterface pool;
+
+    public DatabaseServiceCustomizer(BundleContext context, OXAdminPoolInterface pool) {
+        super();
+        this.context = context;
+        this.pool = pool;
+    }
+
+    @Override
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        DatabaseService service = context.getService(reference);
+        if (service != null) {
+            pool.setService(service);
+            AdminServiceRegistry.getInstance().addService(DatabaseService.class, service);
+        }
+
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        pool.removeService();
+        AdminServiceRegistry.getInstance().removeService(DatabaseService.class);
+        context.ungetService(reference);
     }
 }

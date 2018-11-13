@@ -47,25 +47,36 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.tools.database;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ *
+ * @author cutmasta
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class TableRowObject {
 
-    public UnitTests() {
+    private Hashtable<String, TableColumnObject> columns = null;
+
+    /**
+     * Creates a new instance of TableRowObject
+     */
+    public TableRowObject() {
+        columns = new Hashtable<String, TableColumnObject>();
     }
+
+    public void setColumn(TableColumnObject tc){
+        columns.put(tc.getName(),tc);
+    }
+
+    public TableColumnObject getColumn(String name){
+        return columns.get(name);
+    }
+
+    public Enumeration<String> getColumnNames(){
+        return this.columns.keys();
+    }
+
 }

@@ -47,25 +47,23 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+package com.openexchange.admin.plugin.hosting.monitoring;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
+ * Defines the attributes to be monitored.
  * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * @author cutmasta
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public interface MonitorMBean {
 
-    public UnitTests() {
-    }
+    public static final String MBEAN_NAME = "CallMonitor";
+    public static final String MBEAN_DOMAIN = "com.openexchange.admin.monitor";
+
+    long getNumberOfCreateResourceCalled();
+
+    long getNumberOfCreateContextCalled();
+
+    long getNumberOfCreateUserCalled();
+
+    long getNumberOfCreateGroupCalled();
 }

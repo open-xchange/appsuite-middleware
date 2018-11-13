@@ -7,12 +7,12 @@ Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.admin.user.copy.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.admin.daemons,
- com.openexchange.admin.rmi.dataobjects,
- com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces,
- com.openexchange.admin.storage.utils,
  com.openexchange.admin.tools,
+ com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.storage.utils,
  com.openexchange.admin.user.copy.rmi,
  com.openexchange.config,
  com.openexchange.exception,

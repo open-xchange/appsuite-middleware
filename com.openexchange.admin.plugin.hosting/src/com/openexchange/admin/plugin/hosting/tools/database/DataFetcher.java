@@ -47,25 +47,61 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+/*
+ * DataFetcher.java
+ */
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+package com.openexchange.admin.plugin.hosting.tools.database;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ *
+ * @author cutmasta
+ *
+ * Should retrieve all data which is related to an context.
+ *
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public interface DataFetcher {
 
-    public UnitTests() {
-    }
+     public String getCatalogName();
+
+     public Connection getDbConnection();
+
+     public void setDbConnection(Connection dbConnection,String catalog_name) throws SQLException;
+
+     public String getMatchingColumn();
+
+     /**
+     * Set the column which should be matched
+     */
+     public void setMatchingColumn(String column_name);
+
+     public int getColumnMatchType();
+
+     public Object getColumnMatchObject();
+
+     // fetches data for a table object
+     public TableObject getDataForTable(TableObject to) throws SQLException;
+
+     /**
+     * Sets the criteria match object and its correspoding type.<br>
+     * For example to match an integer:<br>
+     * setCriteriaMatchObject(1337,java.sql.Types.INTEGER)
+     */
+     public void setColumnMatchObject(Object match_obj,int match_type);
+
+     /**
+     * Returns an unsorted list of tables with their data.<br>
+     * Perhaps tables must be sorted cause of contraints etc.
+     */
+    public List<TableObject> fetchTableObjects() throws SQLException;
+
+    /**
+     * Returns an sorted list of tables with their data.<br>
+     * Needed for contraints and primarys etc.
+     */
+    public List<TableObject> sortTableObjects() throws SQLException;
 }

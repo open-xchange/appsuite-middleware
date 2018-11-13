@@ -47,25 +47,24 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.storage.interfaces;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.exception.OXException;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link OXContextGroupStorageInterface}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public interface OXContextGroupStorageInterface {
 
-    public UnitTests() {
-    }
+    /**
+     * Deletes all data from the globaldb that is associated to the specified context group.
+     * 
+     * @param contextGroupId The context group identifier
+     * @throws StorageException If an error occurs
+     * @throws OXException
+     */
+    void deleteContextGroup(String contextGroupId) throws StorageException, OXException;
 }

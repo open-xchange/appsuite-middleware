@@ -47,25 +47,46 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.osgi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.plugin.hosting.services.I18nServices;
+import com.openexchange.i18n.I18nService;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * Adds a found {@link I18nService} to the registry for the services.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
 
-    public UnitTests() {
+    private final BundleContext context;
+
+    public I18nServiceCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    @Override
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService i18n = context.getService(reference);
+        I18nServices.getInstance().addService(i18n);
+        return i18n;
+    }
+
+    @Override
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
+        try {
+            I18nServices.getInstance().removeService(service);
+        } finally {
+            context.ungetService(reference);
+        }
     }
 }

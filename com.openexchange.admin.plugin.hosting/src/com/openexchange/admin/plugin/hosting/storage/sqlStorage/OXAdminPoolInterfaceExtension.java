@@ -47,25 +47,30 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.storage.sqlStorage;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.sql.Connection;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ *
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public interface OXAdminPoolInterfaceExtension extends OXAdminPoolInterface {
 
-    public UnitTests() {
-    }
+    /*
+     * SPECIAL METHODS FOR CONTEXT MOVING
+     */
+
+    int getDBPoolIdForContextId(int context_id) throws PoolException;
+
+    Connection getWRITEConnectionForPoolId(int db_pool_id, String db_schema) throws PoolException;
+
+    void pushWRITEConnectionForPoolId(int db_pool_id, Connection con) throws PoolException;
+
+    String getSchemeForContextId(int context_id) throws PoolException;
+
+    Connection getWRITENoTimeoutConnectionForPoolId(int db_pool_id, String schema_name) throws PoolException;
+
+    void pushWRITENoTimeoutConnectionForPoolId(int db_pool_id, Connection conny) throws PoolException;
 }

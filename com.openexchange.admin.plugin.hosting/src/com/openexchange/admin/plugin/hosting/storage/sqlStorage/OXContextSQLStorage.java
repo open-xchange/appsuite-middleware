@@ -47,25 +47,18 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.storage.sqlStorage;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * This class implements the global storage interface and creates a layer
+ * between the abstract storage definition and a storage in a SQL accessible
+ * database
+ *
+ * @author d7
+ *
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public abstract class OXContextSQLStorage extends OXContextStorageInterface {
 
-    public UnitTests() {
-    }
 }

@@ -47,25 +47,42 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.rmi.impl;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.rmi.RemoteException;
+import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
+import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface;
+import com.openexchange.admin.rmi.OXContextGroupInterface;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.exception.OXException;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * {@link OXContextGroup}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class OXContextGroup implements OXContextGroupInterface {
 
-    public UnitTests() {
+    /**
+     * Initializes a new {@link OXContextGroup}.
+     */
+    public OXContextGroup() {
+        super();
     }
+
+    @Override
+    public void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException {
+        OXContextGroupStorageInterface storage = AdminServiceRegistry.getInstance().getService(OXContextGroupStorageInterface.class);
+
+        if (contextGroupId == null) {
+            throw new IllegalArgumentException("The contextGroupId is null");
+        }
+
+        try {
+            storage.deleteContextGroup(contextGroupId);
+        } catch (OXException e) {
+            throw StorageException.wrapForRMI(e);
+        }
+    }
+
 }

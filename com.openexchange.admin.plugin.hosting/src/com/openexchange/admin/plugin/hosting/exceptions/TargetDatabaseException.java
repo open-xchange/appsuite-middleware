@@ -47,25 +47,18 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+package com.openexchange.admin.plugin.hosting.exceptions;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ *
+ * @author cutmasta
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class TargetDatabaseException extends Exception{
 
-    public UnitTests() {
+    private static final long serialVersionUID = 1802295063505771453L;
+
+    public TargetDatabaseException(String s) {
+        super( s );
     }
+
 }

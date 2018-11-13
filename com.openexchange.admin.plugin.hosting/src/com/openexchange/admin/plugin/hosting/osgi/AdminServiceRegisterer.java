@@ -47,25 +47,48 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.osgi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * Puts a found services into the {@link AdminServiceRegistry}.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+final class AdminServiceRegisterer<S> implements ServiceTrackerCustomizer<S,S> {
 
-    public UnitTests() {
+    private final Class<S> clazz;
+    private final BundleContext context;
+
+    /**
+     * Initializes a new {@link AdminServiceRegisterer}.
+     * @param context
+     */
+    public AdminServiceRegisterer(Class<S> clazz, BundleContext context) {
+        super();
+        this.clazz = clazz;
+        this.context = context;
+    }
+
+    @Override
+    public S addingService(ServiceReference<S> reference) {
+        S service = context.getService(reference);
+        AdminServiceRegistry.getInstance().addService(clazz, service);
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<S> reference, S service) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(ServiceReference<S> reference, S service) {
+        AdminServiceRegistry.getInstance().removeService(clazz);
+        context.ungetService(reference);
     }
 }

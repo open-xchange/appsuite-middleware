@@ -47,25 +47,59 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting;
+package com.openexchange.admin.plugin.hosting.services;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.i18n.I18nService;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * Registry for all found {@link I18nService} instances.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DBWeightComparatorTest.class
-})
-public class UnitTests {
+public class I18nServices {
 
-    public UnitTests() {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static final I18nServices SINGLETON = new I18nServices();
+
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+
+    private I18nServices() {
+        super();
+    }
+
+    public void addService(final I18nService i18n) {
+        if (null != services.put(i18n.getLocale(), i18n)) {
+            LOG.warn("Another i18n translation service found for {}", i18n.getLocale());
+        }
+    }
+
+    public void removeService(final I18nService i18n) {
+        if (null == services.remove(i18n.getLocale())) {
+            LOG.warn("Unknown i18n translation service shut down for {}", i18n.getLocale());
+        }
+    }
+
+    public static I18nServices getInstance() {
+        return SINGLETON;
+    }
+
+    public String translate(final Locale locale, final String toTranslate) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService service = services.get(loc);
+        if (null == service) {
+            if (!"en".equalsIgnoreCase(loc.getLanguage())) {
+                LOG.warn("No i18n service for locale {}.", loc);
+            }
+            return toTranslate;
+        }
+        if (!service.hasKey(toTranslate)) {
+            LOG.debug("I18n service for locale {} has no translation for \"{}\".", loc, toTranslate);
+            return toTranslate;
+        }
+        return service.getLocalized(toTranslate);
     }
 }

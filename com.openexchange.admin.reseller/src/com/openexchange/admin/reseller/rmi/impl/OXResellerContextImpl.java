@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -76,7 +77,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
-import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -377,8 +377,8 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     /**
      *
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
+     * @see com.openexchange.admin.plugin.hosting.plugins.OXContextPluginInterface#list(java.lang.String,
+     * com.openexchange.admin.plugin.hosting.rmi.dataobjects.Credentials)
      */
     @Override
     public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException {
