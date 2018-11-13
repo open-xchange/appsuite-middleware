@@ -451,10 +451,15 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 stmt.setString(3, schema);
             }
             rs = stmt.executeQuery();
-            TIntList tmp = new TIntArrayList();
-            while (rs.next()) {
-                tmp.add(rs.getInt(1));
+            if (!rs.next()) {
+                // No contexts in given pool/schema tuple
+                return new int[0];
             }
+
+            TIntList tmp = new TIntArrayList();
+            do {
+                tmp.add(rs.getInt(1));
+            } while (rs.next());
             return tmp.toArray();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
