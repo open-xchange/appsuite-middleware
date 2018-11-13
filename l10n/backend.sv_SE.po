@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-06-29 09:37+0200\n"
+"PO-Revision-Date: 2018-10-11 19:05+0200\n"
 "Last-Translator: Arve Eriksson <sv@workshop-chapina.com>\n"
 "Language-Team: Swedish <ox@workshop-chapina.com>\n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.0.6\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -161,7 +161,7 @@ msgid "Comments"
 msgstr "Kommentarer"
 
 #: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
 #: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Hela dagen"
@@ -186,7 +186,7 @@ msgid "Undecided"
 msgstr "Ej beslutat"
 
 #: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 msgid "Resources"
 msgstr "Resurser"
 
@@ -196,6 +196,18 @@ msgstr "Resurser"
 #: com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "Synkronisera dina adressböcker och kontakter."
+
+#. * The displayed name for the {@link EventField#ALARMS} property of an event
+#. -
+#. * MISC
+#.
+#. Reminder
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:63
+#: com.openexchange.chronos.alarm.sms/src/com/openexchange/chronos/alarm/sms/SMSAlarmStrings.java:63
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "Reminder"
+msgstr "Påminnelse"
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:62
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:67
@@ -287,7 +299,7 @@ msgstr "Dag"
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
-msgstr "Måndag "
+msgstr "Måndag"
 
 #. Tuesday
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:86
@@ -687,122 +699,134 @@ msgstr "%1$s skapade ett upprepningsundantag. Ursprungligt datum: %2$s:"
 msgid "%1$s has changed an event:"
 msgstr "%1$s skapade en händelse:"
 
+#. %1$s
+#. E.g. Drive Client
+#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
+#. all translations or remove it from the PO file.
+#. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+#: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
+msgid "%1$s"
+msgstr "%1$s"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
 msgid "%1$s has changed an event on behalf of %2$s:"
 msgstr "%1$s ändrade en händelse åt %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
 msgid "%1$s has changed an event on your behalf:"
 msgstr "%1$s ändrade en händelse åt dig:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
 msgid "When:"
 msgstr "När:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
 msgid "Direct link:"
 msgstr "Direktlänk:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
 msgid "Where:"
 msgstr "Var:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
 msgid "Participants:"
 msgstr "Deltagare:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
 msgid "Details:"
 msgstr "Detaljer:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
 msgid "Show as:"
 msgstr "Visa som:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "Created:"
 msgstr "Skapades:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
 msgid "Modified:"
 msgstr "Ändrades:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr ""
 "%1$s tog bort ett möte åt %2$s, eller så togs du bort från deltagarlistan:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s tog bort ett möte åt dig:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s tog bort ett möte, eller så togs du bort från deltagarlistan:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
 msgid "Change the subject to %1$s."
 msgstr "Ändra ämne till %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
 msgid "The appointment has a new subject: %1$s."
 msgstr "Mötet har ett nytt ämne: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "Mötet kommer nu visas som: \"%1$s\"."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "Mötets tidszon ändrades till: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
 msgid "Change the location to %1$s."
 msgstr "Ändra plats till %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "Mötet har förlagts på en ny plats: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Use the appointment description below."
 msgstr "Använd mötesbeskrivningen nedanför."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "The appointment description has changed."
 msgstr "Mötets beskrivning har ändrats."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid "Please invite %1$s to the appointment."
 msgstr "Bjud in %1$s till mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
 msgid "Add %1$s to the appointment."
 msgstr "Lägg till %1$s i mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s har bjudits in till mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid "Remove %1$s from the appointment."
 msgstr "Ta bort %1$s från mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s togs bort från mötet."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:227
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:229
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s har %2$s mötet."
 
@@ -814,68 +838,68 @@ msgstr "%1$s har %2$s mötet."
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:233
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:235
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "väntar"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:237
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
 msgid "Invite the group %1$s to the appointment."
 msgstr "Bjud in gruppen %1$s till mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
 msgid "The group %1$s has been invited to the appointment"
 msgstr "Gruppen %1$s har bjudits in till mötet"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
 msgid "Remove the group %1$s from the appointment."
 msgstr "Ta bort gruppen %1$s från mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
 msgid "The group %1$s has been removed from the appointment"
 msgstr "Gruppen %1$s har tagits bort från mötet"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Reservera resursen %1$s för mötet"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Reservera resursen %1$s för mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "Resursen %1$s har reserverats för mötet"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Ta bort resursen %1$s från mötet"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Ta bort resursen %1$s från mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "Resursen %1$s är inte längre reserverad för mötet"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Tidpunkt för mötet ändrades. Ursprungligt datum: %1$s. Nytt datum: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr ""
 "Tidszon för mötet ändrades. Ursprunglig tidszon: %1$s. Ny tidszon: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
@@ -883,7 +907,7 @@ msgstr ""
 "Tidszon för mötets startdatum ändrades. Ursprunglig tidszon: %1$s. Ny "
 "tidszon: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
@@ -891,78 +915,87 @@ msgstr ""
 "Tidszon för mötets slutdatum ändrades. Ursprunglig tidszon: %1$s. Ny "
 "tidszon: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr "Ändra tidpunkt för mötet. Ursprungligt datum: %1$s. Nytt datum: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Ändra tidpunkt för mötet. Ursprunglig tid/datum: %1$s. Ny tid/datum: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "New appointment: %1$s"
 msgstr "Nytt möte: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "Appointment changed: %1$s"
 msgstr "Möte ändrat: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
 msgid "Appointment canceled: %1$s"
 msgstr "Möte inställt: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Föreslagna ändringar för mötet: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s anger status som 'ingen' för: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s inbjudan: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "Resend the invitation for: %1$s"
 msgstr "Skicka inbjudan igen för: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
 msgid "Change not accepted for: %1$s"
 msgstr "Ändring avslagen för: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Alla tider kommer visas i tidszonen %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
-msgstr "%1$s har %2$s mötet, men vill göra ett motförslag:"
+msgstr "%1$s har %2$s mötet, men vill göra ett motförslag: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "Du fick det här meddelandet eftersom du är ordförande för mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "Du fick det här meddelandet eftersom du organiserar mötet."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr ""
 "Du fick det här meddelandet eftersom mötet innehåller resursen %1$s, vilken "
 "hanteras av dig."
+
+#. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:310
+msgid ""
+"You have received an E-Mail containing a reply to an appointment that you "
+"didn't organize. Best ignore it."
+msgstr ""
+"Du har fått ett meddelande som innehåller ett svar till ett möte som du inte "
+"anordnade. Bäst att ignorera."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1032,7 +1065,7 @@ msgstr ""
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
 msgid "🎂 %1$s"
-msgstr ""
+msgstr "🎂 %1$s"
 
 #. *
 #. * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
@@ -1049,7 +1082,7 @@ msgstr "* %1$s"
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
 msgid "🎂 %1$s (%2$d. birthday)"
-msgstr ""
+msgstr "🎂 %1$s (%2$d. födelsedag)"
 
 #: com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
 msgid ""
@@ -1202,16 +1235,6 @@ msgstr "Upprepa"
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
 msgid "Description"
 msgstr "Beskrivning"
-
-#. * The displayed name for the {@link EventField#ALARMS} property of an event
-#. -
-#. * MISC
-#.
-#. Reminder
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
-msgstr "Påminnelse"
 
 #. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
@@ -1616,7 +1639,7 @@ msgstr "SMS skickades"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
 msgid "To set up your device, click following link: "
-msgstr "För att ställa in din enhet klicka på följande länk:"
+msgstr "För att ställa in din enhet klicka på följande länk: "
 
 #. The user salutation; e.g. "Dear John Doe,"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
@@ -1875,7 +1898,7 @@ msgstr "Försäljningsvolym"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:92
 msgid "Tax id"
-msgstr "Org.nr."
+msgstr "Org.nr"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:93
 msgid "Commercial register"
@@ -2404,10 +2427,10 @@ msgstr "Den angivna DoveAdm-resursen finns inte: %1$s"
 msgid "Authentication failed: %1$s"
 msgstr "Behörighetskontroll misslyckades: %1$s"
 
-#. The DoveAdm resource does not exist
+#. Doveadm HTTP API communication error: 404 Not Found
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
-msgid "The DoveAdm resource does not exist"
-msgstr "DoveAdm-resursen finns inte"
+msgid "Doveadm HTTP API communication error: 404 Not Found"
+msgstr "Doveadm HTTP-API kommunikationsfel: 404 Hittades inte"
 
 #. A temporary failure because a subsystem is down. Please try again later.
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:83
@@ -2439,15 +2462,6 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:65
 msgid "%1$s %2$s"
 msgstr "%1$s %2$s"
-
-#. %1$s
-#. E.g. Drive Client
-#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
-#. all translations or remove it from the PO file.
-#: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
-#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
-msgid "%1$s"
-msgstr "%1$s"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
@@ -2641,10 +2655,28 @@ msgstr "En katalog med namnet \"%1$s\" finns redan på \"%2$s\"."
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
+#: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "Välj ett befintligt konto"
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:62
+msgid "The total upload size (%1$s) exceeds the available free space of %2$s."
+msgstr ""
+"Den totala uppladdningsstorleken (%1$s) överskrider det tillgängliga lediga "
+"utrymmet på %2$s."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:64
+msgid "The total number of files exceeds the maximum of %1$s."
+msgstr "Det totala antalet filer överskrider det maximala på %1$s."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:66
+msgid "'%1$s' (%2$s) exceeds the allowed size of %3$s per file."
+msgstr "'%1$s' (%2$s) överskrider den tillåtna storleken på %3$s per fil."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:68
+msgid "You are not allowed to upload files to the given folder."
+msgstr "Du har inte tillstånd att ladda upp filer till den givna mappen."
 
 #. The name for the virtual folder containing all attachments from all messages
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
@@ -3908,16 +3940,6 @@ msgstr "Resursen finns inte"
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:82
 msgid "A JSON error occurred: %1$s"
 msgstr "Ett JSON-fel inträffade: %1$s"
-
-#. No Linked-In account available.
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
-msgid "No Linked-In account available."
-msgstr "Inget Linke-In-konto tillgängligt."
-
-#. Need an e-mail address to look up Linked-In data
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:66
-msgid "Need an e-mail address to look up Linked-In data."
-msgstr "Behöver en e-postadress för att slå upp Linked-In-data."
 
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.
 #: com.openexchange.halo/src/com/openexchange/halo/HaloExceptionMessages.java:63
@@ -5443,7 +5465,7 @@ msgstr ""
 msgid ""
 "The following field(s) are too long: %1$s. Please shorten the values and try "
 "again"
-msgstr "Följande fält är för långa: %1$s. Korta ner värdena och försök igen."
+msgstr "Följande fält är för långa: %1$s. Korta ner värdena och försök igen"
 
 #: com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:64
 msgid "The data you provided (%1$s) cannot be changed."
@@ -6576,7 +6598,7 @@ msgstr "Kunde inte ansluta till kontextlagringen."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
 msgid "The account \"%1$s\" was not found."
-msgstr "Kontot \"%1$s\" hittades inte"
+msgstr "Kontot \"%1$s\" hittades inte."
 
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
 #. This should happen in very rare conditions and is not visible to the client.
@@ -8218,7 +8240,7 @@ msgstr "Versionskommentar"
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:96
 msgid "Problem putting/removing an object into/from the cache."
-msgstr "Problem med att lägga till/ta bort ett objekt från cacheminnet"
+msgstr "Problem med att lägga till/ta bort ett objekt från cacheminnet."
 
 #. *
 #. * Hash algorithm %s isn't found.
@@ -9704,11 +9726,11 @@ msgid "The allowed quota on mail server exceeded."
 msgstr "Kvoten på e-postservern har överskridits."
 
 #. *
-#. * The allowed quota on mail server "%1$s" exceeded.
+#. * The allowed storage limit for your account \"%6$s\" was exceeded.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-msgid "The allowed quota on mail server \"%1$s\" exceeded."
-msgstr "Kvoten på e-postservern \"%1$s\" har överskridits."
+msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
+msgstr "Den tillåtna lagringsgränsen för ditt konto \"%6$s\" överskreds."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -10433,7 +10455,7 @@ msgstr "mappen"
 #. John Doe has shared the folder "Photos" with you. Please log in to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr "%1$s har delat %2$s \"%3$s\" med dig. Logga in för att visa den."
+msgstr "%1$s har delat %2$s \"%3$s\" med dig. Logga in för att visa den. "
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -11524,7 +11546,7 @@ msgstr "Filåtkomst nekas."
 
 #: com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "This template was not whitelisted,"
-msgstr "Mallen var inte vitlistad."
+msgstr "Mallen var inte vitlistad,"
 
 #: com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:64
 msgid "Unable to change data. (%1$s)"
@@ -13936,6 +13958,18 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The DoveAdm resource does not exist"
+#~ msgstr "DoveAdm-resursen finns inte"
+
+#~ msgid "No Linked-In account available."
+#~ msgstr "Inget Linke-In-konto tillgängligt."
+
+#~ msgid "Need an e-mail address to look up Linked-In data."
+#~ msgstr "Behöver en e-postadress för att slå upp Linked-In-data."
+
+#~ msgid "The allowed quota on mail server \"%1$s\" exceeded."
+#~ msgstr "Kvoten på e-postservern \"%1$s\" har överskridits."
 
 #~ msgid "???? %1$s"
 #~ msgstr "???? %1$s"
