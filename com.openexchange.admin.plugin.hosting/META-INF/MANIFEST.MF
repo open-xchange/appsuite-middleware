@@ -63,8 +63,6 @@ Import-Package: com.google.common.annotations,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.admin.plugin.hosting.rmi.impl,
- com.openexchange.admin.plugin.hosting.schemamove,
- com.openexchange.admin.plugin.hosting.schemamove.mbean,
  com.openexchange.admin.plugin.hosting.storage.interfaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .

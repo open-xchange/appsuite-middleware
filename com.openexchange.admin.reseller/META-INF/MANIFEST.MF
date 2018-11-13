@@ -8,17 +8,18 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.admin.reseller.osgi.Activator
 Import-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
- com.openexchange.admin.rmi,
- com.openexchange.admin.rmi.impl,
- com.openexchange.admin.tools,
+ com.openexchange.admin.plugin.hosting.storage.interfaces,
  com.openexchange.admin.plugins,
  com.openexchange.admin.reseller.rmi,
  com.openexchange.admin.reseller.rmi.dataobjects,
  com.openexchange.admin.reseller.rmi.exceptions,
  com.openexchange.admin.reseller.rmi.extensions,
+ com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
+ com.openexchange.admin.rmi.impl,
+ com.openexchange.admin.tools,
  com.openexchange.config,
  com.openexchange.database,
  com.openexchange.exception,
@@ -35,6 +36,4 @@ Import-Package: com.openexchange.admin.daemons,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Require-Bundle: com.openexchange.admin,
- com.openexchange.admin.plugin.hosting
 Bundle-ClassPath: .
