@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-06-29 09:35+0200\n"
+"PO-Revision-Date: 2018-11-04 18:16+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.0.5\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
@@ -162,7 +162,7 @@ msgid "Comments"
 msgstr "Kommentit"
 
 #: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
 #: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Koko päivän"
@@ -187,7 +187,7 @@ msgid "Undecided"
 msgstr "Avoin"
 
 #: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 msgid "Resources"
 msgstr "Resurssit"
 
@@ -197,6 +197,18 @@ msgstr "Resurssit"
 #: com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "Synkronoi osoitekirjasi ja yhteystietosi."
+
+#. * The displayed name for the {@link EventField#ALARMS} property of an event
+#. -
+#. * MISC
+#.
+#. Reminder
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:63
+#: com.openexchange.chronos.alarm.sms/src/com/openexchange/chronos/alarm/sms/SMSAlarmStrings.java:63
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "Reminder"
+msgstr "Muistutus"
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:62
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:67
@@ -695,122 +707,134 @@ msgstr ""
 msgid "%1$s has changed an event:"
 msgstr "%1$s on muuttanut tapahtumaa:"
 
+#. %1$s
+#. E.g. Drive Client
+#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
+#. all translations or remove it from the PO file.
+#. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+#: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
+msgid "%1$s"
+msgstr "%1$s"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
 msgid "%1$s has changed an event on behalf of %2$s:"
 msgstr "%1$s on %2$2 puolesta muuttanut tapahtumaa:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
 msgid "%1$s has changed an event on your behalf:"
 msgstr "%1$s on muuttanut puolestasi tapahtumaa:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
 msgid "When:"
 msgstr "Milloin:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
 msgid "Direct link:"
 msgstr "Suora linkki:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
 msgid "Where:"
 msgstr "Missä:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
 msgid "Participants:"
 msgstr "Osallistujat:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
 msgid "Details:"
 msgstr "Yksityiskohdat:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
 msgid "Show as:"
 msgstr "Näytä muodossa:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "Created:"
 msgstr "Luotu:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
 msgid "Modified:"
 msgstr "Muutettu:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr ""
 "%1$s on %2$s puolesta poistanut tapaamisen, tai sinut sen osallistujista:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s on puolestasi poistanut tapaamisen:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s on poistanut tapaamisen, tai sinut sen osallistujista:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
 msgid "Change the subject to %1$s."
 msgstr "Muuta aiheeksi %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
 msgid "The appointment has a new subject: %1$s."
 msgstr "Tapaamisella on uusi aihe: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "Tapaaminen näytetään nyt tilassa: \"%1$s\"."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "Tapaamisen aikavyöhykkeeksi muutettiin: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
 msgid "Change the location to %1$s."
 msgstr "Muuta sijainniksi %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "Tapaamisen uusi sijainti on: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Use the appointment description below."
 msgstr "Käytä alla olevaa tapaamiskuvausta."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "The appointment description has changed."
 msgstr "Tapaamisen kuvaus on muuttunut."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid "Please invite %1$s to the appointment."
 msgstr "Ole hyvä ja kutsu %1$s tapaamiseen."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
 msgid "Add %1$s to the appointment."
 msgstr "Lisää %1$s tapaamiseen."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s on kutsuttu tapaamiseen."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid "Remove %1$s from the appointment."
 msgstr "Poista %1$s tapaamisesta."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s on poistettu tapaamisesta."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:227
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:229
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s on %2$s tapaamisen."
 
@@ -822,61 +846,61 @@ msgstr "%1$s on %2$s tapaamisen."
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:233
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:235
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "odottaa"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:237
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
 msgid "Invite the group %1$s to the appointment."
 msgstr "Kutsu ryhmä %1$s tapaamiseen."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
 msgid "The group %1$s has been invited to the appointment"
 msgstr "Ryhmä %1$s on kutsuttu tapaamiseen"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
 msgid "Remove the group %1$s from the appointment."
 msgstr "Poista ryhmä %1$s tapaamisesta."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
 msgid "The group %1$s has been removed from the appointment"
 msgstr "Rymä %1$s on poistettu tapaamisesta"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Varaa tapaamiselle resurssi %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Varaa tapaamiselle resurssi %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "Resurssi %1$s on varattu tapaamiselle"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Poista resurssi %1$s tapaamisesta"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Poista resurssi %1$s tapaamisesta."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "Resurssi %1$s ei ole enää varattu tapaamiselle"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Tapaaminen on siirretty. Alkuperäinen päivämäärä: %1$s. Uusi päivämäärä: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
@@ -884,7 +908,7 @@ msgstr ""
 "Tapaamisen aikavyöhykettä muutettiin. Alkuperäinen aikavyöhyke: %1$s. Uusi "
 "aikavyöhyke: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
@@ -892,7 +916,7 @@ msgstr ""
 "Tapaamisen aloituspäivän aikavyöhykettä muutettiin. Alkuperäinen "
 "aikavyöhyke: %1$s. Uusi aikavyöhyke: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
@@ -900,79 +924,88 @@ msgstr ""
 "Tapaamisen loppumispäivän aikavyöhykettä muutettiin. Alkuperäinen "
 "aikavyöhyke: %1$s. Uusi aikavyöhyke: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Siirrä tapahtumaa. Alkuperäinen päivämäärä: %1$s. Uusi päivämäärä: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Siirrä tapahtumaa. Alkuperäinen päivämäärä: %1$s. Uusi päivämäärä: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "New appointment: %1$s"
 msgstr "Uusi tapaaminen: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "Appointment changed: %1$s"
 msgstr "Tapaamista muutettu: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
 msgid "Appointment canceled: %1$s"
 msgstr "Tapaaminen peruttu: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Tapaamiseen ehdotetut muutokset: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s on asettanut tilaksi 'ei mitään' käyttäjälle %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s kutsun: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "Resend the invitation for: %1$s"
 msgstr "Lähetä uudelleen kutsu: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
 msgid "Change not accepted for: %1$s"
 msgstr "Muutosta ei hyväksytty kohteelle: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Kaikki ajat näytetään aikavyöhykkeessä %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s on %2$s tapaamisen, mutta haluaisi tehdä vastaehdotuksen: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "Olet saanut tämän sähköpostin, koska olet tapaamisen puheenjohtaja."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "Olet saanut tämän sähköpostin, koska olet tapaamisen järjestäjä."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr ""
 "Olet saanut tämän sähköpostin, koska tapaaminen sisältää hallinnoimasi "
 "resurssin %1$s."
+
+#. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:310
+msgid ""
+"You have received an E-Mail containing a reply to an appointment that you "
+"didn't organize. Best ignore it."
+msgstr ""
+"Olet vastaanottanut sähköpostin, joka sisältää vastauksen tapaamiseen, jota "
+"et järjestänyt. On paras jättää se huomiotta."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1041,7 +1074,7 @@ msgstr ""
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
 msgid "🎂 %1$s"
-msgstr ""
+msgstr "🎂 %1$s"
 
 #. *
 #. * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
@@ -1058,7 +1091,7 @@ msgstr "* %1$s"
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
 msgid "🎂 %1$s (%2$d. birthday)"
-msgstr ""
+msgstr "🎂 %1$s (%2$d. syntymäpäivä)"
 
 #: com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
 msgid ""
@@ -1211,16 +1244,6 @@ msgstr "Toista"
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
 msgid "Description"
 msgstr "Kuvaus"
-
-#. * The displayed name for the {@link EventField#ALARMS} property of an event
-#. -
-#. * MISC
-#.
-#. Reminder
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
-msgstr "Muistutus"
 
 #. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
@@ -2412,10 +2435,10 @@ msgstr "Annettua DoveAdm-resurssia ei ole olemassa: %1$s"
 msgid "Authentication failed: %1$s"
 msgstr "Varmennus epäonnistui: %1$s"
 
-#. The DoveAdm resource does not exist
+#. Doveadm HTTP API communication error: 404 Not Found
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
-msgid "The DoveAdm resource does not exist"
-msgstr "DoveAdm-resurssia ei ole olemassa"
+msgid "Doveadm HTTP API communication error: 404 Not Found"
+msgstr "Doveadm HTTP API -viestintävirhe: 404 Not Found"
 
 #. A temporary failure because a subsystem is down. Please try again later.
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:83
@@ -2447,15 +2470,6 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:65
 msgid "%1$s %2$s"
 msgstr "%1$s %2$s"
-
-#. %1$s
-#. E.g. Drive Client
-#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
-#. all translations or remove it from the PO file.
-#: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
-#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
-msgid "%1$s"
-msgstr "%1$s"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
@@ -2655,10 +2669,27 @@ msgstr "Hakemisto nimeltä  \"%1$s\" on jo olemassa kohteessa  \"%2$s\"."
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
+#: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "Valitse olemassaoleva tili"
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:62
+msgid "The total upload size (%1$s) exceeds the available free space of %2$s."
+msgstr ""
+"Latauksen yhteiskoko (%1$s) ylittää vapaana olevan %2$s tallennustilan koon."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:64
+msgid "The total number of files exceeds the maximum of %1$s."
+msgstr "Tiedostojen määrä ylittää enimmäismäärän %1$s."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:66
+msgid "'%1$s' (%2$s) exceeds the allowed size of %3$s per file."
+msgstr "'%1$s' (%2$s) ylittää sallitun enimmäiskoon %3$s per tiedosto."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:68
+msgid "You are not allowed to upload files to the given folder."
+msgstr "Et voi ladata tiedostoja tähän kansioon."
 
 #. The name for the virtual folder containing all attachments from all messages
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
@@ -3932,16 +3963,6 @@ msgstr "Resurssia ei ole olemassa"
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:82
 msgid "A JSON error occurred: %1$s"
 msgstr "JSON-virhe: %1$s"
-
-#. No Linked-In account available.
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
-msgid "No Linked-In account available."
-msgstr "Linked-in tiliä ei saatavilla."
-
-#. Need an e-mail address to look up Linked-In data
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:66
-msgid "Need an e-mail address to look up Linked-In data."
-msgstr "Tarvitaan sähköpostiosoite Linked-in datan noutamiseksi."
 
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.
 #: com.openexchange.halo/src/com/openexchange/halo/HaloExceptionMessages.java:63
@@ -9721,11 +9742,11 @@ msgid "The allowed quota on mail server exceeded."
 msgstr "Kiintiö ylitetty postipalvelimella."
 
 #. *
-#. * The allowed quota on mail server "%1$s" exceeded.
+#. * The allowed storage limit for your account \"%6$s\" was exceeded.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-msgid "The allowed quota on mail server \"%1$s\" exceeded."
-msgstr "Kiintiö ylitetty postipalvelimella \"%1$s\"."
+msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
+msgstr "Tilisi ”%6$s” sallittu enimmäiskoko on ylitetty."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -13947,6 +13968,18 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The DoveAdm resource does not exist"
+#~ msgstr "DoveAdm-resurssia ei ole olemassa"
+
+#~ msgid "No Linked-In account available."
+#~ msgstr "Linked-in tiliä ei saatavilla."
+
+#~ msgid "Need an e-mail address to look up Linked-In data."
+#~ msgstr "Tarvitaan sähköpostiosoite Linked-in datan noutamiseksi."
+
+#~ msgid "The allowed quota on mail server \"%1$s\" exceeded."
+#~ msgstr "Kiintiö ylitetty postipalvelimella \"%1$s\"."
 
 #~ msgid "???? %1$s"
 #~ msgstr "???? %1$s"
