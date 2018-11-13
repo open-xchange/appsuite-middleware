@@ -100,7 +100,7 @@ public class SAMLLoginTools {
     public static final String AUTO_LOGIN_COOKIE_PREFIX = "open-xchange-saml-";
 
     /**
-     * Generates the relative redirect location to enter the web frontend directly with a session.
+     * Generates the relative redirect location to enter the web front-end directly with a session.
      *
      * @param session The session
      * @param uiWebPath The path to use
@@ -115,9 +115,9 @@ public class SAMLLoginTools {
     }
 
     /**
-     * Generates the absolute redirect location to the frontend.
+     * Generates the absolute redirect location to the front-end.
      *
-     * @param httpRequest The servlet request
+     * @param httpRequest The HTTP request
      * @param session The session
      * @param uiWebPath The path to use
      * @param hostnameService The {@link HostnameService} if available
@@ -126,7 +126,7 @@ public class SAMLLoginTools {
         URIBuilder location = new URIBuilder().setScheme(Tools.considerSecure(httpRequest) ? "https" : "http");
         String hostname = null;
         if (hostnameService != null) {
-            hostname = hostnameService.getHostname(-1, -1);
+            hostname = hostnameService.getHostname(session.getUserId(), session.getContextId());
         }
         if (hostname == null) {
             hostname = httpRequest.getServerName();
@@ -140,8 +140,7 @@ public class SAMLLoginTools {
     }
 
     /**
-     * Validates that the given session matches the given request with regards to the client IP
-     * and session secret.
+     * Validates that the given session matches the given request with regards to the client IP and session secret.
      *
      * @param httpRequest The HTTP request
      * @param session The session
