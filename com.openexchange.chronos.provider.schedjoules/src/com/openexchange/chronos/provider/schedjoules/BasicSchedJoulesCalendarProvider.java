@@ -53,9 +53,9 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
-import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
 import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
@@ -74,6 +74,7 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
+import com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
@@ -212,7 +213,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         JSONObject internalConfig = new JSONObject();
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue)) {
-            internalConfig.putSafe(SchedJoulesFields.COLOR, colorValue);
+            internalConfig.putSafe(CommonCalendarConfigurationFields.COLOR, colorValue);
         }
         Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
         if (null != usedForSync) {
@@ -220,9 +221,9 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         }
         try {
             if (Strings.isNotEmpty(settings.getName())) {
-                internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
+                internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, settings.getName());
             } else {
-                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
+                internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, item.getString(CommonCalendarConfigurationFields.NAME));
             }
 
             internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
@@ -247,12 +248,12 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         boolean changed = applyLocaleChange(session, account, settings, internalConfig);
         // Check & apply changes to extended properties
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
-        if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(SchedJoulesFields.COLOR))) {
-            internalConfig.putSafe(SchedJoulesFields.COLOR, colorValue);
+        if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(CommonCalendarConfigurationFields.COLOR))) {
+            internalConfig.putSafe(CommonCalendarConfigurationFields.COLOR, colorValue);
             changed = true;
         }
-        if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt(SchedJoulesFields.NAME))) {
-            internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
+        if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt(CommonCalendarConfigurationFields.NAME))) {
+            internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, settings.getName());
             changed = true;
         }
         Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
@@ -302,7 +303,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             if (false == l.equals(locale)) {
                 JSONObject item = fetchItem(session.getContextId(), getItemId(session, account, userConfig), locale);
                 internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
-                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
+                internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, item.getString(CommonCalendarConfigurationFields.NAME));
                 return true;
             }
         } catch (MalformedURLException e) {

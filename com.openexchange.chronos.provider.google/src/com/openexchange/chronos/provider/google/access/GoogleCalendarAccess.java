@@ -49,10 +49,6 @@
 
 package com.openexchange.chronos.provider.google.access;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,10 +63,10 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Events;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -79,6 +75,7 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
+import com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.config.GoogleCalendarConfig;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
@@ -310,17 +307,19 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
      *
      * @param conversionService A reference to the conversion service
      * @param jsonObject The JSON object to parse the properties from
-     * @return The parsed extended properties
+     * @return The parsed extended properties or <code>null</code> if there aren't any.
      */
-    protected static ExtendedProperties parseExtendedProperties(ConversionService conversionService, JSONObject jsonObject) throws OXException {
-        if (null != jsonObject) {
-            DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2XPROPERTIES);
-            if (null != dataHandler) {
-                ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
-                if (null != result && null != result.getData() && ExtendedProperties.class.isInstance(result.getData())) {
-                    return (ExtendedProperties) result.getData();
-                }
-            }
+    protected @Nullable static ExtendedProperties parseExtendedProperties(ConversionService conversionService, JSONObject jsonObject) throws OXException {
+        if (null == jsonObject) {
+            return null;
+        }
+        DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2XPROPERTIES);
+        if (null == dataHandler) {
+            return null;
+        }
+        ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
+        if (null != result && null != result.getData() && ExtendedProperties.class.isInstance(result.getData())) {
+            return (ExtendedProperties) result.getData();
         }
         return null;
     }
@@ -338,25 +337,20 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        CalendarSettings settings = new CalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
         JSONObject internalConfig = account.getInternalConfiguration();
-        settings.setName(internalConfig.optString("name", DEFAULT_CALENDAR_NAME));
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString(GoogleCalendarConfigField.DESCRIPTION, null), false));
+
+        ExtendedProperties extendedProperties = getExtendedProperties();
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        extendedProperties.add(COLOR(internalConfig.optString(GoogleCalendarConfigField.COLOR, null), false));
-        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
-        settings.setExtendedProperties(extendedProperties);
+
+        CalendarSettings settings = getCalendarSettings(extendedProperties);
         settings.setSubscribed(true);
-        settings.setError(optAccountError());
+        settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
+
         return settings;
     }
 
     @Override
-    public List<OXException> getWarnings() {
+    public @Nullable List<OXException> getWarnings() {
         // TODO handle warnings
         return null;
     }

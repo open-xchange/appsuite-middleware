@@ -49,12 +49,6 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -62,8 +56,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -90,11 +82,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     private static final String NO_ACCESS = "You have no access to this calendar";
 
     /**
-     * The default calendar name if none supplied by the user
-     */
-    private static final String DEFAULT_CALENDAR_NAME = "calendar";
-
-    /**
      * Defines the amount of time to wait before attempting another external request upon failure. Defaults in 1 hour.
      */
     private static final int EXTERNAL_REQUEST_TIMEOUT = 3600;
@@ -118,23 +105,8 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString(SchedJoulesFields.DESCRIPTION, null)));
-        extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(SchedJoulesFields.USED_FOR_SYNC, false)), false));
-        extendedProperties.add(COLOR(internalConfig.optString(SchedJoulesFields.COLOR, null), false));
-        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
-
-        CalendarSettings settings = new CalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        settings.setName(internalConfig.optString(SchedJoulesFields.NAME, DEFAULT_CALENDAR_NAME));
-        settings.setExtendedProperties(extendedProperties);
+        CalendarSettings settings = getCalendarSettings(getExtendedProperties());
         settings.setSubscribed(true);
-        settings.setError(optAccountError());
-
         return settings;
     }
 

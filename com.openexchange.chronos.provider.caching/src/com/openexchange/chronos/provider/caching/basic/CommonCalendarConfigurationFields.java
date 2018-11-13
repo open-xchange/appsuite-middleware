@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,38 @@
  *
  */
 
-package com.openexchange.chronos.provider.schedjoules;
+package com.openexchange.chronos.provider.caching.basic;
 
 /**
- * {@link SchedJoulesFields}
+ * {@link CommonCalendarConfigurationFields} - Specifies the common fields of calendar configurations
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
-final class SchedJoulesFields {
-
-    ////////////////////// EXTERNAL ATTRIBUTES ////////////////////
+public class CommonCalendarConfigurationFields {
 
     /**
-     * The itemId that maps to a SchedJoules itemId
+     * The folder's description
      */
-    static final String ITEM_ID = "itemId";
+    public static final String DESCRIPTION = "description";
 
     /**
-     * The user configuration's key for all available/visible folders
+     * Flag indicating whether the folder is used for sync
      */
-    static final String FOLDERS = "folders";
-
-    ////////////////////// INTERNAL ATTRIBUTES ////////////////////
+    public static final String USED_FOR_SYNC = "usedForSync";
 
     /**
-     * The user configuration's key for the feed's URL
+     * The folder's color
      */
-    static final String URL = "url";
+    public static final String COLOR = "color";
 
     /**
-     * The refreshInterval for a folder.
+     * The user configuration's key for the folder's name
      */
-    static final String REFRESH_INTERVAL = "refreshInterval";
+    public static final String NAME = "name";
 
     /**
-     * The optional locale for the item
+     * Flag indicating whether the calendar is subscribed.
      */
-    static final String LOCALE = "locale";
-
-    /**
-     * The schedule transparency property
-     */
-    static final String SCHEDULE_TRANSP = "scheduleTransp";
-
-    /**
-     * The unique user key
-     */
-    static final String USER_KEY = "userKey";
-
-    /**
-     * The etag of a calendar
-     */
-    static final String ETAG = "etag";
-
-    /**
-     * The lastModified of a calendar. The timestamp represents
-     * the last time the events were modified and not the attributes
-     * of the calendar folder, e.g. colour or name.
-     */
-    static final String LAST_MODIFIED = "lastModified";
+    public static final String SUBSCRIBED = "subscribed";
 }
