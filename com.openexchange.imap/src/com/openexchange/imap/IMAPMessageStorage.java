@@ -1051,8 +1051,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (null == msg) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
                 }
-                String sContentType = msg.getContentType();
-                if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                try {
+                    String sContentType = msg.getContentType();
+                    if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                        useGetPart = false;
+                    }
+                } catch (MessagingException e) {
+                    if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                        throw e;
+                    }
+                    
+                    // Grab from copied IMAP message
                     useGetPart = false;
                 }
             }
@@ -1141,15 +1150,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Check Content-Type
              */
+            MimeMessage msg;
             boolean useGetPart = true;
             {
                 imapFolder.fetch(null, new long[] { msgUID }, FETCH_PROFILE_PART, null);
-                IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 if (null == msg) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
                 }
-                String sContentType = msg.getContentType();
-                if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                try {
+                    String sContentType = msg.getContentType();
+                    if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                        useGetPart = false;
+                    }
+                } catch (MessagingException e) {
+                    if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                        throw e;
+                    }
+                    
+                    // Grab from copied IMAP message
+                    msg = MimeMessageUtility.newMimeMessage(((IMAPMessage) msg).getMimeStream(), null);
                     useGetPart = false;
                 }
             }
@@ -1170,10 +1190,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Regular look-up
              */
-            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-            if (null == msg) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
-            }
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
