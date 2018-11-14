@@ -6,7 +6,6 @@ Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.chronos.provider.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: com.openexchange.chronos.provider.common
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,
@@ -25,3 +24,4 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.server,
  org.json,
  org.slf4j
+Export-Package: com.openexchange.chronos.provider.common

@@ -61,6 +61,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
@@ -86,14 +95,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * {@link AlarmHelper}
@@ -299,12 +300,27 @@ public class AlarmHelper {
                  * (re)-schedule any alarm triggers & return appropriate update result
                  */
                 List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
-                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(
+                    event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
                 if (null != originalAlarms && 0 < originalAlarms.size()) {
                     storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
                 }
                 storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
                 return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(event, newAlarms));
+            }
+        }.executeUpdate();
+    }
+    
+    public void updateAlarmTriggers(final Event event) throws OXException {
+        new OSGiCalendarStorageOperation<UpdateResult>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected UpdateResult call(CalendarStorage storage) throws OXException {
+                List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
+                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+                storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
+                storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
+                return null;
             }
         }.executeUpdate();
     }
@@ -396,16 +412,16 @@ public class AlarmHelper {
         return true;
     }
 
-    int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Event> birthdaySeriesList) throws OXException {
+    int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Event> events) throws OXException {
         int count = 0;
-        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<String, Map<Integer, List<Alarm>>>(birthdaySeriesList.size());
-        for (Event birthdaySeries : birthdaySeriesList) {
+        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<String, Map<Integer, List<Alarm>>>(events.size());
+        for (Event event : events) {
             List<Alarm> newAlarms = prepareNewAlarms(storage, defaultAlarms);
-            alarmsByUserByEventId.put(birthdaySeries.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+            alarmsByUserByEventId.put(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
             count += newAlarms.size();
         }
         storage.getAlarmStorage().insertAlarms(alarmsByUserByEventId);
-        storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, birthdaySeriesList);
+        storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, events);
         return count;
     }
 
