@@ -218,7 +218,7 @@ public final class Databases {
      * @return The SQL statement
      */
     public static String getSqlStatement(Statement stmt, String query) {
-        if (stmt == null) {
+        if (stmt == null || isClosedSafe(stmt)) {
             return query;
         }
         try {
@@ -227,6 +227,15 @@ public final class Databases {
             return pos < 0 ? sql : sql.substring(pos + 2);
         } catch (Exception x) {
             return query;
+        }
+    }
+
+    private static boolean isClosedSafe(Statement stmt) {
+        try {
+            return stmt.isClosed();
+        } catch (Exception e) {
+            // Assume as closed
+            return true;
         }
     }
 
