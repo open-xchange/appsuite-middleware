@@ -60,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -463,7 +464,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         /*
          * get root folder for all accounts from all filestorage services
          */
-        List<FileStorageFolder> rootFolders = new ArrayList<FileStorageFolder>();
+        List<FileStorageFolder> rootFolders = new ArrayList<>();
         for (FileStorageService service : getFileStorageServiceRegistry().getAllServices()) {
             List<FileStorageAccount> accounts = null;
             if (AccountAware.class.isInstance(service)) {
@@ -495,7 +496,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         /*
          * get shared folders of all accounts from all filestorage services
          */
-        List<FileStorageFolder> sharedFolders = new ArrayList<FileStorageFolder>();
+        List<FileStorageFolder> sharedFolders = new ArrayList<>();
         for (FileStorageService service : getFileStorageServiceRegistry().getAllServices()) {
             List<FileStorageAccount> accounts = null;
             if (AccountAware.class.isInstance(service)) {
@@ -578,10 +579,38 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     @Override
     public Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException {
         FileStorageFolderAccess folderAccess = getFolderAccess(new FolderID(defaultDestFolderId));
+
+        if (null == folderIds || folderIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         if(folderAccess instanceof FileStorageRestoringFolderAccess) {
-            return ((FileStorageRestoringFolderAccess) folderAccess).restoreFolderFromTrash(folderIds, defaultDestFolderId);
+            Map<String,FolderID[]> sourcePathFolders = getFolderPaths(folderIds, folderAccess);
+            Map<String, FileStorageFolder[]> restoreFolderFromTrash = ((FileStorageRestoringFolderAccess) folderAccess).restoreFolderFromTrash(folderIds, defaultDestFolderId);
+            Map<String,FolderID[]> targetPathFolders = getFolderPaths(folderIds, folderAccess);
+
+            fireEvents(sourcePathFolders, FileStorageEventConstants.DELETE_FOLDER_TOPIC);
+            fireEvents(targetPathFolders, FileStorageEventConstants.CREATE_FOLDER_TOPIC);
+
+            return restoreFolderFromTrash;
         }
         return Collections.emptyMap();
+    }
+
+    private Map<String,FolderID[]> getFolderPaths(List<String> folderIds, FileStorageFolderAccess folderAccess) throws OXException {
+        Map<String,FolderID[]> folderPaths = new HashMap<>();
+        for (String folder : folderIds) {
+            FolderID folderID = new FolderID(folder);
+            folderPaths.put(folder, getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess));
+        }
+        return folderPaths;
+    }
+
+    private void fireEvents(Map<String,FolderID[]> pathFolders, String fileStorageEventConstant) {
+        for (Map.Entry<String, FolderID[]> entry : pathFolders.entrySet()) {
+            FolderID sourceFolderID = new FolderID(entry.getKey());
+            fire(new Event(fileStorageEventConstant, getEventProperties(session, sourceFolderID, entry.getValue())));
+        }
     }
 
     private void fire(final Event event) {
