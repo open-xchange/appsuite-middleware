@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.update.internal;
 
+import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import java.sql.Connection;
+import java.sql.SQLException;
+import org.slf4j.Logger;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.ConnectionProvider;
 
@@ -61,6 +64,11 @@ import com.openexchange.groupware.update.ConnectionProvider;
  * @since v7.10.0
  */
 public abstract class AbstractConnectionProvider implements ConnectionProvider {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConnectionProvider.class);
+    }
 
     /**
      * Initializes a new {@link AbstractConnectionProvider}.
@@ -75,8 +83,19 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
      * @param connection The connection
      * @return The checked connection
      */
-    protected Connection checkConnection(Connection connection) {
+    protected Connection checkConnectionElseReturnNull(Connection connection) {
         if (null != connection) {
+            // Ensure auto-commit mode is set for given connection
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                if (isEitherOf(e, java.io.EOFException.class)) {
+                    // Connection closed by database system
+                    return null;
+                }
+                LoggerHolder.LOG.error("Failed to set auto-commit mode", e);
+            }
+
             Databases.autocommit(connection);
         }
         return connection;
