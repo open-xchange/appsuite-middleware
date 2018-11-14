@@ -111,6 +111,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
+import com.openexchange.admin.storage.utils.CreateTableRegistry;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -852,6 +853,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // ####### ##### geht hier was kaputt -> enableContext(); ########
         LOG.debug("Backup complete!");
 
+        Set<String> knownTables = CreateTableRegistry.getInstance().getKnownTables();
+
         Connection ox_db_write_con = null;
         Connection configdb_write_con = null;
         PreparedStatement stm = null;
@@ -896,16 +899,27 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // now insert all data to target db
             LOG.debug("Now filling target database system {} with data of context {}!", target_database_id, ctx.getId());
+            boolean rollback = false;
             target_ox_db_con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
             try {
-                target_ox_db_con.setAutoCommit(false);
-                fillTargetDatabase(sorted_tables, target_ox_db_con, ox_db_write_con, ctx.getId());
+                target_ox_db_con.setAutoCommit(false); // BEGIN
+                rollback = true;
+
+                Set<String> nonexisting = fillTargetDatabase(sorted_tables, target_ox_db_con, ox_db_write_con, ctx.getId(), knownTables);
+                for (String nonexistingTable : nonexisting) {
+                    LOG.warn("(Unknown) table '{}' does not exist on target database system {}. Therefore the data of context {} from that table could not be moved.", nonexistingTable, target_database_id, ctx.getId());
+                }
+
                 // commit ALL tables with all data of every row
-                target_ox_db_con.commit();
-            } catch (final SQLException sql) {
-                rollback(target_ox_db_con);
+                target_ox_db_con.commit(); // COMMIT
+                rollback = false;
+            } catch (SQLException sql) {
                 LOG.error("SQL Error", sql);
                 throw new TargetDatabaseException("" + sql.getMessage());
+            } finally {
+                if (rollback) {
+                    rollback(target_ox_db_con);
+                }
             }
 
             LOG.debug("Filling completed for target database system {} with data of context {}!", target_database_id, ctx.getId());
@@ -2099,11 +2113,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return found;
     }
 
-    private void fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch) throws SQLException {
+    private Set<String> fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch, Set<String> knownTables) throws SQLException {
         // do the inserts for all tables!
+        Set<String> nonexisting = null;
         StringBuilder prep_sql = new StringBuilder();
         StringBuilder sb_values = new StringBuilder();
-        for (TableObject to : sorted_tables) {
+        NextTable: for (TableObject to : sorted_tables) {
             to = getDataForTable(to, ox_db_connection, criteriaMatch);
             if (to.getDataRowCount() > 0) {
                 // ok data in table found, copy to db
@@ -2152,6 +2167,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                         prep_ins.executeUpdate();
                         prep_ins.close();
+                    } catch (SQLException e) {
+                        // Check if SQL error was thrown because such a table does not exists on target database
+                        if (false == Databases.tableExists(target_ox_db_con, to.getName())) {
+                            if (knownTables.contains(to.getName())) {
+                                // The table should be available on target database
+                                throw e;
+                            }
+
+                            // An unknown table...
+                            if (null == nonexisting) {
+                                nonexisting = new HashSet<String>();
+                            }
+                            nonexisting.add(to.getName());
+                            continue NextTable;
+                        }
+                        throw e;
                     } finally {
                         try {
                             if (prep_ins != null) {
@@ -2167,6 +2198,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }// end of if table has data
             to = null;
         }// end of table loop
+        return null == nonexisting ? Collections.emptySet() : new TreeSet<String>(nonexisting);
     }
 
     // Deduced from https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-type-conversions.html

@@ -52,7 +52,7 @@ package com.openexchange.admin.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
+import com.openexchange.admin.storage.utils.CreateTableRegistry;
 import com.openexchange.database.CreateTableService;
 
 /**

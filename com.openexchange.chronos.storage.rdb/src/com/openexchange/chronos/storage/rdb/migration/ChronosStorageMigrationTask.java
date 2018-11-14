@@ -106,52 +106,74 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        MigrationConfig config = new MigrationConfig(services);
         ContextService contextService = services.getService(ContextService.class);
         int[] contextIds = params.getContextsInSameSchema();
         MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length);
-        Connection connection = params.getConnection();
-        int rollback = 0;
-        try {
-            connection.setAutoCommit(false);
-            rollback = 1;
+        MigrationConfig config = new MigrationConfig(services);
+        if (config.isIntermediateCommits()) {
             /*
-             * migrate calendar data for all contexts & increment progress
+             * calendar migration will be performed using an individual database connection for each batch
+             * (as configured through "com.openexchange.calendar.migration.batchSize")
              */
-            for (int contextId : contextIds) {
-                Context context;
-                try {
-                    context = contextService.loadContext(contextId);
-                } catch (OXException e) {
-                    if ("CTX-0001".equals(e.getErrorCode())) {
-                        LOG.error("Unable to load context {}, skipping migration.", I(contextId), e);
-                        progress.nextContext();
-                        continue;
+            migrateCalendarData(contextIds, config, progress, contextService, null);
+        } else {
+            /*
+             * calendar migration will be performed using a single database connection
+             */
+            Connection connection = params.getConnection();
+            int rollback = 0;
+            try {
+                connection.setAutoCommit(false);
+                rollback = 1;
+
+                migrateCalendarData(contextIds, config, progress, contextService, connection);
+
+                connection.commit();
+                rollback = 2;
+            } catch (SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            } finally {
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        rollback(connection);
                     }
-                    throw e;
+                    autocommit(connection);
                 }
+            }
+        }
+    }
+
+    private void migrateCalendarData(int[] contextIds, MigrationConfig config, MigrationProgress progress, ContextService contextService, Connection optConnection) throws OXException {
+        /*
+         * migrate calendar data for each context & increment progress
+         */
+        for (int contextId : contextIds) {
+            Context context = tryLoadContext(contextId, contextService);
+            if (context != null) {
                 try {
-                    new CalendarDataMigration(progress, config, context, connection).perform();
+                    new CalendarDataMigration(progress, config, context, optConnection).perform();
                 } catch (Exception e) {
                     throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, "Error performing calendar migration in context " + contextId);
                 }
-                progress.nextContext();
             }
-            if (config.isUncommitted()) {
-                LOG.warn("Skipping commit phase as migration is configured in 'uncommited' mode.");
-                return;
+            progress.nextContext();
+        }
+        if (config.isUncommitted()) {
+            LOG.warn("Skipping commit phase as migration is configured in 'uncommited' mode.");
+            return;
+        }
+    }
+
+    private Context tryLoadContext(int contextId, ContextService contextService) throws OXException {
+        try {
+            return contextService.loadContext(contextId);
+        } catch (OXException e) {
+            if (e.equalsCode(1, "CTX")) {
+                // Mailadmin for a context is missing; see com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NO_MAILADMIN
+                LOG.error("Unable to load context {}, skipping migration.", I(contextId), e);
+                return null;
             }
-            connection.commit();
-            rollback = 2;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback > 0) {
-                if (rollback == 1) {
-                    rollback(connection);
-                }
-                autocommit(connection);
-            }
+            throw e;
         }
     }
 

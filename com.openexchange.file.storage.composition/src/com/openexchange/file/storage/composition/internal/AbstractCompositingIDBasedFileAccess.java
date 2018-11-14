@@ -1730,6 +1730,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return Collections.emptyMap();
         }
 
+        List<Event> deleteEventList = new ArrayList<>(fileIds.size());
         List<IDTuple> idTuples = new ArrayList<>(fileIds.size());
         for (String fileId : fileIds) {
             FileID sourceID = new FileID(fileId);
@@ -1737,15 +1738,46 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(fileId);
             }
             idTuples.add(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()));
+
+            File sourceFile = fileAccess.getFileMetadata(sourceID.getFolderId(), sourceID.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
+
+            deleteEventList.add(FileStorageEventHelper.buildDeleteEvent(
+                session,
+                sourceID.getService(),
+                sourceID.getAccountId(),
+                new FolderID(sourceID.getService(), sourceID.getAccountId(), sourceID.getFolderId()).toUniqueID(),
+                sourceID.toUniqueID(),
+                sourceFile.getFileName(),
+                null));
         }
 
         Map<IDTuple, FileStorageFolder[]> restored = ((FileStorageRestoringFileAccess) fileAccess).restore(idTuples, defaultDestFolderId);
+
+        for (Event deleteEvent : deleteEventList) {
+            postEvent(deleteEvent);
+        }
+
         Map<FileID, FileStorageFolder[]> result = new LinkedHashMap<>(restored.size());
         for (Map.Entry<IDTuple, FileStorageFolder[]> entry : restored.entrySet()) {
             IDTuple tuple = entry.getKey();
             FileID fileId = new FileID(destService, destAccountId, tuple.getFolder(), tuple.getId());
             result.put(fileId, entry.getValue());
+
+            FileID destFileId = new FileID(destService, destAccountId, entry.getValue()[0].getId(), tuple.getId());
+            File destinationFile = fileAccess.getFileMetadata(destFileId.getFolderId(), destFileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
+            FolderID destFolderId = new FolderID(destService, destAccountId, destFileId.getFolderId());
+
+            Event createEvent = FileStorageEventHelper.buildCreateEvent(
+            session,
+            destService,
+            destAccountId,
+            destFolderId.toUniqueID(),
+            destFileId.toUniqueID(),
+            destinationFile.getFileName());
+
+            postEvent(createEvent);
         }
+
         return result;
     }
 
