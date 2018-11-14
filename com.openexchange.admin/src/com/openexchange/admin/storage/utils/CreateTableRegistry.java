@@ -47,16 +47,19 @@
  *
  */
 
-package com.openexchange.admin.storage.sqlStorage;
+package com.openexchange.admin.storage.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.database.CreateTableService;
 
 /**
- * {@link CreateTableRegistry}
+ * {@link CreateTableRegistry} - A registry for appearing instances of <code>CreateTableService</code>.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -66,6 +69,17 @@ public class CreateTableRegistry {
 
     private static final CreateTableRegistry SINGLETON = new CreateTableRegistry();
 
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static CreateTableRegistry getInstance() {
+        return SINGLETON;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
     private final ConcurrentMap<CreateTableService, Object> createTables;
 
     /**
@@ -74,10 +88,6 @@ public class CreateTableRegistry {
     private CreateTableRegistry() {
         super();
         createTables = new ConcurrentHashMap<CreateTableService, Object>(128, 0.9F, 1);
-    }
-
-    public static CreateTableRegistry getInstance() {
-        return SINGLETON;
     }
 
     public void addCreateTable(CreateTableService service) {
@@ -95,4 +105,28 @@ public class CreateTableRegistry {
     public List<CreateTableService> getList() {
         return new ArrayList<CreateTableService>(createTables.keySet());
     }
+
+    /**
+     * Gets all known tables.
+     *
+     * @return A set containing the names of all known tables
+     */
+    public Set<String> getKnownTables() {
+        int size = createTables.size();
+        if (size <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<String> knownTables = new HashSet<String>(size);
+        for (CreateTableService service : createTables.keySet()) {
+            String[] tables = service.tablesToCreate();
+            if (null != tables) {
+                for (String table : tables) {
+                    knownTables.add(table);
+                }
+            }
+        }
+        return knownTables;
+    }
+
 }
