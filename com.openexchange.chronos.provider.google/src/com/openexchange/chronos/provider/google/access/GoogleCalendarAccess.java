@@ -340,7 +340,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         JSONObject internalConfig = account.getInternalConfiguration();
 
         ExtendedProperties extendedProperties = getExtendedProperties();
-        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, true));
 
         CalendarSettings settings = getCalendarSettings(extendedProperties);
         settings.setSubscribed(true);
