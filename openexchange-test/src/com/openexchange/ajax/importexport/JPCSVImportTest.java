@@ -52,9 +52,11 @@ package com.openexchange.ajax.importexport;
 import java.io.File;
 import java.rmi.server.UID;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,8 +94,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         super.setUp();
         this.importApi = new ImportApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
-        String defaultFolder = getDefaultFolder(getSessionId(), foldersApi);
-        folderId = createAndRememberNewFolder(foldersApi, defaultFolder, getApiClient().getUserId());
+        folderId = createAndRememberNewFolder(foldersApi, getDefaultFolder(getSessionId()), getApiClient().getUserId());
         contactsApi = new ContactsApi(getApiClient());
     }
 
@@ -127,7 +128,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule("contacts");
         folderData.setSubscribed(true);
-        folderData.setTitle("chronos_test_" + new UID().toString());
+        folderData.setTitle(this.getClass().getSimpleName() + new UID().toString());
         folderData.setPermissions(permissions);
 
         NewFolderBody body = new NewFolderBody();
@@ -158,12 +159,11 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
      * Retrieves the default contact folder of the user with the specified session
      *
      * @param session The session of the user
-     * @param foldersApi The {@link FoldersApi}
      * @return The default contact folder of the user
      * @throws Exception if the default contact folder cannot be found
      */
     @SuppressWarnings("unchecked")
-    private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
+    private String getDefaultFolder(String session) throws Exception {
         FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
@@ -187,7 +187,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
     @Test
     public void testJPImport() throws ApiException {
         File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "jpcontact.csv");
-        String importCSV = importApi.importCSV(getSessionId(), folderId, file, null);
+        importApi.importCSV(getSessionId(), folderId, file, null);
         ContactsResponse allContacts = contactsApi.getAllContacts(getSessionId(), folderId, COLUMNS, null, null, null, null);
         Object data = checkResponse(allContacts.getError(), allContacts.getErrorDesc(), allContacts.getData());
         Assert.assertTrue("Wrong response type. Expected ArrayList but received: " + data.getClass().getSimpleName(), data instanceof ArrayList<?>);
@@ -204,8 +204,9 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         Assert.assertEquals("Wrong contact data:", "12345", conData.get(3).toString());
         Assert.assertEquals("Wrong contact data:", "Olpe", conData.get(4).toString());
         Assert.assertEquals("Wrong contact data:", "Deutschland", conData.get(5).toString());
-
-        System.out.println(data.toString());
-        // TODO check data
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.clear();
+        cal.set(1990, 0, 1);
+        Assert.assertEquals("Wrong contact data:", String.valueOf(cal.getTimeInMillis()), conData.get(6).toString());
     }
 }
