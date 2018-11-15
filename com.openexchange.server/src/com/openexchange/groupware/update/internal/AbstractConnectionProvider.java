@@ -53,7 +53,7 @@ import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ConnectionProvider;
 
 
@@ -70,11 +70,20 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConnectionProvider.class);
     }
 
+    /** For creating/closing connections */
+    private final ConnectionAccess connectionAccess;
+
+    /** The connection reference */
+    private Connection connection;
+
     /**
      * Initializes a new {@link AbstractConnectionProvider}.
+     *
+     * @param connectionAccess The connection access for creating/closing connections
      */
-    protected AbstractConnectionProvider() {
+    protected AbstractConnectionProvider(ConnectionAccess connectionAccess) {
         super();
+        this.connectionAccess = connectionAccess;
     }
 
     /**
@@ -83,7 +92,7 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
      * @param connection The connection
      * @return The checked connection
      */
-    protected Connection checkConnectionElseReturnNull(Connection connection) {
+    private Connection checkConnectionElseReturnNull(Connection connection) {
         if (null != connection) {
             // Ensure auto-commit mode is set for given connection
             try {
@@ -95,8 +104,26 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
                 }
                 LoggerHolder.LOG.error("Failed to set auto-commit mode", e);
             }
+        }
+        return connection;
+    }
 
-            Databases.autocommit(connection);
+    @Override
+    public synchronized Connection getConnection() throws OXException {
+        Connection connection = this.connection;
+        if (null == connection) {
+            connection = connectionAccess.getConnection();
+            this.connection = connection;
+            return connection;
+        }
+
+        // Already in use. Check connection.
+        connection = checkConnectionElseReturnNull(connection);
+        if (null == connection) {
+            // Closed by server. Null'ify this.connection and try to establish a new connection
+            this.connection = null;
+            connection = connectionAccess.getConnection();
+            this.connection = connection;
         }
         return connection;
     }
@@ -104,6 +131,48 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
     /**
      * Closes the connection.
      */
-    public abstract void close();
+    public synchronized void close() {
+        Connection connection = this.connection;
+        if (null != connection) {
+            this.connection = null;
+            connectionAccess.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public int[] getContextsInSameSchema() throws OXException {
+        return connectionAccess.getContextsInSameSchema();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Allows to create & close connections.
+     */
+    public static interface ConnectionAccess {
+
+        /**
+         * Gets a new connection.
+         *
+         * @return The new connection
+         * @throws OXException If a new connection cannot be returned
+         */
+        Connection getConnection() throws OXException;
+
+        /**
+         * Closes given connection
+         *
+         * @param connection The connection to close
+         */
+        void closeConnection(Connection connection);
+
+        /**
+         * Finds all contexts their data is stored in the same schema and on the same database like the given one.
+         *
+         * @return all contexts having their data in the same schema and on the same database.
+         * @throws OXException if some problem occurs.
+         */
+        int[] getContextsInSameSchema() throws OXException;
+    }
 
 }

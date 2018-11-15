@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,65 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import java.sql.Connection;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
-
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.session.Session;
 
 /**
- * {@link ContextConnectionProvider}
+ * {@link ForwardUnquoted}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class ContextConnectionProvider extends AbstractConnectionProvider {
-
-    private static class ContextConnectionAccess implements ConnectionAccess {
-
-        private final DatabaseService databaseService;
-        private final int contextId;
-
-        ContextConnectionAccess(int contextId) {
-            super();
-            this.contextId = contextId;
-            databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        }
-
-        @Override
-        public Connection getConnection() throws OXException {
-            if (null == databaseService) {
-                throw ServiceExceptionCode.absentService(DatabaseService.class);
-            }
-
-            return databaseService.getForUpdateTask(contextId);
-        }
-
-        @Override
-        public void closeConnection(Connection connection) {
-            if (null != databaseService) {
-                databaseService.backForUpdateTask(contextId, connection);
-            }
-        }
-
-        @Override
-        public int[] getContextsInSameSchema() throws OXException {
-            if (null == databaseService) {
-                throw ServiceExceptionCode.absentService(DatabaseService.class);
-            }
-
-            return databaseService.getContextsInSameSchema(contextId);
-        }
-
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------------------------
+public class ForwardUnquoted implements PreferencesItemService, ConfigTreeEquivalent {
 
     /**
-     * Initializes a new {@link ContextConnectionProvider}.
+     * Initializes a new {@link ForwardUnquoted}.
      */
-    public ContextConnectionProvider(int contextId) {
-        super(new ContextConnectionAccess(contextId));
+    public ForwardUnquoted() {
+        super();
+    }
+
+    @Override
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "forwardunquoted" };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                boolean forwardUnquoted = MailProperties.getInstance().isForwardUnquoted(session.getUserId(), session.getContextId());
+                setting.setSingleValue(Boolean.valueOf(forwardUnquoted));
+            }
+        };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+        return "modules/mail/forwardunquoted";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/mail//forwardunquoted";
     }
 
 }
