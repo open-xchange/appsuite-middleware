@@ -69,8 +69,7 @@ public class AdminCacheExtended extends AdminCache {
 
     public void initCacheExtended() {
         prop = new PropertyHandlerExtended(System.getProperties());
-        pool = new OXAdminPoolDBPoolExtension();
-        initPool(pool);
+        initPool(new OXAdminPoolDBPoolExtension());
     }
 
     /**

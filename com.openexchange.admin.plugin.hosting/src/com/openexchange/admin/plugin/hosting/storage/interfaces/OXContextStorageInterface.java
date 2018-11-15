@@ -89,7 +89,7 @@ public abstract class OXContextStorageInterface {
      * Creates a new instance implementing the context storage interface.
      *
      * @return an instance implementing the group storage interface.
-     * @throws com.openexchange.admin.plugin.hosting.rmi.exceptions.StorageException Storage exception
+     * @throws StorageException Storage exception
      */
     public static OXContextStorageInterface getInstance() throws StorageException {
         OXContextStorageInterface inst = instance;
