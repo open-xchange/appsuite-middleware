@@ -87,8 +87,18 @@ public class ContextConnectionProvider extends AbstractConnectionProvider {
         if (null == connection) {
             connection = databaseService.getForUpdateTask(contextId);
             this.connection = connection;
+            return connection;
         }
-        return checkConnection(connection);
+
+        // Already in use. Check connection.
+        connection = checkConnectionElseReturnNull(connection);
+        if (null == connection) {
+            // Closed by server. Null'ify this.connection and try to establish a new connection
+            this.connection = null;
+            connection = databaseService.getForUpdateTask(contextId);
+            this.connection = connection;
+        }
+        return connection;
     }
 
     @Override

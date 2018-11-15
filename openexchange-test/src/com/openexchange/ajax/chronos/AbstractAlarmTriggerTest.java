@@ -160,7 +160,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @throws ParseException
      */
     protected void checkAlarmTime(AlarmTrigger trigger, String eventId, long expectedTime) throws ParseException {
-        assertEquals(eventId, trigger.getEventId());
+        assertEquals("Wrong event id.", eventId, trigger.getEventId());
         Date parsedTime = DateTimeUtil.parseZuluDateTime(trigger.getTime());
         assertEquals("The alarm trigger time is different than expected.", expectedTime, parsedTime.getTime());
     }
