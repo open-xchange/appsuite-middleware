@@ -56,7 +56,7 @@ Typically the DoveAdm REST end-point is accessible on port 8080 via API path `/d
 
 Further connection settings
 
-- `com.openexchange.dovecot.doveadm.endpoints.totalConnections` specifies the total number ofconnections held in connector's HTTP connection pool. Default is `100`.
+- `com.openexchange.dovecot.doveadm.endpoints.totalConnections` specifies the total number of connections held in connector's HTTP connection pool. Default is `100`.
 - `com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute ` specifies the number of connections per route held in HTTP connection pool; or less than/equal to `0` (zero) for auto-determining. Default is `0`.
 - `com.openexchange.dovecot.doveadm.endpoints.readTimeout` defines connector's read timeout in milliseconds for HTTP requests issued against the Dovecot's DoveAdm REST end-point. Default is `10000`
 - `com.openexchange.dovecot.doveadm.endpoints. connectTimeout ` defines connector's connect timeout in milliseconds when establishing a HTTP connection to the Dovecot's DoveAdm REST end-point. Default is `3000`
