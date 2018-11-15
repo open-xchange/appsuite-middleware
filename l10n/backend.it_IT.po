@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-10-11 11:20+0100\n"
-"Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.com>\n"
+"PO-Revision-Date: 2018-11-09 07:31+0100\n"
+"Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.comm>\n"
 "Language-Team: Italian <it@workshop-chapina.com>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
@@ -1016,9 +1016,8 @@ msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
 msgstr ""
-"Hai ricevuto un messaggio di posta contenente una risposta a un appuntamento"
-" che "
-"non hai organizzato. Puoi ignorala."
+"Hai ricevuto un messaggio di posta contenente una risposta a un appuntamento "
+"che non hai organizzato. Puoi ignorala."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1747,7 +1746,7 @@ msgstr "%1$s, %2$s su %3$s"
 #. %1$s on %2$s %3$s
 #. E.g. OX Mail App on Android 8.0
 #: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:85
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:96
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:105
 msgid "%1$s on %2$s %3$s"
 msgstr "%1$s su %2$s %3$s"
 
@@ -1756,11 +1755,26 @@ msgstr "%1$s su %2$s %3$s"
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr "Client Microsoft Exchange ActiveSync"
 
+#. WebDAV InfoStore
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:91
+msgid "WebDAV InfoStore"
+msgstr "WebDAV InfoStore"
+
+#. WebDAV VCard
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:94
+msgid "WebDAV VCard"
+msgstr "WebDAV vCard"
+
+#. WebDAV iCal
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:97
+msgid "WebDAV iCal"
+msgstr "WebDAV iCal"
+
 #. %1$s %2$s on %3$s %4$s
 #. E.g. OX Mail App 1.10 on Android 8.0
 #. %1$s %2$s on %3$s %4$s
 #. E.g. Drive Client 2.4.0 on Windows 10
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:92
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:101
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:65
 msgid "%1$s %2$s on %3$s %4$s"
 msgstr "%1$s %2$s su %3$s %4$s"
@@ -1769,7 +1783,7 @@ msgstr "%1$s %2$s su %3$s %4$s"
 #. E.g. OX Mail App 1.10 on Android
 #. %1$s %2$s on %3$s
 #. E.g. Drive Client 2.4.0 on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:100
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:109
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:69
 msgid "%1$s %2$s on %3$s"
 msgstr "%1$s %2$s su %3$s"
@@ -1778,10 +1792,15 @@ msgstr "%1$s %2$s su %3$s"
 #. E.g. OX Mail App on Android
 #. %1$s on %2$s
 #. E.g. Drive Client on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:104
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:113
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
 msgid "%1$s on %2$s"
 msgstr "%1$s su %2$s"
+
+#. Unknown client
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:116
+msgid "Unknown client"
+msgstr "Client sconosciuto"
 
 #: com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
@@ -2720,8 +2739,8 @@ msgstr "Seleziona un account esistente"
 #: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:62
 msgid "The total upload size (%1$s) exceeds the available free space of %2$s."
 msgstr ""
-"La dimensione totale di caricamento (%1$s) supera lo spazio libero"
-" disponibile di %2$s."
+"La dimensione totale di caricamento (%1$s) supera lo spazio libero "
+"disponibile di %2$s."
 
 #: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:64
 msgid "The total number of files exceeds the maximum of %1$s."
@@ -3846,6 +3865,11 @@ msgstr "La password non è corretta."
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:116
 msgid "Login denied."
 msgstr "Accesso negato."
+
+#. Used in case there were too many failed login attempts for an account within a certain timeframe.
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:122
+msgid "Too many login attempts. Please try again later."
+msgstr "Troppi tentativi di accesso. Riprova più tardi."
 
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
