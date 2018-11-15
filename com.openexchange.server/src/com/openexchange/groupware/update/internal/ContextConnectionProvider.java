@@ -64,57 +64,51 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class ContextConnectionProvider extends AbstractConnectionProvider {
 
-    private final int contextId;
-    private final DatabaseService databaseService; // Ok to remember since freshly created for each using thread
-    private Connection connection;
+    private static class ContextConnectionAccess implements ConnectionAccess {
+
+        private final DatabaseService databaseService;
+        private final int contextId;
+
+        ContextConnectionAccess(int contextId) {
+            super();
+            this.contextId = contextId;
+            databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        }
+
+        @Override
+        public Connection getConnection() throws OXException {
+            if (null == databaseService) {
+                throw ServiceExceptionCode.absentService(DatabaseService.class);
+            }
+
+            return databaseService.getForUpdateTask(contextId);
+        }
+
+        @Override
+        public void closeConnection(Connection connection) {
+            if (null != databaseService) {
+                databaseService.backForUpdateTask(contextId, connection);
+            }
+        }
+
+        @Override
+        public int[] getContextsInSameSchema() throws OXException {
+            if (null == databaseService) {
+                throw ServiceExceptionCode.absentService(DatabaseService.class);
+            }
+
+            return databaseService.getContextsInSameSchema(contextId);
+        }
+
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link ContextConnectionProvider}.
      */
     public ContextConnectionProvider(int contextId) {
-        super();
-        this.contextId = contextId;
-        databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-    }
-
-    @Override
-    public synchronized Connection getConnection() throws OXException {
-        if (null == databaseService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-
-        Connection connection = this.connection;
-        if (null == connection) {
-            connection = databaseService.getForUpdateTask(contextId);
-            this.connection = connection;
-            return connection;
-        }
-
-        // Already in use. Check connection.
-        connection = checkConnectionElseReturnNull(connection);
-        if (null == connection) {
-            // Closed by server. Null'ify this.connection and try to establish a new connection
-            this.connection = null;
-            connection = databaseService.getForUpdateTask(contextId);
-            this.connection = connection;
-        }
-        return connection;
-    }
-
-    @Override
-    public synchronized void close() {
-        Connection connection = this.connection;
-        if (null != connection) {
-            this.connection = null;
-            if (null != databaseService) {
-                databaseService.backForUpdateTask(contextId, connection);
-            }
-        }
-    }
-
-    @Override
-    public int[] getContextsInSameSchema() throws OXException {
-        return databaseService.getContextsInSameSchema(contextId);
+        super(new ContextConnectionAccess(contextId));
     }
 
 }
