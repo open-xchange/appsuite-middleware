@@ -107,7 +107,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 if (null == readableUserAgent || UNKNOWN.equalsIgnoreCase(readableUserAgent.getName())) {
                     // Maybe iOS accountsd?
                     if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("iOS") && sUserAgent.contains("accountsd")) {
-                        return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, UNKNOWN, null, "ios_calendar/addressbook", ClientInfoType.DAV);
+                        return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, IOS_DAV, null, IOS_DAV, ClientInfoType.DAV);
                     }
 
                     // Unknown User-Agent
@@ -151,6 +151,12 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 }
                 if (userAgent.equals(DAVUserAgent.OX_SYNC) || userAgent.equals(DAVUserAgent.SMOOTH_SYNC)) {
                     return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily, ClientInfoType.OXAPP);
+                }
+                if (UNKNOWN.equals(clientFamily)) {
+                    //Maybe akonadi
+                    if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("akonadi")) {
+                        return new DAVClientInfo("KDE/Plasma DAV Client", "linux", null, "akonadi", null, "akonadi", ClientInfoType.DAV);
+                    }
                 }
                 return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
             }
