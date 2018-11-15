@@ -274,7 +274,7 @@ public final class Conversations {
                 final Response response = r[len];
                 if (response.isOK()) {
                     try {
-                        final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
+                        final List<MailMessage> mails = new ArrayList<MailMessage>(r.length);
                         final String fullName = imapFolder.getFullName();
                         final String sInReplyTo = "In-Reply-To";
                         final String sReferences = "References";
