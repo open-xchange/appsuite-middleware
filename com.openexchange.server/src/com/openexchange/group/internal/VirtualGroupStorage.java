@@ -90,15 +90,30 @@ public final class VirtualGroupStorage extends GroupStorage {
      */
     @Override
     public Group getGroup(final int gid, final Context ctx) throws OXException {
-        final Group retval;
-        if (GroupStorage.GROUP_ZERO_IDENTIFIER == gid) {
-            retval = GroupTools.getGroupZero(ctx);
-        } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == gid) {
-            retval = GroupTools.getGuestGroup(ctx);
-        } else {
-            retval = delegate.getGroup(gid, ctx);
+        return getGroup(new int[] { gid }, ctx)[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Group[] getGroup(int[] gid, Context context) throws OXException {
+        final List<Group> retval = new ArrayList<>();
+        for (int i = 0; i < gid.length; i++) {
+            int j = gid[i];
+            Group found = null;
+            if (GroupStorage.GROUP_ZERO_IDENTIFIER == j) {
+                found = GroupTools.getGroupZero(context);
+            } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == j) {
+                found = GroupTools.getGuestGroup(context);
+            } else {
+                found = delegate.getGroup(j, context);
+            }
+            if (found != null) {
+                retval.add(found);
+            }
         }
-        return retval;
+        return retval.stream().toArray(Group[]::new);
     }
 
     /**
@@ -186,8 +201,7 @@ public final class VirtualGroupStorage extends GroupStorage {
         delegate.deleteGroup(ctx, con, groupId, lastRead);
     }
 
-    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
-        '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] { '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
 
     /**
      * Converts specified wild-card string to a regular expression
@@ -224,5 +238,4 @@ public final class VirtualGroupStorage extends GroupStorage {
         s.append('$');
         return (s.toString());
     }
-
 }

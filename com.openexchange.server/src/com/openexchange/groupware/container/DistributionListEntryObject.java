@@ -298,12 +298,11 @@ public class DistributionListEntryObject implements Serializable {
         if (o instanceof DistributionListEntryObject) {
             final DistributionListEntryObject distributionlistentry = (DistributionListEntryObject) o;
 
-            if (emailaddress.equals(distributionlistentry.getEmailaddress())) {
+            if ((emailaddress == null && distributionlistentry.getEmailaddress() == null) || emailaddress.equals(distributionlistentry.getEmailaddress())) {
                 return true;
             }
         }
         return false;
-
     }
 
     public boolean searchDlistObject(final DistributionListEntryObject dleo) {

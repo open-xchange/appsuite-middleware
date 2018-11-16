@@ -47,63 +47,35 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.config.admin.osgi;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.admin.HideAdminService;
+import com.openexchange.config.admin.internal.HideAdminServiceImpl;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.UserService;
 
 /**
- * {@link AllAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ConfigAdminActivator}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public final class AllAction extends AbstractGroupAction {
+public final class ConfigAdminActivator extends AJAXModuleActivator {
 
-    /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
-     */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { LeanConfigurationService.class, ContextService.class, UserService.class };
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = new Date(0);
-
-        boolean loadMembers = false;
-        {
-            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            for (final int column : columns) {
-                if (Group.Field.MEMBERS.getColNumber() == column) {
-                    loadMembers = true;
-                }
-            }
-        }
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groups = groupService.listAllGroups(req.getSession().getContext(), loadMembers);
-
-        int length = groups.length;
-        List<Group> groupList = new ArrayList<Group>(length);
-        for (int a = 0; a < length; a++) {
-            Group group = groups[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = lastModified;
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
+    protected void startBundle() throws Exception {
+        HideAdminService hideAdminService = new HideAdminServiceImpl(getServiceSafe(LeanConfigurationService.class), getServiceSafe(ContextService.class), getServiceSafe(UserService.class));
+        registerService(HideAdminService.class, hideAdminService);
+        ServerServiceRegistry.getInstance().addService(HideAdminService.class, hideAdminService);
     }
+
 }

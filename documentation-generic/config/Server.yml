@@ -820,3 +820,14 @@ properties:
     file: Server.properties
     packageName: open-xchange-core
     tags: ["Server", "Cookie"] 
+  - key: com.openexchange.showAdmin
+    description: |
+      Controls whether the context administrator should be visible to the end user or not. Note that this setting is ConfigCascade-aware on context level only.
+    defaultValue: true
+    version: 7.10.2
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: server.properties
+    packageName: open-xchange-core
+    tags: ["Admin"]

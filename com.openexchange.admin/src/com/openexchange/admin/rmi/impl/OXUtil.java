@@ -87,9 +87,9 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.StorageInfo;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.snippet.QuotaAwareSnippetService;
-import com.openexchange.user.UserService;
 
 /**
  * Implementation class for the RMI interface for util
@@ -557,7 +557,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         if (!tool.existsServer(server.getId())) {
             throw new InvalidDataException("No such server " + server);
         }
-         oxutil.changeServer(server.getId(), schemaName);
+        oxutil.changeServer(server.getId(), schemaName);
     }
 
     @Override
@@ -916,12 +916,11 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         try {
             ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
-            UserService userService = AdminServiceRegistry.getInstance().getService(UserService.class);
             List<Integer> allContextIds = optContextId == null ? contextService.getAllContextIds() : Collections.singletonList(optContextId);
             for (Integer contextId : allContextIds) {
                 if (scope == null || RecalculationScope.ALL.equals(scope)) {
                     Context ctx = contextService.getContext(contextId.intValue());
-                    int[] userIds = userService.listAllUser(ctx, false, false);
+                    int[] userIds = UserStorage.getInstance().listAllUser(null, ctx, false, false);
                     for (int userId : userIds) {
                         doRecalculateFilestoreUsage(contextId, Integer.valueOf(userId), false);
                     }
@@ -929,7 +928,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 } else {
                     if (RecalculationScope.USER.equals(scope)) {
                         Context ctx = contextService.getContext(contextId.intValue());
-                        int[] userIds = userService.listAllUser(ctx, false, false);
+                        int[] userIds = UserStorage.getInstance().listAllUser(null, ctx, false, false);
                         for (int userId : userIds) {
                             doRecalculateFilestoreUsage(contextId, Integer.valueOf(userId), false);
                         }

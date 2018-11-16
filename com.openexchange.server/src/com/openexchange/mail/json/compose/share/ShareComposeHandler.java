@@ -91,6 +91,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
@@ -320,15 +321,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             addresses.addAll(Arrays.asList(source.getCc()));
             addresses.addAll(Arrays.asList(source.getBcc()));
 
-            UserService userService = ServerServiceRegistry.getServize(UserService.class);
-            if (null == userService) {
-                throw ServiceExceptionCode.absentService(UserService.class);
-            }
             Context ctx = composeRequest.getContext();
 
             recipients = new LinkedHashSet<>(addresses.size());
             for (InternetAddress address : addresses) {
-                User user = resolveToUser(address, ctx, userService);
+                User user = resolveToUser(address, ctx);
                 String personal = address.getPersonal();
                 String sAddress = address.getAddress();
                 recipients.add(null == user ? Recipient.createExternalRecipient(personal, sAddress) : Recipient.createInternalRecipient(personal, sAddress, user));
@@ -463,10 +460,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
     }
 
-    private User resolveToUser(InternetAddress address, Context ctx, UserService userService) throws OXException {
-        User user;
+    private User resolveToUser(InternetAddress address, Context ctx) throws OXException {
+        User user = null;
         try {
-            user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
+            user = UserStorage.getInstance().searchUser(IDNA.toIDN(address.getAddress()), ctx);
         } catch (final OXException e) {
             /*
              * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
@@ -582,7 +579,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             case "application/vnd.oasis.opendocument.text":
                 thumbnailName = THUMBNAIL_WORD;
                 break;
-            default: thumbnailName = THUMBNAIL_DEFAULT;
+            default:
+                thumbnailName = THUMBNAIL_DEFAULT;
         }
         String thumbnail = templatePath + java.io.File.separator + thumbnailName;
         InputStream in = null;

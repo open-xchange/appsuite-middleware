@@ -69,6 +69,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
@@ -1517,7 +1518,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     /*
                      * take over adjusted filenames; remember to update document version, too
                      */
-                    for (Map.Entry<DocumentMetadata, FilenameReservation> entry : reservations.entrySet()) {
+                    for (Entry<DocumentMetadata, FilenameReservation> entry : reservations.entrySet()) {
                         FilenameReservation reservation = entry.getValue();
                         if (reservation.wasAdjusted()) {
                             DocumentMetadata document = entry.getKey();
@@ -1540,7 +1541,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 /*
                  * perform document move
                  */
-                Metadata[] modified;
+                Metadata[] modified = null;
                 if (null == optOriginPaths) {
                     modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
                 } else {

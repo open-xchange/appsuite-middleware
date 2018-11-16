@@ -69,8 +69,11 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * This class implements the group storage using a relational database.
@@ -117,8 +120,7 @@ public class RdbGroupStorage extends GroupStorage {
     public void updateGroup(final Context ctx, final Connection con, final Group group, final Date lastRead) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE groups SET identifier=?,"
-                + "displayName=?,lastModified=? WHERE cid=? AND id=? AND lastModified<=?");
+            stmt = con.prepareStatement("UPDATE groups SET identifier=?,displayName=?,lastModified=? WHERE cid=? AND id=? AND lastModified<=?");
             int pos = 1;
             stmt.setString(pos++, group.getSimpleName());
             stmt.setString(pos++, group.getDisplayName());
@@ -147,8 +149,7 @@ public class RdbGroupStorage extends GroupStorage {
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,"
-                + "member) VALUES (?,?,?)");
+            stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, group.getIdentifier());
             for (final int member : members) {
@@ -167,15 +168,13 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public void deleteMember(final Context ctx, final Connection con,
-        final Group group, final int[] members) throws OXException {
+    public void deleteMember(final Context ctx, final Connection con, final Group group, final int[] members) throws OXException {
         if (0 == members.length) {
             return;
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(getIN("DELETE FROM groups_member "
-                + "WHERE cid=? AND id=? AND member IN (", members.length));
+            stmt = con.prepareStatement(getIN("DELETE FROM groups_member WHERE cid=? AND id=? AND member IN (", members.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, group.getIdentifier());
@@ -217,31 +216,59 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public Group getGroup(final int gid, final Context context) throws OXException {
+        return getGroup(new int[] { gid }, context)[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Group[] getGroup(final int[] groupIds, final Context context) throws OXException {
+        final int length = groupIds.length;
+        if (0 == length) {
+            return new Group[0];
+        }
+        final TIntObjectMap<Group> groups = new TIntObjectHashMap<Group>(length);
+
         final Connection con = DBPool.pickup(context);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_GROUPS + " AND id = ?");
-            stmt.setLong(1, context.getContextId());
-            stmt.setInt(2, gid);
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                throw LdapExceptionCode.GROUP_NOT_FOUND.create(Integer.valueOf(gid), Integer.valueOf(context.getContextId())).setPrefix("GRP");
-            }
+            stmt = con.prepareStatement(DBUtils.getIN(SELECT_GROUPS + " AND id IN (", groupIds.length));
             int pos = 1;
-            Group group = new Group();
-            group.setIdentifier(result.getInt(pos++));
-            group.setSimpleName(result.getString(pos++));
-            group.setDisplayName(result.getString(pos++));
-            group.setLastModified(new Date(result.getLong(pos++)));
-            group.setMember(selectMember(con, context, group.getIdentifier()));
-            return group;
+            stmt.setLong(pos++, context.getContextId());
+            for (final int groupId : groupIds) {
+                stmt.setInt(pos++, groupId);
+            }
+            result = stmt.executeQuery();
+
+            while (result.next()) {
+                pos = 1;
+                Group group = new Group();
+                group.setIdentifier(result.getInt(pos++));
+                group.setSimpleName(result.getString(pos++));
+                group.setDisplayName(result.getString(pos++));
+                group.setLastModified(new Date(result.getLong(pos++)));
+                group.setMember(selectMember(con, context, group.getIdentifier()));
+                groups.put(group.getIdentifier(), group);
+            }
         } catch (final SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
+        for (final int groupId : groupIds) {
+            if (!groups.containsKey(groupId)) {
+                throw LdapExceptionCode.GROUP_NOT_FOUND.create(Integer.valueOf(groupId), Integer.valueOf(context.getContextId())).setPrefix("GRP");
+            }
+        }
+
+        final Group[] retval = new Group[groups.size()];
+        for (int i = 0; i < length; i++) {
+            retval[i] = groups.get(groupIds[i]);
+        }
+        return retval;
     }
 
     @Override
@@ -276,20 +303,17 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                group.setMember(selectMember(con, context,
-                    group.getIdentifier()));
+                group.setMember(selectMember(con, context, group.getIdentifier()));
                 tmp.add(group);
             }
             return tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create(e,
-                e.getMessage()).setPrefix("GRP");
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -322,15 +346,14 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                if(loadMembers) {
+                if (loadMembers) {
                     group.setMember(selectMember(con, context, group.getIdentifier()));
                 }
                 groups.add(group);
             }
             return groups.toArray(new Group[groups.size()]);
         } catch (final SQLException e) {
-            throw GroupExceptionCodes.SQL_ERROR.create(e,
-                e.getMessage());
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
@@ -363,15 +386,14 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                if(loadMembers) {
+                if (loadMembers) {
                     group.setMember(selectMember(con, context, group.getIdentifier()));
                 }
                 tmp.add(group);
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create(e,
-                e.getMessage()).setPrefix("GRP");
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

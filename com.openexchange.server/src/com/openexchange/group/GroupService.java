@@ -66,56 +66,71 @@ public interface GroupService {
     /**
      * Creates a group.
      *
-     * @param ctx Context.
+     * @param context Context.
      * @param user User for permission checks.
      * @param group group to create.
      * @param checkI18nNames Whether to check i18n names
      * @throws OXException if some problem occurs.
      */
-    void create(Context ctx, User user, Group group, boolean checkI18nNames) throws OXException;
+    void create(Context context, User user, Group group, boolean checkI18nNames) throws OXException;
+
+    /**
+     * Deletes a group.
+     *
+     * @param context Context.
+     * @param user User for permission checks.
+     * @param groupId unique identifier of the group to delete.
+     * @param lastModified timestamp when the group to delete has last been read.
+     * @throws OXException if some problem occurs.
+     */
+    void delete(Context context, User user, int groupId, Date lastModified) throws OXException;
+
+    /**
+     * Returns the denoted group.
+     *
+     * @param context The context
+     * @param groupId The group identifier
+     * @return The group
+     * @throws OXException If group cannot be returned
+     */
+    Group getGroup(Context context, int groupId) throws OXException;
+
+    /**
+     * Returns the denoted groups.
+     *
+     * @param context The context
+     * @param groupIds An array of group identifiers
+     * @return The groups
+     * @throws OXException If one group cannot be returned
+     */
+    Group[] getGroup(Context context, int[] groupIds) throws OXException;
+
+    /**
+     * Searches for groups by their display name.
+     *
+     * @param context The context
+     * @param pattern The pattern to search for
+     * @param loadMembers <code>true</code> to load the members of found groups, <code>false</code>, otherwise
+     * @return An array of groups that match the search pattern
+     * @throws OXException if searching has some storage related problem.
+     */
+    Group[] search(Context context, String pattern, boolean loadMembers) throws OXException;
+
+    Group[] listAllGroups(Context context, boolean loadMembers) throws OXException;
+
+    Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException;
+
+    Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException;
 
     /**
      * Updates a group.
      *
-     * @param ctx Context.
+     * @param context Context.
      * @param user User for permission checks.
      * @param group group to update.
      * @param lastRead timestamp when the group to update has last been read.
      * @param checkI18nNames Whether to check i18n names
      * @throws OXException if some problem occurs.
      */
-    void update(Context ctx, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
-
-    /**
-     * Deletes a group.
-     *
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param groupId unique identifier of the group to delete.
-     * @param lastModified timestamp when the group to delete has last been read.
-     * @throws OXException if some problem occurs.
-     */
-    void delete(Context ctx, User user, int groupId, Date lastModified) throws OXException;
-
-    /**
-     * Returns the denoted group.
-     *
-     * @param ctx The context
-     * @param groupId The group identifier
-     * @return The group
-     * @throws OXException If group cannot be returned
-     */
-    Group getGroup(Context ctx, int groupId) throws OXException;
-
-    /**
-     * Searches for groups by their display name.
-     *
-     * @param ctx The context
-     * @param pattern The pattern to search for
-     * @param loadMembers <code>true</code> to load the members of found groups, <code>false</code>, otherwise
-     * @return An array of groups that match the search pattern
-     * @throws OXException if searching has some storage related problem.
-     */
-    Group[] search(Context ctx, String pattern, boolean loadMembers) throws OXException;
-
+    void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
 }

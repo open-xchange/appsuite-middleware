@@ -25,7 +25,8 @@ properties:
   after_complete:
     type: integer
     format: int64
-    description: Deprecated. Only present in AJAX interface. Value will not be stored on OX server.
+    description: (DEPRECATED) Only present in AJAX interface. Value will not be stored on OX server.
+#    deprecated: true
   billing_information:
     type: string
     description: Billing information of the task.

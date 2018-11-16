@@ -98,6 +98,7 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
@@ -145,6 +146,7 @@ import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.internal.FilteringGroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
@@ -158,6 +160,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteFileVersionsLoginHandler;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.FilteringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -261,6 +264,7 @@ import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
+import com.openexchange.user.FilteringUserService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -598,7 +602,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track QuotaFileStorageService
          */
         track(QuotaFileStorageService.class, new RegistryCustomizer<QuotaFileStorageService>(context, QuotaFileStorageService.class));
-
+        track(HideAdminService.class, new RegistryCustomizer<HideAdminService>(context, HideAdminService.class));
         /*
          * Track QuotaAwareSnippetService
          */
@@ -610,20 +614,15 @@ public final class ServerActivator extends HousekeepingActivator {
         UserAliasStorage aliasStorage;
         {
             String regionName = "UserAlias";
-            byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
-                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
-                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
-                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
-                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" + 
+                            "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
+                            "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" + 
+                            "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
+                            "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" + 
+                            "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
+                            "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" + 
+                            "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + 
+                            "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
 
             aliasStorage = new CachingAliasStorage(new RdbAliasStorage());
@@ -636,7 +635,7 @@ public final class ServerActivator extends HousekeepingActivator {
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
 
-        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechRegistry.class));
+        UserService userService = new FilteringUserService(new UserServiceImpl(interceptorRegistry, getService(PasswordMechRegistry.class)), this);
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
@@ -662,7 +661,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         registerService(FileBackedJSONStringProvider.class, new FileBackedJSONStringProviderImpl());
-        final GroupService groupService = new GroupServiceImpl();
+        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(), this);
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
@@ -896,9 +895,10 @@ public final class ServerActivator extends HousekeepingActivator {
         EventFiringInfostoreFacade eventFiringInfostoreFacade = new EventFiringInfostoreFacadeImpl(dbProvider);
         eventFiringInfostoreFacade.setTransactional(true);
         eventFiringInfostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
-        registerService(InfostoreFacade.class, infostoreFacade);
+        FilteringInfostoreFacadeImpl filteringInfostoreFacadeImpl = new FilteringInfostoreFacadeImpl(infostoreFacade, this);
+        registerService(InfostoreFacade.class, filteringInfostoreFacadeImpl);
         registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
-        registerService(InfostoreSearchEngine.class, infostoreFacade);
+        registerService(InfostoreSearchEngine.class, filteringInfostoreFacadeImpl);
         registerService(LoginHandlerService.class, new InfostoreAutodeleteFileVersionsLoginHandler(infostoreFacade));
     }
 

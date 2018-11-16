@@ -49,69 +49,114 @@
 
 package com.openexchange.group.internal;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Optional;
+import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
 
 /**
+ * {@link FilteringGroupService}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public class GroupServiceImpl implements GroupService {
+public class FilteringGroupService implements GroupService {
 
-    public GroupServiceImpl() {
-        super();
+    private GroupService delegate;
+    private ServiceLookup services;
+
+    public FilteringGroupService(GroupService lDelegate, ServiceLookup lServices) {
+        this.delegate = lDelegate;
+        this.services = lServices;
+    }
+
+    private Group[] removeAdminFromGroups(Context context, Group[] groups) throws OXException {
+        HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
+        if (hideAdminService == null) {
+            return groups;
+        }
+        return hideAdminService.removeAdminFromGroupMemberList(context.getContextId(), groups);
+    }
+
+    private Group getOriginalGroup(Context context, int groupId) throws OXException {
+        return delegate.getGroup(context, groupId);
     }
 
     @Override
     public void create(Context context, User user, Group group, boolean checkI18nNames) throws OXException {
-        Create create = new Create(context, user, group, checkI18nNames);
-        create.perform();
+        delegate.create(context, user, group, checkI18nNames);
     }
 
     @Override
-    public void delete(Context context, User user, int groupId, Date lastRead) throws OXException {
-        Delete delete = new Delete(context, user, groupId, lastRead);
-        delete.perform();
+    public void delete(Context context, User user, int groupId, Date lastModified) throws OXException {
+        delegate.delete(context, user, groupId, lastModified);
     }
 
     @Override
     public Group getGroup(Context context, int groupId) throws OXException {
-        return GroupStorage.getInstance().getGroup(groupId, context);
+        Group group = delegate.getGroup(context, groupId);
+        Group[] groups = removeAdminFromGroups(context, new Group[] { group });
+        return groups[0];
     }
 
     @Override
     public Group[] getGroup(Context context, int[] groupIds) throws OXException {
-        return GroupStorage.getInstance().getGroup(groupIds, context);
+        Group[] groups = delegate.getGroup(context, groupIds);
+        HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
+        if (hideAdminService == null) {
+            return groups;
+        }
+        Group[] groupsWithoutAdmin = hideAdminService.removeAdminFromGroupMemberList(context.getContextId(), groups);
+        for (final int groupId : groupIds) {
+            Optional<Group> found = Arrays.stream(groupsWithoutAdmin).filter(x -> x.getIdentifier() == groupId).findFirst();
+            if (!found.isPresent()) {
+                throw LdapExceptionCode.GROUP_NOT_FOUND.create(Integer.valueOf(groupId), Integer.valueOf(context.getContextId())).setPrefix("GRP");
+            }
+        }
+        return groupsWithoutAdmin;
     }
 
     @Override
     public Group[] search(Context context, String pattern, boolean loadMembers) throws OXException {
-        return GroupStorage.getInstance().searchGroups(pattern, loadMembers, context);
+        Group[] groups = delegate.search(context, pattern, loadMembers);
+        return removeAdminFromGroups(context, groups);
     }
 
     @Override
     public Group[] listAllGroups(Context context, boolean loadMembers) throws OXException {
-        return GroupStorage.getInstance().getGroups(loadMembers, context);
+        Group[] groups = delegate.listAllGroups(context, loadMembers);
+        return removeAdminFromGroups(context, groups);
     }
 
     @Override
     public Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException {
-        return GroupStorage.getInstance().listModifiedGroups(modifiedSince, context);
+        Group[] groups = delegate.listModifiedGroups(context, modifiedSince);
+        return removeAdminFromGroups(context, groups);
     }
 
     @Override
     public Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException {
-        return GroupStorage.getInstance().listDeletedGroups(modifiedSince, context);
+        Group[] groups = delegate.listDeletedGroups(context, modifiedSince);
+        return removeAdminFromGroups(context, groups);
     }
 
     @Override
     public void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException {
-        Update update = new Update(context, user, group, lastRead, checkI18nNames);
-        update.perform();
+        HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
+        if (hideAdminService == null) {
+            delegate.update(context, user, group, lastRead, checkI18nNames);
+            return;
+        }
+        Group origGroup = getOriginalGroup(context, group.getIdentifier());
+        int[] newGroupMember = hideAdminService.addAdminToGroupMemberList(context.getContextId(), origGroup.getMember(), group.getMember());
+        group.setMember(newGroupMember);
+        delegate.update(context, user, origGroup, lastRead, checkI18nNames);
     }
 }

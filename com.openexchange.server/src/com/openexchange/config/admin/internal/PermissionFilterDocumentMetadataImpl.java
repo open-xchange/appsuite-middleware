@@ -47,63 +47,49 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.config.admin.internal;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
+import java.util.stream.Collectors;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 /**
- * {@link AllAction}
+ * 
+ * {@link PermissionFilterDocumentMetadataImpl} overrides {@link DocumentMetadataImpl} to filter out administrators permission
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public final class AllAction extends AbstractGroupAction {
+public class PermissionFilterDocumentMetadataImpl extends DocumentMetadataImpl implements DocumentMetadata {
+
+    private static final long serialVersionUID = -1093207200136520302L;
+    private final int adminUserId;
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
+     * Initializes a new {@link PermissionFilterDocumentMetadataImpl} from specified folder.
+     * 
+     * @param adminUserId The user id of the context admin
+     * @param userizedFolder The requested origin {@link UserizedFolder}
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public PermissionFilterDocumentMetadataImpl(int adminUserId, DocumentMetadata documentMetadata) {
+        super(documentMetadata);
+        this.adminUserId = adminUserId;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * The returned {@link ObjectPermission}s will not contain one for the administrator even she actually has got {@link ObjectPermission}s for the related document. So this implementation should be used to view permissions only.
+     */
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = new Date(0);
-
-        boolean loadMembers = false;
-        {
-            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            for (final int column : columns) {
-                if (Group.Field.MEMBERS.getColNumber() == column) {
-                    loadMembers = true;
-                }
-            }
+    public List<ObjectPermission> getObjectPermissions() {
+        List<ObjectPermission> lObjectPermissions = super.getObjectPermissions();
+        if (lObjectPermissions == null || lObjectPermissions.isEmpty()) {
+            return lObjectPermissions;
         }
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groups = groupService.listAllGroups(req.getSession().getContext(), loadMembers);
-
-        int length = groups.length;
-        List<Group> groupList = new ArrayList<Group>(length);
-        for (int a = 0; a < length; a++) {
-            Group group = groups[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = lastModified;
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
+        return lObjectPermissions.stream().filter(x -> x.getEntity() != this.adminUserId).collect(Collectors.toList());
     }
 }

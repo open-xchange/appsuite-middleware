@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportExceptionCodes;
@@ -68,7 +69,6 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.user.UserService;
 
 /**
  * The {@link AnalyzeContextBatch} class is the workhorse of the reporting system. It runs the reports on a batch of
@@ -135,7 +135,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                         break;
                     }
                     if (ReportExceptionCodes.REPORT_GENERATION_CANCELED.equals(oxException)) {
-                        LOG.info("Stop execution of report generation due to an user instruction!" , oxException);
+                        LOG.info("Stop execution of report generation due to an user instruction!", oxException);
                         contextIds = Collections.emptyList();
                         reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
@@ -223,7 +223,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     }
 
     protected User[] loadUsers(Context ctx) throws OXException {
-        return Services.getService(UserService.class).getUser(ctx, true, false);
+        return UserStorage.getInstance().getUser(ctx, true, false);
     }
 
     protected Context loadContext(int contextId) throws OXException {

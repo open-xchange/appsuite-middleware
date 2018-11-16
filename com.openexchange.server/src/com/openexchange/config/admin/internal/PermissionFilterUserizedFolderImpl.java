@@ -47,63 +47,48 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.config.admin.internal;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
+import java.util.Arrays;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 
 /**
- * {@link AllAction}
+ * {@link PermissionFilterUserizedFolderImpl} overrides {@link UserizedFolderImpl} to filter out administrators permission
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public final class AllAction extends AbstractGroupAction {
+public class PermissionFilterUserizedFolderImpl extends UserizedFolderImpl implements UserizedFolder {
+
+    private static final long serialVersionUID = 3941871306938103932L;
+    private final int adminUserId;
 
     /**
-     * Initializes a new {@link AllAction}.
+     * Initializes a new {@link PermissionFilterUserizedFolderImpl} from specified folder.
+     * 
+     * @param adminUserId The user id of the context admin
+     * @param userizedFolder The requested origin {@link UserizedFolder}
      *
-     * @param services
+     * @throws IllegalArgumentException If folder is <code>null</code>
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public PermissionFilterUserizedFolderImpl(int adminUserId, UserizedFolder userizedFolder) {
+        super(userizedFolder);
+        this.adminUserId = adminUserId;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * The returned {@link Permission}s will not contain one for the administrator even she actually has got {@link Permission}s for the given {@link UserizedFolder}. So this implementation should be used to view permissions only.
+     */
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = new Date(0);
-
-        boolean loadMembers = false;
-        {
-            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            for (final int column : columns) {
-                if (Group.Field.MEMBERS.getColNumber() == column) {
-                    loadMembers = true;
-                }
-            }
+    public Permission[] getPermissions() {
+        Permission[] permissions = super.getPermissions();
+        if (permissions == null || permissions.length == 0) {
+            return permissions;
         }
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groups = groupService.listAllGroups(req.getSession().getContext(), loadMembers);
-
-        int length = groups.length;
-        List<Group> groupList = new ArrayList<Group>(length);
-        for (int a = 0; a < length; a++) {
-            Group group = groups[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = lastModified;
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
+        return Arrays.stream(permissions).filter(x -> x.getEntity() != adminUserId).toArray(Permission[]::new);
     }
 }

@@ -51,9 +51,11 @@ package com.openexchange.contact.osgi;
 
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
 import com.openexchange.contact.internal.ContactServiceLookup;
+import com.openexchange.contact.internal.FilteringContactService;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.folder.FolderService;
@@ -96,6 +98,7 @@ public class ContactServiceActivator extends HousekeepingActivator {
             LOG.info("starting bundle: com.openexchange.contact.service");
             ContactServiceLookup.set(this);
 
+            trackService(HideAdminService.class);
             final UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
             track(UserServiceInterceptor.class, interceptorRegistry);
             track(ContactPictureURLService.class, new SimpleRegistryListener<ContactPictureURLService>() {
@@ -112,10 +115,9 @@ public class ContactServiceActivator extends HousekeepingActivator {
             });
             openTrackers();
 
-            final ContactService contactService = new ContactServiceImpl(interceptorRegistry);
+            final ContactService contactService = new FilteringContactService(new ContactServiceImpl(interceptorRegistry), this);
             super.registerService(ContactService.class, contactService);
             ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
-
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.service\"", e);
             throw e;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,50 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.config.admin.internal;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link AllAction}
+ * 
+ * {@link HideAdminProperty}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public final class AllAction extends AbstractGroupAction {
+public enum HideAdminProperty implements Property {
+    SHOW_ADMIN_ENABLED("showAdmin", Boolean.TRUE),
+
+    ;
+
+    private final Object defaultValue;
+    private final String fqn;
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
+     * Initializes a new {@link HideAdminProperty}.
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    private HideAdminProperty(String suffix, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        fqn = "com.openexchange." + suffix;
     }
 
+    /**
+     * Gets the fully qualified name for the property
+     *
+     * @return the fully qualified name for the property
+     */
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = new Date(0);
+    public String getFQPropertyName() {
+        return fqn;
+    }
 
-        boolean loadMembers = false;
-        {
-            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            for (final int column : columns) {
-                if (Group.Field.MEMBERS.getColNumber() == column) {
-                    loadMembers = true;
-                }
-            }
-        }
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groups = groupService.listAllGroups(req.getSession().getContext(), loadMembers);
-
-        int length = groups.length;
-        List<Group> groupList = new ArrayList<Group>(length);
-        for (int a = 0; a < length; a++) {
-            Group group = groups[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = lastModified;
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
+    /**
+     * Gets the default value of this property
+     *
+     * @return the default value of this property
+     */
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }
