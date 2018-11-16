@@ -226,25 +226,34 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
                     AddSessionParameterImpl sessionToAdd = new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context);
                     final Map<String, String> additionals = null != targetPath ? targetPath.getAdditionals() : null;
-                    if (null != additionals && 0 < additionals.size()) {
-                        sessionToAdd.setEnhancement(new SessionEnhancement() {
+                    final SessionEnhancement sessionEnhancement = SessionEnhancement.class.isInstance(authenticated) ? (SessionEnhancement) authenticated : null;
+                    {
+                        SessionEnhancement effectiveEnhancement = new SessionEnhancement() {
 
                             @Override
                             public void enhanceSession(Session session) {
-                                for (Map.Entry<String, String> entry : additionals.entrySet()) {
-                                    session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
+                                // Add optional additionals (if any)
+                                if (null != additionals) {
+                                    for (Map.Entry<String, String> entry : additionals.entrySet()) {
+                                        session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
+                                    }
+                                }
+
+                                // Set guest marker
+                                session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
+
+                                // Apply SessionEnhancement (if not null)
+                                if (null != sessionEnhancement) {
+                                    sessionEnhancement.enhanceSession(session);
                                 }
                             }
-                        });
+                        };
+                        sessionToAdd.setEnhancement(effectiveEnhancement);
                     }
                     session = sessiondService.addSession(sessionToAdd);
                     if (null == session) {
                         // Session could not be created
                         throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                    }
-                    session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
-                    if (SessionEnhancement.class.isInstance(authenticated)) {
-                        ((SessionEnhancement) authenticated).enhanceSession(session);
                     }
                     LogProperties.putSessionProperties(session);
                 }
