@@ -382,3 +382,14 @@ properties:
       file: AdminUser.properties
       packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]
+    - key: com.openexchange.admin.enableAdminMailChecks
+      description: |
+        Controls whether context administrator's E-Mail addresses are supposed to be validated on 'changeuser' invocation
+      defaultValue: false
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: AdminUser.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "User"]

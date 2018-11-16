@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-11-01 16:28+0900\n"
+"PO-Revision-Date: 2018-11-11 16:39+0900\n"
 "Last-Translator: Sandrine Burriel <sandrine@workshop-chapina.com>\n"
 "Language-Team: French <fr@workshop-chapina.com>\n"
 "Language: fr_FR\n"
@@ -1029,8 +1029,8 @@ msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
 msgstr ""
-"Vous avez reçu un courriel contenant une réponse à un rendez-vous que "
-"vous n'avez pas organisé. Vous pouvez sans doute l'ignorer."
+"Vous avez reçu un courriel contenant une réponse à un rendez-vous que vous "
+"n'avez pas organisé. Vous pouvez sans doute l'ignorer."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1384,7 +1384,7 @@ msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
 msgstr ""
-"Impossible d'effectuer cette opération, du fait d'une modification déjà en "
+"Impossible d'effectuer cette opération car une modification est déjà en "
 "cours. Veuillez recharger les données et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
@@ -1779,7 +1779,7 @@ msgstr "%1$s, %2$s sur %3$s"
 #. %1$s on %2$s %3$s
 #. E.g. OX Mail App on Android 8.0
 #: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:85
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:96
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:105
 msgid "%1$s on %2$s %3$s"
 msgstr "%1$s sur %2$s %3$s"
 
@@ -1788,11 +1788,26 @@ msgstr "%1$s sur %2$s %3$s"
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr "Client Microsoft Exchange ActiveSync"
 
+#. WebDAV InfoStore
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:91
+msgid "WebDAV InfoStore"
+msgstr "InfoStore WebDAV"
+
+#. WebDAV VCard
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:94
+msgid "WebDAV VCard"
+msgstr "VCard WebDAV"
+
+#. WebDAV iCal
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:97
+msgid "WebDAV iCal"
+msgstr "iCal WebDAV"
+
 #. %1$s %2$s on %3$s %4$s
 #. E.g. OX Mail App 1.10 on Android 8.0
 #. %1$s %2$s on %3$s %4$s
 #. E.g. Drive Client 2.4.0 on Windows 10
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:92
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:101
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:65
 msgid "%1$s %2$s on %3$s %4$s"
 msgstr "%1$s %2$s sur %3$s %4$s"
@@ -1801,7 +1816,7 @@ msgstr "%1$s %2$s sur %3$s %4$s"
 #. E.g. OX Mail App 1.10 on Android
 #. %1$s %2$s on %3$s
 #. E.g. Drive Client 2.4.0 on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:100
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:109
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:69
 msgid "%1$s %2$s on %3$s"
 msgstr "%1$s %2$s sur %3$s"
@@ -1810,10 +1825,15 @@ msgstr "%1$s %2$s sur %3$s"
 #. E.g. OX Mail App on Android
 #. %1$s on %2$s
 #. E.g. Drive Client on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:104
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:113
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
 msgid "%1$s on %2$s"
 msgstr "%1$s sur %2$s"
+
+#. Unknown client
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:116
+msgid "Unknown client"
+msgstr "Client inconnu"
 
 #: com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
@@ -2144,83 +2164,83 @@ msgstr "Catégories"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:132
 msgid "Optional 01"
-msgstr "Optionnel 01"
+msgstr "Facultatif 01"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:133
 msgid "Optional 02"
-msgstr "Optionnel 02"
+msgstr "Facultatif 02"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:134
 msgid "Optional 03"
-msgstr "Optionnel 03"
+msgstr "Facultatif 03"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:135
 msgid "Optional 04"
-msgstr "Optionnel 04"
+msgstr "Facultatif 04"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:136
 msgid "Optional 05"
-msgstr "Optionnel 05"
+msgstr "Facultatif 05"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:137
 msgid "Optional 06"
-msgstr "Optionnel 06"
+msgstr "Facultatif 06"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:138
 msgid "Optional 07"
-msgstr "Optionnel 07"
+msgstr "Facultatif 07"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:139
 msgid "Optional 08"
-msgstr "Optionnel 08"
+msgstr "Facultatif 08"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:140
 msgid "Optional 09"
-msgstr "Optionnel 09"
+msgstr "Facultatif 09"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:141
 msgid "Optional 10"
-msgstr "Optionnel 10"
+msgstr "Facultatif 10"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:142
 msgid "Optional 11"
-msgstr "Optionnel 11"
+msgstr "Facultatif 11"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:143
 msgid "Optional 12"
-msgstr "Optionnel 12"
+msgstr "Facultatif 12"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:144
 msgid "Optional 13"
-msgstr "Optionnel 13"
+msgstr "Facultatif 13"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:145
 msgid "Optional 14"
-msgstr "Optionnel 14"
+msgstr "Facultatif 14"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:146
 msgid "Optional 15"
-msgstr "Optionnel 15"
+msgstr "Facultatif 15"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:147
 msgid "Optional 16"
-msgstr "Optionnel 16"
+msgstr "Facultatif 16"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:148
 msgid "Optional 17"
-msgstr "Optionnel 17"
+msgstr "Facultatif 17"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:149
 msgid "Optional 18"
-msgstr "Optionnel 18"
+msgstr "Facultatif 18"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:150
 msgid "Optional 19"
-msgstr "Optionnel 19"
+msgstr "Facultatif 19"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:151
 msgid "Optional 20"
-msgstr "Optionnel 20"
+msgstr "Facultatif 20"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:152
 msgid "Date of birth"
@@ -2384,10 +2404,9 @@ msgid ""
 "there was a previous message about this object not having been returned to "
 "the pool, the object was just in use too long."
 msgstr ""
-"L'objet %1$s n'appartient pas à cette réserve. Il sera supprimé. S'il y "
-"avait un message auparavant à propos de cet objet selon lequel il n'a pas "
-"été remis en réserve, c'est simplement qu'il a été utilisé pendant trop "
-"longtemps."
+"L'objet %1$s n'appartient pas à cette réserve. Il sera supprimé. S'il y a "
+"eu auparavant un message indiquant que l'objet n'a pas été remis en "
+"réserve, il est simplement utilisé depuis trop longtemps."
 
 #. A property defining the server name was not found in the configuration properties files.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
@@ -3908,6 +3927,13 @@ msgstr "Le mot de passe est incorrect."
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:116
 msgid "Login denied."
 msgstr "Connexion refusée."
+
+#. Used in case there were too many failed login attempts for an account within a certain timeframe.
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:122
+msgid "Too many login attempts. Please try again later."
+msgstr ""
+"Nombre de tentatives de connexions trop important. Veuillez réessayer"
+" ultérieurement."
 
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
@@ -5716,7 +5742,7 @@ msgstr "Site"
 
 #: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
 msgid "Apply a template (optional)"
-msgstr "Appliquer un modèle (optionnel)"
+msgstr "Appliquer un modèle (facultatif)"
 
 #: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
 msgid "Add cipher code"
@@ -5797,8 +5823,8 @@ msgid ""
 "note: The quota refers to all items of all users in this context."
 msgstr ""
 "Quota dépassé. Veuillez supprimer certains éléments pour en créer de "
-"nouveaux. Remarque : le quota se réfère à tous les éléments de tous les "
-"utilisateurs de ce contexte."
+"nouveaux. Remarque : dans ce contexte, le quota se réfère à l'ensemble "
+"des éléments de tous les utilisateurs."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
 msgid ""
@@ -5807,9 +5833,11 @@ msgid ""
 "refers to all appointments of all users in this context."
 msgstr ""
 "Quota dépassé pour le calendrier. Limite du quota : %2$s. Quota utilisé : "
-"%1$s. Veuillez supprimer certains rendez-vous afin d'en créer de nouveaux. "
-"Remarque : le quota se réfère à tous les rendez-vous de tous les "
-"utilisateurs de ce contexte."
+"%1$s. Veuillez supprimer certains rendez-vous pour pouvoir en créer de "
+"nouveaux. "
+"Remarque : dans ce contexte, le quota se réfère à l'ensemble des rendez-vous "
+"de tous les "
+"utilisateurs."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 msgid ""
@@ -5818,9 +5846,9 @@ msgid ""
 "refers to all contacts of all users in this context."
 msgstr ""
 "Quota dépassé pour les contacts. Limite du quota : %2$s. Quota utilisé : "
-"%1$s. Veuillez supprimer certains contacts afin d'en créer de nouveaux. "
-"Remarque : le quota se réfère à tous les contactsde tous les utilisateurs de "
-"ce contexte."
+"%1$s. Veuillez supprimer certains contacts pour pouvoir en créer de nouveaux. "
+"Remarque : dans ce contexte, le quota se réfère à l'ensemble des contacts de "
+"tous les utilisateurs."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
@@ -5829,9 +5857,10 @@ msgid ""
 "tasks of all users in this context."
 msgstr ""
 "Quota dépassé pour les tâches. Limite du quota : %2$s. Quota utilisé : %1$s. "
-"Veuillez supprimer certaines tâches afin d'en créer de nouvelles. Remarque : "
-"le quota se réfère à toutes les tâches de tous les utilisateurs de ce "
-"contexte."
+"Veuillez supprimer certaines tâches pour pouvoir en créer de nouvelles. "
+"Remarque : "
+"dans ce contexte, le quota se réfère à l'ensemble des tâches de tous les "
+"utilisateurs."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -5840,9 +5869,9 @@ msgid ""
 "files of all users in this context."
 msgstr ""
 "Quota dépassé pour les fichiers. Limite du quota : %2$s. Quota utilisé : "
-"%1$s. Veuillez supprimer certains fichiers afin d'en créer de nouveaux. "
-"Remarque : le quota se réfère à tous les fichiersde tous les utilisateurs de "
-"ce contexte."
+"%1$s. Veuillez supprimer certains fichiers pour pouvoir en créer de nouveaux. "
+"Remarque : dans ce contexte, le quota se réfère à l'ensemble des fichiers de "
+"tous les utilisateurs."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
 msgid ""
@@ -5851,9 +5880,11 @@ msgid ""
 "refers to all attachments of all users in this context."
 msgstr ""
 "Quota dépassé pour les pièces jointes. Limite du quota : %2$s. Quota "
-"utilisé : %1$s. Veuillez supprimer certaines pièces jointes afin d'en créer "
-"de nouvelles. Remarque : le quota se réfère à toutes les pièces jointes de "
-"tous les utilisateurs de ce contexte."
+"utilisé : %1$s. Veuillez supprimer certaines pièces jointes pour pouvoir en "
+"créer "
+"de nouvelles. Remarque : dans ce contexte, le quota se réfère à l'ensemble "
+"des pièces jointes de "
+"tous les utilisateurs."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid ""
@@ -5862,7 +5893,7 @@ msgid ""
 "refers to all shares of one user in this context."
 msgstr ""
 "Quota dépassé pour les partages. Limite du quota : %2$s. Quota utilisé : "
-"%1$s. Veuillez supprimer certains partages afin d'en créer de nouveaux. "
+"%1$s. Veuillez supprimer certains partages pour pouvoir en créer de nouveaux. "
 "Remarque : dans ce contexte, le quota se réfère à l'ensemble des partages "
 "d'un utilisateur donné."
 
@@ -5873,7 +5904,7 @@ msgid ""
 "refers to all shares of one user in this context."
 msgstr ""
 "Quota dépassé pour les liens de partages. Limite du quota : %2$s. Quota "
-"utilisé : %1$s. Veuillez supprimer certains partages afin d'en créer de "
+"utilisé : %1$s. Veuillez supprimer certains partages pour pouvoir en créer de "
 "nouveaux. Remarque : dans ce contexte, le quota se réfère à l'ensemble des "
 "partages d'un utilisateur donné."
 
@@ -5884,7 +5915,7 @@ msgid ""
 "refers to all shares of one user in this context."
 msgstr ""
 "Quota dépassé pour les utilisateurs invités. Limite du quota : %2$s. Quota "
-"utilisé : %1$s. Veuillez supprimer certains partages afin d'en créer de "
+"utilisé : %1$s. Veuillez supprimer certains partages pour pouvoir en créer de "
 "nouveaux. Remarque : dans ce contexte, le quota se réfère à l'ensemble des "
 "partages d'un utilisateur donné."
 
@@ -5893,9 +5924,9 @@ msgid ""
 "Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please "
 "delete some signatures in order to create new ones."
 msgstr ""
-"Quota atteint pour les signatures. Limite du quota : %2$s. Quota utilisé : "
-"%1$s. Veuillez supprimer certaines signatures afin de pouvoir en créer à "
-"nouveau."
+"Quota dépassé pour les signatures. Limite du quota : %2$s. Quota utilisé : "
+"%1$s. Veuillez supprimer certaines signatures pour pouvoir en créer de "
+"nouvelles."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
 msgid ""
@@ -5903,7 +5934,7 @@ msgid ""
 "to store a new one."
 msgstr ""
 "La limite de stockage des signatures est de %1$s. Supprimez les anciennes "
-"signatures afin d'en stocker une nouvelle."
+"signatures pour pouvoir en stocker une nouvelle."
 
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
@@ -6524,7 +6555,7 @@ msgid ""
 "You are trying to create a new recurring appointment from an exception. This "
 "is not possible."
 msgstr ""
-"Vous essayez de créer un nouveau rendez-vous répétitif à partir d'une "
+"Vous essayez de créer un nouveau rendez-vous récurrent à partir d'une "
 "exception, ce qui n'est pas possible."
 
 #. *
@@ -6535,7 +6566,7 @@ msgid ""
 "Moving an instance of a recurring appointment into another folder is not "
 "allowed."
 msgstr ""
-"Il n'est pas permis de déplacer un rendez-vous répétitif dans un autre "
+"Il n'est pas permis de déplacer un rendez-vous récurrent dans un autre "
 "dossier."
 
 #. *
@@ -6557,7 +6588,7 @@ msgid ""
 "appointment."
 msgstr ""
 "Vous ne pouvez pas utiliser des drapeaux privés différents pour une "
-"occurrence d'un rendez-vous répétitif."
+"occurrence d'un rendez-vous récurrent."
 
 #. *
 #. * You can not use the private flag in a non private folder.
@@ -6688,7 +6719,8 @@ msgstr "Vous n'avez pas le droit de marquer ce contact comme privé."
 #. his object.
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:81
 msgid "An edit conflict occurred. To edit the contact please reload it."
-msgstr "Conflit d'édition. Veuillez recharger le contact afin de le modifier."
+msgstr ""
+"Conflit d'édition. Veuillez recharger le contact pour pouvoir le modifier."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:83
 msgid "No changes found. No update required."
@@ -9459,10 +9491,12 @@ msgid ""
 "folders. Consequently, the mail module is not usable at the moment. Please "
 "delete other folders first in order to re-use the mail module again"
 msgstr ""
-"Les dossiers par défaut ne peuvent pas être créés car le système de courrier "
+"Il n'est pas possible de créer les dossiers par défaut car le système de "
+"messagerie "
 "interdit de créer de nouveaux dossiers. Par conséquent, le module de "
-"courrier est instable pour le moment. Veuillez supprimer préalablement "
-"d'autres dossiers afin de pouvoir réutiliser le module de courrier."
+"courrier n'est pas utilisable pour le moment. Veuillez supprimer "
+"préalablement "
+"d'autres dossiers pour pouvoir réutiliser le module de courrier."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "The types of specified data source are not supported."
@@ -9716,7 +9750,7 @@ msgid ""
 "Please specify an expiration date in order to compose a message containing "
 "share links"
 msgstr ""
-"Veuillez spécifier une date d'expiration afin de rédiger un message "
+"Veuillez spécifier une date d'expiration pour pouvoir rédiger un message "
 "contenant des liens partagés"
 
 #. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
