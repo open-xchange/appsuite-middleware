@@ -104,7 +104,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 DAVUserAgent userAgent = DAVUserAgent.parse(sUserAgent);
                 String clientFamily = getClientFamily(userAgent);
                 ReadableUserAgent readableUserAgent = userAgentParser.parse(sUserAgent);
-                if (null == readableUserAgent || UNKNOWN.equalsIgnoreCase(readableUserAgent.getName())) {
+                if (UNKNOWN.equals(clientFamily) && (null == readableUserAgent || UNKNOWN.equalsIgnoreCase(readableUserAgent.getName()))) {
                     // Maybe iOS accountsd?
                     if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("iOS") && sUserAgent.contains("accountsd")) {
                         return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, IOS_DAV, null, IOS_DAV, ClientInfoType.DAV);
