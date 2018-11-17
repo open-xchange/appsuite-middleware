@@ -87,10 +87,14 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
     }
 
     /**
-     * Checks given connection if suitable for being freshly used.
+     * Checks given connection if suitable for being further used.
+     * <p>
+     * In detail, this routine attempts to set given connection to auto-commit mode. In case such an attempt yields a
+     * <code>java.io.EOFException</code> the given connection appears to be closed by the remote host (database). Then <code>null</code> is
+     * is returned.
      *
      * @param connection The connection
-     * @return The checked connection
+     * @return The checked connection or <code>null</code> if closed by remote host (database)
      */
     private Connection checkConnectionElseReturnNull(Connection connection) {
         if (null != connection) {
@@ -120,12 +124,23 @@ public abstract class AbstractConnectionProvider implements ConnectionProvider {
         // Already in use. Check connection.
         connection = checkConnectionElseReturnNull(connection);
         if (null == connection) {
-            // Closed by server. Null'ify this.connection and try to establish a new connection
+            // Closed by remote host (database). Null'ify this.connection and try to lease a new connection
+            closeSafelyAfterCheck(this.connection);
             this.connection = null;
             connection = connectionAccess.getConnection();
             this.connection = connection;
         }
         return connection;
+    }
+
+    private void closeSafelyAfterCheck(Connection connection) {
+        if (null != connection) {
+            try {
+                connectionAccess.closeConnection(connection);
+            } catch (Exception x) {
+                LoggerHolder.LOG.debug("Failed to close connection", x);
+            }
+        }
     }
 
     /**
