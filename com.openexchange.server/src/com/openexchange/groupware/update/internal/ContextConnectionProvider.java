@@ -86,7 +86,7 @@ public class ContextConnectionProvider extends AbstractConnectionProvider {
 
         @Override
         public void closeConnection(Connection connection) {
-            if (null != databaseService) {
+            if (null != databaseService && null != connection) {
                 databaseService.backForUpdateTask(contextId, connection);
             }
         }

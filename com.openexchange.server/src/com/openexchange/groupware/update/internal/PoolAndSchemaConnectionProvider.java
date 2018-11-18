@@ -88,7 +88,7 @@ public class PoolAndSchemaConnectionProvider extends AbstractConnectionProvider 
 
         @Override
         public void closeConnection(Connection connection) {
-            if (null != databaseService) {
+            if (null != databaseService && null != connection) {
                 databaseService.backNoTimeoout(poolId, connection);
             }
         }
