@@ -88,6 +88,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
@@ -380,7 +381,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         boolean isDefault;
         {
             isDefault = accountDescription.getId() == MailAccount.DEFAULT_ID;
-            if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
+            if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), MailAccounts.isGuest(session)))) {
                 ConfiguredServer mailServer = MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId());
                 mailProvider = getMailProviderByURL(mailServer.getUrlString(false));
             } else {
@@ -418,7 +419,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             }
 
             // Set server and port
-            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
+            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), MailAccounts.isGuest(session)))) {
                 URI uri = parseUri(mailServerURL);
                 if (null != uri) {
                     mailConfig.setServer(uri.getHost());

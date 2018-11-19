@@ -7,7 +7,7 @@ title: OX-Report Client
 
 **You have been blocked already?**
 
-**Don't panic**, you can still access <https://software.open-xchange.com/OX6/stable>, 
+**Don't panic**, you can still access <https://software.open-xchange.com>, 
 because that is open for everyone. So install the Report Client from stable instead 
 of updates and once you're done, update to the latest version.
 

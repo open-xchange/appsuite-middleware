@@ -51,11 +51,14 @@ package com.openexchange.clientinfo.impl;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoService;
+import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 
@@ -72,6 +75,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientInfoServiceImpl.class);
 
     private final ServiceListing<ClientInfoProvider> providers;
+    private final ClientInfo defaultClientInfo;
 
     /**
      * Initializes a new {@link ClientInfoServiceImpl}.
@@ -81,6 +85,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
     public ClientInfoServiceImpl(ServiceListing<ClientInfoProvider> providers) {
         super();
         this.providers = providers;
+        defaultClientInfo = new DefaultClientInfo();
     }
 
     @Override
@@ -94,7 +99,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
             }
             LOG.debug("Unknown client found. Client identifier: {} User-Agent: {}", session.getClient(), session.getParameter(Session.PARAM_USER_AGENT));
         }
-        return null;
+        return defaultClientInfo;
     }
 
     @Override
@@ -108,7 +113,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
             }
             LOG.debug("Unknown client found. Client identifier: {}", clientId);
         }
-        return null;
+        return defaultClientInfo;
     }
 
     @Override
@@ -122,5 +127,54 @@ public class ClientInfoServiceImpl implements ClientInfoService {
         }
         return map;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class DefaultClientInfo implements ClientInfo {
+
+        private final String unknown = "unknown";
+
+        /**
+         * Initializes a new {@link ClientInfoServiceImpl.DefaultClientInfo}.
+         */
+        DefaultClientInfo() {
+            super();
+        }
+
+        @Override
+        public ClientInfoType getType() {
+            return ClientInfoType.OTHER;
+        }
+
+        @Override
+        public String getDisplayName(Locale locale) {
+            return StringHelper.valueOf(locale).getString(ClientInfoStrings.UNKNOWN_CLIENT);
+        }
+
+        @Override
+        public String getOSFamily() {
+            return unknown;
+        }
+
+        @Override
+        public String getOSVersion() {
+            return unknown;
+        }
+
+        @Override
+        public String getClientName() {
+            return unknown;
+        }
+
+        @Override
+        public String getClientVersion() {
+            return unknown;
+        }
+
+        @Override
+        public String getClientFamily() {
+            return unknown;
+        }
+    } // End of class DefaultClientInfo
 
 }

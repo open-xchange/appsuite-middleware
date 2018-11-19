@@ -824,6 +824,41 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
+    public java.lang.Boolean existsInServer(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+        final OXContextInterface contextInterface = getContextInterface();
+        try {
+            return Boolean.valueOf(contextInterface.existsInServer(soap2Context(ctx), soap2Credentials(auth)));
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
+            com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidDataException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.InvalidDataException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        } catch (DuplicateExtensionException e) {
+            com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException();
+            com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException value = new com.openexchange.admin.soap.reseller.context.rmi.exceptions.DuplicateExtensionException();
+            faultDetail.setDuplicateExtensionException(value);
+            throw new DuplicateExtensionException_Exception(e.getMessage(), faultDetail, e);
+        }
+    }
+
+    @Override
     public void disableAll(DisableAll parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , NoSuchReasonException_Exception , StorageException_Exception , RemoteException_Exception , OXContextException_Exception , InvalidDataException_Exception    {
         final OXContextInterface contextInterface = getContextInterface();
         try {

@@ -91,6 +91,7 @@ import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.Password;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -357,7 +358,7 @@ public abstract class MailConfig {
         UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount, userId, contextId);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
             }
             throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(" in context ").append(contextId).toString());
@@ -450,7 +451,7 @@ public abstract class MailConfig {
         if (!mailAccount.isDefaultAccount()) {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
-        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(mailAccount)))) {
             return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
@@ -467,8 +468,10 @@ public abstract class MailConfig {
     public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
+            if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+            }
         }
 
         MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
@@ -616,7 +619,7 @@ public abstract class MailConfig {
                 userIds = new TIntHashSet(accounts.length);
                 for (final MailAccount candidate : accounts) {
                     final String shouldMatch;
-                    switch (MailProperties.getInstance().getMailServerSource(iUserId, ctx.getContextId())) {
+                    switch (MailProperties.getInstance().getMailServerSource(iUserId, ctx.getContextId(), MailAccounts.isGuestAccount(candidate))) {
                     case USER:
                         shouldMatch = toSocketAddrString(candidate.generateMailServerURL(), 143);
                         break;

@@ -63,7 +63,7 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 /**
  * This abstract class contains all the common options between all command line tools
- * 
+ *
  * @author cutmasta,d7
  *
  */
@@ -160,6 +160,7 @@ public abstract class BasicCommandlineOptions {
     protected static final char OPT_NAME_SEARCHPATTERN = 's';
     protected static final String OPT_NAME_IGNORECASE_LONG = "ignorecase";
     protected static final char OPT_NAME_IGNORECASE = 'i';
+    protected static final String OPT_NAME_IN_SERVER_LONG = "inserver";
 
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
@@ -180,6 +181,7 @@ public abstract class BasicCommandlineOptions {
 
     protected CLIOption contextOption = null;
     protected CLIOption contextNameOption = null;
+    protected CLIOption inServerOption = null;
     protected CLIOption adminUserOption = null;
     protected CLIOption adminPassOption = null;
     protected CLIOption searchOption = null;
@@ -463,6 +465,10 @@ public abstract class BasicCommandlineOptions {
 
     protected final void setContextNameOption(final AdminParser admp, final NeededQuadState needed) {
         this.contextNameOption = setShortLongOpt(admp, OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, needed);
+    }
+
+    protected final void setInServerOption(final AdminParser admp, final NeededQuadState needed) {
+        this.inServerOption = setLongOpt(admp, OPT_NAME_IN_SERVER_LONG, "Whether check should be limited to the registered server this provisioning node is running in", false, false);
     }
 
     // ------------------------------------------------------------------------------------- //

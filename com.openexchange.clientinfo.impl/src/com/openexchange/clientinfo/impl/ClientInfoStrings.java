@@ -87,6 +87,15 @@ public class ClientInfoStrings implements LocalizableStrings {
     // Microsoft Exchange ActiveSync Client
     public final static String USM_EAS_CLIENT = "Microsoft Exchange ActiveSync Client";
 
+    // WebDAV InfoStore
+    public final static String WEBDAV_INFOSTORE = "WebDAV InfoStore";
+
+    // WebDAV VCard
+    public final static String WEBDAV_VCARD = "WebDAV VCard";
+
+    // WebDAV iCal
+    public final static String WEBDAV_ICAL = "WebDAV iCal";
+
     // %1$s %2$s on %3$s %4$s
     // E.g. OX Mail App 1.10 on Android 8.0
     public final static String MAILAPP_WITH_VERSION_AND_PLATFORM_AND_PLATFORMVERSION = "%1$s %2$s on %3$s %4$s";
@@ -102,6 +111,9 @@ public class ClientInfoStrings implements LocalizableStrings {
     // %1$s on %2$s
     // E.g. OX Mail App on Android
     public final static String MAILAPP_WITH_PLATFORM = "%1$s on %2$s";
+
+    // Unknown client
+    public final static String UNKNOWN_CLIENT = "Unknown client";
 
     private ClientInfoStrings() {
         super();

@@ -104,7 +104,12 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 DAVUserAgent userAgent = DAVUserAgent.parse(sUserAgent);
                 String clientFamily = getClientFamily(userAgent);
                 ReadableUserAgent readableUserAgent = userAgentParser.parse(sUserAgent);
-                if (null == readableUserAgent) {
+                if (UNKNOWN.equals(clientFamily) && (null == readableUserAgent || UNKNOWN.equalsIgnoreCase(readableUserAgent.getName()))) {
+                    // Maybe iOS accountsd?
+                    if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("iOS") && sUserAgent.contains("accountsd")) {
+                        return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, IOS_DAV, null, IOS_DAV, ClientInfoType.DAV);
+                    }
+
                     // Unknown User-Agent
                     return new DAVClientInfo(userAgent.getReadableName(), clientFamily);
                 }
@@ -147,6 +152,12 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 if (userAgent.equals(DAVUserAgent.OX_SYNC) || userAgent.equals(DAVUserAgent.SMOOTH_SYNC)) {
                     return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily, ClientInfoType.OXAPP);
                 }
+                if (UNKNOWN.equals(clientFamily)) {
+                    //Maybe akonadi
+                    if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("akonadi")) {
+                        return new DAVClientInfo("KDE/Plasma DAV Client", "linux", null, "akonadi", null, "akonadi", ClientInfoType.DAV);
+                    }
+                }
                 return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
             }
         };
@@ -166,7 +177,8 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         }
 
         try {
-            return clientInfoCache.get(sUserAgent);
+            DAVClientInfo davClientInfo = clientInfoCache.get(sUserAgent);
+            return UNKNOWN.equals(davClientInfo.getClientFamily()) ? null : davClientInfo;
         } catch (ExecutionException e) {
             LOG.error("Failed to determine client info for User-Agent {}", sUserAgent, e.getCause());
             return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName(), getClientFamily(DAVUserAgent.UNKNOWN));
