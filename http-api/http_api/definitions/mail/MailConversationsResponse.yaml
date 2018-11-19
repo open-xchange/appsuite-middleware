@@ -1,6 +1,6 @@
 type: object
 properties:
-  $ref: ../common/CommonResponseData.yaml
+  $ref: ../common/FlaggedResponseData.yaml
   data:
     type: array
     description: An array of JSON objects each representing a conversation's root message.
