@@ -57,7 +57,7 @@ import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import com.openexchange.pgp.core.PGPSessionDecrypter;
+import com.openexchange.pgp.core.PGPSessionKeyExtractor;
 
 /**
  * {@link AddRecipientPacketProcessorHandler} adds new recipients to a PGP Message without the need to re-encrypt the whole Message
@@ -94,7 +94,7 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
             List<PGPPacket> ret = new ArrayList<PGPPacket>(Arrays.asList(new PGPPacket[] { packet /* keep the original packet */}));
 
             //Decrypt the session data
-            byte[] symmetricSessionKey = new PGPSessionDecrypter().decryptSymmetricSessionKey((PublicKeyEncSessionPacket) rawPacket, addingIdentity);
+            byte[] symmetricSessionKey = new PGPSessionKeyExtractor().decryptSymmetricSessionKey((PublicKeyEncSessionPacket) rawPacket, addingIdentity);
             try {
                 //Creating a new session packet for each new identity
                 for (PGPPublicKey identities : identitiesToAdd) {
