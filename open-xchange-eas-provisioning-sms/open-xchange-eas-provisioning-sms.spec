@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 19
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,8 +62,6 @@ ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
-* Fri Nov 16 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-11-19 (4966)
 * Mon Oct 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-11-05 (4933)
 * Mon Oct 08 2018 Marcus Klein <marcus.klein@open-xchange.com>
