@@ -385,7 +385,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 SearchIterators.close(it);
             }
             final AJAXRequestResult result = new AJAXRequestResult(mails, "mail").setDurationByStart(start);
-            result.setResponseProperty("cached", Boolean.valueOf(cache));
+            if (cache) {
+                result.setResponseProperty("cached", Boolean.TRUE);
+            }
             if (warnings != null) {
                 result.addWarnings(warnings);
             }

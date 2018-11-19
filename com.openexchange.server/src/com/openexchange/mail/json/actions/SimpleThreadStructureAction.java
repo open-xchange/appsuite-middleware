@@ -453,7 +453,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             }
 
             AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
-            result.setResponseProperty("cached", Boolean.valueOf(cached));
+            if (cache) {
+                result.setResponseProperty("cached", Boolean.TRUE);
+            }
             if (more > 0) {
                 result.setResponseProperty("more", Integer.valueOf(more));
             }
