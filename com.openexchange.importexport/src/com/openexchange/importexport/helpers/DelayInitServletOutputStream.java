@@ -63,6 +63,7 @@ public class DelayInitServletOutputStream extends OutputStream {
 
     private final HttpServletResponse response;
     private OutputStream out;
+    private boolean closed;
 
     /**
      * Initializes a new {@link DelayInitServletOutputStream}.
@@ -70,6 +71,7 @@ public class DelayInitServletOutputStream extends OutputStream {
     public DelayInitServletOutputStream(HttpServletResponse response) {
         super();
         this.response = response;
+        closed = false;
     }
 
     private OutputStream out() throws IOException {
@@ -113,9 +115,14 @@ public class DelayInitServletOutputStream extends OutputStream {
             return;
         }
 
+        if (closed) {
+            return;
+        }
+
         try {
             out.flush();
         } finally {
+            closed = true;
             out.close();
         }
     }
