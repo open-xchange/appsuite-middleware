@@ -52,10 +52,10 @@ package com.openexchange.importexport.exporters.ical;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.cascade.ConfigView;
@@ -67,13 +67,14 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.i18n.I18nServiceRegistry;
-import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.DelayInitServletOutputStream;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -122,17 +123,19 @@ public abstract class AbstractICalExporter implements ICalExport {
     public SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException {
         if (null != requestData) {
             // Try to stream
-            try {
-                OutputStream out = requestData.optOutputStream();
-                if (null != out) {
-                    requestData.setResponseHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment" + filename);
-                    requestData.removeCachingHeader();
+            HttpServletResponse response = requestData.optHttpServletResponse();
+            if (null != response) {
+                OutputStream out = null;
+                try {
+                    response.setHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    response.setHeader("Content-Disposition", "attachment" + filename);
+                    Tools.removeCachingHeader(response);
+                    out = new DelayInitServletOutputStream(response);
                     getExportDataSource(session, out);
                     return null;
+                } finally {
+                    Streams.close(out);
                 }
-            } catch (IOException e) {
-                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
             }
         }
 
@@ -209,7 +212,7 @@ public abstract class AbstractICalExporter implements ICalExport {
 
     /**
      * Gets the configured maximum number of included components when exporting to the iCalendar format.
-     * 
+     *
      * @param session The session
      * @return The export limit, or <code>-1</code> if not limited
      */
