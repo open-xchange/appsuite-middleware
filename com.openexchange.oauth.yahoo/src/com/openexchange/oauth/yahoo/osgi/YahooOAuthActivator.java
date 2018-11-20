@@ -56,6 +56,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -105,7 +106,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class, ThreadPoolService.class, OAuthScopeRegistry.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class, ThreadPoolService.class, OAuthScopeRegistry.class, OAuthAccessRegistryService.class, SSLSocketFactoryProvider.class };
     }
 
     @Override
