@@ -139,4 +139,8 @@ public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
         // Nothing to do
     }
 
+    @Override
+    public void visit(final XMailboxTerm term) {
+        // Nothing to do
+    }
 }

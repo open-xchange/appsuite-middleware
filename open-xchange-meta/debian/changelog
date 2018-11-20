@@ -1,3 +1,9 @@
+open-xchange-meta (7.6.3-43) stable; urgency=medium
+
+  * Build for patch 2018-11-19 (4895)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 12 Nov 2018 14:34:04 +0100
+
 open-xchange-meta (7.6.3-42) stable; urgency=medium
 
   * Build for patch 2018-08-30 (4876)

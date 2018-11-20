@@ -195,6 +195,8 @@ import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.util.MessageRemovedIOException;
 import com.sun.mail.util.ReadableMime;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
@@ -202,8 +204,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.procedure.TLongObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
@@ -1673,8 +1673,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Perform "SEARCH UNSEEN" IMAP command
             int[] unseenSeqNums = null;
             int[] seenSeqNums = null;
-
             int[] seqNumsToFetch = null;
+
             if (OrderDirection.ASC.equals(order)) {
                 SearchTerm<?> unseenSearchterm = new FlagTerm(MailMessage.FLAG_SEEN, false);
                 unseenSeqNums = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig).msgIds;
@@ -1752,7 +1752,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             }
                             numToCopy -= length;
                             if (numToCopy > 0) {
-                                System.arraycopy(seenSeqNums, 0, sortedSeqNums, length, numToCopy);
+                                int start = fromIndex - unseenSeqNums.length;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                System.arraycopy(seenSeqNums, start, sortedSeqNums, length, numToCopy);
                             }
                         } else {
                             int length = Math.min(seenSeqNums.length - fromIndex, numToCopy);
@@ -1764,7 +1768,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             }
                             numToCopy -= length;
                             if (numToCopy > 0) {
-                                System.arraycopy(unseenSeqNums, 0, sortedSeqNums, length, numToCopy);
+                                int start = fromIndex - seenSeqNums.length;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                System.arraycopy(unseenSeqNums, start, sortedSeqNums, length, numToCopy);
                             }
                         }
                     }
@@ -3440,7 +3448,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                         throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
-                    
+
                     OXException oxe = handleMessagingException(destFullName, e);
                     if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
@@ -3647,7 +3655,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                         throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
-                    
+
                     OXException oxe = handleMessagingException(destFullName, e);
                     if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);

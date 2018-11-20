@@ -197,6 +197,11 @@ public class SimHtmlService implements HtmlService {
     public HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) throws OXException {
         return htmlService.sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize);
     }
+    
+	@Override
+	public HtmlSanitizeResult sanitize(String htmlContent, HtmlSanitizeOptions options) throws OXException {
+		return htmlService.sanitize(htmlContent, options);
+	}
 
     @Override
     public HtmlSanitizeResult htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize) {

@@ -122,6 +122,8 @@ public class SearchSequence {
 	    return messageid((MessageIDTerm)term, charset);
 	else if (term instanceof ModifiedSinceTerm)	// RFC 4551 MODSEQ
 	    return modifiedSince((ModifiedSinceTerm)term);
+	else if (term instanceof XMailboxTerm)    // X-MAIBOX
+        return xMailbox((XMailboxTerm)term, charset);
 	else
 	    throw new SearchException("Search too complex. Cannot handle term: " + term.getClass().getName());
     }
@@ -496,5 +498,14 @@ public class SearchSequence {
 	result.writeAtom("MODSEQ");
 	result.writeNumber(term.getModSeq());
 	return result;
+    }
+    
+    protected Argument xMailbox(javax.mail.search.XMailboxTerm term, String charset) 
+        throws SearchException, IOException {
+    Argument result = new Argument();
+    
+    result.writeAtom("X-MAILBOX");
+    result.writeString(term.getPattern(), charset);
+    return result;
     }
 }
