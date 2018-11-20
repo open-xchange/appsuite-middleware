@@ -1041,8 +1041,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (null == msg) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
                 }
-                String sContentType = msg.getContentType();
-                if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                try {
+                    String sContentType = msg.getContentType();
+                    if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                        useGetPart = false;
+                    }
+                } catch (MessagingException e) {
+                    if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                        throw e;
+                    }
+                    
+                    // Grab from copied IMAP message
                     useGetPart = false;
                 }
             }
@@ -1131,15 +1140,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Check Content-Type
              */
+            MimeMessage msg;
             boolean useGetPart = true;
             {
                 imapFolder.fetch(null, new long[] { msgUID }, FETCH_PROFILE_PART, null);
-                IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 if (null == msg) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
                 }
-                String sContentType = msg.getContentType();
-                if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                try {
+                    String sContentType = msg.getContentType();
+                    if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                        useGetPart = false;
+                    }
+                } catch (MessagingException e) {
+                    if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                        throw e;
+                    }
+                    
+                    // Grab from copied IMAP message
+                    msg = MimeMessageUtility.newMimeMessage(((IMAPMessage) msg).getMimeStream(), null);
                     useGetPart = false;
                 }
             }
@@ -1160,10 +1180,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Regular look-up
              */
-            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-            if (null == msg) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
-            }
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
@@ -1618,25 +1634,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 long size = msg.getSize();
                 Long origUid = (Long) msg.getItem("X-REAL-UID");
                 String origFolder = (String) msg.getItem("X-MAILBOX");
-                if (size > _5MB && isComplex(msg.getBodystructure())) {
+                if (size > _5MB && isComplex(msg)) {
                     int blkSize = imapStore.getFetchBlockSize();
                     try {
-                        // Copy complete MIME stream
+                        // Convert from copied MIME message
                         imapStore.setFetchBlockSize(_5MB);
-                        MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
-                        mail = MimeMessageConverter.convertMessage(copy, false);
-                        // Set flags and received date
-                        MimeMessageConverter.parseFlags(msg.getFlags(), mail);
-                        if (!mail.containsColorLabel()) {
-                            mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
-                        }
-                        mail.setReceivedDate(msg.getReceivedDate());
+                        mail = convertFromCopy(msg);
                     } finally {
                         // Restore fetch block size
                         imapStore.setFetchBlockSize(blkSize);
                     }
                 } else {
-                    mail = MimeMessageConverter.convertMessage(msg, false);
+                    // Ensure BODYSTRUCTURE is valid
+                    try {
+                        msg.getBodystructure();
+                        mail = MimeMessageConverter.convertMessage(msg, false);
+                    } catch (MessagingException e) {
+                        if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                            throw e;
+                        }
+
+                        // Convert from copied MIME message
+                        mail = convertFromCopy(msg);
+                    }
                 }
                 mail.setFolder(fullName);
                 if (null != origUid) {
@@ -1702,12 +1722,33 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private boolean isComplex(BODYSTRUCTURE bodystructure) {
-        int threshold = 10;
-        return countNested(bodystructure, 0, threshold) >= threshold;
+    private MailMessage convertFromCopy(IMAPMessage msg) throws OXException, MessagingException {
+        MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
+        MailMessage mail = MimeMessageConverter.convertMessage(copy, false);
+        // Set flags and received date
+        MimeMessageConverter.parseFlags(msg.getFlags(), mail);
+        if (!mail.containsColorLabel()) {
+            mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+        }
+        mail.setReceivedDate(msg.getReceivedDate());
+        return mail;
     }
 
-    private int countNested(BODYSTRUCTURE bodystructure, int current, int threshold) {
+    private static boolean isComplex(IMAPMessage msg) throws MessagingException {
+        try {
+            BODYSTRUCTURE bodystructure = msg.getBodystructure();
+            int threshold = 10;
+            return countNested(bodystructure, 0, threshold) >= threshold;
+        } catch (MessagingException e) {
+            if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
+                throw e;
+            }
+
+            return true;
+        }
+    }
+
+    private static int countNested(BODYSTRUCTURE bodystructure, int current, int threshold) {
         int count = current;
         if (count >= threshold) {
             return count;

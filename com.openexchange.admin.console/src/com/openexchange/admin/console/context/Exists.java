@@ -73,10 +73,10 @@ public class Exists extends ExistsCore {
     }
 
     @Override
-    protected boolean maincall(final AdminParser parser, final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException {
+    protected boolean maincall(AdminParser parser, Context ctx, boolean inServer, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException {
         // get rmi ref
         final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
-        return oxctx.exists(ctx, auth);
+        return inServer ? oxctx.existsInServer(ctx, auth) : oxctx.exists(ctx, auth);
     }
 }
