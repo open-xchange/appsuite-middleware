@@ -904,8 +904,8 @@ msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Randevuların başlangıç tarihi saat dilimi değiştirildi. Asıl saat dilimi: "
-"%1$s. Yeni saat dilimi: %2$s"
+"Randevuların başlangıç tarihi saat dilimi değiştirildi. Asıl saat dilimi: %1$"
+"s. Yeni saat dilimi: %2$s"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 msgid ""
@@ -1175,8 +1175,7 @@ msgstr ""
 msgid ""
 "Access to this calendar is restricted. Please enter your password and try "
 "again."
-msgstr ""
-"Bu takvime erişim kısıtlanmış. Lütfen parolanızı girip yeniden deneyin."
+msgstr "Bu takvime erişim kısıtlanmış. Lütfen parolanızı girip yeniden deneyin."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
@@ -1533,8 +1532,7 @@ msgstr "İstenen ek bulunamadı."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
-msgstr ""
-"Çok fazla randevu sorgulandı. Lütfen daha kısa bir zaman aralığı seçin."
+msgstr "Çok fazla randevu sorgulandı. Lütfen daha kısa bir zaman aralığı seçin."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The appointment contains too many participants."
@@ -3209,8 +3207,8 @@ msgid ""
 "openexchange.filestore.s3.[filestoreID].signerOverride is properly "
 "configured for this filestore."
 msgstr ""
-"S3 depolaması \"hatalı istek\" yanıtı verdi. Lütfen bu dosya deposu için com."
-"openexchange.filestore.s3.[filestoreID].signerOverride değerinin düzgün "
+"S3 depolaması \"hatalı istek\" yanıtı verdi. Lütfen bu dosya deposu için "
+"com.openexchange.filestore.s3.[filestoreID].signerOverride değerinin düzgün "
 "yapılandırıldığını kontrol edin."
 
 #. Failed to create a bucket for name "%1$s" using region "%2$s"
@@ -3918,8 +3916,7 @@ msgstr "Oturumunuz sona erdi. Lütfen yeniden giriş yapın."
 
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:65
 msgid "The account \"%2$s\" is currently not enabled. Please try again later."
-msgstr ""
-"\"%2$s\" hesabı şu anda etkin değil. Lütfen daha sonra yeniden deneyin."
+msgstr "\"%2$s\" hesabı şu anda etkin değil. Lütfen daha sonra yeniden deneyin."
 
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:66
 msgid ""
@@ -4154,8 +4151,8 @@ msgid ""
 "Message move aborted for user %1$s. Source and destination folder are equal "
 "to \"%2$s\""
 msgstr ""
-"%1$s kullanıcısı için ileti taşıma iptal edildi. Kaynak ve hedef klasör "
-"aynı: \"%2$s\""
+"%1$s kullanıcısı için ileti taşıma iptal edildi. Kaynak ve hedef klasör aynı:"
+" \"%2$s\""
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
 msgid "IMAP folder read-only check failed"
@@ -4354,8 +4351,8 @@ msgid ""
 "No field was set that might give the contact in line %s a display name: no "
 "name, company or E-Mail."
 msgstr ""
-"%s. satırdaki kişiye görünen bir ad vermek için herhangi bir alan "
-"bulunamadı: isim, şirket veya e-posta yoktu."
+"%s. satırdaki kişiye görünen bir ad vermek için herhangi bir alan bulunamadı:"
+" isim, şirket veya e-posta yoktu."
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:101
 msgid "Can only handle one file, not %s"
@@ -5221,8 +5218,7 @@ msgstr "Sağlanan \"%1$s\" şeklindeki arama alanı bilinmiyor."
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:172
 msgid "Moving mail folder %1$s to subsequent folder %2$s is not allowed."
-msgstr ""
-"%1$s posta klasörünü sonraki %2$s klasörüne taşımanıza izin verilmiyor."
+msgstr "%1$s posta klasörünü sonraki %2$s klasörüne taşımanıza izin verilmiyor."
 
 #. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
@@ -5300,8 +5296,7 @@ msgstr ""
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:205
 msgid ""
 "The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr ""
-"%2$s klasöründeki %1$s iletisinin ham içeriğinin giriş akışı okunamıyor"
+msgstr "%2$s klasöründeki %1$s iletisinin ham içeriğinin giriş akışı okunamıyor"
 
 #. *
 #. * Versit object %1$s could not be saved
@@ -5466,8 +5461,8 @@ msgid ""
 "The POP3 storage path is invalid. POP3 storage path \"%1$s\" cannot be "
 "created for user %2$s"
 msgstr ""
-"POP3 depolama yolu geçersiz. %2$s kullanıcısı için POP3 depolama yolu \"%1$s"
-"\" oluşturulamıyor"
+"POP3 depolama yolu geçersiz. %2$s kullanıcısı için POP3 depolama yolu \"%1$"
+"s\" oluşturulamıyor"
 
 #. *
 #. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
@@ -5688,9 +5683,9 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"Konuk kullanıcılar için kota aşıldı. Kota sınırı: %2$s. Kullanılan kota: "
-"%1$s. Yenilerini oluşturmak için lütfen bazı paylaşımları silin. Lütfen "
-"dikkat: Bu bağlamda kota, tüm kullanıcıların tüm paylaşımlarını içerir."
+"Konuk kullanıcılar için kota aşıldı. Kota sınırı: %2$s. Kullanılan kota: %1$"
+"s. Yenilerini oluşturmak için lütfen bazı paylaşımları silin. Lütfen dikkat: "
+"Bu bağlamda kota, tüm kullanıcıların tüm paylaşımlarını içerir."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:80
 msgid ""
@@ -8399,8 +8394,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d."
-msgstr ""
-"Geçersiz parola uzunluğu. Parolanın en az %1$d karakter olması gerekir."
+msgstr "Geçersiz parola uzunluğu. Parolanın en az %1$d karakter olması gerekir."
 
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
@@ -8700,8 +8694,7 @@ msgstr "Henüz başlamamış görevlerin tamamlanma yüzdesi %d değil, 0 olmal�
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
 msgid ""
 "You do not have the appropriate permissions to edit tasks in that folder"
-msgstr ""
-"Bu klasördeki görevleri düzenlemek için uygun izinlere sahip değilsiniz"
+msgstr "Bu klasördeki görevleri düzenlemek için uygun izinlere sahip değilsiniz"
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into a shared folder is not allowed."
@@ -9429,8 +9422,8 @@ msgid ""
 "Please change mail settings and configure a secure connection (if Transport "
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
 msgstr ""
-"Lütfen e-posta ayarlarınızı değiştirip güvenli bir bağlantı yapılandırın "
-"(Aktarım Katmanı Güvenliği (TLS) kullanılmıyorsa istemci STARTTLS'i "
+"Lütfen e-posta ayarlarınızı değiştirip güvenli bir bağlantı yapılandırın ("
+"Aktarım Katmanı Güvenliği (TLS) kullanılmıyorsa istemci STARTTLS'i "
 "deneyebilir)"
 
 #. Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
@@ -9815,8 +9808,7 @@ msgstr "E-posta sunucusu erişimi reddetti."
 msgid ""
 "Destination folder does not exist. Please try to create it and retry the "
 "operation."
-msgstr ""
-"Hedef klasör yok. Lütfen oluşturmaya çalışın ve işlemi yeniden deneyin."
+msgstr "Hedef klasör yok. Lütfen oluşturmaya çalışın ve işlemi yeniden deneyin."
 
 #. Temporary failure because a subsystem is down. For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:215
@@ -9836,8 +9828,7 @@ msgstr ""
 #. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
 msgid "Access to mail server is not permitted due to a lack of privacy."
-msgstr ""
-"Gizlilik eksikliği nedeniyle e-posta sunucusuna erişim izni verilmiyor."
+msgstr "Gizlilik eksikliği nedeniyle e-posta sunucusuna erişim izni verilmiyor."
 
 #. The message advertising that everything is fine with checked account
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -10335,8 +10326,7 @@ msgstr "Klasörü \"%2$s\" ile paylaşmanıza izin verilmiyor"
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
-msgstr ""
-"Çöp kutusu klasörünün veya alt klasörlerin izinlerini değiştiremezsiniz"
+msgstr "Çöp kutusu klasörünün veya alt klasörlerin izinlerini değiştiremezsiniz"
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -11523,8 +11513,7 @@ msgstr ""
 #. The message displayed if the user would like to access the service but does not have an OAuth account.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:83
 msgid "You need to create an OAuth-account first to access this service."
-msgstr ""
-"Bu hizmete erişmek için ilk önce bir OAuth hesabı oluşturmanız gerekir."
+msgstr "Bu hizmete erişmek için ilk önce bir OAuth hesabı oluşturmanız gerekir."
 
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:85
 msgid "Your account needs to be verified: %1$s"
@@ -11840,8 +11829,7 @@ msgstr ""
 #. No XING OAuth access available for user %1$s in context %2$s.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
 msgid "No XING OAuth access available. Please create a XING OAuth account."
-msgstr ""
-"XING OAuth erişimi bulunmamaktadır. Lütfen XING OAuth hesabı oluşturun."
+msgstr "XING OAuth erişimi bulunmamaktadır. Lütfen XING OAuth hesabı oluşturun."
 
 #: TimeZones.java:2
 msgid "Africa/Abidjan"
