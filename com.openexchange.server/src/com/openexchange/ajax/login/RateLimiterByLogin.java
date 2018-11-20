@@ -51,6 +51,7 @@ package com.openexchange.ajax.login;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -69,6 +70,11 @@ import com.openexchange.login.listener.LoginListener;
  * @since v7.10.1
  */
 public class RateLimiterByLogin implements LoginListener {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RateLimiterByLogin.class);
+    }
 
     private final LoadingCache<String, SimpleInMemoryRateLimiter> limiters;
 
@@ -97,7 +103,7 @@ public class RateLimiterByLogin implements LoginListener {
             SimpleInMemoryRateLimiter rateLimiter = limiters.getIfPresent(login);
             if (null != rateLimiter && !rateLimiter.canAcquire()) {
                 // Rate limit is already exhausted
-                throw LoginExceptionCodes.TOO_MANY_LOGIN_ATTEMPTS.create();
+                throw LoginExceptionCodes.TOO_MANY_LOGIN_ATTEMPTS.create(login);
             }
         }
     }
@@ -107,6 +113,7 @@ public class RateLimiterByLogin implements LoginListener {
         String login = result.getRequest().getLogin();
         if (Strings.isNotEmpty(login)) {
             // Drop rate limiter
+            LoggerHolder.LOG.debug("Detected successful login attempt for login {}", login);
             limiters.invalidate(login);
         }
     }
@@ -117,6 +124,7 @@ public class RateLimiterByLogin implements LoginListener {
             String login = request.getLogin();
             if (Strings.isNotEmpty(login)) {
                 // Consume...
+                LoggerHolder.LOG.debug("Detected failed login attempt due to invalid credentials for login {}", login);
                 limiters.getUnchecked(login).tryAcquire();
             }
         }
