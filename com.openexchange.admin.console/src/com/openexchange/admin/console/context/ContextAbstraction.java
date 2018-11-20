@@ -178,6 +178,8 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     protected String contextname = null;
 
+    protected boolean inServer = false;
+
     private ServiceLoader<? extends ContextConsoleCommonInterface> subclasses = null;
 
     @Override
@@ -201,6 +203,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
         if (this.contextname != null) {
             ctx.setName(this.contextname);
         }
+    }
+
+    protected boolean parseAndSetInServer(final AdminParser parser) {
+        this.inServer = parser.hasOption(inServerOption);
+        return this.inServer;
     }
 
     protected void parseAndSetContextQuota(final AdminParser parser, final Context ctx) {

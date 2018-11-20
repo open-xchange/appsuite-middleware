@@ -60,6 +60,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.lock.LockService;
 
 /**
  * Contains the code to startup the complete database connection pooling and replication monitor.
@@ -89,6 +90,26 @@ public final class Initialization {
      */
     public static ConfigurationService getConfigurationService() {
         return CONF_REF.get();
+    }
+
+    private static final AtomicReference<LockService> LOCKSERV_REF = new AtomicReference<LockService>();
+
+    /**
+     * Sets the lock service.
+     *
+     * @param configurationService The lock service
+     */
+    public static void setLockService(final LockService configurationService) {
+        LOCKSERV_REF.set(configurationService);
+    }
+
+    /**
+     * Gets the lock service.
+     *
+     * @return The lock service or <code>null</code> if absent
+     */
+    public static LockService getLockService() {
+        return LOCKSERV_REF.get();
     }
 
     // -------------------------------------------------------------------------------------------------------------- //

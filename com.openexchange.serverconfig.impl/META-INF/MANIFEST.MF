@@ -8,6 +8,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.annotations,
  com.google.common.base,
+ com.google.common.cache,
  com.google.common.collect,
  com.openexchange.capabilities,
  com.openexchange.config,

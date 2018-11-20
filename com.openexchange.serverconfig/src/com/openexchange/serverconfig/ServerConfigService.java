@@ -49,6 +49,8 @@
 
 package com.openexchange.serverconfig;
 
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -89,4 +91,15 @@ public interface ServerConfigService {
      * @return The look-up
      */
     ServerConfigServicesLookup getServerConfigServicesLookup();
+
+    /**
+     * Gets all custom properties for a given host from as-config.yml.
+     *
+     * @param hostName, the name of the host, to get the properties for
+     * @param userID, can be -1 if no id is available at present
+     * @param contextID, can be -1 if no id is available at present
+     * @return the whole map with all custom properties for a host
+     * @throws OXException
+     */
+    List<Map<String, Object>> getCustomHostConfigurations(String hostName, int userID, int contextID) throws OXException;
 }
