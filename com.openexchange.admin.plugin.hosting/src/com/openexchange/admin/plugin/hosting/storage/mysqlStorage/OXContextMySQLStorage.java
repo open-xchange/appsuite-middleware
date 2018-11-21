@@ -117,7 +117,6 @@ import com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorageCommon;
 import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage;
 import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
-import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.storage.utils.CreateTableRegistry;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
