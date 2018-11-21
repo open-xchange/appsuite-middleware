@@ -153,7 +153,7 @@ public class RateLimiterImpl implements RateLimiter {
                     // ignore
                 }
             }
-            LOG.error("Unable to insert permit: {}", e.getMessage(), e);
+            LOG.error("Unable to insert permit.", e);
         }
         return false;
     }
