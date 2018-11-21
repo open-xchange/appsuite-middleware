@@ -98,7 +98,15 @@ public class RateLimitCreateTableUpdateTask extends UpdateTaskAdapter {
             connection.setAutoCommit(false);
             rollback = 1;
 
-            createTable(connection, service.getCreateStatements()[0]);
+            {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = connection.prepareStatement(service.getCreateStatements()[0]);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
 
             connection.commit();
             rollback = 2;
@@ -111,16 +119,6 @@ public class RateLimitCreateTableUpdateTask extends UpdateTaskAdapter {
                 }
                 Databases.autocommit(connection);
             }
-        }
-    }
-
-    private static void createTable(Connection connection, String createStatement) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(createStatement);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 
