@@ -47,17 +47,17 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.impl;
+package com.openexchange.ratelimit.rdb.impl.groupware;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link RatelimitCreateTableService}
+ * {@link RateLimitCreateTableService} - The service to create needed "ratelimit" table.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RatelimitCreateTableService extends AbstractCreateTableImpl {
+public class RateLimitCreateTableService extends AbstractCreateTableImpl {
 
     private static String TABLE_NAME = "ratelimit";
 
