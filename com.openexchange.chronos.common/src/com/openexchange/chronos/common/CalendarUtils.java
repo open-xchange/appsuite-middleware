@@ -174,7 +174,8 @@ public class CalendarUtils {
     /** A collection of identifying meta fields */
     private static final Set<EventField> IDENTIFYING_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.UID, EventField.FILENAME,
-        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE
+        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE,
+        EventField.SEQUENCE, EventField.MODIFIED_BY, EventField.CLASSIFICATION, EventField.RECURRENCE_RULE
     )));
 
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
