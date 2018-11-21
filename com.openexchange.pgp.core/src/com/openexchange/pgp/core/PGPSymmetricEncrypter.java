@@ -56,6 +56,8 @@ import java.security.SecureRandom;
 import java.util.Date;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
+import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
@@ -73,23 +75,35 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPDataEncryptorBuilder;
 public class PGPSymmetricEncrypter {
 
     private static final int BUFFERSIZE          = 256;
-    private boolean          withIntegrityPacket = true;
+    private boolean          withIntegrityPacket  = true;
     private final int        algorithm;
+    private final int        compressionAlgorithm;
 
     /**
-     * Initializes a new {@link PGPSymmetricEncrypter} using AES-256 for encryption.
+     * Initializes a new {@link PGPSymmetricEncrypter} using AES-256 for uncompressed encryption.
      */
     public PGPSymmetricEncrypter() {
-        this(PGPEncryptedData.AES_256);
+        this(PGPEncryptedData.AES_256, CompressionAlgorithmTags.UNCOMPRESSED);
+    }
+
+    /**
+     * Initializes a new {@link PGPSymmetricEncrypter} for uncompressed encryption.
+     *
+     * @param algorithm The algorithm to use for encryption. See RFC-4880 (9.2 Symmetric key algorithm) for a list of supported algorithms.
+     */
+    public PGPSymmetricEncrypter(int algorithm) {
+        this(algorithm, CompressionAlgorithmTags.UNCOMPRESSED);
     }
 
     /**
      * Initializes a new {@link PGPSymmetricEncrypter}.
      *
-     * @param algorithm The algorithm to use for encryption. See RFC-4880 (9.2 Symmetric key algorithm) for a list of supported algorithms.
+     * @param algorithm The algorithm to use for encryption. See RFC-4880 (9.2 Symmetric-Key Algorithms) for a list of supported algorithms.
+     * @param compressionAlgorithm The compression algorithm to use. See RFC-4880 (9.3 Compression Algorithms) for a list of supported algorithms.
      */
-    public PGPSymmetricEncrypter(int algorithm) {
+    public PGPSymmetricEncrypter(int algorithm, int compressionAlgorithm) {
         this.algorithm = algorithm;
+        this.compressionAlgorithm = compressionAlgorithm;
     }
 
     /**
@@ -102,6 +116,7 @@ public class PGPSymmetricEncrypter {
         this.withIntegrityPacket = withIntegrityPacket;
         return this;
     }
+
 
     /**
      * Symetric, pgp based, encryption of data
@@ -121,8 +136,11 @@ public class PGPSymmetricEncrypter {
         dataGenerator.addMethod(new BcPBEKeyEncryptionMethodGenerator(key));
         final PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
 
+        PGPCompressedDataGenerator compressionGenerator = new PGPCompressedDataGenerator(compressionAlgorithm);
+
         try (OutputStream out = armored ? new ArmoredOutputStream(output) : output;
-             OutputStream cOut = dataGenerator.open(out, new byte[BUFFERSIZE]);
+             OutputStream dOut = dataGenerator.open(out, new byte[BUFFERSIZE]);
+             OutputStream cOut = compressionGenerator.open(dOut, new byte[BUFFERSIZE]);
              OutputStream ldOut = lData.open(cOut,
                 PGPLiteralData.BINARY,
                 PGPLiteralData.CONSOLE,

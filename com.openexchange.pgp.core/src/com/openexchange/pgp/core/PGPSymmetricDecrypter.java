@@ -96,7 +96,7 @@ public class PGPSymmetricDecrypter {
                     Object decrKey = decrFactor.nextObject();
                     // Check for compressed data
                     if (decrKey instanceof PGPCompressedData) {
-                        PGPCompressedData compressedData = (PGPCompressedData) pgpObject;
+                        PGPCompressedData compressedData = (PGPCompressedData) decrKey;
                         objectFact = new PGPObjectFactory(compressedData.getDataStream(), new BcKeyFingerprintCalculator());
                         decrKey = objectFact.nextObject();
                     }

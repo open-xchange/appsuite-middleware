@@ -71,6 +71,8 @@ public class PGPSymmetricEncrypterDecrypterTest {
     private final boolean armored;
     private static final byte[] TEST_DATA = "Hello World!".getBytes();
     private static final char[] TEST_PASSWORD = new char[] { 'S', 'E', 'C', 'R', 'E', 'T' };
+    private static final int AES_256 = 9; //see RFC 4880
+    private static final int ZLIB = 2; //see RFC 4880
 
     /**
      * Initializes a new {@link PGPSymmetricEncrypterDecrypterTest}.
@@ -100,6 +102,21 @@ public class PGPSymmetricEncrypterDecrypterTest {
         ByteArrayInputStream plaintextStream = new ByteArrayInputStream(TEST_DATA);
         ByteArrayOutputStream encryptedData = new ByteArrayOutputStream();
         new PGPSymmetricEncrypter().encrypt(plaintextStream, encryptedData, armored, TEST_PASSWORD);
+
+        //Decrypt
+        ByteArrayOutputStream decryptedStream = new ByteArrayOutputStream();
+        new PGPSymmetricDecrypter().decrypt(new ByteArrayInputStream(encryptedData.toByteArray()), decryptedStream, TEST_PASSWORD);
+
+        //Verify
+        Assert.assertArrayEquals(TEST_DATA, decryptedStream.toByteArray());
+    }
+
+    @Test
+    public void testEncryptDecryptCompressed() throws Exception {
+        //Encrypt
+        ByteArrayInputStream plaintextStream = new ByteArrayInputStream(TEST_DATA);
+        ByteArrayOutputStream encryptedData = new ByteArrayOutputStream();
+        new PGPSymmetricEncrypter(AES_256, ZLIB).encrypt(plaintextStream, encryptedData, armored, TEST_PASSWORD);
 
         //Decrypt
         ByteArrayOutputStream decryptedStream = new ByteArrayOutputStream();
