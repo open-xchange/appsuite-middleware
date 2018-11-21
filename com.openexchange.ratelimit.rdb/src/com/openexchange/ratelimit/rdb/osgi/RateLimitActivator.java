@@ -57,10 +57,10 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.ratelimit.RateLimiterFactory;
-import com.openexchange.ratelimit.rdb.impl.CreateTableUpdateTask;
 import com.openexchange.ratelimit.rdb.impl.RateLimiterFactoryImpl;
-import com.openexchange.ratelimit.rdb.impl.RatelimitCreateTableService;
-import com.openexchange.ratelimit.rdb.impl.RatelimitDeleteListener;
+import com.openexchange.ratelimit.rdb.impl.groupware.RateLimitCreateTableService;
+import com.openexchange.ratelimit.rdb.impl.groupware.RateLimitCreateTableUpdateTask;
+import com.openexchange.ratelimit.rdb.impl.groupware.RateLimitDeleteListener;
 
 /**
  * {@link RateLimitActivator}
@@ -77,11 +77,11 @@ public class RateLimitActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        RatelimitCreateTableService ratelimitCreateTableService = new RatelimitCreateTableService();
-        registerService(CreateTableService.class, ratelimitCreateTableService);
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateTableUpdateTask(ratelimitCreateTableService)));
+        RateLimitCreateTableService rateLimitCreateTableService = new RateLimitCreateTableService();
+        registerService(CreateTableService.class, rateLimitCreateTableService);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new RateLimitCreateTableUpdateTask(rateLimitCreateTableService)));
         registerService(RateLimiterFactory.class, new RateLimiterFactoryImpl(this));
-        registerService(DeleteListener.class, new RatelimitDeleteListener());
+        registerService(DeleteListener.class, new RateLimitDeleteListener());
     }
 
 }

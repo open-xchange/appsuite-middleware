@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,10 @@ import com.openexchange.ratelimit.RateLimiter;
  */
 public class RateLimiterImpl implements RateLimiter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RateLimiterImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RateLimiterImpl.class);
+    }
 
     private final long timeframe;
     private final long amount;
@@ -110,9 +112,9 @@ public class RateLimiterImpl implements RateLimiter {
             readOnly = readOnly && !result;
             return result;
         } catch (OXException e) {
-            LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
+            LoggerHolder.LOG.error("Unable to aquire permits.", e);
         } catch (SQLException e) {
-            LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
+            LoggerHolder.LOG.error("Unable to aquire permits.", e);
         } finally {
             if (writeCon != null) {
                 if (rollback > 0) {
@@ -153,7 +155,7 @@ public class RateLimiterImpl implements RateLimiter {
                     // ignore
                 }
             }
-            LOG.error("Unable to insert permit: {}", e.getMessage(), e);
+            LoggerHolder.LOG.error("Unable to insert permit.", e);
         }
         return false;
     }
@@ -189,7 +191,7 @@ public class RateLimiterImpl implements RateLimiter {
             stmt.setLong(index, start);
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            LOG.error("Unable to delete old permits: {}", e.getMessage(), e);
+            LoggerHolder.LOG.error("Unable to delete old permits.", e);
             return -1;
         }
     }

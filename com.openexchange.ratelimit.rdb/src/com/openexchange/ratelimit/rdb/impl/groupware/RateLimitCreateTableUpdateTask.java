@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.impl;
+package com.openexchange.ratelimit.rdb.impl.groupware;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.tableExists;
@@ -62,19 +62,19 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link CreateTableUpdateTask}
+ * {@link RateLimitCreateTableUpdateTask} - The appropriate update task to create needed "ratelimit" table.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class CreateTableUpdateTask extends UpdateTaskAdapter {
+public class RateLimitCreateTableUpdateTask extends UpdateTaskAdapter {
 
-    private final RatelimitCreateTableService service;
+    private final RateLimitCreateTableService service;
 
     /**
-     * Initializes a new {@link CreateTableUpdateTask}.
+     * Initializes a new {@link RateLimitCreateTableUpdateTask}.
      */
-    public CreateTableUpdateTask(RatelimitCreateTableService createTableService) {
+    public RateLimitCreateTableUpdateTask(RateLimitCreateTableService createTableService) {
         super();
         this.service = createTableService;
     }
@@ -87,34 +87,38 @@ public class CreateTableUpdateTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
+            String tableName = service.tablesToCreate()[0];
+            if (tableExists(connection, tableName)) {
+                LoggerFactory.getLogger(RateLimitCreateTableUpdateTask.class).debug("Table {} already exists, skipping.", tableName);
+                return;
+            }
+
             connection.setAutoCommit(false);
-            rollback = true;
-            createTable(connection, service.tablesToCreate()[0], service.getCreateStatements()[0]);
+            rollback = 1;
+
+            {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = connection.prepareStatement(service.getCreateStatements()[0]);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
-        }
-    }
-
-    private static void createTable(Connection connection, String tableName, String createStatement) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            if (tableExists(connection, tableName)) {
-                LoggerFactory.getLogger(CreateTableUpdateTask.class).debug("Table {} already exists, skipping.", tableName);
-                return;
-            }
-            stmt = connection.prepareStatement(createStatement);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 

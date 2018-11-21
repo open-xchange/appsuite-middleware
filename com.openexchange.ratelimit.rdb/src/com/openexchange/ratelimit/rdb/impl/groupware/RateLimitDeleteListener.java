@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.impl;
+package com.openexchange.ratelimit.rdb.impl.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,37 +58,32 @@ import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 
 /**
- * 
- * {@link RatelimitDeleteListener}
+ *
+ * {@link RateLimitDeleteListener}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RatelimitDeleteListener implements DeleteListener {
-
-    private static final String SQL_DELETE_CONTEXT = "DELETE FROM ratelimit WHERE cid=?";
-    private static final String SQL_DELETE_USER    = "DELETE FROM ratelimit WHERE cid=? AND userId=?";
+public class RateLimitDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if(event.getType() == DeleteEvent.TYPE_CONTEXT) {
+        int type = event.getType();
+        if (type == DeleteEvent.TYPE_CONTEXT) {
             int ctxId = event.getId();
-            try (PreparedStatement stmt = writeCon.prepareStatement(SQL_DELETE_CONTEXT)) {
+            try (PreparedStatement stmt = writeCon.prepareStatement("DELETE FROM ratelimit WHERE cid=?")) {
                 stmt.setInt(1, ctxId);
                 stmt.executeUpdate();
-                return;
             } catch (SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             }
-        }
-        if(event.getType() == DeleteEvent.TYPE_USER) {
+        } else if (type == DeleteEvent.TYPE_USER) {
             int userId = event.getId();
             int ctxId = event.getContext().getContextId();
-            try (PreparedStatement stmt = writeCon.prepareStatement(SQL_DELETE_USER)) {
+            try (PreparedStatement stmt = writeCon.prepareStatement("DELETE FROM ratelimit WHERE cid=? AND userId=?")) {
                 stmt.setInt(1, ctxId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
-                return;
             } catch (SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             }
