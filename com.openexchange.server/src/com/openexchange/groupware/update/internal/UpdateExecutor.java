@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -278,11 +279,33 @@ public final class UpdateExecutor {
                     timerService.purge();
                 }
             }
-            // Unlock schema
-            unlockSchema(blocking, state);
-            // Remove contexts from cache if they are cached during update process.
-            if (blocking) {
-                removeContexts();
+
+            // Is context cache supposed to be invalidated?
+            boolean doRemoveContexts = blocking;
+
+            // Either unlock schema or unlock schema and invalidate context cache
+            if (doRemoveContexts) {
+                try {
+                    unlockSchema(blocking, state);
+                } catch (OXException oxe) {
+                    if (!SchemaExceptionCodes.SQL_PROBLEM.equals(oxe)) {
+                        throw oxe;
+                    }
+
+                    Throwable cause = oxe.getCause();
+                    if (!(cause instanceof SQLException) || !Databases.isReadTimeout((SQLException) cause)) {
+                        throw oxe;
+                    }
+
+                    // Unlocking the schema might be successfully executed then...
+                }
+
+                // Remove contexts from cache if they are cached during update process.
+                if (doRemoveContexts) {
+                    removeContexts();
+                }
+            } else {
+                unlockSchema(blocking, state);
             }
         }
     }

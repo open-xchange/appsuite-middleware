@@ -68,6 +68,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.exception.ExceptionUtils;
 
 /**
  * Utilities for database resource handling.
@@ -443,7 +444,7 @@ public final class Databases {
      *
      * @param e The <code>SQLException</code> instance to check
      * @param keyName The name of the key causing the integrity constraint violation
-     * @return <code>true</code> if given {@link SQLException} instance denotes a conflict caused by the specified ke; otherwise <code>false</code>
+     * @return <code>true</code> if given {@link SQLException} instance denotes a conflict caused by the specified key; otherwise <code>false</code>
      */
     public static boolean isKeyConflictInMySQL(SQLException e, String keyName) {
         if (null == e || null == keyName) {
@@ -467,6 +468,16 @@ public final class Databases {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if given {@link SQLException} instance is caused by a (recoverable) socket read timeout.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @return <code>true</code> if given {@link SQLException} instance is a read timeout; otherwise <code>false</code>
+     */
+    public static boolean isReadTimeout(SQLException e) {
+        return (e instanceof java.sql.SQLRecoverableException) && ExceptionUtils.isEitherOf(e.getCause(), java.net.SocketTimeoutException.class);
     }
 
     /**
