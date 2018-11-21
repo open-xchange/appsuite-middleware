@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,69 +47,84 @@
  *
  */
 
-package com.openexchange.oauth.impl.httpclient;
+package com.openexchange.importexport.helpers;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.scribe.model.OAuthRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.client.builder.HTTPRequest;
-import com.openexchange.http.client.builder.HTTPResponse;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.impl.services.Services;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * {@link OAuthHTTPRequest} - The HTTP OAuth request.
+ * {@link DelayInitServletOutputStream} - Delegates to an HTTP response's output stream, which is only obtained when actually needed.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Error handling
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.1
  */
-public class OAuthHTTPRequest implements HTTPRequest {
+public class DelayInitServletOutputStream extends OutputStream {
 
-	private final OAuthRequest delegate;
-	private final Map<String, String> parameters;
+    private final HttpServletResponse response;
+    private OutputStream out;
+    private boolean closed;
 
-	/**
-	 * Initializes a new {@link OAuthHTTPRequest}.
-	 */
-	public OAuthHTTPRequest(OAuthRequest req, Map<String, String> parameters) {
-	    super();
-		delegate = req;
-		this.parameters = parameters;
-	}
+    /**
+     * Initializes a new {@link DelayInitServletOutputStream}.
+     */
+    public DelayInitServletOutputStream(HttpServletResponse response) {
+        super();
+        this.response = response;
+        closed = false;
+    }
 
-	@Override
-	public HTTPResponse execute() throws OXException {
-	    try {
-            delegate.setConnectTimeout(5, TimeUnit.SECONDS);
-            delegate.setReadTimeout(15, TimeUnit.SECONDS);
-
-            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
-            if (null != factoryProvider) {
-                delegate.setSSLSocketFactory(factoryProvider.getDefault());
-            }
-
-            // Wrap response & return
-            return new HttpOauthResponse(delegate.send());
-        } catch (org.scribe.exceptions.OAuthException e) {
-            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
-            Throwable cause = e.getCause();
-            if (cause instanceof java.net.SocketTimeoutException) {
-                // A socket timeout
-                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
-            }
-
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+    private OutputStream out() throws IOException {
+        OutputStream out = this.out;
+        if (null == out) {
+            out = response.getOutputStream();
+            this.out = out;
         }
-	}
+        return out;
+    }
 
-	@Override
-	public Map<String, String> getParameters() {
-		return parameters;
-	}
+    @Override
+    public void write(int b) throws IOException {
+        OutputStream out = out();
+        out.write(b);
+    }
 
-	@Override
-	public Map<String, String> getHeaders() {
-		return delegate.getHeaders();
-	}
+    @Override
+    public void write(byte[] bytes) throws IOException {
+        OutputStream out = out();
+        out.write(bytes);
+    }
+
+    @Override
+    public void write(byte[] bytes, int off, int len) throws IOException {
+        OutputStream out = out();
+        out.write(bytes, off, len);
+    }
+
+    @Override
+    public void flush() throws IOException {
+        OutputStream out = out();
+        out.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        OutputStream out = this.out;
+        if (null == out) {
+            // Not yet initialized
+            return;
+        }
+
+        if (closed) {
+            return;
+        }
+
+        try {
+            out.flush();
+        } finally {
+            closed = true;
+            out.close();
+        }
+    }
+
 }

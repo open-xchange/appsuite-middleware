@@ -57,7 +57,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -72,7 +71,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -276,7 +274,6 @@ public class OAuthServiceImpl implements OAuthService {
         OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
 
-        HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
 
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
@@ -341,7 +338,6 @@ public class OAuthServiceImpl implements OAuthService {
             String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             account.setDisplayName(displayName);
 
-            HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
             obtainToken(type, arguments, account, scopes);
 
             account.setEnabledScopes(scopes);
