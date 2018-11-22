@@ -1,0 +1,7 @@
+$ref: ../common/CommonResponseData.yaml
+cache:
+  type: boolean
+  description: If present and set to true, that parameter signals that response has been fetched from cache
+more:
+  type: integer
+  description: If present that parameter signals how many items are totally available since client requested a certain chunk from overall result set

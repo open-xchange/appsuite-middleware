@@ -201,7 +201,7 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         for (String address : addresses) {
             queries.add(CalendarUtils.getURI(address));
         }
-        return new DefaultSearchFilter("participant", queries);
+        return new DefaultSearchFilter("participants", queries);
     }
 
     private SearchFilter getUserFilter(User user) {

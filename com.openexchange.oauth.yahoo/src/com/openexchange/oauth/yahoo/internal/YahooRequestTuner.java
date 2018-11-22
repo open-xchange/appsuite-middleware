@@ -52,6 +52,8 @@ package com.openexchange.oauth.yahoo.internal;
 import java.util.concurrent.TimeUnit;
 import org.scribe.model.Request;
 import org.scribe.model.RequestTuner;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.oauth.yahoo.osgi.Services;
 
 /**
  * {@link YahooRequestTuner}
@@ -83,6 +85,11 @@ public final class YahooRequestTuner extends RequestTuner {
     public void tune(Request request) {
         request.setConnectTimeout(5, TimeUnit.SECONDS);
         request.setReadTimeout(30, TimeUnit.SECONDS);
+
+        SSLSocketFactoryProvider factoryProvider = Services.getOptionalService(SSLSocketFactoryProvider.class);
+        if (null != factoryProvider) {
+            request.setSSLSocketFactory(factoryProvider.getDefault());
+        }
     }
 
 }

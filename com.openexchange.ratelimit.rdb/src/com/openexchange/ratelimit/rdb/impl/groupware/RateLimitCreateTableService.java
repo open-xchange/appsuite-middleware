@@ -47,52 +47,40 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.impl;
+package com.openexchange.ratelimit.rdb.impl.groupware;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
-import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * 
- * {@link RatelimitDeleteListener}
+ * {@link RateLimitCreateTableService} - The service to create needed "ratelimit" table.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RatelimitDeleteListener implements DeleteListener {
+public class RateLimitCreateTableService extends AbstractCreateTableImpl {
 
-    private static final String SQL_DELETE_CONTEXT = "DELETE FROM ratelimit WHERE cid=?";
-    private static final String SQL_DELETE_USER    = "DELETE FROM ratelimit WHERE cid=? AND userId=?";
+    private static String TABLE_NAME = "ratelimit";
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if(event.getType() == DeleteEvent.TYPE_CONTEXT) {
-            int ctxId = event.getId();
-            try (PreparedStatement stmt = writeCon.prepareStatement(SQL_DELETE_CONTEXT)) {
-                stmt.setInt(1, ctxId);
-                stmt.executeUpdate();
-                return;
-            } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            }
-        }
-        if(event.getType() == DeleteEvent.TYPE_USER) {
-            int userId = event.getId();
-            int ctxId = event.getContext().getContextId();
-            try (PreparedStatement stmt = writeCon.prepareStatement(SQL_DELETE_USER)) {
-                stmt.setInt(1, ctxId);
-                stmt.setInt(2, userId);
-                stmt.executeUpdate();
-                return;
-            } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            }
-        }
+    public String[] requiredTables() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return new String[] { TABLE_NAME };
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[] {   "CREATE TABLE " + TABLE_NAME + " (" +
+                                    "cid INT4 UNSIGNED NOT NULL," +
+                                    "userId INT4 UNSIGNED NOT NULL," +
+                                    "id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +
+                                    "timestamp BIGINT(20) NOT NULL," +
+                                    "permits BIGINT(20) NOT NULL," +
+                                    "PRIMARY KEY (cid,userId,id,timestamp)" +
+                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"};
     }
 
 }

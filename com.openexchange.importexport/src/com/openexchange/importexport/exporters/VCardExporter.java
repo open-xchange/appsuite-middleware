@@ -52,7 +52,6 @@ package com.openexchange.importexport.exporters;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -60,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
@@ -79,6 +79,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.DelayInitServletOutputStream;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
@@ -86,6 +87,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -263,55 +265,51 @@ public class VCardExporter extends AbstractExporter {
     }
 
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
-      if (null != batchIds) {
-          for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
-              if (!canExportBatch(session, format, batchEntry, optionalParams)) {
-                  throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-              }
-          }
-      } else {
-          if (!canExport(session, format, folder, optionalParams)) {
-              throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
-          }
-      }
+        if (null != batchIds) {
+            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                if (!canExportBatch(session, format, batchEntry, optionalParams)) {
+                    throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+                }
+            }
+        } else {
+            if (!canExport(session, format, folder, optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
+            }
+        }
 
-      boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
-      try {
-          AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-          if (null != requestData) {
-              // Try to stream
-              final OutputStream out = requestData.optOutputStream();
-              if (null != out) {
-                  requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
-                  if (null != folder) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.VCARD.getExtension())));
-                  } else if (null != batchIds) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.VCARD.getExtension())));
-                  } else {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
-                  }
-                  requestData.removeCachingHeader();
-                  export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);
-                  return null;
-              }
-          }
+        boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            // Try to stream
+            HttpServletResponse response = requestData.optHttpServletResponse();
+            if (null != response) {
+                response.setHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
+                if (null != folder) {
+                    response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.VCARD.getExtension())));
+                } else if (null != batchIds) {
+                    response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.VCARD.getExtension())));
+                } else {
+                    response.setHeader("Content-Disposition", "attachment; filename=Export." + Format.VCARD.getExtension());
+                }
+                Tools.removeCachingHeader(response);
+                export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(new DelayInitServletOutputStream(response), DEFAULT_CHARSET), batchIds);
+                return null;
+            }
+        }
 
-          // No streaming support possible
-          ThresholdFileHolder sink = new ThresholdFileHolder();
-          boolean error = true;
-          try {
-              export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET), batchIds);
-              SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
-              error = false;
-              return sizedIn;
-          } finally {
-              if (error) {
-                  Streams.close(sink);
-              }
-          }
-      } catch (final IOException e) {
-          throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-      }
+        // No streaming support possible
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET), batchIds);
+            SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
+            error = false;
+            return sizedIn;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
     }
 
     private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };

@@ -72,10 +72,7 @@ public class Capability implements Serializable, Comparable<Capability> {
     public Capability(String id) {
         super();
         this.id = id;
-        int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        this.hash = result;
+        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
     }
 
     /**

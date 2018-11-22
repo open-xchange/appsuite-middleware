@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import java.sql.Connection;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -65,55 +64,57 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class PoolAndSchemaConnectionProvider extends AbstractConnectionProvider {
 
-    private final int poolId;
-    private final String schema;
-    private final DatabaseService databaseService; // Ok to remember since freshly created for each using thread
-    private Connection connection;
+    private static class PoolAndSchemaConnectionAccess implements ConnectionAccess {
+
+        private final DatabaseService databaseService;
+        private final int poolId;
+        private final String schema;
+
+        PoolAndSchemaConnectionAccess(int poolId, String schema) {
+            super();
+            this.poolId = poolId;
+            this.schema = schema;
+            databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        }
+
+        @Override
+        public Connection getConnection() throws OXException {
+            if (null == databaseService) {
+                throw ServiceExceptionCode.absentService(DatabaseService.class);
+            }
+
+            return databaseService.getNoTimeout(poolId, schema);
+        }
+
+        @Override
+        public void closeConnection(Connection connection) {
+            if (null != databaseService && null != connection) {
+                databaseService.backNoTimeoout(poolId, connection);
+            }
+        }
+
+        @Override
+        public int[] getContextsInSameSchema() throws OXException {
+            if (null == databaseService) {
+                throw ServiceExceptionCode.absentService(DatabaseService.class);
+            }
+
+            Connection con = databaseService.getReadOnly();
+            try {
+                return databaseService.getContextsInSchema(con, poolId, schema);
+            } finally {
+                databaseService.backReadOnly(con);
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link PoolAndSchemaConnectionProvider}.
      */
     public PoolAndSchemaConnectionProvider(int poolId, String schema) {
-        super();
-        this.poolId = poolId;
-        this.schema = schema;
-        databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-    }
-
-    @Override
-    public synchronized Connection getConnection() throws OXException {
-        if (null == databaseService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-
-        Connection connection = this.connection;
-        if (null == connection) {
-            connection = databaseService.getNoTimeout(poolId, schema);
-            this.connection = connection;
-        }
-        return checkConnection(connection);
-    }
-
-    @Override
-    public synchronized void close() {
-        Connection connection = this.connection;
-        if (null != connection) {
-            this.connection = null;
-            if (null != databaseService) {
-                databaseService.backNoTimeoout(poolId, connection);
-            }
-        }
-    }
-
-    @Override
-    public int[] getContextsInSameSchema() throws OXException {
-        DatabaseService databaseService = Database.getDatabaseService();
-        Connection con = databaseService.getReadOnly();
-        try {
-            return databaseService.getContextsInSchema(con, poolId, schema);
-        } finally {
-            databaseService.backReadOnly(con);
-        }
+        super(new PoolAndSchemaConnectionAccess(poolId, schema));
     }
 
 }

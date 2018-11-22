@@ -112,6 +112,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -2417,66 +2418,78 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             newuser.setPasswordMech(dbuser.getPasswordMech());
         }
 
-        if (mailCheckNeeded && !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
-            // checks below throw InvalidDataException
-            tool.checkValidEmailsInUserObject(newuser);
-            Set<String> useraliases = newuser.getAliases();
-            if (useraliases == null) {
-                useraliases = dbuser.getAliases();
-            }
-            if (null != useraliases) {
-                Set<String> tmp = new HashSet<String>(useraliases.size());
-                for (String email : useraliases) {
-                    tmp.add(IDNA.toIDN(email));
+        if (mailCheckNeeded) {
+            // Check if E-Mail addresses should be checked for context administrator, too (default is false)
+            boolean enableAdminMailChecks = false;
+            {
+                ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null != configService) {
+                    enableAdminMailChecks = configService.getBoolProperty(AdminProperties.User.ENABLE_ADMIN_MAIL_CHECKS, enableAdminMailChecks);
                 }
-                useraliases = tmp;
-            } else {
-                useraliases = new HashSet<String>(1);
             }
 
-            if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
-                // primary mail value must be same with email1
-                throw new InvalidDataException("email1 not equal with primarymail!");
-            }
-
-            String check_primary_mail;
-            String check_email1;
-            String check_default_sender_address;
-            if (newPrimaryEmail != null) {
-                check_primary_mail = IDNA.toIDN(newPrimaryEmail);
-                if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                    tool.primaryMailExists(ctx, newPrimaryEmail);
+            // Validate E-Mail addresses for either all users (com.openexchange.admin.enableAdminMailChecks=true) or only non-admin users
+            if (enableAdminMailChecks || !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
+                // checks below throw InvalidDataException
+                tool.checkValidEmailsInUserObject(newuser);
+                Set<String> useraliases = newuser.getAliases();
+                if (useraliases == null) {
+                    useraliases = dbuser.getAliases();
                 }
-            } else {
-                final String email = dbuser.getPrimaryEmail();
-                check_primary_mail = email == null ? email : IDNA.toIDN(email);
-            }
+                if (null != useraliases) {
+                    Set<String> tmp = new HashSet<String>(useraliases.size());
+                    for (String email : useraliases) {
+                        tmp.add(IDNA.toIDN(email));
+                    }
+                    useraliases = tmp;
+                } else {
+                    useraliases = new HashSet<String>(1);
+                }
 
-            if (newEmail1 != null) {
-                check_email1 = IDNA.toIDN(newEmail1);
-            } else {
-                final String s = dbuser.getEmail1();
-                check_email1 = s == null ? s : IDNA.toIDN(s);
-            }
-            if (newDefaultSenderAddress != null) {
-                check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
-            } else {
-                final String s = dbuser.getDefaultSenderAddress();
-                check_default_sender_address = s == null ? s : IDNA.toIDN(s);
-            }
+                if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
+                    // primary mail value must be same with email1
+                    throw new InvalidDataException("email1 not equal with primarymail!");
+                }
 
-            final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-            final boolean found_email1 = useraliases.contains(check_email1);
-            final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+                String check_primary_mail;
+                String check_email1;
+                String check_default_sender_address;
+                if (newPrimaryEmail != null) {
+                    check_primary_mail = IDNA.toIDN(newPrimaryEmail);
+                    if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
+                        tool.primaryMailExists(ctx, newPrimaryEmail);
+                    }
+                } else {
+                    final String email = dbuser.getPrimaryEmail();
+                    check_primary_mail = email == null ? email : IDNA.toIDN(email);
+                }
 
-            if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
-            }
-            // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
-            // which is not very good when just changing the displayname for example
-            if (newPrimaryEmail != null && newEmail1 == null) {
-                throw new InvalidDataException("email1 not sent but required!");
+                if (newEmail1 != null) {
+                    check_email1 = IDNA.toIDN(newEmail1);
+                } else {
+                    final String s = dbuser.getEmail1();
+                    check_email1 = s == null ? s : IDNA.toIDN(s);
+                }
+                if (newDefaultSenderAddress != null) {
+                    check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
+                } else {
+                    final String s = dbuser.getDefaultSenderAddress();
+                    check_default_sender_address = s == null ? s : IDNA.toIDN(s);
+                }
 
+                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
+                final boolean found_email1 = useraliases.contains(check_email1);
+                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+
+                if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
+                    throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+                }
+                // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+                // which is not very good when just changing the displayname for example
+                if (newPrimaryEmail != null && newEmail1 == null) {
+                    throw new InvalidDataException("email1 not sent but required!");
+
+                }
             }
         }
 

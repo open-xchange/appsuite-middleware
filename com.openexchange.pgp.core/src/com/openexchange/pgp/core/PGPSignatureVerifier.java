@@ -156,7 +156,9 @@ public class PGPSignatureVerifier {
                 }
                 else {
                     //Key not found; KeyRetrievalStrategy is responsible for logging this;
-                    ret.add(new PGPSignatureVerificationResult(signature, false));
+                    final boolean verified = false;
+                    final boolean keyMissing = true;
+                    ret.add(new PGPSignatureVerificationResult(signature, verified, keyMissing));
                 }
             }
             return ret;

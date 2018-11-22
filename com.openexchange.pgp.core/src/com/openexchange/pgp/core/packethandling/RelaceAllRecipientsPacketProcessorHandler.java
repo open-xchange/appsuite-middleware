@@ -57,7 +57,7 @@ import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import com.openexchange.pgp.core.PGPSessionDecrypter;
+import com.openexchange.pgp.core.PGPSessionKeyExtractor;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 
 /**
@@ -120,7 +120,7 @@ public class RelaceAllRecipientsPacketProcessorHandler implements PacketProcesso
             if (pKey == null) {
                 throw PGPCoreExceptionCodes.PRIVATE_KEY_NOT_FOUND.create();
             }
-            byte[] symmetricSessionKey = new PGPSessionDecrypter().decryptSymmetricSessionKey(encrPacket, pKey);
+            byte[] symmetricSessionKey = new PGPSessionKeyExtractor().decryptSymmetricSessionKey(encrPacket, pKey);
             try {
                 //Creating a new session packet for each new identity
                 for (PGPPublicKey identities : newIdentitiesToAdd) {

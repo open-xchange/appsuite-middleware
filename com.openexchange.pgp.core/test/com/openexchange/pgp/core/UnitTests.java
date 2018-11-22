@@ -62,6 +62,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     PGPEncrypterDecrypterTest.class,
+    PGPSymmetricEncrypterDecrypterTest.class,
     PGPSignVerifyTests.class,
     ModifyRecipientTest.class,
     ExtractSessionPaketTest.class,

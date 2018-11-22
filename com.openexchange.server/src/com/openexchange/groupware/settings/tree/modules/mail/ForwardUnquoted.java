@@ -47,75 +47,65 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.impl;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.tableExists;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.session.Session;
 
 /**
- * {@link CreateTableUpdateTask}
+ * {@link ForwardUnquoted}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class CreateTableUpdateTask extends UpdateTaskAdapter {
-
-    private final RatelimitCreateTableService service;
+public class ForwardUnquoted implements PreferencesItemService, ConfigTreeEquivalent {
 
     /**
-     * Initializes a new {@link CreateTableUpdateTask}.
+     * Initializes a new {@link ForwardUnquoted}.
      */
-    public CreateTableUpdateTask(RatelimitCreateTableService createTableService) {
+    public ForwardUnquoted() {
         super();
-        this.service = createTableService;
     }
 
     @Override
-    public String[] getDependencies() {
-        return new String[0];
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "forwardunquoted" };
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection connection = params.getConnection();
-        boolean rollback = false;
-        try {
-            connection.setAutoCommit(false);
-            rollback = true;
-            createTable(connection, service.tablesToCreate()[0], service.getCreateStatements()[0]);
-            connection.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
             }
-            Databases.autocommit(connection);
-        }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                boolean forwardUnquoted = MailProperties.getInstance().isForwardUnquoted(session.getUserId(), session.getContextId());
+                setting.setSingleValue(Boolean.valueOf(forwardUnquoted));
+            }
+        };
     }
 
-    private static void createTable(Connection connection, String tableName, String createStatement) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            if (tableExists(connection, tableName)) {
-                LoggerFactory.getLogger(CreateTableUpdateTask.class).debug("Table {} already exists, skipping.", tableName);
-                return;
-            }
-            stmt = connection.prepareStatement(createStatement);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-        }
+    @Override
+    public String getConfigTreePath() {
+        return "modules/mail/forwardunquoted";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/mail//forwardunquoted";
     }
 
 }
