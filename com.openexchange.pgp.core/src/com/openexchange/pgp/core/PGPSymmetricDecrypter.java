@@ -49,105 +49,68 @@
 
 package com.openexchange.pgp.core;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
-import com.openexchange.pgp.keys.common.PGPSymmetricKey;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPEncryptedDataList;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPLiteralData;
+import org.bouncycastle.openpgp.PGPObjectFactory;
+import org.bouncycastle.openpgp.PGPPBEEncryptedData;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
+import org.bouncycastle.openpgp.operator.bc.BcPBEDataDecryptorFactory;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 
 /**
- * {@link PGPSymmetricDecrypter} decrypts PGP data with a known symmetric key (PGP session key).
+ * {@link PGPSymmetricDecrypter} offers PGP based, symmetric decryption
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.10.0
+ * @since v7.10.2
  */
-public class PGPSymmetricDecrypter extends PGPDecrypter {
+public class PGPSymmetricDecrypter {
 
-    private final byte[] key;
+    private static final int BUFFERSIZE = 256;
 
     /**
-     * Initializes a new {@link PGPSymmetricDecrypter}.
+     * Decrypts, pgp based, symmetric encrypted data
      *
-     * @param key The symmetric key data to use for decryption
+     * @param input The data to decrypt
+     * @param output The output stream to write the decrypted data to
+     * @param key The secret symmetric key required for decryption
+     * @throws IOException
+     * @throws PGPException
      */
-    PGPSymmetricDecrypter(final byte[] key) {
-        //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
-        super(new PGPKeyRetrievalStrategy() {
-
-            @Override
-            public PGPPrivateKey getSecretKey(long keyId, String userIdentity, char[] password) throws Exception {
-                return null;
+    public void decrypt(InputStream input, OutputStream output, char[] key) throws IOException, PGPException {
+        try (InputStream decoderStream = PGPUtil.getDecoderStream(input)) {
+            PGPObjectFactory objectFact = new PGPObjectFactory(decoderStream, new BcKeyFingerprintCalculator());
+            Object pgpObject = objectFact.nextObject();
+            if (pgpObject instanceof PGPEncryptedDataList) {
+                Object nextObj = ((PGPEncryptedDataList) pgpObject).get(0);
+                if (nextObj instanceof PGPPBEEncryptedData) {
+                    PGPPBEEncryptedData encrypted = (PGPPBEEncryptedData) nextObj;
+                    InputStream decrypted = encrypted
+                        .getDataStream(new BcPBEDataDecryptorFactory(key, new BcPGPDigestCalculatorProvider()));
+                    PGPObjectFactory decrFactor = new PGPObjectFactory(decrypted, new BcKeyFingerprintCalculator());
+                    Object decrKey = decrFactor.nextObject();
+                    // Check for compressed data
+                    if (decrKey instanceof PGPCompressedData) {
+                        PGPCompressedData compressedData = (PGPCompressedData) decrKey;
+                        objectFact = new PGPObjectFactory(compressedData.getDataStream(), new BcKeyFingerprintCalculator());
+                        decrKey = objectFact.nextObject();
+                    }
+                    // Handle literal data
+                    if (decrKey instanceof PGPLiteralData) {
+                        PGPLiteralData decrData = (PGPLiteralData) decrKey;
+                        byte[] buffer = new byte[BUFFERSIZE];
+                        int len = 0;
+                        while ((len = decrData.getDataStream().read(buffer)) > -1) {
+                            output.write(buffer, 0, len);
+                        }
+                    }
+                }
             }
-
-            @Override
-            public PGPPublicKey getPublicKey(long keyId) throws Exception {
-                return null;
-            }
-        });
-        this.key = key;
-    }
-
-    /**
-     * Initializes a new {@link PGPSymmetricDecrypter}.
-     *
-     * @param key The symmetric key data to use for decryption
-     * @param strategy A custom strategy to retrieval public keys for signature verification
-     */
-    public PGPSymmetricDecrypter(final byte[] key, PGPKeyRetrievalStrategy strategy) {
-        super(strategy);
-        this.key = key;
-    }
-
-    /**
-     * Initializes a new {@link PGPSymmetricDecrypter}.
-     *
-     * @param The symmetric key to use for decryption
-     */
-    public PGPSymmetricDecrypter(PGPSymmetricKey key) {
-        this(key.getKeyData());
-    }
-
-    /**
-     * Initializes a new {@link PGPSymmetricDecrypter}.
-     *
-     * @param The symmetric key to use for decryption
-     * @param strategy A custom strategy to retrieval public keys for signature verification
-     */
-    public PGPSymmetricDecrypter(PGPSymmetricKey key, PGPKeyRetrievalStrategy strategy) {
-        this(key.getKeyData(), strategy);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.pgp.core.PGPDecrypter#keyFound(org.bouncycastle.openpgp.PGPPrivateKey)
-     */
-    @Override
-    protected boolean keyFound(PGPPrivateKey key) {
-        //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.pgp.core.PGPDecrypter#getDecryptionFactory(com.openexchange.pgp.core.PGPDecrypter.PGPDataContainer)
-     */
-    @Override
-    protected PublicKeyDataDecryptorFactory getDecryptionFactory(PGPDataContainer publicKeyEncryptedData) {
-        return new SymmetricKeyDataDecryptorFactory(key);
-    }
-
-    /**
-     * Decrypts the given PGP data.
-     *
-     * @param input The input stream to read the PGP data from
-     * @param output The output stream to write the decoded data to
-     * @return The decryption result
-     * @throws Exception
-     */
-    public PGPDecryptionResult decrypt(InputStream input, OutputStream output) throws Exception {
-        return super.decrypt(input, output, null, null);
+        }
     }
 }

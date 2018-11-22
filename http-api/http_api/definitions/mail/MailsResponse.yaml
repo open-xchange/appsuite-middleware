@@ -1,12 +1,13 @@
 type: object
 properties:
-  $ref: ../common/CommonResponseData.yaml
+  $ref: ../common/FlaggedResponseData.yaml
   data:
     type: array
     description: Array of mails. Each mail is described as an array itself.
     items:
         type: array
         description: An Array of mail fields.
+        title: MailFields
         items:
             type: string
             description: A mail field.

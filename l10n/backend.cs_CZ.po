@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-10-14 14:12+0100\n"
+"PO-Revision-Date: 2018-11-13 02:07+0100\n"
 "Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs_CZ\n"
@@ -998,8 +998,8 @@ msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
 msgstr ""
-"Obdrželi jste zprávu s odpovědí na schůzku, kterou neorganizujete."
-" Doporučujeme zprávu ignorovat."
+"Obdrželi jste zprávu s odpovědí na schůzku, kterou neorganizujete. "
+"Doporučujeme zprávu ignorovat."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1711,7 +1711,7 @@ msgstr "%1$s, %2$s, %3$s"
 #. %1$s on %2$s %3$s
 #. E.g. OX Mail App on Android 8.0
 #: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:85
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:96
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:105
 msgid "%1$s on %2$s %3$s"
 msgstr "%1$s, %2$s %3$s"
 
@@ -1720,11 +1720,26 @@ msgstr "%1$s, %2$s %3$s"
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr "Microsoft Exchange ActiveSync Client"
 
+#. WebDAV InfoStore
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:91
+msgid "WebDAV InfoStore"
+msgstr "WebDAV InfoStore"
+
+#. WebDAV VCard
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:94
+msgid "WebDAV VCard"
+msgstr "WebDAV VCard"
+
+#. WebDAV iCal
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:97
+msgid "WebDAV iCal"
+msgstr "WebDAV iCal"
+
 #. %1$s %2$s on %3$s %4$s
 #. E.g. OX Mail App 1.10 on Android 8.0
 #. %1$s %2$s on %3$s %4$s
 #. E.g. Drive Client 2.4.0 on Windows 10
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:92
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:101
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:65
 msgid "%1$s %2$s on %3$s %4$s"
 msgstr "%1$s %2$s, %3$s %4$s"
@@ -1733,7 +1748,7 @@ msgstr "%1$s %2$s, %3$s %4$s"
 #. E.g. OX Mail App 1.10 on Android
 #. %1$s %2$s on %3$s
 #. E.g. Drive Client 2.4.0 on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:100
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:109
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:69
 msgid "%1$s %2$s on %3$s"
 msgstr "%1$s %2$s, %3$s"
@@ -1742,10 +1757,15 @@ msgstr "%1$s %2$s, %3$s"
 #. E.g. OX Mail App on Android
 #. %1$s on %2$s
 #. E.g. Drive Client on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:104
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:113
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
 msgid "%1$s on %2$s"
 msgstr "%1$s, %2$s"
+
+#. Unknown client
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:116
+msgid "Unknown client"
+msgstr "Neznámý klient"
 
 #: com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
@@ -3772,6 +3792,11 @@ msgstr "Chybné heslo."
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:116
 msgid "Login denied."
 msgstr "Přihlášení zamítnuto."
+
+#. Used in case there were too many failed login attempts for an account within a certain timeframe.
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:122
+msgid "Too many login attempts. Please try again later."
+msgstr "Příliš mnoho pokusů o přihlášení. Zkuste to později."
 
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70

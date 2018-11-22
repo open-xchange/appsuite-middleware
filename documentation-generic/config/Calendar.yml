@@ -82,7 +82,7 @@ properties:
         Defines a maximum number of attendees per event. The intention of this limit is to prevent out of memory situations.
       defaultValue: 1000
       version: 7.10.0
-      reloadable: false
+      reloadable: true
       configcascadeAware: true
       related: 
       file: calendar.properties
@@ -93,7 +93,7 @@ properties:
         Defines a maximum number of alarms per event. The intention of this limit is to prevent out of memory situations.
       defaultValue: 100
       version: 7.10.0
-      reloadable: false
+      reloadable: true
       configcascadeAware: true
       related: 
       file: calendar.properties

@@ -55,7 +55,9 @@ import org.scribe.model.OAuthRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.impl.services.Services;
 
 /**
  * {@link OAuthHTTPRequest} - The HTTP OAuth request.
@@ -81,6 +83,11 @@ public class OAuthHTTPRequest implements HTTPRequest {
 	    try {
             delegate.setConnectTimeout(5, TimeUnit.SECONDS);
             delegate.setReadTimeout(15, TimeUnit.SECONDS);
+
+            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+            if (null != factoryProvider) {
+                delegate.setSSLSocketFactory(factoryProvider.getDefault());
+            }
 
             // Wrap response & return
             return new HttpOauthResponse(delegate.send());
