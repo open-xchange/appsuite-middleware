@@ -617,6 +617,20 @@ EOF
       done
       ox_scr_done ${SCR}
     }
+
+    SCR=SCR-299
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/cache.ccf
+      for region in OXFolderCache OXFolderQueryCache GlobalFolderCache
+      do
+        curr_val=$(ox_read_property jcs.region.${region}.elementattributes.MaxLifeSeconds ${pfile})
+        if [ "-1" = "${curr_val}" ]
+        then
+          ox_set_property jcs.region.${region}.elementattributes.MaxLifeSeconds 3600 ${pfile}
+        fi
+      done
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
