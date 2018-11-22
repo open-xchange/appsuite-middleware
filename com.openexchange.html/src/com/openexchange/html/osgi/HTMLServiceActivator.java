@@ -88,23 +88,22 @@ public class HTMLServiceActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTMLServiceActivator.class);
 
+    private HtmlServiceImpl htmlService;
+
+    /**
+     * Initializes a new {@link HTMLServiceActivator}.
+     */
+    public HTMLServiceActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, ThreadPoolService.class };
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        apply((ConfigurationService) getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        restore();
-    }
-
-    @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
             HTMLImageFilterHandler.PREFIX.set(getService(DispatcherPrefixService.class));
@@ -134,7 +133,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         try {
             /*
              * Other shut-down stuff
@@ -144,13 +143,14 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             JerichoParser.shutDown();
             JsoupParser.shutDown();
             /*
-             * Close trackers
+             * Stop rest
              */
-            cleanUp();
-            /*
-             * Restore
-             */
-            restore();
+            HtmlServiceImpl htmlService = this.htmlService;
+            if (null != htmlService) {
+                this.htmlService = null;
+                htmlService.stop();
+            }
+            super.stopBundle();
             HTMLImageFilterHandler.PREFIX.set(null);
             Services.setServiceLookup(null);
         } catch (final Exception e) {
@@ -180,7 +180,9 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         /*
          * Register HTML service
          */
-        registerService(HtmlService.class, new HtmlServiceImpl(htmlCharMap, htmlEntityMap), null);
+        HtmlServiceImpl htmlService = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+        this.htmlService = htmlService;
+        registerService(HtmlService.class, htmlService, null);
     }
 
     public static Object[] getHTMLEntityMaps(final File htmlEntityFile) {
@@ -486,11 +488,6 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             }
         }
         return properties;
-    }
-
-    private void restore() {
-        cleanUp();
-        ServiceRegistry.getInstance().removeService(ConfigurationService.class);
     }
 
     /**
