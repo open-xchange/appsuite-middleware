@@ -103,8 +103,9 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
      */
     public SpecialAlphanumSortContactComparator(Locale locale) {
         super();
-        this.delegate = new AlphanumComparator(locale);
-        this.locale = locale;
+        Locale localeToUse = null == locale ? Locale.US : locale;
+        this.delegate = new AlphanumComparator(localeToUse);
+        this.locale = localeToUse;
     }
 
     @Override

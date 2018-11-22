@@ -48,6 +48,15 @@
         required: false    
       - $ref: "#/parameters/gblQueryParamsDecrypt"
       - $ref: "#/parameters/glbQueryParamsCryptoAuth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationHeight"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationShrinkOnly"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationScaleType"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropWidth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropHeight"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropX"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"
     responses:
       200:
         description: The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.

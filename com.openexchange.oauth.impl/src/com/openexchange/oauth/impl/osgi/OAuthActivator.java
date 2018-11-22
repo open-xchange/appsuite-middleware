@@ -49,8 +49,10 @@
 
 package com.openexchange.oauth.impl.osgi;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -119,9 +121,10 @@ import com.openexchange.user.UserService;
  */
 public final class OAuthActivator extends HousekeepingActivator {
 
-    private volatile OSGiDelegateServiceMap delegateServices;
-    private volatile ScheduledTimerTask timerTask;
-    private volatile OAuthAccessRegistryServiceImpl accessRegistryService;
+    private OSGiDelegateServiceMap delegateServices;
+    private ScheduledTimerTask timerTask;
+    private OAuthAccessRegistryServiceImpl accessRegistryService;
+    private org.scribe.model.RequestListener scribeRequestListener;
 
     /**
      * Initializes a new {@link OAuthActivator}.
@@ -132,11 +135,13 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class,
+            SessionHolder.class, CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class,
+            UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OAuthActivator.class);
         try {
             log.info("starting bundle: com.openexchange.oauth");
@@ -225,6 +230,27 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(EncryptedItemCleanUpService.class, oauthAccountStorage);
             registerService(OAuthAPIRegistry.class, OAuthAPIRegistryImpl.getInstance());
 
+            org.scribe.model.RequestListener scribeRequestListener = new org.scribe.model.RequestListener() {
+
+                @Override
+                public void onBeforeSend(org.scribe.model.Request request) throws IOException {
+                    request.setConnectTimeout(5, TimeUnit.SECONDS);
+                    request.setReadTimeout(30, TimeUnit.SECONDS);
+
+                    SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+                    if (null != factoryProvider) {
+                        request.setSSLSocketFactory(factoryProvider.getDefault());
+                    }
+                }
+
+                @Override
+                public void onAfterSend(org.scribe.model.Request request, org.scribe.model.Response response) {
+                    // Don't care
+                }
+            };
+            org.scribe.model.Request.addRequestListener(scribeRequestListener);
+            this.scribeRequestListener = scribeRequestListener;
+
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
             registerService(OAuthHTTPClientFactory.class, oauthFactory);
 
@@ -273,7 +299,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OAuthActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.oauth");
@@ -299,6 +325,12 @@ public final class OAuthActivator extends HousekeepingActivator {
             if (null != accessRegistryService) {
                 this.accessRegistryService = null;
                 accessRegistryService.clear();
+            }
+
+            org.scribe.model.RequestListener scribeRequestListener = this.scribeRequestListener;
+            if (null != scribeRequestListener) {
+                this.scribeRequestListener = null;
+                org.scribe.model.Request.removeRequestListener(scribeRequestListener);
             }
 
             ReauthorizeListenerRegistry.releaseInstance();

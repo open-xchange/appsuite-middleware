@@ -59,6 +59,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchTermFields;
@@ -95,6 +96,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactRequest {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactRequest.class);
+    }
 
     private final AJAXRequestData request;
     private final ServerSession session;
@@ -200,7 +206,13 @@ public class ContactRequest {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
                 return true;
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-                Collections.sort(contacts, new UseCountComparator(user.getLocale()));
+                try {
+                    Collections.sort(contacts, new UseCountComparator(user.getLocale()));
+                } catch (IllegalArgumentException e) {
+                    // The Comparator contract is violated
+                    LoggerHolder.LOG.error("Comparator contract is violated by UseCountComparator with locale {}", user.getLocale(), e);
+                    Collections.sort(contacts, UseCountComparator.FALLBACK_USE_COUNT_COMPARATOR);
+                }
                 return true;
             }
         }

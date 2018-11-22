@@ -47,40 +47,79 @@
  *
  */
 
-package com.openexchange.ratelimit.rdb.impl;
+package com.openexchange.ratelimit.rdb.impl.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import org.slf4j.LoggerFactory;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link RatelimitCreateTableService}
+ * {@link RateLimitCreateTableUpdateTask} - The appropriate update task to create needed "ratelimit" table.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RatelimitCreateTableService extends AbstractCreateTableImpl {
+public class RateLimitCreateTableUpdateTask extends UpdateTaskAdapter {
 
-    private static String TABLE_NAME = "ratelimit";
+    private final RateLimitCreateTableService service;
+
+    /**
+     * Initializes a new {@link RateLimitCreateTableUpdateTask}.
+     */
+    public RateLimitCreateTableUpdateTask(RateLimitCreateTableService createTableService) {
+        super();
+        this.service = createTableService;
+    }
 
     @Override
-    public String[] requiredTables() {
+    public String[] getDependencies() {
         return new String[0];
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return new String[] { TABLE_NAME };
-    }
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        int rollback = 0;
+        try {
+            String tableName = service.tablesToCreate()[0];
+            if (tableExists(connection, tableName)) {
+                LoggerFactory.getLogger(RateLimitCreateTableUpdateTask.class).debug("Table {} already exists, skipping.", tableName);
+                return;
+            }
 
-    @Override
-    protected String[] getCreateStatements() {
-        return new String[] {   "CREATE TABLE " + TABLE_NAME + " (" +
-                                    "cid INT4 UNSIGNED NOT NULL," +
-                                    "userId INT4 UNSIGNED NOT NULL," +
-                                    "id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +
-                                    "timestamp BIGINT(20) NOT NULL," +
-                                    "permits BIGINT(20) NOT NULL," +
-                                    "PRIMARY KEY (cid,userId,id,timestamp)" +
-                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"};
+            connection.setAutoCommit(false);
+            rollback = 1;
+
+            {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = connection.prepareStatement(service.getCreateStatements()[0]);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+
+            connection.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
+            }
+        }
     }
 
 }

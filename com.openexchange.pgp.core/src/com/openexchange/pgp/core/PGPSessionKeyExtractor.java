@@ -58,12 +58,12 @@ import org.bouncycastle.openpgp.operator.bc.BcPublicKeyDataDecryptorFactory;
 import com.openexchange.pgp.core.packethandling.ExtractSessionProcessorHandler.EncryptedSession;
 
 /**
- * {@link PGPSessionDecrypter} provides functionality to decrypt a Public-Key encrypted symmetric PGP session key.
+ * {@link PGPSessionKeyExtractor} provides functionality to extract/decrypt a Public-Key encrypted symmetric PGP session key from a PGP message.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.0
  */
-public class PGPSessionDecrypter {
+public class PGPSessionKeyExtractor {
 
     /**
      * Internal method to create a decrypto factory

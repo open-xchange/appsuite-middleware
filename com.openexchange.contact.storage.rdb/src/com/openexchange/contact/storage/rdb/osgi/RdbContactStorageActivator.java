@@ -58,6 +58,8 @@ import com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
+import com.openexchange.contact.storage.rdb.mbean.ContactStorageMBean;
+import com.openexchange.contact.storage.rdb.mbean.ContactStorageMBeanImpl;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
 import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
@@ -69,6 +71,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
 
@@ -115,7 +118,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
             registerService(Reloadable.class, FulltextAutocompleteAdapter.RELOADABLE);
             track(I18nService.class, new I18nTracker(context));
-            track(ManagementService.class, new ManagementRegisterer(context));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, ContactStorageMBean.NAME, ContactStorageMBean.DOMAIN, new ContactStorageMBeanImpl()));
             trackService(ImageMetadataService.class);
             openTrackers();
         } catch (Exception e) {

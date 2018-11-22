@@ -15,6 +15,7 @@ Moreover, both come with the same implications:
 
 * Rate-limit is per Middleware node, i.e. the total number of possible attempts is the number per node times the number of nodes.
 * This doesn't really solve a brute-force case where e.g. a large pool of source IP addresses and User-Agents iterates over a pool of user names
+* The limit is across all clients/interfaces. I.e. if a user changes his password and forgets to adjust his sync client accordingly, the sync client might cause a constant rate limit of login attempts, which effectively also blocks the webmail login until the sync client is stopped.
 
 They only differ on how the associations take place. One executes the rate limiting of failed login attempts by attributes/characterirstics of HTTP protocol (like value of the User-Agent header and Internet Protocol (IP) address of the client or last proxy that sent the request). A client that exceeds that limit will receive a `"429 Too Many Requests"` HTTP error code.
 
