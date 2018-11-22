@@ -1,4 +1,4 @@
-package com.openexchange.oidc.test;
+package com.openexchange.oidc;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
