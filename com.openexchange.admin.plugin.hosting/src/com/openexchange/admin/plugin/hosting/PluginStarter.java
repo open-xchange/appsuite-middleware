@@ -77,7 +77,7 @@ public class PluginStarter {
             this.context = context;
 
             // Create all OLD Objects and bind export them
-            com.openexchange.admin.plugin.hosting.rmi.impl.OXContext oxctx_v2 = new com.openexchange.admin.plugin.hosting.rmi.impl.OXContext(context);
+            com.openexchange.admin.plugin.hosting.rmi.impl.OXContext oxctx_v2 = new com.openexchange.admin.plugin.hosting.rmi.impl.OXContext();
 
             // bind all NEW Objects to registry
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);

@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
@@ -124,11 +123,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     /**
      * Initializes a new {@link OXContext}.
-     *
-     * @param context The associated bundle context
      */
-    public OXContext(final BundleContext context) {
-        super(context);
+    public OXContext() {
+        super();
         cache = ClientAdminThread.cache;
         LOGGER.debug("Class loaded: {}", this.getClass().getName());
     }
