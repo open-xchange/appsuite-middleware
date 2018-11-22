@@ -172,7 +172,7 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         //-------------------------------------------------------------------------------------------------------------
         // Decrypting the symmetric encryption key from the obtained session data
 
-        PGPSessionDecrypter pgpSessionDecrypter = new PGPSessionDecrypter();
+        PGPSessionKeyExtractor pgpSessionDecrypter = new PGPSessionKeyExtractor();
         PGPPrivateKey privateKey = decodePrivateKey(testIdentity.getSecretKey(), TEST_IDENTITY_PASSWORD);
         byte[] symmetricKey = pgpSessionDecrypter.decryptSymmetricSessionKey(encryptedPgpSession, privateKey);
         assertTrue("The session key should have at least some data", symmetricKey.length > 0);
@@ -180,7 +180,7 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         //-------------------------------------------------------------------------------------------------------------
 
         //Now trying to decrypt the PGP Data just with the knowledge of the session key
-        PGPSymmetricDecrypter symmetricDecrypter = new PGPSymmetricDecrypter(symmetricKey);
+        PGPSessionKeyDecrypter symmetricDecrypter = new PGPSessionKeyDecrypter(symmetricKey);
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
         PGPDecryptionResult result = symmetricDecrypter.decrypt(new ByteArrayInputStream(encryptedTestData), decryptedData);
         List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();

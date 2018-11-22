@@ -59,15 +59,27 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class UseCountComparator implements Comparator<Contact> {
 
-    private Comparator<Contact> contactComparator;
+    /** The fall-back use-count comparator */
+    public static final UseCountComparator FALLBACK_USE_COUNT_COMPARATOR = new UseCountComparator((Comparator<Contact>) null);
 
+    private final Comparator<Contact> contactComparator;
+
+    /**
+     * Initializes a new {@link UseCountComparator}.
+     *
+     * @param locale The locale to use
+     */
     public UseCountComparator(final Locale locale) {
-        super();
-        this.contactComparator = new SpecialAlphanumSortContactComparator(locale);
+        this(new SpecialAlphanumSortContactComparator(locale));
     }
 
+    /**
+     * Initializes a new {@link UseCountComparator}.
+     *
+     * @param comp The comparator to use if both - use-count and folder - are equal
+     */
     public UseCountComparator(final Comparator<Contact> comp) {
-        this(Locale.US);
+        super();
         this.contactComparator = comp;
     }
 

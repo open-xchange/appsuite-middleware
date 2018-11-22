@@ -105,7 +105,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
-            AlarmTrigger alarmTrigger = triggers.get(0);
+            AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
             eventId.setFolder(event.getFolder());
@@ -123,7 +123,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
-            AlarmTrigger alarmTrigger = triggers.get(0);
+            AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
         }
     }
@@ -151,7 +151,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
-            AlarmTrigger alarmTrigger = triggers.get(0);
+            AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
             eventId.setFolder(event.getFolder());
@@ -169,7 +169,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
-            AlarmTrigger alarmTrigger = triggers.get(0);
+            AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
         }
     }

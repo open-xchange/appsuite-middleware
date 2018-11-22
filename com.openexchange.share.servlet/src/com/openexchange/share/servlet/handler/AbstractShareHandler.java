@@ -89,24 +89,40 @@ public abstract class AbstractShareHandler implements ShareHandler {
         /*
          * add session enhancement as needed
          */
-        final Map<String, String> additionals = null != shareRequest.getTargetPath() ? shareRequest.getTargetPath().getAdditionals() : null;
-        if (null != additionals && 0 < additionals.size()) {
-            return new ShareLoginMethod(context, guest, new SessionEnhancement() {
-
-                @Override
-                public void enhanceSession(Session session) {
-                    for (Map.Entry<String, String> entry : additionals.entrySet()) {
-                        session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
-                    }
-                }
-            });
-        }
-        return new ShareLoginMethod(context, guest, null);
+        Map<String, String> additionals = null != shareRequest.getTargetPath() ? shareRequest.getTargetPath().getAdditionals() : null;
+        return new ShareLoginMethod(context, guest, (null == additionals || additionals.isEmpty()) ? null : new ShareLoginSessionEnhancement(additionals));
     }
 
     @Override
     public ShareHandlerReply handleNotFound(HttpServletRequest request, HttpServletResponse response, String status) throws IOException {
         return ShareHandlerReply.NEUTRAL;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class ShareLoginSessionEnhancement implements SessionEnhancement {
+
+        private final Map<String, String> additionals;
+
+        ShareLoginSessionEnhancement(Map<String, String> additionals) {
+            super();
+            this.additionals = additionals;
+        }
+
+        @Override
+        public void enhanceSession(Session session) {
+            StringBuilder keyBuilder = null;
+            int reslen = 0;
+            for (Map.Entry<String, String> entry : additionals.entrySet()) {
+                if (null == keyBuilder) {
+                    keyBuilder = new StringBuilder("com.openexchange.share.");
+                    reslen = keyBuilder.length();
+                } else {
+                    keyBuilder.setLength(reslen);
+                }
+                session.setParameter(keyBuilder.append(entry.getKey()).toString(), entry.getValue());
+            }
+        }
     }
 
 }

@@ -352,13 +352,15 @@ public abstract class SessionServlet extends AJAXServlet {
         // Check expected output format
         if (isJsonResponseExpected(req, true) || Dispatchers.isApiOutputExpectedFor(req)) {
             // First, try to obtain the writer
-            PrintWriter writer = getWriterFrom(resp);
+            PrintWriter writer = getWriterFrom(resp, false);
 
             // API response
             if (null != writer) {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 resp.setHeader("Content-Disposition", "inline");
                 APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), writer, req, resp);
+            } else {
+                LOG.error("Unable to output following exception to client as getOutputStream() method has already been called", e);
             }
         } else {
             // No JSON response; either JavaScript call-back or regular HTML error (page)
@@ -366,13 +368,15 @@ public abstract class SessionServlet extends AJAXServlet {
                 writeErrorAsJsCallback(e, req, resp);
             } else {
                 // First, try to obtain the writer
-                PrintWriter writer = getWriterFrom(resp);
+                PrintWriter writer = getWriterFrom(resp, false);
 
                 // Write error page
                 if (null != writer) {
                     String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
                     resp.setStatus(statusCode);
                     writeErrorPage(statusCode, desc, resp);
+                } else {
+                    LOG.error("Unable to output following exception to client as getOutputStream() method has already been called", e);
                 }
             }
         }

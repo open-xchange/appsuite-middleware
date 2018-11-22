@@ -10,7 +10,7 @@ properties:
         description: An array of files.
         items:
           $ref: "#/definitions/DriveFileMetadata"
-      folders:
+      directories:
         type: array
         description: An array of folders.
         items:
