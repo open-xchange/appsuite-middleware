@@ -64,7 +64,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net.ssl.config.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.impl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oidc"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oidc.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pgp.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pgp.keys"/>

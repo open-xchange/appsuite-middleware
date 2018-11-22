@@ -1,10 +1,10 @@
-package com.openexchange.oidc;
+package com.openexchange.oidc.impl;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.oidc.impl.OIDCSessionInspectorServiceTest;
-import com.openexchange.oidc.impl.OIDCWebSSoProviderImplTest;
+import com.openexchange.oidc.impl.tests.OIDCSessionInspectorServiceTest;
+import com.openexchange.oidc.impl.tests.OIDCWebSSoProviderImplTest;
 import com.openexchange.oidc.spi.AbstractOIDCBackendTest;
 import com.openexchange.oidc.tools.OIDCToolsTest;
 
