@@ -68,8 +68,11 @@ public class AdminCacheExtended extends AdminCache {
     // sql filenames order and directory
 
     public void initCacheExtended() {
-        prop = new PropertyHandlerExtended(System.getProperties());
-        initPool(new OXAdminPoolDBPoolExtension());
+        this.prop = new PropertyHandlerExtended(System.getProperties());
+        this.pool = new OXAdminPoolDBPoolExtension();
+        
+        // Overwrite pool in parent class
+        initPool(this.pool);
     }
 
     /**
