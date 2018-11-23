@@ -1,3 +1,9 @@
+open-xchange-authentication-ucs-common (7.10.1-2) stable; urgency=medium
+
+  * RC 1 for 7.10.1 release
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Fri, 23 Nov 2018 14:39:24 +0100
+
 open-xchange-authentication-ucs-common (7.10.1-1) stable; urgency=medium
 
   * Second preview for 7.10.1 release
