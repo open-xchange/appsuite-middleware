@@ -128,11 +128,17 @@ public abstract class AbstractICalExporter implements ICalExport {
             // Try to stream
             HttpServletResponse response = requestData.optHttpServletResponse();
             if (null != response) {
-                response.setHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                response.setHeader("Content-Disposition", "attachment" + filename);
-                Tools.removeCachingHeader(response);
-                getExportDataSource(session, new DelayInitServletOutputStream(response));
-                return null;
+                OutputStream out = null;
+                try {
+                    response.setHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    response.setHeader("Content-Disposition", "attachment" + filename);
+                    Tools.removeCachingHeader(response);
+                    out = new DelayInitServletOutputStream(response);
+                    getExportDataSource(session, out);
+                    return null;
+                } finally {
+                    Streams.close(out);
+                }
             }
         }
 
