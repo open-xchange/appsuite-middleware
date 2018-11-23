@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oidc.impl;
+package com.openexchange.oidc.impl.tests;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
+import com.openexchange.oidc.impl.OIDCSessionInspectorService;
 import com.openexchange.oidc.osgi.OIDCBackendRegistry;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Reply;

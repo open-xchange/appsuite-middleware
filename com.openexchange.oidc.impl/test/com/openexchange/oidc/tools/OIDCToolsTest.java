@@ -123,6 +123,7 @@ public class OIDCToolsTest {
 
     @Before
     public void setUp() {
+        new File(TESTFILES_PATH).mkdir();
         MockitoAnnotations.initMocks(this);
 
         Mockito.when(mockedHostnameService.getHostname(-1, -1)).thenReturn(HOSTNAME);

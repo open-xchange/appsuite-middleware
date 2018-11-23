@@ -486,9 +486,18 @@ public abstract class ParticipantStorage {
         Set<ExternalParticipant> participants, StorageType type)
         throws OXException;
 
-    public final static Set<ExternalParticipant> extractExternal(final Set<TaskParticipant> participants) {
-        final Set<ExternalParticipant> retval = new HashSet<ExternalParticipant>();
-        for (final TaskParticipant participant : participants) {
+    public static Set<ExternalParticipant> extractExternal(Set<TaskParticipant> participants) {
+        if (null == participants) {
+            return Collections.emptySet();
+        }
+
+        int size = participants.size();
+        if (size <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<ExternalParticipant> retval = new HashSet<ExternalParticipant>(size);
+        for (TaskParticipant participant : participants) {
             if (Type.EXTERNAL == participant.getType()) {
                 retval.add((ExternalParticipant) participant);
             }
@@ -496,11 +505,18 @@ public abstract class ParticipantStorage {
         return retval;
     }
 
-    public static Set<InternalParticipant> extractInternal(
-        final Set<TaskParticipant> participants) {
-        final Set<InternalParticipant> retval =
-            new HashSet<InternalParticipant>();
-        for (final TaskParticipant participant : participants) {
+    public static Set<InternalParticipant> extractInternal(Set<TaskParticipant> participants) {
+        if (null == participants) {
+            return Collections.emptySet();
+        }
+
+        int size = participants.size();
+        if (size <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<InternalParticipant> retval = new HashSet<InternalParticipant>(size);
+        for (TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
                 retval.add((InternalParticipant) participant);
             }
@@ -508,8 +524,11 @@ public abstract class ParticipantStorage {
         return retval;
     }
 
-    static InternalParticipant getParticipant(
-        final Set<InternalParticipant> participants, final int userId) {
+    static InternalParticipant getParticipant(final Set<InternalParticipant> participants, final int userId) {
+        if (null == participants || participants.isEmpty()) {
+            return null;
+        }
+
         InternalParticipant retval = null;
         for (final InternalParticipant participant : participants) {
             if (participant.getIdentifier() == userId) {
