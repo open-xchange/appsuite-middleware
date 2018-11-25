@@ -76,26 +76,31 @@ public class AddPrimaryKeyVcardPrincipalTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
-            con.setAutoCommit(false);
-            rollback = true;
-
-            if (!Tools.hasPrimaryKey(con, "vcard_principal")) {
-                Tools.createPrimaryKey(con, "vcard_principal", new String[] { "cid", "object_id" });
+            boolean hasPrimaryKey = Tools.hasPrimaryKey(con, "vcard_principal");
+            if (hasPrimaryKey) {
+                return;
             }
 
+            con.setAutoCommit(false);
+            rollback = 1;
+
+            Tools.createPrimaryKey(con, "vcard_principal", new String[] { "cid", "object_id" });
+
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

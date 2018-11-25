@@ -119,22 +119,26 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
 
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
+
             delete(subscription, writeConnection);
+
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
@@ -290,23 +294,27 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
 
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
+
             final int id = save(subscription, writeConnection);
             subscription.setId(id);
+
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
@@ -319,22 +327,26 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
 
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
+
             update(subscription, writeConnection);
+
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
@@ -418,11 +430,11 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     @Override
     public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException {
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
 
             new StatementBuilder().executeStatement(writeConnection,
                 new UPDATE(subscriptions)
@@ -432,15 +444,17 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
 
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(ctx, writeConnection);
             }
         }

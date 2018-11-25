@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
@@ -100,10 +99,10 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
     public void perform(final PerformParameters params) throws OXException {
         final ProgressState progress = params.getProgressState();
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             Exception re = null;
             final int[] contextIds = params.getContextsInSameSchema();
@@ -126,14 +125,16 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
     }
 

@@ -102,11 +102,15 @@ public class Deduplicator {
          */
         DatabaseService databaseService = RdbServiceLookup.getService(DatabaseService.class, true);
         Connection connection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
-            connection = dryRun ? databaseService.getReadOnly(contextID) : databaseService.getWritable(contextID);
-            connection.setAutoCommit(false);
-            rollback = true;
+            if (dryRun) {
+                connection = databaseService.getReadOnly(contextID);
+            } else {
+                connection = databaseService.getWritable(contextID);
+                connection.setAutoCommit(false);
+                rollback = 1;
+            }
             /*
              * get contacts per hash code, split data into lists of ids for different tables in case there are two or more found
              */
@@ -143,16 +147,20 @@ public class Deduplicator {
                 LOG.info("Deleted {} records in table {}.", imageDataDeleted, Table.IMAGES);
                 LOG.info("Deleted {} records in table {}.", distListDataDeleted, Table.DISTLIST);
             }
-            connection.commit();
-            rollback = false;
+            if (rollback > 0) {
+                connection.commit();
+                rollback = 2;
+            }
             return contactDataToDelete;
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
             if (dryRun) {
                 databaseService.backReadOnly(contextID, connection);
             } else {
@@ -452,11 +460,11 @@ public class Deduplicator {
         Executor executor = new Executor();
         DatabaseService databaseService = RdbServiceLookup.getService(DatabaseService.class, true);
         Connection connection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection = databaseService.getWritable(contextID);
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             /*
              * get contacts to duplicate
              */
@@ -505,14 +513,16 @@ public class Deduplicator {
                 }
             }
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
             databaseService.backWritable(contextID, connection);
         }
     }

@@ -109,24 +109,26 @@ public final class MailPasswordUtil {
         public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
             final int contextId = customizationNote.session.getContextId();
             final Connection con = Database.get(contextId, true);
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 con.setAutoCommit(false);
-                rollback = true;
+                rollback = 1;
 
                 update0(recrypted, customizationNote, con);
 
                 con.commit();
-                rollback = false;
+                rollback = 2;
             } catch (final SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 Database.back(contextId, true, con);
             }
         }

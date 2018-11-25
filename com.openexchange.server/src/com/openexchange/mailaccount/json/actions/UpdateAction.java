@@ -49,9 +49,7 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -219,10 +217,10 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         MailAccount updatedAccount = null;
         {
             final Connection wcon = Database.get(contextId, true);
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 Databases.startTransaction(wcon);
-                rollback = true;
+                rollback = 1;
 
                 // Invoke update
                 storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), contextId, session, wcon, false);
@@ -268,16 +266,18 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 }
 
                 wcon.commit();
-                rollback = false;
+                rollback = 2;
             } catch (final SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                if (rollback) {
-                    rollback(wcon);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(wcon);
+                    }
+                    Databases.autocommit(wcon);
                 }
-                autocommit(wcon);
                 Database.back(contextId, true, wcon);
             }
         }

@@ -85,10 +85,10 @@ public class DriveEventSubscriptionsMakeUuidPrimaryTask extends UpdateTaskAdapte
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             if (false == Tools.columnExists(connection, "driveEventSubscriptions", "uuid")) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid", "driveEventSubscriptions");
@@ -102,16 +102,18 @@ public class DriveEventSubscriptionsMakeUuidPrimaryTask extends UpdateTaskAdapte
             Tools.createIndex(connection, "driveEventSubscriptions", new String[] { "cid", "service", "token" });
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 

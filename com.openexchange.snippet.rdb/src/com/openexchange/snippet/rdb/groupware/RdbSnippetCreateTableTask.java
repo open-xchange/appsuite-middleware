@@ -97,10 +97,10 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         Connection writeCon = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
             createTable(RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetContentTable(), writeCon);
@@ -108,14 +108,16 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
             createTable(RdbSnippetTables.getSnippetMiscName(), RdbSnippetTables.getSnippetMiscTable(), writeCon);
 
             writeCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
             }
-            Databases.autocommit(writeCon);
         }
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());

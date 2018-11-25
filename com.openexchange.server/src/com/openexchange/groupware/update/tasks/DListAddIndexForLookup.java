@@ -81,25 +81,27 @@ public final class DListAddIndexForLookup extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             final String[] tables = { "prg_dlist", "del_dlist" };
             createDListIndex(con, tables, "userIndex", "intfield02", "intfield03");
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(e, params.getSchema().getSchema(), e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 

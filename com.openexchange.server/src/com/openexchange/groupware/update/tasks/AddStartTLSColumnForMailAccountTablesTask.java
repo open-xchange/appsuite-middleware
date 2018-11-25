@@ -92,10 +92,10 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
         boolean force = configService.getBoolProperty("com.openexchange.mail.enforceSecureConnection", false);
 
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             Column column = new Column("starttls", "TINYINT UNSIGNED NOT NULL DEFAULT 0");
             for (String table : tables) {
@@ -108,16 +108,18 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

@@ -94,10 +94,10 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             LOG.info("Starting {}", CalendarExtendDNColumnTaskV2.class.getSimpleName());
             modifyColumnInTable("prg_date_rights", con);
@@ -105,16 +105,18 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
             LOG.info("{} finished.", CalendarExtendDNColumnTaskV2.class.getSimpleName());
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

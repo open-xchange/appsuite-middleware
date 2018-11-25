@@ -88,10 +88,10 @@ public class MakeNotNullUpdateTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             // Changes "cap VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL" to "cap VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT ''" (if not yet performed)
             Column column = new Column("cap", "VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT ''");
@@ -104,16 +104,18 @@ public class MakeNotNullUpdateTask extends UpdateTaskAdapter {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

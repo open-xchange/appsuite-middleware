@@ -77,10 +77,10 @@ public class DropDataFromPreviewCacheTable extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
             if (Tools.columnExists(con, "preview", "data")) {
                 Statement stmt = null;
                 try {
@@ -91,16 +91,18 @@ public class DropDataFromPreviewCacheTable extends UpdateTaskAdapter {
                 }
             }
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 
