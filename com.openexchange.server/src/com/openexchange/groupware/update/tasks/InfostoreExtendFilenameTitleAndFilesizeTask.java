@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
@@ -103,25 +102,27 @@ public final class InfostoreExtendFilenameTitleAndFilesizeTask extends UpdateTas
             new Column("file_size", "bigint(20)")
         };
 
-        Connection connnection = params.getConnection();
-        boolean rollback = false;
+        Connection connection = params.getConnection();
+        int rollback = 0;
         try {
-            connnection.setAutoCommit(false);
-            rollback = true;
+            connection.setAutoCommit(false);
+            rollback = 1;
 
-            checkAndModifyColumns(connnection, "infostore_document", colums);
+            checkAndModifyColumns(connection, "infostore_document", colums);
 
-            connnection.commit();
-            rollback = false;
+            connection.commit();
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (Exception e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connnection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            autocommit(connnection);
         }
         log.info("{} successfully performed.", InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
     }

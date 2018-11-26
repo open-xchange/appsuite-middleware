@@ -283,17 +283,23 @@ public class VCardExporter extends AbstractExporter {
             // Try to stream
             HttpServletResponse response = requestData.optHttpServletResponse();
             if (null != response) {
-                response.setHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
-                if (null != folder) {
-                    response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.VCARD.getExtension())));
-                } else if (null != batchIds) {
-                    response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.VCARD.getExtension())));
-                } else {
-                    response.setHeader("Content-Disposition", "attachment; filename=Export." + Format.VCARD.getExtension());
+                Writer writer = null;
+                try {
+                    response.setHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
+                    if (null != folder) {
+                        response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.VCARD.getExtension())));
+                    } else if (null != batchIds) {
+                        response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.VCARD.getExtension())));
+                    } else {
+                        response.setHeader("Content-Disposition", "attachment; filename=Export." + Format.VCARD.getExtension());
+                    }
+                    Tools.removeCachingHeader(response);
+                    writer = new OutputStreamWriter(new DelayInitServletOutputStream(response), DEFAULT_CHARSET);
+                    export(session, folder, exportDistributionLists, fieldsToBeExported, writer, batchIds);
+                    return null;
+                } finally {
+                    Streams.close(writer);
                 }
-                Tools.removeCachingHeader(response);
-                export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(new DelayInitServletOutputStream(response), DEFAULT_CHARSET), batchIds);
-                return null;
             }
         }
 

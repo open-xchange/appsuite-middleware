@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +57,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -99,10 +98,10 @@ public final class FolderInheritTrashFolderTypeTask extends UpdateTaskAdapter {
         log.info("Performing update task {}", FolderInheritTrashFolderTypeTask.class.getSimpleName());
 
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             for (int contextId : params.getContextsInSameSchema()) {
                 List<Integer> trashFolderIDs = getDefaultTrashFolderIDs(connection, contextId);
@@ -113,17 +112,19 @@ public final class FolderInheritTrashFolderTypeTask extends UpdateTaskAdapter {
             }
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
             log.info("{} successfully performed.", FolderInheritTrashFolderTypeTask.class.getSimpleName());
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 

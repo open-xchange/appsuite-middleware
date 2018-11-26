@@ -371,8 +371,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     Connection con = dbService.getWritable(contextId);
                     refIds.clear();
                     condition.resetTransactionRollbackException();
-                    boolean transactionStarted = false;
-                    boolean rollback = false;
+                    int rollback = 0;
                     try {
                         long usedContextQuota = metadataStore.getUsedSize(con, contextId);
                         if (globalQuota > 0 && usedContextQuota > globalQuota) {
@@ -380,8 +379,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                             long collected = 0L;
 
                             Databases.startTransaction(con);
-                            transactionStarted = true;
-                            rollback = true;
+                            rollback = 1;
 
                             List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
                             Iterator<ResourceCacheMetadata> it = entries.iterator();
@@ -399,7 +397,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                             }
 
                             con.commit();
-                            rollback = false;
+                            rollback = 2;
                         }
                     } catch (SQLException s) {
                         if (condition.isFailedTransactionRollback(s)) {
@@ -408,10 +406,10 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                             LOG.error("Could not align preview cache for context {} to quota.", iContextId, s);
                         }
                     } finally {
-                        if (rollback) {
-                            Databases.rollback(con);
-                        }
-                        if (transactionStarted) {
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                Databases.rollback(con);
+                            }
                             Databases.autocommit(con);
                         }
                         if (refIds.isEmpty()) {

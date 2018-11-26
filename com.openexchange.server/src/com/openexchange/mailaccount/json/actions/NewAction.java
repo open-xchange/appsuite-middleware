@@ -49,8 +49,6 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -215,10 +213,10 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         MailAccount newAccount = null;
         {
             Connection wcon = Database.get(cid, true);
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 Databases.startTransaction(wcon);
-                rollback = true;
+                rollback = 1;
 
                 // Insert account
                 id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
@@ -250,16 +248,18 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                     newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
                 }
                 wcon.commit();
-                rollback = false;
+                rollback = 2;
             } catch (SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (RuntimeException e) {
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                if (rollback) {
-                    rollback(wcon);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(wcon);
+                    }
+                    Databases.autocommit(wcon);
                 }
-                autocommit(wcon);
                 Database.back(cid, true, wcon);
             }
         }

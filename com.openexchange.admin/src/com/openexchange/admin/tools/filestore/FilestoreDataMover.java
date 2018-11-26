@@ -486,22 +486,24 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         }
         int contextId = ctx.getId().intValue();
         Connection con = Database.getNoTimeout(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
                 updater.updateFileLocations(prevFileName2newFileName, contextId, con);
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             Database.backNoTimeout(contextId, true, con);
         }
     }
@@ -701,26 +703,28 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     protected static void changeUsage(DecrementUsage decUsage, IncrementUsage incUsage, int contextId) throws StorageException {
         AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getConnectionForContext(contextId);
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             doDecUsage(decUsage.decrementUsage, decUsage.ownerId, contextId, con);
             doIncUsage(incUsage.incrementUsage, incUsage.ownerId, contextId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
 
             if (null != con) {
                 try {

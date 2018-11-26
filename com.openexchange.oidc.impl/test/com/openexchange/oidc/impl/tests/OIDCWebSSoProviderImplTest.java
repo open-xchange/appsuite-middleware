@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oidc.impl;
+package com.openexchange.oidc.impl.tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -87,6 +87,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
+import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.LogoutRequestInfo;
@@ -106,6 +107,8 @@ import com.openexchange.session.reservation.SessionReservationService;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class, OIDCTools.class })
 public class OIDCWebSSoProviderImplTest {
+
+    private static final String STATE_VALUE = "stateValue";
 
     @Mock
     private OIDCBackendConfig mockedBackendConfig;
@@ -244,13 +247,16 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void authenticateUser_getTokenResponseFailTest() throws Exception {
-        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(ArgumentMatchers.anyString())).thenReturn(mockedAuthRequestInfo);
+        Mockito.when(mockedRequest.getParameter("state")).thenReturn(STATE_VALUE);
+        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
 
-        PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class));
-
+        PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(mockedRequest);
+        
+        
         HTTPRequest mockedHttpRequest = Mockito.mock(HTTPRequest.class);
         HTTPResponse mockedHttpResponse = Mockito.mock(HTTPResponse.class);
-
+        Mockito.when(mockedTokenRequest.toHTTPRequest()).thenReturn(mockedHttpRequest);
+        
         Mockito.when(mockedBackend.getHttpRequest(ArgumentMatchers.any(HTTPRequest.class))).thenReturn(mockedHttpRequest);
         Mockito.when(mockedHttpRequest.send()).thenReturn(mockedHttpResponse);
 
@@ -269,7 +275,8 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void authenticateUser_TokenValidationFailTest() throws Exception {
-        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(ArgumentMatchers.anyString())).thenReturn(mockedAuthRequestInfo);
+        Mockito.when(mockedRequest.getParameter("state")).thenReturn(STATE_VALUE);
+        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
 
         PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class));
 
@@ -299,9 +306,10 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void authenticateUser_SuccessTest() throws Exception {
-        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(ArgumentMatchers.anyString())).thenReturn(mockedAuthRequestInfo);
+        Mockito.when(mockedRequest.getParameter("state")).thenReturn(STATE_VALUE);
+        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
 
-        PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class));
+        PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(mockedRequest);
 
         JWT mockedIdToken = Mockito.mock(JWT.class);
         OIDCTokenResponse mockedTokenResponse = new OIDCTokenResponse(new OIDCTokens(mockedIdToken, new AccessToken(AccessTokenType.BEARER) {
@@ -317,6 +325,7 @@ public class OIDCWebSSoProviderImplTest {
         PowerMockito.doReturn(mockedTokenResponse).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getTokenResponse", TokenRequest.class)).withArguments(mockedTokenRequest);
 
         IDTokenClaimsSet mockedClaimSet = Mockito.mock(IDTokenClaimsSet.class);
+        Mockito.when(mockedAuthRequestInfo.getNonce()).thenReturn("nonce");
         Mockito.when(this.mockedBackend.validateIdToken(ArgumentMatchers.any(JWT.class), ArgumentMatchers.anyString())).thenReturn(mockedClaimSet);
         Mockito.when(mockedAuthRequestInfo.getDomainName()).thenReturn("domainname");
 
@@ -352,8 +361,8 @@ public class OIDCWebSSoProviderImplTest {
     public void getLogoutRedirectRequest_NoSSOLogoutTest() throws Exception {
         String logoutRequest = "correctLogoutRequest";
         Mockito.when(mockedBackendConfig.isSSOLogout()).thenReturn(false);
-        PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class));
-        PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class), ArgumentMatchers.any(HttpServletRequest.class), ArgumentMatchers.any(HttpServletResponse.class), ArgumentMatchers.any(LogoutRequestInfo.class));
+        PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(mockedRequest);
+        PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(mockedSession, mockedRequest, mockedResponse, null);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
 
         assertTrue("Wrong request as result", result.equals(logoutRequest));
@@ -421,7 +430,7 @@ public class OIDCWebSSoProviderImplTest {
         Mockito.when(logoutRequestInfo.getSessionId()).thenReturn(sessionID);
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getSessionFromId", String.class)).withArguments(sessionID);
         String logoutRequest = "logoutRequest";
-        PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class), ArgumentMatchers.any(HttpServletRequest.class), ArgumentMatchers.any(HttpServletResponse.class), ArgumentMatchers.any(LogoutRequestInfo.class));
+        PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(mockedSession, mockedRequest, mockedResponse, logoutRequestInfo);
         
         String result = this.provider.logoutSSOUser(mockedRequest, mockedResponse);
         assertTrue("Wrong request as result", result.equals(logoutRequest));

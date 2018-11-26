@@ -529,22 +529,24 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public void initMonitoringTables(int writePoolId, String schema) throws OXException {
         Connection con = get(writePoolId, schema);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             CreateReplicationTable createReplicationTable = new CreateReplicationTable();
             createReplicationTable.perform(con);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException x) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(x, x.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
             if (con != null) {
-                Databases.autocommit(con);
                 back(writePoolId, con);
             }
         }
@@ -557,10 +559,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
         Connection con = get(writePoolId, schema);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?, ?)");
             stmt.setInt(2, 0);
             for (int partition : partitions) {
@@ -569,16 +571,18 @@ public final class DatabaseServiceImpl implements DatabaseService {
             }
             stmt.executeBatch();
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException x) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(x, x.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(stmt);
-            if (con != null) {
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
+            }
+            if (con != null) {
                 back(writePoolId, con);
             }
         }

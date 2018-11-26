@@ -80,20 +80,22 @@ public abstract class TransactionalUpdateTaskAdapter extends UpdateTaskAdapter {
             }
 
             // Perform changes in transaction
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 con.setAutoCommit(false);
-                rollback = true;
+                rollback = 1;
 
                 performChanges(params, con);
 
                 con.commit();
-                rollback = false;
+                rollback = 2;
             } finally {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
             }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

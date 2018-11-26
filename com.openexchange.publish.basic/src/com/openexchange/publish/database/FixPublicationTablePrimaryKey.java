@@ -49,10 +49,9 @@
 
 package com.openexchange.publish.database;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,21 +83,23 @@ public final class FixPublicationTablePrimaryKey extends UpdateTaskAdapter {
                 return;
             }
 
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 con.setAutoCommit(false);
-                rollback = true;
+                rollback = 1;
 
                 Tools.dropPrimaryKey(con, "publications");
                 Tools.createPrimaryKey(con, "publications", new String[] { "cid", "id" });
 
                 con.commit();
-                rollback = false;
+                rollback = 2;
             } finally {
-                if (rollback) {
-                    rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                autocommit(con);
             }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -99,26 +98,28 @@ public final class FolderExtendNameTask extends UpdateTaskAdapter {
         log.info("Performing update task {}", simpleName);
 
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             Tools.changeVarcharColumnSize("fname", 767, "oxfolder_tree", con);
             Tools.changeVarcharColumnSize("name", 767, "virtualTree", con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             log.info("{} successfully performed.", simpleName);
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
     }
 }

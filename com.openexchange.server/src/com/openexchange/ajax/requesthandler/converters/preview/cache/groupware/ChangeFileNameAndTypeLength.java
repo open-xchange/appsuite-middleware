@@ -76,24 +76,26 @@ public class ChangeFileNameAndTypeLength extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
             Column cFileName = new Column("fileName", "varchar(767) COLLATE utf8_unicode_ci DEFAULT NULL");
             Column cFileType = new Column("fileType", "varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL");
             Tools.checkAndModifyColumns(con, "preview", cFileName, cFileType);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (1==rollback) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 
