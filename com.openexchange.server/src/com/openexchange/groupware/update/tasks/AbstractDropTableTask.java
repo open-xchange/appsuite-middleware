@@ -119,6 +119,6 @@ public abstract class AbstractDropTableTask implements UpdateTaskV2 {
 
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
+        return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.SCHEMA);
     }
 }
