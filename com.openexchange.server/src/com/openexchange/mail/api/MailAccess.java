@@ -768,27 +768,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             if (!supports(mailConfig.getAuthType())) {
                 throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(mailConfig.getAuthType().getName(), mailConfig.getServer());
             }
-            {
-                MailAccount mailAccount = getMailAccount(mailConfig);
-                if (null != mailAccount && mailAccount.isMailDisabled()) {
-                    if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
-                        OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-                        if (null != oauthService) {
-                            OAuthAccount oAuthAccount;
-                            try {
-                                oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
-                            } catch (Exception x) {
-                                LOG.warn("Failed to load mail-associated OAuth account", x);
-                                oAuthAccount = null;
-                            }
-                            if (null != oAuthAccount) {
-                                throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
-                            }
-                        }
-                    }
-                    throw MailExceptionCode.MAIL_ACCESS_DISABLED.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
-                }
-            }
+            checkIfDisabled(mailConfig);
             try {
                 connectInternal();
             } catch (OXException e) {
@@ -814,6 +794,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if (isTrackable() && !tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
+        }
+    }
+
+    private void checkIfDisabled(MailConfig mailConfig) throws OXException {
+        MailAccount mailAccount = getMailAccount(mailConfig);
+        if (null != mailAccount && mailAccount.isMailDisabled()) {
+            if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
+                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                if (null != oauthService) {
+                    OAuthAccount oAuthAccount;
+                    try {
+                        oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
+                    } catch (Exception x) {
+                        LOG.warn("Failed to load mail-associated OAuth account", x);
+                        oAuthAccount = null;
+                    }
+                    if (null != oAuthAccount) {
+                        throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                    }
+                }
+            }
+            throw MailExceptionCode.MAIL_ACCESS_DISABLED.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
         }
     }
 
@@ -844,11 +846,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     }
                 }
             }
-        
+
             if (OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
                 return AuthenticationFailureHandlerResult.createErrorResult(e);
             }
-        
+
             // Authentication failed... Check for OAuth-based authentication
             if (AuthType.isOAuthType(mailConfig.getAuthType())) {
                 // Determine identifier of the associated OAuth account
@@ -869,10 +871,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     }
                 }
             }
-        
+
             return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
-        
+
         // Otherwise signal regular error result
         return AuthenticationFailureHandlerResult.createErrorResult(e);
     }
