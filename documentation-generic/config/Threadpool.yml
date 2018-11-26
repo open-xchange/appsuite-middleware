@@ -4,11 +4,30 @@ properties:
       description: |
         The number of threads to keep in the pool, even if they are idle.
         If unsure follow this rule: Size = Number of CPUs + 1.
+        
+        Note: The rule "Number of CPUs + 1" will be followed if configured number of threads is less than rule's result
+        To enforce that this setting will be taken regardless of the afore-mentioned rule see "com.openexchange.threadpool.corePoolSize.enforce"
       defaultValue: 3
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.threadpool.corePoolSize.enforce
+      file: threadpool.properties
+      packageName: open-xchange-core
+      tags: ["Threadpool", "Thread"]
+    - key: com.openexchange.threadpool.corePoolSize.enforce
+      description: |
+        Enforces that value defined by setting "com.openexchange.threadpool.corePoolSize" is applied regardless if rule
+        "Size = Number of CPUs + 1" will be violated.
+        
+        The purpose of this setting is to reflect that in containers (Docker, Solaris Zones, FreeBSD jails, etc.) all CPU's are usually
+        visible for the application but the application can't use them all. Newer Java versions have flags to make 'availableProcessors'
+        respect these boundaries but most JVM's support that yet.
+      defaultValue: false
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.threadpool.corePoolSize
       file: threadpool.properties
       packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]
