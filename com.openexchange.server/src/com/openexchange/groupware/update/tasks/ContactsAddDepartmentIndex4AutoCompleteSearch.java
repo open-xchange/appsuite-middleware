@@ -99,24 +99,26 @@ public class ContactsAddDepartmentIndex4AutoCompleteSearch extends UpdateTaskAda
         log.info("Performing update task {}", ContactsAddDepartmentIndex4AutoCompleteSearch.class.getSimpleName());
 
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             createIndexIfNeeded(log, connection, new String[] { "cid", "field19" }, "department");
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
+            if (rollback > 0) {
+            if (rollback == 1) {
                 Databases.rollback(connection);
             }
             autocommit(connection);
+            }
         }
         log.info("{} successfully performed.", ContactsAddDepartmentIndex4AutoCompleteSearch.class.getSimpleName());
     }

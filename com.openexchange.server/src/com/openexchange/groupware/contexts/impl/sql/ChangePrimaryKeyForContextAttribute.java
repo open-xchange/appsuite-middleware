@@ -90,8 +90,7 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
         Connection con = params.getConnection();
 
         // Start task processing
-        boolean restoreAutocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             if (Tools.existsPrimaryKey(con, "contextAttribute", new String[] { "cid", "name" })) {
                 // PRIMARY KEY already changed
@@ -99,22 +98,21 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
             }
 
             Databases.startTransaction(con);
-            restoreAutocommit = true;
-            rollback = true;
+            rollback = 1;
 
             doPerform(con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            if (restoreAutocommit) {
+            if (rollback > 0) {
+                if (1==rollback) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
         }

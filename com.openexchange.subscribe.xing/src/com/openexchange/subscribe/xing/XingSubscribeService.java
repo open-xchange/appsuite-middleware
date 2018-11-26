@@ -191,7 +191,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
      */
     @Override
@@ -230,7 +230,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
                     offset += chunk.size();
                 }
                 // All retrieved
-                LOG.info("Going to converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
+                LOG.info("Going to convert {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
                 final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
                 final PhotoHandler photoHandler = new CollectingPhotoHandler(photoUrlsMap);
                 final List<Contact> retval = convert(chunk, photoHandler, subscription, session);
@@ -273,7 +273,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
      */
     @Override
@@ -292,7 +292,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
      */
     @Override

@@ -102,9 +102,9 @@ import net.freeutils.tnef.MAPIProps;
 import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
-import net.freeutils.tnef.mime.ContactHandler;
+import net.freeutils.tnef.mime.ContactConverter;
 import net.freeutils.tnef.mime.RawDataSource;
-import net.freeutils.tnef.mime.ReadReceiptHandler;
+import net.freeutils.tnef.mime.ReadReceiptConverter;
 import net.freeutils.tnef.mime.TNEFMime;
 
 /**
@@ -543,7 +543,8 @@ public final class StructureMailMessageParser {
                         if (null == subjetcAttr) {
                             message.addAttribute(new Attr(Attr.LVL_MESSAGE, Attr.atpText, Attr.attSubject, "vcard"));
                         }
-                        mp = ContactHandler.convert(message);
+                        net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ContactConverter().convert(message, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
+                        mp = (Multipart) convertResult.getContent();
                     } catch (final RuntimeException e) {
                         LOG.error("Invalid TNEF contact", e);
                         return;
@@ -560,7 +561,8 @@ public final class StructureMailMessageParser {
                      */
                     final Multipart mp;
                     try {
-                        mp = ReadReceiptHandler.convert(message);
+                        net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ReadReceiptConverter().convert(message, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
+                        mp = (Multipart) convertResult.getContent();
                     } catch (final RuntimeException e) {
                         LOG.warn("Invalid TNEF read receipt", e);
                         return;

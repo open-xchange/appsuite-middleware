@@ -88,17 +88,17 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connnection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         PreparedStatement statement = null;
         try {
             connnection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             statement = connnection.prepareStatement("UPDATE prg_contacts SET intfield04 = NULL WHERE intfield04 > 0 AND NOT EXISTS (SELECT intfield01 FROM prg_contacts_image WHERE prg_contacts.intfield01 = prg_contacts_image.intfield01 AND prg_contacts.cid = prg_contacts_image.cid)");
             int updated = statement.executeUpdate();
 
             connnection.commit();
-            rollback = false;
+            rollback = 2;
 
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CorrectNumberOfImagesTask.class);
             logger.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
@@ -108,10 +108,12 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
-            if (rollback) {
-                Databases.rollback(connnection);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(connnection);
+                }
+                autocommit(connnection);
             }
-            autocommit(connnection);
         }
     }
 

@@ -591,10 +591,10 @@ public class RdbContextStorage extends ContextStorage {
     private static void insertOrUpdateAttribute(String name, String newValue, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
             stmt = con.prepareStatement("SELECT value FROM contextAttribute WHERE cid=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setString(2, name);
@@ -631,17 +631,19 @@ public class RdbContextStorage extends ContextStorage {
                 }
             }
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(stmt);
-            Databases.autocommit(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
         }
     }
 }

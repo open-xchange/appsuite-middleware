@@ -56,6 +56,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -70,8 +72,6 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
-
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentCountUpdateTask.class);
 
     /**
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.
@@ -93,43 +93,71 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
         PreparedStatement repairStmt = null;
         Statement stmt = null;
         ResultSet rs = null;
+        int rollback = 0;
         try {
-            con.setAutoCommit(false);
-            rollback = true;
-
             stmt = con.createStatement();
             rs = stmt.executeQuery(SELECT);
-            repairStmt = con.prepareStatement(REPAIR);
-            while (rs.next()) {
-                int cid = rs.getInt("cid");
-                int id = rs.getInt("id");
-                int count = rs.getInt("count");
-                int realCount = rs.getInt("realCount");
+            if (false == rs.next()) {
+                // No such appointments having field 'numberOfAttachments' not equal to the real number of attachments
+                return;
+            }
 
-                repairStmt.setInt(1, realCount);
-                repairStmt.setInt(2, cid);
-                repairStmt.setInt(3, id);
+            class Row {
+
+                final int cid;
+                final int id;
+                final int count;
+                final int realCount;
+
+                Row(ResultSet rs) throws SQLException {
+                    super();
+                    cid = rs.getInt("cid");
+                    id = rs.getInt("id");
+                    count = rs.getInt("count");
+                    realCount = rs.getInt("realCount");
+                }
+            }
+
+            List<Row> rows = new LinkedList<>();
+            do {
+                rows.add(new Row(rs));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AttachmentCountUpdateTask.class);
+
+            con.setAutoCommit(false);
+            rollback = 1;
+
+            repairStmt = con.prepareStatement(REPAIR);
+            for (Row row : rows) {
+                repairStmt.setInt(1, row.realCount);
+                repairStmt.setInt(2, row.cid);
+                repairStmt.setInt(3, row.id);
                 repairStmt.addBatch();
 
-                LOG.info("Fixed appointment {}/{} (cid/id) old count: {} new count: {}", cid, id, count, realCount);
+                logger.info("Fixed appointment {}/{} (cid/id) old count: {} new count: {}", row.cid, row.id, row.count, row.realCount);
             }
             repairStmt.executeBatch();
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(repairStmt);
             Databases.closeSQLStuff(rs, stmt);
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
 
     }

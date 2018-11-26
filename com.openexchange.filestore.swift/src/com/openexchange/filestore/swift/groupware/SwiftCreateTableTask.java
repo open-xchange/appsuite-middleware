@@ -76,26 +76,24 @@ public class SwiftCreateTableTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection writeCon = params.getConnection();
-        boolean rollback = false;
-        boolean restoreAutoCommit = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            restoreAutoCommit = true;
-            rollback = true;
+            rollback = 1;
 
             perform(writeCon);
 
             writeCon.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
-            }
-            if (restoreAutoCommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
+                }
                 Databases.autocommit(writeCon);
             }
         }

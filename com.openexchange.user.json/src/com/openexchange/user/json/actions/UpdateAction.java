@@ -197,23 +197,25 @@ public final class UpdateAction extends AbstractUserAction {
                 if (null != service) {
                     final int contextId = session.getContextId();
                     Connection con = null;
-                    boolean rollback = false;
+                    int rollback = 0;
                     try {
                         con = service.getWritable(contextId);
                         con.setAutoCommit(false);
-                        rollback = true;
+                        rollback = 1;
                         final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
                         OXFolderAdminHelper.propagateUserModification(id, changedfields, System.currentTimeMillis(), con, con, contextId);
                         con.commit();
-                        rollback = false;
+                        rollback = 2;
                     } catch (final Exception ignore) {
                         // Ignore
                     } finally {
-                        if (null != con) {
-                            if (rollback) {
+                        if (rollback > 0) {
+                            if (rollback == 1) {
                                 Databases.rollback(con);
                             }
                             Databases.autocommit(con);
+                        }
+                        if (null != con) {
                             service.backWritable(contextId, con);
                         }
                     }

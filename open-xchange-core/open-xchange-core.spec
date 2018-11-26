@@ -584,6 +584,53 @@ EOF
         ox_set_property ${scale_k} ${scale_v} ${pfile}
       fi
     fi
+
+    SCR=SCR-208
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/configdb.properties
+
+      declare -A dmap
+      dmap[3]="useUnicode=true"
+      dmap[4]="characterEncoding=UTF-8"
+      dmap[5]="autoReconnect=false"
+      dmap[6]="useServerPrepStmts=false"
+      dmap[7]="useTimezone=true"
+      dmap[8]="serverTimezone=UTC"
+      dmap[9]="connectTimeout=15000"
+      dmap[10]="socketTimeout=15000"
+
+      for x in {3..10}
+      do
+        default_val=${dmap[$x]}
+        for prop_type in readProperty writeProperty
+        do
+          prop=${prop_type}.${x}
+          curr_val=$(ox_read_property ${prop} ${pfile})
+          if [ -n "${curr_val}" ]
+          then
+            if [ "${default_val}" == "${curr_val}" ]
+            then
+              ox_remove_property ${prop} ${pfile}
+            fi
+          fi
+        done
+      done
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-299
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/cache.ccf
+      for region in OXFolderCache OXFolderQueryCache GlobalFolderCache
+      do
+        curr_val=$(ox_read_property jcs.region.${region}.elementattributes.MaxLifeSeconds ${pfile})
+        if [ "-1" = "${curr_val}" ]
+        then
+          ox_set_property jcs.region.${region}.elementattributes.MaxLifeSeconds 3600 ${pfile}
+        fi
+      done
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
