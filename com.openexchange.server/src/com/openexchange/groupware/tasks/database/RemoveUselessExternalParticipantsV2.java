@@ -67,9 +67,4 @@ public final class RemoveUselessExternalParticipantsV2 extends AbstractDropTable
     public RemoveUselessExternalParticipantsV2() {
         super("del_task_eparticipant");
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { RemoveUselessExternalParticipants.class.getName() };
-    }
 }

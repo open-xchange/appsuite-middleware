@@ -66,7 +66,6 @@ import com.openexchange.groupware.tasks.InsertData;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
 import com.openexchange.groupware.tasks.TaskQuotaProvider;
 import com.openexchange.groupware.tasks.database.CreateTaskTables;
-import com.openexchange.groupware.tasks.database.RemoveUselessExternalParticipants;
 import com.openexchange.groupware.tasks.database.RemoveUselessExternalParticipantsV2;
 import com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -99,7 +98,7 @@ public class TaskActivator extends AJAXModuleActivator {
 
             @Override
             protected Collection<? extends UpdateTaskV2> createTasks(DatabaseService service) {
-                return Arrays.asList(new TasksModifyCostColumnTask(), new RemoveUselessExternalParticipants(), new RemoveUselessExternalParticipantsV2());
+                return Arrays.asList(new TasksModifyCostColumnTask(), new RemoveUselessExternalParticipantsV2());
             }
         });
 
