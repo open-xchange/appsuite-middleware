@@ -94,7 +94,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         PreparedStatement stmt = null;
         try {
             if (!tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
@@ -102,24 +102,26 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
             }
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
             stmt.setString(1, subscriptionSourceId);
             stmt.executeUpdate();
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

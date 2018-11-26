@@ -62,6 +62,7 @@ import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.Privilege;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.DAVCollection;
@@ -168,6 +169,10 @@ public class CalDAVRootCollection extends DAVRootCollection {
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (matches(name, folder)) {
+                    return createCollection(folder);
+                }
+                if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(getUserAgent()) && matchesLegacy(name, folder)) {
+                    LOG.debug("Resolving legacy resource name {} to folder {} for Thunderbird/Lightning.", name, folder.getID());
                     return createCollection(folder);
                 }
             }
@@ -359,6 +364,25 @@ public class CalDAVRootCollection extends DAVRootCollection {
         return treeID;
     }
 
+    private static boolean matchesLegacy(String resourceName, UserizedFolder folder) {
+        if (null == resourceName || null == folder || null == folder.getID()) {
+            return false;
+        }
+        /*
+         * try constructed composite identifier
+         */
+        if ((Tools.DEFAULT_ACCOUNT_PREFIX + resourceName).equals(folder.getID())) {
+            return true;
+        }
+        /*
+         * try relative folder identifier as-is as additional fallback
+         */
+        if (resourceName.equals(folder.getID())) {
+            return true;
+        }
+        return false;
+    }
+
     private static boolean matches(String resourceName, UserizedFolder folder) {
         if (null == resourceName || null == folder || null == folder.getID()) {
             return false;
@@ -371,19 +395,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
                 return true;
             }
         } catch (IllegalArgumentException e) {
-            LOG.debug("Error decoding child resource name {}, assuming legacy name.", resourceName, e);
-        }
-        /*
-         * try constructed composite identifier as fallback
-         */
-        if ((Tools.DEFAULT_ACCOUNT_PREFIX + resourceName).equals(folder.getID())) {
-            return true;
-        }
-        /*
-         * try relative folder identifier as fallback
-         */
-        if (resourceName.equals(folder.getID())) {
-            return true;
+            LOG.debug("Error decoding child resource name {}, assuming legacy or stored resource name.", resourceName, e);
         }
         /*
          * try via stored resource name, too

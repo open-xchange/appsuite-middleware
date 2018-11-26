@@ -187,23 +187,25 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public Client registerClient(String groupId, String clientId, String secret, ClientData clientData) throws ClientManagementException {
         DatabaseService dbService = getDbService();
         Connection con = getWriteCon(dbService, groupId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             Client client = registerClient(groupId, clientId, secret, clientData, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             return client;
         } catch (SQLException e) {
             throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             dbService.backWritableForGlobal(groupId, con);
         }
     }
@@ -268,23 +270,25 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public Client updateClient(String groupId, String clientId, ClientData clientData) throws ClientManagementException {
         DatabaseService dbService = getDbService();
         Connection con = getWriteCon(dbService, groupId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             Client client = updateClient(groupId, clientId, clientData, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             return client;
         } catch (SQLException e) {
             throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             dbService.backWritableForGlobal(groupId, con);
         }
     }
@@ -412,23 +416,25 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public boolean unregisterClient(String groupId, String clientId) throws ClientManagementException {
         DatabaseService dbService = getDbService();
         Connection con = getWriteCon(dbService, groupId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             boolean deleted = unregisterClient(groupId, clientId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             return deleted;
         } catch (SQLException e) {
             throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             dbService.backWritableForGlobal(groupId, con);
         }
     }
@@ -577,23 +583,25 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public Client revokeClientSecret(String groupId, String clientId, String secret) throws ClientManagementException {
         DatabaseService dbService = getDbService();
         Connection con = getWriteCon(dbService, groupId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             Client client = revokeClientSecret(groupId, clientId, secret, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             return client;
         } catch (SQLException e) {
             throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             dbService.backWritableForGlobal(groupId, con);
         }
     }

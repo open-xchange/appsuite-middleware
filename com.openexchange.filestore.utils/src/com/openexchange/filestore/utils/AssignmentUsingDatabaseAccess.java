@@ -95,12 +95,10 @@ public class AssignmentUsingDatabaseAccess implements DatabaseAccess {
     @Override
     public void createIfAbsent(DatabaseTable... tables) throws OXException {
         Connection con = databaseService.getWritable(assignment, false);
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             for (DatabaseTable databaseTable : tables) {
                 if (false == Databases.tableExists(con, databaseTable.getTableName())) {
@@ -109,14 +107,14 @@ public class AssignmentUsingDatabaseAccess implements DatabaseAccess {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw FileStorageCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
             Databases.close(con);

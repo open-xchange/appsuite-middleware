@@ -140,8 +140,10 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
-        if (!isInline || part.getContentDisposition().containsFilenameParameter() || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || part.getContentType().startsWith(
-            APPLICATION)) {
+        if (!isInline || part.getContentDisposition().containsFilenameParameter() || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || part.getContentType().startsWith(APPLICATION)) {
+            if (!part.containsSequenceId()) {
+                part.setSequenceId(id);
+            }
             nonInlineParts.add(part);
         }
         return true;
@@ -185,11 +187,17 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         if (imageCID == null && (!isInline || part.getContentDisposition().containsFilenameParameter())) {
+            if (!part.containsSequenceId()) {
+                part.setSequenceId(id);
+            }
             nonInlineParts.add(part);
         } else if (imageCID != null && !imageContentIds.contains(prepareContentId(imageCID))) {
             /*
              * Image is not referenced in HTML content
              */
+            if (!part.containsSequenceId()) {
+                part.setSequenceId(id);
+            }
             nonInlineParts.add(part);
         }
         /*-
@@ -269,6 +277,9 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
          * Force to add as attachment
          */
         mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+        if (!mailPart.containsSequenceId()) {
+            mailPart.setSequenceId(id);
+        }
         nonInlineParts.add(mailPart);
         // final NonInlineForwardPartHandler handler = new
         // NonInlineForwardPartHandler(nonInlineParts);
@@ -294,11 +305,17 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         if (baseContentType.startsWith("text/")) {
+            if (!part.containsSequenceId()) {
+                part.setSequenceId(id);
+            }
             nonInlineParts.add(part);
         } else {
             final String disposition =
                 part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE : Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
             if (!Part.INLINE.equalsIgnoreCase(disposition)) {
+                if (!part.containsSequenceId()) {
+                    part.setSequenceId(id);
+                }
                 nonInlineParts.add(part);
             }
         }

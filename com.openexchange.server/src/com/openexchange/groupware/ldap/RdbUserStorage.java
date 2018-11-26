@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
@@ -842,40 +840,50 @@ public class RdbUserStorage extends UserStorage {
                         throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
                     }
                     condition.resetTransactionRollbackException();
-                    boolean rollback = false;
+                    int rollback = 0;
                     try {
                         startTransaction(con);
-                        rollback = true;
+                        rollback = 1;
+
                         updateUserInDB(con, user, context);
+
                         con.commit();
-                        rollback = false;
+                        rollback = 2;
                     } catch (final SQLException e) {
                         if (!condition.isFailedTransactionRollback(e)) {
                             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                         }
                     } finally {
-                        if (rollback) {
-                            rollback(con);
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                Databases.rollback(con);
+                            }
+                            Databases.autocommit(con);
                         }
-                        autocommit(con);
                         DBPool.closeWriterSilent(context, con);
                     }
                 } while (condition.checkRetry());
             } else {
                 boolean autoCommit = con.getAutoCommit();
                 if (autoCommit) {
+                    int rollback = 0;
                     try {
                         startTransaction(con);
+                        rollback = 1;
+
                         updateUserInDB(con, user, context);
+
                         con.commit();
-                    } catch (OXException e) {
-                        rollback(con);
-                        throw e;
+                        rollback = 2;
                     } catch (SQLException e) {
-                        rollback(con);
                         throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                     } finally {
-                        autocommit(con);
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                Databases.rollback(con);
+                            }
+                            Databases.autocommit(con);
+                        }
                     }
                 } else {
                     updateUserInDB(con, user, context);

@@ -93,10 +93,10 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
     @Override
     public void perform(final PerformParameters params) throws OXException {
         final Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             final Logger logger = org.slf4j.LoggerFactory.getLogger(CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence.class);
 
@@ -302,14 +302,16 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 

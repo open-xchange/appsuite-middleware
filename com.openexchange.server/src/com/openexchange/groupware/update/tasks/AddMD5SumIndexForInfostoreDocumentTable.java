@@ -77,10 +77,10 @@ public class AddMD5SumIndexForInfostoreDocumentTable extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
             if (null == Tools.existsIndex(con, "infostore_document", new String[] { "cid", "file_md5sum"})) {
                 Tools.createIndex(con, "infostore_document", "md5sumIndex", new String[] { "cid", "file_md5sum"}, false);
             }
@@ -88,16 +88,18 @@ public class AddMD5SumIndexForInfostoreDocumentTable extends UpdateTaskAdapter {
                 Tools.createIndex(con, "del_infostore_document", "md5sumIndex", new String[] { "cid", "file_md5sum"}, false);
             }
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 

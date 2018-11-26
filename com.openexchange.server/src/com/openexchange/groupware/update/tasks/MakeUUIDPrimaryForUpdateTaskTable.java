@@ -49,14 +49,13 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -80,10 +79,10 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "updateTask", "uuid")) {
@@ -96,16 +95,18 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
             Tools.createPrimaryKeyIfAbsent(con, "updateTask", new String[] { "cid", "uuid" });
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
     }
 

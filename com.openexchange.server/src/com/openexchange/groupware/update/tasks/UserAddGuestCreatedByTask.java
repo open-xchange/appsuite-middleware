@@ -96,10 +96,10 @@ public final class UserAddGuestCreatedByTask extends UpdateTaskAdapter {
         log.info("Performing update task {}", UserAddGuestCreatedByTask.class.getSimpleName());
 
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             Column guestCreatedByColumn = new Column("guestCreatedBy", "int(10) unsigned NOT NULL DEFAULT 0");
             Tools.checkAndAddColumns(con, "user", guestCreatedByColumn);
@@ -109,16 +109,18 @@ public final class UserAddGuestCreatedByTask extends UpdateTaskAdapter {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
 
         log.info("{} successfully performed.", UserAddGuestCreatedByTask.class.getSimpleName());

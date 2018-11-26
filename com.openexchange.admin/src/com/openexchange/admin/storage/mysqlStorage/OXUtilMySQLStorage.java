@@ -398,26 +398,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     @Override
     public void changeFilestoreDataFor(Context ctx) throws StorageException {
         Connection configDbCon = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             configDbCon = cache.getWriteConnectionForConfigDB();
             configDbCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             changeFilestoreDataFor(ctx, configDbCon);
 
             configDbCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException exp) {
             throw new StorageException(exp);
         } catch (PoolException e) {
             throw new StorageException(e);
         } finally {
             if (null != configDbCon) {
-                if (rollback) {
-                    Databases.rollback(configDbCon);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(configDbCon);
+                    }
+                    Databases.autocommit(configDbCon);
                 }
-                Databases.autocommit(configDbCon);
                 try {
                     cache.pushWriteConnectionForConfigDB(configDbCon);
                 } catch (PoolException e) {
@@ -465,26 +467,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void prepareFilestoreUsageFor(User user, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             prepareFilestoreUsageFor(user, ctx, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException exp) {
             throw new StorageException(exp);
         } catch (PoolException e) {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
@@ -538,26 +542,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void cleanseFilestoreUsageFor(User user, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             cleanseFilestoreUsageFor(user, ctx, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException exp) {
             throw new StorageException(exp);
         } catch (PoolException e) {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
@@ -589,26 +595,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void changeFilestoreDataFor(User user, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             changeFilestoreDataFor(user, ctx, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException exp) {
             throw new StorageException(exp);
         } catch (PoolException e) {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
@@ -722,11 +730,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         Connection configdb_write_con = null;
         PreparedStatement prep = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             configdb_write_con = cache.getWriteConnectionForConfigDB();
             configdb_write_con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             final Integer id = fstore.getId();
             final String url = fstore.getUrl();
@@ -763,7 +771,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             configdb_write_con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -776,11 +784,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         } finally {
             closeSQLStuff(prep);
 
-            if (rollback) {
-                rollback(configdb_write_con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(configdb_write_con);
+                }
+
+                autocommit(configdb_write_con);
             }
 
-            autocommit(configdb_write_con);
             if (configdb_write_con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(configdb_write_con);
@@ -1678,14 +1689,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         store_size = store_size << 20;
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getWriteConnectionForConfigDB();
 
             final int fstore_id = nextId(con);
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             stmt = con.prepareStatement("INSERT INTO filestore (id,uri,size,max_context) VALUES (?,?,?,?)");
             stmt.setInt(1, fstore_id);
             stmt.setString(2, fstore.getUrl());
@@ -1700,7 +1711,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.executeUpdate();
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             return fstore_id;
         } catch (final DataTruncation dt) {
@@ -1713,8 +1724,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
             }
             closeSQLStuff(stmt);
             if (con != null) {
