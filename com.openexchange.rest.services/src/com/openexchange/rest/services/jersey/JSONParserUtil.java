@@ -50,74 +50,73 @@
 package com.openexchange.rest.services.jersey;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import java.io.OutputStreamWriter;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-import javax.ws.rs.ext.Provider;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.rest.services.CommonMediaType;
 
 /**
- * A converter for request and response bodies producing/writing JSON objects
- * based on {@link JSONValue}.
+ * {@link JSONParserUtil}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
-@Provider
-@Consumes(MediaType.WILDCARD)
-@Produces(MediaType.APPLICATION_JSON)
-public class JSONReaderWriter implements MessageBodyReader<JSONValue>, MessageBodyWriter<JSONValue> {
+final class JSONParserUtil {
 
     /**
-     * Initialises a new {@link JSONReaderWriter}.
+     * Checks whether the specified <code>target</code> {@link MediaType} is applicable for the specified
+     * <code>source</code> {@link MediaType} and whether the specified {@link Class} is a {@link JSONValue}
+     * 
+     * @param type The {@link Class}
+     * @param sourceMediaType The source {@link MediaType}
+     * @param targetMediaType The target {@link MediaType}
+     * @return <code>true</code> if applicable, <code>false</code> otherwise
      */
-    public JSONReaderWriter() {
-        super();
+    static final boolean isApplicable(Class<?> type, MediaType sourceMediaType, MediaType targetMediaType) {
+        return targetMediaType.equals(sourceMediaType) && JSONValue.class.isAssignableFrom(type);
     }
 
-    @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return JSONValue.class.isAssignableFrom(type);
-    }
-
-    @Override
-    public JSONValue readFrom(Class<JSONValue> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
-        String charset = mediaType.getParameters().get("charset");
-        if (charset == null || charset.length() == 0) {
-            charset = "UTF-8";
-        }
-
+    /**
+     * Writes to the specified {@link OutputStream} the specified {@link JSONValue} and appends the appropriate Content-Type
+     * header to the specified headers map
+     * 
+     * @param t The {@link JSONValue} to write
+     * @param contentType The Content-Type
+     * @param httpHeaders The map with the Http Headers
+     * @param entityStream The {@link OutputStream} to write to
+     * @throws IOException if an I/O error is occurred
+     */
+    static final void writeTo(JSONValue t, String contentType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException {
+        httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE, contentType.toString());
+        OutputStreamWriter writer = new OutputStreamWriter(entityStream, "UTF-8");
         try {
-            return JSONObject.parse(new InputStreamReader(entityStream, charset));
+            t.write(writer);
         } catch (JSONException e) {
             throw JSONParserUtil.convertJSONException(e);
+        } finally {
+            writer.flush();
         }
     }
 
-    @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return JSONParserUtil.isApplicable(type, mediaType, MediaType.APPLICATION_JSON_TYPE);
-    }
+    /**
+     * Converts the specified {@link JSONException} to an {@link IOException}
+     * 
+     * @param e The {@link JSONException} to convert
+     * @return The {@link IOException}
+     */
+    static IOException convertJSONException(JSONException e) {
+        Throwable cause = e.getCause();
+        if (cause == null) {
+            return new IOException(e);
+        }
 
-    @Override
-    public long getSize(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return -1;
-    }
+        if (IOException.class.isAssignableFrom(cause.getClass())) {
+            return (IOException) cause;
+        }
 
-    @Override
-    public void writeTo(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-        JSONParserUtil.writeTo(t, CommonMediaType.APPLICATION_JSON + ";charset=UTF-8", httpHeaders, entityStream);
+        return new IOException(cause);
     }
 }

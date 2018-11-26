@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.services.CommonMediaType;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
@@ -110,7 +111,7 @@ public class SessiondRESTService extends JAXRSService {
     @POST
     @Path("/by-id")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({ MediaType.APPLICATION_JSON, CommonMediaType.APPLICATION_PROBLEM_JSON })
     public Response closeSessionsById(@QueryParam("global") Boolean global, JSONObject payload) {
         return perform(() -> closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.SESSION_IDS), SessionFilterType.SESSION)));
     }
@@ -132,7 +133,7 @@ public class SessiondRESTService extends JAXRSService {
     @POST
     @Path("/by-context")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({ MediaType.APPLICATION_JSON, CommonMediaType.APPLICATION_PROBLEM_JSON })
     public Response closeSessionsByContextId(@QueryParam("global") Boolean global, JSONObject payload) {
         return perform(() -> closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.CONTEXT_IDS), SessionFilterType.CONTEXT)));
     }
@@ -154,7 +155,7 @@ public class SessiondRESTService extends JAXRSService {
     @POST
     @Path("/by-user")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({ MediaType.APPLICATION_JSON, CommonMediaType.APPLICATION_PROBLEM_JSON })
     public Response closeSessionsByUserId(@QueryParam("global") Boolean global, JSONObject payload) {
         return perform(() -> closeSessions(global, createFilter(getPayloadValues(payload, SessiondRESTField.USERS), SessionFilterType.USER)));
     }
@@ -179,7 +180,7 @@ public class SessiondRESTService extends JAXRSService {
             return supplier.get();
         } catch (IllegalArgumentException e) {
             LOGGER.debug("", e);
-            return Response.status(400).entity(parse(e)).build();
+            return Response.status(400).type(CommonMediaType.APPLICATION_PROBLEM_JSON_TYPE).entity(parse(e, 400)).build();
         } catch (Exception e) {
             LOGGER.debug("", e);
             return Response.status(500).build();
@@ -285,10 +286,11 @@ public class SessiondRESTService extends JAXRSService {
      * @param e The {@link Exception} to parse
      * @return The {@link JSONObject} with the exception
      */
-    private JSONObject parse(Exception e) {
+    private JSONObject parse(Exception e, int statusCode) {
         try {
             JSONObject j = new JSONObject();
-            j.put("error", e.getMessage());
+            j.put("title", e.getMessage());
+            j.put("status", statusCode);
             return j;
         } catch (JSONException x) {
             LOGGER.error("", e);

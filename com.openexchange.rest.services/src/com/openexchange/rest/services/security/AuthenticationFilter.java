@@ -396,7 +396,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * 
      * @param roleToCheck The role to check
      * @param roles The array of roles
-     * @return <code>true</code> if the role is enlised; <code>false</code> otherwise
+     * @return <code>true</code> if the role is enlisted; <code>false</code> otherwise
      */
     private boolean hasRole(String roleToCheck, String[] roles) {
         if (null == roles) {

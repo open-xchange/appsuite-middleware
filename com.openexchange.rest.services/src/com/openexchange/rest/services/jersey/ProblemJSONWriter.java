@@ -50,74 +50,62 @@
 package com.openexchange.rest.services.jersey;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.rest.services.CommonMediaType;
 
 /**
- * A converter for request and response bodies producing/writing JSON objects
- * based on {@link JSONValue}.
+ * {@link ProblemJSONWriter} - Writes an 'application/json+problem' response
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
 @Provider
-@Consumes(MediaType.WILDCARD)
-@Produces(MediaType.APPLICATION_JSON)
-public class JSONReaderWriter implements MessageBodyReader<JSONValue>, MessageBodyWriter<JSONValue> {
+@Produces(CommonMediaType.APPLICATION_PROBLEM_JSON)
+public class ProblemJSONWriter implements MessageBodyWriter<JSONValue> {
 
     /**
-     * Initialises a new {@link JSONReaderWriter}.
+     * Initialises a new {@link ProblemJSONWriter}.
      */
-    public JSONReaderWriter() {
+    public ProblemJSONWriter() {
         super();
     }
 
-    @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return JSONValue.class.isAssignableFrom(type);
-    }
-
-    @Override
-    public JSONValue readFrom(Class<JSONValue> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
-        String charset = mediaType.getParameters().get("charset");
-        if (charset == null || charset.length() == 0) {
-            charset = "UTF-8";
-        }
-
-        try {
-            return JSONObject.parse(new InputStreamReader(entityStream, charset));
-        } catch (JSONException e) {
-            throw JSONParserUtil.convertJSONException(e);
-        }
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.ws.rs.ext.MessageBodyWriter#isWriteable(java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
+     */
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return JSONParserUtil.isApplicable(type, mediaType, MediaType.APPLICATION_JSON_TYPE);
+        return JSONParserUtil.isApplicable(type, mediaType, CommonMediaType.APPLICATION_PROBLEM_JSON_TYPE);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.ws.rs.ext.MessageBodyWriter#getSize(java.lang.Object, java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
+     */
     @Override
     public long getSize(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return -1;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.ws.rs.ext.MessageBodyWriter#writeTo(java.lang.Object, java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType, javax.ws.rs.core.MultivaluedMap, java.io.OutputStream)
+     */
     @Override
     public void writeTo(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-        JSONParserUtil.writeTo(t, CommonMediaType.APPLICATION_JSON + ";charset=UTF-8", httpHeaders, entityStream);
+        JSONParserUtil.writeTo(t, CommonMediaType.APPLICATION_PROBLEM_JSON, httpHeaders, entityStream);
     }
 }
