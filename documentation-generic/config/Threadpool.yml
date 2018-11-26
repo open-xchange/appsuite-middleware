@@ -19,6 +19,10 @@ properties:
       description: |
         Enforces that value defined by setting "com.openexchange.threadpool.corePoolSize" is applied regardless if rule
         "Size = Number of CPUs + 1" will be violated.
+        
+        The purpose of this setting is to reflect that in containers (Docker, Solaris Zones, FreeBSD jails, etc.) all CPU's are usually
+        visible for the application but the application can't use them all. Newer Java versions have flags to make 'availableProcessors'
+        respect these boundaries but most JVM's support that yet.
       defaultValue: false
       version: 7.10.2
       reloadable: false
