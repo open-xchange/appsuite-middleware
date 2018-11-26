@@ -88,10 +88,10 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             progress.setTotal(getTotalRows(con));
             Tools.checkAndAddColumns(con, TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
@@ -101,14 +101,16 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
             fillUUIDs(con, DEL_TABLE, progress);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

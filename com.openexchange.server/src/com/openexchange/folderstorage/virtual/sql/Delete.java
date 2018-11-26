@@ -106,7 +106,7 @@ public final class Delete {
         // Get a connection
         Connection con = databaseService.getWritable(cid);
         boolean modified = false;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             List<String> folderIds = getFoldersForTree(cid, tree, user, con);
             if (folderIds.isEmpty()) {
@@ -114,21 +114,23 @@ public final class Delete {
             }
 
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
             for (String folderId : folderIds) {
                 deleteFolder(cid, tree, user, folderId, false, true, session, con);
             }
             modified = true;
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
             return true;
         } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con); // ROLLBACK
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con); // ROLLBACK
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             if (modified) {
                 databaseService.backWritable(cid, con);
             } else {
@@ -176,24 +178,26 @@ public final class Delete {
         DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
         Connection con = databaseService.getWritable(cid);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
 
             deleteFolder(cid, tree, user, folderId, backup, session, con);
 
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con); // ROLLBACK
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con); // ROLLBACK
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }

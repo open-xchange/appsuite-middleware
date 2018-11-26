@@ -51,6 +51,7 @@ package com.openexchange.pgp.keys.parsing;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.bouncycastle.openpgp.PGPObjectFactory;
@@ -69,6 +70,10 @@ public class PGPSecretKeyRingFactory {
 
     private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPSecretKeyRingFactory.class);
 
+    public static PGPSecretKeyRing create(String keyData) throws  IOException {
+        return create(new ByteArrayInputStream(keyData.getBytes("UTF-8")));
+    }
+
     /**
      * Creates a PGPSecretKeyRing object from the given ASCII-Armored data.
      *
@@ -77,8 +82,8 @@ public class PGPSecretKeyRingFactory {
      * @throws IOException
      * @throws IllegalArgumentException if asciiKeyData does not contain a valid ASCII-armored key
      */
-    public static PGPSecretKeyRing create(String asciiKeyData) throws IOException {
-        PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(new ByteArrayInputStream(asciiKeyData.getBytes("UTF-8"))), new BcKeyFingerprintCalculator());
+    public static PGPSecretKeyRing create(InputStream keyData) throws IOException {
+        PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(keyData), new BcKeyFingerprintCalculator());
         Object o = factory.nextObject();
         if (o instanceof PGPSecretKeyRing) {
             return (PGPSecretKeyRing) o;

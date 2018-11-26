@@ -55,7 +55,6 @@ import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -74,11 +73,8 @@ import com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask;
  */
 public final class RemoveUselessExternalParticipants extends UpdateTaskAdapter {
 
-    private final DatabaseService service;
-
-    public RemoveUselessExternalParticipants(DatabaseService service) {
+    public RemoveUselessExternalParticipants() {
         super();
-        this.service = service;
     }
 
     @Override
@@ -94,27 +90,29 @@ public final class RemoveUselessExternalParticipants extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             stmt = con.createStatement();
             stmt.execute("DELETE FROM del_task_eparticipant");
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 }

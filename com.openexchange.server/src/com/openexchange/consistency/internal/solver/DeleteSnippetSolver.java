@@ -86,11 +86,11 @@ public class DeleteSnippetSolver implements ProblemSolver {
 
             Connection con = null;
             PreparedStatement stmt = null;
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 con = Database.get(entity.getContext(), true);
                 con.setAutoCommit(false);
-                rollback = true;
+                rollback = 1;
 
                 int contextId = entity.getContext().getContextId();
                 // Not recoverable
@@ -105,14 +105,16 @@ public class DeleteSnippetSolver implements ProblemSolver {
                 }
 
                 con.commit();
-                rollback = false;
+                rollback = 2;
             } catch (SQLException | OXException | RuntimeException e) {
                 LOG.error("{}", e.getMessage(), e);
             } finally {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback==1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.closeSQLStuff(stmt);
                 }
-                Databases.closeSQLStuff(stmt);
                 if (null != con) {
                     Databases.autocommit(con);
                     Database.back(entity.getContext(), true, con);

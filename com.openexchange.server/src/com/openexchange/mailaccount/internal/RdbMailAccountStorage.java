@@ -575,22 +575,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         DatabaseService databaseService = Database.getDatabaseService();
 
         Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             clearFullNamesForMailAccount(id, indexes, userId, contextId, con);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             databaseService.backWritable(contextId, con);
         }
     }
@@ -676,25 +678,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         DatabaseService databaseService = Database.getDatabaseService();
 
         Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             modified = setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             if (modified) {
                 databaseService.backWritable(contextId, con);
             } else {
@@ -786,25 +790,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         DatabaseService databaseService = Database.getDatabaseService();
 
         Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             modified = setNamesForMailAccount(id, indexes, names, userId, contextId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             if (modified) {
                 databaseService.backWritable(contextId, con);
             } else {
@@ -895,24 +901,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     @Override
     public void propagateEvent(Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
         Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             propagateEvent(event, id, eventProps, userId, contextId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }
@@ -1620,24 +1628,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     @Override
     public void enableMailAccount(int accountId, int userId, int contextId) throws OXException {
         Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             enableMailAccount(accountId, userId, contextId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }
@@ -1691,22 +1701,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int userId, final int contextId, final Session session, final boolean changePrimary) throws OXException {
         final Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             updateMailAccount(mailAccount, attributes, userId, contextId, session, con, changePrimary);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }
@@ -2347,7 +2359,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         dropPOP3StorageFolders(userId, contextId);
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             // Check prerequisites
             checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {accountId}), userId, contextId, con);
@@ -2376,7 +2388,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             // Update...
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             {
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);
                 stmt = con.prepareStatement("UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ?, archive = ?, archive_fullname = ?, starttls = ?, oauth = ?, failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid = ? AND id = ? AND user = ?");
@@ -2501,7 +2513,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final MailAccount retval = getMailAccount(accountId, userId, contextId, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             /*
              * Automatically check Unified Mail existence
@@ -2519,11 +2531,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
-            }
             closeSQLStuff(null, stmt);
-            autocommit(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
             Database.back(contextId, true, con);
         }
     }
@@ -2546,7 +2560,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         dropPOP3StorageFolders(userId, contextId);
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             // Check prerequisites
             checkDuplicateTransportAccount(transportAccount, new TIntHashSet(new int[] { accountId }), userId, contextId, con);
@@ -2567,7 +2581,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             // Update...
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             final String transportURL = transportAccount.generateTransportServerURL();
             if (null != transportURL) {
@@ -2624,17 +2638,19 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
-            }
             closeSQLStuff(null, stmt);
-            autocommit(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
             Database.back(contextId, true, con);
         }
     }
@@ -2642,48 +2658,52 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     @Override
     public void updateTransportAccount(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
         Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             updateTransportAccount(transportAccount, attributes, userId, contextId, UpdateProperties.builder().setChangePrimary(false).setChangeProtocol(false).setCon(con).setSession(session).build());
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }
 
     private void updateTransportAccount0(TransportAccountDescription transportAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
         Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             updateTransportAccount(transportAccount, attributes, userId, contextId, UpdateProperties.builder(updateProperties).setCon(con).build());
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }
@@ -4106,11 +4126,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement selectStmt = null;
         PreparedStatement updateStmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = Database.get(contextId, true);
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
 
             // Perform SELECT query
             selectStmt = con.prepareStatement("SELECT id, password FROM user_mail_account WHERE cid = ? AND user = ?");
@@ -4205,19 +4225,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 updateStmt = null;
             }
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(rs, selectStmt);
             Databases.closeSQLStuff(updateStmt);
-            if (con != null) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
+            }
+            if (con != null) {
                 Database.back(contextId, true, con);
             }
         }
@@ -4234,12 +4256,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement selectStmt = null;
         PreparedStatement updateStmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
         try {
             con = Database.get(contextId, true);
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
             /*
              * Perform SELECT query
              */
@@ -4316,19 +4338,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 updateStmt = null;
             }
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(rs, selectStmt);
             Databases.closeSQLStuff(updateStmt);
-            if (con != null) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
+            }
+            if (con != null) {
                 if (modified) {
                     Database.getDatabaseService().backWritable(contextId, con);
                 } else {
@@ -4349,11 +4373,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement selectStmt = null;
         PreparedStatement updateStmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = Database.get(contextId, true);
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
             /*
              * Perform SELECT query
              */
@@ -4426,19 +4450,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 updateStmt = null;
             }
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(rs, selectStmt);
             Databases.closeSQLStuff(updateStmt);
-            if (con != null) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
+            }
+            if (con != null) {
                 Database.back(contextId, true, con);
             }
         }

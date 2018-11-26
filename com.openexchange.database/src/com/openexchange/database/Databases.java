@@ -501,7 +501,7 @@ public final class Databases {
                 con.close();
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to close database connection", e);
         }
     }
 

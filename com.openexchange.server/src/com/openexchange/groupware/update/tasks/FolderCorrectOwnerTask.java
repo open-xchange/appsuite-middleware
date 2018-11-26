@@ -108,11 +108,11 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
         log.info("Performing update task {}", FolderCorrectOwnerTask.class.getSimpleName());
 
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         final Map<Integer, List<Map<Integer, List<VersionControlResult>>>> resultMaps = new LinkedHashMap<Integer, List<Map<Integer, List<VersionControlResult>>>>();
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             List<int[]> users = getUsers(con);
             params.getProgressState().setTotal(users.size());
@@ -154,41 +154,43 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                // Roll-back connection
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    // Roll-back connection
+                    Databases.rollback(con);
 
-                // Try to restore files
-                Databases.autocommit(con);
-                for (Map.Entry<Integer, List<Map<Integer, List<VersionControlResult>>>> entry : resultMaps.entrySet()) {
-                    int contextId = entry.getKey().intValue();
-                    ContextImpl ctx = new ContextImpl(contextId);
+                    // Try to restore files
+                    Databases.autocommit(con);
+                    for (Map.Entry<Integer, List<Map<Integer, List<VersionControlResult>>>> entry : resultMaps.entrySet()) {
+                        int contextId = entry.getKey().intValue();
+                        ContextImpl ctx = new ContextImpl(contextId);
 
-                    for (Map<Integer, List<VersionControlResult>> resultMap : entry.getValue()) {
+                        for (Map<Integer, List<VersionControlResult>> resultMap : entry.getValue()) {
 
-                        for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
-                            Integer documentId = documentEntry.getKey();
-                            List<VersionControlResult> versionInfo = documentEntry.getValue();
+                            for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
+                                Integer documentId = documentEntry.getKey();
+                                List<VersionControlResult> versionInfo = documentEntry.getValue();
 
-                            try {
-                                VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), ctx, con);
-                            } catch (Exception e) {
-                                log.error("Failed to restore InfoStore/Drive files for document {} in context {}", documentId, contextId, e);
+                                try {
+                                    VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), ctx, con);
+                                } catch (Exception e) {
+                                    log.error("Failed to restore InfoStore/Drive files for document {} in context {}", documentId, contextId, e);
+                                }
                             }
-                        }
 
+                        }
                     }
                 }
-            }
 
-            // Ensure auto-commit mode is restored & push back to pool
-            Databases.autocommit(con);
+                // Ensure auto-commit mode is restored & push back to pool
+                Databases.autocommit(con);
+            }
         }
         log.info("{} successfully performed.", FolderCorrectOwnerTask.class.getSimpleName());
     }

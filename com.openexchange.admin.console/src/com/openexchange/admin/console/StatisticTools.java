@@ -661,7 +661,6 @@ public class StatisticTools extends AbstractJMXTools {
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXFolderQueryCache"));
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXMessageCache"));
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!MailMessageCache"));
-        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!CalendarCache"));
         sb.append(getStats(mbc, "com.openexchange.caching", "name", "CacheEventInformation"));
         return sb.toString();
     }

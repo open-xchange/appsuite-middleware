@@ -106,15 +106,15 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
             throw new CustomChangeException("Cannot get underlying connection because database connection is not of type " + JdbcConnection.class.getName() + ", but of type: " + databaseConnection.getClass().getName());
         }
         Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(configDbCon);
-            rollback = true;
+            rollback = 1;
 
             execute(configDbCon);
 
             configDbCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             LOG.error("Failed to initialize count tables for ConfigDB", e);
             throw new CustomChangeException("SQL error", e);
@@ -122,10 +122,12 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
             LOG.error("Failed to initialize count tables for ConfigDB", e);
             throw new CustomChangeException("Runtime error", e);
         } finally {
-            if (rollback) {
-                Databases.rollback(configDbCon);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(configDbCon);
+                }
+                Databases.autocommit(configDbCon);
             }
-            Databases.autocommit(configDbCon);
         }
     }
 
@@ -165,7 +167,7 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
                     stmt.setString(1, id2NewUrl.get(entry.getKey()));
                     stmt.setInt(2, entry.getKey().intValue());
                     stmt.addBatch();
-                    
+
                     LOG.info("Changed url for db_pool_id {} from '{}' to '{}'", entry.getKey(), id2Url.get(entry.getKey()), id2NewUrl.get(entry.getKey()));
                 }
                 stmt.executeBatch();

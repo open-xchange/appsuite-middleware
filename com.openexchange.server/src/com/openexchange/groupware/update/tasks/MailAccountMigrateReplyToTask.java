@@ -89,23 +89,25 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
 
             process("user_mail_account", con);
             process("user_transport_account", con);
 
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

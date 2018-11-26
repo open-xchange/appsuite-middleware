@@ -97,10 +97,10 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
         log.info("Performing update task {}", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
 
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             createIndexIfNeeded(log, connection, new String[] { "cid", "field03" }, "givenname");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field02" }, "surname");
@@ -110,16 +110,18 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
             createIndexIfNeeded(log, connection, new String[] { "cid", "field67" }, "email3");
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
+            if (rollback > 0) {
+            if (rollback == 1) {
                 Databases.rollback(connection);
             }
             Databases.autocommit(connection);
+            }
         }
         log.info("{} successfully performed.", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
     }

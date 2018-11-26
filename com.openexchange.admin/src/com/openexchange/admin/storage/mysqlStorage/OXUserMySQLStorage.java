@@ -304,12 +304,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         // SQL resources
         Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean autocommit = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             stmt = con.prepareStatement("UPDATE user_mail_account SET personal=? WHERE cid=? AND user=? AND id=?");
             if (Strings.isEmpty(personal)) {
@@ -325,7 +323,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt = null;
 
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
 
             // Invalidate cache
             try {
@@ -350,11 +348,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (rollback) {
+            if (rollback > 0) {
+            if (rollback == 1) {
                 rollback(con);
             }
-            if (autocommit) {
-                autocommit(con);
+            autocommit(con);
             }
             releaseWriteContextConnection(con, ctx, cache);
         }
@@ -366,12 +364,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         // SQL resources
         Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean autocommit = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
             // First drop
             if (null != capsToDrop && !capsToDrop.isEmpty()) {
                 for (final String cap : capsToDrop) {
@@ -494,7 +490,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = null;
             }
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
 
             // Invalidate cache
             {
@@ -527,10 +523,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (rollback) {
-                rollback(con);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
                 autocommit(con);
             }
             releaseWriteContextConnection(con, ctx, cache);
@@ -1608,20 +1604,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
         int context_id = ctx.getId().intValue();
         Connection write_ox_con = leaseConnectionForContext(context_id, cache);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             final int internal_user_id = nextId(context_id, com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
             final int contact_id = nextId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
             final int uid_number = (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) ? nextId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con) : -1;
 
             write_ox_con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             lock(context_id, write_ox_con);
 
             final int userId = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
             write_ox_con.commit();
-            rollback = false;
+            rollback = 2;
             LOG.info("User {} created!", Integer.toString(userId));
             return userId;
         } catch (final DataTruncation dt) {
@@ -1634,10 +1630,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             LOG.error("", e);
             throw e;
         } finally {
-            if (rollback) {
-                Databases.rollback(write_ox_con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(write_ox_con);
+                }
+                autocommit(write_ox_con);
             }
-            autocommit(write_ox_con);
             releaseWriteContextConnection(write_ox_con, ctx, cache);
         }
     }
@@ -2358,17 +2356,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int contextId = ctx.getId().intValue();
                 Connection con = leaseWriteContextConnectionWithoutTimeout(contextId, cache);
                 condition.resetTransactionRollbackException();
-                boolean rollback = false;
+                int rollback = 0;
                 try {
                     startTransaction(con);
-                    rollback = true;
+                    rollback = 1;
 
                     lock(contextId, con);
 
                     delete(ctx, users, destUser, con);
 
                     con.commit();
-                    rollback = false;
+                    rollback = 2;
 
                     for (final User user : users) {
                         try {
@@ -2394,10 +2392,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     LOG.error("", e);
                     throw e;
                 } finally {
-                    if (rollback) {
-                        rollback(con);
+                    if (rollback > 0) {
+                        if (rollback == 1) {
+                            rollback(con);
+                        }
+                        autocommit(con);
                     }
-                    autocommit(con);
                     releaseWriteContextConnectionWithoutTimeout(con, contextId, cache);
                 }
             } while (retry(condition, users, ctx));

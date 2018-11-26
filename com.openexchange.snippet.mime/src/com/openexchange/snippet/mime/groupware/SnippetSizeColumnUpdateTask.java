@@ -72,25 +72,27 @@ public class SnippetSizeColumnUpdateTask implements UpdateTaskV2 {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connnection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connnection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             Column sizeColumn = new Column("size", "int(10) unsigned DEFAULT NULL");
             Tools.checkAndAddColumns(connnection, "snippet", sizeColumn);
 
             connnection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connnection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connnection);
+                }
+                Databases.autocommit(connnection);
             }
-            Databases.autocommit(connnection);
         }
 
     }

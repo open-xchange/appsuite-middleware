@@ -78,10 +78,10 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection writeCon = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
 
             final String[] tableNames = DriveCreateTableService.getTablesToCreate();
             final String[] createStmts = DriveCreateTableService.getCreateStmts();
@@ -101,7 +101,7 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
             }
 
             writeCon.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final OXException e) {
             throw e;
         } catch (final SQLException e) {
@@ -109,10 +109,12 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
         } catch (final Exception e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
             }
-            Databases.autocommit(writeCon);
         }
     }
 

@@ -97,7 +97,7 @@ public class TaskActivator extends AJAXModuleActivator {
         track(DatabaseService.class, new UpdateTaskRegisterer(context) {
             @Override
             protected Collection<? extends UpdateTaskV2> createTasks(DatabaseService service) {
-                return Arrays.asList(new TasksModifyCostColumnTask(service), new RemoveUselessExternalParticipants(service)
+                return Arrays.asList(new TasksModifyCostColumnTask(), new RemoveUselessExternalParticipants()
                     // TODO enable this task with the upcoming major release after 7.8.0
                     // RemoveUselessExternalParticipantsV2(service)
                     );

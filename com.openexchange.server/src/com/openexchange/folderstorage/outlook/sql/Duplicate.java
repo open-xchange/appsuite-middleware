@@ -231,18 +231,20 @@ public final class Duplicate {
                     cm.upgradeConnection();
                     final Connection connection = cm.connection;
                     // Start transaction
-                    boolean rollback = false;
+                    int rollback = 0;
                     try {
                         connection.setAutoCommit(false); // BEGIN
-                        rollback = true;
+                        rollback = 1;
                         deleteEntries(name2ids, cid, tree, user, connection);
                         connection.commit(); // COMMIT
-                        rollback = false;
+                        rollback = 2;
                     } finally {
-                        if (rollback) {
-                            Databases.rollback(connection); // ROLLBACK
+                        if (rollback > 0) {
+                            if (rollback==1) {
+                                Databases.rollback(connection); // ROLLBACK
+                            }
+                            Databases.autocommit(connection);
                         }
-                        Databases.autocommit(connection);
                     }
                 }
             }
