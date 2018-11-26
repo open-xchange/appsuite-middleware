@@ -49,70 +49,27 @@
 
 package com.openexchange.groupware.tasks.database;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.tasks.AbstractDropTableTask;
 
 /**
  * {@link RemoveUselessExternalParticipantsV2} drops table task_eparticipant because it does not contain any useful information anymore after
  * US #53461243 and fixing bug 29809.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * TODO Enable this tasks with the next major release after 7.8.0.
- * TODO @since
+ * @since v7.8.0
  */
-public final class RemoveUselessExternalParticipantsV2 extends UpdateTaskAdapter {
+public final class RemoveUselessExternalParticipantsV2 extends AbstractDropTableTask {
 
-    private final DatabaseService service;
-
-    public RemoveUselessExternalParticipantsV2(DatabaseService service) {
-        super();
-        this.service = service;
+    /**
+     * 
+     * Initializes a new {@link RemoveUselessExternalParticipantsV2}.
+     */
+    public RemoveUselessExternalParticipantsV2() {
+        super("del_task_eparticipant");
     }
 
     @Override
     public String[] getDependencies() {
         return new String[] { RemoveUselessExternalParticipants.class.getName() };
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND, SCHEMA);
-    }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        int rollback = 0;
-        try {
-            con.setAutoCommit(false);
-            rollback = 1;
-
-            Tools.dropTable(con, "del_task_eparticipant");
-
-            con.commit();
-            rollback = 2;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback > 0) {
-                if (rollback == 1) {
-                    Databases.rollback(con);
-                }
-                Databases.autocommit(con);
-            }
-        }
     }
 }

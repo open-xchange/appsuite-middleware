@@ -50,16 +50,12 @@
 package com.openexchange.groupware.tasks.database;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask;
@@ -80,11 +76,6 @@ public final class RemoveUselessExternalParticipants extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[] { TasksAddFulltimeColumnTask.class.getName() };
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND, SCHEMA);
     }
 
     @Override

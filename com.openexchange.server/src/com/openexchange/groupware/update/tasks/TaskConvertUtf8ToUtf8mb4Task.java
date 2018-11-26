@@ -81,6 +81,5 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
         String schema = params.getSchema().getSchema();
         List<String> columnsToIgnore = Collections.singletonList("mail");
         changeTable(connection, schema, "task_eparticipant", columnsToIgnore);
-        changeTable(connection, schema, "del_task_eparticipant", columnsToIgnore);
     }
 }
