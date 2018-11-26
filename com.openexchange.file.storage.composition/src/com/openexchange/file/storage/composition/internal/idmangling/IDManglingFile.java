@@ -57,8 +57,10 @@ import com.openexchange.file.storage.DelegatingFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.GeoLocation;
 
 /**
  * {@link IDManglingFile}
@@ -398,6 +400,86 @@ public class IDManglingFile implements DelegatingFile {
     @Override
     public void setOrigin(FolderPath origin) {
         file.setOrigin(origin);
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        return file.getCaptureDate();
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        file.setCaptureDate(captureDate);
+    }
+
+    @Override
+    public Long getIsoSpeed() {
+        return file.getIsoSpeed();
+    }
+
+    @Override
+    public void setIsoSpeed(long isoSpeed) {
+        file.setIsoSpeed(isoSpeed);
+    }
+
+    @Override
+    public String getCameraModel() {
+        return file.getCameraModel();
+    }
+
+    @Override
+    public void setCameraModel(String cameraModel) {
+        file.setCameraModel(cameraModel);
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        return file.getGeoLocation();
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        file.setGeoLocation(geoLocation);
+    }
+
+    @Override
+    public Long getHeight() {
+        return file.getHeight();
+    }
+
+    @Override
+    public void setHeight(long height) {
+        file.setHeight(height);
+    }
+
+    @Override
+    public Long getWidth() {
+        return file.getWidth();
+    }
+
+    @Override
+    public void setWidth(long width) {
+        file.setWidth(width);
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        return file.getMediaMeta();
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        file.setMediaMeta(mediaMeta);
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        return file.getMediaStatus();
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus mediaStatus) {
+        file.setMediaStatus(mediaStatus);
     }
 
     @Override

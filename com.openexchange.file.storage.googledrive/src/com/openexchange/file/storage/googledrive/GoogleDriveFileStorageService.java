@@ -87,11 +87,6 @@ public final class GoogleDriveFileStorageService extends AbstractOAuthFileStorag
         return new GoogleDriveAccountAccess(this, account, session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
-     */
     @Override
     protected OAuthScope getScope() {
         return GoogleOAuthScope.drive;

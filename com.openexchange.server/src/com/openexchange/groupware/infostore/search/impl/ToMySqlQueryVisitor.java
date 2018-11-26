@@ -61,6 +61,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
 import com.openexchange.groupware.infostore.search.AndTerm;
+import com.openexchange.groupware.infostore.search.CameraModelTerm;
+import com.openexchange.groupware.infostore.search.CaptureDateTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
 import com.openexchange.groupware.infostore.search.ColorLabelTerm;
 import com.openexchange.groupware.infostore.search.ComparablePattern;
@@ -73,9 +75,12 @@ import com.openexchange.groupware.infostore.search.FileMd5SumTerm;
 import com.openexchange.groupware.infostore.search.FileMimeTypeTerm;
 import com.openexchange.groupware.infostore.search.FileNameTerm;
 import com.openexchange.groupware.infostore.search.FileSizeTerm;
+import com.openexchange.groupware.infostore.search.HeightTerm;
+import com.openexchange.groupware.infostore.search.IsoSpeedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedUtcTerm;
 import com.openexchange.groupware.infostore.search.LockedUntilTerm;
+import com.openexchange.groupware.infostore.search.MediaDateTerm;
 import com.openexchange.groupware.infostore.search.MetaTerm;
 import com.openexchange.groupware.infostore.search.ModifiedByTerm;
 import com.openexchange.groupware.infostore.search.NotTerm;
@@ -88,6 +93,7 @@ import com.openexchange.groupware.infostore.search.TitleTerm;
 import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
+import com.openexchange.groupware.infostore.search.WidthTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSession;
@@ -321,9 +327,27 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
+    public void visit(CameraModelTerm cameraModelTerm) {
+        String field = "camera_model";
+        parseStringSearchTerm(cameraModelTerm, field);
+    }
+
+    @Override
     public void visit(LastModifiedTerm lastModifiedTerm) {
         String comp = getComparionType(lastModifiedTerm.getPattern());
         filterBuilder.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
+    }
+
+    @Override
+    public void visit(MediaDateTerm mediaDateTerm) throws OXException {
+        String comp = getComparionType(mediaDateTerm.getPattern());
+        filterBuilder.append("COALESCE(").append(DOCUMENT).append("capture_date").append(',').append(INFOSTORE).append("last_modified").append(')').append(comp).append(mediaDateTerm.getPattern().getPattern().getTime()).append(" ");
+    }
+
+    @Override
+    public void visit(CaptureDateTerm captureDateTerm) throws OXException {
+        String comp = getComparionType(captureDateTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("capture_date").append(comp).append(captureDateTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
@@ -358,6 +382,24 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     public void visit(FileSizeTerm fileSizeTerm) {
         String comp = getComparionType(fileSizeTerm.getPattern());
         filterBuilder.append(DOCUMENT).append("file_size").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(IsoSpeedTerm isoSpeedTerm) throws OXException {
+        String comp = getComparionType(isoSpeedTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("iso_speed").append(comp).append(isoSpeedTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(HeightTerm heightTerm) throws OXException {
+        String comp = getComparionType(heightTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("height").append(comp).append(heightTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(WidthTerm widthTerm) throws OXException {
+        String comp = getComparionType(widthTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("width").append(comp).append(widthTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override

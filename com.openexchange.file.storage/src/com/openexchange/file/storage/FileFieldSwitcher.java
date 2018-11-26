@@ -56,6 +56,7 @@ package com.openexchange.file.storage;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface FileFieldSwitcher {
+
     Object lastModified(Object...args);
     Object created(Object...args);
     Object modifiedBy(Object...args);
@@ -83,5 +84,14 @@ public interface FileFieldSwitcher {
     Object objectPermissions(Object...args);
     Object shareable(Object...args);
     Object origin(Object...args);
+    Object captureDate(Object... args);
+    Object geolocation(Object... args);
+    Object width(Object... args);
+    Object height(Object... args);
+    Object cameraModel(Object... args);
+    Object isoSpeed(Object... args);
+    Object mediaMeta(Object... args);
+    Object mediaStatus(Object[] args);
+    Object mediaDate(Object[] args);
 
 }

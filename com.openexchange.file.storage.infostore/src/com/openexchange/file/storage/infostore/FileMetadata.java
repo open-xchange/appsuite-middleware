@@ -58,6 +58,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -66,6 +67,7 @@ import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
+import com.openexchange.java.GeoLocation;
 
 
 /**
@@ -138,13 +140,29 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public long getFolderId() {
         String folderId = file.getFolderId();
-        return folderId == null ? -1 : Long.parseLong(folderId);
+        if (folderId == null) {
+            String fileId = file.getId();
+            if (fileId == FileStorageFileAccess.NEW) {
+                return -1;
+            }
+
+            String unmangledFolderId = new com.openexchange.file.storage.composition.FileID(fileId).getFolderId();
+            if (null != unmangledFolderId) {
+                return Long.parseLong(unmangledFolderId);
+            }
+        }
+
+        return Long.parseLong(new com.openexchange.file.storage.composition.FolderID(folderId).getFolderId());
     }
 
     @Override
     public int getId() {
         String fileId = file.getId();
-        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Integer.valueOf(fileId);
+        if (fileId == FileStorageFileAccess.NEW) {
+            return InfostoreFacade.NEW;
+        }
+
+        return Integer.parseInt(new com.openexchange.file.storage.composition.FileID(fileId).getFileId());
     }
 
     @Override
@@ -689,12 +707,93 @@ public class FileMetadata implements DocumentMetadata {
                 file.setSequenceNumber(sequenceNumber);
             }
 
+            @Override
             public InfostoreFolderPath getOriginFolderPath() {
                 return null;
             }
 
             @Override
             public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+                // nothing to do
+            }
+
+            @Override
+            public Date getCaptureDate() {
+                return file.getCaptureDate();
+            }
+
+            @Override
+            public void setCaptureDate(Date captureDate) {
+                // nothing to do
+            }
+
+            @Override
+            public GeoLocation getGeoLocation() {
+                return file.getGeoLocation();
+            }
+
+            @Override
+            public void setGeoLocation(GeoLocation geoLocation) {
+                // nothing to do
+            }
+
+            @Override
+            public Long getWidth() {
+                return file.getWidth();
+            }
+
+            @Override
+            public void setWidth(long width) {
+                // nothing to do
+            }
+
+            @Override
+            public Long getHeight() {
+                return file.getHeight();
+            }
+
+            @Override
+            public void setHeight(long height) {
+                // nothing to do
+            }
+
+            @Override
+            public Long getIsoSpeed() {
+                return file.getIsoSpeed();
+            }
+
+            @Override
+            public void setIsoSpeed(long isoSpeed) {
+                // nothing to do
+            }
+
+            @Override
+            public String getCameraModel() {
+                return file.getCameraModel();
+            }
+
+            @Override
+            public void setCameraModel(String cameraModel) {
+                // nothing to do
+            }
+
+            @Override
+            public Map<String, Object> getMediaMeta() {
+                return file.getMediaMeta();
+            }
+
+            @Override
+            public void setMediaMeta(Map<String, Object> mediaMeta) {
+                // nothing to do
+            }
+
+            @Override
+            public MediaStatus getMediaStatus() {
+                return file.getMediaStatus();
+            }
+
+            @Override
+            public void setMediaStatus(MediaStatus infostoreMediaStatus) {
                 // nothing to do
             }
 
@@ -739,6 +838,7 @@ public class FileMetadata implements DocumentMetadata {
         file.setSequenceNumber(sequenceNumber);
     }
 
+    @Override
     public InfostoreFolderPath getOriginFolderPath() {
         FolderPath folderPath = file.getOrigin();
         return null == folderPath ? null : InfostoreFolderPath.copyOf(folderPath);
@@ -747,6 +847,86 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
         file.setOrigin(null == originFolderPath ? null : FolderPath.copyOf(originFolderPath));
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        return file.getCaptureDate();
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        file.setCaptureDate(captureDate);
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        return file.getGeoLocation();
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        file.setGeoLocation(geoLocation);
+    }
+
+    @Override
+    public Long getWidth() {
+        return file.getWidth();
+    }
+
+    @Override
+    public void setWidth(long width) {
+        file.setWidth(width);
+    }
+
+    @Override
+    public Long getHeight() {
+        return file.getHeight();
+    }
+
+    @Override
+    public void setHeight(long height) {
+        file.setHeight(height);
+    }
+
+    @Override
+    public Long getIsoSpeed() {
+        return file.getIsoSpeed();
+    }
+
+    @Override
+    public void setIsoSpeed(long isoSpeed) {
+        file.setIsoSpeed(isoSpeed);
+    }
+
+    @Override
+    public String getCameraModel() {
+        return file.getCameraModel();
+    }
+
+    @Override
+    public void setCameraModel(String cameraModel) {
+        file.setCameraModel(cameraModel);
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        return file.getMediaMeta();
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        file.setMediaMeta(mediaMeta);
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        return file.getMediaStatus();
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus infostoreMediaStatus) {
+        file.setMediaStatus(infostoreMediaStatus);
     }
 
 }

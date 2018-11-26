@@ -80,7 +80,8 @@ public class MDCEnablerTurboFilter extends ExtendedTurboFilter {
 
     @Override
     public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format, final Object[] params, final Throwable t) {
-        if (!(Thread.currentThread() instanceof OXThreadMarker)) {
+        // Check if a log message is supposed to be logged
+        if ((null != format) && !(Thread.currentThread() instanceof OXThreadMarker)) {
             MDC.clear();
         }
         return FilterReply.NEUTRAL;

@@ -50,19 +50,29 @@
 package com.openexchange.file.storage.googledrive;
 
 import static com.openexchange.file.storage.googledrive.GoogleDriveConstants.ROOT_ID;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.File.ImageMediaMetadata;
+import com.google.api.services.drive.model.File.ImageMediaMetadata.Location;
 import com.google.api.services.drive.model.Revision;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.googledrive.osgi.Services;
+import com.openexchange.java.GeoLocation;
+import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
@@ -71,6 +81,15 @@ import com.openexchange.mime.MimeTypeMap;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GoogleDriveFile extends DefaultFile {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(GoogleDriveFile.class);
+
+    private final static SimpleDateFormat EXIF_FORMAT;
+
+    static {
+        EXIF_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        EXIF_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     /**
      * Initializes a new {@link GoogleDriveFile}.
@@ -172,6 +191,63 @@ public final class GoogleDriveFile extends DefaultFile {
                 if (set.contains(Field.FILE_MD5SUM)) {
                     setFileMD5Sum(file.getMd5Checksum());
                 }
+                // ---------- MEDIA STUFF ----------
+                ImageMediaMetadata imageMediaMetadata = file.getImageMediaMetadata();
+                if (null != imageMediaMetadata) {
+                    setMediaStatus(MediaStatus.valueFor(MediaStatus.Status.DONE_SUCCESS));
+                    if (set.contains(Field.CAPTURE_DATE)) {
+                        if (null != imageMediaMetadata.getTime()) {
+                            try {
+                                Date date;
+                                synchronized (EXIF_FORMAT) {
+                                    /*
+                                     * EXIF doesn't standardize time zones, therefore the actual time is best guess. Using UTC for the moment
+                                     */
+                                    date = EXIF_FORMAT.parse(imageMediaMetadata.getTime());
+                                }
+                                setCaptureDate(date);
+                            } catch (ParseException e) {
+                                LOGGER.debug("Unable to set capture date.", e);
+                            }
+                        }
+                    }
+                    if (set.contains(Field.GEOLOCATION)) {
+                        if (null != imageMediaMetadata.getLocation()) {
+                            Location location = imageMediaMetadata.getLocation();
+                            if (null != location.getLatitude() && null != location.getLongitude()) {
+                                setGeoLocation(new GeoLocation(location.getLatitude().doubleValue(), location.getLongitude().doubleValue()));
+                            }
+                        }
+                    }
+                    if (set.contains(Field.WIDTH)) {
+                        if (null != imageMediaMetadata.getWidth()) {
+                            setWidth(imageMediaMetadata.getWidth().longValue());
+                        }
+                    }
+                    if (set.contains(Field.HEIGHT)) {
+                        if (null != imageMediaMetadata.getHeight()) {
+                            setHeight(imageMediaMetadata.getHeight().longValue());
+                        }
+                    }
+                    if (set.contains(Field.CAMERA_MODEL)) {
+                        if (null != imageMediaMetadata.getCameraModel()) {
+                            String make = imageMediaMetadata.getCameraMake();
+                            if (Strings.isEmpty(make)) {
+                                setCameraModel(imageMediaMetadata.getCameraModel());
+                            } else {
+                                setCameraModel(new StringBuffer(make).append(' ').append(imageMediaMetadata.getCameraModel()).toString());
+                            }
+                        }
+                    }
+                    if (set.contains(Field.ISO_SPEED)) {
+                        if (null != imageMediaMetadata.getIsoSpeed()) {
+                            setIsoSpeed(imageMediaMetadata.getIsoSpeed().longValue());
+                        }
+                    }
+                } else {
+                    setMediaStatus(MediaStatus.valueFor(MediaStatus.Status.NONE));
+                }
+
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }

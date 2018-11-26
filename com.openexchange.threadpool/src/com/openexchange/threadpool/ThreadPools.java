@@ -58,13 +58,20 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.processing.ProcessorService;
+import com.openexchange.processing.internal.ProcessorThreadFactory;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
+import com.openexchange.threadpool.internal.ScalingQueue;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
 
@@ -82,6 +89,33 @@ public final class ThreadPools {
      */
     private ThreadPools() {
         super();
+    }
+
+    /**
+     * Creates a new (thread pool) executor service from given arguments.
+     *
+     * @param name The name (prefix) for created threads
+     * @param corePoolSize The he number of threads to keep in the pool, even if they are idle
+     * @param maximumPoolSize The maximum number of threads to allow in the pool
+     * @param workQueueCapacity The max. capacity for the work queue, which is used for holding tasks before they are executed
+     * @param supportMDC Whether to support MDC log properties; otherwise MDC will be cleared prior to each log output
+     * @return The newly created (thread pool) executor service
+     */
+    public static ThreadPoolExecutor newThreadPoolExecutor(String name, int corePoolSize, int maximumPoolSize, int workQueueCapacity, boolean supportMDC) {
+        RejectedExecutionHandler defaultHandler = new AbortPolicy();
+        if (corePoolSize == maximumPoolSize) {
+            return new ThreadPoolExecutor(corePoolSize, corePoolSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ProcessorThreadFactory(name, supportMDC), defaultHandler);
+        }
+
+        if (maximumPoolSize == Integer.MAX_VALUE || workQueueCapacity <= 0) {
+            return new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new ProcessorThreadFactory(name, supportMDC), defaultHandler);
+        }
+
+        ScalingQueue scalingQueue = workQueueCapacity > 0 ? new ScalingQueue(workQueueCapacity) : new ScalingQueue();
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 60L, TimeUnit.SECONDS, scalingQueue, new ProcessorThreadFactory(name, supportMDC), defaultHandler);
+        scalingQueue.setThreadPoolExecutor(threadPoolExecutor);
+        threadPoolExecutor.setRejectedExecutionHandler(scalingQueue.createRejectedExecutionHandler(defaultHandler));
+        return threadPoolExecutor;
     }
 
     /**

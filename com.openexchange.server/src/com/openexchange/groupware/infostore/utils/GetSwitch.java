@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore.utils;
 
+import java.util.Date;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class GetSwitch implements MetadataSwitcher {
@@ -76,12 +78,12 @@ public class GetSwitch implements MetadataSwitcher {
 
 	@Override
     public Object modifiedBy() {
-		return metadata.getModifiedBy();
+		return Integer.valueOf(metadata.getModifiedBy());
 	}
 
 	@Override
     public Object folderId() {
-		return metadata.getFolderId();
+		return Long.valueOf(metadata.getFolderId());
 	}
 
 	@Override
@@ -91,7 +93,7 @@ public class GetSwitch implements MetadataSwitcher {
 
 	@Override
     public Object version() {
-		return metadata.getVersion();
+		return Integer.valueOf(metadata.getVersion());
 	}
 
 	@Override
@@ -101,12 +103,12 @@ public class GetSwitch implements MetadataSwitcher {
 
 	@Override
     public Object id() {
-		return metadata.getId();
+		return Integer.valueOf(metadata.getId());
 	}
 
 	@Override
     public Object fileSize() {
-		return metadata.getFileSize();
+		return Long.valueOf(metadata.getFileSize());
 	}
 
 	@Override
@@ -121,7 +123,7 @@ public class GetSwitch implements MetadataSwitcher {
 
 	@Override
     public Object createdBy() {
-		return metadata.getCreatedBy();
+		return Integer.valueOf(metadata.getCreatedBy());
 	}
 
 	@Override
@@ -136,7 +138,7 @@ public class GetSwitch implements MetadataSwitcher {
 
 	@Override
     public Object sequenceNumber() {
-		return metadata.getSequenceNumber();
+		return Long.valueOf(metadata.getSequenceNumber());
 	}
 
 	@Override
@@ -161,12 +163,12 @@ public class GetSwitch implements MetadataSwitcher {
 
 	@Override
     public Object currentVersion() {
-		return metadata.isCurrentVersion();
+		return Boolean.valueOf(metadata.isCurrentVersion());
 	}
 
 	@Override
     public Object colorLabel() {
-		return metadata.getColorLabel();
+		return Integer.valueOf(metadata.getColorLabel());
 	}
 
 	@Override
@@ -181,7 +183,7 @@ public class GetSwitch implements MetadataSwitcher {
 
     @Override
     public Object numberOfVersions() {
-        return metadata.getNumberOfVersions();
+        return Integer.valueOf(metadata.getNumberOfVersions());
     }
 
     @Override
@@ -191,12 +193,59 @@ public class GetSwitch implements MetadataSwitcher {
 
     @Override
     public Object shareable() {
-        return metadata.isShareable();
+        return Boolean.valueOf(metadata.isShareable());
     }
 
     @Override
     public Object origin() {
         return metadata.getOriginFolderPath();
+    }
+
+    @Override
+    public Object captureDate() {
+        return metadata.getCaptureDate();
+    }
+
+    @Override
+    public Object geolocation() {
+        return metadata.getGeoLocation();
+    }
+
+    @Override
+    public Object width() {
+        return metadata.getWidth();
+    }
+
+    @Override
+    public Object height() {
+        return metadata.getHeight();
+    }
+
+    @Override
+    public Object cameraModel() {
+        return metadata.getCameraModel();
+    }
+
+    @Override
+    public Object isoSpeed() {
+        return metadata.getIsoSpeed();
+    }
+
+    @Override
+    public Object mediaMeta() {
+        return metadata.getMediaMeta();
+    }
+
+    @Override
+    public Object mediaStatus() {
+        MediaStatus status = metadata.getMediaStatus();
+        return null == status ? MediaStatus.none() : status;
+    }
+
+    @Override
+    public Object mediaDate() {
+        Date d = metadata.getCaptureDate();
+        return null == d ? metadata.getLastModified() : d;
     }
 
 }

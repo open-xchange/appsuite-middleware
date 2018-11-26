@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.meta.FileFieldGet;
@@ -95,15 +96,84 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private static final String USER_INFOSTORE_FOLDER_ID   = Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
     private static final String PUBLIC_INFOSTORE_FOLDER_ID = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
 
+    /**
+     * A named value retrieved for a certain field when calling
+     * {@link JsonFieldHandler#handle(Field, Object...) JsonFieldHandler's handle() method}.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: A named value can only be returned when JsonFieldHandler has been initialized through
+     * {@link JsonFieldHandler#JsonFieldHandler(AJAXInfostoreRequest, JSONObject) this constructor}.
+     * </div>
+     */
+    public static interface NamedValue<V> {
+
+        /**
+         * Gets the name
+         *
+         * @return The name
+         */
+        String getName() ;
+
+        /**
+         * Gets the value
+         *
+         * @return The value
+         */
+        V getValue();
+    }
+
+    private static class MediaNamedValue implements NamedValue<JSONObject> {
+
+        private final String name;
+        private final JSONObject value;
+
+        /**
+         * Initializes a new {@link MediaNamedValue}.
+         */
+        MediaNamedValue(String name, JSONObject value) {
+            super();
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public JSONObject getValue() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(32);
+            builder.append('[');
+            if (name != null) {
+                builder.append("name=").append(name).append(", ");
+            }
+            if (value != null) {
+                builder.append("value=").append(value);
+            }
+            builder.append(']');
+            return builder.toString();
+        }
+
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private final AJAXInfostoreRequest request;
     private final JSONObject optJsonFile;
+    private MediaNamedValue mediaStruct;
     private Map<String, Object> cache;
     private IDBasedFolderAccess folderAccess;
 
     /**
      * Initializes a new {@link JsonFieldHandler}.
      *
-     * @param request The underlying infostore request
+     * @param request The underlying request
      */
     public JsonFieldHandler(AJAXInfostoreRequest request) {
         this(request, null);
@@ -112,13 +182,13 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     /**
      * Initializes a new {@link JsonFieldHandler}.
      *
-     * @param request The underlying infostore request
-     * @param jFile The JSON file representation
+     * @param request The underlying request
+     * @param jFile The JSON object, to which file's JSON representation is serialized
      */
-    public JsonFieldHandler(AJAXInfostoreRequest request, JSONObject optJsonFile) {
+    public JsonFieldHandler(AJAXInfostoreRequest request, JSONObject jFile) {
         super();
         this.request = request;
-        this.optJsonFile = optJsonFile;
+        this.optJsonFile = jFile;
     }
 
     @Override
@@ -136,6 +206,60 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 return ContentType.getBaseType(ct);
             } catch (final OXException e) {
                 return value;
+            }
+        }
+        if (Field.MEDIA_FIELDS.contains(field)) {
+            try {
+                if (null != optJsonFile && mediaStruct == null) {
+                    // Output a NamedValue in case we're serializing to a JSON object
+                    mediaStruct = new MediaNamedValue("media", new JSONObject(8));
+                }
+                if (value == null) {
+                    if (field == File.Field.MEDIA_STATUS && mediaStruct == null) {
+                        value = MediaStatus.Status.NONE.getIdentifier();
+                    }
+                } else {
+                    if (Date.class.isInstance(value)) {
+                        TimeZone tz = Field.LAST_MODIFIED_UTC == field ? UTC : request.getTimezone();
+                        value = writeDate((Date) value, tz);
+                    } else {
+                        switch (field) {
+                            case MEDIA_STATUS:
+                                MediaStatus mediaStatus = (MediaStatus) value;
+                                if (MediaStatus.Status.NONE == mediaStatus.getStatus()) {
+                                    // Apparently no media information. Null'ify if we're serializing to media struct
+                                    if (mediaStruct != null) {
+                                        value = null;
+                                    } else {
+                                        value = mediaStatus.getStatus().getIdentifier();
+                                    }
+                                } else {
+                                    value = mediaStatus.getStatus().getIdentifier();
+                                }
+                                break;
+                            case MEDIA_META:
+                                value = new JSONObject((Map<String, Object>) value);
+                                break;
+                            case GEOLOCATION:
+                                value = value.toString();
+                                break;
+                            default: // do nothing;
+                        }
+
+                        if (null != value && mediaStruct != null) {
+                            mediaStruct.getValue().put(field.getName(), value);
+                        }
+                    }
+                }
+
+                if (mediaStruct == null || mediaStruct.getValue().isEmpty()) {
+                    // We're either not serializing to a JSON object or nothing has been written to media struct
+                    return value;
+                }
+
+                return mediaStruct;
+            } catch (JSONException e) {
+                LOG.error("Error writing field: {}", field.getName(), e);
             }
         }
         if (value == null) {
@@ -171,7 +295,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 Map<String, Object> meta = (Map<String, Object>) value;
                 // Add encrypted flag if appropriate
                 Object oEncrypted = meta.get(FileStorageConstants.METADATA_KEY_ENCRYPTED);
-                optJsonFile.put(FIELD_ENCRYPTED, ((oEncrypted instanceof Boolean) && ((Boolean) oEncrypted).booleanValue()));
+                optJsonFile.put(FIELD_ENCRYPTED, Boolean.TRUE.equals(oEncrypted));
                 return new JSONObject(meta);
             } catch (JSONException e) {
                 LOG.error("", e);

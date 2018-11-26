@@ -61,7 +61,6 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.exception.OXException;
@@ -73,6 +72,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.log.LogProperties;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.RemoteInternalPreviewService;
@@ -97,13 +97,27 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     /** The logger */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractListingAction.class);
 
-    private static final String PARAMETER_PREGENERATE_PREVIEWS = "pregenerate_previews";
-
     /**
      * Initializes a new {@link AbstractListingAction}.
      */
     protected AbstractListingAction() {
         super();
+    }
+
+    @Override
+    protected void before(AJAXInfostoreRequest req) throws OXException {
+        super.before(req);
+        if (req.isPregeneratePreviews()) {
+            LogProperties.putProperty(LogProperties.Name.FILE_STORAGE_PREGENERATE_PREVIEWS, Boolean.TRUE);
+        }
+    }
+
+    @Override
+    protected void after(AJAXInfostoreRequest req) {
+        if (req.isPregeneratePreviews()) {
+            LogProperties.remove(LogProperties.Name.FILE_STORAGE_PREGENERATE_PREVIEWS);
+        }
+        super.after(req);
     }
 
     /**
@@ -117,7 +131,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws OXException {
         TimedResult<File> timedResult = documents;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
+        if (request.isPregeneratePreviews()) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -154,7 +168,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult results(final SearchIterator<File> searchIterator, final long timestamp, final InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
+        if (request.isPregeneratePreviews()) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -187,7 +201,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
         Long timestamp = null;
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
+        if (request.isPregeneratePreviews()) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {

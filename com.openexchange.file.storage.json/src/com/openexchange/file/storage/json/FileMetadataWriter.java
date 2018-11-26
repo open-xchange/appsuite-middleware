@@ -100,9 +100,8 @@ public class FileMetadataWriter {
         /*
          * serialize regular fields
          */
-        JSONObject jsonObject = new JSONObject();
-        final JsonFieldHandler handler = new JsonFieldHandler(request, jsonObject);
-        jsonObject = File.Field.inject(getJsonHandler(file, handler), jsonObject);
+        JSONObject jsonObject = new JSONObject(32);
+        jsonObject = File.Field.inject(getJsonHandler(file, new JsonFieldHandler(request, jsonObject)), jsonObject);
         /*
          * render additional fields if available
          */
@@ -131,7 +130,7 @@ public class FileMetadataWriter {
         /*
          * serialize regular fields
          */
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject(32);
         FileFieldHandler jsonHandler = getJsonHandler(file, new JsonFieldHandler(request, jsonObject));
         for (Field field : fields) {
             field.handle(jsonHandler, jsonObject);
@@ -254,7 +253,13 @@ public class FileMetadataWriter {
             public Object handle(Field field, Object... args) {
                 JSONObject jsonObject = get(0, JSONObject.class, args);
                 try {
-                    jsonObject.put(field.getName(), fieldHandler.handle(field, file));
+                    Object result = fieldHandler.handle(field, file);
+                    if (result instanceof JsonFieldHandler.NamedValue) {
+                        JsonFieldHandler.NamedValue<?> namedValue = (JsonFieldHandler.NamedValue) result;
+                        jsonObject.put(namedValue.getName(), namedValue.getValue());
+                    } else {
+                        jsonObject.put(field.getName(), result);
+                    }
                 } catch (JSONException e) {
                     LOG.error("Error writing field: {}", field.getName(), e);
                 }

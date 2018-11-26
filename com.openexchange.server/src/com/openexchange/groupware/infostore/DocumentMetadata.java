@@ -54,7 +54,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.java.GeoLocation;
 
 public interface DocumentMetadata extends Serializable {
 
@@ -241,5 +243,122 @@ public interface DocumentMetadata extends Serializable {
      * @param originFolderPath
      */
     void setOriginFolderPath(InfostoreFolderPath originFolderPath);
+
+
+    // ------------------------------------------------------------ MEDIA STUFF ------------------------------------------------------------
+
+    /**
+     * Gets the capture date of the image associated with this file
+     *
+     * @return The capture date
+     */
+    Date getCaptureDate();
+
+    /**
+     * Sets the capture date of the image associated with this file
+     *
+     * @param captureDate The capture date
+     */
+    void setCaptureDate(Date captureDate);
+
+    /**
+     * Gets the geo location of the media resource associated with this file
+     *
+     * @return The geo location
+     */
+    GeoLocation getGeoLocation();
+
+    /**
+     * Sets the geo location of the media resource associated with this file
+     *
+     * @param geoLocation The geo location
+     */
+    void setGeoLocation(GeoLocation geoLocation);
+
+    /**
+     * Gets the width of the media resource associated with this file
+     *
+     * @return The width or <code>null</code> if unknown/not set
+     */
+    Long getWidth();
+
+    /**
+     * Sets the width of the media resource associated with this file
+     *
+     * @param width The width
+     */
+    void setWidth(long width);
+
+    /**
+     * Gets the height of the media resource associated with this file
+     *
+     * @return The height or <code>null</code> if unknown/not set
+     */
+    Long getHeight();
+
+    /**
+     * Sets the height of the media resource associated with this file
+     *
+     * @param heigth The height
+     */
+    void setHeight(long height);
+
+    /**
+     * Gets the name of the camera model associated with this file
+     *
+     * @return The camera model or <code>null</code> if unknown/not set
+     */
+    String getCameraModel();
+
+    /**
+     * Sets the name of the camera model associated with this file
+     *
+     * @param cameraModel The duration
+     */
+    void setCameraModel(String cameraModel);
+
+    /**
+     * Gets ISO speed value of a camera or input device associated with this file
+     *
+     * @return The ISO speed value or <code>null</code> if unknown/not set
+     */
+    Long getIsoSpeed();
+
+    /**
+     * Sets ISO speed value of a camera or input device associated with this file
+     *
+     * @param isoSpeed The ISO speed value
+     */
+    void setIsoSpeed(long isoSpeed);
+
+    /**
+     * Gets the meta information for the media resource associated with this file
+     *
+     * @return The meta information
+     */
+    Map<String, Object> getMediaMeta();
+
+    /**
+     * Sets the meta information for the media resource associated with this file
+     *
+     * @param mediaMeta The meta information
+     */
+    void setMediaMeta(Map<String, Object> mediaMeta);
+
+    /**
+     * Gets the status of parsing/analyzing media meta-data from the media resource associated with this file
+     *
+     * @return The media status
+     */
+    MediaStatus getMediaStatus();
+
+    /**
+     * Sets the status of parsing/analyzing media meta-data from the media resource associated with this file
+     *
+     * @param infostoreMediaStatus The media status
+     */
+    void setMediaStatus(MediaStatus infostoreMediaStatus);
+
+    // --------------------------------------------------------- END OF MEDIA STUFF --------------------------------------------------------
 
 }

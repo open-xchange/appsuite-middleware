@@ -54,7 +54,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.java.GeoLocation;
 
 /**
  * {@link DefaultDocumentMetadata}
@@ -95,7 +97,21 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected Map<String, String> properties;
     protected boolean shareable;
     protected InfostoreFolderPath originFolderPath;
+    protected Date captureDate;
+    protected GeoLocation geoLocation;
+    protected Long width = null;
+    protected Long height = null;
+    private String cameraModel = null;
+    private Long isoSpeed = null;
+    protected Map<String, Object> mediaMeta;
+    protected MediaStatus mediaStatus = MediaStatus.none();
 
+    /**
+     * Initializes a new {@link DefaultDocumentMetadata}.
+     */
+    protected DefaultDocumentMetadata() {
+        super();
+    }
 
     @Override
     public String getProperty(String key) {
@@ -285,6 +301,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
         return 0;
     }
 
+    @Override
     public void setSequenceNumber(long sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
     }
@@ -407,6 +424,98 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
         this.originFolderPath = originFolderPath;
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        return captureDate;
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        this.captureDate = captureDate;
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        return geoLocation;
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        this.geoLocation = geoLocation;
+    }
+
+    @Override
+    public Long getWidth() {
+        return width;
+    }
+
+    @Override
+    public void setWidth(long width) {
+        if (width < 0) {
+            this.width = null;
+        } else {
+            this.width = Long.valueOf(width);
+        }
+    }
+
+    @Override
+    public Long getHeight() {
+        return height;
+    }
+
+    @Override
+    public void setHeight(long height) {
+        if (height < 0) {
+            this.height = null;
+        } else {
+            this.height = Long.valueOf(height);
+        }
+    }
+
+    @Override
+    public Long getIsoSpeed() {
+        return isoSpeed;
+    }
+
+    @Override
+    public void setIsoSpeed(long isoSpeed) {
+        if (isoSpeed < 0) {
+            this.isoSpeed = null;
+        } else {
+            this.isoSpeed = Long.valueOf(isoSpeed);
+        }
+    }
+
+    @Override
+    public String getCameraModel() {
+        return cameraModel;
+    }
+
+    @Override
+    public void setCameraModel(String cameraModel) {
+        this.cameraModel = cameraModel;
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        return mediaMeta;
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        this.mediaMeta = mediaMeta;
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        return mediaStatus;
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus mediaStatus) {
+        this.mediaStatus = mediaStatus == null ? MediaStatus.none() : mediaStatus;
     }
 
     @Override

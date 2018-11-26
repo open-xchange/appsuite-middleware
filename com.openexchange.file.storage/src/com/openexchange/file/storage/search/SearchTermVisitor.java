@@ -259,4 +259,52 @@ public interface SearchTermVisitor {
      * @throws OXException If visit attempt fails
      */
     void visit(CreatedByTerm term) throws OXException;
+
+   /**
+    * The visitation for media date term.
+    *
+    * @param mediaDateTerm The visited media date term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(MediaDateTerm mediaDateTerm) throws OXException;
+
+   /**
+    * The visitation for capture date term.
+    *
+    * @param captureDateTerm The visited capture date term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(CaptureDateTerm captureDateTerm) throws OXException;
+
+   /**
+    * The visitation for ISO speed term.
+    *
+    * @param isoSpeedTerm The visited ISO speed term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(IsoSpeedTerm isoSpeedTerm) throws OXException;
+
+   /**
+    * The visitation for width term.
+    *
+    * @param widthTerm The visited width term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(WidthTerm widthTerm) throws OXException;
+
+   /**
+    * The visitation for height term.
+    *
+    * @param heightTerm The visited height term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(HeightTerm heightTerm) throws OXException;
+
+   /**
+    * The visitation for camera model term.
+    *
+    * @param cameraModelTerm The visited camera model term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(CameraModelTerm cameraModelTerm) throws OXException;
 }

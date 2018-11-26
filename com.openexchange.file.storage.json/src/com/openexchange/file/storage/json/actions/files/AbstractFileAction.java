@@ -128,7 +128,9 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         /** The <code>"attachment"</code> parameter */
         ATTACHMENT("attachment"),
         /** The <code>"attachment_module"</code> parameter */
-        ATTACHMENT_MODULE("attachment_module");
+        ATTACHMENT_MODULE("attachment_module"),
+        /** The <code>"pregenerate_previews"</code> parameter */
+        PREGENERATE_PREVIEWS("pregenerate_previews");
 
         private final String name;
 

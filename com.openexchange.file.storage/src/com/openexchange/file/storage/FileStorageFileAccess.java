@@ -234,23 +234,8 @@ public interface FileStorageFileAccess extends TransactionAware {
             return null;
         }
 
-        public Comparator<File> comparatorBy(final File.Field by, final Comparator<File> comparator) {
-            final FileComparator fileComparator = new FileComparator(by, comparator);
-            switch (this) {
-                case ASC:
-                    return fileComparator;
-                case DESC:
-                    return new InverseComparator(fileComparator);
-            }
-            return null;
-        }
-
         public void sort(final List<File> collection, final File.Field by) {
             Collections.sort(collection, comparatorBy(by));
-        }
-
-        public void sort(final List<File> collection, final File.Field by, final Comparator<File> comparator) {
-            Collections.sort(collection, comparatorBy(by, comparator));
         }
 
         private static final class InverseComparator implements Comparator<File> {

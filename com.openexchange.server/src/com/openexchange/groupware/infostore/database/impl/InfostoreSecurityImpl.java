@@ -119,7 +119,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             readCon = getReadConnection(ctx);
             OXFolderAccess folderAccess = new OXFolderAccess(readCon, ctx);
 
-            TIntList admins = new TIntArrayList();
+            TIntList admins = new TIntArrayList(documents.size());
             for (DocumentMetadata document : documents) {
                 FolderObject folder = folderAccess.getFolderObject((int) document.getFolderId());
                 admins.add(getFolderOwner(folder));

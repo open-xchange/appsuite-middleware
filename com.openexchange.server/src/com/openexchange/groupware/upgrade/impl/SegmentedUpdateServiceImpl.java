@@ -83,7 +83,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tools.SegmentedUpdateService#getMigrationRedirectURL(java.lang.String)
      */
     @Override
@@ -93,7 +93,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.upgrade.SegmentedUpdateService#getSharingMigrationRedirectURL(java.lang.String)
      */
     @Override
@@ -108,7 +108,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
     /**
      * Retrieves the requested {@link Property} by first checking in the 'as-config.yaml'
      * and then trying the lean configuration
-     * 
+     *
      * @param host the host
      * @param property The property to fetch
      * @return The value of the property
@@ -127,7 +127,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
 
     /**
      * Gets the migration URL from the yaml configuration for the specified host
-     * 
+     *
      * @param host The host for which to retrieve the migration URL
      * @return The migrationURL if present, <code>null</code> if not configured or if the <code>host</code> is <code>null</code>.
      * @throws OXException if an error is occurred
@@ -152,7 +152,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
 
     /**
      * Gets the migration URL from the lean configuration
-     * 
+     *
      * @return The migration URL or <code>null</code> if not configured.
      */
     private String getFromLean(Property property) {

@@ -84,6 +84,28 @@ public class S3Activator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
         logger.info("Starting bundle: com.openexchange.filestore.s3");
 
+        // Disable MD5 validation...
+        //
+        // If enabled, requesting an object's input stream has an intermediate DigestValidationInputStream, which breaks
+        // to communication a call to 'abort()' to the low-level S3AbortableInputStream as it does not inherit from SdkFilterInputStream.
+        // In consequence, AbortIfNotFullyConsumedS3ObjectInputStreamWrapper is of no effect: The HTTP request is not aborted and an
+        // accompanying WARN message occurs (see com.amazonaws.services.s3.internal.S3AbortableInputStream.close())
+        //
+        // Stack:
+        //    S3AbortableInputStream.close() line: 182
+        //    S3ObjectInputStream(SdkFilterInputStream).close() line: 99
+        //    S3ObjectInputStream.close() line: 136
+        //    ServiceClientHolderInputStream(SdkFilterInputStream).close() line: 99
+        //    AmazonS3Client$2(SdkFilterInputStream).close() line: 99
+        //    AmazonS3Client$2(ProgressInputStream).close() line: 211
+        //    DigestValidationInputStream(FilterInputStream).close() line: 181
+        //    IOUtils.closeQuietly(Closeable, Log) line: 70
+        //    S3ObjectInputStream.abort() line: 98
+        //    AbortIfNotFullyConsumedS3ObjectInputStreamWrapper.close() line: 111
+        //     ...
+        //
+        System.setProperty(com.amazonaws.services.s3.internal.SkipMd5CheckStrategy.DISABLE_GET_OBJECT_MD5_VALIDATION_PROPERTY, "true");
+
         final LeanConfigurationService config = getService(LeanConfigurationService.class);
         track(MetricService.class, new SimpleRegistryListener<MetricService>() {
             @Override

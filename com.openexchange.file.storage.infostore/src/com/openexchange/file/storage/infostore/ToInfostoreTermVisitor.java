@@ -56,6 +56,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.file.storage.search.AndTerm;
+import com.openexchange.file.storage.search.CameraModelTerm;
+import com.openexchange.file.storage.search.CaptureDateTerm;
 import com.openexchange.file.storage.search.CategoriesTerm;
 import com.openexchange.file.storage.search.ColorLabelTerm;
 import com.openexchange.file.storage.search.ContentTerm;
@@ -67,9 +69,12 @@ import com.openexchange.file.storage.search.FileMd5SumTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
+import com.openexchange.file.storage.search.HeightTerm;
+import com.openexchange.file.storage.search.IsoSpeedTerm;
 import com.openexchange.file.storage.search.LastModifiedTerm;
 import com.openexchange.file.storage.search.LastModifiedUtcTerm;
 import com.openexchange.file.storage.search.LockedUntilTerm;
+import com.openexchange.file.storage.search.MediaDateTerm;
 import com.openexchange.file.storage.search.MetaTerm;
 import com.openexchange.file.storage.search.ModifiedByTerm;
 import com.openexchange.file.storage.search.NotTerm;
@@ -82,6 +87,7 @@ import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.file.storage.search.UrlTerm;
 import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.file.storage.search.VersionTerm;
+import com.openexchange.file.storage.search.WidthTerm;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.search.ComparisonType;
 
@@ -254,6 +260,36 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     @Override
     public void visit(final CreatedByTerm term) throws OXException {
         infstoreTerm = new com.openexchange.groupware.infostore.search.CreatedByTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(MediaDateTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.MediaDateTerm(new ComparablePatternImpl<Date>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(CameraModelTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CameraModelTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
+    }
+
+    @Override
+    public void visit(CaptureDateTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CaptureDateTerm(new ComparablePatternImpl<Date>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(HeightTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.HeightTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(IsoSpeedTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.IsoSpeedTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(WidthTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.WidthTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     private static final class ComparablePatternImpl<T> implements com.openexchange.groupware.infostore.search.ComparablePattern<T> {

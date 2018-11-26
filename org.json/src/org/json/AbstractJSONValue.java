@@ -55,8 +55,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.PipedOutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import org.json.helpers.ExceptionAwarePipedInputStream;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
@@ -290,17 +292,52 @@ abstract class AbstractJSONValue implements JSONValue {
         }
     }
 
+    @Override
+    public InputStream getStream(final boolean asciiOnly) throws JSONException {
+        try {
+            final PipedOutputStream pos = new PipedOutputStream();
+            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+
+            final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    OutputStreamWriter writer = null;
+                    try {
+                        writer = new OutputStreamWriter(pos, "UTF-8");
+                        write(writer, asciiOnly);
+                        writer.flush();
+                    } catch (final Exception e) {
+                        pin.setException(e);
+                    } finally {
+                        close(writer, pos);
+                    }
+                }
+            };
+
+            new Thread(r, "getStreamFromJSON").start();
+
+            return pin;
+        } catch (IOException e) {
+            throw new JSONException(e);
+        }
+    }
+
     /**
      * Closes given <code>java.io.Closeable</code> instance (if non-<code>null</code>).
      *
      * @param closeable The <code>java.io.Closeable</code> instance
      */
-    protected static void close(final java.io.Closeable closeable) {
-        if (null != closeable) {
-            try {
-                closeable.close();
-            } catch (final Exception e) {
-                // Ignore
+    protected static void close(java.io.Closeable... closeables) {
+        if (null != closeables) {
+            for (java.io.Closeable closeable : closeables) {
+                if (null != closeable) {
+                    try {
+                        closeable.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
             }
         }
     }

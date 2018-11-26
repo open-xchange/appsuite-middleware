@@ -52,63 +52,54 @@ package com.openexchange.file.storage.meta;
 import java.util.Comparator;
 import com.openexchange.file.storage.File;
 
-
 /**
- * {@link FileComparator}
+ * {@link FileComparator} - A comparator for files.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileComparator implements Comparator<File>{
+public class FileComparator implements Comparator<File> {
 
     private static final FileFieldGet GET = new FileFieldGet();
 
-    private Comparator delegate = null;
-    private File.Field by = null;
+    private final File.Field by;
 
+    /**
+     * Initializes a new {@link FileComparator}.
+     *
+     * @param by The field to sort by
+     */
     public FileComparator(final File.Field by) {
+        super();
         this.by = by;
-    }
-
-    public FileComparator(final File.Field by, final Comparator comparator) {
-        this.by = by;
-        delegate = comparator;
     }
 
     @Override
     public int compare(final File o1, final File o2) {
-        if(o1 == o2) {
+        if (o1 == o2) {
             return 0;
         }
-
-        if(o1 == null) {
+        if (o1 == null) {
             return -1;
         }
-
-        if(o2 == null) {
+        if (o2 == null) {
             return 1;
         }
 
-        final Object v1 = by.doSwitch(GET, o1);
-        final Object v2 = by.doSwitch(GET, o2);
-
-        if(v1 == v2) {
+        Object v1 = by.doSwitch(GET, o1);
+        Object v2 = by.doSwitch(GET, o2);
+        if (v1 == v2) {
             return 0;
         }
-
-        if(v1 == null) {
+        if (v1 == null) {
             return -1;
         }
-
-        if(v2 == null) {
+        if (v2 == null) {
             return 1;
         }
 
-        if(delegate != null) {
-            return delegate.compare(v1, v2);
-        } else if (v1 instanceof Comparable) {
-            return ((Comparable)v1).compareTo(v2);
+        if (v1 instanceof Comparable) {
+            return ((Comparable<Object>) v1).compareTo(v2);
         }
-
         return 0;
     }
 

@@ -82,6 +82,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
         new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
+        new com.openexchange.groupware.infostore.media.osgi.MediaMetadataActivator(),
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
         new com.openexchange.consistency.osgi.ConsistencyActivator(),
         new com.openexchange.authorization.osgi.AuthorizationActivator(),

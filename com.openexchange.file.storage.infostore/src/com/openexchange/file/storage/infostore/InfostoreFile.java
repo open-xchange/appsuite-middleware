@@ -9,11 +9,13 @@ import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
+import com.openexchange.java.GeoLocation;
 
 /*
  *
@@ -363,6 +365,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
         document.setSequenceNumber(sequenceNumber);
     }
 
+    @Override
     public FolderPath getOrigin() {
         InfostoreFolderPath folderPath = document.getOriginFolderPath();
         return null == folderPath ? null : FolderPath.copyOf(folderPath);
@@ -371,6 +374,87 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public void setOrigin(FolderPath origin) {
         document.setOriginFolderPath(null == origin ? null : InfostoreFolderPath.copyOf(origin));
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        return document.getCaptureDate();
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        document.setCaptureDate(captureDate);
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        return document.getGeoLocation();
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        document.setGeoLocation(geoLocation);
+    }
+
+    @Override
+    public Long getWidth() {
+        return document.getWidth();
+    }
+
+    @Override
+    public void setWidth(long width) {
+        document.setWidth(width);
+    }
+
+    @Override
+    public Long getHeight() {
+        return document.getHeight();
+    }
+
+    @Override
+    public void setHeight(long height) {
+        document.setHeight(height);
+    }
+
+    @Override
+    public Long getIsoSpeed() {
+        return document.getIsoSpeed();
+    }
+
+    @Override
+    public void setIsoSpeed(long isoSpeed) {
+        document.setIsoSpeed(isoSpeed);
+    }
+
+    @Override
+    public String getCameraModel() {
+        return document.getCameraModel();
+    }
+
+    @Override
+    public void setCameraModel(String cameraModel) {
+        document.setCameraModel(cameraModel);
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        return document.getMediaMeta();
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        document.setMediaMeta(mediaMeta);
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        MediaStatus status = document.getMediaStatus();
+        return null == status ? MediaStatus.none() : status;
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus mediaStatus) {
+        document.setMediaStatus(mediaStatus);
     }
 
 }

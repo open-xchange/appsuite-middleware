@@ -49,8 +49,11 @@
 
 package com.openexchange.groupware.infostore.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.infostore.InfostoreStrings;
@@ -86,6 +89,15 @@ public class Metadata {
     public static final int OBJECT_PERMISSIONS = 108;
     public static final int SHAREABLE = 109;
     public static final int ORIGIN = 712;
+    public static final int CAPTURE_DATE = 713;
+    public static final int GEOLOCATION = 714;
+    public static final int WIDTH = 715;
+    public static final int HEIGHT = 716;
+    public static final int CAMERA_MODEL = 717;
+    public static final int ISO_SPEED = 718;
+    public static final int MEDIA_META = 719;
+    public static final int MEDIA_STATUS = 720;
+    public static final int MEDIA_DATE = 721;
 
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED, "last_modified");
@@ -116,7 +128,15 @@ public class Metadata {
     public static final Metadata OBJECT_PERMISSIONS_LITERAL = new Metadata(OBJECT_PERMISSIONS, "object_permissions");
     public static final Metadata SHAREABLE_LITERAL = new Metadata(SHAREABLE, "shareable");
     public static final Metadata ORIGIN_LITERAL = new Metadata(ORIGIN, "origin");
-
+    public static final Metadata CAPTURE_DATE_LITERAL = new Metadata(CAPTURE_DATE, "capture_date");
+    public static final Metadata GEOLOCATION_LITERAL = new Metadata(GEOLOCATION, "geolocation");
+    public static final Metadata WIDTH_LITERAL = new Metadata(WIDTH, "width");
+    public static final Metadata HEIGHT_LITERAL = new Metadata(HEIGHT, "height");
+    public static final Metadata CAMERA_MODEL_LITERAL = new Metadata(CAMERA_MODEL, "camera_model");
+    public static final Metadata ISO_SPEED_LITERAL = new Metadata(ISO_SPEED, "iso_speed");
+    public static final Metadata MEDIA_META_LITERAL = new Metadata(MEDIA_META, "media_meta");
+    public static final Metadata MEDIA_STATUS_LITERAL = new Metadata(MEDIA_STATUS, "media_status");
+    public static final Metadata MEDIA_DATE_LITERAL = new Metadata(MEDIA_DATE, "media_date");
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
         LAST_MODIFIED_LITERAL,
@@ -146,7 +166,15 @@ public class Metadata {
         META_LITERAL,
         OBJECT_PERMISSIONS_LITERAL,
         SHAREABLE_LITERAL,
-        ORIGIN_LITERAL
+        ORIGIN_LITERAL,
+        CAPTURE_DATE_LITERAL,
+        GEOLOCATION_LITERAL,
+        WIDTH_LITERAL,
+        HEIGHT_LITERAL,
+        CAMERA_MODEL_LITERAL,
+        ISO_SPEED_LITERAL,
+        MEDIA_META_LITERAL,
+        MEDIA_STATUS_LITERAL
     };
 
     public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
@@ -175,11 +203,31 @@ public class Metadata {
         META_LITERAL,
         OBJECT_PERMISSIONS_LITERAL,
         SHAREABLE_LITERAL,
-        ORIGIN_LITERAL
+        ORIGIN_LITERAL,
+        CAPTURE_DATE_LITERAL,
+        GEOLOCATION_LITERAL,
+        WIDTH_LITERAL,
+        HEIGHT_LITERAL,
+        CAMERA_MODEL_LITERAL,
+        ISO_SPEED_LITERAL,
+        MEDIA_META_LITERAL,
+        MEDIA_STATUS_LITERAL
+    };
+
+    public static final Metadata[] MEDIA_VALUES_ARRAY = new Metadata[]{
+        CAPTURE_DATE_LITERAL,
+        GEOLOCATION_LITERAL,
+        WIDTH_LITERAL,
+        HEIGHT_LITERAL,
+        CAMERA_MODEL_LITERAL,
+        ISO_SPEED_LITERAL,
+        MEDIA_META_LITERAL,
+        MEDIA_STATUS_LITERAL
     };
 
     public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
     public static final List<Metadata> HTTPAPI_VALUES = Collections.unmodifiableList(Arrays.asList(HTTPAPI_VALUES_ARRAY));
+    public static final List<Metadata> MEDIA_VALUES = Collections.unmodifiableList(Arrays.asList(MEDIA_VALUES_ARRAY));
 
     private final String name;
     private final String displayName;
@@ -248,6 +296,15 @@ public class Metadata {
         case OBJECT_PERMISSIONS: return OBJECT_PERMISSIONS_LITERAL;
         case SHAREABLE: return SHAREABLE_LITERAL;
         case ORIGIN: return ORIGIN_LITERAL;
+        case CAPTURE_DATE: return CAPTURE_DATE_LITERAL;
+        case GEOLOCATION: return GEOLOCATION_LITERAL;
+        case WIDTH: return WIDTH_LITERAL;
+        case HEIGHT: return HEIGHT_LITERAL;
+        case CAMERA_MODEL: return CAMERA_MODEL_LITERAL;
+        case ISO_SPEED: return ISO_SPEED_LITERAL;
+        case MEDIA_META: return MEDIA_META_LITERAL;
+        case MEDIA_STATUS: return MEDIA_STATUS_LITERAL;
+        case MEDIA_DATE: return MEDIA_DATE_LITERAL;
         default : return null;
         }
     }
@@ -300,6 +357,15 @@ public class Metadata {
         case OBJECT_PERMISSIONS: return switcher.objectPermissions();
         case SHAREABLE: return switcher.shareable();
         case ORIGIN: return switcher.origin();
+        case CAPTURE_DATE: return switcher.captureDate();
+        case GEOLOCATION: return switcher.geolocation();
+        case WIDTH: return switcher.width();
+        case HEIGHT: return switcher.height();
+        case CAMERA_MODEL: return switcher.cameraModel();
+        case ISO_SPEED: return switcher.isoSpeed();
+        case MEDIA_META: return switcher.mediaMeta();
+        case MEDIA_STATUS: return switcher.mediaStatus();
+        case MEDIA_DATE: return switcher.mediaDate();
         default : return null;
         }
     }
@@ -343,6 +409,113 @@ public class Metadata {
             }
         }
         return false;
+    }
+
+    /**
+     * Adds given metadata fields to specified metadata array if absent.
+     *
+     * @param metadata The metadata array to enhance
+     * @param toAdd The metadata fields to add
+     * @return The resulting metadata array
+     */
+    public static Metadata[] addIfAbsent(Metadata[] metadata, Metadata... toAdd) {
+        if (null == metadata) {
+            return toAdd;
+        }
+
+        if (toAdd == null || toAdd.length == 0) {
+            return metadata;
+        }
+
+        int metadataLength = metadata.length;
+        if (toAdd.length == 1) {
+            // Add exactly one field
+            Metadata fieldToAdd = toAdd[0];
+            for (Metadata field : metadata) {
+                if (field == fieldToAdd) {
+                    return metadata;
+                }
+            }
+
+            Metadata[] copy = new Metadata[metadataLength + 1];
+            System.arraycopy(metadata, 0, copy, 0, metadataLength);
+            copy[metadataLength] = fieldToAdd;
+            return copy;
+        }
+
+        // Add multiple fields
+        List<Metadata> absent = null;
+        for (Metadata fieldToAdd : toAdd) {
+            boolean found = false;
+            for (int i = metadataLength; !found && i-- > 0;) {
+                if (metadata[i] == fieldToAdd) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                if (null == absent) {
+                    absent = new ArrayList<Metadata>(toAdd.length);
+                }
+                absent.add(fieldToAdd);
+            }
+        }
+        if (null == absent) {
+            return metadata;
+        }
+
+        int numOfAbsent = absent.size();
+        Metadata[] copy = new Metadata[metadataLength + numOfAbsent];
+        System.arraycopy(metadata, 0, copy, 0, metadataLength);
+        for (int i = 0; i < numOfAbsent; i++) {
+            copy[metadataLength + i] = absent.get(i);
+        }
+        return copy;
+    }
+
+    /**
+     * Adds given metadata fields to specified metadata array if absent.
+     *
+     * @param metadata The metadata array to enhance
+     * @param toAdd The metadata fields to add
+     * @return The resulting metadata array
+     * @throws IllegalArgumentException If metadata is <code>null</code>
+     */
+    public static <C extends Collection<Metadata>> C addIfAbsent(C metadata, Metadata... toAdd) {
+        if (null == metadata) {
+            throw new IllegalArgumentException("metadata must not be null");
+        }
+
+        if (toAdd == null || toAdd.length == 0) {
+            return metadata;
+        }
+
+        if (toAdd.length == 1) {
+            // Add exactly one field
+            Metadata fieldToAdd = toAdd[0];
+            for (Metadata field : metadata) {
+                if (field == fieldToAdd) {
+                    return metadata;
+                }
+            }
+
+            metadata.add(fieldToAdd);
+            return metadata;
+        }
+
+        // Add multiple fields
+        for (Metadata fieldToAdd : toAdd) {
+            boolean found = false;
+            for (Iterator<Metadata> it = metadata.iterator(); !found && it.hasNext(); ) {
+                Metadata field = it.next();
+                if (field == fieldToAdd) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                metadata.add(fieldToAdd);
+            }
+        }
+        return metadata;
     }
 
 }

@@ -59,27 +59,41 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.8.1
  */
- final class ProcessorThreadFactory implements ThreadFactory {
+public final class ProcessorThreadFactory implements ThreadFactory {
 
     private final AtomicInteger threadNumber;
     private final String namePrefix;
+    private final boolean supportMDC;
 
     /**
      * Initializes a new {@link ProcessorThreadFactory}.
      *
      * @param name The name prefix; e.g. <code>"MyThread"</code>
+     * @param supportMDC Whether to support MDC log properties; otherwise MDC will be cleared prior to each log output
      */
-    ProcessorThreadFactory(String name) {
+    public ProcessorThreadFactory(String name, boolean supportMDC) {
         super();
+        this.supportMDC = supportMDC;
         threadNumber = new AtomicInteger();
         this.namePrefix = null == name ? "ProcessorThread-" : new StringBuilder(name).append('-').toString();
     }
 
     @Override
     public Thread newThread(Runnable r) {
-        final Thread t = new Thread(r, getThreadName(threadNumber.incrementAndGet(), namePrefix));
+        final Thread t = supportMDC ? new PseudoOXThread(r, getThreadName(getThreadNumber(), namePrefix)) : new Thread(r, getThreadName(getThreadNumber(), namePrefix));
         t.setUncaughtExceptionHandler(ProcessorUncaughtExceptionhandler.getInstance());
         return t;
+    }
+
+    private int getThreadNumber() {
+        int number;
+        do {
+            number = threadNumber.incrementAndGet();
+            if (number > 0) {
+                return number;
+            }
+        } while (!threadNumber.compareAndSet(number, 0));
+        return threadNumber.incrementAndGet();
     }
 
     private static String getThreadName(int threadNumber, String namePrefix) {

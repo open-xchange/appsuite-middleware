@@ -51,59 +51,77 @@ package com.openexchange.groupware.infostore.utils;
 
 public interface MetadataSwitcher {
 
-	public Object lastModified();
+	Object lastModified();
 
-	public Object creationDate();
+	Object creationDate();
 
-	public Object modifiedBy();
+	Object modifiedBy();
 
-	public Object folderId();
+	Object folderId();
 
-	public Object title();
+	Object title();
 
-	public Object version();
+	Object version();
 
-	public Object content();
+	Object content();
 
-	public Object id();
+	Object id();
 
-	public Object fileSize();
+	Object fileSize();
 
-	public Object description();
+	Object description();
 
-	public Object url();
+	Object url();
 
-	public Object createdBy();
+	Object createdBy();
 
-	public Object fileName();
+	Object fileName();
 
-	public Object fileMIMEType();
+	Object fileMIMEType();
 
-	public Object sequenceNumber();
+	Object sequenceNumber();
 
-	public Object categories();
+	Object categories();
 
-	public Object lockedUntil();
+	Object lockedUntil();
 
-	public Object fileMD5Sum();
+	Object fileMD5Sum();
 
-	public Object versionComment();
+	Object versionComment();
 
-	public Object currentVersion();
+	Object currentVersion();
 
-	public Object colorLabel();
+	Object colorLabel();
 
-	public Object filestoreLocation();
+	Object filestoreLocation();
 
-    public Object lastModifiedUTC();
+    Object lastModifiedUTC();
 
-    public Object numberOfVersions();
+    Object numberOfVersions();
 
-    public Object meta();
+    Object meta();
 
     Object objectPermissions();
 
     Object shareable();
 
     Object origin();
+
+    Object captureDate();
+
+    Object geolocation();
+
+    Object width();
+
+    Object height();
+
+    Object cameraModel();
+
+    Object isoSpeed();
+
+    Object mediaMeta();
+
+    Object mediaStatus();
+
+    Object mediaDate();
 }

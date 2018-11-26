@@ -475,7 +475,6 @@ specific field data of single or multiple objects.
 |:----|:------|:------|:-------|
 |108 | object_permissions | Array | Each element is an object described in [Object Permission object](#object-permission-object) (preliminary, available with 7.8.0). |
 |109 | shareable | Boolean | (read-only) Indicates if the item can be shared (preliminary, available with 7.8.0). |
-|712 | origin | String | The file's origin path. Since 7.10.0. |
 |700 | title | String | Title |
 |701 | url | String | Link/URL |
 |702 | filename | String | Displayed filename of the document. |
@@ -488,6 +487,16 @@ specific field data of single or multiple objects.
 |709 | version_comment | String | A version comment is used to file a changelog for the file. |
 |710 | current_version | Boolean | “true” if this version is the current version “false” otherwise. Note: This is not writeable |
 |711 | number_of_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |
+|712 | origin | String | The file's origin path. Since 7.10.0. |
+|713 | capture_date | Time | The capture/creation date of the media resource. Since 7.10.2. |
+|714 | geolocation | String | The geo location of the media resource as a parenthesized latitude and longitude pair. Since 7.10.2. |
+|715 | width | Number | Thhe width of the media resource. Since 7.10.2. |
+|716 | height | Number | The height of the media resource. Since 7.10.2. |
+|717 | camera_model | Time | The name of the camera model. Since 7.10.2. |
+|718 | iso_speed | Number | The ISO speed value of a camera or input device. Since 7.10.2. |
+|719 | media_meta | JSON | The meta information for the media resource. Since 7.10.2. |
+|720 | media_status | String | The status of parsing/analyzing media meta-data from the media resource. Since 7.10.2. |
+|721 | media_date | Time | The media date represents the capture date, which falls-back to last-modified date if there is capture date. Useful for sorting. Since 7.10.2. |
 |7010 | com.openexchange.share.extendedObjectPermissions | Array | Each element is an object described in [Extended object permission object](#extended-object-permission-object). Read Only, Since 7.8.0.|
 |7020 | com.openexchange.realtime.resourceID | String | The resource identifier for the infoitem for usage within the realtime component. Read Only, Since 7.8.0. |
 |7030 | com.openexchange.file.storage.mail.mailMetadata | Object | Additional metadata for items in the mail file storage. Read Only. |

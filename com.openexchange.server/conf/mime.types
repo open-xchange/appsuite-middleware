@@ -637,6 +637,7 @@ video/vnd.mpegurl mxu m4u
 video/vnd.rn-realvideo rv
 video/vnd.vivo viv
 video/x-fli fli
+video/x-matroska mkv
 video/x-ms-asf asf asx
 video/x-ms-wm wm
 video/x-ms-wmv wmv

@@ -50,6 +50,8 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.tools.sql.DBUtils.getStatement;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,11 +61,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -74,7 +78,10 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
@@ -187,6 +194,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final Object[] args;
     private final DBProvider provider;
     private final String query;
@@ -231,18 +240,18 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
     @Override
     public boolean hasNext() throws OXException {
-        if(!queried) {
+        if (false == queried) {
             query();
         }
-        if(exception != null) {
+        if (exception != null) {
             return true;
         }
-        if(initNext) {
+        if (initNext) {
             Statement stmt = null;
             try {
                 stmt = rs.getStatement();
                 next = rs.next();
-                if(!next) {
+                if (!next) {
                     close();
                 }
             } catch (final SQLException e) {
@@ -274,34 +283,32 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
     private void query() {
         queried = true;
-        initNext=true;
+        initNext = true;
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         boolean close = true;
-        try{
+        try {
             con = provider.getReadConnection(ctx);
             stmt = con.prepareStatement(query);
             int i = 1;
-            for(final Object arg : args) {
-                stmt.setObject(i++,arg);
+            for (Object arg : args) {
+                stmt.setObject(i++, arg);
             }
-            LOG.trace("{}", stmt);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("{}", stmt.toString());
+            }
             rs = stmt.executeQuery();
-            close = false;
             this.stmt = stmt;
             this.rs = rs;
             this.con = con;
-        } catch (final SQLException x) {
-            if(stmt != null) {
-                Databases.closeSQLStuff(null, stmt);
-            }
-            if(con != null) {
-                provider.releaseReadConnection(ctx, con);
-            }
-            this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt, query));
-        } catch (final OXException e) {
-            this.exception =e;
+            close = false;
+        } catch (OXException e) {
+            this.exception = e;
+        } catch (SQLException x) {
+            this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(x, Databases.getSqlStatement(stmt, query));
+        } catch (RuntimeException x) {
+            this.exception = OXException.general(x.getMessage(), x);
         } finally {
             if (close) {
                 Databases.closeSQLStuff(rs, stmt);
@@ -322,65 +329,82 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     private DocumentMetadata getDocument() throws OXException {
-        final DocumentMetadata dm = new DocumentMetadataImpl();
-        final SetSwitch set = new SetSwitch(dm);
-        final StringBuilder sb = new StringBuilder(100);
-        SetValues: for (final Metadata m : fields) {
+        DocumentMetadata dm = new DocumentMetadataImpl();
+        SetSwitch set = new SetSwitch(dm);
+
+        StringBuilder sb = new StringBuilder(64);
+        NextMetadata: for (final Metadata m : fields) {
             if (m == Metadata.CURRENT_VERSION_LITERAL) {
-                Statement stmt = null;
                 try {
-                    stmt = rs.getStatement();
                     dm.setIsCurrentVersion(rs.getBoolean("current_version"));
-                    continue SetValues;
-                } catch (final SQLException e) {
-                    throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                } catch (SQLException e) {
+                    throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "Failed to query \"current_version\" from result set.");
                 }
-            }
-            final Table t = chooser.choose(m);
-            final String colName = (String) m.doSwitch(t.getFieldSwitcher());
-            if (colName == null) {
-                continue;
-            }
-            Statement stmt = null;
-            try {
-                stmt = rs.getStatement();
+            } else {
+                // Determine column name for current field
+                Table t = chooser.choose(m);
+                String colName = (String) m.doSwitch(t.getFieldSwitcher());
+                if (colName == null) {
+                    continue NextMetadata;
+                }
 
-                final String column = sb.append(t.getTablename()).append('.').append(colName).toString();
-                if (m == Metadata.META_LITERAL) {
-                    final InputStream jsonBlobStream = rs.getBinaryStream(column);
-                    if (!rs.wasNull() && null != jsonBlobStream) {
-                        try {
-                            set.setValue(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
-                        } catch (final JSONException e) {
-                            LOG.warn("Failed to read metadata from document {} in folder {}", dm.getId(), dm.getFolderId(), e);
-                            set.setValue(null);
-                        } finally {
-                            Streams.close(jsonBlobStream);
-                        }
-                    } else {
-                        set.setValue(null);
-                    }
-                } else if (m == Metadata.ORIGIN_LITERAL) {
-                    String sFolderPath = rs.getString(column);
-                    if (rs.wasNull()) {
-                        set.setValue(null);
-                    } else {
-                        set.setValue(InfostoreFolderPath.parseFrom(sFolderPath));
-                    }
-                } else {
-                    set.setValue(process(m, rs.getObject(column)));
-                }
+                String column = sb.append(t.getTablename()).append('.').append(colName).toString();
                 sb.setLength(0);
-            } catch (final SQLException e) {
-                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                try {
+                    switch (m.getId()) {
+                        case Metadata.META:
+                            //$FALL-THROUGH$
+                        case Metadata.MEDIA_META:
+                            // If the value is SQL NULL, the result is null
+                            set.setValue(readMetaFrom(rs.getBinaryStream(column), m, dm));
+                            break;
+                        case Metadata.ORIGIN:
+                            String sFolderPath = rs.getString(column);
+                            if (rs.wasNull()) {
+                                set.setValue(null);
+                            } else {
+                                set.setValue(InfostoreFolderPath.parseFrom(sFolderPath));
+                            }
+                            break;
+                        case Metadata.GEOLOCATION:
+                            // If the value is SQL NULL, the result is null
+                            String point = rs.getString(colName);
+                            if (null != point) {
+                                // POINT(28.093833333333333 -16.735833333333336)
+                                set.setValue(GeoLocation.parseSqlPoint(point));
+                            } else {
+                                set.setValue(null);
+                            }
+                            break;
+                        case Metadata.MEDIA_STATUS:
+                            String status = rs.getString(column);
+                            if (!rs.wasNull() && null != status) {
+                                MediaStatus mediaStatus = MediaStatus.valueFor(status);
+                                set.setValue(null == mediaStatus ? MediaStatus.none() : mediaStatus);
+                            } else {
+                                set.setValue(MediaStatus.none());
+                            }
+                            break;
+                        case Metadata.CAPTURE_DATE:
+                            long date = rs.getLong(column);
+                            if (!rs.wasNull()) {
+                                set.setValue(new Date(date));
+                            } else {
+                                set.setValue(null);
+                            }
+                            break;
+                        default:
+                            set.setValue(process(m, rs.getObject(column)));
+                            break;
+                    }
+                } catch (final SQLException e) {
+                    throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sb.append("Failed to query \"").append(column).append("\" from result set.").toString());
+                }
+                m.doSwitch(set);
             }
-            m.doSwitch(set);
         }
 
-        if (cutomizer != null) {
-            return cutomizer.handle(dm);
-        }
-        return dm;
+        return cutomizer != null ? cutomizer.handle(dm) : dm;
     }
 
     private Object process(final Metadata m, final Object object) {
@@ -412,6 +436,80 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             return result;
         } finally {
             close();
+        }
+    }
+
+    /**
+     * Reads metadata from specified {@link java.sql.Types#BLOB SQL <code>BLOB</code>} input stream providing JSON data.
+     *
+     * @param jsonBlobStream The SQL <code>BLOB</code> input stream providing JSON data
+     * @param m The metadata field
+     * @param dm The document metadata, which is currently filled
+     * @return The resulting metadata as a map
+     */
+    public static Map<String, Object> readMetaFrom(InputStream jsonBlobStream, Metadata m, DocumentMetadata dm) {
+        if (null == jsonBlobStream) {
+            return null;
+        }
+
+        String jsonString = null;
+        try {
+            if (jsonBlobStream instanceof ByteArrayInputStream) {
+                jsonString = Charsets.toAsciiString((ByteArrayInputStream) jsonBlobStream);
+                if (Strings.isEmpty(jsonString) || "null".equalsIgnoreCase(jsonString)) {
+                    return null;
+                }
+                return new JSONObject(jsonString).asMap();
+            }
+
+            jsonBlobStream = getNonEmptyMeta(jsonBlobStream, m, dm);
+            if (null == jsonBlobStream) {
+                return null;
+            }
+            return new JSONObject(new AsciiReader(jsonBlobStream)).asMap();
+        } catch (JSONException e) {
+            if (null != jsonString && !LOG.isDebugEnabled()) {
+                jsonString = null;
+            }
+            logFailedMetaRead(jsonString, m, dm, e);
+            return null;
+        } finally {
+            Streams.close(jsonBlobStream);
+        }
+    }
+
+    /**
+     * Safely checks if specified stream is empty.
+     * <p>
+     * If <code>null</code> is returned, the given stream is ensured to be closed.
+     */
+    private static InputStream getNonEmptyMeta(InputStream is, Metadata m, DocumentMetadata dm) {
+        InputStream toCheck = is;
+        try {
+            InputStream nonEmpty = Streams.getNonEmpty(toCheck);
+            toCheck = null;
+            return nonEmpty;
+        } catch (IOException e) {
+            logFailedMetaRead(null, m, dm, e);
+            return null;
+        } finally {
+            Streams.close(toCheck);
+        }
+    }
+
+    private static void logFailedMetaRead(String optCorruptJson, Metadata m, DocumentMetadata dm, Exception e) {
+        if (m == Metadata.MEDIA_META_LITERAL) {
+            if (null == optCorruptJson) {
+                LOG.warn("Failed to read media metadata from document {} in folder {}", dm.getId(), dm.getFolderId(), e);
+            } else {
+                LOG.warn("Failed to read media metadata from document {} in folder {}:{}{}", dm.getId(), dm.getFolderId(), Strings.getLineSeparator(), optCorruptJson, e);
+            }
+        } else {
+            if (null == optCorruptJson) {
+                LOG.warn("Failed to read metadata from document {} in folder {}", dm.getId(), dm.getFolderId(), e);
+            } else {
+                LOG.warn("Failed to read metadata from document {} in folder {}:{}{}", dm.getId(), dm.getFolderId(), Strings.getLineSeparator(), optCorruptJson, e);
+            }
         }
     }
 

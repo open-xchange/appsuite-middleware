@@ -55,6 +55,8 @@ import java.util.Map;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.java.GeoLocation;
 
 /**
  * {@link FileFieldSet}
@@ -250,6 +252,73 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         } else {
             md(args).setOrigin(null);
         }
+        return null;
+    }
+
+    @Override
+    public Object captureDate(Object... args) {
+        Date date = date(1, args);
+        if (date != null) {
+            md(args).setCaptureDate(date);
+        }
+        return ret(args);
+    }
+
+    @Override
+    public Object geolocation(Object... args) {
+        if (args[1] instanceof GeoLocation) {
+            md(args).setGeoLocation((GeoLocation) args[1]);
+        } else {
+            md(args).setGeoLocation(null);
+        }
+        return null;
+    }
+
+    @Override
+    public Object width(Object... args) {
+        md(args).setWidth(longValue(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object height(Object... args) {
+        md(args).setHeight(longValue(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object cameraModel(Object... args) {
+        md(args).setCameraModel(string(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object isoSpeed(Object... args) {
+        md(args).setIsoSpeed(longValue(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object mediaMeta(Object... args) {
+        if (args[1] instanceof Map<?,?>) {
+            md(args).setMediaMeta((Map<String, Object>) args[1]);
+        }
+        return null;
+    }
+
+    @Override
+    public Object mediaStatus(Object[] args) {
+        if (args[1] instanceof MediaStatus) {
+            md(args).setMediaStatus((MediaStatus) args[1]);
+        } else {
+            md(args).setMediaStatus(null);
+        }
+        return null;
+    }
+
+    @Override
+    public Object mediaDate(Object[] args) {
+        // Nothing to do
         return null;
     }
 

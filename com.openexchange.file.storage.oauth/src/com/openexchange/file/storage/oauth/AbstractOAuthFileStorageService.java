@@ -230,7 +230,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
@@ -241,7 +241,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
@@ -298,7 +298,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Fetches the optional updateScopes session parameter and evaluates it's value
-     * 
+     *
      * @param session the session
      * @return The value of the optional 'updateScopes' session parameter. Returns <code>true</code> as fall-back.
      */
@@ -341,13 +341,13 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
             }
             return manager.getAccount(accountId, session);
-        } else {
-            FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
-            if (null == manager) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
-            }
-            return manager.getAccount(accountId, session);
         }
+
+        FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
+        if (null == manager) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
+        }
+        return manager.getAccount(accountId, session);
     }
 
     /**
@@ -421,7 +421,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Retrieves a {@link Session} for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link Session} or <code>null</code> if none exists
@@ -444,7 +444,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Returns the {@link OAuthScope} for this provider
-     * 
+     *
      * @return the {@link OAuthScope} for this provider
      */
     protected abstract OAuthScope getScope();

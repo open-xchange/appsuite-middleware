@@ -9,6 +9,7 @@ properties:
   shareable:
     type: boolean
     description: (read-only) Indicates if the item can be shared.
+    readOnly: true
   title:
     type: string
     description: The title.
@@ -49,6 +50,47 @@ properties:
   number_of_versions:
     type: integer
     description: 'The number of all versions of the item. Note: This is not writeable.'
+    readOnly: true
+  capture_date:
+    type: integer
+    format: int64
+    description: Date and time when media file was captured/recorded
+    readOnly: true
+  geolocation:
+    type: string
+    description: The geo location associated with the media resource as latitude and longitude pair; e.g. "(45 23)"
+    readOnly: true
+  width:
+    type: integer
+    format: int64
+    description: The width of the media resource
+    readOnly: true
+  height:
+    type: integer
+    format: int64
+    description: The height of the media resource
+    readOnly: true
+  iso_speed:
+    type: integer
+    format: int64
+    description: The ISO speed value of a camera or input device associated with the media resource
+    readOnly: true
+  camera_model:
+    type: string
+    description: The name of the camera model associated with the media resource
+    readOnly: true
+  media_meta:
+    type: object
+    description: Contains metadata extracted from the media resource
+    readOnly: true
+  media_status:
+    type: string
+    description: Represents the status for the process of extracting metadata from a media resource
+    readOnly: true
+  media_date:
+    type: integer
+    format: int64
+    description: A special field, which prefers the capture date and falls-back to last-modified date if absent
     readOnly: true
   com.openexchange.share.extendedObjectPermissions:
     type: array

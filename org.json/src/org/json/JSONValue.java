@@ -50,6 +50,7 @@
 package org.json;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.Writer;
 
@@ -99,6 +100,15 @@ public interface JSONValue extends Serializable {
      * @throws JSONException If writing the JSON object fails (e.g. I/O error)
      */
     Writer write(Writer writer, boolean asciiOnly) throws JSONException;
+
+    /**
+     * Gets the stream containing this JSON value's raw data.
+     *
+     * @param asciiOnly <code>true</code> to only write ASCII characters; otherwise <code>false</code>
+     * @return The stream
+     * @throws JSONException If serializing the JSON object fails (e.g. I/O error)
+     */
+    InputStream getStream(boolean asciiOnly) throws JSONException;
 
     /**
      * Resets this JSON value for re-use.

@@ -60,6 +60,7 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -92,7 +93,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     /**
      * Initializes a new {@link GoogleDriveFolderAccess}.
      */
-    public GoogleDriveFolderAccess(final GoogleDriveOAuthAccess googleDriveAccess, final FileStorageAccount account, final Session session) throws OXException {
+    public GoogleDriveFolderAccess(final @NonNull GoogleDriveOAuthAccess googleDriveAccess, final @NonNull FileStorageAccount account, final @NonNull Session session) throws OXException {
         super(googleDriveAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
@@ -107,10 +108,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public boolean exists(String folderId) throws OXException {
-        return exists(folderId, 0);
-    }
-
-    private boolean exists(String folderId, int retryCount) throws OXException {
         return new BackOffPerformer<Boolean>(googleDriveAccess, account, session) {
 
             @Override
@@ -125,10 +122,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        return getFolder(folderId, 0);
-    }
-
-    private FileStorageFolder getFolder(String folderId, int retryCount) throws OXException {
         return new BackOffPerformer<FileStorageFolder>(googleDriveAccess, account, session) {
 
             @Override
@@ -163,10 +156,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
-        return getSubfolders(parentIdentifier, all, 0);
-    }
-
-    private FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all, int retryCount) throws OXException {
         return new BackOffPerformer<FileStorageFolder[]>(googleDriveAccess, account, session) {
 
             @Override
@@ -222,10 +211,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
-        return createFolder(toCreate, autoRename, 0);
-    }
-
-    private String createFolder(FileStorageFolder toCreate, boolean autorename, int retryCount) throws OXException {
         return new BackOffPerformer<String>(googleDriveAccess, account, session) {
 
             @Override
@@ -235,7 +220,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
                 String baseName = toCreate.getName();
 
                 NameBuilder name = new NameBuilder(baseName);
-                if (autorename) {
+                if (autoRename) {
                     // Duplicate name needs to be explicitly checked since Google Drive allows multiple folders with the same name next to each other
                     {
                         com.google.api.services.drive.Drive.Files.List list = drive.files().list();
@@ -301,10 +286,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
-        return moveFolder(folderId, newParentId, newName, autoRename, 0);
-    }
-
-    private String moveFolder(String folderId, String newParentId, String newName, boolean autoRename, int retryCount) throws OXException {
         return new BackOffPerformer<String>(googleDriveAccess, account, session) {
 
             @Override
@@ -360,10 +341,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
-        return renameFolder(folderId, newName, 0);
-    }
-
-    private String renameFolder(String folderId, String newName, int retryCount) throws OXException {
         return new BackOffPerformer<String>(googleDriveAccess, account, session) {
 
             @Override
@@ -411,10 +388,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        return deleteFolder(folderId, hardDelete, 0);
-    }
-
-    private String deleteFolder(String folderId, boolean hardDelete, int retryCount) throws OXException {
         return new BackOffPerformer<String>(googleDriveAccess, account, session) {
 
             @Override
@@ -440,10 +413,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        clearFolder(folderId, hardDelete, 0);
-    }
-
-    private void clearFolder(String folderId, boolean hardDelete, int retryCount) throws OXException {
         new BackOffPerformer<Void>(googleDriveAccess, account, session) {
 
             @Override
@@ -478,10 +447,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
-        return getPath2DefaultFolder(folderId, 0);
-    }
-
-    private FileStorageFolder[] getPath2DefaultFolder(String folderId, int retryCount) throws OXException {
         return new BackOffPerformer<FileStorageFolder[]>(googleDriveAccess, account, session) {
 
             @Override
@@ -510,10 +475,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
-        return getStorageQuota(folderId, 0);
-    }
-
-    private Quota getStorageQuota(String folderId, int retryCount) throws OXException {
         return new BackOffPerformer<Quota>(googleDriveAccess, account, session) {
 
             @Override

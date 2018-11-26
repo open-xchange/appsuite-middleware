@@ -74,17 +74,19 @@ import com.openexchange.session.Session;
 public final class DropboxFileStorageService extends AbstractOAuthFileStorageService implements RootFolderPermissionsAware {
 
     /**
-     * Initializes a new {@link BoxFileStorageService}.
+     * Initializes a new {@link DropboxFileStorageService}.
+     * 
+     * @param services The {@link ServiceLookup} 
      */
     public DropboxFileStorageService(ServiceLookup services) {
         super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID);
     }
 
     /**
-     * Initialises a new {@link BoxFileStorageService}.
+     * Initialises a new {@link DropboxFileStorageService}.
      *
-     * @param services
-     * @param compositeFileStorageAccountManagerProvider
+     * @param services The {@link ServiceLookup}
+     * @param compositeFileStorageAccountManagerProvider The {@link CompositeFileStorageAccountManagerProvider}
      */
     public DropboxFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
         super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID, compositeFileStorageAccountManagerProvider);

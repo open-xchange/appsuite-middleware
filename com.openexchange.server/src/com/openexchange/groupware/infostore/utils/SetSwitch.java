@@ -50,230 +50,249 @@
 /**
  *
  */
+
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
+import com.openexchange.java.GeoLocation;
 
-public class SetSwitch implements MetadataSwitcher{
+public class SetSwitch implements MetadataSwitcher {
 
-	public static void copy(final DocumentMetadata source, final DocumentMetadata dest) {
-		final SetSwitch sw = new SetSwitch(dest);
-		final GetSwitch gw = new GetSwitch(source);
-		for(final Metadata metadata : Metadata.VALUES) {
-			sw.setValue(metadata.doSwitch(gw));
-			metadata.doSwitch(sw);
-		}
-	}
+    public static void copy(final DocumentMetadata source, final DocumentMetadata dest) {
+        final SetSwitch sw = new SetSwitch(dest);
+        final GetSwitch gw = new GetSwitch(source);
+        for (final Metadata metadata : Metadata.VALUES) {
+            sw.setValue(metadata.doSwitch(gw));
+            metadata.doSwitch(sw);
+        }
+    }
 
-	private Object value;
-	private final DocumentMetadata impl;
+    private Object                 value;
+    private final DocumentMetadata impl;
 
-	public SetSwitch(final DocumentMetadata impl) {
-		this.impl = impl;
-	}
+    public SetSwitch(final DocumentMetadata impl) {
+        this.impl = impl;
+    }
 
-	public void setValue(final Object value) {
-		this.value = value;
-	}
+    public void setValue(final Object value) {
+        this.value = value;
+    }
 
-	@Override
-	public Object meta() {
-	    if(null == value) { return null; }
-        impl.setMeta((Map<String, Object>)value);
+    @Override
+    public Object meta() {
+        if (null != value) {
+            impl.setMeta((Map<String, Object>) value);
+        }
         return null;
-	}
+    }
 
-	@Override
+    @Override
     public Object lastModified() {
-        if(null == value) { return null; }
-        impl.setLastModified((Date)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setLastModified((Date) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object creationDate() {
-        if(null == value) { return null; }
-        impl.setCreationDate((Date)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setCreationDate((Date) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object modifiedBy() {
-		nullNumber();
-		impl.setModifiedBy(((Integer)value).intValue());
-		return null;
-	}
+        nullNumber();
+        impl.setModifiedBy(((Integer) value).intValue());
+        return null;
+    }
 
-	@Override
+    @Override
     public Object folderId() {
-		nullNumberAsLong();
-		impl.setFolderId(((Long)value).longValue());
-		return null;
-	}
+        nullNumberAsLong();
+        impl.setFolderId(((Long) value).longValue());
+        return null;
+    }
 
-	@Override
+    @Override
     public Object title() {
-        if(null == value) { return null; }
-        impl.setTitle((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setTitle((String) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object version() {
-		nullNumber();
-        impl.setVersion(((Integer)value).intValue());
-		return null;
-	}
+        nullNumber();
+        impl.setVersion(((Integer) value).intValue());
+        return null;
+    }
 
-	@Override
+    @Override
     public Object content() {
-		//impl.setContent((String)value);
-		return null;
-	}
+        //impl.setContent((String)value);
+        return null;
+    }
 
-	@Override
+    @Override
     public Object id() {
-		nullNumber();
-        impl.setId(((Integer)value).intValue());
-		return null;
-	}
+        nullNumber();
+        impl.setId(((Integer) value).intValue());
+        return null;
+    }
 
-	@Override
+    @Override
     public Object fileSize() {
-		nullNumberAsLong();
-		impl.setFileSize(((Long)value).longValue());
-		return null;
-	}
+        nullNumberAsLong();
+        impl.setFileSize(((Long) value).longValue());
+        return null;
+    }
 
-	@Override
+    @Override
     public Object description() {
-        if(null == value) { return null; }
-        impl.setDescription((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setDescription((String) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object url() {
-        if(null == value) { return null; }
-        impl.setURL((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setURL((String) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object createdBy() {
-		nullNumber();
-		impl.setCreatedBy(((Integer)value).intValue());
-		return null;
-	}
+        nullNumber();
+        impl.setCreatedBy(((Integer) value).intValue());
+        return null;
+    }
 
-	@Override
+    @Override
     public Object fileName() {
-        if(null == value) { return null; }
-        impl.setFileName((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setFileName((String) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object fileMIMEType() {
-        if(null == value) { return null; }
-        impl.setFileMIMEType((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setFileMIMEType((String) value);
+        }
+        return null;
+    }
 
-	@Override
-	public Object sequenceNumber() {
-	    if(null == value) { return null; }
-	    impl.setSequenceNumber((Long)value);
-	    return null;
-	}
+    @Override
+    public Object sequenceNumber() {
+        if (null != value) {
+            impl.setSequenceNumber(((Long) value).longValue());
+        }
+        return null;
+    }
 
-	@Override
-    public Object categories(){
-        if(null == value) { return null; }
-        impl.setCategories((String)value);
-		return null;
-	}
+    @Override
+    public Object categories() {
+        if (null != value) {
+            impl.setCategories((String) value);
+        }
+        return null;
+    }
 
-	@Override
-    public Object lockedUntil(){
-        if(null == value) { return null; }
-        impl.setLockedUntil((Date)value);
-		return null;
-	}
+    @Override
+    public Object lockedUntil() {
+        if (null != value) {
+            impl.setLockedUntil((Date) value);
+        }
+        return null;
+    }
 
-	@Override
-    public Object fileMD5Sum(){
-        if(null == value) { return null; }
-        impl.setFileMD5Sum((String)value);
-		return null;
-	}
+    @Override
+    public Object fileMD5Sum() {
+        if (null != value) {
+            impl.setFileMD5Sum((String) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object versionComment() {
-        if(null == value) { return null; }
-        impl.setVersionComment((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setVersionComment((String) value);
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object currentVersion() {
-        if(null == value) { return null; }
-        impl.setIsCurrentVersion(((Boolean)value).booleanValue());
-		return null;
-	}
+        if (null != value) {
+            impl.setIsCurrentVersion(((Boolean) value).booleanValue());
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public Object colorLabel() {
-		nullNumber();
-		impl.setColorLabel(((Integer)value).intValue());
-		return null;
-	}
+        nullNumber();
+        impl.setColorLabel(((Integer) value).intValue());
+        return null;
+    }
 
-	private void nullNumber() {
-		if(value == null) {
-			value = Integer.valueOf(0);
-		}
-	}
+    private void nullNumber() {
+        if (value == null) {
+            value = Integer.valueOf(0);
+        }
+    }
 
-	private void nullNumberAsLong() {
-		if(value == null) {
-			value = Long.valueOf(0);
-		}
-	}
+    private void nullNumberAsLong() {
+        if (value == null) {
+            value = Long.valueOf(0);
+        }
+    }
 
-	@Override
+    @Override
     public Object filestoreLocation() {
-        if(null == value) { return null; }
-        impl.setFilestoreLocation((String)value);
-		return null;
-	}
+        if (null != value) {
+            impl.setFilestoreLocation((String) value);
+        }
+        return null;
+    }
 
     @Override
     public Object lastModifiedUTC() {
-       return lastModified();
+        return lastModified();
     }
 
     @Override
     public Object numberOfVersions() {
-        impl.setNumberOfVersions(((Integer)value).intValue());
+        impl.setNumberOfVersions(((Integer) value).intValue());
         return null;
     }
 
     @Override
     public Object objectPermissions() {
-        impl.setObjectPermissions((List<ObjectPermission>)value);
+        impl.setObjectPermissions((List<ObjectPermission>) value);
         return null;
     }
 
     @Override
     public Object shareable() {
-        if(null == value) { return null; }
-        impl.setShareable(((Boolean)value).booleanValue());
+        if (null != value) {
+            impl.setShareable(((Boolean) value).booleanValue());
+        }
         return null;
     }
 
@@ -283,6 +302,75 @@ public class SetSwitch implements MetadataSwitcher{
             return null;
         }
         impl.setOriginFolderPath((InfostoreFolderPath) value);
+        return null;
+    }
+
+    @Override
+    public Object captureDate() {
+        if (null != value) {
+            impl.setCaptureDate((Date) value);
+        }
+        return null;
+    }
+
+    @Override
+    public Object geolocation() {
+        if (null != value) {
+            impl.setGeoLocation((GeoLocation) value);
+        }
+        return null;
+    }
+
+    @Override
+    public Object width() {
+        if (null != value) {
+            impl.setWidth(((Number) value).longValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Object height() {
+        if (null != value) {
+            impl.setHeight(((Number) value).longValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Object cameraModel() {
+        if (null != value) {
+            impl.setCameraModel((String) value);
+        }
+        return null;
+    }
+
+    @Override
+    public Object isoSpeed() {
+        if (null != value) {
+            impl.setIsoSpeed(((Number) value).longValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Object mediaMeta() {
+        if (null != value) {
+            impl.setMediaMeta((Map<String, Object>) value);
+        }
+        return null;
+    }
+
+    @Override
+    public Object mediaStatus() {
+        if (null != value) {
+            impl.setMediaStatus((MediaStatus) value);
+        }
+        return null;
+    }
+
+    @Override
+    public Object mediaDate() {
         return null;
     }
 

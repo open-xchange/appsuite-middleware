@@ -69,10 +69,11 @@ public class ProcessorThreadPoolExecutor extends ThreadPoolExecutor {
      *
      * @param name The name prefix to use for associated threads
      * @param nThreads The number of threads in the pool
+     * @param supportMDC Whether to support MDC log properties; otherwise MDC will be cleared prior to each log output
      */
-    public ProcessorThreadPoolExecutor(String name, int nThreads) {
+    public ProcessorThreadPoolExecutor(String name, int nThreads, boolean supportMDC) {
         // See java.util.concurrent.Executors.newFixedThreadPool(int, ThreadFactory)
-        super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ProcessorThreadFactory(name));
+        super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ProcessorThreadFactory(name, supportMDC));
     }
 
     @Override

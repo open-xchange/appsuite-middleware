@@ -232,4 +232,34 @@ public class FieldCollectorVisitor implements SearchTermVisitor {
         handleTerm(term);
     }
 
+    @Override
+    public void visit(MediaDateTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(CaptureDateTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(IsoSpeedTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(WidthTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(HeightTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(CameraModelTerm term) throws OXException {
+        handleTerm(term);
+    }
+
 }

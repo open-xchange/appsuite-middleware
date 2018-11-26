@@ -53,7 +53,6 @@ import static com.openexchange.groupware.infostore.InfostoreSearchEngine.ASC;
 import static com.openexchange.groupware.infostore.InfostoreSearchEngine.DESC;
 import static com.openexchange.groupware.infostore.InfostoreSearchEngine.NOT_SET;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,28 +63,27 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.Databases;
 import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.java.AsciiReader;
-import com.openexchange.java.Streams;
+import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -690,6 +688,30 @@ public class SearchEngineImpl extends DBService {
                 case Metadata.ORIGIN:
                     retval.add("infostore.origin");
                     break Metadata2DBSwitch;
+                case Metadata.GEOLOCATION:
+                    retval.add("AsText(infostore_document.geolocation)");
+                    break Metadata2DBSwitch;
+                case Metadata.CAPTURE_DATE:
+                    retval.add("infostore_document.capture_date");
+                    break Metadata2DBSwitch;
+                case Metadata.WIDTH:
+                    retval.add("infostore_document.width");
+                    break Metadata2DBSwitch;
+                case Metadata.HEIGHT:
+                    retval.add("infostore_document.height");
+                    break Metadata2DBSwitch;
+                case Metadata.CAMERA_MODEL:
+                    retval.add("infostore_document.camera_model");
+                    break Metadata2DBSwitch;
+                case Metadata.ISO_SPEED:
+                    retval.add("infostore_document.iso_speed");
+                    break Metadata2DBSwitch;
+                case Metadata.MEDIA_META:
+                    retval.add("infostore_document.media_meta");
+                    break Metadata2DBSwitch;
+                case Metadata.MEDIA_STATUS:
+                    retval.add("infostore_document.media_status");
+                    break Metadata2DBSwitch;
             }
         }
         return (retval.toArray(new String[0]));
@@ -925,21 +947,61 @@ public class SearchEngineImpl extends DBService {
                         retval.setColorLabel(result.getInt(++columnIndex));
                         break;
                     case Metadata.META:
-                        final InputStream jsonBlobStream = result.getBinaryStream(++columnIndex);
-                        if (false == result.wasNull() && null != jsonBlobStream) {
-                            try {
-                                retval.setMeta(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
-                            } catch (JSONException e) {
-                                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-                            } finally {
-                                Streams.close(jsonBlobStream);
-                            }
-                        }
+                        retval.setMeta(InfostoreIterator.readMetaFrom(result.getBinaryStream(++columnIndex), metadata, retval));
                         break;
                     case Metadata.ORIGIN:
                         String sFolderPath = result.getString(++columnIndex);
                         if (false == result.wasNull() &&  null != sFolderPath) {
                             retval.setOriginFolderPath(InfostoreFolderPath.parseFrom(sFolderPath));
+                        }
+                        break;
+                    case Metadata.CAPTURE_DATE:
+                        long captureDate = result.getLong(++columnIndex);
+                        retval.setCaptureDate(result.wasNull() ? null : new Date(captureDate));
+                        break;
+                    case Metadata.GEOLOCATION:
+                        // If the value is SQL NULL, the result is null
+                        String point = result.getString(++columnIndex);
+                        if (null != point) {
+                            retval.setGeoLocation(GeoLocation.parseSqlPoint(point));
+                        } else {
+                            retval.setGeoLocation(null);
+                        }
+                        break;
+                    case Metadata.WIDTH:
+                        long width = result.getLong(++columnIndex);
+                        if (!result.wasNull()) {
+                            retval.setWidth(width);
+                        }
+                        break;
+                    case Metadata.HEIGHT:
+                        long height = result.getLong(++columnIndex);
+                        if (!result.wasNull()) {
+                            retval.setHeight(height);
+                        }
+                        break;
+                    case Metadata.ISO_SPEED:
+                        long duration = result.getLong(++columnIndex);
+                        if (!result.wasNull()) {
+                            retval.setIsoSpeed(duration);
+                        }
+                        break;
+                    case Metadata.CAMERA_MODEL:
+                        String cameraModel = result.getString(++columnIndex);
+                        if (false == result.wasNull() && null != cameraModel) {
+                            retval.setCameraModel(cameraModel);
+                        }
+                        break;
+                    case Metadata.MEDIA_META:
+                        retval.setMediaMeta(InfostoreIterator.readMetaFrom(result.getBinaryStream(++columnIndex), metadata, retval));
+                        break;
+                    case Metadata.MEDIA_STATUS:
+                        String status = result.getString(++columnIndex);
+                        if (!result.wasNull() && null != status) {
+                            MediaStatus mediaStatus = MediaStatus.valueFor(status);
+                            retval.setMediaStatus(null == mediaStatus ? MediaStatus.none() : mediaStatus);
+                        } else {
+                            retval.setMediaStatus(MediaStatus.none());
                         }
                         break;
                     default:

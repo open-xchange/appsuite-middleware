@@ -295,5 +295,50 @@ public class FileFieldHandling {
             return handler.handle(Field.ORIGIN, args);
         }
 
+        @Override
+        public Object captureDate(Object... args) {
+            return handler.handle(Field.CAPTURE_DATE, args);
+        }
+
+        @Override
+        public Object geolocation(Object... args) {
+            return handler.handle(Field.GEOLOCATION, args);
+        }
+
+        @Override
+        public Object width(Object... args) {
+            return handler.handle(Field.WIDTH, args);
+        }
+
+        @Override
+        public Object height(Object... args) {
+            return handler.handle(Field.HEIGHT, args);
+        }
+
+        @Override
+        public Object cameraModel(Object... args) {
+            return handler.handle(Field.CAMERA_MODEL, args);
+        }
+
+        @Override
+        public Object isoSpeed(Object... args) {
+            return handler.handle(Field.ISO_SPEED, args);
+        }
+
+        @Override
+        public Object mediaMeta(Object... args) {
+            return handler.handle(Field.MEDIA_META, args);
+        }
+
+        @Override
+        public Object mediaStatus(Object[] args) {
+            return handler.handle(Field.MEDIA_STATUS, args);
+        }
+
+        @Override
+        public Object mediaDate(Object[] args) {
+            return handler.handle(Field.MEDIA_DATE, args);
+        }
+
     }
 }

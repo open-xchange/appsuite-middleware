@@ -65,250 +65,258 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
+/**
+ * Writes a <code>DocumentMetadata</code> to its JSON representation
+ *
+ * @deprecated Only used for testing
+ */
+@Deprecated
 public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 
-	public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreWriter.class);
+    public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreWriter.class);
 
-	public InfostoreWriter(final JSONWriter w) {
-		super(w);
-	}
+    public InfostoreWriter(final JSONWriter w) {
+        super(w);
+    }
 
-	public void writeMetadata(final SearchIterator<DocumentMetadata> iter, final Metadata[] cols, final TimeZone tz) throws JSONException, OXException {
-		jsonWriter.array();
+    public void writeMetadata(final SearchIterator<DocumentMetadata> iter, final Metadata[] cols, final TimeZone tz) throws JSONException, OXException {
+        jsonWriter.array();
 
-		fillArray(iter,cols,tz);
-		jsonWriter.endArray();
+        fillArray(iter, cols, tz);
+        jsonWriter.endArray();
 
-	}
+    }
 
+    @Override
+    protected void fillArray(final SearchIterator<DocumentMetadata> iter, final Object[] cols, final TimeZone tz) throws JSONException, OXException {
+        final WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
 
-	@Override
-	protected void fillArray(final SearchIterator<DocumentMetadata> iter, final Object[] cols, final TimeZone tz) throws JSONException, OXException {
-		final WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
+        //The array contains one array for every DocumentMetadata, and filled according to the requested columns
 
-		//The array contains one array for every DocumentMetadata, and filled according to the requested columns
+        while (iter.hasNext()) {
+            sw.setDocumentMetadata(iter.next());
+            jsonWriter.array();
+            for (final Metadata column : (Metadata[]) cols) {
+                column.doSwitch(sw);
+            }
+            jsonWriter.endArray();
+        }
+    }
 
-		while (iter.hasNext()) {
-			sw.setDocumentMetadata(iter.next());
-			jsonWriter.array();
-			for(final Metadata column : (Metadata[]) cols) {
-				column.doSwitch(sw);
-			}
-			jsonWriter.endArray();
-		}
-	}
-
-	public void write(final DocumentMetadata dm, final TimeZone tz) throws JSONException {
-		jsonWriter.object();
-
-		final WriterSwitch w = new WriterSwitch(jsonWriter, tz);
-		w.setDocumentMetadata(dm);
-		for(final Metadata metadata : Metadata.HTTPAPI_VALUES) {
-			w.setMetadata(metadata);
-			metadata.doSwitch(w);
-		}
-		jsonWriter.endObject();
-	}
-
-	public void writeLimited(final DocumentMetadata dm, final Metadata[] fields, final TimeZone tz) throws JSONException {
+    public void write(final DocumentMetadata dm, final TimeZone tz) throws JSONException {
         jsonWriter.object();
 
-        final WriterSwitch w = new WriterSwitch(jsonWriter, tz);
-        w.setDocumentMetadata(dm);
-        for(final Metadata metadata : fields) {
+        final WriterSwitch w = new WriterSwitch(jsonWriter, tz).setDocumentMetadata(dm);
+        for (Metadata metadata : Metadata.HTTPAPI_VALUES) {
             w.setMetadata(metadata);
             metadata.doSwitch(w);
         }
         jsonWriter.endObject();
     }
 
-	private static final class WriterSwitch implements MetadataSwitcher{
+    public void writeLimited(final DocumentMetadata dm, final Metadata[] fields, final TimeZone tz) throws JSONException {
+        jsonWriter.object();
 
-		private DocumentMetadata dm;
-		private final JSONWriter writer;
-		private final TimeZone tz;
+        final WriterSwitch w = new WriterSwitch(jsonWriter, tz).setDocumentMetadata(dm);
+        for (Metadata metadata : fields) {
+            w.setMetadata(metadata);
+            metadata.doSwitch(w);
+        }
+        jsonWriter.endObject();
+    }
 
-		public WriterSwitch(final JSONWriter writer, final TimeZone tz) {
-			this.writer = writer;
-			this.tz = tz;
-		}
+    private static final class WriterSwitch implements MetadataSwitcher {
 
-		public void setDocumentMetadata(final DocumentMetadata dm) {
-			this.dm = dm;
-		}
+        private DocumentMetadata dm;
+        private final JSONWriter writer;
+        private final TimeZone tz;
 
-		public void setMetadata(final Metadata current) {
-			try {
-				writer.key(current.getName());
-			} catch (final JSONException e) {
-				LOG.error("",e);
-			}
-		}
+        /**
+         * Initializes a new {@link WriterSwitch}.
+         */
+        WriterSwitch(JSONWriter writer, TimeZone tz) {
+            super();
+            this.writer = writer;
+            this.tz = tz;
+        }
 
-		@Override
-		public Object meta() {
-		    final Map<String, Object> meta = dm.getMeta();
-		    if (null != meta && !meta.isEmpty()) {
-		        try {
+        WriterSwitch setDocumentMetadata(final DocumentMetadata dm) {
+            this.dm = dm;
+            return this;
+        }
+
+        void setMetadata(final Metadata current) {
+            try {
+                writer.key(current.getName());
+            } catch (final JSONException e) {
+                LOG.error("", e);
+            }
+        }
+
+        @Override
+        public Object meta() {
+            final Map<String, Object> meta = dm.getMeta();
+            if (null != meta && !meta.isEmpty()) {
+                try {
                     writer.value(new JSONObject(meta));
                 } catch (final JSONException e) {
-                    LOG.error("",e);
+                    LOG.error("", e);
                 }
             } else {
                 writeNull();
             }
-		    return null;
-		}
+            return null;
+        }
 
-		@Override
+        @Override
         public Object lastModified() {
-			writeDate(dm.getLastModified());
-			return null;
-		}
+            writeDate(dm.getLastModified());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object creationDate() {
-			writeDate(dm.getCreationDate());
-			return null;
-		}
+            writeDate(dm.getCreationDate());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object modifiedBy() {
-			writeId(dm.getModifiedBy());
-			return null;
-		}
+            writeId(dm.getModifiedBy());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object folderId() {
-			writeId(dm.getFolderId());
-			return null;
-		}
+            writeId(dm.getFolderId());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object title() {
-			writeString(dm.getTitle());
-			return null;
-		}
+            writeString(dm.getTitle());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object version() {
-			writeInteger(dm.getVersion());
-			return null;
-		}
+            writeInteger(dm.getVersion());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object content() {
-			writeString(dm.getContent());
-			return null;
-		}
+            writeString(dm.getContent());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object id() {
-			writeId(dm.getId());
-			return null;
-		}
+            writeId(dm.getId());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object fileSize() {
-			writeInteger(dm.getFileSize());
-			return null;
-		}
+            writeInteger(dm.getFileSize());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object description() {
-			writeString(dm.getDescription());
-			return null;
-		}
+            writeString(dm.getDescription());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object url() {
-			writeString(dm.getURL());
-			return null;
-		}
+            writeString(dm.getURL());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object createdBy() {
-			writeId(dm.getCreatedBy());
-			return null;
-		}
+            writeId(dm.getCreatedBy());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object fileName() {
-			writeString(dm.getFileName());
-			return null;
-		}
+            writeString(dm.getFileName());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object fileMIMEType() {
-			writeString(dm.getFileMIMEType());
-			return null;
-		}
+            writeString(dm.getFileMIMEType());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object sequenceNumber() {
-			return null;
+            return null;
 
-		}
+        }
 
-		@Override
+        @Override
         public Object categories() {
-			final String categoriesString = dm.getCategories();
-			if(categoriesString==null || categoriesString.equals("")) {
-				try {
-					writer.array();
-					writer.endArray();
-				} catch (final JSONException e) {
-					LOG.debug("",e);
-				}
-				return null;
-			}
-			final String[] categoriesArray = Strings.splitByComma(categoriesString);
+            final String categoriesString = dm.getCategories();
+            if (categoriesString == null || categoriesString.equals("")) {
+                try {
+                    writer.array();
+                    writer.endArray();
+                } catch (final JSONException e) {
+                    LOG.debug("", e);
+                }
+                return null;
+            }
+            final String[] categoriesArray = Strings.splitByComma(categoriesString);
 
-			try {
-				writer.array();
-				for(final String cat : categoriesArray) {
-					writer.value(cat);
-				}
-				writer.endArray();
-			} catch (final JSONException e) {
-				LOG.debug("",e);
-			}
-			return null;
-		}
+            try {
+                writer.array();
+                for (final String cat : categoriesArray) {
+                    writer.value(cat);
+                }
+                writer.endArray();
+            } catch (final JSONException e) {
+                LOG.debug("", e);
+            }
+            return null;
+        }
 
-		@Override
+        @Override
         public Object versionComment() {
-			writeString(dm.getVersionComment());
-			return null;
-		}
+            writeString(dm.getVersionComment());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object currentVersion() {
-			writeBoolean(dm.isCurrentVersion());
-			return null;
-		}
+            writeBoolean(dm.isCurrentVersion());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object colorLabel() {
-			writeInteger(dm.getColorLabel());
-			return null;
-		}
+            writeInteger(dm.getColorLabel());
+            return null;
+        }
 
-		@Override
+        @Override
         public Object lockedUntil() {
-			if(dm.getLockedUntil() != null && dm.getLockedUntil().getTime()>System.currentTimeMillis()) {
-				writeDate(dm.getLockedUntil());
-			} else {
-				writeInteger(0);
-			}
-			return null;
-		}
+            if (dm.getLockedUntil() != null && dm.getLockedUntil().getTime() > System.currentTimeMillis()) {
+                writeDate(dm.getLockedUntil());
+            } else {
+                writeInteger(0);
+            }
+            return null;
+        }
 
-		@Override
+        @Override
         public Object fileMD5Sum() {
-			writeString(dm.getFileMD5Sum());
-			return null;
-		}
+            writeString(dm.getFileMD5Sum());
+            return null;
+        }
 
         @Override
         public Object objectPermissions() {
@@ -336,73 +344,74 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             return null;
         }
 
-		private void writeDate(final Date date) {
-			if (date == null) {
+        private void writeDate(final Date date) {
+            if (date == null) {
                 writeNull();
             } else {
-				final int offset = tz.getOffset(date.getTime());
-				long time = date.getTime()+offset;
-				// Happens on infinite locks.
-				if(time < 0) {
-					time = Long.MAX_VALUE;
-				}
-				writeInteger(time);
-			}
-		}
+                final int offset = tz.getOffset(date.getTime());
+                long time = date.getTime() + offset;
+                // Happens on infinite locks.
+                if (time < 0) {
+                    time = Long.MAX_VALUE;
+                }
+                writeInteger(time);
+            }
+        }
 
-		private void writeId(final long id) {
-			writeString(Long.toString(id));
-		}
+        private void writeId(final long id) {
+            writeString(Long.toString(id));
+        }
 
-		private void writeString(final String string) {
-            if(string == null) {
+        private void writeString(final String string) {
+            if (string == null) {
                 writeNull();
                 return;
             }
             try {
-				writer.value(string);
-			} catch (final JSONException e) {
-				LOG.error("",e);
-			}
-		}
+                writer.value(string);
+            } catch (final JSONException e) {
+                LOG.error("", e);
+            }
+        }
 
-		private void writeInteger(final long l) {
-			try {
-				writer.value(l);
-			} catch (final JSONException e) {
-				LOG.error("",e);
-			}
-		}
+        private void writeInteger(final long l) {
+            try {
+                writer.value(l);
+            } catch (final JSONException e) {
+                LOG.error("", e);
+            }
+        }
 
         private void writeNull() {
             try {
                 writer.value(null);
             } catch (final JSONException e) {
-                LOG.error("",e);
+                LOG.error("", e);
             }
         }
 
         private void writeBoolean(final boolean b) {
-			try {
-				writer.value(b);
-			} catch (final JSONException e) {
-				LOG.error("",e);
-			}
-		}
+            try {
+                writer.value(b);
+            } catch (final JSONException e) {
+                LOG.error("", e);
+            }
+        }
 
-		@Override
+        @Override
         public Object filestoreLocation() {
-			writeString(dm.getFilestoreLocation());
-			return null;
-		}
+            writeString(dm.getFilestoreLocation());
+            return null;
+        }
 
         @Override
         public Object lastModifiedUTC() {
-            if(dm.getLastModified() == null) {
+            Date lastModified = dm.getLastModified();
+            if (lastModified == null) {
                 writeNull();
                 return null;
             }
-            writeInteger(dm.getLastModified().getTime());
+            writeInteger(lastModified.getTime());
             return null;
         }
 
@@ -427,11 +436,56 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             }
             return null;
         }
+
+        @Override
+        public Object captureDate() {
+            return null;
+        }
+
+        @Override
+        public Object geolocation() {
+            return null;
+        }
+
+        @Override
+        public Object width() {
+            return null;
+        }
+
+        @Override
+        public Object height() {
+            return null;
+        }
+
+        @Override
+        public Object cameraModel() {
+            return null;
+        }
+
+        @Override
+        public Object isoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object mediaMeta() {
+            return null;
+        }
+
+        @Override
+        public Object mediaStatus() {
+            return null;
+        }
+
+        @Override
+        public Object mediaDate() {
+            return null;
+        }
     }
 
-	@Override
-	protected int getId(final Object object) {
-		return ((DocumentMetadata)object).getId();
-	}
+    @Override
+    protected int getId(final Object object) {
+        return ((DocumentMetadata) object).getId();
+    }
 
 }

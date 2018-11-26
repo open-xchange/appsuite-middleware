@@ -163,7 +163,7 @@ public final class InternalList {
     private static UpdateTaskV2[] TASKS = null;
 
     private static UpdateTaskV2[] genTaskList() {
-        List<UpdateTaskV2> list = new ArrayList<>();
+        List<UpdateTaskV2> list = new ArrayList<>(256);
 
         // Renames "Unified INBOX" to "Unified Mail"
         list.add(new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask());
@@ -701,12 +701,12 @@ public final class InternalList {
 
         // Drops the unused "Shared address book" from database
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
-        
+
         // +++++++++++++++++++++++++++++++++ Version 7.10.1 starts here. +++++++++++++++++++++++++++++++++
-        
+
         // Adds the 'salt' column to 'user' and 'del_user' table in preparation for usage in the following release
         list.add(new com.openexchange.groupware.update.tasks.AddUserSaltColumnTask());
-        
+
         // +++++++++++++++++++++++++++++++++ Version 7.10.2 starts here. +++++++++++++++++++++++++++++++++
 
         // Drop unused tables, see MW-1092
@@ -715,6 +715,8 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.DropVCardIDsTableTask());
         list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipalTableTask());
         list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkageTableTask());
+
+        list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTable());
 
         // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
         // TODO Enable UpdateTask with 7.10.3, see MW-1108

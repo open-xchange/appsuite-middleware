@@ -314,7 +314,7 @@ public class JSONObject extends AbstractJSONValue {
             if (max > 0 && size > max) {
                 throw new IllegalStateException("Max. size (" + max + ") for JSON object exceeded");
             }
-            this.myHashMap = new LinkedHashMap<String, Object>(map.size());
+            this.myHashMap = new LinkedHashMap<String, Object>(size);
             for (final Map.Entry<String, ? extends Object> entry : map.entrySet()) {
                 final Object value = entry.getValue();
                 if (value instanceof JSONValue) {
@@ -1558,7 +1558,7 @@ public class JSONObject extends AbstractJSONValue {
             final int len = myHashMap.size();
             if (len > 0) {
                 final Iterator<Map.Entry<String, Object>> iter = myHashMap.entrySet().iterator();
-                for (int i = 0; i < len; i++) {
+                for (int i = len; i-- > 0;) {
                     final Entry<String, Object> entry = iter.next();
                     jGenerator.writeFieldName(entry.getKey());
                     write(entry.getValue(), jGenerator);

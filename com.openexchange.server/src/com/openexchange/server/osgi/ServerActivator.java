@@ -161,6 +161,7 @@ import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteFileVe
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.FilteringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -173,6 +174,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.json.FileBackedJSONStringProviderImpl;
@@ -481,6 +483,8 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
+        track(ImageMetadataService.class, new RegistryCustomizer<ImageMetadataService>(context, ImageMetadataService.class));
+        track(MediaMetadataExtractorService.class, new RegistryCustomizer<MediaMetadataExtractorService>(context, MediaMetadataExtractorService.class));
 
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));

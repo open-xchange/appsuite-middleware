@@ -117,7 +117,9 @@ public class InfostoreQueryCatalog {
         Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL,
         Metadata.DESCRIPTION_LITERAL, Metadata.CATEGORIES_LITERAL, Metadata.FILENAME_LITERAL, Metadata.FILE_SIZE_LITERAL,
         Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_MD5SUM_LITERAL, Metadata.VERSION_COMMENT_LITERAL,
-        Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.META_LITERAL };
+        Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.META_LITERAL,
+        Metadata.CAPTURE_DATE_LITERAL, Metadata.GEOLOCATION_LITERAL, Metadata.WIDTH_LITERAL, Metadata.HEIGHT_LITERAL,
+        Metadata.CAMERA_MODEL_LITERAL, Metadata.ISO_SPEED_LITERAL, Metadata.MEDIA_META_LITERAL, Metadata.MEDIA_STATUS_LITERAL };
 
     public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = ImmutableSet.copyOf(INFOSTORE_DOCUMENT_FIELDS);
 
@@ -128,23 +130,47 @@ public class InfostoreQueryCatalog {
 
     public static final Set<Metadata> DEL_INFOSTORE_DOCUMENT_FIELDS_SET = ImmutableSet.copyOf(DEL_INFOSTORE_DOCUMENT_FIELDS);
 
-    public static final Set<Metadata> IGNORE_ON_WRITE = ImmutableSet.of(Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.SEQUENCE_NUMBER_LITERAL);
+    public static final Set<Metadata> IGNORE_ON_WRITE = ImmutableSet.of(Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.SEQUENCE_NUMBER_LITERAL, Metadata.MEDIA_DATE_LITERAL);
 
-    public Metadata[] filterWritable(final Metadata[] fields) {
-        boolean mustRemove = false;
-        for (final Metadata field : fields) {
-            mustRemove = mustRemove || IGNORE_ON_WRITE.contains(field);
-        }
-        if (!mustRemove) {
-            return fields;
-        }
-        ArrayList<Metadata> list = new ArrayList<Metadata>();
-        for (final Metadata field : fields) {
-            if (!IGNORE_ON_WRITE.contains(field)) {
-                list.add(field);
+    /**
+     * Filters non-writable fields from given field array
+     *
+     * @param fields The field array to filter
+     * @return The possibly filtered field array
+     */
+    public Metadata[] filterWritable(Metadata[] fields) {
+        List<Metadata> list = null;
+        for (int i = 0; i < fields.length; i++) {
+            Metadata field = fields[i];
+            if (IGNORE_ON_WRITE.contains(field)) {
+                // Current field must not be modified
+                if (null == list) {
+                    list = createListFor(fields, i);
+                }
+            } else {
+                if (null != list) {
+                    list.add(field);
+                }
             }
         }
-        return list.toArray(new Metadata[list.size()]);
+        return null == list ? fields : list.toArray(new Metadata[list.size()]);
+    }
+
+    /**
+     * Creates a list carrying the elements from given field array until specified end index (exclusive).
+     *
+     * @param fields The field array
+     * @param end The end index (exclusive)
+     * @return The resulting list
+     */
+    private List<Metadata> createListFor(Metadata[] fields, int end) {
+        List<Metadata> list = new ArrayList<Metadata>(fields.length);
+        if (end > 0) {
+            for (int j = 0; j < end; j++) {
+                list.add(fields[j]);
+            }
+        }
+        return list;
     }
 
 
@@ -181,13 +207,13 @@ public class InfostoreQueryCatalog {
         public MetadataSwitcher getFieldSwitcher() {
             switch (this) {
                 case INFOSTORE:
-                    return new InfostoreColumnsSwitch();
+                    return InfostoreColumnsSwitch.getInstance();
                 case DEL_INFOSTORE:
-                    return new DelInfostoreColumnsSwitch();
+                    return DelInfostoreColumnsSwitch.getInstance();
                 case INFOSTORE_DOCUMENT:
-                    return new InfostoreDocumentColumnsSwitch();
+                    return InfostoreDocumentColumnsSwitch.getInstance();
                 case DEL_INFOSTORE_DOCUMENT:
-                    return new DelInfostoreDocumentColumnsSwitch();
+                    return DelInfostoreDocumentColumnsSwitch.getInstance();
                 default:
                     throw new IllegalArgumentException("Will not happen");
             }
@@ -195,9 +221,9 @@ public class InfostoreQueryCatalog {
     }
 
     private static String buildInsert(final String tablename, final Metadata[] metadata, final MetadataSwitcher columnNames, final String... additionalFields) {
-        final StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder(128);
         builder.append("INSERT INTO ").append(tablename).append(" (");
-        final StringBuilder questionMarks = new StringBuilder();
+        final StringBuilder questionMarks = new StringBuilder(64);
 
         for (final Metadata m : metadata) {
             if (IGNORE_ON_WRITE.contains(m)) {
@@ -207,7 +233,12 @@ public class InfostoreQueryCatalog {
             if (col != null) {
                 builder.append(col);
                 builder.append(',');
-                questionMarks.append("?,");
+                if (Metadata.GEOLOCATION_LITERAL == m) {
+                    // See https://dev.mysql.com/doc/refman/8.0/en/populating-spatial-columns.html
+                    questionMarks.append("GeomFromText(?),");
+                } else {
+                    questionMarks.append("?,");
+                }
             }
         }
 
@@ -221,7 +252,7 @@ public class InfostoreQueryCatalog {
         builder.setLength(builder.length() - 1);
         questionMarks.setLength(questionMarks.length() - 1);
 
-        builder.append(") VALUES (").append(questionMarks.toString()).append(')');
+        builder.append(") VALUES (").append(questionMarks).append(')');
 
         return builder.toString();
     }
@@ -231,7 +262,7 @@ public class InfostoreQueryCatalog {
     }
 
     private static StringBuilder buildUpdateWithoutWhere(final Table table, final Metadata[] metadata, final MetadataSwitcher columnNames, final String... additionalFields) {
-        final StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder(128);
         builder.append("UPDATE ").append(table.getTablename()).append(" SET ");
         for (final Metadata m : metadata) {
             if (m == Metadata.VERSION_LITERAL && (table == Table.INFOSTORE_DOCUMENT || table == Table.DEL_INFOSTORE_DOCUMENT)) {
@@ -243,7 +274,12 @@ public class InfostoreQueryCatalog {
             final String col = (String) m.doSwitch(columnNames);
             if (col != null) {
                 builder.append(col);
-                builder.append(" = ?,");
+                if (Metadata.GEOLOCATION_LITERAL == m) {
+                    // See https://dev.mysql.com/doc/refman/8.0/en/populating-spatial-columns.html
+                    builder.append(" = GeomFromText(?),");
+                } else {
+                    builder.append(" = ?,");
+                }
             }
         }
 
@@ -338,7 +374,7 @@ public class InfostoreQueryCatalog {
         }
         Metadata[] fields = table.getFields();
         MetadataSwitcher switcher = table.getFieldSwitcher();
-        StringBuilder questionMarksAllocator = new StringBuilder("(");
+        StringBuilder questionMarksAllocator = new StringBuilder().append('(');
         StringBuilder allocator = new StringBuilder("REPLACE INTO ").append(table.getTablename()).append(" (");
         for (int i = 0; i < fields.length; i++) {
             if (IGNORE_ON_WRITE.contains(fields[i])) {
@@ -347,30 +383,35 @@ public class InfostoreQueryCatalog {
 
             Object sqlField = fields[i].doSwitch(switcher);
             if (sqlField != null) {
-                questionMarksAllocator.append("?,");
+                if (Metadata.GEOLOCATION_LITERAL == fields[i]) {
+                    // See https://dev.mysql.com/doc/refman/8.0/en/populating-spatial-columns.html
+                    questionMarksAllocator.append("GeomFromText(?),");
+                } else {
+                    questionMarksAllocator.append("?,");
+                }
                 allocator.append(sqlField).append(',');
             }
         }
         boolean multipleAdditional = false;
         for (int i = 0; i < additional.length; i++) {
             if (multipleAdditional) {
-                questionMarksAllocator.append(",");
+                questionMarksAllocator.append(',');
             }
-            questionMarksAllocator.append("?");
+            questionMarksAllocator.append('?');
             multipleAdditional = true;
         }
-        String questionMarks = questionMarksAllocator.append(")").toString();
+        questionMarksAllocator.append(')');
         multipleAdditional = false;
         for (int i = 0; i < additional.length; i++) {
             if (multipleAdditional) {
-                allocator.append(",");
+                allocator.append(',');
             }
             allocator.append(additional[i]);
             multipleAdditional = true;
         }
-        allocator.append(") VALUES ").append(questionMarks);
+        allocator.append(") VALUES ").append(questionMarksAllocator);
         for (int i = 1; i < count; i++) {
-            allocator.append(',').append(questionMarks);
+            allocator.append(',').append(questionMarksAllocator);
         }
         allocator.append(';');
         return allocator.toString();
@@ -611,7 +652,7 @@ public class InfostoreQueryCatalog {
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId);
 
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
 
         if (start >= 0 && end > 0) {
@@ -630,7 +671,7 @@ public class InfostoreQueryCatalog {
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK02).append(userId);
 
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
 
         if (start >= 0 && end > 0) {
@@ -649,7 +690,7 @@ public class InfostoreQueryCatalog {
             SQL_CHUNK03).append(contextId).append(" AND infostore.id = infostore_document.infostore_id ").append(" WHERE infostore.id = ").append(
                 id);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -658,7 +699,7 @@ public class InfostoreQueryCatalog {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(" AND infostore.creating_date >= ").append(since);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -667,7 +708,7 @@ public class InfostoreQueryCatalog {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK05).append(since);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -687,7 +728,7 @@ public class InfostoreQueryCatalog {
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(" AND infostore.creating_date >= ").append(since).append(
                 SQL_CHUNK02).append(userId);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -697,7 +738,7 @@ public class InfostoreQueryCatalog {
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(
                 userId);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -707,7 +748,7 @@ public class InfostoreQueryCatalog {
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
                 contextId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(userId);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -763,7 +804,7 @@ public class InfostoreQueryCatalog {
         builder.append(" AND object_permission.bits >=").append(leastPermission);
 
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         if (start >= 0 && end > 0) {
             builder.append(STR_LIMIT);
@@ -788,7 +829,7 @@ public class InfostoreQueryCatalog {
             .append(" AND object_permission.permission_id != ").append(userId)
             ;
         if (sort != null) {
-            stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         if (start >= 0 && end > 0) {
             stringBuilder.append(STR_LIMIT);
@@ -825,7 +866,7 @@ public class InfostoreQueryCatalog {
 
         builder.append(" AND object_permission.last_modified > ").append(since);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -839,7 +880,7 @@ public class InfostoreQueryCatalog {
 
         builder.append(" AND infostore.last_modified > ").append(since);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -853,7 +894,7 @@ public class InfostoreQueryCatalog {
 
         builder.append(" AND object_permission.last_modified > ").append(since);
         if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -893,21 +934,33 @@ public class InfostoreQueryCatalog {
         return new String[] { t.getTablename(), col };
     }
 
-    private String fieldName(final Metadata sort, final FieldChooser wins) {
-        if (sort == Metadata.CURRENT_VERSION_LITERAL) {
+    private String fieldName(Metadata field, FieldChooser wins, boolean forOrderByClause) {
+        if (field == Metadata.CURRENT_VERSION_LITERAL) {
             return "(infostore.version = infostore_document.version_number) AS current_version";
         }
-        final String[] tuple = getFieldTuple(sort, wins);
+        if (field == Metadata.MEDIA_DATE_LITERAL) {
+            if (forOrderByClause) {
+                return "COALESCE(infostore_document.capture_date, infostore_document.last_modified)";
+            }
+            return "COALESCE(infostore_document.capture_date, infostore_document.last_modified) AS media_date";
+        }
+        if (field == Metadata.GEOLOCATION_LITERAL) {
+            String[] tuple = getFieldTuple(field, wins);
+            String tableName = tuple[0];
+            String col = tuple[1];
+            return new StringBuilder("AsText(").append(tableName).append(".").append(col).append(") AS ").append(col).toString();
+        }
+        final String[] tuple = getFieldTuple(field, wins);
         if (tuple == null) {
             return null;
         }
         return new StringBuilder(tuple[0]).append('.').append(tuple[1]).toString();
     }
 
-    private String fields(final Metadata[] metadata, final FieldChooser wins) {
-        final StringBuilder builder = new StringBuilder();
-        for (final Metadata m : metadata) {
-            final String col = fieldName(m, wins);
+    private String fields(Metadata[] metadata, FieldChooser wins) {
+        StringBuilder builder = new StringBuilder(metadata.length << 2);
+        for (Metadata m : metadata) {
+            String col = fieldName(m, wins, false);
             if (col != null) {
                 builder.append(col).append(',');
             }
@@ -918,6 +971,21 @@ public class InfostoreQueryCatalog {
 
     public static final class InfostoreColumnsSwitch implements MetadataSwitcher {
 
+        private static final InfostoreColumnsSwitch INST = new InfostoreColumnsSwitch();
+
+        /**
+         * Gets the switcher instance
+         *
+         * @return The instance
+         */
+        public static InfostoreColumnsSwitch getInstance() {
+            return INST;
+        }
+
+        private InfostoreColumnsSwitch() {
+            super();
+        }
+
         @Override
         public Object categories() {
             return null;
@@ -1057,11 +1125,72 @@ public class InfostoreQueryCatalog {
         @Override
         public Object origin() {
             return "origin";
+        }
+
+        @Override
+        public Object captureDate() {
+            return null;
+        }
+
+        @Override
+        public Object geolocation() {
+            return null;
+        }
+
+        @Override
+        public Object width() {
+            return null;
+        }
+
+        @Override
+        public Object height() {
+            return null;
+        }
+
+        @Override
+        public Object cameraModel() {
+            return null;
+        }
+
+        @Override
+        public Object isoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object mediaMeta() {
+            return null;
+        }
+
+        @Override
+        public Object mediaStatus() {
+            return null;
+        }
+
+        @Override
+        public Object mediaDate() {
+            return null;
         }
 
     }
 
     public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
+
+        private static final DelInfostoreColumnsSwitch INST = new DelInfostoreColumnsSwitch();
+
+        /**
+         * Gets the switcher instance
+         *
+         * @return The instance
+         */
+        public static DelInfostoreColumnsSwitch getInstance() {
+            return INST;
+        }
+
+        private DelInfostoreColumnsSwitch() {
+            super();
+        }
+
         @Override
         public Object categories() {
             return null;
@@ -1203,9 +1332,69 @@ public class InfostoreQueryCatalog {
             return "origin";
         }
 
+        @Override
+        public Object captureDate() {
+            return null;
+        }
+
+        @Override
+        public Object geolocation() {
+            return null;
+        }
+
+        @Override
+        public Object width() {
+            return null;
+        }
+
+        @Override
+        public Object height() {
+            return null;
+        }
+
+        @Override
+        public Object cameraModel() {
+            return null;
+        }
+
+        @Override
+        public Object isoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object mediaMeta() {
+            return null;
+        }
+
+        @Override
+        public Object mediaStatus() {
+            return null;
+        }
+
+        @Override
+        public Object mediaDate() {
+            return null;
+        }
+
     }
 
     public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher {
+
+        private static final InfostoreDocumentColumnsSwitch INST = new InfostoreDocumentColumnsSwitch();
+
+        /**
+         * Gets the switcher instance
+         *
+         * @return The instance
+         */
+        public static InfostoreDocumentColumnsSwitch getInstance() {
+            return INST;
+        }
+
+        private InfostoreDocumentColumnsSwitch() {
+            super();
+        }
 
         @Override
         public Object categories() {
@@ -1347,9 +1536,69 @@ public class InfostoreQueryCatalog {
             return "origin";
         }
 
+        @Override
+        public Object captureDate() {
+            return "capture_date";
+        }
+
+        @Override
+        public Object geolocation() {
+            return "geolocation";
+        }
+
+        @Override
+        public Object width() {
+            return "width";
+        }
+
+        @Override
+        public Object height() {
+            return "height";
+        }
+
+        @Override
+        public Object cameraModel() {
+            return "camera_model";
+        }
+
+        @Override
+        public Object isoSpeed() {
+            return "iso_speed";
+        }
+
+        @Override
+        public Object mediaMeta() {
+            return "media_meta";
+        }
+
+        @Override
+        public Object mediaStatus() {
+            return "media_status";
+        }
+
+        @Override
+        public Object mediaDate() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreDocumentColumnsSwitch implements MetadataSwitcher {
+
+        private static final DelInfostoreDocumentColumnsSwitch INST = new DelInfostoreDocumentColumnsSwitch();
+
+        /**
+         * Gets the switcher instance
+         *
+         * @return The instance
+         */
+        public static DelInfostoreDocumentColumnsSwitch getInstance() {
+            return INST;
+        }
+
+        private DelInfostoreDocumentColumnsSwitch() {
+            super();
+        }
 
         @Override
         public Object categories() {
@@ -1489,6 +1738,51 @@ public class InfostoreQueryCatalog {
         @Override
         public Object origin() {
             return "origin";
+        }
+
+        @Override
+        public Object captureDate() {
+            return null;
+        }
+
+        @Override
+        public Object geolocation() {
+            return null;
+        }
+
+        @Override
+        public Object width() {
+            return null;
+        }
+
+        @Override
+        public Object height() {
+            return null;
+        }
+
+        @Override
+        public Object cameraModel() {
+            return null;
+        }
+
+        @Override
+        public Object isoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object mediaMeta() {
+            return null;
+        }
+
+        @Override
+        public Object mediaStatus() {
+            return null;
+        }
+
+        @Override
+        public Object mediaDate() {
+            return null;
         }
 
     }
