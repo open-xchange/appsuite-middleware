@@ -64,23 +64,15 @@ import com.openexchange.config.ConfigurationService;
 public final class ThreadPoolProperties {
 
     private int corePoolSize;
-
+    private boolean enforceCorePoolSize;
     private boolean prestartAllCoreThreads;
-
     private int maximumPoolSize;
-
     private long keepAliveTime;
-
     private String workQueue;
-
     private int workQueueSize;
-
     private String refusedExecutionBehavior;
-
     private boolean blocking;
-
     private long watcherMinWaitTime;
-
     private long watcherMaxRunningTime;
 
     /**
@@ -105,9 +97,20 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         corePoolSize = Integer.parseInt(tmp.trim());
+                        if (corePoolSize < 0) {
+                            corePoolSize = 3;
+                        }
                     } catch (final NumberFormatException e) {
                         corePoolSize = 3;
                     }
+                }
+            }
+
+            enforceCorePoolSize = false;
+            {
+                String tmp = configurationService.getProperty("com.openexchange.threadpool.corePoolSize.enforce");
+                if (null != tmp) {
+                    enforceCorePoolSize = Boolean.parseBoolean(tmp.trim());
                 }
             }
 
@@ -125,6 +128,9 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         maximumPoolSize = Integer.parseInt(tmp.trim());
+                        if (maximumPoolSize < 0) {
+                            maximumPoolSize = Integer.MAX_VALUE;
+                        }
                     } catch (final NumberFormatException e) {
                         maximumPoolSize = Integer.MAX_VALUE;
                     }
@@ -137,6 +143,9 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         keepAliveTime = Long.parseLong(tmp.trim());
+                        if (keepAliveTime < 0) {
+                            keepAliveTime = 60000L;
+                        }
                     } catch (final NumberFormatException e) {
                         keepAliveTime = 60000L;
                     }
@@ -149,6 +158,9 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         workQueueSize = Integer.parseInt(tmp.trim());
+                        if (workQueueSize < 0) {
+                            workQueueSize = 0;
+                        }
                     } catch (final NumberFormatException e) {
                         workQueueSize = 0;
                     }
@@ -196,6 +208,9 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         watcherMaxRunningTime = Integer.parseInt(tmp.trim());
+                        if (watcherMaxRunningTime < 0) {
+                            watcherMaxRunningTime = 60000L;
+                        }
                     } catch (final NumberFormatException e) {
                         watcherMaxRunningTime = 60000L;
                     }
@@ -208,6 +223,9 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         watcherMinWaitTime = Integer.parseInt(tmp.trim());
+                        if (watcherMinWaitTime < 0) {
+                            watcherMinWaitTime = 20000L;
+                        }
                     } catch (final NumberFormatException e) {
                         watcherMinWaitTime = 20000L;
                     }
@@ -215,6 +233,7 @@ public final class ThreadPoolProperties {
             }
         } else {
             corePoolSize = 3;
+            enforceCorePoolSize = false;
             prestartAllCoreThreads = true;
             maximumPoolSize = Integer.MAX_VALUE;
             keepAliveTime = 60000L;
@@ -225,7 +244,7 @@ public final class ThreadPoolProperties {
         }
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
         final String ls = System.getProperty("line.separator");
-        LOG.info("Thread Pool Configuration:\n\tcorePoolSize={}{}\tprestartAllCoreThreads={}{}\tkeepAliveTime={}sec{}\tworkQueue={}{}\trefusedExecutionBehavior={}", corePoolSize, ls, prestartAllCoreThreads, ls, keepAliveTime, ls, workQueue, ls, refusedExecutionBehavior);
+        LOG.info("Thread Pool Configuration:\n\tcorePoolSize={}{}\tenforceCorePoolSize={}{}\tprestartAllCoreThreads={}{}\tkeepAliveTime={}sec{}\tworkQueue={}{}\trefusedExecutionBehavior={}", corePoolSize, ls, enforceCorePoolSize, ls, prestartAllCoreThreads, ls, keepAliveTime, ls, workQueue, ls, refusedExecutionBehavior);
         return this;
     }
 
@@ -236,6 +255,15 @@ public final class ThreadPoolProperties {
      */
     public int getCorePoolSize() {
         return corePoolSize;
+    }
+
+    /**
+     * Checks whether configured core pool size will be accepted regardless of the rule "Number of CPUs + 1".
+     *
+     * @return <code>true</code> if accepted as-is; otherwise <code>false</code>
+     */
+    public boolean isEnforceCorePoolSize() {
+        return enforceCorePoolSize;
     }
 
     /**
