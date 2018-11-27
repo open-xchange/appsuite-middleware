@@ -2008,9 +2008,6 @@ msgstr ""
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:130
 #: com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
 msgid "URL"
 msgstr ""
 
@@ -5277,75 +5274,6 @@ msgstr ""
 msgid "Could not load data via proxy."
 msgstr ""
 
-#. The operation is forbidden
-#: com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONErrorDisplayMessage.java:71
-msgid "The operation is forbidden"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
-msgid "Site"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
-msgid "Apply a template (optional)"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
-msgid "Add cipher code"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:69
-msgid "Shared contacts"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:71
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
-msgid "Shared files"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
-msgid ""
-"Privacy:\n"
-"The data and any references contained in this webpage are shared with you "
-"under the assumption that the owner of the data was entitled to make them "
-"available to you. Neither %s, nor any of its subsidiaries or affiliates "
-"shall be liable for its publication or re-publication.\n"
-"Any unauthorized use or dissemination of this data is prohibited. If you "
-"intend to store, process, or pass on this data, please make sure that you "
-"have the right to do so.\n"
-"If you are one of the people listed or responsible for a resource listed on "
-"this page and you don't agree with the publication, please send an email "
-"containing the URL (the link) to this webpage to %s and the publisher of the "
-"data:\n"
-"Data published by %s on %s\n"
-msgstr ""
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
-msgid "the hoster"
-msgstr ""
-
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
-msgid "Publish Infostore document"
-msgstr ""
-
-#. Cannot find the requested publication site.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
-msgid "Cannot find the requested publication site."
-msgstr ""
-
-#. You do not have the appropriate permissions to perform the chosen action.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:66
-msgid ""
-"You do not have the appropriate permissions to perform the chosen action."
-msgstr ""
-
-#. The published document has been deleted in the meantime and therefore is no longer available.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:69
-msgid ""
-"The published document has been deleted in the meantime and therefore is no "
-"longer available."
-msgstr ""
-
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
 msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
@@ -6391,6 +6319,10 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
+msgstr ""
+
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
+msgid "Shared files"
 msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
@@ -10382,45 +10314,6 @@ msgstr ""
 #. The operation is forbidden
 #: com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
 msgid "The operation is forbidden."
-msgstr ""
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
-msgid "OXMF Contacts"
-msgstr ""
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
-msgid "OXMF Infostore"
-msgstr ""
-
-#. A parsing error occurred: %1$s.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
-msgid "A parsing error occurred: %1$s."
-msgstr ""
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
-msgid "Provide well-formed HTML."
-msgstr ""
-
-#. Can only post to external subscription sources.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "You can only post to external subscription sources."
-msgstr ""
-
-#. Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:69
-msgid ""
-"Could not fetch site at %1$s. Please check the spelling or whether you can "
-"reach the site in your browser."
-msgstr ""
-
-#. The string cannot be parsed to a valid URL.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
-msgid "You provided an invalid URL."
-msgstr ""
-
-#. No URL was provided.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-msgid "You provided no URL."
 msgstr ""
 
 #: com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
