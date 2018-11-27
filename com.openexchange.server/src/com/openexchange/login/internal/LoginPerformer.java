@@ -68,7 +68,6 @@ import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -77,6 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
@@ -96,7 +96,6 @@ import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -311,7 +310,8 @@ public final class LoginPerformer {
             }
             // Redirect
             if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
-                String migrationRedirectURL = getMigrationRedirectURL(request.getServerName());
+                SegmentedUpdateService segmentedUpdateService = ServerServiceRegistry.getInstance().getService(SegmentedUpdateService.class);
+                String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
                 if (Strings.isEmpty(migrationRedirectURL)) {
                     LOG.error("Cannot redirect. The property 'com.openexchange.server.migrationRedirectURL' is not set.");
                 } else {
@@ -345,39 +345,6 @@ public final class LoginPerformer {
         } finally {
             logLoginRequest(request, retval);
         }
-    }
-
-    /**
-     * Returns the configured migrationRedirectURL by consulting the configuration for defined hosts (as-config.yml) and falling back to server configuration (server.properties)
-     * if no URL was defined for the host.
-     * 
-     * @param host The host to get the migrationRedirectURL for
-     * @return The redirect URL for mentioned host (if configured) or <code>null</code> if no configuration can be found.
-     * @throws OXException
-     */
-    private String getMigrationRedirectURL(String host) throws OXException {
-        String migrationRedirectURL = null;
-
-        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        if (serverConfigService != null && Strings.isNotEmpty(host)) {
-            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
-            for (Map<String, Object> map : customHostConfigurations) {
-                Object object = map.get("com.openexchange.server.migrationRedirectURL");
-                if (object != null && object instanceof String) {
-                    migrationRedirectURL = (String) object;
-                    LOG.debug("Found the following migrationRedirectURL config for host {} in as-config.yml: {}", host, migrationRedirectURL);
-                    break;
-                }
-            }
-        }
-        if (Strings.isEmpty(migrationRedirectURL)) {
-            ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (configService != null) {
-                migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
-                LOG.debug("Use the following migrationRedirectURL taken from server configuration: {}", migrationRedirectURL);
-            }
-        }
-        return migrationRedirectURL;
     }
 
     /**
