@@ -150,17 +150,13 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
             if (Tools.tableExists(con, "publication_users")) {
                 // Only fetch data if we can log something useful
                 if (existsPublication) {
-                    executeQuerry(con, "SELECT cid, id, name, created, lastModified FROM publication_users", (ResultSet resultSet) -> {
+                    executeQuery(con, "SELECT cid, id, name, created, lastModified FROM publication_users", (ResultSet resultSet) -> {
                         int i = 1;
                         do {
                             Integer contextId = I(resultSet.getInt(i++));
                             Integer publicationId = I(resultSet.getInt(i++));
 
-                            PublicationUser publicationUser = new PublicationUser();
-                            publicationUser.name = resultSet.getString(i++);
-                            publicationUser.created = new Date(resultSet.getInt(i++));
-                            publicationUser.lastModified = new Date(resultSet.getInt(i++));
-
+                            PublicationUser publicationUser = new PublicationUser(resultSet.getString(i++), new Date(resultSet.getInt(i++)), new Date(resultSet.getInt(i++)));
                             if (contextToPub.containsKey(contextId)) {
                                 // Known context
                                 Map<Integer, List<PublicationUser>> pubToUser = contextToPub.get(contextId);
@@ -191,7 +187,7 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
              * Get all publications and print out the information that is going to be deleted
              */
             if (existsPublication) {
-                executeQuerry(con, "SELECT cid, id, user_id, entity, module, configuration_id, target_id, enabled, created, lastModified FROM publications", (ResultSet rs) -> {
+                executeQuery(con, "SELECT cid, id, user_id, entity, module, configuration_id, target_id, enabled, created, lastModified FROM publications", (ResultSet rs) -> {
                     do {
                         int i = 1;
                         Integer contextId = I(rs.getInt(i++));
@@ -250,7 +246,7 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
 
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
+        return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.SCHEMA);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
@@ -280,7 +276,7 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
      * @param logResults The logging to to
      * @throws SQLException If the query fails
      */
-    private static void executeQuerry(final Connection con, String query, SQLConsumer<ResultSet> logResults) throws SQLException {
+    private static void executeQuery(final Connection con, String query, SQLConsumer<ResultSet> logResults) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -309,8 +305,11 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
         Date created;
         Date lastModified;
 
-        public PublicationUser() {
+        public PublicationUser(String name, Date created, Date lastModified) {
             super();
+            this.name = name;
+            this.created = created;
+            this.lastModified = lastModified;
         }
 
         @Override
