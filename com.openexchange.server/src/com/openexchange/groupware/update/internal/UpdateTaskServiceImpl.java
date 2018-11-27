@@ -54,9 +54,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -91,7 +94,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     private ScheduledTimerTask timerTask; // Guarded by synchronized
 
     private enum TaskMetadata {
-        taskName, successful, lastModified, uuid, schema, className;
+        taskName, state, successful, lastModified, uuid, schema, className;
     }
 
     /**
@@ -240,6 +243,80 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
                 executedTasks.add(taskMap);
             }
             return executedTasks;
+        } catch (OXException e) {
+            LOG.error("", e);
+            throw new RemoteException(e.getPlainLogMessage(), e);
+        } catch (RuntimeException | Error e) {
+            LOG.error("", e);
+            throw e;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskService#getPendingTasksList(java.lang.String, boolean, boolean)
+     */
+    @Override
+    public List<Map<String, Object>> getPendingTasksList(String schemaName, boolean pending, boolean excluded, boolean namespaceAware) throws RemoteException {
+        SchemaStore store = SchemaStore.getInstance();
+        try {
+            SchemaInfo schemaInfo = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
+            ExecutedTask[] tasks = store.getExecutedTasks(schemaInfo.getPoolId(), schemaName);
+            if (null == tasks) {
+                tasks = new ExecutedTask[0];
+            } else {
+                Arrays.sort(tasks);
+            }
+
+            List<Map<String, Object>> pendingTasks = new LinkedList<>();
+
+            // First get the successfully executed tasks
+            Set<String> executedTasks = new HashSet<>();
+            for (ExecutedTask task : tasks) {
+                if (task.isSuccessful()) {
+                    executedTasks.add(task.getTaskName());
+                }
+            }
+
+            if (pending) {
+                // Add all update tasks that are not in the executed set
+                Set<String> registeredTasks = UpdateTaskToolkit.getRegisteredUpdateTasks();
+                for (String r : registeredTasks) {
+                    if (executedTasks.contains(r)) {
+                        continue;
+                    }
+                    Map<String, Object> taskMap = new HashMap<>();
+                    taskMap.put(TaskMetadata.taskName.name(), r);
+                    taskMap.put(TaskMetadata.state.name(), "pending");
+                    pendingTasks.add(taskMap);
+                }
+            }
+
+            // Consider excluded via properties
+            if (excluded) {
+                for (String s : UpdateTaskToolkit.getExcludedUpdateTasks()) {
+                    Map<String, Object> taskMap = new HashMap<>();
+                    taskMap.put(TaskMetadata.taskName.name(), s);
+                    taskMap.put(TaskMetadata.state.name(), "excluded via file 'excludedupdatetask.properties'");
+                    pendingTasks.add(taskMap);
+                }
+            }
+
+            // Consider excluded via namespace
+            if (namespaceAware) {
+                for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
+                    String state = "excluded via namespace '" + entry.getKey() + "'";
+                    for (String s : entry.getValue()) {
+                        Map<String, Object> taskMap = new HashMap<>();
+                        taskMap.put(TaskMetadata.taskName.name(), s);
+                        taskMap.put(TaskMetadata.state.name(), state);
+                        pendingTasks.add(taskMap);
+                    }
+                }
+            }
+
+            return pendingTasks;
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);

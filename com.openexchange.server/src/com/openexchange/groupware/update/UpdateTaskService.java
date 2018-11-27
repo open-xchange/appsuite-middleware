@@ -122,6 +122,17 @@ public interface UpdateTaskService extends Remote {
     List<Map<String, Object>> getExecutedTasksList(String schemaName) throws RemoteException;
 
     /**
+     * Returns a list with all pending update tasks for the specified schema.
+     * 
+     * @param schemaName The schema name
+     * @param pending Whether the pending tasks (registered but neither executed nor excluded) should be returned
+     * @param excluded Whether the update tasks excluded via 'excludeupdatetask.properties' should be returned
+     * @param namespaceAware Whether the namespace aware excluded tasks should be returned
+     * @return a list with all the pending update tasks for the specified schema
+     */
+    List<Map<String, Object>> getPendingTasksList(String schemaName, boolean pending, boolean excluded, boolean namespaceAware) throws RemoteException;
+
+    /**
      * Returns the status of a scheduled update task job
      * 
      * @param jobId The job identifier
