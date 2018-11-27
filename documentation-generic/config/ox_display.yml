@@ -1,29 +1,29 @@
-feature_name: Advertisement
+feature_name: OX Display
 feature_description: |
-  This page describes the properties related to the advertisement feature.
+  This page describes the properties related to the server-side configuration feature for OX Display plugins.
 
-  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/Advertisement.html]] for more informations.
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/OX%20Display.html]] for more information.
 properties:
   - key: com.openexchange.advertisement.[reseller].packageScheme
     description: |
       Defines which package scheme is used for the reseller. [reseller] can be replaced with either the reseller name or the reseller id.
-      Use 'OX_ALL' for the default reseller. Available package schemes are:
+      Use 'default' for single-tenant environments (i.e. no reseller plugin installed or used). Available package schemes are:
       <ul>
-       <li>Global - always uses the default reseller and default package.</li>
-       <li>AccessCombinations - Using access combination names to retrieve the package.</li>
-       <li>TaxonomyTypes - Using taxonomy types to retrieve the package.</li>
+       <li>Global - Assumes all users to be part of package 'default'.</li>
+       <li>AccessCombinations - Uses access combination names as package identifiers.</li>
+       <li>TaxonomyTypes - Using context taxonomies/types to denote a user's package.</li>
       </ul>
     defaultValue: Global
     version: 7.8.3
     reloadable: true
     configcascadeAware: false
-    related: 
+    related: com.openexchange.advertisement.[reseller].taxonomy.types
     file: advertisement.properties
     packageName: open-xchange-advertisement
     tags: ["Reseller"]
   - key: com.openexchange.advertisement.[reseller].taxonomy.types
     description: |
-      Defines a comma separated list of taxonomy types which are used as package identifiers. 
+      Defines a comma separated list of taxonomies/types which are used as package identifiers.
       This list is used by the 'TaxonomyTypes' package scheme to identify the package.
     defaultValue: 
     version: 7.8.3
