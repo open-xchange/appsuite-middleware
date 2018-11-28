@@ -272,6 +272,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
                 }
             }
 
+            // Then collect all tasks from the different sets
             if (pending) {
                 // Add all update tasks that are not in the executed set
                 Set<String> registeredTasks = UpdateTaskToolkit.getRegisteredUpdateTasks();
@@ -286,6 +287,9 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             // Consider excluded via properties
             if (excluded) {
                 for (String s : UpdateTaskToolkit.getExcludedUpdateTasks()) {
+                    if (executedTasks.contains(s)) {
+                        continue;
+                    }
                     pendingTasks.add(new TaskMetadataBuilder().withTaskName(s).withTaskState("excluded via file 'excludedupdatetask.properties'").build());
                 }
             }
@@ -295,6 +299,9 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
                 for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
                     String state = "excluded via namespace '" + entry.getKey() + "'";
                     for (String s : entry.getValue()) {
+                        if (executedTasks.contains(s)) {
+                            continue;
+                        }
                         pendingTasks.add(new TaskMetadataBuilder().withTaskName(s).withTaskState(state).build());
                     }
                 }
