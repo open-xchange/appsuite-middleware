@@ -281,13 +281,27 @@ public class SessiondRESTService extends JAXRSService {
     }
 
     /**
-     * Parses the specified {@link Exception} to a {@link JSONObject}
+     * Parses the specified {@link Exception} to a {@link JSONObject} that conforms with the
+     * <code>RFC-7807</code>.
      * 
      * @param e The {@link Exception} to parse
      * @return The {@link JSONObject} with the exception
+     * @see <a href="https://tools.ietf.org/html/rfc7807">RFC-7807</a>
      */
     private JSONObject parse(Exception e, int statusCode) {
         try {
+            // At the moment we lack proper documentation and/or code logic 
+            // to either include the 'type', 'instance' or the 'detail' fields.
+            // - For the 'type' and 'instance' fields the documentation framework 
+            // needs to be adjusted in order to consider and include generic models 
+            // for the problem types and publish them at doc.ox.com.
+            // - For the 'detail' field maybe the display message of the OXException ought
+            // to do it, though for other non-OXExceptions there isn't much that 
+            // can be done other than explicitly analysing them or assigning them specific extra
+            // details regarding their error type: e.g. 
+            //   * for IOExceptions:   'An I/O error was occurred. That's all we know'
+            //   * for JSONExceptions: 'A JSON error was occurred due to xyz'
+            //   * etc.
             JSONObject j = new JSONObject();
             j.put("title", e.getMessage());
             j.put("status", statusCode);
