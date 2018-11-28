@@ -64,6 +64,7 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated Use {@link ListUpdateTasksCLT} instead. Scheduled to be removed on the next release.
  */
 public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
@@ -86,7 +87,7 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      * Initialises a new {@link ListExecutedTasksCLT}.
      */
     public ListExecutedTasksCLT() {
-        super("listExecutedTasks", "Lists executed update tasks of a schema.");
+        super("listExecutedTasks", "Lists executed update tasks of a schema. This command line tool is due to deprecation with the next release. Use the 'listUpdateTasks' instead.");
     }
 
     /*
