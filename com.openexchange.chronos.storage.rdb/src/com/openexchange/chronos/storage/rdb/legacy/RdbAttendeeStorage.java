@@ -688,6 +688,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         int updated = 0;
         Set<Integer> usedEntities = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
+            /*
+             * enforce a 'set' participation status due to NOT NULL constraint on column in legacy storage
+             */
+            if (false == attendee.containsPartStat()) {
+                attendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                attendee.setPartStat(null);
+            }
             if (0 > attendee.getEntity() || 0 == attendee.getEntity() && false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
                 /*
                  * insert additional record into dateExternal for external users
