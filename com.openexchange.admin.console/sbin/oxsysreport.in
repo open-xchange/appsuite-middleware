@@ -619,6 +619,15 @@ exclude_secret_entries() {
     local _blacklist="${_blacklist}|salt${_pattern}"
     local _blacklist="${_blacklist}|(${_separator}|\.|JMX|JDBC|[[:blank:]])login(name)*${_pattern}"
     local _blacklist="${_blacklist}|(${_separator}|\.|[[:blank:]]|=)user(name)*${_pattern}"
+
+    # strip all comments, remove empty files and delete empty files
+    for config in $(find "${_config_copy}" -type f); do
+        sed -E -i '/^[[:blank:]]*(#|$)/d' ${config}
+        if [ ! -s "${config}" ] ; then
+            rm ${config}
+        fi
+    done
+
     find "${_config_copy}" -type f | \
         sed 's|[[:blank:]]|\\ |g' | \
         xargs egrep -iHrIv "${_whitelist}" | \
