@@ -94,6 +94,8 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
                     }
                     stmt = writeCon.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+                    stmt = null;
                 } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
