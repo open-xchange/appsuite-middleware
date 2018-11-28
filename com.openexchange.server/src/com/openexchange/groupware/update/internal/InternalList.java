@@ -716,7 +716,9 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipalTableTask());
         list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkageTableTask());
 
-        list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
+        // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
+        // TODO Enable UpdateTask with 7.10.3, see MW-1108
+        // list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
