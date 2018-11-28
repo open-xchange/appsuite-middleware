@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
@@ -81,6 +82,8 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.extensions.BasicCTagAware;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SubscribeAware;
@@ -108,6 +111,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -128,7 +132,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAware, PersonalAlarmAware, BasicSearchAware {
+public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAware, PersonalAlarmAware, BasicSearchAware, BasicCTagAware {
 
     /** Search term to query for contacts having a birthday */
     private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
@@ -217,7 +221,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
-        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.add(USED_FOR_SYNC(CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session), false));
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
         settings.setExtendedProperties(extendedProperties);
         return settings;
@@ -234,9 +238,9 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     public List<Event> getEvents() throws OXException {
         List<Contact> contacts = getBirthdayContacts();
         if (isExpandOccurrences()) {
-            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()), false);
         } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()), true);
         }
     }
 
@@ -283,22 +287,29 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(filters, queries));
         if (isExpandOccurrences()) {
-            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()), false);
         } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()), true);
         }
     }
 
-    private List<Event> postProcess(List<Event> events) throws OXException {
+    @Override
+    public String getCTag() throws OXException {
+        return Long.toString(getLastModified().getTime());
+    }
+
+    private List<Event> postProcess(List<Event> events, boolean master) throws OXException {
         if (contains(getFields(), EventField.ALARMS)) {
             events = getAlarmHelper().applyAlarms(events);
         }
         TimeZone timeZone = getTimeZone();
         Date from = getFrom();
         Date until = getUntil();
-        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-            if (false == CalendarUtils.isInRange(iterator.next(), from, until, timeZone)) {
-                iterator.remove();
+        if (!master) {
+            for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+                if (!CalendarUtils.isInRange(iterator.next(), from, until, timeZone)) {
+                    iterator.remove();
+                }
             }
         }
         CalendarUtils.sortEvents(events, new SearchOptions(parameters).getSortOrders(), timeZone);
@@ -458,6 +469,43 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         return folderIds;
+    }
+
+    private List<String> getAllContactFolderIds() throws OXException {
+        List<String> folderIds = new ArrayList<>();
+        folderIds.addAll(getContactFolderIds(PublicType.getInstance()));
+        folderIds.addAll(getContactFolderIds(SharedType.getInstance()));
+        folderIds.addAll(getContactFolderIds(PrivateType.getInstance()));
+        return folderIds;
+    }
+
+    private static final ContactField[] LAST_MODIFIED_FIELDS = new ContactField[] {ContactField.LAST_MODIFIED, ContactField.BIRTHDAY};
+
+    private Date getLastModified() throws OXException {
+        Date lastModified = new Date(0);
+        List<String> folders = getAllContactFolderIds();
+
+        SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
+        sortOptions.setLimit(1);
+        ContactService contactService = services.getService(ContactService.class);
+
+        for (String folder : folders) {
+            try (SearchIterator<Contact> searchIterator = contactService.getModifiedContacts(session, folder, lastModified, LAST_MODIFIED_FIELDS, sortOptions)) {
+                if (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    if (contact.getBirthday() != null) {
+                        lastModified = lastModified.after(contact.getLastModified()) ? lastModified : contact.getLastModified();
+                    }
+                }
+            }
+            try (SearchIterator<Contact> searchIterator = contactService.getDeletedContacts(session, folder, lastModified, LAST_MODIFIED_FIELDS, sortOptions)) {
+                if (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    lastModified = lastModified.after(contact.getLastModified()) ? lastModified : contact.getLastModified();
+                }
+            }
+        }
+        return lastModified;
     }
 
     protected Date getFrom() {

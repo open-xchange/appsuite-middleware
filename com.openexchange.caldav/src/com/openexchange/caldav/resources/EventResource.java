@@ -159,8 +159,8 @@ public class EventResource extends DAVObjectResource<Event> {
     }
 
     @Override
-    protected int getId(Event object) {
-        return null != object ? Integer.parseInt(object.getId()) : null;
+    protected String getId(Event object) {
+        return object == null ? null : object.getId();
     }
 
     @Override

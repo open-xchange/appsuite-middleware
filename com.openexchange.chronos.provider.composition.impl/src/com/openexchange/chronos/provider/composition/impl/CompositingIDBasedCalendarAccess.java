@@ -115,8 +115,10 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingC
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventsResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingImportResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
+import com.openexchange.chronos.provider.extensions.BasicCTagAware;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
+import com.openexchange.chronos.provider.extensions.CTagAware;
 import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -753,6 +755,21 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             }
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    @Override
+    public String getCTag(String folderID) throws OXException {
+        CalendarAccount account = getAccount(getAccountId(folderID), true);
+        try {
+            CalendarAccess access = getAccess(account.getAccountId(), CTagAware.class);
+            if (BasicCTagAware.class.isInstance(access)) {
+                return ((BasicCTagAware) access).getCTag();
+            } else {
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+            }
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
         }
     }
 

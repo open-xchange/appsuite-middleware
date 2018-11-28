@@ -605,4 +605,12 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      */
     Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException;
 
+    /**
+     * Retrieves the CTag
+     * @param string
+     *
+     * @return the CTag
+     * @throws OXException
+     */
+    String getCTag(String string) throws OXException;
 }
