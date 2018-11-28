@@ -2,7 +2,7 @@ feature_name: OX Display
 feature_description: |
   This page describes the properties related to the server-side configuration feature for OX Display plugins.
 
-  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/OX%20Display.html]] for more information.
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/ox_display.html]] for more information.
 properties:
   - key: com.openexchange.advertisement.[reseller].packageScheme
     description: |
