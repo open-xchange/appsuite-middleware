@@ -101,14 +101,14 @@ public class DeleteSnippetSolver implements ProblemSolver {
             } catch (SQLException | OXException | RuntimeException e) {
                 LOG.error("{}", e.getMessage(), e);
             } finally {
+                Databases.closeSQLStuff(stmt);
                 if (rollback > 0) {
                     if (rollback==1) {
                         Databases.rollback(con);
                     }
-                    Databases.closeSQLStuff(stmt);
+                    Databases.autocommit(con);
                 }
                 if (null != con) {
-                    Databases.autocommit(con);
                     Database.back(entity.getContext(), true, con);
                 }
             }
