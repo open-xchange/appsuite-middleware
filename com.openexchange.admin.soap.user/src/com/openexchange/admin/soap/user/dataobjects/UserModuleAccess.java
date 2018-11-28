@@ -545,7 +545,6 @@ public class UserModuleAccess {
      *            allowed object is
      *            {@link Boolean }
      * @deprecated Publication has been removed with v7.10.2
-     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
     @Deprecated
     public void setPublicFolderEditable(Boolean value) {
@@ -559,7 +558,6 @@ public class UserModuleAccess {
      *         possible object is
      *         {@link Boolean }
      * @deprecated Publication has been removed with v7.10.2
-     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
     @Deprecated
     public Boolean isPublication() {
@@ -573,7 +571,6 @@ public class UserModuleAccess {
      *            allowed object is
      *            {@link Boolean }
      * @deprecated Publication has been removed with v7.10.2
-     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
     @Deprecated
     public void setPublication(Boolean value) {

@@ -82,7 +82,6 @@ import com.openexchange.tools.update.Tools;
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
- * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
  */
 public class DropPublicationTablesTask implements UpdateTaskV2 {
 

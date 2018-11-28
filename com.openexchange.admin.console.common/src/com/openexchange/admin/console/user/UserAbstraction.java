@@ -217,7 +217,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessSubscription(19, OPT_ACCESS_SUBSCRIPTION, false),
         /**
          * @deprecated Publication has been removed with v7.10.2
-         * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
          */
         accessPublication(20, OPT_ACCESS_PUBLICATION, false),
         accessActiveSync(21, OPT_ACCESS_ACTIVE_SYNC, false),

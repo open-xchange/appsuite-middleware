@@ -112,7 +112,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     /**
      * @deprecated Publication has been removed with v7.10.2
-     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      */
     @Deprecated
     private boolean Publication = true;
@@ -290,7 +289,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
      * Gets the publication access.
      * 
      * @deprecated Publication has been removed with v7.10.2
-     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      * @return The publication
      */
     @Deprecated
@@ -302,7 +300,6 @@ public class UserModuleAccess implements Serializable, Cloneable {
      * Sets the publication access.
      * 
      * @deprecated Publication has been removed with v7.10.2
-     * @see <a href="https://jira.open-xchange.com/browse/MW-1089">MW-1089</a>
      * @param publication The publication access to set
      */
     @Deprecated
