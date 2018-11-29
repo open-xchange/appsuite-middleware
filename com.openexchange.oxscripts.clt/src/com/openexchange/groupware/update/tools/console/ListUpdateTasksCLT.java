@@ -95,7 +95,7 @@ public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
      * Initialises a new {@link ListUpdateTasksCLT}.
      */
     public ListUpdateTasksCLT() {
-        super("listUpdateTasks [[-e | -r | -x | -xf | -xn] -A <adminUser> -P <adminPassword> [-p <port> -s <server> --responsetime <responseTime>]] | -h", "Lists executed, pending and excluded update tasks of a schema. The switches '-a', '-e', '-r', '-x', '-xf' and '-xn' are mutually exclusive AND mandatory.\n\n An overall database status of all schemata can be retrieved via the 'checkdatabase' command line tool.");
+        super("listUpdateTasks [[-a | -g | -e | -x | -xf | -xn] -A <adminUser> -P <adminPassword> [-p <port> -s <server> --responsetime <responseTime>]] | -h", "Lists executed, pending and excluded update tasks of a schema. The switches '-a', '-e', '-g', '-x', '-xf' and '-xn' are mutually exclusive AND mandatory.\n\n An overall database status of all schemata can be retrieved via the 'checkdatabase' command line tool.");
     }
 
     /*
@@ -111,11 +111,11 @@ public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
         OptionGroup optionGroup = new OptionGroup();
         optionGroup.addOption(createOption("a", "all", false, "Lists all pending and excluded update tasks (both via excludedupdate.properties' file and namespace)", false));
-        optionGroup.addOption(createOption("e", "pending", false, "Lists only the pending update tasks", false));
+        optionGroup.addOption(createOption("g", "pending", false, "Lists only the pending update tasks", false));
         optionGroup.addOption(createOption("x", "excluded", false, "Lists only the update tasks excluded both via excludedupdate.properties' file and namespace", false));
         optionGroup.addOption(createOption("xf", "excluded-via-file", false, "Lists only the update tasks excluded via 'excludedupdate.properties' file", false));
         optionGroup.addOption(createOption("xn", "excluded-via-namespace", false, "Lists only the update tasks excluded via namespace", false));
-        optionGroup.addOption(createOption("r", "executed", false, "Lists executed update tasks of a schema", false));
+        optionGroup.addOption(createOption("e", "executed", false, "Lists all executed (ran at least once) update tasks of a schema", false));
         optionGroup.setRequired(true);
         options.addOptionGroup(optionGroup);
     }
