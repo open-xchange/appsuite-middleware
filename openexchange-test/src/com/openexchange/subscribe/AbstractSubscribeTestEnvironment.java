@@ -50,6 +50,7 @@
 package com.openexchange.subscribe;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -74,7 +75,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AbstractSubscribeTestEnvironment}

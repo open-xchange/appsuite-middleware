@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +68,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * {@link UseCountTest}
