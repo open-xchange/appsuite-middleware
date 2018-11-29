@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import org.junit.Test;
 import com.openexchange.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -64,7 +65,6 @@ import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.modules.ConfigApi;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link Bug40142Test}

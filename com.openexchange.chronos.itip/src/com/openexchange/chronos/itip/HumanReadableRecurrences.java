@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -65,7 +66,6 @@ import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
 import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import com.openexchange.chronos.Event;
 import com.openexchange.i18n.tools.StringHelper;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link HumanReadableRecurrences}

@@ -52,11 +52,11 @@ package com.openexchange.ajax.folder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.models.FolderCheckLimitsFiles;
 import com.openexchange.testing.httpclient.models.FolderCheckLimitsResponse;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link CheckLimitsTest}

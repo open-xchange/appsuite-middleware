@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class SortingInJapanTest extends AbstractManagedContactTest {
 
