@@ -70,7 +70,7 @@ public class ISO8601DateParser {
 
         @Override
         protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sssz");
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
         }
 
     };
