@@ -55,15 +55,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -128,6 +132,20 @@ public class BirthdaysCollection extends EventCollection {
     @Override
     public String getSyncToken() throws WebdavProtocolException {
         return null;
+    }
+
+    @Override
+    protected Event getObject(String resourceName) throws OXException {
+        if (Strings.isEmpty(resourceName)) {
+            return null;
+        }
+        return new CalendarAccessOperation<Event>(factory) {
+
+            @Override
+            protected Event perform(IDBasedCalendarAccess access) throws OXException {
+                return access.getEvent(new EventID(folder.getID(), resourceName));
+            }
+        }.execute(factory.getSession());
     }
 
     @Override
