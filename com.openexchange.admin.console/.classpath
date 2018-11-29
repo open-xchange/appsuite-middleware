@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.4-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
