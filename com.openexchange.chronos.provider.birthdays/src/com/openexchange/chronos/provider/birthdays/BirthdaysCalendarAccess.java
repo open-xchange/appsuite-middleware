@@ -221,7 +221,11 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
-        extendedProperties.add(USED_FOR_SYNC(CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session), false));
+        if (CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
+            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
+        } else {
+            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        }
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
         settings.setExtendedProperties(extendedProperties);
         return settings;
