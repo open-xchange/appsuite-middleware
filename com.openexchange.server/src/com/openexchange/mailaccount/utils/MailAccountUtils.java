@@ -110,7 +110,7 @@ public class MailAccountUtils {
                         String[] tokens = Strings.splitByComma(prop);
                         tmp = new HashSet<Integer>(tokens.length);
                         for (String token : tokens) {
-                            if (false == Strings.isEmpty(token)) {
+                            if (Strings.isNotEmpty(token)) {
                                 try {
                                     tmp.add(Integer.valueOf(token.trim()));
                                 } catch (NumberFormatException e) {

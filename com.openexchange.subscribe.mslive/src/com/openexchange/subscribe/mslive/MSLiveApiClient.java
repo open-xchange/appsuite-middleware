@@ -61,6 +61,7 @@ import org.scribe.model.Verb;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -119,6 +120,10 @@ public class MSLiveApiClient {
             OAuthRequest request = new OAuthRequest(Verb.GET, "https://apis.live.net/v5.0/me?access_token=" + encodedToken);
             request.setConnectTimeout(5, TimeUnit.SECONDS);
             request.setReadTimeout(15, TimeUnit.SECONDS);
+            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+            if (null != factoryProvider) {
+                request.setSSLSocketFactory(factoryProvider.getDefault());
+            }
             Response response = request.send();
             if (response.getCode() == 401 || response.getCode() == 400) {
                 // 401 unauthorized

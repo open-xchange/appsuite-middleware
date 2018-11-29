@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.admin.osgi.AdminActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: OX Software GmbH
@@ -59,6 +59,7 @@ Import-Package: com.damienmiller,
  com.openexchange.publish,
  com.openexchange.publish.helpers,
  com.openexchange.publish.tools,
+ com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.snippet,
  com.openexchange.spamhandler,
@@ -72,6 +73,7 @@ Import-Package: com.damienmiller,
  com.openexchange.tools.net,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.pipesnfilters,
+ com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.user,
  com.openexchange.version,

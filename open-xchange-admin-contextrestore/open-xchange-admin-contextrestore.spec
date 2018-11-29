@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,26 +66,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
-* Mon Nov 19 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-11-19 (4966)
-* Mon Oct 29 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-11-05 (4933)
-* Mon Oct 08 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-10-15 (4918)
-* Tue Sep 25 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-10-01 (4897)
-* Mon Sep 24 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-09-21 (4900)
-* Mon Sep 10 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-09-17 (4882)
-* Mon Aug 27 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-09-03 (4870)
-* Wed Aug 15 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-08-20 (4863)
-* Thu Aug 02 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-08-13 (4853)
-* Fri Jul 20 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2018-07-25 (4835)
+* Fri Nov 23 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+RC 1 for 7.10.1 release
+* Fri Nov 02 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second preview for 7.10.1 release
+* Thu Oct 11 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First candidate for 7.10.1 release
+* Thu Sep 06 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>

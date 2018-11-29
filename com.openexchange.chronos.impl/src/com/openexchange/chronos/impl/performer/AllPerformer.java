@@ -50,29 +50,34 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
-import static com.openexchange.chronos.impl.Utils.isSkipClassifiedEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Arrays.remove;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -139,6 +144,29 @@ public class AllPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
+     * @param folderId The identifier of the parent folder to get all events from
+     * @return The loaded events
+     */
+    public List<Event> perform(String folderId) throws OXException {
+        /*
+         * perform search & userize the results based on the requested folder
+         */
+        CalendarFolder folder = getFolder(session, folderId);
+        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
+        /*
+         * get events with default fields & load additional event data as needed
+         */
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField[] fields = getFieldsForStorage(requestedFields);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
+        events = storage.getUtilities().loadAdditionalEventData(folder.getCalendarUserId(), events, fields);
+        return postProcessor(getObjectIDs(events), folder.getCalendarUserId(), requestedFields, fields).process(events, folder.getCalendarUserId()).getEvents();
+    }
+
+    /**
+     * Performs the operation.
+     *
      * @param folderIds The identifiers of the parent folders to get all events from
      * @return The loaded events
      */
@@ -177,13 +205,18 @@ public class AllPerformer extends AbstractQueryPerformer {
             }
         }
         /*
+         * evaluate fields to query from storage based on requested fields
+         */
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField[] fields = getFieldsForStorage(requestedFields);
+        SearchOptions searchOptions = getSearchOptionsForStorage(session);
+        /*
          * load event data per folder & additional event data per calendar user
          */
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        SearchOptions searchOptions = new SearchOptions(session);
-        Map<CalendarFolder, List<Event>> eventsPerFolder = new HashMap<CalendarFolder, List<Event>>(folders.size());
         for (Entry<Integer, List<CalendarFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
+            int calendarUserId = i(entry.getKey());
             List<Event> eventsForCalendarUser = new ArrayList<Event>();
+            Map<CalendarFolder, List<Event>> eventsPerFolder = new HashMap<CalendarFolder, List<Event>>(entry.getValue().size());
             for (CalendarFolder folder : entry.getValue()) {
                 /*
                  * load events in folder
@@ -198,19 +231,58 @@ public class AllPerformer extends AbstractQueryPerformer {
                 }
             }
             /*
-             * batch-load additional event data for this calendar user
+             * batch-load additional event data for this calendar user & prepare associated event post-processor
              */
-            storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
-        }
-        /*
-         * post process events, based on each requested folder's perspective
-         */
-        boolean skipClassified = isSkipClassifiedEvents(session);
-        for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            resultsPerFolderId.put(entry.getKey().getId(), new EventPostProcessor(session, storage, skipClassified).process(entry.getValue(), entry.getKey()).getEventsResult());
-            Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+            storage.getUtilities().loadAdditionalEventData(calendarUserId, eventsForCalendarUser, fields);
+            EventPostProcessor postProcessor = postProcessor(getObjectIDs(eventsForCalendarUser), calendarUserId, requestedFields, fields);
+            /*
+             * post process events per folder, based on each requested folder's perspective
+             */
+            for (Entry<CalendarFolder, List<Event>> eventsInFolder : eventsPerFolder.entrySet()) {
+                resultsPerFolderId.put(eventsInFolder.getKey().getId(), postProcessor.process(eventsInFolder.getValue(), eventsInFolder.getKey()).getEventsResult());
+                Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, requestedFields);
+            }
         }
         return resultsPerFolderId;
+    }
+
+    /**
+     * Initializes a new event post processor, implicitly supplying further data for the calendar user attendee and event flags as needed.
+     * 
+     * @param eventIds The identifiers of the events being processed
+     * @param calendarUserId The identifier of the underlying calendar user
+     * @param requestedFields The fields as requested by the client
+     * @param queriedFields The fields loaded from the storage
+     * @return The event post processor, enriched with further data as needed
+     */
+    private EventPostProcessor postProcessor(String[] eventIds, int calendarUserId, EventField[] requestedFields, EventField[] queriedFields) throws OXException {
+        EventPostProcessor postProcessor = super.postProcessor();
+        /*
+         * always supply essential data for actual calendar user attendee, unless already requested explicitly
+         */
+        if (false == contains(queriedFields, EventField.ATTENDEES)) {
+            Attendee attendee = new Attendee();
+            attendee.setEntity(calendarUserId);
+            AttendeeField[] fields = {
+                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, AttendeeField.PARTSTAT, AttendeeField.HIDDEN
+            };
+            postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
+        }
+        /*
+         * supply info for event flag generation as needed
+         */
+        if (contains(requestedFields, EventField.FLAGS)) {
+            if (false == contains(queriedFields, EventFlag.ATTACHMENTS)) {
+                postProcessor.setAttachmentsFlagInfo(storage.getAttachmentStorage().hasAttachments(eventIds));
+            }
+            if (false == contains(queriedFields, EventFlag.ALARMS)) {
+                postProcessor.setAlarmsFlagInfo(storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds));
+            }
+            if (false == contains(queriedFields, EventField.ATTENDEES)) {
+                postProcessor.setScheduledFlagInfo(storage.getAttendeeStorage().loadAttendeeCounts(eventIds, null));
+            }
+        }
+        return postProcessor;
     }
 
     /**
@@ -293,34 +365,13 @@ public class AllPerformer extends AbstractQueryPerformer {
             );
         }
         /*
-         * perform search & userize the results for the current session's user
+         * perform search, userize & post-process the results for the current session's user
          */
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField[] fields = getFieldsForStorage(requestedFields);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-        return new EventPostProcessor(session, storage, false).process(events, session.getUserId()).getEvents();
-    }
-
-    /**
-     * Performs the operation.
-     *
-     * @param folderId The identifier of the parent folder to get all events from
-     * @return The loaded events
-     */
-    public List<Event> perform(String folderId) throws OXException {
-        /*
-         * perform search & userize the results based on the requested folder
-         */
-        CalendarFolder folder = getFolder(session, folderId);
-        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        /*
-         * get events with default fields & load additional event data as needed
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-        events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        return new EventPostProcessor(session, storage, isSkipClassifiedEvents(session)).process(events, folder).getEvents();
+        return postProcessor(getObjectIDs(events), session.getUserId(), requestedFields, fields).process(events, session.getUserId()).getEvents();
     }
 
     private static Map<Integer, List<CalendarFolder>> getFoldersPerCalendarUserId(List<CalendarFolder> folders) {
@@ -329,6 +380,59 @@ public class AllPerformer extends AbstractQueryPerformer {
             com.openexchange.tools.arrays.Collections.put(foldersPerCalendarUserId, I(getCalendarUserId(folder)), folder);
         }
         return foldersPerCalendarUserId;
+    }
+
+    /**
+     * Gets the (possible adjusted) search options to pass down to the storage in case a subsequent <i>post-processing</i> of the events
+     * will take place, based on the supplied calendar parameters.
+     * <p/>
+     * In case the resulting events are <i>post-processed</i>, sorting is done by the {@link EventPostProcessor}, so that the storage does
+     * not need to consider an <code>ORDER BY ...</code> clause.
+     * 
+     * @param parameters The parameters to get the storage search options from
+     * @return The search options to use for storage operations
+     */
+    private static SearchOptions getSearchOptionsForStorage(CalendarParameters parameters) {
+        Integer leftHandLimit = parameters.get(CalendarParameters.PARAMETER_LEFT_HAND_LIMIT, Integer.class);
+        Integer rightHandLimit = parameters.get(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, Integer.class);
+        EventField by = parameters.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
+        if (null == by || null != leftHandLimit || null != rightHandLimit) {
+            /*
+             * no order by, or order by with limit, pass-through to storage as-is
+             */
+            return new SearchOptions(parameters);
+        }
+        /*
+         * ignore order by when getting data from storage
+         */
+        return new SearchOptions(new DefaultCalendarParameters(parameters)
+            .set(CalendarParameters.PARAMETER_ORDER, null)
+            .set(CalendarParameters.PARAMETER_ORDER_BY, null))
+        ;
+    }
+
+    /**
+     * Gets the event fields to pass down to the storage in case a subsequent <i>post-processing</i> of the events
+     * will take place, based on the supplied calendar parameters.
+     * <p/>
+     * In case the resulting events are <i>post-processed</i>, and information for event flag generation will be fetched separately, a
+     * different set of fields should be queried from the storage.
+     * 
+     * @param requestedFields The event fields as requested from the client
+     * @return The event fields to hand down to the storage when querying event data
+     */
+    private static EventField[] getFieldsForStorage(EventField[] requestedFields) {
+        if (null == requestedFields || contains(requestedFields, EventField.ATTENDEES) || false == contains(requestedFields, EventField.FLAGS)) {
+            /*
+             * all attendees, or no event flags requested, no special handling needed
+             */
+            return getFields(requestedFields);
+        }
+        /*
+         * event flags are requested, but not all attendees; temporary remove flags field to supply info for event flag generation
+         * afterwards, also ensure to include further fields relevant for event flag generation
+         */
+        return getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
     }
 
 }

@@ -225,7 +225,7 @@ public class SAMLWebSSOProviderOAuthTest {
         String relayState = parseURIQuery(authnRequestURI).get("RelayState");
         Assert.assertNotNull(relayState);
         SimHttpServletRequest authnHTTPRequest = prepareHTTPRequest("GET", authnRequestURI);
-        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, testCredentials.getSPSigningCredential()));
+        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
         AuthnRequest authnRequest = parseAuthnRequest(authnHTTPRequest);
 
         /*

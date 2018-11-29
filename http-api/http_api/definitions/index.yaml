@@ -62,6 +62,16 @@ FolderRestoreResponse:
   $ref: ./folders/FolderRestoreResponse.yaml
 FolderPathData:
   $ref: ./folders/FolderPathData.yaml
+FolderCheckLimitsData:
+  $ref: ./folders/FolderCheckLimitsData.yaml
+FolderCheckLimitsFiles:
+  $ref: ./folders/FolderCheckLimitsFiles.yaml
+FolderCheckLimitsResponse:
+  $ref: ./folders/FolderCheckLimitsResponse.yaml
+FolderCheckLimitsResponseData:
+  $ref: ./folders/FolderCheckLimitsResponseData.yaml
+FolderCheckLimitsResponseErrorData:
+  $ref: ./folders/FolderCheckLimitsResponseErrorData.yaml
 # Module: tasks
 TasksResponse:
   $ref: ./tasks/TasksResponse.yaml
@@ -100,6 +110,8 @@ DistributionListMember:
   $ref: ./contacts/DistributionListMember.yaml
 ContactData:
   $ref: ./contacts/ContactData.yaml
+ContactDataWithInternalId:
+  $ref: ./contacts/ContactDataWithInternalId.yaml
 ContactResponse:
   $ref: ./contacts/ContactResponse.yaml
 ContactUpdateData:

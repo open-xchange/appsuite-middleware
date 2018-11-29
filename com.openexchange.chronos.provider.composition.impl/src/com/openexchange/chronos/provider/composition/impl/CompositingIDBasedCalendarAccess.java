@@ -991,7 +991,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return results;
     }
 
-    private SelfProtection getSelfProtection() throws OXException {
+    private SelfProtection getSelfProtection() {
         if (protection == null) {
             LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
             protection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
@@ -1006,7 +1006,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
         if (null != events) {
             for (Event event : events) {
-                if (null != event && folderId.equals(event.getFolderId()) && eventId.equals(event.getId())) {
+                if (null != event && eventId.equals(event.getId()) && 
+                    (folderId.equals(event.getFolderId()) || folderId.equals(BasicCalendarAccess.FOLDER_ID) && null == event.getFolderId())) { 
                     if (null == recurrenceId || recurrenceId.equals(event.getRecurrenceId())) {
                         return event;
                     }

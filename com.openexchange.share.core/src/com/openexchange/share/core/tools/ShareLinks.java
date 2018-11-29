@@ -88,7 +88,7 @@ public class ShareLinks {
     public static String generateExternal(HostData hostData, String guestToken, ShareTargetPath targetPath) {
         URIBuilder builder = prepare(hostData);
         String guestHostname = getGuestHostname(guestToken);
-        if (false == Strings.isEmpty(guestHostname)) {
+        if (Strings.isNotEmpty(guestHostname)) {
             builder.setHost(guestHostname);
         } else {
             getLogger(ShareLinks.class).warn("No hostname for guests is configured. Falling back to current host \"{}\" for share link " +

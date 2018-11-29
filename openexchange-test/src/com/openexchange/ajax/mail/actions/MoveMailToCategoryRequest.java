@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,7 +94,7 @@ public class MoveMailToCategoryRequest extends AbstractMailCategoriesRequest<Mov
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(PARAMETER_ACTION, ACTION_MOVE));
         list.add(new Parameter(PARAMETER_CATEGORY_ID, categoryId));
@@ -114,7 +113,7 @@ public class MoveMailToCategoryRequest extends AbstractMailCategoriesRequest<Mov
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return new JSONArray(body);
     }
 

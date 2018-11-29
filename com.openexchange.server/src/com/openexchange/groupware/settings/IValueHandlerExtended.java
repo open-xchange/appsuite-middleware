@@ -72,4 +72,13 @@ public interface IValueHandlerExtended extends IValueHandler {
      */
     boolean isAvailable(Session session, UserConfiguration userConfig) throws OXException;
 
+    /**
+     * Checks if the setting can be written.
+     *
+     * @param session The session providing user data
+     * @return <code>true</code> if the setting can be written; otherwise <code>false</code>
+     * @throws OXException if an error occurs.
+     */
+    boolean isWritable(Session session) throws OXException;
+
 }

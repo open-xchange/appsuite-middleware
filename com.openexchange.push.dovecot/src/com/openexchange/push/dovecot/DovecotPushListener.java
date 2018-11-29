@@ -49,7 +49,6 @@
 
 package com.openexchange.push.dovecot;
 
-import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
@@ -123,9 +122,6 @@ public class DovecotPushListener implements PushListener, Runnable {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private final String authPassword;
-    private final String authLogin;
-    private final URI uri;
     private final boolean permanent;
     final RegistrationContext registrationContext;
     private final ServiceLookup services;
@@ -138,19 +134,13 @@ public class DovecotPushListener implements PushListener, Runnable {
     /**
      * Initializes a new {@link DovecotPushListener}.
      *
-     * @param uri The URL end-point
-     * @param authLogin The option login
-     * @param authPassword The optional password
      * @param registrationContext The registration context
      * @param permanent <code>true</code> if associated with a permanent listener; otherwise <code>false</code>
      * @param pushManager The Dovecot push manager instance
      * @param services The OSGi service look-up
      */
-    public DovecotPushListener(URI uri, final String authLogin, final String authPassword, RegistrationContext registrationContext, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
+    public DovecotPushListener(RegistrationContext registrationContext, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
         super();
-        this.uri = uri;
-        this.authLogin = authLogin;
-        this.authPassword = authPassword;
         this.pushManager = pushManager;
         this.permanent = permanent;
         this.registrationContext = registrationContext;
@@ -206,7 +196,7 @@ public class DovecotPushListener implements PushListener, Runnable {
     }
 
     @Override
-    public void notifyNewMail() throws OXException {
+    public void notifyNewMail() {
         // Do nothing as we notify on incoming push event
     }
 
@@ -286,21 +276,21 @@ public class DovecotPushListener implements PushListener, Runnable {
 
             // Cancel timer tasks
             {
-                ScheduledTimerTask retryTask = this.retryTask;
-                if (null != retryTask) {
+                ScheduledTimerTask retryTask_tmp = this.retryTask;
+                if (null != retryTask_tmp) {
                     this.retryTask = null;
-                    retryTask.cancel();
+                    retryTask_tmp.cancel();
                 }
 
-                ScheduledTimerTask refreshLockTask = this.refreshLockTask;
-                if (null != refreshLockTask) {
+                ScheduledTimerTask refreshLockTask_tmp = this.refreshLockTask;
+                if (null != refreshLockTask_tmp) {
                     this.refreshLockTask = null;
-                    refreshLockTask.cancel();
+                    refreshLockTask_tmp.cancel();
                 }
             }
 
             // Dispose...
-            Runnable cleanUpTask = createCleanUpTask(pushManager);
+            Runnable cleanUpTask = createCleanUpTask();
             doUnregistration();
             initialized = false;
             return cleanUpTask;
@@ -309,16 +299,16 @@ public class DovecotPushListener implements PushListener, Runnable {
         // Session-based...
         // Cancel timer tasks
         {
-            ScheduledTimerTask retryTask = this.retryTask;
-            if (null != retryTask) {
+            ScheduledTimerTask retryTask_tmp = this.retryTask;
+            if (null != retryTask_tmp) {
                 this.retryTask = null;
-                retryTask.cancel();
+                retryTask_tmp.cancel();
             }
 
-            ScheduledTimerTask refreshLockTask = this.refreshLockTask;
-            if (null != refreshLockTask) {
+            ScheduledTimerTask refreshLockTask_tmp = this.refreshLockTask;
+            if (null != refreshLockTask_tmp) {
                 this.refreshLockTask = null;
-                refreshLockTask.cancel();
+                refreshLockTask_tmp.cancel();
             }
         }
 
@@ -327,7 +317,7 @@ public class DovecotPushListener implements PushListener, Runnable {
         if (null == anotherListener) {
             // No other listener available
             // Give up lock and return
-            cleanUpTask = createCleanUpTask(pushManager);
+            cleanUpTask = createCleanUpTask();
         } else {
             try {
                 // No need to re-execute registration
@@ -335,7 +325,7 @@ public class DovecotPushListener implements PushListener, Runnable {
             } catch (Exception e) {
                 LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
                 // Give up lock and return
-                cleanUpTask = createCleanUpTask(pushManager);
+                cleanUpTask = createCleanUpTask();
             }
         }
 
@@ -348,16 +338,16 @@ public class DovecotPushListener implements PushListener, Runnable {
         return cleanUpTask;
     }
 
-    private Runnable createCleanUpTask(final DovecotPushManagerService pushManager) {
-        final RegistrationContext registrationContext = this.registrationContext;
-        final boolean permanent = this.permanent;
+    private Runnable createCleanUpTask() {
+        final RegistrationContext registrationContext_tmp = this.registrationContext;
+        final boolean permanent_tmp = this.permanent;
         return new Runnable() {
             @Override
             public void run() {
                 try {
-                    pushManager.releaseLock(new SessionInfo(registrationContext, permanent));
+                    pushManager.releaseLock(new SessionInfo(registrationContext_tmp, permanent_tmp));
                 } catch (Exception e) {
-                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
+                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(registrationContext_tmp.getUserId()), Integer.valueOf(registrationContext_tmp.getContextId()), e);
                 }
             }
         };

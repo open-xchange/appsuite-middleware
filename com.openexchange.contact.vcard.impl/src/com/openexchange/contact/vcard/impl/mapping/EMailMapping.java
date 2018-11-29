@@ -168,7 +168,7 @@ public class EMailMapping extends AbstractMapping {
     private String parseEMail(Email property, VCardParameters parameters, List<OXException> warnings) {
         if (null != property) {
             String value = property.getValue();
-            if (false == Strings.isEmpty(value)) {
+            if (Strings.isNotEmpty(value)) {
                 if (null == parameters || false == parameters.isValidateContactEMail()) {
                     return value;
                 }

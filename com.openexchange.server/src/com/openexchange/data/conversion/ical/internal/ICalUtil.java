@@ -59,6 +59,7 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -131,6 +132,9 @@ public class ICalUtil {
         List<Event> events = parseEvents(inputStream, session);
         if (null != events && 0 < events.size()) {
             CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class).init(session);
+            calendarSession.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
+            calendarSession.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
+            calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
             for (Event event : events) {
                 CalendarResult result = calendarSession.getCalendarService().createEvent(calendarSession, String.valueOf(folderID), event);
                 results.addAll(result.getCreations());

@@ -49,18 +49,16 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.sms.tools.SMSBucketExceptionCodes;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 
 /**
  * {@link PlistSMSUserLimitTest}
@@ -79,46 +77,37 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
     }
 
     @Test
-    @Ignore("always failing - obsolete, wrong behavior, badly written, unfixable or whatever")
     public void testExceedUserLimitTest() throws Exception {
         // Expecting user limit 2 and refresh interval 1min
 
         String jsonString = "{\"sms\":\"+49276183850\"}";
-        JSONObject body = new JSONObject(jsonString);
 
         for (int x = 0; x < 3; x++) {
-            ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-            OnboardingTestResponse response = getAjaxClient().execute(req);
-            assertNotNull("Response is empty!", response);
-            assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+            CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+            assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
 
             if (x < 2) {
                 // Expecting an sipgate authorization exception
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), 3, response.getException().getCode());
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), "SMS", response.getException().getPrefix());
+                checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
             } else {
                 // SMS should run into user limit
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), 1, response.getException().getCode());
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), "SMSLIMIT", response.getException().getPrefix());
+                checkException(response.getCode(), SMSBucketExceptionCodes.SMS_LIMIT_REACHED);
             }
         }
     }
 
     @Test
-    @Ignore("always failing - obsolete, wrong behavior, badly written, unfixable or whatever")
     public void testRefreshTest() throws Exception {
-        // Expecting user limit 2 and refresh interval 1min
+        // Expecting user limit 2 and refresh interval 2min
 
         String jsonString = "{\"sms\":\"+49276183850\"}";
-        JSONObject body = new JSONObject(jsonString);
 
         for (int x = 0; x < 10; x++) {
-            ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-            OnboardingTestResponse response = getAjaxClient().execute(req);
-            assertNotNull("Response is empty!", response);
-            assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+            CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
 
-            if (response.getException().getCode() == 1 && response.getException().getPrefix().equals("SMSLIMIT")) {
+            assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
+
+            if (response.getCode().endsWith("0001") && response.getCode().startsWith("SMSLIMIT")) {
                 break;
             }
 
@@ -131,21 +120,25 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         Thread.sleep(122000);
 
         //Execute another sms request which shouldn't run into the user sms limit
-        ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-        OnboardingTestResponse response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), 3, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), "SMS", response.getException().getPrefix());
+        checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
     }
 
     @Override
     protected Map<String, String> getNeededConfigurations() {
         Map<String, String> map = new HashMap<String, String>();
+        map.put("com.openexchange.sms.userlimit.enabled", Boolean.TRUE.toString());
         map.put("com.openexchange.sms.userlimit", String.valueOf(2));
         map.put("com.openexchange.sms.userlimit.refreshInterval", String.valueOf(2));
+        map.put("com.openexchange.client.onboarding.sms.ratelimit", String.valueOf(0));
         return map;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
     }
 
 }

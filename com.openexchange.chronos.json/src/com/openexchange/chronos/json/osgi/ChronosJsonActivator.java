@@ -108,8 +108,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, 
-            CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, 
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class,
+            CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
             ContactService.class, ResourceService.class, GroupService.class
         };
     }

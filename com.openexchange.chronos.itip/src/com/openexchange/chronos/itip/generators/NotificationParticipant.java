@@ -83,27 +83,18 @@ public class NotificationParticipant implements Cloneable {
     private TimeZone tz;
     private String folderId;
     private boolean virtual;
+    private boolean hidden;
 
     public NotificationParticipant(ITipRole role, boolean external, String email) {
-        super();
-        this.roles = EnumSet.of(role);
-        this.external = external;
-        this.email = email;
+        this(EnumSet.of(role), external, email);
     }
 
     public NotificationParticipant(Set<ITipRole> roles, boolean external, String email) {
-        super();
-        this.roles = roles;
-        this.external = external;
-        this.email = email;
+        this(roles, external, email, -1);
     }
 
     public NotificationParticipant(ITipRole role, boolean external, String email, int identifier) {
-        super();
-        this.roles = EnumSet.of(role);
-        this.external = external;
-        this.email = email;
-        this.identifier = identifier;
+        this(EnumSet.of(role), external, email, identifier);
     }
 
     public NotificationParticipant(Set<ITipRole> roles, boolean external, String email, int identifier) {
@@ -274,6 +265,14 @@ public class NotificationParticipant implements Cloneable {
         this.folderId = folderId;
     }
 
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
     @Override
     public NotificationParticipant clone() {
         NotificationParticipant clone = new NotificationParticipant(roles, external, comment);
@@ -292,6 +291,7 @@ public class NotificationParticipant implements Cloneable {
         clone.tz = this.tz;
         clone.folderId = this.folderId;
         clone.virtual = this.virtual;
+        clone.hidden = this.hidden;
 
         return clone;
     }

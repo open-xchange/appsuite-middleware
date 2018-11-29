@@ -50,6 +50,7 @@
 package com.openexchange.logging.osgi;
 
 import java.net.URL;
+import java.rmi.Remote;
 import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
@@ -69,6 +70,7 @@ import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.internal.LogLevelServiceImpl;
+import com.openexchange.logging.internal.LogbackConfigurationRMIServiceImpl;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
@@ -104,6 +106,7 @@ public class Activator implements BundleActivator, Reloadable {
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
     private ServiceRegistration<Reloadable> reloadable;
     private ServiceRegistration<LogLevelService> logLevelService;
+    private LogbackConfigurationRMIServiceImpl logbackConfigurationRMIService;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -152,6 +155,10 @@ public class Activator implements BundleActivator, Reloadable {
         registerIncludeStackTraceService(serviceImpl, context);
         reloadable = context.registerService(Reloadable.class, this, null);
 
+        // Register RMI logback config service
+        logbackConfigurationRMIService = new LogbackConfigurationRMIServiceImpl(loggerContext, rankingAwareTurboFilterList, serviceImpl);
+        context.registerService(Remote.class, logbackConfigurationRMIService, null);
+
         logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
     }
 
@@ -194,6 +201,9 @@ public class Activator implements BundleActivator, Reloadable {
         if (logLevelService != null) {
             logLevelService.unregister();
             logLevelService = null;
+        }
+        if (logbackConfigurationRMIService != null) {
+            logbackConfigurationRMIService.dispose();
         }
     }
 

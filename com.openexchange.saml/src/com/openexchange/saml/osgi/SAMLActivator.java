@@ -68,23 +68,26 @@ public class SAMLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigurationService.class};
+        return new Class[] { ConfigurationService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         samlFeature = new SAMLFeature(context);
         samlFeature.open();
+
+        SAMLConfigRegistryImpl configRegistry = SAMLConfigRegistryImpl.getInstance();
         DefaultConfig config = DefaultConfig.init(getService(ConfigurationService.class));
-        SAMLConfigRegistryImpl.getInstance().registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
-        registerService(SAMLConfigRegistry.class, SAMLConfigRegistryImpl.getInstance());
+        configRegistry.registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
+        registerService(SAMLConfigRegistry.class, configRegistry);
 
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         if (samlFeature != null) {
             samlFeature.close();
+            samlFeature = null;
         }
         super.stopBundle();
     }

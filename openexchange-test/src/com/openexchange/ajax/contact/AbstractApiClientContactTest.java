@@ -73,6 +73,7 @@ import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.ContactData;
+import com.openexchange.testing.httpclient.models.ContactListElement;
 import com.openexchange.testing.httpclient.models.ContactResponse;
 import com.openexchange.testing.httpclient.models.ContactUpdateResponse;
 import com.openexchange.testing.httpclient.models.DistributionListMember;
@@ -105,6 +106,8 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
     protected TimeZone tz = null;
 
     private Long lastTimestamp;
+
+    private final List<String> createdContacts = new ArrayList<>();
 
     @Override
     @Before
@@ -176,7 +179,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0");
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -185,11 +188,10 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
-        } else {
-            for (ArrayList<?> folder : privateList) {
-                if ((Boolean) folder.get(1)) {
-                    return (String) folder.get(0);
-                }
+        }
+        for (ArrayList<?> folder : privateList) {
+            if ((Boolean) folder.get(1)) {
+                return (String) folder.get(0);
             }
         }
         throw new Exception("Unable to find default contact folder!");
@@ -308,7 +310,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         final ContactData contactObj = new ContactData();
         contactObj.setLastName("Meier");
         contactObj.setFirstName("Herbert");
-        //contactObj.setDisplayName(displayname);
+        contactObj.setDisplayName(displayname);
         contactObj.setStreetBusiness("Franz-Meier Weg 17");
         contactObj.setCityBusiness("Test Stadt");
         contactObj.setStateBusiness("NRW");
@@ -317,7 +319,8 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         contactObj.setCompany("Internal Test AG");
         contactObj.setEmail1("hebert.meier@open-xchange.com");
         contactObj.setFolderId(contactFolderId);
-
+        contactObj.setMarkAsDistributionlist(false);
+        contactObj.setDistributionList(null);
         return contactObj;
     }
 
@@ -442,7 +445,31 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         lastTimestamp = response.getTimestamp();
-        return response.getData().getId();
+        return rememberContact(response.getData().getId());
+    }
+
+    private String rememberContact(String id) {
+        createdContacts.add(id);
+        return id;
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        List<ContactListElement> body = new ArrayList<>();
+        for(String id: createdContacts) {
+            ContactListElement element = new ContactListElement();
+            element.setFolder(contactFolderId);
+            element.setId(id);
+            body.add(element);
+        }
+        if(!body.isEmpty()) {
+            try {
+                contactsApi.deleteContacts(getSessionId(), Long.MAX_VALUE, body);
+            } catch(Exception e) {
+                // ignore
+            }
+        }
+        super.tearDown();
     }
 
     public void updateContact(final ContactData contactObj, String folder) throws Exception {

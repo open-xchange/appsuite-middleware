@@ -91,7 +91,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractRestTest {
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
+            ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
             ChangePropertiesResponse response = getAjaxClient().execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
         }
@@ -113,7 +113,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractRestTest {
                     }
                 }
                 if (!map.isEmpty()) {
-                    ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
+                    ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, "server", getReloadables());
                     ChangePropertiesResponse response = getAjaxClient().execute(req);
                     oldData = ResponseWriter.getJSON(response.getResponse());
                 }

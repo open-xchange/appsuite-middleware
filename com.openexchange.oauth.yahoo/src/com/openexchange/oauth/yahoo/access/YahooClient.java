@@ -141,7 +141,7 @@ public class YahooClient {
      * @throws OXException if a connection error is occurred
      */
     public boolean ping() throws OXException {
-        return !Strings.isEmpty(getGUID());
+        return Strings.isNotEmpty(getGUID());
     }
 
     /**

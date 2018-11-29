@@ -104,6 +104,10 @@ public enum AlarmTriggerField {
     /**
      * The date and time the trigger time is calculated on
      */
-    RELATED_TIME
+    RELATED_TIME,
+    /**
+     * The processed field. Contains information about whether the trigger is already picked up by a node to perform mail delivery.
+     */
+    PROCESSED
 
 }

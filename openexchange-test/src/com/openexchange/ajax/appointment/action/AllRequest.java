@@ -85,8 +85,6 @@ public class AllRequest extends CommonAllRequest {
 
     private String timeZoneId;
 
-    private final boolean showPrivates;
-
     public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz) {
         this(folderId, columns, start, end, tz, true);
     }
@@ -95,15 +93,10 @@ public class AllRequest extends CommonAllRequest {
      * Default constructor.
      */
     public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster) {
-        this(folderId, columns, start, end, tz, recurrenceMaster, false);
-    }
-
-    public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
         super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns), 0, null, true);
         this.start = start;
         this.end = end;
         this.recurrenceMaster = recurrenceMaster;
-        this.showPrivates = showPrivates;
         this.timeZoneId = tz.getID();
     }
 
@@ -112,10 +105,6 @@ public class AllRequest extends CommonAllRequest {
     }
 
     public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster) {
-        this(folderId, alias, start, end, tz, recurrenceMaster, false);
-    }
-
-    public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
         super(AbstractAppointmentRequest.URL, folderId, alias, 0, null, true);
         // Add time zone's offset to simulate local time as passed by requests from GUI
         this.start = addTimeZone2Date(start, tz);
@@ -123,7 +112,6 @@ public class AllRequest extends CommonAllRequest {
 //        this.start = start;
 //        this.end = end;
         this.recurrenceMaster = recurrenceMaster;
-        this.showPrivates = showPrivates;
         this.timeZoneId = tz.getID();
     }
 
@@ -186,7 +174,6 @@ public class AllRequest extends CommonAllRequest {
         params.add(new Parameter(AJAXServlet.PARAMETER_START, start));
         params.add(new Parameter(AJAXServlet.PARAMETER_END, end));
         params.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
-        params.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
 
         return params.toArray(new Parameter[] {});
     }

@@ -87,9 +87,8 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
 
         if(isNotMatcher){
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>()));
-        } else {
-            return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());
         }
+        return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());
     }
 
     @Override

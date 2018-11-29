@@ -60,8 +60,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
@@ -154,8 +154,8 @@ public class UpdateITipAnalyzerTest2 {
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
         // Mock settings
-        PowerMockito.when(contextService.getContext(Matchers.anyInt())).thenReturn(context);
-        PowerMockito.when(userService.getUser(Matchers.anyInt(), Matchers.any())).thenReturn(user);
+        PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);
+        PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn(user);
 
     }
 

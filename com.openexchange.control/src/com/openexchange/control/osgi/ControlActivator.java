@@ -50,12 +50,11 @@
 package com.openexchange.control.osgi;
 
 import static com.openexchange.control.internal.GeneralControl.shutdown;
-import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.control.internal.GeneralControl;
+import com.openexchange.control.internal.GeneralControlMBean;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -65,8 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ControlActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(ControlActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ControlActivator.class);
 
     private volatile Thread shutdownHookThread;
 
@@ -90,7 +88,7 @@ public final class ControlActivator extends HousekeepingActivator {
             /*
              * Create & open service tracker
              */
-            track(ManagementService.class, new ManagementServiceTrackerCustomizer(context, LOG));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, GeneralControlMBean.MBEAN_NAME, GeneralControlMBean.DOMAIN, new GeneralControl(context)));
             openTrackers();
             /*
              * Add shutdown hook
@@ -134,51 +132,6 @@ public final class ControlActivator extends HousekeepingActivator {
             throw e;
         }
     }
-
-    private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
-
-        private final BundleContext bundleContext;
-        private final org.slf4j.Logger logger;
-
-        ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.slf4j.Logger logger) {
-            super();
-            this.bundleContext = bundleContext;
-            this.logger = logger;
-        }
-
-        @Override
-        public ManagementService addingService(final ServiceReference<ManagementService> reference) {
-            final ManagementService addedService = bundleContext.getService(reference);
-            try {
-                addedService.registerMBean(new ObjectName("com.openexchange.control", "name", "Control"), new GeneralControl(bundleContext));
-                logger.info("Control MBean successfully registered.");
-                return addedService;
-            } catch (final Exception e) {
-                logger.error("Control MBean registration failed.", e);
-            }
-            bundleContext.ungetService(reference);
-            return null;
-        }
-
-        @Override
-        public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
-            // Nothing to do
-        }
-
-        @Override
-        public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
-            if (null != service) {
-                try {
-                    service.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
-                    logger.info("Control MBean successfully unregistered.");
-                } catch (final Exception e) {
-                    logger.error("Control MBean unregistration failed.", e);
-                } finally {
-                    bundleContext.ungetService(reference);
-                }
-            }
-        }
-    } // End of ManagementServiceTrackerCustomizer
 
     /**
      * {@link ControlShutdownHookThread} - The shutdown hook thread of control bundle.

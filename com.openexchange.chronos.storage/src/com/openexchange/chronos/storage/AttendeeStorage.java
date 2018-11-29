@@ -52,7 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.exception.OXException;
 
 /**
@@ -90,13 +90,24 @@ public interface AttendeeStorage {
     Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal) throws OXException;
 
     /**
-     * Loads an attendee's participation statuses for specific events.
+     * Loads the number of (internal) attendees for specific events.
      *
-     * @param eventIds The identifiers of the events to load the participation statuses for
-     * @param attendee The attendee to load the participation statuses for
-     * @return The participation statuses, mapped to the identifiers of the corresponding events
+     * @param eventIds The identifiers of the events to load the attendee counts for
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to not filter by internal/external
+     * @return The number of attendees, mapped to the identifiers of the corresponding events
      */
-    Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException;
+    Map<String, Integer> loadAttendeeCounts(String[] eventIds, Boolean internal) throws OXException;
+
+    /**
+     * Loads data of a specific attendee for a number of events.
+     *
+     * @param eventIds The identifiers of the events to load the attendee data for
+     * @param attendee The attendee to load
+     * @param fields The attendee fields to load, or <code>null</code> to include all properties
+     * @return The loaded attendee data, mapped to the identifiers of the corresponding events
+     */
+    Map<String, Attendee> loadAttendee(String[] eventIds, Attendee attendee, AttendeeField[] fields) throws OXException;
 
     /**
      * Deletes all attendees for a specific event.

@@ -107,7 +107,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     @Override
     public Integer call() throws Exception {
-        LOG.debug("Starting context processing ot one schema, for report with uuid: " + this.uuid + " and context amount: " + this.contextIds.size());
+        LOG.debug("Starting context processing ot one schema, for report with uuid: {} and context amount: {}", this.uuid, this.contextIds.size());
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
         currentThread.setPriority(ReportProperties.getThreadPriority());
@@ -182,7 +182,6 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
         User[] loadUsers = loadUsers(ctx);
 
         for (User user : loadUsers) {
-            boolean skip = false;
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
             // Are extended options available?
             if (this.report != null) {
@@ -191,22 +190,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                 contextReport.getUserList().add(user.getId());
                 contextReport.setReportConfig(this.report.getReportConfig());
             }
-            // Run User Analyzers
-            for (ReportUserHandler userHandler : Services.getUserHandlers()) {
-                if (userHandler.appliesTo(reportType)) {
-                    try {
-                        userHandler.runUserReport(userReport);
-                    } catch (OXException e) {
-                        LOG.error("", e);
-                        contextReport.getUserList().remove((Integer) user.getId());
-                        skip = true;
-                        if (this.report != null) {
-                            this.report.addError(e);
-                        }
-                    }
-                }
-            }
-            if (skip) {
+            if (runUserAnalyzers(contextReport, user, userReport)) {
                 continue;
             }
             // Compact User Analysis and add to context report
@@ -217,6 +201,25 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
             }
         }
 
+    }
+
+    private boolean runUserAnalyzers(ContextReport contextReport, User user, UserReport userReport) {
+        boolean skip = false;
+        for (ReportUserHandler userHandler : Services.getUserHandlers()) {
+            if (userHandler.appliesTo(reportType)) {
+                try {
+                    userHandler.runUserReport(userReport);
+                } catch (OXException e) {
+                    LOG.error("", e);
+                    contextReport.getUserList().remove((Integer) user.getId());
+                    skip = true;
+                    if (this.report != null) {
+                        this.report.addError(e);
+                    }
+                }
+            }
+        }
+        return skip;
     }
 
     protected User[] loadUsers(Context ctx) throws OXException {

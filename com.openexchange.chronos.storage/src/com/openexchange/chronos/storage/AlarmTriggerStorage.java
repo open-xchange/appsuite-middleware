@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
@@ -99,6 +100,15 @@ public interface AlarmTriggerStorage {
     void deleteTriggers(List<String> eventIds) throws OXException;
 
     /**
+     * Removes the triggers for the given alarm ids
+     *
+     * @param alarmIds The alarm ids
+     * @throws OXException
+     */
+    void deleteTriggersById(List<Integer> alarmIds) throws OXException;
+
+
+    /**
      * Deletes any existing triggers of a specific user for multiple events.
      *
      * @param eventIds The identifiers of the events to delete the triggers for
@@ -132,6 +142,16 @@ public interface AlarmTriggerStorage {
     List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException;
 
     /**
+     * Retrieves the given trigger
+     *
+     * @param id The alarm id
+     * @return The {@link AlarmTrigger} or null
+     * @throws OXException
+     */
+    AlarmTrigger loadTrigger(int id) throws OXException;
+
+
+    /**
      * Recalculates the trigger time for floating events. E.g. to adapt to a timezone change of the user.
      *
      * @param userId The user id
@@ -145,8 +165,8 @@ public interface AlarmTriggerStorage {
      *
      * @param userId The identifier of the user to get the trigger information for
      * @param eventIds The identifiers of the event to get the trigger information for
-     * @return A map that associates the identifiers of those events where at least one alarm trigger is stored for the user to {@link Boolean#TRUE}
+     * @return A set holding the identifiers of those events where at least one alarm trigger is stored for the user
      */
-    Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException;
+    Set<String> hasTriggers(int userId, String[] eventIds) throws OXException;
 
 }

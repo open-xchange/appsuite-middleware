@@ -105,7 +105,7 @@ public class LinkResult implements Result {
             }
             {
                 String imageUrl = link.getImageUrl();
-                if (false == Strings.isEmpty(imageUrl)) {
+                if (Strings.isNotEmpty(imageUrl)) {
                     jLink.put("image", imageUrl);
                 }
             }

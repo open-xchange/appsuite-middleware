@@ -203,7 +203,7 @@ public class ImageGetAction implements AJAXActionService {
         long size = -1L;
         {
             String sSize = dataProperties.get(DataProperties.PROPERTY_SIZE);
-            if (false == Strings.isEmpty(sSize)) {
+            if (Strings.isNotEmpty(sSize)) {
                 try {
                     size = Long.parseLong(sSize.trim());
                 } catch (NumberFormatException e) {

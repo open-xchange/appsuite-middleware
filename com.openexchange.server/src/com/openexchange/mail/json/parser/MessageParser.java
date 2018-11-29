@@ -241,7 +241,7 @@ public final class MessageParser {
                     if (conversionService == null) {
                         throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConversionService.class.getName());
                     }
-                    Set<Class<?>> types = new HashSet<Class<?>>(4);
+                    Set<Class<?>> types = new HashSet<>(4);
                     for (int i = 0; i < length; i++) {
                         JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
                         if (!dataSourceObject.hasAndNotNull(JSON_IDENTIFIER)) {
@@ -453,7 +453,7 @@ public final class MessageParser {
         if (!m.find()) {
             return Collections.emptySet();
         }
-        Set<String> set = new HashSet<String>(4);
+        Set<String> set = new HashSet<>(4);
         do {
             String imageTag = m.group();
             Matcher tmp = PATTERN_ID_ATTRIBUTE.matcher(imageTag);
@@ -498,7 +498,7 @@ public final class MessageParser {
         if (jsonObj.hasAndNotNull(MailJSONField.USER.getKey())) {
             JSONArray arr = jsonObj.getJSONArray(MailJSONField.USER.getKey());
             int length = arr.length();
-            List<String> l = new ArrayList<String>(length);
+            List<String> l = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
                 l.add(arr.getString(i));
             }
@@ -572,7 +572,7 @@ public final class MessageParser {
                     /*
                      * Any other value
                      */
-                    mail.setDispositionNotification(null);
+                    mail.removeDispositionNotification();
                 } else {
                     /*
                      * Valid email address
@@ -691,7 +691,7 @@ public final class MessageParser {
                     properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
                     {
                         String fileName = jAttachment.optString(ATTACHMENT_FILE_NAME, null);
-                        if (!Strings.isEmpty(fileName)) {
+                        if (Strings.isNotEmpty(fileName)) {
                             properties.put(DataProperties.PROPERTY_NAME, fileName);
                         }
                     }
@@ -795,14 +795,14 @@ public final class MessageParser {
         try {
             access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
             access.connect();
-            retval = new HashMap<String, ReferencedMailPart>(len);
+            retval = new HashMap<>(len);
             handleMultipleRefs(provider, session, parentMsgRef, contentIds, prepare4Transport, groupedSeqIDs, retval, access);
         } catch (OXException oe) {
             if (null == access || !shouldRetry(oe)) {
                 throw oe;
             }
             access = MailAccess.reconnect(access);
-            retval = new HashMap<String, ReferencedMailPart>(len);
+            retval = new HashMap<>(len);
             handleMultipleRefs(provider, session, parentMsgRef, contentIds, prepare4Transport, groupedSeqIDs, retval, access);
         } finally {
             if (null != access) {
@@ -820,7 +820,7 @@ public final class MessageParser {
         }
         referencedMail.setAccountId(access.getAccountId());
         // Get attachments out of referenced mail
-        Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
+        Set<String> remaining = new HashSet<>(groupedSeqIDs.keySet());
         MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);
         new MailMessageParser().parseMailMessage(referencedMail, handler);
         for (Map.Entry<String, MailPart> e : handler.getMailParts().entrySet()) {
@@ -983,7 +983,7 @@ public final class MessageParser {
      */
     public static InternetAddress[] parseAdressArray(JSONArray jAddresses, int length, ParseMode parseMode) throws JSONException, AddressException {
         boolean strictOrLenient = (ParseMode.STRICT == parseMode) || (ParseMode.LENIENT == parseMode);
-        List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
+        List<InternetAddress> addresses = new ArrayList<>(length);
         for (int i = 0, k = length; k-- > 0; i++) {
             JSONArray persAndAddr = jAddresses.getJSONArray(i);
             int pLen = persAndAddr.length();
@@ -1038,7 +1038,7 @@ public final class MessageParser {
     }
 
     private static InternetAddress getEmailAddress(String addrStr) {
-        if (com.openexchange.java.Strings.isEmpty(addrStr)) {
+        if (com.openexchange.java.Strings.isEmpty(addrStr) || "false".equalsIgnoreCase(addrStr)) {
             return null;
         }
         try {

@@ -134,7 +134,7 @@ public class AccountConfiguration {
         if (refreshInterval > 0) {
             folder.put("refreshInterval", refreshInterval);
         }
-        if (!Strings.isEmpty(locale)) {
+        if (Strings.isNotEmpty(locale)) {
             folder.put("locale", locale);
         }
         return folder;

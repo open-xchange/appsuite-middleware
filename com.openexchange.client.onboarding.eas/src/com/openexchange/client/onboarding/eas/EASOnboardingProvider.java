@@ -293,7 +293,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
             if (generateIfAbsent) {
-                return OnboardingUtility.constructURLWithParameters(hostData, null, "/Microsoft-Server-ActiveSync", false, null).toString();
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/Microsoft-Server-ActiveSync", null).toString();
             }
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
@@ -301,7 +301,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         String value = property.get();
         if (Strings.isEmpty(value)) {
             if (generateIfAbsent) {
-                return OnboardingUtility.constructURLWithParameters(hostData, null, "/Microsoft-Server-ActiveSync", false, null).toString();
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/Microsoft-Server-ActiveSync", null).toString();
             }
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }

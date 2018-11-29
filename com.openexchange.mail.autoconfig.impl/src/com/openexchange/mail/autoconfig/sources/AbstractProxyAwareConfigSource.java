@@ -146,7 +146,7 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
                 if (propPassword.isDefined()) {
                     proxyLogin = propLogin.get();
                     proxyPassword = propPassword.get();
-                    if (false == Strings.isEmpty(proxyLogin) && false == Strings.isEmpty(proxyPassword)) {
+                    if (Strings.isNotEmpty(proxyLogin) && Strings.isNotEmpty(proxyPassword)) {
                         proxyLogin = proxyLogin.trim();
                         proxyPassword = proxyPassword.trim();
                     }

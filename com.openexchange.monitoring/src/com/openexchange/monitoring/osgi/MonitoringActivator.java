@@ -59,13 +59,16 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
 import com.openexchange.monitoring.sockets.SocketMonitoringService;
+import com.openexchange.monitoring.sockets.SocketTraceMBean;
 import com.openexchange.monitoring.sockets.TracingSocketMonitor;
 import com.openexchange.monitoring.sockets.TracingSocketMonitor.TracingSocketMonitorConfig;
 import com.openexchange.monitoring.sockets.internal.SocketMonitoringSystem;
+import com.openexchange.monitoring.sockets.internal.SocketTraceMBeanImpl;
 import com.openexchange.net.HostList;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -176,7 +179,7 @@ public final class MonitoringActivator extends HousekeepingActivator implements 
                 int[] filterPorts = null;
                 {
                     String filterExpression = configService.getProperty("com.openexchange.monitoring.sockets.tracing.filter.ports", "").trim();
-                    if (!Strings.isEmpty(filterExpression)) {
+                    if (Strings.isNotEmpty(filterExpression)) {
                         try {
                             String[] sPorts = Strings.splitByComma(filterExpression);
                             filterPorts = new int[sPorts.length];
@@ -210,7 +213,7 @@ public final class MonitoringActivator extends HousekeepingActivator implements 
 
             // Only makes sense if samples are collected
             if (numberOfSamplesPerSocket > 0) {
-                ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceTracker(tracingSocketMonitor, context));
+                ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new HousekeepingManagementTracker(context, SocketTraceMBean.class.getName(), SocketTraceMBean.DOMAIN, new SocketTraceMBeanImpl(tracingSocketMonitor)));
                 this.managementServiceTracker = tracker;
                 tracker.open();
             }

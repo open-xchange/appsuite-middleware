@@ -77,6 +77,8 @@ public final class MessagingPermissions {
 
     static final class UnmodifiableMessagingPermission implements MessagingPermission {
 
+        private static final long serialVersionUID = 5026003840275420722L;
+        
         private MessagingPermission delegate;
 
         UnmodifiableMessagingPermission(final MessagingPermission delegate) {

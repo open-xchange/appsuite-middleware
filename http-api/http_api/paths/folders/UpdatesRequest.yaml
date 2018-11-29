@@ -19,6 +19,7 @@
         required: true
       - $ref: "#/parameters/gblQueryParamFolderColumns"
       - $ref: "#/parameters/gblQueryParamFolderTree"
+      - $ref: "#/parameters/gblQueryParamLanguage"
       - in: query
         name: ignore
         type: string

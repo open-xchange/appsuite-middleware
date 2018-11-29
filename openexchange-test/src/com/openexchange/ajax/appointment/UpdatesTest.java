@@ -27,7 +27,7 @@ public class UpdatesTest extends AppointmentTest {
 
     @Test
     public void testDeleted() throws Exception {
-        catm.updates(appointmentFolderId, _appointmentFields, new Date(System.currentTimeMillis() - (dayInMillis * 7)), false, false, Ignore.CHANGED, null, null);
+        catm.updates(appointmentFolderId, _appointmentFields, new Date(System.currentTimeMillis() - (dayInMillis * 7)), false, Ignore.CHANGED, null, null);
         assertFalse(catm.getLastResponse().hasError());
     }
 
@@ -43,7 +43,7 @@ public class UpdatesTest extends AppointmentTest {
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = loadAppointment.getLastModified();
 
-        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, decrementDate(modified), false, false, Ignore.DELETED, start, end);
+        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, decrementDate(modified), false, Ignore.DELETED, start, end);
 
         assertTrue("no appointment object in response", appointmentArray.size() > 0);
         boolean found = false;
@@ -69,7 +69,7 @@ public class UpdatesTest extends AppointmentTest {
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId1);
         Date modified = loadAppointment.getLastModified();
 
-        List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, decrementDate(modified), false, false, Ignore.DELETED, start, end);
+        List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, decrementDate(modified), false, Ignore.DELETED, start, end);
 
         assertTrue("no appointment object in response", appointmentArray.size() > 0);
         boolean found1 = false;
@@ -89,7 +89,7 @@ public class UpdatesTest extends AppointmentTest {
         loadAppointment = catm.get(appointmentFolderId, objectId2);
         modified = loadAppointment.getLastModified();
 
-        appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, decrementDate(modified), false, false, Ignore.DELETED, start, end);
+        appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, decrementDate(modified), false, Ignore.DELETED, start, end);
 
         assertTrue("no appointment object in response", appointmentArray.size() > 0);
         found1 = false;
@@ -119,7 +119,7 @@ public class UpdatesTest extends AppointmentTest {
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         final Date modified = new Date(loadAppointment.getLastModified().getTime() + (7 * dayInMillis));
 
-        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, modified, false, false, Ignore.DELETED, start, end);
+        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, modified, false, Ignore.DELETED, start, end);
 
         assertEquals("unexpected data in response", 0, appointmentArray.size());
     }
@@ -138,7 +138,7 @@ public class UpdatesTest extends AppointmentTest {
 
         appointmentObj.setObjectID(objectId);
 
-        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, new Date(0), false, false, Ignore.DELETED, start, end);
+        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, new Date(0), false, Ignore.DELETED, start, end);
 
         boolean found = false;
 

@@ -65,6 +65,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -107,6 +108,7 @@ public final class RangeAction extends AbstractReminderAction {
             timeZone = null == timeZoneId ? tz : getTimeZone(timeZoneId);
         }
 
+
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         try {
             final ServerSession session = req.getSession();
@@ -116,7 +118,7 @@ public final class RangeAction extends AbstractReminderAction {
             final JSONArray jsonResponseArray = new JSONArray();
             for (ReminderObject reminder : reminders) {
                 try {
-                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                    if (isRequested(req, reminder) && hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
                         final JSONObject jsonReminderObj = new JSONObject(12);
                         reminderWriter.writeObject(reminder, jsonReminderObj);
                         jsonResponseArray.put(jsonReminderObj);
@@ -130,8 +132,9 @@ public final class RangeAction extends AbstractReminderAction {
                 }
             }
 
-
-            addEventReminder(session, jsonResponseArray, reminderWriter, end);
+            if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(Types.APPOINTMENT)) {
+                addEventReminder(session, jsonResponseArray, reminderWriter, end);
+            }
 
             return new AJAXRequestResult(jsonResponseArray, "json");
         } catch (final OXException e) {

@@ -81,8 +81,11 @@ import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
+import com.openexchange.groupware.upload.StreamedUpload;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -167,6 +170,12 @@ public class AJAXRequestData {
 
     /** The upload event */
     private volatile @Nullable UploadEvent uploadEvent;
+
+    /** The streamed upload */
+    private volatile @Nullable StreamedUpload streamedUpload;
+
+    /** The streamed upload flag */
+    private volatile @Nullable Boolean hasStreamedUpload;
 
     /** The format */
     private @Nullable String format;
@@ -299,6 +308,7 @@ public class AJAXRequestData {
         copy.state = null;
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
+        copy.streamedUpload = null;
         return copy;
     }
 
@@ -640,6 +650,7 @@ public class AJAXRequestData {
                     this.lastModified = lastModified;
                 } catch (Exception e) {
                     // Ignore
+                    LOGGER.trace("", e);
                 }
             }
         }
@@ -806,7 +817,7 @@ public class AJAXRequestData {
         try {
             return Integer.parseInt(value.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, value);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, value);
         }
     }
 
@@ -899,7 +910,7 @@ public class AJAXRequestData {
             throw new NullPointerException("name is null");
         }
         final String value = params.get(name);
-        if (com.openexchange.java.Strings.isEmpty(value)) {
+        if (null == value || com.openexchange.java.Strings.isEmpty(value)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         return value;
@@ -931,7 +942,7 @@ public class AJAXRequestData {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
             }
         }
         return ret;
@@ -1282,7 +1293,7 @@ public class AJAXRequestData {
      * @see #hasUploads(long, long)
      */
     public boolean hasUploads() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         return !files.isEmpty();
     }
 
@@ -1298,7 +1309,53 @@ public class AJAXRequestData {
     public boolean hasUploads(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
+        return !files.isEmpty();
+    }
+
+    /**
+     * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
+     * multiple module.
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param streamed Whether a streamed upload is preferred
+     * @return <code>true</code> if one or more files were uploaded, <code>false</code> otherwise.
+     * @throws OXException If upload files cannot be processed
+     */
+    public boolean hasUploads(long maxUploadFileSize, long maxUploadSize, boolean streamed) throws OXException {
+        if (!files.isEmpty()) {
+            // Already parsed
+            return true;
+        }
+
+        if (streamed) {
+            Boolean hasStreamedUpload = this.hasStreamedUpload;
+            if (null == hasStreamedUpload) {
+                this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+                this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+                try {
+                    processUpload(maxUploadFileSize, maxUploadSize, true);
+                } catch (OXException e) {
+                    if (UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                        return (null != e.getArgument("__uploadEvent")) && !files.isEmpty();
+                    }
+                    throw e;
+                }
+                StreamedUpload streamedUpload = this.streamedUpload;
+                hasStreamedUpload = Boolean.valueOf(streamedUpload != null && streamedUpload.hasAny());
+                this.hasStreamedUpload = hasStreamedUpload;
+            }
+            return hasStreamedUpload.booleanValue();
+        }
+
+        this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+        this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         return !files.isEmpty();
     }
 
@@ -1310,7 +1367,7 @@ public class AJAXRequestData {
      * @see #getFiles(long, long)
      */
     public List<UploadFile> getFiles() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         return Collections.unmodifiableList(files);
     }
 
@@ -1325,7 +1382,7 @@ public class AJAXRequestData {
     public List<UploadFile> getFiles(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         return Collections.unmodifiableList(files);
     }
 
@@ -1338,7 +1395,7 @@ public class AJAXRequestData {
      * @see #getFile(String, long, long)
      */
     public @Nullable UploadFile getFile(String name) throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
@@ -1359,13 +1416,47 @@ public class AJAXRequestData {
     public @Nullable UploadFile getFile(String name, long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the streamed upload
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
+     *
+     * @return The streamed upload
+     * @throws OXException If upload cannot be processed
+     */
+    public StreamedUpload getStreamedUpload() throws OXException {
+        processUpload(maxUploadFileSize, maxUploadSize, true);
+        return streamedUpload;
+    }
+
+    /**
+     * Gets the streamed upload.
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return The upload event
+     * @throws OXException If upload cannot be processed
+     */
+    public StreamedUpload getStreamedUpload(long maxUploadFileSize, long maxUploadSize) throws OXException {
+        this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
+        this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
+        processUpload(maxUploadFileSize, maxUploadSize, true);
+        return streamedUpload;
     }
 
     /**
@@ -1376,7 +1467,7 @@ public class AJAXRequestData {
      * @see #getUploadEvent(long, long)
      */
     public UploadEvent getUploadEvent() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         return uploadEvent;
     }
 
@@ -1391,11 +1482,11 @@ public class AJAXRequestData {
     public UploadEvent getUploadEvent(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize);
+        processUpload(maxUploadFileSize, maxUploadSize, false);
         return uploadEvent;
     }
 
-    private void processUpload(long maxFileSize, long maxOverallSize) throws OXException {
+    private void processUpload(long maxFileSize, long maxOverallSize, boolean streamed) throws OXException {
         HttpServletRequest localHttpServletRequest = httpServletRequest;
         if (null == localHttpServletRequest) {
             return;
@@ -1403,18 +1494,54 @@ public class AJAXRequestData {
         if (multipart) {
             final List<UploadFile> thisFiles = this.files;
             synchronized (thisFiles) {
-                UploadEvent uploadEvent = this.uploadEvent;
-                if (null == uploadEvent) {
-                    uploadEvent = AJAXServlet.processUploadStatic(localHttpServletRequest, maxFileSize, maxOverallSize, session);
-                    this.uploadEvent = uploadEvent;
-                    final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
-                    while (iterator.hasNext()) {
-                        thisFiles.add(iterator.next());
+                if (streamed) {
+                    UploadEvent existingUploadEvent = this.uploadEvent;
+                    if (null != existingUploadEvent) {
+                        // Spooling upload already triggered
+                        UploadException uploadException = UploadException.UploadCode.FAILED_STREAMED_UPLOAD.create();
+                        uploadException.setArgument("__uploadEvent", existingUploadEvent);
+                        throw uploadException;
                     }
-                    final Iterator<String> names = uploadEvent.getFormFieldNames();
-                    while (names.hasNext()) {
-                        final String name = names.next();
-                        putParameter0(name, uploadEvent.getFormField(name), false);
+
+                    StreamedUpload streamedUpload = this.streamedUpload;
+                    if (null == streamedUpload) {
+                        try {
+                            streamedUpload = UploadUtility.processStreamedUpload(true, localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                            this.streamedUpload = streamedUpload;
+                            for (Iterator<String> names = streamedUpload.getFormFieldNames(); names.hasNext();) {
+                                String name = names.next();
+                                putParameter0(name, streamedUpload.getFormField(name), false);
+                            }
+                        } catch (OXException e) {
+                            if (UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                                UploadEvent uploadEvent = this.uploadEvent;
+                                if (null == uploadEvent) {
+                                    uploadEvent = (UploadEvent) e.getArgument("__uploadEvent");
+                                    this.uploadEvent = uploadEvent;
+                                    for (Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator(); iterator.hasNext();) {
+                                        thisFiles.add(iterator.next());
+                                    }
+                                    for (Iterator<String> names = uploadEvent.getFormFieldNames(); names.hasNext();) {
+                                        String name = names.next();
+                                        putParameter0(name, uploadEvent.getFormField(name), false);
+                                    }
+                                }
+                            }
+                            throw e;
+                        }
+                    }
+                } else {
+                    UploadEvent uploadEvent = this.uploadEvent;
+                    if (null == uploadEvent) {
+                        uploadEvent = AJAXServlet.processUploadStatic(localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                        this.uploadEvent = uploadEvent;
+                        for (Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator(); iterator.hasNext();) {
+                            thisFiles.add(iterator.next());
+                        }
+                        for (Iterator<String> names = uploadEvent.getFormFieldNames(); names.hasNext();) {
+                            String name = names.next();
+                            putParameter0(name, uploadEvent.getFormField(name), false);
+                        }
                     }
                 }
             }
@@ -1422,14 +1549,25 @@ public class AJAXRequestData {
             // Process simple binary upload
             final List<UploadFile> files = this.files;
             synchronized (files) {
-                if (files.isEmpty()) {
-                    UploadEvent uploadEvent = this.uploadEvent;
-                    if (null == uploadEvent) {
-                        uploadEvent = UploadUtility.processPutUpload(localHttpServletRequest, maxFileSize, maxOverallSize, session);
-                        this.uploadEvent = uploadEvent;
-                        final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
-                        while (iterator.hasNext()) {
-                            files.add(iterator.next());
+                if (streamed) {
+                    StreamedUpload streamedUpload = this.streamedUpload;
+                    if (null == streamedUpload) {
+                        streamedUpload = UploadUtility.processStreamedPutUpload(localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                        this.streamedUpload = streamedUpload;
+                        for (Iterator<String> names = streamedUpload.getFormFieldNames(); names.hasNext();) {
+                            String name = names.next();
+                            putParameter0(name, streamedUpload.getFormField(name), false);
+                        }
+                    }
+                } else {
+                    if (files.isEmpty()) {
+                        UploadEvent uploadEvent = this.uploadEvent;
+                        if (null == uploadEvent) {
+                            uploadEvent = UploadUtility.processPutUpload(localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                            this.uploadEvent = uploadEvent;
+                            for (Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator(); iterator.hasNext();) {
+                                files.add(iterator.next());
+                            }
                         }
                     }
                 }
@@ -1449,7 +1587,7 @@ public class AJAXRequestData {
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURL(final String path, final boolean withRoute) {
-        return constructURL(null, path, withRoute, null);
+        return constructURL(null, path, withRoute);
     }
 
     /**
@@ -1466,38 +1604,15 @@ public class AJAXRequestData {
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURL(final String protocol, final String path, final boolean withRoute, final String query) {
-        final StringBuilder url = new StringBuilder(64 + (null == query ? 0 : query.length()));
-        // Protocol/schema
-        {
-            String prot = protocol;
-            if (prot == null) {
-                prot = isSecure() ? "https://" : "http://";
-            }
-            url.append(prot);
-            if (!prot.endsWith("://")) {
-                url.append("://");
-            }
-        }
-        // Host name
-        url.append(hostname);
-        // Path
-        if (path != null) {
-            if (!path.startsWith("/")) {
-                url.append('/');
-            }
-            url.append(path);
-        }
-        // JVM route
-        if (withRoute) {
-            url.append(";jsessionid=").append(route);
+        StringBuilder url = constructURL(protocol, path, withRoute);
+        if (Strings.isEmpty(query)) {
+            return url;
         }
         // Query string
-        if (query != null) {
-            if (!query.startsWith("?")) {
-                url.append('?');
-            }
-            url.append(query);
+        if (!query.startsWith("?")) {
+            url.append('?');
         }
+        url.append(query);
         // Return URL
         return url;
     }
@@ -1516,7 +1631,45 @@ public class AJAXRequestData {
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURLWithParameters(final String protocol, final String path, final boolean withRoute, final Map<String, String> params) {
-        final StringBuilder url = new StringBuilder(128);
+        StringBuilder url = constructURL(protocol, path, withRoute);
+        if (params == null || params.isEmpty()) {
+            return url;
+        }
+        boolean first = true;
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            String key = entry.getKey();
+            if (Strings.isNotEmpty(key)) {
+                if (first) {
+                    url.append('?');
+                    first = false;
+                } else {
+                    url.append('&');
+                }
+                url.append(AJAXUtility.encodeUrl(key, true));
+                String value = entry.getValue();
+                if (Strings.isNotEmpty(value)) {
+                    url.append('=').append(AJAXUtility.encodeUrl(value, true));
+                }
+            }
+        }
+        // Return URL
+        return url;
+    }
+
+    /**
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     * &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * </pre>
+     *
+     * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
+     * @param path The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the JVM route in the server URL or not
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    private StringBuilder constructURL(String protocol, String path, boolean withRoute) {
+        StringBuilder url = new StringBuilder(128);
         // Protocol/schema
         {
             String prot = protocol;
@@ -1530,6 +1683,7 @@ public class AJAXRequestData {
         }
         // Host name
         url.append(hostname);
+        appendPort(url);
         // Path
         if (path != null) {
             if (!path.startsWith("/")) {
@@ -1541,28 +1695,26 @@ public class AJAXRequestData {
         if (withRoute) {
             url.append(";jsessionid=").append(route);
         }
-        // Query string
-        if (params != null) {
-            boolean first = true;
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                String key = entry.getKey();
-                if (!Strings.isEmpty(key)) {
-                    if (first) {
-                        url.append('?');
-                        first = false;
-                    } else {
-                        url.append('&');
-                    }
-                    url.append(AJAXUtility.encodeUrl(key, true));
-                    String value = entry.getValue();
-                    if (!Strings.isEmpty(value)) {
-                        url.append('=').append(AJAXUtility.encodeUrl(value, true));
-                    }
-                }
-            }
-        }
-        // Return URL
         return url;
+    }
+
+    /**
+     * Appends the port if necessary, either:
+     *
+     * a) if it is an SSL connection and the port is other
+     * than the standard 443 port port, or
+     *
+     * b) if it's other than the default non-secure one.
+     *
+     * @param urlBuilder The URL {@link StringBuilder}
+     */
+    private void appendPort(StringBuilder urlBuilder) {
+        if (serverPort < 0 || serverPort == 80 || serverPort == 443) {
+            return;
+        }
+        if (((isSecure() && serverPort != 443) || serverPort != 80)) {
+            urlBuilder.append(':').append(serverPort);
+        }
     }
 
     /**
@@ -1671,10 +1823,14 @@ public class AJAXRequestData {
      * <p>
      * With '/' concatenated module identifiers will still be returned as they are, e. g. <code>"oauth/account"</code> will stay as it is.
      *
-     * @return The normalized module
+     * @return The normalized module or <code>null</code> if module has not been set
      */
     public String getNormalizedModule() {
         String lModule = module;
+        if (null == lModule) {
+            return null;
+        }
+
         int pos = lModule.indexOf('/');
         if ((pos > 0) && (pathInfo != null) && (lModule.endsWith(pathInfo))) {
             lModule = lModule.substring(0, pos);
@@ -1769,6 +1925,7 @@ public class AJAXRequestData {
         try {
             return (V) properties.get(name);
         } catch (final RuntimeException e) {
+            LOGGER.trace("", e);
             return null;
         }
     }

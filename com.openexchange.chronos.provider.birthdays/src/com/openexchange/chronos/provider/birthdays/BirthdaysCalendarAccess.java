@@ -73,7 +73,9 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -82,8 +84,10 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SubscribeAware;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
@@ -254,8 +258,25 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
+        AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getOptionalService(CalendarUtilities.class), alarms);
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
-        return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
+        DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
+        return notifyHandlers(result);
+    }
+
+    private DefaultCalendarResult notifyHandlers(DefaultCalendarResult result) throws OXException {
+        CalendarEventNotificationService notificationService = services.getServiceSafe(CalendarEventNotificationService.class);
+        notificationService.notifyHandlers(new DefaultCalendarEvent(    session.getContextId(),
+                                                                        account.getAccountId(),
+                                                                        session.getUserId(),
+                                                                        Collections.singletonMap(session.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+                                                                        result.getCreations(),
+                                                                        result.getUpdates(),
+                                                                        result.getDeletions(),
+                                                                        session,
+                                                                        null,
+                                                                        parameters));
+        return result;
     }
 
     @Override

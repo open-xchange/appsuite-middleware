@@ -49,19 +49,14 @@
 
 package com.openexchange.admin.user.copy.rmi;
 
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.configuration.TestConfig.Property;
-
 
 /**
  * {@link TestTool}
@@ -70,17 +65,17 @@ import com.openexchange.configuration.TestConfig.Property;
  */
 public class TestTool {
 
-    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials, int filestoreId) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public static Context createContext(ContextManager ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials, int filestoreId) throws Exception {
         Context ctx = null;
         int ctxId = getRandomContextId();
         boolean created = false;
         while (!created) {
             try {
-                Context newContext = AbstractRMITest.newContext(prefix + ctxId, ctxId);
+                Context newContext = ContextFactory.createContext(ctxId, prefix + ctxId);
                 if (filestoreId > 0) {
                     newContext.setFilestoreId(filestoreId);
                 }
-                ctx = ci.create(newContext, admin, accessCombinationName, superAdminCredentials);
+                ctx = ci.create(newContext, admin, accessCombinationName);
                 created = true;
             } catch (ContextExistsException e) {
                 ctxId = getRandomContextId();
@@ -89,7 +84,7 @@ public class TestTool {
         return ctx;
     }
 
-    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public static Context createContext(ContextManager ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws Exception {
         int filestoreId;
         try {
             filestoreId = Integer.parseInt(TestConfig.getProperty(Property.FILESTORE));

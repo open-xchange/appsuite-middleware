@@ -50,7 +50,7 @@
 package com.openexchange.userfeedback.starrating.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.starrating.v1.StarRatingV1;
 
 /**
@@ -63,16 +63,13 @@ public class Activator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{FeedbackTypeRegistry.class};
+        return new Class[]{};
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        FeedbackTypeRegistry registry = Services.getService(FeedbackTypeRegistry.class);
-
-        // TODO use service tracker customzier instead
-        registry.registerType(new StarRatingV1());
+        registerService(FeedbackType.class, new StarRatingV1());
     }
 
 

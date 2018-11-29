@@ -94,7 +94,7 @@ public class SocketTraceMBeanImpl extends AnnotatedStandardMBean implements Sock
     public long getAverageDuration(String hostNames, String ports) throws MBeanException {
         HostList hostList = Strings.isEmpty(hostNames) ? null : HostList.valueOf(hostNames);
         int[] filterPorts = null;
-        if (!Strings.isEmpty(ports)) {
+        if (Strings.isNotEmpty(ports)) {
             try {
                 String[] sPorts = Strings.splitByComma(ports);
                 filterPorts = new int[sPorts.length];
@@ -128,7 +128,7 @@ public class SocketTraceMBeanImpl extends AnnotatedStandardMBean implements Sock
     public long getAverageTimeouts(String hostNames, String ports) throws MBeanException {
         HostList hostList = Strings.isEmpty(hostNames) ? null : HostList.valueOf(hostNames);
         int[] filterPorts = null;
-        if (!Strings.isEmpty(ports)) {
+        if (Strings.isNotEmpty(ports)) {
             try {
                 String[] sPorts = Strings.splitByComma(ports);
                 filterPorts = new int[sPorts.length];

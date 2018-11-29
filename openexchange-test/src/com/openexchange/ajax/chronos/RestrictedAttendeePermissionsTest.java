@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -130,10 +132,25 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         event.setId(expectedEventId);
 
         eventManager2.deleteEvent(event);
+        try {
+            eventManager2.getEvent(folderId2, eventId, true);
+            Assert.fail("Expected an exception.");
+        } catch (ChronosApiException e) {
+            // expected
+        }
 
         expectedEventData = eventManager.getEvent(folderId, expectedEventId);
         assertNotNull(expectedEventData);
-        assertEquals(1, expectedEventData.getAttendees().size());
+        assertEquals("Wrong attendee size.", 2, expectedEventData.getAttendees().size());
+        boolean found = false;
+        for (Attendee att : expectedEventData.getAttendees()) {
+            if (att.getEntity() == user2.getCalUser()) {
+                assertEquals("declined", att.getPartStat().toLowerCase());
+                found = true;
+            }
+        }
+
+        assertTrue("Second user not found in the attendee list.", found);
     }
 
     @Test

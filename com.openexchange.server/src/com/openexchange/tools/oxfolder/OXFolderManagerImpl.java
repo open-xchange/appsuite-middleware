@@ -93,7 +93,6 @@ import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -461,9 +460,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (FolderQueryCacheManager.isInitialized()) {
                     FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
                 }
-                if (CalendarCache.isInitialized()) {
-                    CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
-                }
                 try {
                     if (FolderObject.INFOSTORE == folderObj.getModule()) {
                         new EventClient(session).create(folderObj, parentFolder, getFolderPath(folderObj, parentFolder, wc));
@@ -583,7 +579,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     // Move to trash
                     int defaultFolderId = oxfolderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC);
                     int folderId = fo.getObjectID();
-                    String name = fo.containsFolderName() && !Strings.isEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
+                    String name = fo.containsFolderName() && Strings.isNotEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
                     try {
                         while (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderId, newParentFolderID, name, storageObject.getModule(), readCon, ctx)) {
                             name = incrementSequenceNumber(name);
@@ -710,9 +706,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
                 if (FolderQueryCacheManager.isInitialized()) {
                     FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
-                }
-                if (CalendarCache.isInitialized()) {
-                    CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
                 if (FolderObject.SYSTEM_MODULE != fo.getModule()) {
                     try {
@@ -1687,9 +1680,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (FolderQueryCacheManager.isInitialized()) {
             FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
         }
-        if (CalendarCache.isInitialized()) {
-            CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
-        }
         /*
          * Continue
          */
@@ -1957,9 +1947,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         if (FolderQueryCacheManager.isInitialized()) {
             FolderQueryCacheManager.getInstance().invalidateContextQueries(ctx.getContextId());
-        }
-        if (CalendarCache.isInitialized()) {
-            CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
         }
         ConditionTreeMapManagement.dropFor(ctx.getContextId());
         if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {

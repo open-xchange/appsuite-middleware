@@ -249,26 +249,29 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
      * Asynchronously sends specified text message to all locally managed Web Socket connections.
      *
      * @param message The text message to send
+     * @param sourceToken The push token of the client triggering the update, or <code>null</code> if not available
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public Future<Void> sendToUserAsync(String message, String pathFilter, boolean remote, int userId, int contextId) {
-        SendToUserTask task = new SendToUserTask(message, pathFilter, remote, userId, contextId, this);
+    public Future<Void> sendToUserAsync(String message, String sourceToken, String pathFilter, boolean remote, int userId, int contextId) {
+        SendToUserTask task = new SendToUserTask(message, sourceToken, pathFilter, remote, userId, contextId, this);
         return ThreadPools.submitElseExecute(task);
     }
 
     /**
-     * Sends specified text message to all locally managed Web Socket connections.
+     * Sends specified text message to all locally managed Web Socket connections. Connections whose identifier matches the optional
+     * source token are excluded implicitly.
      *
      * @param message The text message to send
+     * @param sourceToken The push token of the client triggering the update, or <code>null</code> if not available
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void sendToUser(String message, String pathFilter, boolean remote, int userId, int contextId) {
+    public void sendToUser(String message, String sourceToken, String pathFilter, boolean remote, int userId, int contextId) {
         String info = remote ? "remotely received" : "locally created";
 
         ConcurrentMap<ConnectionId, DefaultSessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
@@ -279,6 +282,10 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
 
         boolean any = false;
         for (DefaultSessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matchesToken(sessionBoundSocket, sourceToken)) {
+                WS_LOGGER.debug("Skipping transport of {} message to web socket with matching connection id {}", info, sessionBoundSocket.getConnectionId());
+                continue;
+            }
             if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
                 any = true;
                 try {

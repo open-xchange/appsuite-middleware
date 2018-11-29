@@ -26,7 +26,7 @@ import com.openexchange.report.appsuite.serialization.Report;
 
 public class ChunkingUtilities {
 
-    private final static int MAX_LOCK_FILE_ATTEMPTS = 20;
+    private static final int MAX_LOCK_FILE_ATTEMPTS = 20;
 
     public static void removeAllReportParts(String uuid) {
         File partsFolder = new File(ReportProperties.getStoragePath());

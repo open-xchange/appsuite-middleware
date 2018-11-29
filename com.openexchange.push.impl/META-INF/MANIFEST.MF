@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Mail Push Implementation Bundle
 Bundle-SymbolicName: com.openexchange.push.impl
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
@@ -23,6 +23,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.hazelcast,
  com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.serialization,
  com.openexchange.i18n,
@@ -33,6 +34,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.mail.api,
  com.openexchange.mail.config,
  com.openexchange.management,
+ com.openexchange.management.osgi,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.push,

@@ -62,7 +62,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -101,7 +100,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         Map<String, String> map = Collections.singletonMap("com.openexchange.quota.calendar", "-1");
         if (!map.isEmpty()) {
             // change configuration to new values
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
+            ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
             getClient().execute(req);
         }
         super.tearDown();
@@ -138,7 +137,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), getApiClient());
 
         // Can't use EventManager, we need to check the exception here
-        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), getApiClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, Boolean.FALSE);
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), getApiClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE);
 
         // Check that creation failed
         assertThat("No response!", resultResponse, is(not(nullValue())));

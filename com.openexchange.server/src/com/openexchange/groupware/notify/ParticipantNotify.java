@@ -70,11 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -950,7 +946,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             if (isTask) {
                 isFulltime = true;
             } else {
-                isFulltime = ((Appointment) newObj).getFullTime();
+                isFulltime = false;
             }
             final Date start = newObj.getStartDate();
             renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));
@@ -1705,22 +1701,6 @@ public class ParticipantNotify implements TaskEventInterface2 {
         cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
         cal.set(Calendar.MINUTE, minutes);
         return cal.getTime();
-    }
-
-    private static Date computeFirstOccurrenceEnd(final CalendarObject app) throws OXException {
-        final RecurringResultsInterface recurrences = CalendarCollectionUtils.calculateRecurring(app, 0, 0, 1, CalendarCollectionUtils.MAX_OCCURRENCESE, true);
-        final RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
-        return new Date(recurringResult.getEnd());
-    }
-
-    /**
-     * Checks if specified appointment is a change exception.
-     *
-     * @param event The event to examine
-     * @return <code>true</code> if specified appointment is a change exception; otherwise <code>false</code>
-     */
-    private static boolean isChangeException(final CalendarObject appointment) {
-        return appointment.containsObjectID() && appointment.containsRecurrenceID() && appointment.getRecurrenceID() > 0 && appointment.getObjectID() != appointment.getRecurrenceID();
     }
 
     /**

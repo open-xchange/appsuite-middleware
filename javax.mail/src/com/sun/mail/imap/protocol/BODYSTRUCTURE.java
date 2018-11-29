@@ -389,8 +389,17 @@ public class BODYSTRUCTURE implements Item {
 	     */
 	    encoding = r.readAtomString();
 	    if (encoding != null && encoding.equalsIgnoreCase("NIL")) {
-            encoding = null;
+        if (parseDebug)
+            System.out.println("DEBUG IMAP: NIL encoding" +
+                    ", applying Exchange bug workaround");
+        encoding = null;
         }
+        /*
+         * XXX - Work around bug in office365.com that returns
+         *       a string with a trailing space in some cases.
+         */
+        if (encoding != null)
+        encoding = encoding.trim();
 	    if (parseDebug) {
             System.out.println("DEBUG IMAP: encoding " + encoding);
         }
@@ -575,7 +584,10 @@ public class BODYSTRUCTURE implements Item {
 		if (parseDebug) {
             System.out.println("DEBUG IMAP: parameter value " + value);
         }
-		if (value == null) {
+		if (value == null) {    // work around buggy servers
+            if (parseDebug)
+            System.out.println("DEBUG IMAP: NIL parameter value" +
+                    ", applying Exchange bug workaround");
             value = "";
         }
 		list.set(name, value);

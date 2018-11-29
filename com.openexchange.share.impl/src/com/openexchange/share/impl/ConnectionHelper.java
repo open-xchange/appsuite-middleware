@@ -51,6 +51,9 @@ package com.openexchange.share.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import com.openexchange.caching.ThreadLocalConditionHolder;
+import com.openexchange.caching.events.DefaultCondition;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -65,12 +68,39 @@ import com.openexchange.share.ShareExceptionCodes;
  */
 public class ConnectionHelper {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ConnectionHelper.class);
+    }
+
+    /** Whether a <code>ConnectionHelper</code> instance owns a connection or not */
+    private static enum ConnectionOwnership {
+        /** Connection is <b>not(!)</b> owned by <code>ConnectionHelper</code> instance */
+        NONE,
+        /** Connection is owned by <code>ConnectionHelper</code> instance in read-only mode */
+        OWNED_READABLE,
+        /** Connection is owned by <code>ConnectionHelper</code> instance in read-write mode */
+        OWNED_WRITEABLE;
+    }
+
+    /**
+     * <pre>
+     * Connection.class.getName()) + '@' + Thread.currentThread().getId()
+     * </pre>
+     */
+    private static String getConnectionSessionParameterName() {
+        return new StringBuilder(Connection.class.getName()).append('@').append(Thread.currentThread().getId()).toString();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final ServiceLookup services;
-    private final boolean ownsConnection;
+    private final ConnectionOwnership ownership;
     private final Connection connection;
     private final int contextID;
     private final Session session;
     private final boolean sessionParameterSet;
+    private final DefaultCondition cacheCondition;
 
     private boolean committed;
 
@@ -86,8 +116,17 @@ public class ConnectionHelper {
         this.contextID = contextID;
         this.services = services;
         DatabaseService dbService = services.getService(DatabaseService.class);
-        connection = needsWritable ? dbService.getWritable(contextID) : dbService.getReadOnly(contextID);
-        ownsConnection = true;
+        if (needsWritable) {
+            connection = dbService.getWritable(contextID);
+            DefaultCondition condition = new DefaultCondition();
+            cacheCondition = condition;
+            ThreadLocalConditionHolder.getInstance().setCondition(condition);
+            ownership = ConnectionOwnership.OWNED_WRITEABLE;
+        } else {
+            connection = dbService.getReadOnly(contextID);
+            cacheCondition = null;
+            ownership = ConnectionOwnership.OWNED_READABLE;
+        }
         session = null;
         sessionParameterSet = false;
     }
@@ -104,22 +143,35 @@ public class ConnectionHelper {
         this.session = session;
         this.contextID = session.getContextId();
         this.services = services;
-        Connection connection = (Connection) session.getParameter(Connection.class.getName() + '@' + Thread.currentThread().getId());
+        Connection connection = (Connection) session.getParameter(getConnectionSessionParameterName());
         try {
             if (null == connection) {
                 DatabaseService dbService = services.getService(DatabaseService.class);
-                connection = needsWritable ? dbService.getWritable(contextID) : dbService.getReadOnly(contextID);
-                connection.setAutoCommit(false);
-                ownsConnection = true;
-                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
+                if (needsWritable) {
+                    connection = dbService.getWritable(contextID);
+                    connection.setAutoCommit(false);
+                    DefaultCondition condition = new DefaultCondition();
+                    cacheCondition = condition;
+                    ThreadLocalConditionHolder.getInstance().setCondition(condition);
+                    ownership = ConnectionOwnership.OWNED_WRITEABLE;
+                } else {
+                    connection = dbService.getReadOnly(contextID);
+                    cacheCondition = null;
+                    ownership = ConnectionOwnership.OWNED_READABLE;
+                }
+                session.setParameter(getConnectionSessionParameterName(), connection);
                 sessionParameterSet = true;
             } else if (needsWritable && connection.isReadOnly()) {
                 connection = services.getService(DatabaseService.class).getWritable(contextID);
                 connection.setAutoCommit(false);
-                ownsConnection = true;
+                ownership = ConnectionOwnership.OWNED_WRITEABLE;
+                DefaultCondition condition = new DefaultCondition();
+                cacheCondition = condition;
+                ThreadLocalConditionHolder.getInstance().setCondition(condition);
                 sessionParameterSet = false;
             } else {
-                ownsConnection = false;
+                ownership = ConnectionOwnership.NONE;
+                cacheCondition = null;
                 sessionParameterSet = false;
             }
             this.connection = connection;
@@ -150,7 +202,7 @@ public class ConnectionHelper {
      * Starts the transaction on the underlying connection in case the connection is owned by this instance.
      */
     public void start() throws OXException {
-        if (ownsConnection) {
+        if (ConnectionOwnership.OWNED_WRITEABLE == ownership) {
             try {
                 Databases.startTransaction(connection);
             } catch (SQLException e) {
@@ -163,7 +215,7 @@ public class ConnectionHelper {
      * Commits the transaction on the underlying connection in case the connection is owned by this instance.
      */
     public void commit() throws OXException {
-        if (ownsConnection) {
+        if (ConnectionOwnership.OWNED_WRITEABLE == ownership) {
             try {
                 connection.commit();
             } catch (SQLException e) {
@@ -177,11 +229,29 @@ public class ConnectionHelper {
      * Backs the underlying connection in case the connection is owned by this instance, rolling back automatically if not yet committed.
      */
     public void finish() {
-        if (ownsConnection && null != connection) {
-            if (false == committed) {
-                Databases.rollback(connection);
+        if (ConnectionOwnership.NONE != ownership && null != connection) {
+            if (ConnectionOwnership.OWNED_WRITEABLE == ownership) {
+                if (committed) {
+                    // Committed... Send out possible cache invalidation events
+                    DefaultCondition condition = this.cacheCondition;
+                    if (null != condition) {
+                        condition.set(true);
+                        ThreadLocalConditionHolder.getInstance().clear();
+                    }
+                } else {
+                    // Don't send out possible cache invalidation events
+                    DefaultCondition condition = this.cacheCondition;
+                    if (null != condition) {
+                        condition.set(false);
+                        ThreadLocalConditionHolder.getInstance().clear();
+                    }
+                    // Roll-back the connection
+                    Databases.rollback(connection);
+                }
+                // Restore auto-commit mode
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
+            // Push back connection into pool
             try {
                 if (connection.isReadOnly()) {
                     services.getService(DatabaseService.class).backReadOnly(contextID, connection);
@@ -189,11 +259,11 @@ public class ConnectionHelper {
                     services.getService(DatabaseService.class).backWritable(contextID, connection);
                 }
             } catch (SQLException e) {
-                org.slf4j.LoggerFactory.getLogger(ConnectionHelper.class).warn("Error backing connection", e);
+                LoggerHolder.LOGGER.warn("Error pushing back connection into pool", e);
             }
         }
         if (sessionParameterSet && null != session) {
-            session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+            session.setParameter(getConnectionSessionParameterName(), null);
         }
     }
 

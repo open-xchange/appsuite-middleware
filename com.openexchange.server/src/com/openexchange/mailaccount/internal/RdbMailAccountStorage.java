@@ -531,8 +531,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null != sTransAuth) {
                     transportAccount.setTransportAuth(TransportAuth.transportAuthFor(sTransAuth));
                 }
-                transportAccount.setTransportProperties(properties);
-
             }
         } finally {
             closeSQLStuff(rs, stmt);
@@ -4073,7 +4071,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final int userId = session.getUserId();
         try {
             con = Database.get(contextId, false);
-            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1");
+            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND id > 0 AND primary_addr NOT LIKE '%@unifiedinbox.com' LIMIT 1");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -4082,7 +4080,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             Databases.closeSQLStuff(rs, stmt);
 
-            stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1");
+            stmt = con.prepareStatement("SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 AND send_addr NOT LIKE '%@unifiedinbox.com' LIMIT 1");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();

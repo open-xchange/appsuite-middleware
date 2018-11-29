@@ -650,7 +650,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         if (null != from) {
             for (InternetAddress fromAddr : from) {
                 String personal = fromAddr.getPersonal();
-                if (false == Strings.isEmpty(personal)) {
+                if (Strings.isNotEmpty(personal)) {
                     return StringEscapeUtils.escapeHtml(personal);
                 }
             }

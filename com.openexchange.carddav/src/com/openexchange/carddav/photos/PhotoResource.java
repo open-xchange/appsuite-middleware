@@ -77,7 +77,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class PhotoResource extends DAVResource {
 
     private final Contact contact;
-    
+
     private byte[] photoData;
 
     /**
@@ -137,15 +137,15 @@ public class PhotoResource extends DAVResource {
         byte[] image = getPhotoData();
         return null == image ? Streams.EMPTY_INPUT_STREAM : Streams.newByteArrayInputStream(image);
     }
-    
+
     private byte[] getPhotoData() {
         if (null == photoData && null != contact.getImage1()) {
             TransformedImage transformedImage = null;
             try {
-                 transformedImage = scaleImageIfNeeded(contact.getImage1(), contact.getImageContentType(), getPhotoScaleDimension());
-                 if (null != transformedImage) {
-                     photoData = transformedImage.getImageData();
-                 }
+                transformedImage = scaleImageIfNeeded(contact.getImage1(), contact.getImageContentType(), getPhotoScaleDimension());
+                if (null != transformedImage) {
+                    photoData = transformedImage.getImageData();
+                }
             } catch (OXException e) {
                 org.slf4j.LoggerFactory.getLogger(PhotoResource.class).warn("Error getting scaled contact image", e);
             } finally {
@@ -154,7 +154,7 @@ public class PhotoResource extends DAVResource {
         }
         if (null == photoData) {
             photoData = contact.getImage1();
-        }        
+        }
         return photoData;
     }
 
@@ -174,7 +174,7 @@ public class PhotoResource extends DAVResource {
         } catch (OXException | NumberFormatException e) {
             org.slf4j.LoggerFactory.getLogger(PhotoResource.class).warn(
                 "Error getting \"com.openexchange.carddav.scaleVCardImages\", falling back to defaults.", e);
-            return new Dimension(200, 200);
+            return new Dimension(600, 800);
         }
     }
 

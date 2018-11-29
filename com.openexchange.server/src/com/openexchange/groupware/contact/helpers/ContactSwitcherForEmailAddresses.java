@@ -124,7 +124,7 @@ public class ContactSwitcherForEmailAddresses extends AbstractContactSwitcherWit
         if (null != switcherParameters && 1 < switcherParameters.length &&
             null != switcherParameters[1] && String.class.isInstance(switcherParameters[1])) {
             String emailAddress = (String) switcherParameters[1];
-            if (false == Strings.isEmpty(emailAddress)) {
+            if (Strings.isNotEmpty(emailAddress)) {
                 try {
                     new QuotedInternetAddress(emailAddress).validate();
                 } catch (AddressException e) {

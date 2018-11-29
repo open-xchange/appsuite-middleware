@@ -157,7 +157,7 @@ public class DefaultVCardStorageMetadataStore implements VCardStorageMetadataSto
     private void removeByRefIds(Connection con, int contextId, Set<String> refIds) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND vCardId = ?");
+            stmt = con.prepareStatement("UPDATE prg_contacts SET vCardId=NULL WHERE cid=? AND vCardId=?");
             stmt.setInt(1, contextId);
             for (String refId : refIds) {
                 stmt.setString(2, refId);

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SOAP Plugin based on Apache CXF
 Bundle-SymbolicName: com.openexchange.soap.cxf
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -132,18 +132,18 @@ Import-Package: com.ctc.wstx.stax,
  org.xml.sax.ext,
  org.xml.sax.helpers
 Bundle-ClassPath: .,
- lib/cxf-core-3.2.4.jar,
+ lib/cxf-core-3.2.7.jar,
  lib/xmlschema-core-2.2.3.jar,
  lib/asm-5.2.jar,
- lib/cxf-rt-bindings-soap-3.2.4.jar,
- lib/cxf-rt-bindings-xml-3.2.4.jar,
- lib/cxf-rt-databinding-jaxb-3.2.4.jar,
- lib/cxf-rt-frontend-jaxws-3.2.4.jar,
- lib/cxf-rt-frontend-simple-3.2.4.jar,
- lib/cxf-rt-transports-http-3.2.4.jar,
- lib/cxf-rt-ws-addr-3.2.4.jar,
- lib/cxf-rt-ws-policy-3.2.4.jar,
- lib/cxf-rt-wsdl-3.2.4.jar,
+ lib/cxf-rt-bindings-soap-3.2.7.jar,
+ lib/cxf-rt-bindings-xml-3.2.7.jar,
+ lib/cxf-rt-databinding-jaxb-3.2.7.jar,
+ lib/cxf-rt-frontend-jaxws-3.2.7.jar,
+ lib/cxf-rt-frontend-simple-3.2.7.jar,
+ lib/cxf-rt-transports-http-3.2.7.jar,
+ lib/cxf-rt-ws-addr-3.2.7.jar,
+ lib/cxf-rt-ws-policy-3.2.7.jar,
+ lib/cxf-rt-wsdl-3.2.7.jar,
  lib/neethi-3.1.1.jar,
  lib/wsdl4j-1.6.3.jar
 Export-Package: com.openexchange.soap.cxf,

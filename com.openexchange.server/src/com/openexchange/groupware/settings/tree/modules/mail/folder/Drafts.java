@@ -54,10 +54,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.java.Reference;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 
 /**
  *
@@ -88,7 +90,8 @@ public class Drafts implements PreferencesItemService {
         return new AbstractStandardFolderItemValue() {
 
             @Override
-            protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException {
+            protected void getValue(Setting setting, Reference<MailAccessAndStorage> mailAccessReference, Session session) throws OXException {
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess = getConnectedMailAccess(session, mailAccessReference);
                 setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, primaryMailAccess.getFolderStorage().getDraftsFolder()));
             }
         };

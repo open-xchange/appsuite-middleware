@@ -415,7 +415,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         TimeZone timeZone = entityResolver.getTimeZone(userID);
         List<Alarm> regularAlarms = new ArrayList<Alarm>();
         for (Alarm alarm : displayAlarms) {
-            if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
+            if (null != alarm.getRelatedTo() && "SNOOZE".equalsIgnoreCase(alarm.getRelatedTo().getRelType())) {
                 addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Can't store snoozed alarms");
             } else if (0 <= getReminderMinutes(alarm.getTrigger(), event)) {
                 regularAlarms.add(alarm);
@@ -846,5 +846,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return "ReminderData [reminderMinutes=" + reminderMinutes + ", nextTriggerTime=" + new Date(nextTriggerTime) + "]";
         }
 
+    }
+
+    @Override
+    public Alarm loadAlarm(int alarmId) throws OXException {
+        throw new UnsupportedOperationException();
     }
 }

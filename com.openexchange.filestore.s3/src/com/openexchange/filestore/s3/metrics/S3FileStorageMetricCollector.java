@@ -55,7 +55,7 @@ import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
+import com.openexchange.filestore.s3.internal.S3Properties;
 import com.openexchange.metrics.MetricService;
 
 /**
@@ -140,7 +140,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
 
     @Override
     public boolean isEnabled() {
-        return config.getBooleanProperty(S3FileStoreProperty.metricCollection);
+        return config.getBooleanProperty(S3Properties.METRIC_COLLECTION);
     }
 
     @Override

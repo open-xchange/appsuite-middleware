@@ -276,7 +276,15 @@
 		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.CountTablesToUtf8mb4Change" />
 	</changeSet>
 
-    <changeSet id="7.10.1:filestore2user:changePrimaryKey" author="thorben.betten@open-xchange.com">
+    <!--changeSet id="7.10.1:db_pool:removeUrlParameters" author="martin.herfurth@open-xchange.com" failOnError="false">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="db_pool" />
+        </preConditions>
+        <comment>Removes parameters from db_pool connection URLs</comment>
+        <customChange class="com.openexchange.database.internal.change.custom.RemoveParametersFromPoolConnectionUrlCustomTaskChange" />
+    </changeSet-->
+
+	<changeSet id="7.10.1:filestore2user:changePrimaryKey" author="thorben.betten@open-xchange.com">
 		<comment>This changeset executes a custom task which cares about correcting the PRIMARY KEY of the filestore2user table.</comment>
 		<customChange class="com.openexchange.database.internal.change.custom.ChangeFilestore2UserPrimaryKeyCustomTaskChange" />
 	</changeSet>

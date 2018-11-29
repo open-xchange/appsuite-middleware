@@ -95,7 +95,7 @@ properties:
   - key: com.openexchange.contact.scaleVCardImages
     description: |
       Enables/Disables the start letter based quick select of contacts.
-    defaultValue: 200x200
+    defaultValue: 600x800
     version: 
     reloadable: true
     configcascadeAware: false
@@ -144,7 +144,7 @@ properties:
   - key: com.openexchange.contact.image.maxWidth
     description: |
       Defines the width of scaled contact images.
-    defaultValue: 250
+    defaultValue: 600
     version: 
     reloadable: true
     configcascadeAware: false
@@ -155,7 +155,7 @@ properties:
   - key: com.openexchange.contact.image.maxHeight
     description: |
       Defines the height of scaled contact images.
-    defaultValue: 250
+    defaultValue: 800
     version: 
     reloadable: true
     configcascadeAware: false

@@ -238,7 +238,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
          * dynamically add jump actions per file content type / user capabilities
          */
         String mimeType = DriveUtils.determineMimeType(file);
-        if (false == Strings.isEmpty(mimeType)) {
+        if (Strings.isNotEmpty(mimeType)) {
             if (mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) {
                 jumpActions.add("edit");
                 jumpActions.add("preview");

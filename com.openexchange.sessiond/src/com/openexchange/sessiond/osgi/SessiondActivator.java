@@ -75,6 +75,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
@@ -86,9 +87,11 @@ import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
+import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleanerFactory;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplierFactory;
@@ -308,7 +311,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
 
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
-            track(ManagementService.class, new ManagementRegisterer(context));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, SessiondMBean.MBEAN_NAME, SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));
             track(SessionStorageService.class, new SessionStorageServiceTracker(this, context));
@@ -337,7 +340,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
                             int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
                             int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
                             Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
-                            if (null != session && false == Strings.isEmpty(session.getSessionID())) {
+                            if (null != session && Strings.isNotEmpty(session.getSessionID())) {
                                 Collection<Session> sessions = serviceImpl.getSessions(userId, contextId);
                                 for (Session userSession : sessions) {
                                     if (false == session.getSessionID().equals(userSession.getSessionID())) {

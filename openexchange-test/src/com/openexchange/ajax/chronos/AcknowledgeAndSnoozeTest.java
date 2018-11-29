@@ -57,6 +57,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -65,6 +66,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -80,9 +82,6 @@ import com.openexchange.testing.httpclient.models.EventData;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
 
-    private int previousTriggers;
-
-
     /**
      * Initializes a new {@link AcknowledgeAndSnoozeTest}.
      */
@@ -93,7 +92,6 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        previousTriggers = eventManager.getAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)).size();
     }
 
     /**
@@ -112,8 +110,8 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData expectedEventData = eventManager.createEvent(toCreate);
         getAndAssertAlarms(expectedEventData, 1, folderId);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1 + previousTriggers);
-        AlarmTrigger alarmTrigger = triggerData.get(0);
+        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        AlarmTrigger alarmTrigger = findTrigger(expectedEventData.getId(), triggerData);
 
         EventData getEvent = getAndAssertAlarms(expectedEventData, 1, folderId);
         assertNull(getEvent.getAlarms().get(0).getAcknowledged());
@@ -143,32 +141,54 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData expectedEventData = eventManager.createEvent(toCreate);
         getAndAssertAlarms(expectedEventData, 1, folderId);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1 + previousTriggers);
-        AlarmTrigger alarmTrigger = triggerData.get(0);
+        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        AlarmTrigger alarmTrigger = findTrigger(expectedEventData.getId(), triggerData);
 
         EventData getEvent = getAndAssertAlarms(expectedEventData, 1, folderId);
         assertNull(getEvent.getAlarms().get(0).getAcknowledged());
         int alarmId = Integer.valueOf(alarmTrigger.getAlarmId());
 
         // Snooze the alarm by 5 minutes
-        long expectedTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
-        eventManager.snoozeAlarm(expectedEventData.getId(), alarmId, TimeUnit.MINUTES.toMillis(5), folderId);
+        Calendar expectedTimeCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        expectedTimeCal.setTime(new Date());
+        expectedTimeCal.add(Calendar.MINUTE, 5);
+        long expectedTime = expectedTimeCal.getTimeInMillis();
+        EventData eventData = eventManager.snoozeAlarm(expectedEventData.getId(), alarmId, TimeUnit.MINUTES.toMillis(5), folderId);
+        List<Alarm> alarms = eventData.getAlarms();
+        assertEquals(2, alarms.size());
+        Integer snoozeId = null;
+        if (alarms.get(0).getId().toString().equals(alarmTrigger.getAlarmId())) {
+            snoozeId = alarms.get(1).getId();
+        } else {
+            snoozeId = alarms.get(0).getId();
+        }
 
-        triggerData = getAndCheckAlarmTrigger(2 + previousTriggers);
-        AlarmTrigger alarmTrigger2 = triggerData.get(0);
+        triggerData = getAndCheckAlarmTrigger(2);
+        AlarmTrigger alarmTrigger2 = findTriggerByAlarm(snoozeId, triggerData);
         assertNotEquals(alarmTrigger2.getAlarmId(), alarmTrigger.getAlarmId());
         Date parsedTime = DateTimeUtil.parseZuluDateTime(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
-        String snoozeAlarmId = alarmTrigger2.getAlarmId();
 
         // Snooze the alarm again by 10 minutes
-        expectedTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
-        eventManager.snoozeAlarm(expectedEventData.getId(), Integer.valueOf(snoozeAlarmId), TimeUnit.MINUTES.toMillis(10), folderId);
+        expectedTimeCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        expectedTimeCal.setTime(new Date());
+        expectedTimeCal.add(Calendar.MINUTE, 10);
+        expectedTime = expectedTimeCal.getTimeInMillis();
+        EventData eventData2 = eventManager.snoozeAlarm(expectedEventData.getId(), snoozeId, TimeUnit.MINUTES.toMillis(10), folderId);
 
-        triggerData = getAndCheckAlarmTrigger(2 + previousTriggers);
-        alarmTrigger2 = triggerData.get(0);
+        List<Alarm> alarms2 = eventData2.getAlarms();
+        assertEquals(2, alarms2.size());
+        Integer snoozeId2 = null;
+        if (alarms2.get(0).getId().toString().equals(alarmTrigger.getAlarmId())) {
+            snoozeId2 = alarms2.get(1).getId();
+        } else {
+            snoozeId2 = alarms2.get(0).getId();
+        }
+
+        triggerData = getAndCheckAlarmTrigger(2);
+        alarmTrigger2 = findTriggerByAlarm(snoozeId2, triggerData);
         assertNotEquals(alarmTrigger2.getAlarmId(), alarmTrigger.getAlarmId());
-        assertNotEquals(alarmTrigger2.getAlarmId(), snoozeAlarmId);
+        assertNotEquals(alarmTrigger2.getAlarmId(), snoozeId);
         parsedTime = DateTimeUtil.parseZuluDateTime(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
 

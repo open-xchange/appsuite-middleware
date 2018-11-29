@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -71,7 +70,7 @@ public class ConversationParser extends AbstractAJAXParser<ConversationResponse>
     }
 
     @Override
-    protected ConversationResponse createResponse(Response response) throws JSONException {
+    protected ConversationResponse createResponse(Response response) {
         return new ConversationResponse(response);
     }
 

@@ -929,7 +929,7 @@ public final class FolderWriter {
     private static FolderFieldWriter getPropertyByField(final int field, final TIntObjectMap<com.openexchange.folderstorage.FolderField> fields) {
         final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
         if (null == fieldNamePair) {
-            LOG.warn("Client requested an unknown field: {}", Integer.valueOf(field));
+            LOG.debug("Client requested an unknown field: {}", Integer.valueOf(field));
             return UNKNOWN_FIELD_FFW;
         }
         PropertyFieldWriter pw = PROPERTY_WRITERS.get(field);

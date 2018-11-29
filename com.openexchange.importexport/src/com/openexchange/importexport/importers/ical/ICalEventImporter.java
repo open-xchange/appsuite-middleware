@@ -279,6 +279,7 @@ public class ICalEventImporter extends AbstractICalImporter {
      */
     private static CalendarParameters applyParameters(CalendarParameters parameters, Map<String, String[]> optionalParameters) {
         parameters.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
+        parameters.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
         if (null != optionalParameters) {
             if (optionalParameters.containsKey("suppressNotification")) {
                 parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);

@@ -112,7 +112,6 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @throws OXException
      */
     private JSONObject fetchData(final String accessToken) throws OXException {
-        JSONObject wholeResponse = new JSONObject();
         try {
             final String protectedUrl = "https://apis.live.net/v5.0/me/contacts?access_token=" + URLEncoder.encode(accessToken, "UTF-8");
             final GetMethod getMethod = new GetMethod(protectedUrl);
@@ -122,8 +121,7 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
             client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
             client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
             client.executeMethod(getMethod);
-            String response = getMethod.getResponseBodyAsString();
-            wholeResponse = new JSONObject(response);
+            JSONObject wholeResponse = new JSONObject(getMethod.getResponseBodyAsString());
 
             if (wholeResponse.hasAndNotNull("error")) {
                 JSONObject error = wholeResponse.getJSONObject("error");
@@ -133,6 +131,7 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
                 }
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(error.getString("message"));
             }
+            return wholeResponse;
         } catch (final HttpException e) {
             LOG.error("", e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
@@ -143,12 +142,11 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
             LOG.error("", e);
             throw SubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         }
-        return wholeResponse;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
      */
     @Override

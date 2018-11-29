@@ -643,23 +643,6 @@ public class AlarmUtils extends CalendarUtils {
             }
         }
         /*
-         * special handling to detect 'snooze' of single reminder (as used in legacy storage)
-         */
-        if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 2 == updatedAlarms.size()) {
-            Alarm originalAlarm = originalAlarms.get(0);
-            Alarm snoozedAlarm = AlarmUtils.getSnoozedAlarm(updatedAlarms.get(0), updatedAlarms);
-            if (null == snoozedAlarm) {
-                snoozedAlarm = AlarmUtils.getSnoozedAlarm(updatedAlarms.get(1), updatedAlarms);
-            }
-            if (null != snoozedAlarm) {
-                Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
-                    originalAlarm, snoozedAlarm, true, AlarmField.ACKNOWLEDGED, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
-                if (differentFields.isEmpty()) {
-                    return new DefaultCollectionUpdate<Alarm, AlarmField>(updatedAlarms, originalAlarms, null);
-                }
-            }
-        }
-        /*
          * default collection update, otherwise
          */
         return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {

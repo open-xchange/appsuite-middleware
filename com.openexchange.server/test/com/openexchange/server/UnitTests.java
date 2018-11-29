@@ -110,7 +110,9 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.mail.usersetting.CachingUserSettingMailStorageTest.class,
     com.openexchange.folderstorage.internal.ConfiguredDefaultPermissionsTest.class,
     com.openexchange.groupware.contact.Bug53690Test.class,
+    com.openexchange.groupware.contact.Bug59522Test.class,
     com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
+    com.openexchange.folderstorage.database.DatabaseFolderTest.class
 })
 public class UnitTests {
 

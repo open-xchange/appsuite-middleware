@@ -68,6 +68,7 @@ import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.xml.encryption.DecryptionException;
+import org.opensaml.xml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -202,19 +203,18 @@ public class StrictValidationStrategy implements ValidationStrategy {
          *
          * Nevertheless, we can only check the signature if we have according credentials...
          */
-        if ((binding == Binding.HTTP_POST || binding == Binding.HTTP_REDIRECT) && credentialProvider.hasValidationCredential()) {
+        if ((binding == Binding.HTTP_POST || binding == Binding.HTTP_REDIRECT) && credentialProvider.hasValidationCredentials()) {
             if (binding == Binding.HTTP_REDIRECT) {
                 // Signature is part of the URL
-                return SignatureHelper.validateURISignature(httpRequest, credentialProvider.getValidationCredential());
-            } else {
-                if (!logoutRequest.isSigned()) {
-                    return new ValidationError(ValidationFailedReason.INVALID_REQUEST, "LogoutResponse was not signed");
-                }
-
-                return SignatureHelper.validateSignature(logoutRequest, credentialProvider.getValidationCredential());
+                return SignatureHelper.validateURISignature(httpRequest, credentialProvider.getValidationCredentials());
             }
-        } else if (logoutRequest.isSigned() && credentialProvider.hasValidationCredential()) {
-            return SignatureHelper.validateSignature(logoutRequest, credentialProvider.getValidationCredential());
+            if (!logoutRequest.isSigned()) {
+                return new ValidationError(ValidationFailedReason.INVALID_REQUEST, "LogoutResponse was not signed");
+            }
+
+            return SignatureHelper.validateSignature(logoutRequest, credentialProvider.getValidationCredentials());
+        } else if (logoutRequest.isSigned() && credentialProvider.hasValidationCredentials()) {
+            return SignatureHelper.validateSignature(logoutRequest, credentialProvider.getValidationCredentials());
         }
 
         return null;
@@ -261,7 +261,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
         try {
             List<Assertion> allAssertions = decryptAndCollectAssertions(response);
-            if (allAssertions.size() == 0) {
+            if (allAssertions.isEmpty()) {
                 throw new ValidationException(ValidationFailedReason.MISSING_ELEMENT, "Response contains neither an 'Assertion' nor an 'EncryptedAssertion' element");
             }
 
@@ -474,12 +474,12 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * @return The list of {@link ResponseValidator}s used to the response
      */
     protected List<ResponseValidator> getAuthnResponseValidators(Binding binding, Response response, AuthnRequestInfo requestInfo) {
-        List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
-
+        List<ResponseValidator> responseValidators = new LinkedList<>();
         /*
          * If response is signed, we need to verify the signature
          */
-        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential(), false));
+        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredentials(), false));
+        
 
         /*
          * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
@@ -529,8 +529,8 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * @return The list of {@link ResponseValidator}s used to the response
      */
     protected List<ResponseValidator> getLogoutResponseValidators(Binding binding, StatusResponseType response, HttpServletRequest httpRequest, LogoutRequestInfo requestInfo) {
-        List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
-
+        List<ResponseValidator> responseValidators = new LinkedList<>();
+        List<Credential> validationCredentials = credentialProvider.getValidationCredentials();
         /*
          * The responder MUST authenticate itself to the requester and ensure message integrity, either by signing
          * the message or using a binding-specific mechanism.
@@ -543,10 +543,10 @@ public class StrictValidationStrategy implements ValidationStrategy {
          * [bindings 05 - 3.4.5.2p19/3.5.5.2p24]
          */
         if (binding == Binding.HTTP_REDIRECT) {
-            responseValidators.add(new ResponseURISignatureValidator(credentialProvider.getValidationCredential(), httpRequest, true));
+            responseValidators.add(new ResponseURISignatureValidator(validationCredentials, httpRequest, true));
             responseValidators.add(new ResponseDestinationValidator(config.getSingleLogoutServiceURL(), httpRequest.getParameter("Signature") == null));
         } else {
-            responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential(), true));
+            responseValidators.add(new ResponseSignatureValidator(validationCredentials, true));
             responseValidators.add(new ResponseDestinationValidator(config.getSingleLogoutServiceURL(), !response.isSigned()));
         }
 
@@ -586,14 +586,14 @@ public class StrictValidationStrategy implements ValidationStrategy {
      */
     protected List<AssertionValidator> getAssertionValidators(Binding binding, Response response) {
         List<AssertionValidator> assertionValidators = new LinkedList<AssertionValidator>();
-
         /*
          * The <Assertion> element(s) in the <Response> MUST be signed, if the HTTP POST binding is used,
          * and MAY be signed if the HTTP-Artifact binding is used.
          * [profiles 06 - 4.1.3.5p18]
          */
         boolean enforceSignature = (binding == Binding.HTTP_POST);
-        assertionValidators.add(new AssertionSignatureValidator(credentialProvider.getValidationCredential(), enforceSignature));
+        assertionValidators.add(new AssertionSignatureValidator(credentialProvider.getValidationCredentials(), enforceSignature));
+        
 
         /*
          * Check the assertions issuers

@@ -224,32 +224,32 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                             isReadOnly = false;
                         }
                         return;
-                    } else {
-                        if (includePreview) {
-                            // only remove previews for the given reseller
-                            Databases.closeSQLStuff(resultSet, stmt);
-                            stmt = con.prepareStatement(SQL_SELECT_CONFIGIDS_FROM_MAPPING_WHERE);
-                            stmt.setString(1, reseller);
-                            resultSet = stmt.executeQuery();
-                            List<Integer> ids = new ArrayList<>();
-                            while (resultSet.next()) {
-                                ids.add(resultSet.getInt(1));
-                            }
+                    }
+                    if (includePreview) {
+                        // only remove previews for the given reseller
+                        Databases.closeSQLStuff(resultSet, stmt);
+                        stmt = con.prepareStatement(SQL_SELECT_CONFIGIDS_FROM_MAPPING_WHERE);
+                        stmt.setString(1, reseller);
+                        resultSet = stmt.executeQuery();
+                        List<Integer> ids = new ArrayList<>();
+                        while (resultSet.next()) {
+                            ids.add(resultSet.getInt(1));
+                        }
 
-                            Databases.closeSQLStuff(stmt);
-                            // remove all configs which does not have a mapping
-                            String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), " AND reseller=?;");
-                            stmt = con.prepareStatement(sql);
-                            int x = 1;
-                            for (Integer id : ids) {
-                                stmt.setInt(x++, id);
-                            }
-                            stmt.setString(x, reseller);
-                            if (stmt.executeUpdate() > 0) {
-                                isReadOnly = false;
-                            }
+                        Databases.closeSQLStuff(stmt);
+                        // remove all configs which does not have a mapping
+                        String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), " AND reseller=?;");
+                        stmt = con.prepareStatement(sql);
+                        int x = 1;
+                        for (Integer id : ids) {
+                            stmt.setInt(x++, id);
+                        }
+                        stmt.setString(x, reseller);
+                        if (stmt.executeUpdate() > 0) {
+                            isReadOnly = false;
                         }
                     }
+
                 }
             }
 

@@ -96,6 +96,7 @@ public class CopyAction extends AbstractWriteAction {
         String newId;
         if (request.hasUploads()) {
             newId = fileAccess.copy(id, version, folder, file, request.getUploadedFileData(), request.getSentColumns());
+            request.uploadFinished();
         } else {
             newId = fileAccess.copy(id, version, folder, file, null, request.getSentColumns());
         }

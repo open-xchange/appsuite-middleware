@@ -10,13 +10,14 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
+BuildRequires: open-xchange-hazelcast
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -27,6 +28,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
+Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 
@@ -541,6 +543,94 @@ EOF
     # SoftwareChange_Request-175
     ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
 
+    # SoftwareChange_Request-193
+    VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+    if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\", \"open-xchange-mobile-api-facade*\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+    fi
+
+    # SoftwareChange_Request-236
+    PFILE=/opt/open-xchange/etc/cache.ccf
+    NAMES=( jcs.region.CalendarCache jcs.region.CalendarCache.cacheattributes jcs.region.CalendarCache.cacheattributes.MaxObjects jcs.region.CalendarCache.cacheattributes.MemoryCacheName jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun jcs.region.CalendarCache.elementattributes jcs.region.CalendarCache.elementattributes.IsEternal jcs.region.CalendarCache.elementattributes.MaxLifeSeconds jcs.region.CalendarCache.elementattributes.IdleTime jcs.region.CalendarCache.elementattributes.IsSpool jcs.region.CalendarCache.elementattributes.IsRemote jcs.region.CalendarCache.elementattributes.IsLateral )
+    for I in $(seq 1 ${#NAMES[@]}); do
+      ox_remove_property ${NAMES[$I-1]} $PFILE
+    done
+
+    # SoftwareChange_Request-240
+    pfile=/opt/open-xchange/etc/contact.properties
+    image_k=com.openexchange.contact.scaleVCardImages
+    width_k=com.openexchange.contact.image.maxWidth
+    height_k=com.openexchange.contact.image.maxHeight
+    image_v=$(ox_read_property ${image_k} ${pfile})
+    width_v=$(ox_read_property ${width_k} ${pfile})
+    height_v=$(ox_read_property ${height_k} ${pfile})
+    if [ "200x200" == "${image_v}" ] && [ "250" == "${width_v}" ] && [ "250" == "${height_v}" ]
+    then
+      ox_set_property ${image_k} "600x800" ${pfile}
+      ox_set_property ${width_k} "600" ${pfile}
+      ox_set_property ${height_k} "800" ${pfile}
+    fi
+
+    # SoftwareChange_Request-287
+    pfile=/opt/open-xchange/etc/contact.properties
+    scale_k=com.openexchange.contact.image.scaleType
+    scale_v=$(ox_read_property ${scale_k} ${pfile})
+    if [ -n "${scale_v}" ]
+    then
+      if [ "2" == "${scale_v}" ]
+      then
+        ox_set_property ${scale_k} "1" ${pfile}
+      else
+        ox_set_property ${scale_k} ${scale_v} ${pfile}
+      fi
+    fi
+
+    SCR=SCR-208
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/configdb.properties
+
+      declare -A dmap
+      dmap[3]="useUnicode=true"
+      dmap[4]="characterEncoding=UTF-8"
+      dmap[5]="autoReconnect=false"
+      dmap[6]="useServerPrepStmts=false"
+      dmap[7]="useTimezone=true"
+      dmap[8]="serverTimezone=UTC"
+      dmap[9]="connectTimeout=15000"
+      dmap[10]="socketTimeout=15000"
+
+      for x in {3..10}
+      do
+        default_val=${dmap[$x]}
+        for prop_type in readProperty writeProperty
+        do
+          prop=${prop_type}.${x}
+          curr_val=$(ox_read_property ${prop} ${pfile})
+          if [ -n "${curr_val}" ]
+          then
+            if [ "${default_val}" == "${curr_val}" ]
+            then
+              ox_remove_property ${prop} ${pfile}
+            fi
+          fi
+        done
+      done
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-299
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/cache.ccf
+      for region in OXFolderCache OXFolderQueryCache GlobalFolderCache
+      do
+        curr_val=$(ox_read_property jcs.region.${region}.elementattributes.MaxLifeSeconds ${pfile})
+        if [ "-1" = "${curr_val}" ]
+        then
+          ox_set_property jcs.region.${region}.elementattributes.MaxLifeSeconds 3600 ${pfile}
+        fi
+      done
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -589,26 +679,14 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
-* Mon Nov 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-11-19 (4966)
-* Mon Oct 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-11-05 (4933)
-* Mon Oct 08 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-10-15 (4918)
-* Tue Sep 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-10-01 (4897)
-* Mon Sep 24 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-09-21 (4900)
-* Mon Sep 10 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-09-17 (4882)
-* Mon Aug 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-09-03 (4870)
-* Wed Aug 15 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-08-20 (4863)
-* Thu Aug 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-08-13 (4853)
-* Fri Jul 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-07-25 (4835)
+* Fri Nov 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
+RC 1 for 7.10.1 release
+* Fri Nov 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.1 release
+* Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.1 release
+* Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>

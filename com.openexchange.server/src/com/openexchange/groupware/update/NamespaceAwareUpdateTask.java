@@ -54,7 +54,6 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.openexchange.groupware.update.internal.ExcludedSet;
 
 /**
  * {@link NamespaceAwareUpdateTask} - Marks an {@link UpdateTaskV2} as 'excludable'.

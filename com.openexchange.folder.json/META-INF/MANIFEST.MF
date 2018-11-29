@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Folder HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.folder.json
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.folder.json.osgi.FolderJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -25,6 +25,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
+ com.openexchange.ajax.writer,
  com.openexchange.authentication,
  com.openexchange.calendar.json,
  com.openexchange.chronos.json.oauth,
@@ -34,6 +35,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.limit,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.calendar.contentType,
  com.openexchange.folderstorage.database.contentType,

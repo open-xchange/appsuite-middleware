@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.find.calendar;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
@@ -114,22 +111,13 @@ public class CalendarFindTest extends AbstractFindTest {
         app.setTitle(randomUID());
         app.setLocation(randomUID());
         app.setNote(randomUID());
-        Date randomDate = randomDate();
-        app.setStartDate(randomDate);
-        app.setEndDate(new Date(randomDate.getTime() + TimeUnit.MINUTES.toMillis(15)));
+        app.setStartDate(TimeTools.D("Next friday at 10:15"));
+        app.setEndDate(TimeTools.D("Next friday at 11:30"));
         app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app.setIgnoreConflicts(true);
         return app;
     }
 
-    private Date randomDate() {
-        Random random = new Random();
-        int minDay = (int) LocalDate.of(2000, 1, 1).toEpochDay();
-        int maxDay = (int) LocalDate.of(2015, 1, 1).toEpochDay();
-        long randomDay = minDay + random.nextInt(maxDay - minDay);
-
-        return new Date(randomDay);
-    }
     /**
      * Creates a new, random appointment instance containing some basic random data, with the folder ID being set to the given one.
      * The appointment is not created at the server automatically.

@@ -119,7 +119,7 @@ public class OIDCActivator extends HousekeepingActivator{
         OIDCConfigImpl config = new OIDCConfigImpl(this);
 
         Logger logger = org.slf4j.LoggerFactory.getLogger(OIDCActivator.class);
-        if (config.isEnabled().booleanValue()) {
+        if (config.isEnabled()) {
             logger.info("Starting core OpenID Connect support... ");
             getOIDCBackends(this);
             registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackendRegistry), null);
@@ -130,7 +130,7 @@ public class OIDCActivator extends HousekeepingActivator{
         }
 
         //register default oidc backend if configured
-        if (config.startDefaultBackend().booleanValue()) {
+        if (config.startDefaultBackend()) {
             context.registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
         context.registerService(SessionStorageParameterNamesProvider.class, new OIDCSessionParameterNamesProvider(), null);

@@ -273,9 +273,8 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
             WebDAVClient webDAVClient = new WebDAVClient(testUser, getDefaultUserAgent(), oAuthGrant);
             this.webDAVClients.put(threadID, webDAVClient);
             return webDAVClient;
-        } else {
-            return this.webDAVClients.get(threadID);
         }
+        return this.webDAVClients.get(threadID);
     }
 
     protected String fetchSyncToken(String folderID) throws Exception {

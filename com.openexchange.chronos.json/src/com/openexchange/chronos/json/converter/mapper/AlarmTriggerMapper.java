@@ -60,7 +60,6 @@ import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.fields.ChronosAlarmTriggerJsonFields;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
@@ -140,7 +139,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, String value) throws OXException {
+            public void set(AlarmTrigger object, String value) {
                 object.setAction(value);
             }
 
@@ -163,7 +162,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, Integer value) throws OXException {
+            public void set(AlarmTrigger object, Integer value) {
                 object.setAlarm(value);
             }
 
@@ -186,7 +185,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, String value) throws OXException {
+            public void set(AlarmTrigger object, String value) {
                 object.setEventId(value);
             }
 
@@ -209,7 +208,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, String value) throws OXException {
+            public void set(AlarmTrigger object, String value) {
                 object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value));
             }
 
@@ -233,7 +232,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, String value) throws OXException {
+            public void set(AlarmTrigger object, String value) {
                 object.setFolder(value);
             }
 
@@ -256,7 +255,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, String value) throws OXException {
+            public void set(AlarmTrigger object, String value) {
                 DateTime dateTime = DateTime.parse("UTC", value);
                 object.setTime(dateTime.getTimestamp());
             }

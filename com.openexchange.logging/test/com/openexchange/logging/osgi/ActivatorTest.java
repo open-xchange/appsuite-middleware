@@ -55,8 +55,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
@@ -102,7 +102,7 @@ public class ActivatorTest {
         PowerMockito.mockStatic(LoggerFactory.class);
 
         Mockito.when(loggerContext.getLogger(Mockito.anyString())).thenReturn(logger);
-        PowerMockito.when(loggerContext.getProperty(Matchers.anyString())).thenReturn(null);
+        PowerMockito.when(loggerContext.getProperty(ArgumentMatchers.anyString())).thenReturn(null);
 
         Mockito.when(LoggerFactory.getILoggerFactory()).thenReturn(loggerContext);
 
@@ -111,14 +111,14 @@ public class ActivatorTest {
 
      @Test
      public void testOverrideLoggerLevels_loggerNotAvailable_logWarning() {
-        PowerMockito.when(loggerContext.getLogger(Matchers.anyString())).thenReturn(null);
+        PowerMockito.when(loggerContext.getLogger(ArgumentMatchers.anyString())).thenReturn(null);
 
         Mockito.mock(LoggerContext.class);
 
         activator.overrideLoggerLevels(loggerContext);
 
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString(), Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
     }
 
      @Test
@@ -128,8 +128,8 @@ public class ActivatorTest {
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(ArgumentMatchers.anyString());
     }
 
      @Test
@@ -139,8 +139,8 @@ public class ActivatorTest {
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(ArgumentMatchers.anyString());
     }
 
      @Test
@@ -150,8 +150,8 @@ public class ActivatorTest {
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(ArgumentMatchers.anyString());
     }
 
      @Test
@@ -161,8 +161,8 @@ public class ActivatorTest {
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.never()).setLevel(Level.INFO);
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(ArgumentMatchers.anyString());
     }
 
      @Test
@@ -172,20 +172,20 @@ public class ActivatorTest {
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.never()).setLevel(Level.INFO);
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(ArgumentMatchers.anyString());
     }
 
      @Test
      public void testOverrideLoggerLevels_disableOverrideLogLevels_returnWithOverriding() {
         Mockito.when(logger.getLevel()).thenReturn(Level.OFF);
-        PowerMockito.when(loggerContext.getProperty(Matchers.anyString())).thenReturn("true");
+        PowerMockito.when(loggerContext.getProperty(ArgumentMatchers.anyString())).thenReturn("true");
 
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.never()).setLevel(Level.INFO);
-        Mockito.verify(loggerContext, Mockito.never()).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+        Mockito.verify(loggerContext, Mockito.never()).getLogger(ArgumentMatchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(ArgumentMatchers.anyString());
     }
 
      @Test
@@ -199,7 +199,7 @@ public class ActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any(), (IncludeStackTraceServiceImpl) Mockito.any());
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(ArgumentMatchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any(), (IncludeStackTraceServiceImpl) Mockito.any());
 
         activatorSpy.start(bundleContext);
 
@@ -217,7 +217,7 @@ public class ActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any(), (IncludeStackTraceServiceImpl) Mockito.any());
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(ArgumentMatchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any(), (IncludeStackTraceServiceImpl) Mockito.any());
 
         activatorSpy.start(bundleContext);
 
@@ -227,21 +227,21 @@ public class ActivatorTest {
      @Test
      public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
         Activator activatorSpy = Mockito.spy(activator);
-        Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
+        Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
 
         activatorSpy.installJulLevelChangePropagator(loggerContext);
 
-        Mockito.verify(loggerContext, Mockito.atLeast(1)).addListener((LoggerContextListener) Matchers.any());
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).addListener((LoggerContextListener) ArgumentMatchers.any());
     }
 
      @Test
      public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
         Activator activatorSpy = Mockito.spy(activator);
-        Mockito.doReturn(true).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
+        Mockito.doReturn(true).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
 
         activatorSpy.installJulLevelChangePropagator(loggerContext);
 
-        Mockito.verify(loggerContext, Mockito.never()).addListener((LoggerContextListener) Matchers.any());
+        Mockito.verify(loggerContext, Mockito.never()).addListener((LoggerContextListener) ArgumentMatchers.any());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -485,6 +485,9 @@ public class ContentType extends ParameterizedHeader {
                         while ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                             pt = pt.substring(1);
                         }
+                        while ((fc = pt.charAt(pt.length() - 1)) == '"' || fc == '\'') {
+                            pt = pt.substring(0, pt.length() - 1);
+                        }
                         if (Strings.toLowerCase(pt).startsWith("content-type:")) {
                             pt = pt.substring(13);
                             if ((fc = pt.charAt(0)) == '"' || fc == '\'') {

@@ -89,7 +89,7 @@ public final class ClientWhitelist {
         allowedCache.clear();
         final String[] wps = wildcardPatterns.split(" *, *", 0);
         for (final String wildcardPattern : wps) {
-            if (!Strings.isEmpty(wildcardPattern)) {
+            if (Strings.isNotEmpty(wildcardPattern)) {
                 add(Pattern.compile(Strings.wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
             }
         }

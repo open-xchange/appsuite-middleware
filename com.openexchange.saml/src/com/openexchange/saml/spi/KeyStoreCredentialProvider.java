@@ -51,7 +51,6 @@ package com.openexchange.saml.spi;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
@@ -62,14 +61,18 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.x509.BasicX509Credential;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.saml.SAMLExceptionCode;
 
@@ -82,7 +85,7 @@ import com.openexchange.saml.SAMLExceptionCode;
  */
 public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
 
-    private KeyStoreCredentialProvider(Credential idpCertificateCredential, Credential signingCredential, Credential decryptionCredential) {
+    private KeyStoreCredentialProvider(List<Credential> idpCertificateCredential, Credential signingCredential, Credential decryptionCredential) {
         super(idpCertificateCredential, signingCredential, decryptionCredential);
     }
 
@@ -98,41 +101,61 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
      * @param decryptionKeyPassword The password to load the decryption key or <code>null</code>
      */
     public static KeyStoreCredentialProvider newInstance(String keyStorePath, char[] keyStorePassword, String idpCertAlias, String signingKeyAlias, char[] signingKeyPassword, String decryptionKeyAlias, char[] decryptionKeyPassword) throws OXException {
+        return newInstance(keyStorePath, keyStorePassword, Collections.singletonList(idpCertAlias), signingKeyAlias, signingKeyPassword, decryptionKeyAlias, decryptionKeyPassword);
+    }
+
+    /**
+     * Creates a new instance of a {@link KeyStoreCredentialProvider}.
+     *
+     * @param keyStorePath The file system path of the key store file
+     * @param keyStorePassword The key stores password or <code>null</code> if it's unprotected
+     * @param idpCertAliases The list of aliases of the entry of the IDPs certificate to validate signatures or <code>null</code>
+     * @param signingKeyAlias The alias of the private key entry used for signing SP requests or <code>null</code>
+     * @param signingKeyPassword The password to load the signing key or <code>null</code>
+     * @param decryptionKeyAlias The alias of the private key entry used to decrypt encrypted data or encryption keys or <code>null</code>
+     * @param decryptionKeyPassword The password to load the decryption key or <code>null</code>
+     */
+    public static KeyStoreCredentialProvider newInstance(String keyStorePath, char[] keyStorePassword, List<String> idpCertAliases, String signingKeyAlias, char[] signingKeyPassword, String decryptionKeyAlias, char[] decryptionKeyPassword) throws OXException {
         if (Strings.isEmpty(keyStorePath)) {
             throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("a keystore path must be set");
         }
-
-        BasicCredential idpCertificateCredential = null;
         BasicCredential signingCredential = null;
         BasicCredential encryptionCredential = null;
-
+        List<Credential> idpCertificateCredentials = new ArrayList<>();
         try {
             KeyStore keyStore = initKeyStore(keyStorePath, keyStorePassword);
-            if (!Strings.isEmpty(idpCertAlias)) {
-                Certificate certificate = keyStore.getCertificate(idpCertAlias);
-                if (certificate == null) {
-                    throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no certificate for alias '" + idpCertAlias + "'");
+            boolean keystoreHasCertificates = false;
+            if (idpCertAliases.isEmpty() == false) {
+                keystoreHasCertificates = loadCertificates(idpCertAliases, idpCertificateCredentials, keyStore, keystoreHasCertificates);
+                if (keystoreHasCertificates == false) {
+                    throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no certificate for alias '" + idpCertAliases + "'");
                 }
+            }
+            signingCredential = credentialFromKeyPair(keyStore, signingKeyAlias, signingKeyPassword, UsageType.SIGNING);
+            encryptionCredential = credentialFromKeyPair(keyStore, decryptionKeyAlias, decryptionKeyPassword, UsageType.ENCRYPTION);
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
+        } 
 
+        return new KeyStoreCredentialProvider(idpCertificateCredentials, signingCredential, encryptionCredential);
+    }
+
+    private static boolean loadCertificates(List<String> idpCertAliases, List<Credential> idpCertificateCredentials, KeyStore keyStore, boolean keystoreHasCertificates) throws KeyStoreException, CertificateEncodingException {
+        BasicCredential idpCertificateCredential;
+        for (String alias : idpCertAliases) {
+            Certificate certificate = keyStore.getCertificate(alias);
+            if (certificate != null) {
+                keystoreHasCertificates = true;
                 idpCertificateCredential = new BasicCredential();
                 idpCertificateCredential.setUsageType(UsageType.SIGNING);
                 idpCertificateCredential.setPublicKey(certificate.getPublicKey());
+                idpCertificateCredentials.add(idpCertificateCredential);
             }
-
-            signingCredential = credentialFromKeyPair(keyStore, signingKeyAlias, signingKeyPassword, UsageType.SIGNING);
-            encryptionCredential = credentialFromKeyPair(keyStore, decryptionKeyAlias, decryptionKeyPassword, UsageType.ENCRYPTION);
-        } catch (KeyStoreException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } catch (UnrecoverableEntryException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         }
-
-        return new KeyStoreCredentialProvider(idpCertificateCredential, signingCredential, encryptionCredential);
+        return keystoreHasCertificates;
     }
 
-    private static BasicCredential credentialFromKeyPair(KeyStore keyStore, String alias, char[] password, UsageType type) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, OXException {
+    private static BasicCredential credentialFromKeyPair(KeyStore keyStore, String alias, char[] password, UsageType type) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, OXException, CertificateEncodingException {
         if (Strings.isEmpty(alias)) {
             return null;
         }
@@ -181,23 +204,12 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
             throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("The keystore file " + path + " is not readable");
         }
 
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(keyStoreFile);
+        try (FileInputStream inputStream = new FileInputStream(keyStoreFile)){
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             keystore.load(inputStream, password == null ? null : password);
             return keystore;
-        } catch (FileNotFoundException e) {
+        } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
             throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } catch (CertificateException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Streams.close(inputStream);
         }
     }
-
 }

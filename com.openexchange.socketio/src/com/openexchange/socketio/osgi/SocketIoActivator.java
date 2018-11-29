@@ -54,7 +54,10 @@ import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.socketio.monitoring.SocketIOMBean;
+import com.openexchange.socketio.monitoring.impl.SocketIOMBeanImpl;
 import com.openexchange.socketio.server.SocketIOManager;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
 import com.openexchange.socketio.websocket.WsTransport;
@@ -62,7 +65,6 @@ import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketListener;
-
 
 /**
  * {@link SocketIoActivator}
@@ -109,9 +111,10 @@ public class SocketIoActivator extends HousekeepingActivator {
         getService(HttpService.class).registerServlet("/socket.io", servlet, initParams, null);
 
         SocketIOManager socketIOManager = servlet.getSocketIOManager();
-        ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<>(context, ManagementService.class, new ManagementTracker(socketIOManager, connectionRegistry, context));
-        this.mgmtTracker = mgmtTracker;
+        HousekeepingManagementTracker managementTracker = new HousekeepingManagementTracker(context, SocketIOMBean.class.getName(), SocketIOMBean.DOMAIN, new SocketIOMBeanImpl(socketIOManager, connectionRegistry));
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<>(context, ManagementService.class, managementTracker);
         mgmtTracker.open();
+        this.mgmtTracker = mgmtTracker;
     }
 
     @Override

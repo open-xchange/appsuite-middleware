@@ -100,7 +100,7 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.Category;
@@ -341,7 +341,7 @@ public class Mail extends PermissionServlet {
         }
     }
 
-    private final static void writeError(final String error, final JSONWriter jsonWriter) {
+    private static final void writeError(final String error, final JSONWriter jsonWriter) {
         try {
             startResponse(jsonWriter);
             jsonWriter.value(STR_EMPTY);
@@ -441,7 +441,7 @@ public class Mail extends PermissionServlet {
         }
     }
 
-    private final transient static JSONArray EMPTY_JSON_ARR = new JSONArray();
+    private static final transient JSONArray EMPTY_JSON_ARR = new JSONArray();
 
     private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriters(new MailListField[] { MailListField.ID })[0];
 
@@ -504,16 +504,6 @@ public class Mail extends PermissionServlet {
                     }
                 }
             }
-            // final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderId);
-            /*
-             * Clean session caches
-             */
-            // SessionMailCache.getInstance(session, fa.getAccountId()).clear();
-            /*
-             * Clean message cache
-             */
-            // MailMessageCache.getInstance().removeFolderMessages(fa.getAccountId(), fa.getFullname(), session.getUserId(),
-            // session.getContext());
         } catch (final OXException e) {
             LOG.error("", e);
             response.setException(e);
@@ -777,7 +767,7 @@ public class Mail extends PermissionServlet {
          */
         final Response response = new Response(session);
         Object data = JSONObject.NULL;
-        final List<OXException> warnings = new ArrayList<OXException>(2);
+        final List<OXException> warnings = new ArrayList<>(2);
         /*
          * Start response
          */
@@ -860,7 +850,7 @@ public class Mail extends PermissionServlet {
          */
         final Response response = new Response(session);
         Object data = JSONObject.NULL;
-        final List<OXException> warnings = new ArrayList<OXException>(2);
+        final List<OXException> warnings = new ArrayList<>(2);
         /*
          * Start response
          */
@@ -958,7 +948,6 @@ public class Mail extends PermissionServlet {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final boolean unseen;
             {
                 final String tmp = paramContainer.getStringParam(PARAMETER_UNSEEN);
@@ -1029,7 +1018,6 @@ public class Mail extends PermissionServlet {
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
                             triggerContactCollector(session, mail, false);
                         }
-                        //                        countObjectUse(session, mail);
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
@@ -1283,7 +1271,6 @@ public class Mail extends PermissionServlet {
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
                             triggerContactCollector(session, mail, false);
                         }
-                        //                        countObjectUse(session, mail);
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
@@ -1605,8 +1592,6 @@ public class Mail extends PermissionServlet {
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
-            // final String msgUID =
-            // paramContainer.checkStringParam(PARAMETER_ID);
             final String partIdentifier = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
             /*
              * Get new mails
@@ -1997,19 +1982,6 @@ public class Mail extends PermissionServlet {
                     } else {
                         attachmentInputStream = new InputStreamReadable(mailPart.getInputStream());
                     }
-                    /*-
-                     * TODO: Does not work, yet.
-                     *
-                     * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-                     *     // Treat as a mail get
-                     *     final MailMessage mail = (MailMessage) mailPart.getContent();
-                     *     final Response response = new Response();
-                     *     response.setData(MessageWriter.writeMailMessage(mail, true, session));
-                     *     response.setTimestamp(null);
-                     *     ResponseWriter.write(response, resp.getWriter());
-                     *     return;
-                     * }
-                     */
                 } else {
                     mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
                     if (mailPart == null) {
@@ -2477,7 +2449,7 @@ public class Mail extends PermissionServlet {
                     /*
                      * Parse with default account's transport provider
                      */
-                    final List<OXException> warnings = new ArrayList<OXException>();
+                    final List<OXException> warnings = new ArrayList<>();
                     final ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                     response.addWarnings(warnings);
                     if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
@@ -3050,7 +3022,7 @@ public class Mail extends PermissionServlet {
                         }
                         arr.add(current.getMailID());
                     }
-                    if (arr.size() > 0) {
+                    if (!arr.isEmpty()) {
                         final String[] uids = arr.toArray(new String[arr.size()]);
                         mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
                     }

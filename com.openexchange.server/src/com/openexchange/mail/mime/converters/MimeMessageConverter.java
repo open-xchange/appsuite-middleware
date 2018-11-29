@@ -2237,7 +2237,7 @@ public final class MimeMessageConverter {
                     }
                 } else {
                     String sct = part.getContentType();
-                    if (!Strings.isEmpty(sct)) {
+                    if (Strings.isNotEmpty(sct)) {
                         mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(sct));
                     }
                 }
@@ -2258,7 +2258,7 @@ public final class MimeMessageConverter {
 
                         if (false == contentTypeParsed) {
                             String filename = contentDisposition.getFilenameParameter();
-                            if (false == Strings.isEmpty(filename)) {
+                            if (Strings.isNotEmpty(filename)) {
                                 String contentType = MimeType2ExtMap.getContentType(filename);
                                 mailPart.setContentType(contentType);
                             }

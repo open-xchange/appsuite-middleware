@@ -1,62 +1,26 @@
-open-xchange-oauth (7.10.0-20) stable; urgency=medium
+open-xchange-oauth (7.10.1-3) stable; urgency=medium
 
-  * Build for patch 2018-11-19 (4966)
+  * RC 1 for 7.10.1 release
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 19 Nov 2018 10:53:40 +0100
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 23 Nov 2018 14:39:39 +0100
 
-open-xchange-oauth (7.10.0-19) stable; urgency=medium
+open-xchange-oauth (7.10.1-2) stable; urgency=medium
 
-  * Build for patch 2018-11-05 (4933)
+  * Second preview for 7.10.1 release
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 29 Oct 2018 16:08:00 +0100
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 02 Nov 2018 14:01:48 +0100
 
-open-xchange-oauth (7.10.0-18) stable; urgency=medium
+open-xchange-oauth (7.10.1-1) stable; urgency=medium
 
-  * Build for patch 2018-10-15 (4918)
+  * First candidate for 7.10.1 release
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 08 Oct 2018 15:54:53 +0200
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Thu, 11 Oct 2018 12:12:24 +0200
 
-open-xchange-oauth (7.10.0-17) stable; urgency=medium
+open-xchange-oauth (7.10.1-0) unstable; urgency=medium
 
-  * Build for patch 2018-10-01 (4897)
+  * prepare for 7.10.1 release
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 25 Sep 2018 13:55:47 +0200
-
-open-xchange-oauth (7.10.0-16) stable; urgency=medium
-
-  * Build for patch 2018-09-21 (4900)
-
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 24 Sep 2018 12:50:04 +0200
-
-open-xchange-oauth (7.10.0-15) stable; urgency=medium
-
-  * Build for patch 2018-09-17 (4882)
-
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 10 Sep 2018 15:21:48 +0200
-
-open-xchange-oauth (7.10.0-14) stable; urgency=medium
-
-  * Build for patch 2018-09-03 (4870)
-
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 27 Aug 2018 12:30:35 +0200
-
-open-xchange-oauth (7.10.0-13) stable; urgency=medium
-
-  * Build for patch 2018-08-20 (4863)
-
- -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 15 Aug 2018 15:34:41 +0200
-
-open-xchange-oauth (7.10.0-12) stable; urgency=medium
-
-  * Build for patch 2018-08-13 (4853)
-
- -- Steffen Templin <marcus.klein@open-xchange.com>  Thu, 02 Aug 2018 16:04:39 +0200
-
-open-xchange-oauth (7.10.0-11) stable; urgency=medium
-
-  * Build for patch 2018-07-25 (4835)
-
- -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 20 Jul 2018 10:14:55 +0200
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Thu, 06 Sep 2018 12:29:13 +0200
 
 open-xchange-oauth (7.10.0-10) stable; urgency=medium
 

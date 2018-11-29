@@ -319,12 +319,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             } else {
                 unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
                 if (unifiedQuotaService != null) {
+                    long quota = unifiedQuotaService.getLimit(effectiveUserId, contextId);
                     boolean keepOn = true;
                     while (keepOn) {
                         long otherUsages = unifiedQuotaService.getUsageExceptFor(effectiveUserId, contextId, SERVICE_ID_APPSUITE_DRIVE).getTotal();
                         long oldTotalUsage = otherUsages + oldUsageFromDb;
                         long newTotalUsage = otherUsages + newUsageForDb;
-                        long effectiveLimit = getQuota();
+                        long effectiveLimit = quota;
                         if (checkExceededQuota(id, effectiveLimit, required, newTotalUsage, oldTotalUsage)) {
                             return true;
                         }
@@ -339,7 +340,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                     }
                     toRestore = Long.valueOf(oldUsageFromDb);
                 } else {
-                    long quota = getQuota();
+                    long quota = this.quota;
                     if (checkExceededQuota(id, quota, required, newUsageForDb, oldUsageFromDb)) {
                         return true;
                     }
@@ -383,9 +384,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         return false;
     }
 
-    private void checkAvailable(String id, long required) throws OXException {
+    private void checkAvailable(String id, long required, long quota) throws OXException {
         if (0 < required) {
-            long quota = getQuota();
             long oldUsage = getUsage();
             long usage = oldUsage + required;
             if (checkExceededQuota(id, quota, required, usage, oldUsage)) {
@@ -397,21 +397,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private boolean checkExceededQuota(String id, long quota, long required, long newUsage, long oldUsage) {
         if ((quota == 0) || (quota > 0 && newUsage > quota)) {
             // Advertise exceeded quota to listeners
-            int ownerId = ownerInfo.getOwnerId();
-            for (QuotaFileStorageListener quotaListener : quotaListeners) {
-                try {
-                    quotaListener.onQuotaExceeded(id, required, oldUsage, quota, ownerId, contextId);
-                } catch (Exception e) {
-                    LOGGER.warn("", e);
-                }
-            }
+            notifyOnQuotaExceeded(id, quota, required, newUsage, oldUsage);
             return true;
         }
         return false;
     }
 
-    private boolean checkNoQuota(String id) throws OXException {
-        long quota = getQuota();
+    private boolean checkNoQuota(String id, long quota) throws OXException {
         if (quota == 0) {
             // Advertise no quota to listeners
             int ownerId = ownerInfo.getOwnerId();
@@ -494,9 +486,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
 
             // Advertise usage increment to listeners
+            long quota = getQuota();
             for (QuotaFileStorageListener quotaListener : quotaListeners) {
                 try {
-                    quotaListener.onUsageDecrement(ids, toReleaseBy, oldUsageFromDb, getQuota(), ownerId, contextId);
+                    quotaListener.onUsageDecrement(ids, toReleaseBy, oldUsageFromDb, quota, ownerId, contextId);
                 } catch (Exception e) {
                     LOGGER.warn("", e);
                 }
@@ -644,17 +637,27 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public String saveNewFile(InputStream is, long sizeHint) throws OXException {
-        if (checkNoQuota(null)) {
+        long quota = getQuota();
+        if (checkNoQuota(null, quota)) {
             throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
         }
+
+        boolean checked = false;
         if (0 < sizeHint) {
-            checkAvailable(null, sizeHint);
+            checkAvailable(null, sizeHint, quota);
+            checked = true;
         }
 
         String file = null;
         try {
             // Store new file
-            file = fileStorage.saveNewFile(is);
+            if (checked || 0 > quota) {
+                file = fileStorage.saveNewFile(is);
+            } else {
+                long usage = getUsage();
+                long free = quota - usage;
+                file = fileStorage.saveNewFile(new LimitedInputStream(is, free));
+            }
             String retval = file;
 
             // Check against quota limitation
@@ -675,11 +678,88 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             // Null'ify reference (to avoid preliminary deletion) & return new file identifier
             file = null;
             return retval;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof StorageFullIOException) {
+                long required = ((StorageFullIOException) cause).getActualSize();
+                long usage = getUsage();
+                notifyOnQuotaExceeded(null, quota, required, usage + required, usage);
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
+            }
+            throw e;
         } finally {
             if (file != null) {
                 fileStorage.deleteFile(file);
             }
         }
+    }
+
+    @Override
+    public long appendToFile(InputStream is, String name, long offset) throws OXException {
+        return appendToFile(is, name, offset, -1);
+    }
+
+    @Override
+    public long appendToFile(InputStream is, String name, long offset, long sizeHint) throws OXException {
+        long quota = getQuota();
+        if (checkNoQuota(name, quota)) {
+            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+        }
+
+        boolean checked = false;
+        if (0 < sizeHint) {
+            checkAvailable(name, sizeHint, quota);
+            checked = true;
+        }
+
+        long newSize = -1;
+        boolean notFoundError = false;
+        try {
+            // Append to new file
+            if (checked || 0 > quota) {
+                newSize = fileStorage.appendToFile(is, name, offset);
+            } else {
+                long usage = getUsage();
+                long free = quota - usage;
+                newSize = fileStorage.appendToFile(new LimitedInputStream(is, free), name, offset);
+            }
+
+            // Check against quota limitation
+            boolean full = incUsage(name, newSize - offset);
+            if (full) {
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+            }
+
+            // Notify storage listeners
+            for (FileStorageListener storageListener : storageListeners) {
+                try {
+                    storageListener.onFileModified(name, fileStorage);
+                } catch (Exception e) {
+                    LOGGER.warn("", e);
+                }
+            }
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof StorageFullIOException) {
+                long required = ((StorageFullIOException) cause).getActualSize();
+                long usage = getUsage();
+                notifyOnQuotaExceeded(name, quota, required, usage + required, usage);
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
+            }
+            if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                notFoundError = true;
+            }
+            throw e;
+        } finally {
+            if (false == notFoundError && -1 == newSize) {
+                try {
+                    fileStorage.setFileLength(offset, name);
+                } catch (OXException e) {
+                    LOGGER.warn("Error rolling back 'append' operation", e);
+                }
+            }
+        }
+        return newSize;
     }
 
     /**
@@ -800,50 +880,6 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     }
 
     @Override
-    public long appendToFile(InputStream is, String name, long offset) throws OXException {
-        return appendToFile(is, name, offset, -1);
-    }
-
-    @Override
-    public long appendToFile(InputStream is, String name, long offset, long sizeHint) throws OXException {
-        if (checkNoQuota(name)) {
-            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
-        }
-        if (0 < sizeHint) {
-            checkAvailable(name, sizeHint);
-        }
-        long newSize = -1;
-        boolean notFoundError = false;
-        try {
-            newSize = fileStorage.appendToFile(is, name, offset);
-            if (incUsage(name, newSize - offset)) {
-                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
-            }
-            for (FileStorageListener storageListener : storageListeners) {
-                try {
-                    storageListener.onFileModified(name, fileStorage);
-                } catch (Exception e) {
-                    LOGGER.warn("", e);
-                }
-            }
-        } catch (final OXException e) {
-            if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                notFoundError = true;
-            }
-            throw e;
-        } finally {
-            if (false == notFoundError && -1 == newSize) {
-                try {
-                    fileStorage.setFileLength(offset, name);
-                } catch (OXException e) {
-                    LOGGER.warn("Error rolling back 'append' operation", e);
-                }
-            }
-        }
-        return newSize;
-    }
-
-    @Override
     public void setFileLength(long length, String name) throws OXException {
         // First, remember old length
         long oldLength = fileStorage.getFileSize(name);
@@ -879,6 +915,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         return fileStorage.getFile(name, offset, length);
+    }
+
+    private void notifyOnQuotaExceeded(String id, long quota, long required, long newUsage, long oldUsage) {
+        int ownerId = ownerInfo.getOwnerId();
+        for (QuotaFileStorageListener quotaListener : quotaListeners) {
+            try {
+                quotaListener.onQuotaExceeded(id, required, oldUsage, quota, ownerId, contextId);
+            } catch (Exception e) {
+                LOGGER.warn("", e);
+            }
+        }
     }
 
     @Override

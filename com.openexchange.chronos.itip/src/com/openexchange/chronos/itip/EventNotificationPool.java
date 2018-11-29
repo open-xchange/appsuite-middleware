@@ -70,9 +70,9 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
+import com.openexchange.chronos.itip.generators.ITipNotificationMailGenerator;
+import com.openexchange.chronos.itip.generators.ITipNotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationMail;
-import com.openexchange.chronos.itip.generators.NotificationMailGenerator;
-import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
@@ -97,7 +97,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     int stateChangeInterval;
     int priorityInterval;
 
-    final NotificationMailGeneratorFactory generatorFactory;
+    final ITipNotificationMailGeneratorFactory generatorFactory;
 
     final MailSenderService notificationMailer;
 
@@ -107,7 +107,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
     private final Map<Integer, Map<NotificationParticipant, List<Event>>> sent = new HashMap<Integer, Map<NotificationParticipant, List<Event>>>();
 
-    public EventNotificationPool(TimerService timer, NotificationMailGeneratorFactory generatorFactory, MailSenderService notificationMailer, int detailChangeInterval, int stateChangeInterval, int priorityInterval) {
+    public EventNotificationPool(TimerService timer, ITipNotificationMailGeneratorFactory generatorFactory, MailSenderService notificationMailer, int detailChangeInterval, int stateChangeInterval, int priorityInterval) {
         this.generatorFactory = generatorFactory;
         this.notificationMailer = notificationMailer;
 
@@ -136,7 +136,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
         if (null == original || null == update || null == session) {
             throw new NullPointerException("Please specify an original event, a new event and a session");
         }
@@ -147,7 +147,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         try {
             lock.lock();
-            item(I(session.getContextId()), original.getId()).remember(original, update, session, sharedFolderOwner, principal);
+            item(I(session.getContextId()), original.getId()).remember(original, update, session, sharedFolderOwner, principal, comment);
         } finally {
             lock.unlock();
         }
@@ -321,7 +321,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         public ITipEventUpdate getDiff() throws OXException {
             if (diff == null) {
-                diff = new ITipEventUpdate(oldEvent, newEvent, true, NotificationMailGenerator.DEFAULT_SKIP);
+                diff = new ITipEventUpdate(oldEvent, newEvent, true, ITipNotificationMailGenerator.DEFAULT_SKIP);
             }
             return diff;
         }
@@ -343,6 +343,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         private long         lastKnownStartDateForNextOccurrence;
         private Session      session;
         private CalendarUser principal;
+        private String comment;
 
         private final LinkedList<Update> updates = new LinkedList<Update>();
 
@@ -354,8 +355,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             super();
         }
 
-        public void remember(Event original, Event newEvent, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+        public void remember(Event original, Event newEvent, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
             this.principal = principal;
+            this.comment = comment;
             if (this.original == null) {
                 this.original = original;
                 this.session = session;
@@ -390,7 +392,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 return HandlingSuggestion.DONE;
             }
             // Diff most recent and original version
-            ITipEventUpdate overallDiff = new ITipEventUpdate(original, mostRecent, true, NotificationMailGenerator.DEFAULT_SKIP);
+            ITipEventUpdate overallDiff = new ITipEventUpdate(original, mostRecent, true, ITipNotificationMailGenerator.DEFAULT_SKIP);
 
             if (overallDiff.isAboutStateChangesOnly()) {
                 if (!force && getInterval() < stateChangeInterval && getIntervalToStartDate() > priorityInterval) {
@@ -432,7 +434,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }
@@ -452,7 +454,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null && mail.getStateType() != State.Type.NEW) {
-                        notificationMailer.sendMail(mail, session, principal);
+                        notificationMailer.sendMail(mail, session, principal, comment);
                     }
                 }
             }
@@ -529,7 +531,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                     }
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null && mail.getStateType() != State.Type.NEW) {
-                        notificationMailer.sendMail(mail, session, principal);
+                        notificationMailer.sendMail(mail, session, principal, comment);
                     }
                 }
             }
@@ -566,7 +568,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }
@@ -583,7 +585,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }
@@ -600,7 +602,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }

@@ -83,7 +83,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
 
     /**
      * Initializes a new {@link PasswordChangeRecorderRegistryServiceImpl}.
-     * 
+     *
      * @param context The {@link BundleContext}
      * @param viewFactory The {@link ConfigViewFactory}
      * @param userService The {@link UserService}
@@ -122,7 +122,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
      * @param symbolicName The name of the {@link PasswordChangeRecorder}
      */
     public void unregister(String symbolicName) {
-        if (false == Strings.isEmpty(symbolicName)) {
+        if (Strings.isNotEmpty(symbolicName)) {
             LOGGER.debug("Try to remove recorder with name {}", symbolicName);
             this.recorders.remove(symbolicName);
         }
@@ -135,7 +135,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
 
     @Override
     public PasswordChangeRecorder getRecorder(String symbolicName) {
-        if (false == Strings.isEmpty(symbolicName)) {
+        if (Strings.isNotEmpty(symbolicName)) {
             return this.recorders.get(symbolicName);
         }
         return null;

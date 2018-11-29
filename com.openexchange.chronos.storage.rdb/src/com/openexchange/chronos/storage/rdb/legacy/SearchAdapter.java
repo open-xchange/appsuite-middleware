@@ -74,6 +74,7 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
@@ -86,6 +87,7 @@ import com.openexchange.search.SearchTerm.OperationPosition;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.StringCollection;
 
@@ -380,7 +382,7 @@ public class SearchAdapter {
         }
     }
 
-    private void append(SingleSearchTerm term) throws OXException {
+    private void append(SingleSearchTerm term) {
         /*
          * get relevant mapping for term
          */
@@ -409,29 +411,76 @@ public class SearchAdapter {
         }
     }
 
-    private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping, String prefix) throws OXException {
+    private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping, String prefix) throws IllegalArgumentException {
         stringBuilder.append('(');
-        for (int i = 0; i < operands.length; i++) {
-            if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
-                stringBuilder.append(operation.getSqlRepresentation());
-            }
+        Outer: for (int i = 0; i < operands.length; i++) {
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
                 Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
-                appendColumnOperand(entry.getValue(), entry.getKey());
-            } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
-                appendConstantOperand(operands[i].getValue(), mapping.getSqlType());
-            } else {
-                throw new IllegalArgumentException("unknown type in operand: " + operands[i].getType());
+                if (DefaultDbMultiMapping.class.isAssignableFrom(entry.getValue().getClass())) {
+                    DefaultDbMultiMapping<? extends Object, ?> m = (DefaultDbMultiMapping<? extends Object, ?>) mapping;
+                    String[] lables = null != prefix ? m.getColumnLabels(prefix) : m.getColumnLabels();
+                    Operand<?> operand = operands[i + 1];
+
+                    if (false == Operand.Type.CONSTANT.equals(operand.getType())) {
+                        continue Outer;
+                    }
+
+                    Inner: for (int j = 0; j < lables.length; j++) {
+                        String lable = lables[j];
+                        // XXX quirk to avoid searching strings in number columns and visa versa
+                        try {
+                            Integer.parseInt(String.valueOf(operand.getValue()));
+                            if (false == lable.toLowerCase().contains("id")) {
+                                continue Inner;
+                            }
+                        } catch (NumberFormatException e) {
+                            if (lable.toLowerCase().contains("id")) {
+                                continue Inner;
+                            }
+                        }
+                        if (j != 0) {
+                            stringBuilder.append(" OR ");
+                        }
+
+                        appendOperation(operation, new ColumnOperand(lable), mapping.getSqlType(), prefix, true, false);
+                        appendOperation(operation, operand, mapping.getSqlType(), prefix, false, true);
+                    }
+                    // Skip value
+                    i++;
+                    continue Outer;
+                }
+                
             }
-            if (OperationPosition.AFTER.equals(operation.getSqlPosition())) {
-                stringBuilder.append(' ').append(operation.getSqlRepresentation());
-            } else if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && i != operands.length - 1) {
-                //don't place an operator after the last operand here
-                stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
-            }
+            appendOperation(operation, operands[i], mapping.getSqlType(), prefix, i != operands.length - 1, true);
         }
         stringBuilder.append(')');
+
     }
+
+    private void appendOperation(Operation operation, Operand<?> operand, int sqlType, String prefix, boolean isNotLast, boolean useMapping) throws IllegalArgumentException {
+        if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
+            stringBuilder.append(operation.getSqlRepresentation());
+        }
+        if (Operand.Type.COLUMN.equals(operand.getType())) {
+            if (useMapping) {
+                Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operand.getValue());
+                appendColumnOperand(entry.getValue(), entry.getKey());
+            } else {
+                stringBuilder.append(operand.getValue());
+            }
+        } else if (Operand.Type.CONSTANT.equals(operand.getType())) {
+            appendConstantOperand(operand.getValue(), sqlType);
+        } else {
+            throw new IllegalArgumentException("unknown type in operand: " + operand.getType());
+        }
+        if (OperationPosition.AFTER.equals(operation.getSqlPosition())) {
+            stringBuilder.append(' ').append(operation.getSqlRepresentation());
+        } else if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && isNotLast) {
+            //don't place an operator after the last operand here
+            stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
+        }
+    }
+
 
     private void append(CompositeSearchTerm term) throws OXException {
         stringBuilder.append(" ( ");
@@ -461,7 +510,7 @@ public class SearchAdapter {
      * @param compositeTerm The composite term
      * @return <code>true</code>, if the term was appended as 'IN' clause, <code>false</code>, otherwise
      */
-    private boolean appendAsInClause(CompositeSearchTerm compositeTerm) throws OXException {
+    private boolean appendAsInClause(CompositeSearchTerm compositeTerm) {
         /*
          * check if operation & operands are applicable
          */
@@ -524,7 +573,7 @@ public class SearchAdapter {
         return true;
     }
 
-    private void appendAsInClause(DbMapping<? extends Object, ?> mapping, String prefix, List<Object> constantValues) throws OXException {
+    private void appendAsInClause(DbMapping<? extends Object, ?> mapping, String prefix, List<Object> constantValues) {
         appendColumnOperand(mapping, prefix);
         stringBuilder.append(" IN (");
         appendConstantOperand(constantValues.get(0), mapping.getSqlType());
@@ -535,7 +584,7 @@ public class SearchAdapter {
         stringBuilder.append(") ");
     }
 
-    private void appendConstantOperand(Object value, int sqlType) throws OXException {
+    private void appendConstantOperand(Object value, int sqlType) {
         if (String.class.isInstance(value)) {
             appendConstantOperand((String) value, sqlType);
             return;
@@ -549,7 +598,7 @@ public class SearchAdapter {
         } else if (Date.class.isInstance(value) && Types.BIGINT == sqlType) {
             parameters.add(Long.valueOf(((Date) value).getTime()));
         } else if (ParticipationStatus.class.isInstance(value) && Types.INTEGER == sqlType) {
-            parameters.add(Event2Appointment.getConfirm((ParticipationStatus) value));
+            parameters.add(Integer.valueOf(Event2Appointment.getConfirm((ParticipationStatus) value)));
         } else if (Transp.class.isInstance(value) && Types.INTEGER == sqlType) {
             parameters.add(Integer.valueOf(Event2Appointment.getShownAs((Transp) value)));
         } else {
@@ -559,7 +608,7 @@ public class SearchAdapter {
         stringBuilder.append('?');
     }
 
-    private void appendConstantOperand(String value, int sqlType) throws OXException {
+    private void appendConstantOperand(String value, int sqlType) {
         if (Types.INTEGER == sqlType) {
             if ("true".equalsIgnoreCase(value)) {
                 // special handling for "true" string
@@ -585,7 +634,7 @@ public class SearchAdapter {
         stringBuilder.append('?');
     }
 
-    private void appendColumnOperand(DbMapping<? extends Object, ?> mapping, String prefix) throws OXException {
+    private void appendColumnOperand(DbMapping<? extends Object, ?> mapping, String prefix) {
         String columnLabel = null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
         if (null != charset && Types.VARCHAR == mapping.getSqlType()) {
             stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(charset).append(')');
@@ -594,7 +643,7 @@ public class SearchAdapter {
         }
     }
 
-    private Map<String, DbMapping<? extends Object, ?>> getFirstColumnMappings(SingleSearchTerm term) throws OXException {
+    private Map<String, DbMapping<? extends Object, ?>> getFirstColumnMappings(SingleSearchTerm term) {
         for (Operand<?> operand : term.getOperands()) {
             if (Operand.Type.COLUMN.equals(operand.getType())) {
                 return getMappings(operand.getValue());
@@ -603,7 +652,7 @@ public class SearchAdapter {
         return null;
     }
 
-    private Map<String, DbMapping<? extends Object, ?>> getMappings(Object value) throws OXException {
+    private Map<String, DbMapping<? extends Object, ?>> getMappings(Object value) throws IllegalArgumentException {
         if (EventField.class.isInstance(value)) {
             DbMapping<? extends Object, ?> mapping = EventMapper.getInstance().opt((EventField) value);
             if (null == mapping) {
@@ -612,6 +661,10 @@ public class SearchAdapter {
             return Collections.<String, DbMapping<? extends Object, ?>>singletonMap(prefixEvents, mapping);
         }
         if (AttendeeField.class.isInstance(value)) {
+            if (AttendeeField.HIDDEN.equals(value)) {
+                // workaround to have a pseudo mapping for the "hidden" field in legacy storage
+                value = AttendeeField.ENTITY;
+            }
             DbMapping<? extends Object, Attendee> internalAttendeeMapping = InternalAttendeeMapper.getInstance().opt((AttendeeField) value);
             DbMapping<? extends Object, Attendee> externalAttendeeMapping = ExternalAttendeeMapper.getInstance().opt((AttendeeField) value);
             if (null == internalAttendeeMapping && null == externalAttendeeMapping) {
@@ -637,7 +690,7 @@ public class SearchAdapter {
         throw new IllegalArgumentException("No mapping available for: " + value);
     }
 
-    private Map.Entry<String, DbMapping<? extends Object, ?>> getMapping(Object value) throws OXException {
+    private Map.Entry<String, DbMapping<? extends Object, ?>> getMapping(Object value) {
         Set<Entry<String, DbMapping<? extends Object, ?>>> entries = getMappings(value).entrySet();
         if (1 < entries.size()) {
             throw new IllegalArgumentException("Found multiple mappings for: " + value);

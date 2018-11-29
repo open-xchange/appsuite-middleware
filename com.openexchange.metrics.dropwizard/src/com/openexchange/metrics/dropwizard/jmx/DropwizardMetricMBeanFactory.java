@@ -155,10 +155,6 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      */
     @Override
     public GaugeMBean gauge(Gauge<?> gauge, MetricDescriptor metricDescriptor) {
-        if (!(gauge instanceof Gauge)) {
-            throw new IllegalArgumentException("Invalid metric specified for 'Gauge' mbean: '" + gauge.getClass() + "'");
-        }
-        //checkInstance(metric, Gauge.class);
         try {
             return new GaugeMBeanImpl((DropwizardGauge) gauge, metricDescriptor);
         } catch (NotCompliantMBeanException e) {

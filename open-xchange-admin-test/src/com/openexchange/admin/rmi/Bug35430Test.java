@@ -52,22 +52,13 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
  * {@link Bug35430Test}
@@ -76,61 +67,56 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public final class Bug35430Test extends AbstractRMITest {
 
-    /** Keeps a list of created contexts for later cleanup */
-    private Map<Integer, Context> contexts = new HashMap<Integer, Context>();
-
-    @Before
-    public void setup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        contexts.put(31145, createContext("bug35430context.com", 314159265));
-        //contexts.put(35430, createContext("00314159265.pi", 161803398));
+    /**
+     * Initialises a new {@link Bug35430Test}.
+     */
+    public Bug35430Test() {
+        super();
     }
 
-    @After
-    public void tearDown() throws RemoteException, MalformedURLException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, NotBoundException {
-        for (Integer i : contexts.keySet()) {
-            deleteContext(contexts.get(i));
-        }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.AbstractRMITest#setUp()
+     */
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        createContext("bug35430context.com", 314159265);
     }
 
     @Test
     public void test() throws Throwable {
-        OXContextInterface contextInterface = getContextInterface();
-
-        Context[] contexts = contextInterface.list("bug35430context.com", superAdminCredentials);
+        Context[] contexts = getContextManager().search("bug35430context.com");
         assertEquals(1, contexts.length);
         assertEquals(new Integer(314159265), contexts[0].getId());
         assertEquals("bug35430context.com", contexts[0].getName());
 
-        contexts = contextInterface.list("00314159265.pi", superAdminCredentials);
+        contexts = getContextManager().search("00314159265.pi");
         assertEquals(0, contexts.length);
     }
 
-    private Context createContext(String name, int cid) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        OXContextInterface conInterface = getContextInterface();
-        Context newContext = newContext(name, cid);
-        User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+    private Context createContext(String name, int cid) throws Exception {
+        Context newContext = ContextFactory.createContext(cid, name);
+        User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         boolean created = false;
         try {
-            newContext = conInterface.create(newContext, newAdmin, superAdminCredentials);
+            newContext = getContextManager().create(newContext, newAdmin);
             created = true;
             try {
-                conInterface.create(newContext, newAdmin, superAdminCredentials);
+                getContextManager().create(newContext, newAdmin);
                 fail("Should throw ContextExistsException");
             } catch (ContextExistsException e) {
                 assertTrue("Caught exception", true);
             }
         } catch (Exception e) {
             if (!created) {
-                Context[] ctxs = conInterface.list(name, superAdminCredentials);
+                Context[] ctxs = getContextManager().search(name);
                 if (ctxs.length > 0) {
                     newContext = ctxs[0];
                 }
             }
         }
         return newContext;
-    }
-
-    private void deleteContext(Context context) throws RemoteException, MalformedURLException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, NotBoundException {
-        getContextInterface().delete(context, superAdminCredentials);
     }
 }

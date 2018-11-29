@@ -54,6 +54,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.tx.AbstractUndoable;
@@ -100,7 +101,9 @@ public abstract class FileStreamAction extends AbstractUndoable implements Undoa
 
     private void store(InputStream stream) throws OXException {
         if (0 < sizeHint && com.openexchange.filestore.QuotaFileStorage.class.isInstance(storage)) {
-            store((com.openexchange.filestore.QuotaFileStorage)storage, stream, sizeHint);
+            store((com.openexchange.filestore.QuotaFileStorage) storage, stream, sizeHint);
+        } else if (SizeKnowingInputStream.class.isInstance(stream) && com.openexchange.filestore.QuotaFileStorage.class.isInstance(storage)) {
+            store((com.openexchange.filestore.QuotaFileStorage) storage, stream, ((SizeKnowingInputStream) stream).getSize());
         } else {
             store(storage, stream);
         }

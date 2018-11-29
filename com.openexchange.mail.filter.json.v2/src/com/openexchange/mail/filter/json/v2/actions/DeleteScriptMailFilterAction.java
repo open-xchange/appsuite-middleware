@@ -77,7 +77,7 @@ public class DeleteScriptMailFilterAction extends AbstractMailFilterAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        final Credentials credentials = new Credentials(session);
+        final Credentials credentials = getCredentials(session, requestData);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         mailFilterService.purgeFilters(credentials);
         return new AJAXRequestResult();

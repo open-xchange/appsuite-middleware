@@ -50,49 +50,34 @@
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.Stack;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
-public class OXResellerUserTest extends OXResellerAbstractTest {
+public class OXResellerUserTest extends AbstractOXResellerTest {
 
-    private OXResellerInterface oxresell = null;
-
-    private OXContextInterface oxctx = null;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
+    /**
+     * Initialises a new {@link OXResellerUserTest}.
+     */
+    public OXResellerUserTest() {
+        super();
     }
 
     @Test
-    public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final Credentials creds = DummyMasterCredentials();
-
-        ResellerAdmin adm = RandomAdmin();
+    public void testCreateTooManyOverallUser() throws Exception {
+        ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();
         adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
-        oxresell.create(adm, creds);
+        getResellerManager().create(adm);
         try {
             Stack<Context> ctxstack = new Stack<Context>();
             Credentials resellerRandomCredentials = ResellerRandomCredentials(adm.getName());
@@ -100,7 +85,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // create 3 contexts with 1 user -> 6 user total
                 for (final Context ctx : new Context[] { createContext(resellerRandomCredentials), createContext(resellerRandomCredentials), createContext(resellerRandomCredentials) }) {
                     ctxstack.push(ctx);
-                    Credentials ctxauth = new Credentials(ContextAdmin().getName(), ContextAdmin().getPassword());
+                    User contextAdmin = UserFactory.createContextAdmin();
+                    Credentials ctxauth = new Credentials(contextAdmin.getName(), contextAdmin.getPassword());
                     for (int i = 1; i < 2; i++) {
                         System.out.println("creating user " + i + " in Context " + ctx.getId());
                         createUser(ctx, ctxauth);
@@ -110,7 +96,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // 7th user must fail
                 boolean createFailed = false;
                 try {
-                    createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(), ContextAdmin().getPassword()));
+                    User contextAdmin = UserFactory.createContextAdmin();
+                    createUser(ctxstack.firstElement(), new Credentials(contextAdmin.getName(), contextAdmin.getPassword()));
                 } catch (StorageException e) {
                     createFailed = true;
                 }
@@ -121,16 +108,16 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
             }
         } finally {
-            oxresell.delete(adm, DummyMasterCredentials());
+            getResellerManager().delete(adm);
         }
     }
 
     @Test
-    public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        ResellerAdmin adm = RandomAdmin();
+    public void testCreateTooManyPerContextUser() throws Exception {
+        ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, DummyMasterCredentials());
+        getResellerManager().create(adm);
         try {
             Context ctx = createContext(creds);
             try {
@@ -142,9 +129,9 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
-                oxctx.change(ctx, creds);
+                getContextManager().change(ctx, creds);
 
-                User oxadmin = ContextAdmin();
+                User oxadmin = UserFactory.createContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
                 createUser(ctx, ctxadmcreds);
                 createUser(ctx, ctxadmcreds);
@@ -161,7 +148,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, DummyMasterCredentials());
+            getResellerManager().delete(adm);
         }
     }
 
@@ -170,11 +157,11 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
      * will be changed!
      */
     @Test
-    public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        ResellerAdmin adm = RandomAdmin();
+    public void testCreateTooManyPerContextUserByModuleAccess() throws Exception {
+        ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, DummyMasterCredentials());
+        getResellerManager().create(adm);
         try {
             Context ctx = createContext(creds);
             try {
@@ -187,7 +174,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
-                oxctx.change(ctx, creds);
+                getContextManager().change(ctx, creds);
 
                 try {
                     Thread.sleep(500);
@@ -196,7 +183,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                     e1.printStackTrace();
                 }
                 // webmail test (default perms)
-                User oxadmin = ContextAdmin();
+                User oxadmin = UserFactory.createContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
                 createUser(ctx, ctxadmcreds);
 
@@ -243,7 +230,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, DummyMasterCredentials());
+            getResellerManager().delete(adm);
         }
     }
 }

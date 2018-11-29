@@ -178,7 +178,7 @@ public class MaliciousFolders {
             ComposedConfigProperty<String> property = view.property("com.openexchange.mail.maliciousFolders.listing", String.class);
             if (property.isDefined()) {
                 String folders = property.get();
-                if (false == Strings.isEmpty(folders)) {
+                if (Strings.isNotEmpty(folders)) {
                     tmp = folders;
                 }
             }
@@ -240,7 +240,7 @@ public class MaliciousFolders {
                         throw new OXException(new IllegalArgumentException("Unsupported token: " + token));
                     }
                 } else {
-                    if (false == Strings.isEmpty(token) && !"none".equalsIgnoreCase(token)) {
+                    if (Strings.isNotEmpty(token) && !"none".equalsIgnoreCase(token)) {
                         if (null == fullNames) {
                             fullNames = new LinkedList<>();
                         }

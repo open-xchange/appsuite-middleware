@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -76,7 +74,7 @@ public class GetInfostoreConfigRequest extends AbstractInfostoreRequest<Abstract
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[0];
     }
 
@@ -85,14 +83,14 @@ public class GetInfostoreConfigRequest extends AbstractInfostoreRequest<Abstract
         return new AbstractAJAXParser<AbstractAJAXResponse>(getFailOnError()) {
 
             @Override
-            protected AbstractAJAXResponse createResponse(Response response) throws JSONException {
-                return new AbstractAJAXResponse(response) {};
+            protected AbstractAJAXResponse createResponse(Response response) {
+                return new AbstractAJAXResponse(response) { /* Empty */ };
             }
         };
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return null;
     }
 

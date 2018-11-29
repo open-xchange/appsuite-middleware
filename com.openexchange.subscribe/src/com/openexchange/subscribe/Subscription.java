@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.generic.SessionAwareTargetFolderDefinition;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -60,7 +61,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Subscription extends TargetFolderDefinition {
+public class Subscription extends TargetFolderDefinition implements SessionAwareTargetFolderDefinition {
 
     private int id;
 
@@ -168,6 +169,7 @@ public class Subscription extends TargetFolderDefinition {
         this.session = session;
     }
 
+    @Override
     public ServerSession getSession() {
         if (session != null) {
             return session;

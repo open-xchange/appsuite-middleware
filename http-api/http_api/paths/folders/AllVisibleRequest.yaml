@@ -13,6 +13,7 @@
         description: The desired content type (either numbers or strings; e.g. "tasks", "calendar", "contacts", "mail", "infostore").
         required: true
       - $ref: "#/parameters/gblQueryParamFolderColumns"
+      - $ref: "#/parameters/gblQueryParamLanguage"
     responses:
       200:
         description: |

@@ -50,21 +50,17 @@
 package com.openexchange.pns.transport.apns_http2;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.atomic.AtomicReference;
-import com.clevertap.apns.ApnsClient;
-import com.clevertap.apns.clients.ApnsClientBuilder;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.pns.PushExceptionCodes;
+import com.turo.pushy.apns.ApnsClient;
+import com.turo.pushy.apns.ApnsClientBuilder;
+import com.turo.pushy.apns.auth.ApnsSigningKey;
 
 /**
  * {@link ApnsHttp2Options} - Holds the (immutable) options to communicate with the Apple Push Notification System via HTTP/2.
@@ -123,7 +119,7 @@ public class ApnsHttp2Options {
     private final String clientId;
     private final AuthType authType;
 
-    private final String privateKey;
+    private final File privateKey;
     private final String keyId;
     private final String teamId;
 
@@ -178,7 +174,7 @@ public class ApnsHttp2Options {
      * @param bundleIdentifier The bundle identifier of the app
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
-    public ApnsHttp2Options(String clientId, String privateKey, String keyId, String teamId, boolean production, String topic) {
+    public ApnsHttp2Options(String clientId, File privateKey, String keyId, String teamId, boolean production, String topic) {
         super();
         this.clientId = clientId;
         clientReference = new AtomicReference<ApnsClient>(null);
@@ -251,7 +247,7 @@ public class ApnsHttp2Options {
      *
      * @return The APNS auth key
      */
-    public String getPrivateKey() {
+    public File getPrivateKey() {
         return privateKey;
     }
 
@@ -286,37 +282,25 @@ public class ApnsHttp2Options {
 
     private ApnsClient createNewApnsClient() throws OXException {
         try {
-            ApnsClientBuilder clientBuilder = new ApnsClientBuilder().inSynchronousMode().withDefaultTopic(getTopic());
-            if (isProduction()) {
-                clientBuilder.withProductionGateway();
-            }
-
+            ApnsClientBuilder clientBuilder;
             if (AuthType.CERTIFICATE == getAuthType()) {
-                FileInputStream cert = new FileInputStream(getKeystore());
-                try {
-                    clientBuilder.withCertificate(cert).withPassword(getPassword());
-                } finally {
-                    Streams.close(cert);
-                }
+                clientBuilder = new ApnsClientBuilder()
+                    .setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                    .setClientCredentials(getKeystore(), getPassword());
             } else {
-                clientBuilder.withApnsAuthKey(getPrivateKey()).withTeamID(getTeamId()).withKeyID(getKeyId());
+                clientBuilder = new ApnsClientBuilder()
+                    .setApnsServer(isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                    .setSigningKey(ApnsSigningKey.loadFromPkcs8File(getPrivateKey(), getTeamId(), getKeyId()));
             }
-
             return clientBuilder.build();
-        } catch (UnrecoverableKeyException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid keystore specified for client " + clientId);
-        } catch (KeyManagementException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid keystore specified for client " + clientId);
         } catch (FileNotFoundException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "No such keystore file for client " + clientId + ": " + getKeystore());
-        } catch (CertificateException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "Any of the certificates in the keystore for client " + clientId + " could not be loaded");
         } catch (NoSuchAlgorithmException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "The algorithm used to check the integrity of the keystore for client " + clientId + " cannot be found");
-        } catch (KeyStoreException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid keystore specified for client " + clientId);
         } catch (IOException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "There is an I/O or format problem with the keystore data of the keystore for client " + clientId + " or specified password is invalid");
+        } catch (InvalidKeyException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid private key specified for client " + clientId);
         }
     }
 

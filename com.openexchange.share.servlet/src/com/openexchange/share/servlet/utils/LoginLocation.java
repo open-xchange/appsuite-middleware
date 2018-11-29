@@ -97,9 +97,9 @@ public class LoginLocation {
         if (null != allowedAttributes) {
             Map<String, String> attributes = location.asMap();
             for (String allowedAttribute : allowedAttributes) {
-                if (false == Strings.isEmpty(allowedAttribute)) {
+                if (Strings.isNotEmpty(allowedAttribute)) {
                     String value = attributes.get(allowedAttribute);
-                    if (false == Strings.isEmpty(value)) {
+                    if (Strings.isNotEmpty(value)) {
                         sb.append('&').append(allowedAttribute).append('=').append(value);
                     }
                 }

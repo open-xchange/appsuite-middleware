@@ -100,7 +100,7 @@ public class ExportRequest {
             }
         } else {
             String value = request.getParameter("body");
-            if (!Strings.isEmpty(value)) {
+            if (Strings.isNotEmpty(value)) {
                 String ids = value;
                 try{
                     batchIds = extractBatchArrayFromRequest(new JSONArray(ids));

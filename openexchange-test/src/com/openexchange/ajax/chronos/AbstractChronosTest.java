@@ -64,12 +64,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
+import com.openexchange.testing.httpclient.models.UpdateBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
@@ -87,6 +90,12 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     private Set<EventId> eventIds;
     private Set<String> folderToDelete;
     private long lastTimeStamp;
+
+    private static final String CONTACT_FOLDER = "Contacts";
+    private static final String CONTACT_MODULE = "contacts";
+    private static final String BIRTHDAY_FOLDER = "Birthdays";
+    private static final String EVENT_MODULE = "event";
+    private static final String CALENDAR_MODULE = "calendar";
 
     protected UserApi defaultUserApi;
     protected ChronosApi chronosApi;
@@ -129,12 +138,10 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         LOG.info("Teardown...");
         Exception exception = null;
         try {
-            try {
-                if (eventIds != null) {
-                    defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<EventId>(eventIds), null, null, false, false);
-                }
-            } catch (Exception e) {
-                exception = e;
+            if (eventIds != null) {
+                DeleteBody body = new DeleteBody();
+                body.setEvents(new ArrayList<>(eventIds));
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
             }
             // Clean-up event manager
             eventManager.cleanUp();
@@ -142,14 +149,13 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
             try {
                 if (folderToDelete != null) {
-                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", System.currentTimeMillis(), "event", true, false, false);
+                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
                 }
             } catch (Exception e) {
                 exception = e;
             }
         } finally {
             super.tearDown();
-
         }
 
         if (exception != null) {
@@ -202,7 +208,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         permissions.add(perm);
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
-        folderData.setModule("event");
+        folderData.setModule(EVENT_MODULE);
         folderData.setSubscribed(true);
         folderData.setTitle("chronos_test_" + new UID().toString());
         folderData.setPermissions(permissions);
@@ -210,7 +216,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
@@ -242,6 +248,42 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     }
 
     /**
+     * @return String The identifier of the birthday calendar folder
+     * @throws Exception if the birthday calendar folder cannot be found
+     */
+    protected String getBirthdayCalendarFolder() throws Exception {
+        return getPrivateFolder(defaultUserApi.getFoldersApi(), defaultUserApi.getSession(), EVENT_MODULE, BIRTHDAY_FOLDER);
+    }
+
+    /**
+     * @param session The session of the user
+     * @param client The {@link ApiClient}
+     * @return String The identifier of the birthday calendar folder
+     * @throws Exception if the birthday calendar folder cannot be found
+     */
+    protected String getBirthdayCalendarFolder(String session, ApiClient client) throws Exception {
+        return getPrivateFolder(new FoldersApi(client), session, EVENT_MODULE, BIRTHDAY_FOLDER);
+    }
+
+    /**
+     * @return String The identifier of the default contact folder
+     * @throws Exception if the default contact folder cannot be found
+     */
+    protected String getDefaultContactFolder() throws Exception {
+        return getPrivateFolder(defaultUserApi.getFoldersApi(), defaultUserApi.getSession(), CONTACT_MODULE, CONTACT_FOLDER);
+    }
+
+    /**
+     * @param session The session of the user
+     * @param client client The {@link ApiClient}
+     * @return String The identifier of the default contact folder
+     * @throws Exception if the default contact folder cannot be found
+     */
+    protected String getDefaultContactFolder(String session, ApiClient client) throws Exception {
+        return getPrivateFolder(new FoldersApi(client), session, "contacts", "Contacts");
+    }
+
+    /**
      * Retrieves the default calendar folder of the user with the specified session
      *
      * @param session The session of the user
@@ -249,25 +291,53 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "event", "1,308", "0");
-        if (visibleFolders.getError() != null) {
-            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
-        }
-
-        Object privateFolders = visibleFolders.getData().getPrivate();
-        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
-        } else {
-            for (ArrayList<?> folder : privateList) {
-                if ((Boolean) folder.get(1)) {
-                    return (String) folder.get(0);
-                }
+        }
+        for (ArrayList<?> folder : privateList) {
+            if ((Boolean) folder.get(1)) {
+                return (String) folder.get(0);
             }
         }
         throw new Exception("Unable to find default calendar folder!");
+    }
+
+    /**
+     * @param session The session of the user
+     * @param module The folder module
+     * @param folder The name of the folder
+     * @return folderId The folderId as string
+     * @throws Exception if the folder cannot be found
+     */
+    private String getPrivateFolder(FoldersApi foldersApi, String session, String module, String folder) throws Exception {
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, module, "1,300,308", "1");
+        for (ArrayList<?> folderName : privateList) {
+            if (folderName.get(1).equals(folder)) {
+                return folderName.get(0).toString();
+            }
+        }
+        throw new Exception("Unable to find default " + module + " folder!");
+    }
+
+    /**
+     * @param api The {@link FoldersApi} to use
+     * @param session The session of the user
+     * @param module The folder module
+     * @param columns The columns identifier
+     * @param tree The folder tree identifier
+     * @return List of available folders
+     * @throws Exception if the api call fails
+     */
+    @SuppressWarnings({ "unchecked" })
+    private ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null);
+        if (visibleFolders.getError() != null) {
+            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
+        }
+        Object privateFolders = visibleFolders.getData().getPrivate();
+        return (ArrayList<ArrayList<?>>) privateFolders;
     }
 
     /**
@@ -315,4 +385,15 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         return data;
     }
 
+    /**
+     * Generates an {@link UpdateBody}.
+     *
+     * @param eventData The {@link EventData} to update
+     * @return An {@link UpdateBody}.
+     */
+    protected UpdateBody getUpdateBody(EventData eventData) {
+        UpdateBody body = new UpdateBody();
+        body.setEvent(eventData);
+        return body;
+    }
 }

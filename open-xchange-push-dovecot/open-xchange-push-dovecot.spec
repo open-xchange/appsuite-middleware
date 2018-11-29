@@ -9,14 +9,13 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
-BuildRequires: open-xchange-rest
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -27,7 +26,6 @@ Summary:       Open-Xchange Dovecot Push Bundle
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-imap >= @OXVERSION@
-Requires:      open-xchange-rest >= @OXVERSION@
 
 %description
 Open-Xchange Mail Push Bundle
@@ -45,6 +43,18 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request 282
+    ox_remove_property com.openexchange.push.dovecot.endpoint.host /opt/open-xchange/etc/dovecot-push.properties
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -60,26 +70,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
-* Mon Nov 19 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-11-19 (4966)
-* Mon Oct 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-11-05 (4933)
-* Mon Oct 08 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-10-15 (4918)
-* Tue Sep 25 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-10-01 (4897)
-* Mon Sep 24 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-09-21 (4900)
-* Mon Sep 10 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-09-17 (4882)
-* Mon Aug 27 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-09-03 (4870)
-* Wed Aug 15 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-08-20 (4863)
-* Thu Aug 02 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-08-13 (4853)
-* Fri Jul 20 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-07-25 (4835)
+* Fri Nov 23 2018 Thorben Betten <thorben.betten@open-xchange.com>
+RC 1 for 7.10.1 release
+* Fri Nov 02 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Second preview for 7.10.1 release
+* Thu Oct 11 2018 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.10.1 release
+* Thu Sep 06 2018 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Thorben Betten <thorben.betten@open-xchange.com>

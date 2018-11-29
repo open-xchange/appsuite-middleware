@@ -326,7 +326,7 @@ public class MimeMessageFiller {
         }
         {
             String client = compositionParameters.getClient();
-            if (!Strings.isEmpty(client)) {
+            if (Strings.isNotEmpty(client)) {
                 try {
                     final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_X_ORIGINATING_CLIENT, encoded);

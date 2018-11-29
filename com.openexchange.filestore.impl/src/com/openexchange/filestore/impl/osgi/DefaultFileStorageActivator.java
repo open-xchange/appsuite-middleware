@@ -82,7 +82,7 @@ public class DefaultFileStorageActivator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         CompositeFileStorageService service = new CompositeFileStorageService(context);
 
-        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = new ServiceTracker<FileStorageProvider, FileStorageProvider>(context, FileStorageProvider.class, service);
+        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = new ServiceTracker<>(context, FileStorageProvider.class, service);
         this.tracker = tracker;
         tracker.open();
 

@@ -60,9 +60,9 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.json.FileBackedJSONStringProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -151,13 +151,13 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
+import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteFileVersionsLoginHandler;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -222,6 +222,7 @@ import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -521,27 +522,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Authenticator
         track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));
-        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
-
-            @Override
-            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
-                try {
-                    ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
-                    management.registerMBean(objectName, new AuthenticatorMBeanImpl());
-                } catch (Exception e) {
-                    LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
-                }
-            }
-
-            @Override
-            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
-                try {
-                    management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
-                } catch (Exception e) {
-                    LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
-                }
-            }
-        });
+        track(ManagementService.class, new HousekeepingManagementTracker(context, AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN, new AuthenticatorMBeanImpl()));
         {
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put("RMIName", RemoteAuthenticator.RMI_NAME);
@@ -771,11 +752,6 @@ public final class ServerActivator extends HousekeepingActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.mail.attachment");
             registerService(DataSource.class, new AttachmentMailPartDataSource(), props);
         }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registerService(DataSource.class, new ContactDataSource(), props);
-        }
         // {
         // final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
         // final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
@@ -927,6 +903,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(InfostoreFacade.class, infostoreFacade);
         registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
         registerService(InfostoreSearchEngine.class, infostoreFacade);
+        registerService(LoginHandlerService.class, new InfostoreAutodeleteFileVersionsLoginHandler(infostoreFacade));
     }
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
@@ -935,7 +912,6 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);

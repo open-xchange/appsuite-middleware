@@ -51,9 +51,6 @@ package com.openexchange.halo.contacts;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,20 +59,16 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.junit.MockitoJUnitRunner;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.Picture;
 import com.openexchange.server.MockingServiceLookup;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
 
@@ -119,9 +112,9 @@ public class ContactDataSourceTest {
 
         query.withMergedContacts(Arrays.asList(c));
 
-        Picture picture = dataSource.getPicture(query.build(), session);
+        ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -149,9 +142,9 @@ public class ContactDataSourceTest {
 
         query.withMergedContacts(Arrays.asList(c2, c));
 
-        Picture picture = dataSource.getPicture(query.build(), session);
+        ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -180,9 +173,9 @@ public class ContactDataSourceTest {
 
         query.withMergedContacts(Arrays.asList(c2, c));
 
-        Picture picture = dataSource.getPicture(query.build(), session);
+        ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -213,9 +206,9 @@ public class ContactDataSourceTest {
         ContactService cs = services.mock(ContactService.class);
         when(cs.getContact(session, "37", "12")).thenReturn(c2);
 
-        Picture picture = dataSource.getPicture(query.build(), session);
+        ContactPicture picture = dataSource.getPicture(query.build(), session);
 
-        assertNotNull(picture);
+        assertNotNull(picture.getFileHolder());
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
@@ -223,65 +216,6 @@ public class ContactDataSourceTest {
         assertEquals(-1, stream.read());
 
         stream.close();
-    }
-
-    @Test
-    public void shouldFallBackToOwnSearch() throws IOException, OXException {
-        HaloContactQuery.Builder query = HaloContactQuery.builder();
-
-        Contact c = new Contact();
-        c.setObjectID(12);
-        c.setParentFolderID(37);
-        c.setEmail1("email1");
-        c.setEmail2("email2");
-        c.setEmail3("email3");
-        c.setLastModified(new Date());
-
-        Contact c2 = new Contact();
-        c2.setObjectID(12);
-        c2.setParentFolderID(37);
-        c2.setImage1(new byte[] { 1, 2, 3 });
-        c2.setImageContentType("image/jpeg");
-        c2.setLastModified(new Date());
-
-        query.withContact(c);
-        query.withMergedContacts(Arrays.asList(c));
-
-        ContactService cs = services.mock(ContactService.class);
-        when(cs.getContact(session, "37", "12")).thenReturn(c);
-
-        when(cs.searchContacts(eq(session), searchFor("email1"), (ContactField[]) any())).thenReturn(SearchIteratorAdapter.createArrayIterator(new Contact[] { c }));
-        when(cs.searchContacts(eq(session), searchFor("email2"), (ContactField[]) any())).thenReturn(SearchIteratorAdapter.createArrayIterator(new Contact[] { c }));
-        when(cs.searchContacts(eq(session), searchFor("email3"), (ContactField[]) any())).thenReturn(SearchIteratorAdapter.createArrayIterator(new Contact[] { c, c2 }));
-
-        Picture picture = dataSource.getPicture(query.build(), session);
-
-        assertNotNull(picture);
-        InputStream stream = picture.getFileHolder().getStream();
-        assertEquals(1, stream.read());
-        assertEquals(2, stream.read());
-        assertEquals(3, stream.read());
-        assertEquals(-1, stream.read());
-
-        stream.close();
-    }
-
-    private ContactSearchObject searchFor(final String address) {
-        return argThat(new ArgumentMatcher<ContactSearchObject>() {
-
-            @Override
-            public boolean matches(ContactSearchObject item) {
-                if (!(item instanceof ContactSearchObject)) {
-                    return false;
-                }
-
-                ContactSearchObject cso = (ContactSearchObject) item;
-                if (!cso.isOrSearch()) {
-                    return false;
-                }
-                return cso.getEmail1().equals(address) && cso.getEmail2().equals(address) && cso.getEmail3().equals(address);
-            }
-        });
     }
 
 }

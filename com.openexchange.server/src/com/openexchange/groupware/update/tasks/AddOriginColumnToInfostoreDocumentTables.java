@@ -80,10 +80,10 @@ public class AddOriginColumnToInfostoreDocumentTables extends UpdateTaskAdapter 
             Databases.startTransaction(con);
             rollback = true;
             Column col = new Column("origin", "VARCHAR(255) DEFAULT NULL");
-            Tools.addColumns(con, "infostore", col);
-            Tools.addColumns(con, "del_infostore", col);
-            Tools.addColumns(con, "oxfolder_tree", col);
-            Tools.addColumns(con, "del_oxfolder_tree", col);
+            Tools.checkAndAddColumns(con, "infostore", col);
+            Tools.checkAndAddColumns(con, "del_infostore", col);
+            Tools.checkAndAddColumns(con, "oxfolder_tree", col);
+            Tools.checkAndAddColumns(con, "del_oxfolder_tree", col);
             con.commit();
             rollback = false;
         } catch (SQLException e) {

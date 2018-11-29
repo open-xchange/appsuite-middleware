@@ -852,7 +852,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
          * The samlPath to be added to the session. Helps on resolving redirect and relogin situations in a multi-saml single host environment
          */
         String samlPath = backend.getPath();
-        if (!Strings.isEmpty(samlPath)) {
+        if (Strings.isNotEmpty(samlPath)) {
             properties.put(SAMLSessionParameters.SAML_PATH, samlPath);
         }
 

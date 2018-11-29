@@ -258,7 +258,7 @@ public class APIResponseRenderer implements ResponseRenderer {
             }
 
             String jsonp = req.getParameter(JSONP);
-            if (false == Strings.isEmpty(jsonp)) {
+            if (Strings.isNotEmpty(jsonp)) {
                 String callback = AJAXUtility.sanitizeParam(jsonp);
                 if (false == validateCallbackName(Strings.asciiLowerCase(callback))) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid call-back name");

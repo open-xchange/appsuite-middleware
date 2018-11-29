@@ -90,8 +90,13 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
+
+        DatabaseConnectionListenerTracker connectionListenerTracker = new DatabaseConnectionListenerTracker(context);
+        trackers.push(connectionListenerTracker);
+
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ConfigViewFactory.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DBMigrationExecutorService.class.getName() + "))");
-        trackers.push(new ServiceTracker<Object, Object>(context, filter, new DatabaseServiceRegisterer(context)));
+        trackers.push(new ServiceTracker<Object, Object>(context, filter, new DatabaseServiceRegisterer(connectionListenerTracker, context)));
+
         trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
         trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
         trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));

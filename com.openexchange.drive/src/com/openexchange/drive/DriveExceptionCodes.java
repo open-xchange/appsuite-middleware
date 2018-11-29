@@ -98,6 +98,9 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
+    /** Unexpected error: \"%1$s\" */
+    UNEXPECTED_ERROR("Unexpected error: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 9999),
+
     /** The directory path \"%1$s\" is invalid */
     INVALID_PATH(INVALID_PATH_MSG, INVALID_PATH_MSG, Category.CATEGORY_USER_INPUT, 1),
 

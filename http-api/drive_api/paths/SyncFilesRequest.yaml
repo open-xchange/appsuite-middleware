@@ -31,6 +31,11 @@
         description: If set to `true`, an additional diagnostics trace is supplied in the response.
         required: false
       - in: query
+        name: quota
+        type: boolean
+        description: If set to `true`, additional quota information for the folder is supplied in the response.
+        required: false
+      - in: query
         name: columns
         type: string
         description: A comma-separated list of numeric column identifiers representing additional metadata that is relevant for the client. See [File metadata](#file-metadata). (deprecated, available until API version 2)

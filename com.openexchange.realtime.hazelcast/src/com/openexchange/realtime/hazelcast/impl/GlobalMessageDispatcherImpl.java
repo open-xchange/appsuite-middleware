@@ -190,7 +190,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
         Set<Member> members = hazelcastInstance.getCluster().getMembers();
 
-        if(!Strings.isEmpty(uuid)) {
+        if(Strings.isNotEmpty(uuid)) {
             for(Member member : members) {
                     if(uuid.equals(member.getUuid())) {
                         return member;

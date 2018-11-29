@@ -17,140 +17,141 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *
  * <pre>
  * &lt;complexType name="User">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="aliases" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="anniversary" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
- *         &lt;element name="assistant_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="birthday" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
- *         &lt;element name="branches" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="business_category" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="categories" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="cellular_telephone1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="cellular_telephone2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="city_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="city_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="city_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="commercial_register" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="company" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="contextadmin" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="country_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="country_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="driveUserFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
- *         &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="display_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="email1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="email2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="email3" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="employeeType" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="fax_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="fax_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="fax_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="folderTree" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="given_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="guiPreferencesForSoap" type="{http://dataobjects.soap.admin.openexchange.com/xsd}SOAPStringMap" minOccurs="0"/>
- *         &lt;element name="gui_spam_filter_enabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="imapLogin" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="imapPort" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="imapSchema" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="imapServer" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="imapServerString" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="info" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="instant_messenger1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="instant_messenger2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="language" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mail_folder_confirmed_ham_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mail_folder_confirmed_spam_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mail_folder_drafts_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mail_folder_sent_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mail_folder_spam_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mail_folder_trash_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="mailenabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="manager_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="marital_status" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="middle_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="nickname" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="number_of_children" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="number_of_employee" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="password" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="passwordMech" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="password_expired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="position" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="postal_code_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="postal_code_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="postal_code_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="primaryEmail" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="profession" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="room_number" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="sales_volume" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="smtpPort" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="smtpSchema" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="smtpServer" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="smtpServerString" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="spouse_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="state_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="state_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="state_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="street_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="street_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="street_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="suffix" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="sur_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="tax_id" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_assistant" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_business1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_business2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_callback" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_car" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_company" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_home1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_home2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_ip" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_isdn" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_pager" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_primary" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_radio" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_telex" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="telephone_ttytdd" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="timezone" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="title" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="uploadFileSizeLimit" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="uploadFileSizeLimitPerFile" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="url" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userAttributes" type="{http://dataobjects.soap.admin.openexchange.com/xsd}SOAPStringMapMap" minOccurs="0"/>
- *         &lt;element name="userfield01" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield02" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield03" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield04" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield05" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield06" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield07" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield08" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield09" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield10" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield11" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield12" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield13" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield14" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield15" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield16" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield17" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
+ * &lt;complexContent>
+ * &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ * &lt;sequence>
+ * &lt;element name="aliases" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ * &lt;element name="anniversary" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
+ * &lt;element name="assistant_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="birthday" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
+ * &lt;element name="branches" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="business_category" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="categories" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="cellular_telephone1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="cellular_telephone2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="city_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="city_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="city_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="commercial_register" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="company" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="contextadmin" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="country_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="country_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="driveUserFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
+ * &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="display_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="email1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="email2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="email3" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="employeeType" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="fax_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="fax_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="fax_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="folderTree" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ * &lt;element name="given_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="guiPreferencesForSoap" type="{http://dataobjects.soap.admin.openexchange.com/xsd}SOAPStringMap" minOccurs="0"/>
+ * &lt;element name="gui_spam_filter_enabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ * &lt;element name="imapLogin" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="imapPort" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ * &lt;element name="imapSchema" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="imapServer" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="imapServerString" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="info" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="instant_messenger1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="instant_messenger2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="language" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mail_folder_confirmed_ham_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mail_folder_confirmed_spam_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mail_folder_drafts_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mail_folder_sent_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mail_folder_spam_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mail_folder_trash_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="mailenabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="manager_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="marital_status" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="middle_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="nickname" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="number_of_children" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="number_of_employee" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="password" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="passwordMech" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="password_expired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="position" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="postal_code_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="postal_code_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="postal_code_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="primaryEmail" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="profession" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="room_number" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="sales_volume" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="smtpPort" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ * &lt;element name="smtpSchema" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="smtpServer" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="smtpServerString" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="spouse_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="state_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="state_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="state_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="street_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="street_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="street_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="suffix" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="sur_name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="tax_id" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_assistant" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_business1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_business2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_callback" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_car" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_company" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_home1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_home2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_ip" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_isdn" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_pager" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_primary" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_radio" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_telex" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="telephone_ttytdd" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="timezone" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="title" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="uploadFileSizeLimit" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ * &lt;element name="uploadFileSizeLimitPerFile" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ * &lt;element name="url" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userAttributes" type="{http://dataobjects.soap.admin.openexchange.com/xsd}SOAPStringMapMap" minOccurs="0"/>
+ * &lt;element name="userfield01" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield02" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield03" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield04" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield05" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield06" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield07" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield08" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield09" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield10" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield11" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield12" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield13" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield14" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield15" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield16" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield17" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ * &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="load_remote_mail_content_by_default" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;/sequence>
+ * &lt;/restriction>
+ * &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  *
@@ -290,7 +291,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield19",
     "userfield20",
     "primaryAccountName",
-    "convertDriveUserFolders"
+    "convertDriveUserFolders",
+    "loadRemoteMailContentByDefault"
 })
 public class User {
 
@@ -559,6 +561,8 @@ public class User {
     private String primaryAccountName;
     @XmlElement(name = "convert_drive_user_folders", nillable = true)
     protected Boolean convertDriveUserFolders;
+    @XmlElement(name = "load_remote_mail_content_by_default", nillable = true)
+    protected Boolean loadRemoteMailContentByDefault;
 
     /**
      * Gets the value of the aliases property.
@@ -3739,6 +3743,27 @@ public class User {
 
     public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
         this.convertDriveUserFolders = convertDriveUserFolders;
+    }
+    
+    /**
+     * Indicates whether the loading of content from remote servers is allowed per default when displaying HTML mails
+     * 
+     * @return A {@link Boolean}. The boolean is
+     *         <code>true</code> if loading of content from remote servers is allowed per default when displaying HTML mails
+     *         <code>false</code> if loading of content from remote servers isn't allowed per default when displaying HTML mails
+     *         <code>null</code> if not set
+     */
+    public Boolean isLoadRemoteMailContentByDefault() {
+        return loadRemoteMailContentByDefault;
+    }
+    
+    /**
+     * Set the value for load-remote-mail-content-by-default
+     * 
+     * @param loadRemoteMailContentByDefault The {@link Boolean} to set
+     */
+    public void setLoadRemoteMailContentByDefault(Boolean loadRemoteMailContentByDefault) {
+        this.loadRemoteMailContentByDefault = loadRemoteMailContentByDefault;
     }
 
 }

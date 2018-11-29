@@ -52,7 +52,6 @@ package com.openexchange.chronos.common;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -161,7 +160,7 @@ public class Check {
         RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
         Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, new Date(recurrenceID.getValue().getTimestamp()), null);
         if (false == iterator.hasNext()) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
         }
         return recurrenceID;
     }
@@ -281,19 +280,14 @@ public class Check {
             if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
-        } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
-            if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
+        }
+        if( AlarmAction.SMS.equals(alarm.getAction())) {
+            if(!alarm.containsAttendees()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
             }
-            if (null == alarm.getSummary() && (null == fields || contains(fields, AlarmField.SUMMARY))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.SUMMARY.toString());
-            }
-            if (null == fields || contains(fields, AlarmField.ATTENDEES)) {
-                if (isNullOrEmpty(alarm.getAttendees())) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
-                }
-                for (Attendee attendee : alarm.getAttendees()) {
-                    requireValidEMail(attendee);
+            for(Attendee att : alarm.getAttendees()) {
+                if(!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
+                    throw CalendarExceptionCodes.INVALID_ALARM.create(alarm);
                 }
             }
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.halo;
 
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -62,13 +63,21 @@ public interface TrustedDomainHalo {
 
     /**
      * Retrieves the picture of a trusted domain
-     * @return the {@link Picture}
+     * 
+     * @param trustedDomain The domain
+     * @param session The {@link Session}
+     * @return the {@link ContactPicture}
+     * @throws OXException On error
      */
-    public Picture getPicture(String trustedDomain, Session session) throws OXException;
+    public ContactPicture getPicture(String trustedDomain, Session session) throws OXException;
 
     /**
      * Retrieves the etag of a trusted domain picture
-     * @return the etag of the {@link Picture}
+     * 
+     * @param trustedDomain The domain
+     * @param session The {@link Session}
+     * @return the etag of the {@link ContactPicture}
+     * @throws OXException ON error
      */
     public String getPictureETag(String trustedDomain, Session session) throws OXException;
 

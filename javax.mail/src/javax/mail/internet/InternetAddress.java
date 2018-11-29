@@ -987,8 +987,10 @@ public class InternetAddress extends Address implements Cloneable {
 		break;
 
 	    case '[':	// a domain-literal, probably
-		rfc822 = true;
-		int lindex = index;
+	    int lindex = index;
+	    rfc822 = true;
+	    if (start == -1)
+	        start = index;
 	      outb:
 		for (index++; index < length; index++) {
 		    c = s.charAt(index);
@@ -1342,7 +1344,14 @@ public class InternetAddress extends Address implements Cloneable {
 		    throw new AddressException(
 		     "Quoted local address contains newline without whitespace",
 			addr);
-	    }
+	    } else if (c == '.') {
+        if (i == start)
+            throw new AddressException(
+            "Local address starts with dot", addr);
+        if (lastc == '.')
+            throw new AddressException(
+            "Local address contains dot-dot", addr);
+        }
 	    if (inquote)
 		continue;
 	    if (c == '@') {

@@ -112,7 +112,7 @@ public class ContactDisplayNameHelper {
         String firstName = contact.getGivenName();
         String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
         if (Strings.isEmpty(lastName)) {
-            if (!Strings.isEmpty(firstName)) {
+            if (Strings.isNotEmpty(firstName)) {
                 return String.format(locale, template, firstName, "", department);
             }
         } else {
@@ -131,7 +131,7 @@ public class ContactDisplayNameHelper {
      * @return <code>true</code> if it has the department set and is an entry in the GAB, <code>false</code> otherwise
      */
     private static boolean hasDepartment(Contact contact) {
-        return contact.containsDepartment() && !Strings.isEmpty(contact.getDepartment()) && contact.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID;
+        return contact.containsDepartment() && Strings.isNotEmpty(contact.getDepartment()) && contact.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID;
     }
 
     /**

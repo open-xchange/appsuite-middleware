@@ -1,0 +1,17 @@
+open-xchange-saml-ucs (7.10.1-2) stable; urgency=medium
+
+  * RC 1 for 7.10.1 release
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Fri, 23 Nov 2018 14:40:28 +0100
+
+open-xchange-saml-ucs (7.10.1-1) stable; urgency=medium
+
+  * Second preview for 7.10.1 release
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Fri, 02 Nov 2018 14:02:37 +0100
+
+open-xchange-saml-ucs (7.10.1-0) unstable; urgency=medium
+
+  * prepare for 7.10.1 release
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Mon, 08 Oct 2018 10:29:30 +0200

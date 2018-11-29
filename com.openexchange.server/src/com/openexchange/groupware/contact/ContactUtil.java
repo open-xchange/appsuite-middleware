@@ -50,16 +50,15 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
-import com.openexchange.groupware.contact.datasource.UserImageDataSource;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.java.util.MsisdnCheck;
-import com.openexchange.java.util.Pair;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * First start of a utility class for contacts. This class should contain methods that are useful for the complete backend and not only the
@@ -195,33 +194,23 @@ public class ContactUtil {
     }
 
     /**
-     * Prepares an {@link ImageDataSource} and an {@link ImageLocation} for a given contact. Both
-     * can be used to e.g. generate an URL to the contacts image.
+     * Creates an URL to the contact image of the given contact.
      *
-     * @param contact The contact, never <code>null</code>
-     * @return A {@link Pair} containing both, the {@link ImageDataSource} and {@link ImageLocation}.
-     *         If The contact misses an image, <code>null</code> is returned.
+     * @param session The user session
+     * @param con The contact
+     * @return The URL or <code>null</code>
+     * @throws OXException If services or parameter are missing
      */
-    public static Pair<ImageDataSource, ImageLocation> prepareImageData(Contact contact) {
-        if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
-            String timestamp = null != contact.getLastModified() ? String.valueOf(contact.getLastModified().getTime()) : null;
-            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == contact.getParentFolderID() && contact.containsInternalUserId()) {
-                /*
-                 * prefer user contact image url
-                 */
-                ImageLocation imageLocation = new ImageLocation.Builder().id(
-                    String.valueOf(contact.getInternalUserId())).timestamp(timestamp).build();
-                return new Pair<ImageDataSource, ImageLocation>(UserImageDataSource.getInstance(), imageLocation);
+    public static String generateImageUrl(Session session, Contact con) throws OXException {
+        ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
+        if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
+            Date lastModified = con.getImageLastModified();
+            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
+                return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : lastModified.getTime(), true);
             } else {
-                /*
-                 * use default contact image data source
-                 */
-                ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
-                    String.valueOf(contact.getObjectID())).timestamp(timestamp).build();
-                return new Pair<ImageDataSource, ImageLocation>(ContactImageDataSource.getInstance(), imageLocation);
+                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, lastModified == null ? null : lastModified.getTime(), true);
             }
         }
-
         return null;
     }
 

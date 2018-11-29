@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Contact image datasource
+Bundle-SymbolicName: com.openexchange.contact.datasource
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.contact.datasource
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.groupware.contact.datasource.osgi.ContactDatasourceActivator
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.ajax.helper,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.contact,
+ com.openexchange.contact.picture,
+ com.openexchange.contact.vcard,
+ com.openexchange.conversion,
+ com.openexchange.exception,
+ com.openexchange.groupware.contact,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.image,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.stream,
+ javax.servlet,
+ org.json,
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"

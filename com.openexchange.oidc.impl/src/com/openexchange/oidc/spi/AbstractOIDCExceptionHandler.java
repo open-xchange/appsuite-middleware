@@ -110,7 +110,7 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
 
     @Override
     public void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
-        LOG.trace("handleAuthenticationFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
+        LOG.trace("handleLogoutFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
         this.handleResponseException(request, response, exception);
     }
 

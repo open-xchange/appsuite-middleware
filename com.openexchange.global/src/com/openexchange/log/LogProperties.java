@@ -97,6 +97,10 @@ public final class LogProperties {
          */
         AJAX_MODULE("com.openexchange.ajax.module"),
         /**
+         * com.openexchange.ajax.multiple.queryString
+         */
+        AJAX_MULTIPLE_QUERY_STRING("com.openexchange.ajax.multiple.queryString"),
+        /**
          * threadId
          */
         THREAD_ID("__threadId"),

@@ -92,7 +92,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.FileKnowingInputStream;
-import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -204,7 +203,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
 
                     // Versions are only tracked for Box users with premium accounts- Hence we do not support it (anymore)
-                    /* final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, customRequestObject(Arrays.asList(BoxFile.FIELD_NAME))).size(); */
 
                     com.box.sdk.BoxFile file = new com.box.sdk.BoxFile(boxClient, id);
                     Info fileInfo = file.getInfo();
@@ -395,78 +393,51 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             @Override
             protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 // For a memory-safe download, either pipe the binary data or do the "store in memory, if too big flush to a temp. file" approach
-                boolean usePipes = true;
-                if (usePipes) {
-                    try {
-                        final com.box.sdk.BoxFile boxFile = getBoxFile();
-
-                        final PipedOutputStream pos = new PipedOutputStream();
-                        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
-                        Runnable r = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    boxFile.download(pos);
-                                    pos.flush();
-                                } catch (BoxAPIException e) {
-                                    Throwable cause = e.getCause();
-                                    if (cause instanceof IOException) {
-                                        IOException ioe = (IOException) cause;
-                                        if ("Pipe closed".equals(ioe.getMessage())) {
-                                            // Sink closed intentionally, ignore
-                                        } else {
-                                            pin.setException(ioe);
-                                        }
-                                    } else {
-                                        pin.setException(e);
-                                    }
-                                } catch (Exception e) {
-                                    pin.setException(e);
-                                } finally {
-                                    Streams.close(pos);
-                                }
-                            }
-                        };
-                        ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                        if (null == threadPool) {
-                            new Thread(r, "BoxFileAccess.getDocument").start();
-                        } else {
-                            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
-                        }
-
-                        return pin;
-                    } catch (IOException e) {
-                        throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                    } catch (BoxAPIException e) {
-                        if (SC_UNAUTHORIZED == e.getResponseCode()) {
-                            throw e;
-                        }
-                        throw handleHttpResponseError(id, account.getId(), e);
-                    }
-                }
-
-                // Otherwise use a ThresholdFileHolder for a memory-safe download
-                ThresholdFileHolder tfh = null;
-                boolean error = true;
                 try {
-                    com.box.sdk.BoxFile boxFile = getBoxFile();
+                    final com.box.sdk.BoxFile boxFile = getBoxFile();
 
-                    tfh = new ThresholdFileHolder();
-                    boxFile.download(tfh.asOutputStream());
+                    final PipedOutputStream pos = new PipedOutputStream();
+                    final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+                    Runnable r = new Runnable() {
 
-                    SizeKnowingInputStream stream = new SizeKnowingInputStream(tfh.getClosingStream(), tfh.getLength());
-                    error = true; // Avoid premature closing
-                    return stream;
-                } catch (final BoxAPIException e) {
+                        @Override
+                        public void run() {
+                            try {
+                                boxFile.download(pos);
+                                pos.flush();
+                            } catch (BoxAPIException e) {
+                                Throwable cause = e.getCause();
+                                if (cause instanceof IOException) {
+                                    IOException ioe = (IOException) cause;
+                                    if ("Pipe closed".equals(ioe.getMessage())) {
+                                        // Sink closed intentionally, ignore
+                                    } else {
+                                        pin.setException(ioe);
+                                    }
+                                } else {
+                                    pin.setException(e);
+                                }
+                            } catch (Exception e) {
+                                pin.setException(e);
+                            } finally {
+                                Streams.close(pos);
+                            }
+                        }
+                    };
+                    ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                    if (null == threadPool) {
+                        new Thread(r, "BoxFileAccess.getDocument").start();
+                    } else {
+                        threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+                    }
+                    return pin;
+                } catch (IOException e) {
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }
                     throw handleHttpResponseError(id, account.getId(), e);
-                } finally {
-                    if (error) {
-                        Streams.close(tfh);
-                    }
                 }
             }
 
@@ -598,7 +569,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
                     }
 
-                    if (!Strings.isEmpty(file.getDescription())) {
+                    if (Strings.isNotEmpty(file.getDescription())) {
                         fileInfo.setDescription(file.getDescription());
                         boxFile.updateInfo(fileInfo);
                     }
@@ -758,12 +729,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 // TODO: play with start and end parameters
                 final int limit = 30; //Default Box limit
                 int s = start;
-                int e = end;
                 if (s < 0) {
                     s = 0;
-                }
-                if (e < 0 || e < s) {
-                    e = limit;
                 }
 
                 BoxSearch boxSearch = new BoxSearch(apiConnection);
@@ -774,9 +741,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     }
                     com.box.sdk.BoxFile.Info i = (Info) info;
                     String parentFolderId = i.getParent().getID();
-                    if (includeSubfolders) {
-                        files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
-                    } else if (fid != null && fid.equals(parentFolderId)) {
+                    if (includeSubfolders || (fid != null && fid.equals(parentFolderId))) {
                         files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
                     }
                 }
@@ -993,7 +958,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
          * @return a string array with all parsed {@link BoxFileField}s
          */
         public static String[] parseFields(List<Field> fields) {
-            //String[] parsedFields = new String[fields.size()];
             List<String> parsedFields = new ArrayList<>(fields.size());
             for (Field f : fields) {
                 try {

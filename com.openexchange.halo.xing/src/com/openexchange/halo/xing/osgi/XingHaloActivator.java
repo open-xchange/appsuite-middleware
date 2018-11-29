@@ -46,13 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.xing.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.xing.XingInvestigationResultConverter;
 import com.openexchange.halo.xing.XingUserDataSource;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -65,54 +66,45 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
  */
 public class XingHaloActivator extends HousekeepingActivator {
 
-    private volatile ServiceRegistration<HaloContactDataSource> contactRegistration = null;
-
-    private volatile ServiceRegistration<HaloContactImageSource> imageRegistration = null;
+    ServiceRegistration<HaloContactDataSource> contactRegistration = null;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+        return new Class<?>[] {};
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         registerService(ResultConverter.class, new XingInvestigationResultConverter());
+        final BundleContext xingBungleContext = context;
         track(XingOAuthAccessProvider.class, new SimpleRegistryListener<XingOAuthAccessProvider>() {
+
             @Override
             public void added(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
                 XingUserDataSource xingDataSource = new XingUserDataSource(service);
-                contactRegistration = context.registerService(HaloContactDataSource.class, xingDataSource, null);
-                imageRegistration = context.registerService(HaloContactImageSource.class, xingDataSource, null);
+                contactRegistration = xingBungleContext.registerService(HaloContactDataSource.class, xingDataSource, null);
             }
 
             @Override
             public void removed(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
-                if (contactRegistration != null) {
-                    contactRegistration.unregister();
-                    contactRegistration = null;
-                }
-
-                if (imageRegistration != null) {
-                    imageRegistration.unregister();
-                    imageRegistration = null;
-                }
+                unregisterContact();
             }
+
         });
         openTrackers();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
+        unregisterContact();
+        super.stopBundle();
+    }
+
+    protected void unregisterContact() {
         if (contactRegistration != null) {
             contactRegistration.unregister();
             contactRegistration = null;
         }
-
-        if (imageRegistration != null) {
-            imageRegistration.unregister();
-            imageRegistration = null;
-        }
-        super.stopBundle();
     }
 
 }

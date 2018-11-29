@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LDAP Authentication
 Bundle-SymbolicName: com.openexchange.authentication.ldap
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.authentication.ldap.osgi.AuthLDAPActivator
 Import-Package: com.openexchange.authentication,

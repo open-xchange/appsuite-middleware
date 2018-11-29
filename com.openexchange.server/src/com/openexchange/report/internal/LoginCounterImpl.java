@@ -105,7 +105,7 @@ public class LoginCounterImpl implements LoginCounterService {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 rs = stmt.executeQuery();
-                final List<Object[]> ret = new LinkedList<Object[]>();
+                final List<Object[]> ret = new LinkedList<>();
                 while (rs.next()) {
                     final String name = rs.getString(2);
                     ret.add(new Object[] { new Date(Long.parseLong(rs.getString(1))), name.substring(7) });
@@ -157,9 +157,9 @@ public class LoginCounterImpl implements LoginCounterService {
          * Get all logins of every schema
          */
         int sum = 0;
-        final Map<String, Integer> results = new HashMap<String, Integer>();
+        final Map<String, Integer> results = new HashMap<>();
         for (final Entry<String, Integer> schemaEntry : schemaMap.entrySet()) {
-            final Set<UserContextId> countedUsers = new HashSet<UserContextId>();
+            final Set<UserContextId> countedUsers = new HashSet<>();
             final int readPool = schemaEntry.getValue().intValue();
             final Connection connection = dbService.get(readPool, schemaEntry.getKey());
             PreparedStatement stmt = null;
@@ -302,9 +302,9 @@ public class LoginCounterImpl implements LoginCounterService {
     }
 
     @Override
-    public HashMap<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException {
+    public Map<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException {
         final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final HashMap<String, Long> returnMap = new HashMap<String, Long>();
+        
         if (null == service) {
             throw new OXException(-1, "DatabaseService not available at the moment. Try again later.");
         }
@@ -317,20 +317,7 @@ public class LoginCounterImpl implements LoginCounterService {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                try {
-                    final String name = rs.getString(2);
-                    final Long date = rs.getLong(1);
-                    Date lastLogin = new Date(Long.parseLong(rs.getString(1)));
-                    if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
-                        returnMap.put(name, date);
-                    }
-                } catch (final NumberFormatException e) {
-                    logger.warn("Client value is not a number.", e);
-                }
-            }
-            return returnMap;
+            return parseResult(startDate, endDate, rs);
         } catch (final Exception e) {
             logger.error("", e);
             throw new OXException(-1, e.getMessage(), e);
@@ -340,6 +327,23 @@ public class LoginCounterImpl implements LoginCounterService {
                 service.backReadOnly(contextId, con);
             }
         }
+    }
+
+    private Map<String, Long> parseResult(Date startDate, Date endDate, ResultSet rs) throws SQLException {
+        final Map<String, Long> returnMap = new HashMap<>();
+        while (rs.next()) {
+            try {
+                final String name = rs.getString(2);
+                final Long date = rs.getLong(1);
+                Date lastLogin = new Date(Long.parseLong(rs.getString(1)));
+                if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
+                    returnMap.put(name, date);
+                }
+            } catch (final NumberFormatException e) {
+                logger.warn("Client value is not a number.", e);
+            }
+        }
+        return returnMap;
     }
 
 }

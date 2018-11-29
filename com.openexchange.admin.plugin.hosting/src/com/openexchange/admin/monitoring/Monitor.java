@@ -46,17 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.monitoring;
 
 import java.util.concurrent.atomic.AtomicLong;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 
 /**
  *
  * @author cutmasta
  */
-public final class Monitor implements MonitorMBean {
-
-    private static final Monitor SINGLETON = new Monitor();
+public final class Monitor extends StandardMBean implements MonitorMBean {
 
     private final AtomicLong createResourceCalls = new AtomicLong(0);
 
@@ -66,12 +67,8 @@ public final class Monitor implements MonitorMBean {
 
     private final AtomicLong createGroupCalls = new AtomicLong(0);
 
-    public Monitor() {
-        super();
-    }
-
-    public static Monitor getInstance() {
-        return SINGLETON;
+    public Monitor() throws NotCompliantMBeanException {
+        super(MonitorMBean.class);
     }
 
     public void incrementNumberOfCreateResourceCalled() {

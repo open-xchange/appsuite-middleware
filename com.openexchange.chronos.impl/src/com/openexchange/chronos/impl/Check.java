@@ -50,17 +50,22 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarStrings;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -68,6 +73,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -75,11 +81,14 @@ import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
@@ -483,9 +492,68 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static RecurrenceId recurrenceRangeMatches(RecurrenceId recurrenceId, RecurrenceRange expectedRange) throws OXException {
         if (null == expectedRange && null != recurrenceId.getRange() || null != expectedRange && false == expectedRange.equals(recurrenceId.getRange())) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new Exception("Expected range " + expectedRange), recurrenceId.getValue(), "");
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new Exception("Expected range " + expectedRange), recurrenceId.getValue(), null);
         }
         return recurrenceId;
+    }
+
+    /**
+     * Checks that a specific resource identifier exists.
+     * 
+     * @param entityResolver The entity resolver to use for checking
+     * @param resourceId The resource identifier to check
+     * @return The resource identifier, after it was checked for existence
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
+     */
+    public static ResourceId exists(EntityResolver entityResolver, ResourceId resourceId) throws OXException {
+        /*
+         * implcitly check existence by applying internal entity data
+         */
+        CalendarUser calendarUser = new CalendarUser();
+        calendarUser.setEntity(resourceId.getEntity());
+        calendarUser.setUri(resourceId.getURI());
+        entityResolver.applyEntityData(calendarUser, resourceId.getCalendarUserType());
+        return resourceId;
+    }
+
+    /**
+     * Checks that a calendar user address URI matches a specific user, i.e. it either matches the user's resource identifier, or
+     * references one of the user's e-mail addresses.
+     * 
+     * @param uri The calendar user address string to check
+     * @param contextId The context identifier
+     * @param user The internal user to match against
+     * @return The passed calendar address, after it was checked to match the referenced user
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
+     */
+    public static String calendarAddressMatches(String uri, int contextId, User user) throws OXException {
+        if (null == uri) {
+            CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
+        }
+        ResourceId resourceId = ResourceId.parse(uri);
+        if (null != resourceId && resourceId.getContextID() == contextId && resourceId.getEntity() == user.getId()) {
+            /*
+             * resource id address matches referenced user
+             */
+            return uri;
+        }
+        Set<String> aliases = new HashSet<String>();
+        if (null != user.getMail()) {
+            aliases.add(user.getMail());
+        }
+        if (null != user.getAliases()) {
+            aliases.addAll(Arrays.asList(user.getAliases()));
+        }
+        if (UserAliasUtility.isAlias(extractEMailAddress(uri), aliases)) {
+            /*
+             * e-mail address matches referenced user
+             */
+            return uri;
+        }
+        /*
+         * mismatch, otherwise
+         */
+        throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
     }
 
 }

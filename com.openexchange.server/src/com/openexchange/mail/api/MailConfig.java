@@ -176,23 +176,6 @@ public abstract class MailConfig {
          */
         TRUE("true");
 
-        /**
-         * Parses given capability value. If given value equals ignore-case to string <code>true</code>, constant {@link #TRUE} will be
-         * returned. Else if given value equals ignore-case to string <code>auto</code>, constant {@link #AUTO} will be returned. Otherwise
-         * {@link #FALSE} will be returned.
-         *
-         * @param capVal - the string value to parse
-         * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
-         */
-        public final static BoolCapVal parseBoolCapVal(final String capVal) {
-            if (TRUE.str.equalsIgnoreCase(capVal)) {
-                return TRUE;
-            } else if (AUTO.str.equalsIgnoreCase(capVal)) {
-                return AUTO;
-            }
-            return FALSE;
-        }
-
         private final String str;
 
         private BoolCapVal(final String str) {
@@ -202,6 +185,23 @@ public abstract class MailConfig {
         @Override
         public String toString() {
             return str;
+        }
+
+        /**
+         * Parses given capability value. If given value equals ignore-case to string <code>true</code>, constant {@link #TRUE} will be
+         * returned. Else if given value equals ignore-case to string <code>auto</code>, constant {@link #AUTO} will be returned. Otherwise
+         * {@link #FALSE} will be returned.
+         *
+         * @param capVal - the string value to parse
+         * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
+         */
+        public static BoolCapVal parseBoolCapVal(String capVal) {
+            if (TRUE.str.equalsIgnoreCase(capVal)) {
+                return TRUE;
+            } else if (AUTO.str.equalsIgnoreCase(capVal)) {
+                return AUTO;
+            }
+            return FALSE;
         }
     }
 
@@ -220,22 +220,6 @@ public abstract class MailConfig {
          */
         USER_NAME("name");
 
-        /**
-         * Parses specified string into a login source.
-         *
-         * @param loginSourceStr The string to parse to a login source
-         * @return An appropriate login source or <code>null</code> if string could not be parsed to a login source
-         */
-        public static final LoginSource parse(final String loginSourceStr) {
-            final LoginSource[] values = LoginSource.values();
-            for (final LoginSource loginSource : values) {
-                if (loginSource.str.equalsIgnoreCase(loginSourceStr)) {
-                    return loginSource;
-                }
-            }
-            return null;
-        }
-
         private final String str;
 
         private LoginSource(final String str) {
@@ -245,6 +229,25 @@ public abstract class MailConfig {
         @Override
         public String toString() {
             return str;
+        }
+
+        /**
+         * Parses specified string into a login source.
+         *
+         * @param loginSourceStr The string to parse to a login source
+         * @return An appropriate login source or <code>null</code> if string could not be parsed to a login source
+         */
+        public static LoginSource parse(String loginSourceStr) {
+            if (Strings.isEmpty(loginSourceStr)) {
+                return null;
+            }
+
+            for (LoginSource loginSource : LoginSource.values()) {
+                if (loginSource.str.equalsIgnoreCase(loginSourceStr)) {
+                    return loginSource;
+                }
+            }
+            return null;
         }
     }
 
@@ -259,22 +262,6 @@ public abstract class MailConfig {
          */
         SESSION("session");
 
-        /**
-         * Parses specified string into a password source.
-         *
-         * @param passwordSourceStr The string to parse to a password source
-         * @return An appropriate password source or <code>null</code> if string could not be parsed to a password source
-         */
-        public static final PasswordSource parse(final String passwordSourceStr) {
-            final PasswordSource[] values = PasswordSource.values();
-            for (final PasswordSource passwordSource : values) {
-                if (passwordSource.str.equalsIgnoreCase(passwordSourceStr)) {
-                    return passwordSource;
-                }
-            }
-            return null;
-        }
-
         private final String str;
 
         private PasswordSource(final String str) {
@@ -285,6 +272,26 @@ public abstract class MailConfig {
         public String toString() {
             return str;
         }
+
+        /**
+         * Parses specified string into a password source.
+         *
+         * @param passwordSourceStr The string to parse to a password source
+         * @return An appropriate password source or <code>null</code> if string could not be parsed to a password source
+         */
+        public static PasswordSource parse(String passwordSourceStr) {
+            if (Strings.isEmpty(passwordSourceStr)) {
+                return null;
+            }
+
+            for (PasswordSource passwordSource : PasswordSource.values()) {
+                if (passwordSource.str.equalsIgnoreCase(passwordSourceStr)) {
+                    return passwordSource;
+                }
+            }
+            return null;
+        }
+
     }
 
     public static enum ServerSource {
@@ -298,22 +305,6 @@ public abstract class MailConfig {
          */
         USER("user");
 
-        /**
-         * Parses specified string into a server source.
-         *
-         * @param serverSourceStr The string to parse to a server source
-         * @return An appropriate server source or <code>null</code> if string could not be parsed to a server source
-         */
-        public static final ServerSource parse(final String serverSourceStr) {
-            final ServerSource[] values = ServerSource.values();
-            for (final ServerSource serverSource : values) {
-                if (serverSource.str.equalsIgnoreCase(serverSourceStr)) {
-                    return serverSource;
-                }
-            }
-            return null;
-        }
-
         private final String str;
 
         private ServerSource(final String str) {
@@ -323,6 +314,25 @@ public abstract class MailConfig {
         @Override
         public String toString() {
             return str;
+        }
+
+        /**
+         * Parses specified string into a server source.
+         *
+         * @param serverSourceStr The string to parse to a server source
+         * @return An appropriate server source or <code>null</code> if string could not be parsed to a server source
+         */
+        public static ServerSource parse(String serverSourceStr) {
+            if (Strings.isEmpty(serverSourceStr)) {
+                return null;
+            }
+
+            for (ServerSource serverSource : ServerSource.values()) {
+                if (serverSource.str.equalsIgnoreCase(serverSourceStr)) {
+                    return serverSource;
+                }
+            }
+            return null;
         }
     }
 

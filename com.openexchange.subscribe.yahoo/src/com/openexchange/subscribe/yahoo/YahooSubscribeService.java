@@ -52,6 +52,7 @@ package com.openexchange.subscribe.yahoo;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -103,7 +104,7 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
         if (Strings.isNotEmpty(subscription.getSecret())) {
             YahooService yahooService = services.getService(YahooService.class);
             // No extra null or empty check, it will be checked on super
-            String displayName = yahooService.getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer) subscription.getConfiguration().get("account"));
+            String displayName = yahooService.getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), Autoboxing.a2i(subscription.getConfiguration().get("account")));
             subscription.setDisplayName(displayName);
         }
         super.modifyOutgoing(subscription);

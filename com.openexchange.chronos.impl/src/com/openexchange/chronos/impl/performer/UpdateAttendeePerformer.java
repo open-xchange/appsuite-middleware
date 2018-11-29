@@ -130,7 +130,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * check targeted attendee
          */
-        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null));
+        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null), attendee.getCuType());
         Attendee originalAttendee = Check.attendeeExists(originalEvent, resolvedAttendee);
         if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
@@ -232,7 +232,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for existing change exception
                  */
-                Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceId);
+                Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
@@ -264,7 +264,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  * add change exception date to series master & track results
                  */
                 resultTracker.rememberOriginalEvent(originalSeriesMaster);
-                addChangeExceptionDate(originalSeriesMaster, recurrenceId);
+                addChangeExceptionDate(originalSeriesMaster, recurrenceId, false);
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
                 /*
@@ -307,6 +307,12 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             switch (field) {
                 case FOLDER_ID:
                     checkFolderUpdate(originalEvent, originalAttendee, attendeeUpdate.getFolderId());
+                    break;
+                case PARTSTAT:
+                    /*
+                     * ensure to reset RSVP expectation along with change of participation status
+                     */
+                    attendeeUpdate.setRsvp(null);
                     break;
                 case CU_TYPE:
                 case ENTITY:

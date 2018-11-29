@@ -61,7 +61,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -124,7 +124,7 @@ public class DefaultNotificationParticipantResolverTest {
     private Session session;
 
     // --------- PRIVATE OBJECTS ------------
-    private DefaultNotificationParticipantResolver resolver;
+    private ITipNotificationParticipantResolver resolver;
 
     private final Context context = new ContextImpl(CONTEXT_ID);
 
@@ -143,18 +143,15 @@ public class DefaultNotificationParticipantResolverTest {
         // Mock settings
         UserSettingMailStorage userSettingMailStorage = Mockito.mock(UserSettingMailStorage.class);
         PowerMockito.when(UserSettingMailStorage.getInstance()).thenReturn(userSettingMailStorage);
-        PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(null);
-
-        // Mock util
-        PowerMockito.when(util.getFolderIdForUser(Matchers.any(Session.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(null);
+        PowerMockito.when(userSettingMailStorage.getUserSettingMail(ArgumentMatchers.anyInt(), ArgumentMatchers.eq(ArgumentMatchers.eq(context)))).thenReturn(null);
 
         // Create service to test
-        resolver = new DefaultNotificationParticipantResolver(util);
+        resolver = new ITipNotificationParticipantResolver(util);
     }
 
     private void prepareServices(Event updated, User onBehalfOf) throws OXException {
         List<MockUser> attendeesAsUser = ChronosTestTools.convertToUser(updated.getAttendees());
-        PowerMockito.when(userService.getUser(Matchers.any(Context.class), (int[]) Matchers.any())).thenReturn(attendeesAsUser.toArray(new MockUser[] {}));
+        PowerMockito.when(userService.getUser(ArgumentMatchers.any(Context.class), (int[]) ArgumentMatchers.any())).thenReturn(attendeesAsUser.toArray(new MockUser[] {}));
     }
 
     @Test
@@ -264,7 +261,7 @@ public class DefaultNotificationParticipantResolverTest {
         updated.setAttendees(extendedAttendees);
 
         prepareServices(updated, onBehalfOf);
-        PowerMockito.when(resources.getResource(Matchers.anyInt(), Matchers.any(Context.class))).thenReturn(ChronosTestTools.convertToResource(resource));
+        PowerMockito.when(resources.getResource(ArgumentMatchers.anyInt(), ArgumentMatchers.any(Context.class))).thenReturn(ChronosTestTools.convertToResource(resource));
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -327,7 +324,7 @@ public class DefaultNotificationParticipantResolverTest {
         }
 
         prepareServices(updated, onBehalfOf);
-        PowerMockito.when(userService.getUser(Matchers.eq(session.getUserId()), Matchers.any(Context.class))).thenReturn(user);
+        PowerMockito.when(userService.getUser(ArgumentMatchers.eq(session.getUserId()), ArgumentMatchers.any(Context.class))).thenReturn(user);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -357,7 +354,7 @@ public class DefaultNotificationParticipantResolverTest {
         }
 
         prepareServices(updated, onBehalfOf);
-        PowerMockito.when(userService.getUser(Matchers.eq(session.getUserId()), Matchers.any(Context.class))).thenReturn(user);
+        PowerMockito.when(userService.getUser(ArgumentMatchers.eq(session.getUserId()), ArgumentMatchers.any(Context.class))).thenReturn(user);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());

@@ -290,7 +290,7 @@ public final class Check {
                     Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
             }
         }
-        if (delta.containsUid() && false == Strings.isEmpty(storedContact.getUid())) {
+        if (delta.containsUid() && Strings.isNotEmpty(storedContact.getUid())) {
             if (Strings.isEmpty(delta.getUid()) || delta.getUid().equals(storedContact.getUid())) {
                 delta.removeUid();
             } else {

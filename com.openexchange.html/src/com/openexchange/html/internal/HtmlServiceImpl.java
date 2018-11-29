@@ -95,6 +95,7 @@ import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Node;
+import org.jsoup.parser.InterruptedParsingException;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
@@ -107,6 +108,9 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.emoji.EmojiRegistry;
 import com.openexchange.html.internal.filtering.FilterMaps;
+import com.openexchange.html.internal.html2text.control.Html2TextControl;
+import com.openexchange.html.internal.html2text.control.Html2TextControlTask;
+import com.openexchange.html.internal.html2text.control.Html2TextTask;
 import com.openexchange.html.internal.image.DroppingImageHandler;
 import com.openexchange.html.internal.image.ImageProcessor;
 import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
@@ -124,6 +128,7 @@ import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.html.whitelist.Whitelist;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -177,6 +182,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private final HTMLEntityCodec htmlCodec;
     private final DefaultWhitelist fullWhitelist;
     private final DefaultWhitelist htmlOnlyWhitelist;
+    private final int htmlParseTimeoutSec;
+    private volatile Thread html2TextControlRunner;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -207,6 +214,24 @@ public final class HtmlServiceImpl implements HtmlService {
         builder = DefaultWhitelist.builder();
         builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
         htmlOnlyWhitelist = builder.build();
+
+        ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        int defaultValue = 10;
+        htmlParseTimeoutSec = null == service ? defaultValue : service.getIntProperty("com.openexchange.html.parse.timeout", defaultValue);
+    }
+
+    /**
+     * Stops this HTML service instance.
+     */
+    public void stop() {
+        if (htmlParseTimeoutSec > 0) {
+            Html2TextControl.getInstance().add(Html2TextTask.POISON);
+        }
+        Thread html2TextControlRunner = this.html2TextControlRunner;
+        if (null != html2TextControlRunner) {
+            this.html2TextControlRunner = null;
+            html2TextControlRunner.interrupt();
+        }
     }
 
     @Override
@@ -902,10 +927,42 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
-
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
+        int timeout = htmlParseTimeoutSec;
+        if (timeout <= 0) {
+            return doHtml2Text(htmlContent, appendHref);
+        }
+
+        // Ensure control thread is running
+        Thread html2TextControlRunner = this.html2TextControlRunner;
+        if (null == html2TextControlRunner) {
+            synchronized (this) {
+                html2TextControlRunner = this.html2TextControlRunner;
+                if (null == html2TextControlRunner) {
+                    html2TextControlRunner = new Thread(new Html2TextControlTask(), "Html2TextControl");
+                    html2TextControlRunner.start();
+                    this.html2TextControlRunner = html2TextControlRunner;
+                }
+            }
+        }
+
+        // Run as a monitored task
+        return new Html2TextTask(htmlContent, appendHref, timeout, this).call();
+    }
+
+    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
+
+    /**
+     * Converts specified HTML content to plain text.
+     *
+     * @param htmlContent The <b>validated</b> HTML content
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
+     *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
+     *            <code>Link&nbsp;[www.somewhere.com]</code>
+     * @return The plain text representation of specified HTML content
+     */
+    public String doHtml2Text(final String htmlContent, final boolean appendHref) {
         if (isEmpty(htmlContent)) {
             return htmlContent;
         }
@@ -915,7 +972,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
             // Keep considerable content inside <head> element
             {
-                Source source = new Source(prepared);
+                Source source = new Source(InterruptibleCharSequence.valueOf(prepared));
                 source.fullSequentialParse();
                 OutputDocument outputDocument = new OutputDocument(source);
 
@@ -954,12 +1011,12 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
 
-            prepared = prepareSignatureStart(prepared);
-            prepared = prepareHrTag(prepared);
-            prepared = prepareAnchorTag(prepared);
-            prepared = insertBlockquoteMarker(prepared);
-            prepared = insertSpaceMarker(prepared);
-            Renderer renderer = new Renderer(new Segment(new Source(prepared), 0, prepared.length())) {
+            prepared = prepareSignatureStart(InterruptibleCharSequence.valueOf(prepared));
+            prepared = prepareHrTag(InterruptibleCharSequence.valueOf(prepared));
+            prepared = prepareAnchorTag(InterruptibleCharSequence.valueOf(prepared));
+            prepared = insertBlockquoteMarker(InterruptibleCharSequence.valueOf(prepared));
+            prepared = insertSpaceMarker(InterruptibleCharSequence.valueOf(prepared));
+            Renderer renderer = new Renderer(new Segment(new Source(InterruptibleCharSequence.valueOf(prepared)), 0, prepared.length())) {
                 @Override
                 public String renderHyperlinkURL(final StartTag startTag) {
                     /*
@@ -990,27 +1047,35 @@ public final class HtmlServiceImpl implements HtmlService {
             renderer.setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref);
             String text = quoteText(renderer.toString());
             // Drop heading whitespaces
-            text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
+            text = PATTERN_HEADING_WS.matcher(InterruptibleCharSequence.valueOf(text)).replaceAll("$1");
             // ... but keep enforced ones
-            text = whitespaceText(text);
+            text = whitespaceText(InterruptibleCharSequence.valueOf(text));
             return text;
-        } catch (final StackOverflowError soe) {
-            // Unfortunately it may happen...
-            LOG.warn("Stack-overflow during processing HTML content.", soe);
+        } catch (InterruptedParsingException ipe) {
+            LOG.warn("Timeout during html2text conversion.", ipe);
             // Retry with Tika framework
-            try {
-                return extractFrom(new java.io.ByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
-            } catch (final Exception e) {
-                LOG.error("Error during processing HTML content.", e);
-                return "";
-            }
+            return tikaHtml2Text(htmlContent);
+        } catch (StackOverflowError soe) {
+            // Unfortunately it may happen...
+            LOG.warn("Stack-overflow during html2text conversion.", soe);
+            // Retry with Tika framework
+            return tikaHtml2Text(htmlContent);
+        }
+    }
+
+    private String tikaHtml2Text(String htmlContent) {
+        try {
+            return extractFrom(Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.UTF_8)));
+        } catch (final Exception e) {
+            LOG.error("Error during html2text conversion.", e);
+            return "";
         }
     }
 
     private String extractFrom(final InputStream inputStream) throws OXException {
         try {
             final Metadata metadata = new Metadata();
-            metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
+            metadata.set(Metadata.CONTENT_ENCODING, "UTF-8");
             metadata.set(Metadata.CONTENT_TYPE, "text/html");
             return tika.parseToString(inputStream, metadata);
         } catch (final IOException e) {
@@ -1023,10 +1088,10 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_ANCHOR = Pattern.compile("<a[^>]+href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static String prepareAnchorTag(final String htmlContent) {
+    private static String prepareAnchorTag(final CharSequence htmlContent) {
         final Matcher m = PATTERN_ANCHOR.matcher(htmlContent);
         if (!m.find()) {
-            return htmlContent;
+            return htmlContent.toString();
         }
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         do {
@@ -1040,10 +1105,10 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static String prepareHrTag(final String htmlContent) {
+    private static String prepareHrTag(final CharSequence htmlContent) {
         final Matcher m = PATTERN_HR.matcher(htmlContent);
         if (!m.find()) {
-            return htmlContent;
+            return htmlContent.toString();
         }
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         final String repl = "<br>---------------------------------------------<br>";
@@ -1060,10 +1125,10 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("(?:\r?\n|^)([ \t]*)-- (\r?\n)");
-    private static String prepareSignatureStart(final String htmlContent) {
+    private static String prepareSignatureStart(final CharSequence htmlContent) {
         final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
         if (!m.find()) {
-            return htmlContent;
+            return htmlContent.toString();
         }
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         m.appendReplacement(sb, "$1--&#160;$2");
@@ -1075,13 +1140,13 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final Pattern PATTERN_SPACE_MARKER = Pattern.compile(Pattern.quote(SPACE_MARKER));
 
-    private static String whitespaceText(final String text) {
+    private static String whitespaceText(final CharSequence text) {
         return PATTERN_SPACE_MARKER.matcher(text).replaceAll(" ");
     }
 
     private static final Pattern PATTERN_HTML_MANDATORY_SPACE = Pattern.compile("&#160;");
 
-    private static String insertSpaceMarker(final String html) {
+    private static String insertSpaceMarker(final CharSequence html) {
         return PATTERN_HTML_MANDATORY_SPACE.matcher(html).replaceAll(SPACE_MARKER);
     }
 
@@ -1132,7 +1197,7 @@ public final class HtmlServiceImpl implements HtmlService {
         if (retval.indexOf(SPECIAL) < 0) {
             return retval;
         }
-        return PATTERN_MARKER.matcher(retval).replaceAll("");
+        return PATTERN_MARKER.matcher(InterruptibleCharSequence.valueOf(retval)).replaceAll("");
     }
 
     private static String getPrefixFor(final int quote) {
@@ -1150,7 +1215,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final Pattern PATTERN_BLOCKQUOTE_END = Pattern.compile("(</blockquote>)", Pattern.CASE_INSENSITIVE);
 
-    private static String insertBlockquoteMarker(final String html) {
+    private static String insertBlockquoteMarker(final CharSequence html) {
         return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll("$1"+BLOCKQUOTE_MARKER)).replaceAll("$1"+BLOCKQUOTE_MARKER_END);
     }
 
@@ -1490,7 +1555,7 @@ public final class HtmlServiceImpl implements HtmlService {
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern HREF_PATTERN = Pattern.compile(
-        "(<[a-zA-Z]+[^>]*?)(?:(?:href=([^\\s>]*))|(?:href=\"([^\"]*)\"))([^>]*/?>)",
+        "(<[a-zA-Z]+[^>]*?)(?:(?:href=\\\"([^\\\"]*)\\\")|(?:href=([^\\s>]*)))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
@@ -2397,7 +2462,7 @@ public final class HtmlServiceImpl implements HtmlService {
             tmp.setLength(0);
             tmp.append('<').append(m.group(1));
             String appendix = m.group(3);
-            if (!Strings.isEmpty(appendix)) {
+            if (Strings.isNotEmpty(appendix)) {
                 tmp.append(m.group(2)).append(appendix);
             }
             tmp.append('>');

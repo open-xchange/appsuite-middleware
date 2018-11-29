@@ -93,7 +93,7 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Failed to negotiate the desired level of security with RSS feed from URL: %1$s
      */
-    SSL_HANDSHAKE_ERROR("Failed to negotiate the desired level of security with RSS feed from URL: %1$s", RssExceptionMessages.GENERIC_ERROR_WITH_ARG2_MSG, CATEGORY_ERROR, 8),
+    SSL_HANDSHAKE_ERROR("Failed to negotiate the desired level of security with RSS feed from URL: %1$s", RssExceptionMessages.GENERIC_ERROR_WITH_ARG1_MSG, CATEGORY_ERROR, 8),
 
     ;
 

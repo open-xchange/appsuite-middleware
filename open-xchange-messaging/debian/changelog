@@ -1,62 +1,26 @@
-open-xchange-messaging (7.10.0-20) stable; urgency=medium
+open-xchange-messaging (7.10.1-3) stable; urgency=medium
 
-  * Build for patch 2018-11-19 (4966)
+  * RC 1 for 7.10.1 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 19 Nov 2018 10:55:25 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 23 Nov 2018 14:40:01 +0100
 
-open-xchange-messaging (7.10.0-19) stable; urgency=medium
+open-xchange-messaging (7.10.1-2) stable; urgency=medium
 
-  * Build for patch 2018-11-05 (4933)
+  * Second preview for 7.10.1 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 29 Oct 2018 16:08:21 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 02 Nov 2018 14:02:12 +0100
 
-open-xchange-messaging (7.10.0-18) stable; urgency=medium
+open-xchange-messaging (7.10.1-1) stable; urgency=medium
 
-  * Build for patch 2018-10-15 (4918)
+  * First candidate for 7.10.1 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 08 Oct 2018 15:55:24 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 11 Oct 2018 12:12:49 +0200
 
-open-xchange-messaging (7.10.0-17) stable; urgency=medium
+open-xchange-messaging (7.10.1-0) unstable; urgency=medium
 
-  * Build for patch 2018-10-01 (4897)
+  * prepare for 7.10.1 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 25 Sep 2018 13:56:08 +0200
-
-open-xchange-messaging (7.10.0-16) stable; urgency=medium
-
-  * Build for patch 2018-09-21 (4900)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Sep 2018 12:50:26 +0200
-
-open-xchange-messaging (7.10.0-15) stable; urgency=medium
-
-  * Build for patch 2018-09-17 (4882)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 10 Sep 2018 15:22:16 +0200
-
-open-xchange-messaging (7.10.0-14) stable; urgency=medium
-
-  * Build for patch 2018-09-03 (4870)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 27 Aug 2018 12:31:16 +0200
-
-open-xchange-messaging (7.10.0-13) stable; urgency=medium
-
-  * Build for patch 2018-08-20 (4863)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 15 Aug 2018 15:35:07 +0200
-
-open-xchange-messaging (7.10.0-12) stable; urgency=medium
-
-  * Build for patch 2018-08-13 (4853)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 02 Aug 2018 16:04:59 +0200
-
-open-xchange-messaging (7.10.0-11) stable; urgency=medium
-
-  * Build for patch 2018-07-25 (4835)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Jul 2018 10:15:23 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 06 Sep 2018 12:29:22 +0200
 
 open-xchange-messaging (7.10.0-10) stable; urgency=medium
 

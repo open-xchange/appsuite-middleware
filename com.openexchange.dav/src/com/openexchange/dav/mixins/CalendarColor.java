@@ -149,7 +149,7 @@ public class CalendarColor extends SingleXMLPropertyMixin {
             } else {
                 value = property.getValue();
             }
-            if (false == Strings.isEmpty(value)) {
+            if (Strings.isNotEmpty(value)) {
                 value = value.toUpperCase().trim();
                 if (Pattern.matches("^\\#([A-F0-9]{8})$", value)) {
                     return value;

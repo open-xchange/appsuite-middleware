@@ -130,7 +130,7 @@ public class IMPPMapping extends AbstractMapping {
 
     private static URI getURI(String instantMessenger) {
         URI uri = null;
-        if (false == Strings.isEmpty(instantMessenger)) {
+        if (Strings.isNotEmpty(instantMessenger)) {
             try {
                 uri = new URI(null, instantMessenger, null);
             } catch (URISyntaxException e) {

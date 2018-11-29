@@ -51,6 +51,7 @@ package com.openexchange.capabilities.json;
 
 import java.util.Collection;
 import java.util.Iterator;
+import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,7 +72,7 @@ public class CapabilitiesJsonWriter {
         super();
     }
 
-    private static final JSONObject EMPTY_JSON = new JSONObject(0);
+    private static final JSONObject EMPTY_JSON = ImmutableJSONObject.immutableFor(new JSONObject(0));
 
     /**
      * Converts given capability to its JSON representation.

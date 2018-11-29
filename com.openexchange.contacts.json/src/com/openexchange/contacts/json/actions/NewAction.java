@@ -114,7 +114,7 @@ public class NewAction extends ContactAction {
 		}
 
         if (containsImage) {
-            if (!json.has("image1") || !Strings.isEmpty(json.opt("image1").toString())) {
+            if (!json.has("image1") || Strings.isNotEmpty(json.opt("image1").toString())) {
                 RequestTools.setImageData(request, contact);
             }
         } else if (null != imageBase64) {

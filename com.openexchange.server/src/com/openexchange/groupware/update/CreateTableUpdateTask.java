@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
+import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.CreateTableService;
@@ -77,7 +79,9 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
      * @param dependencies The dependencies to preceding update tasks
      * @param version The version number; no more used
      * @param databaseService The database service; no more used
+     * @deprecated Please use {@link #CreateTableUpdateTask(CreateTableService, String[])}
      */
+    @Deprecated
     public CreateTableUpdateTask(CreateTableService create, String[] dependencies, int version, DatabaseService databaseService) {
         this(create, dependencies, databaseService);
     }
@@ -90,7 +94,9 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
      * @param create The create-table service
      * @param dependencies The dependencies to preceding update tasks
      * @param databaseService The database service; no more used
+     * @deprecated Please use {@link #CreateTableUpdateTask(CreateTableService, String[])}
      */
+    @Deprecated
     public CreateTableUpdateTask(CreateTableService create, String[] dependencies, DatabaseService databaseService) {
         this(create, dependencies);
     }
@@ -99,19 +105,18 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
      * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
      *
      * @param create The create-table service
-     * @param dependencies The dependencies to preceding update tasks
+     * @param dependencies The dependencies to preceding update tasks or <code>null</code> for no dependencies
      */
     public CreateTableUpdateTask(CreateTableService create, String[] dependencies) {
         super();
         this.create = create;
-        this.dependencies = dependencies;
+        this.dependencies = null == dependencies ? new String[0] : dependencies;
     }
 
     @Override
     public TaskAttributes getAttributes() {
         // Creating Tables is blocking and schema level.
-        return new Attributes();
-
+        return new Attributes(BLOCKING, SCHEMA);
     }
 
     @Override
@@ -122,24 +127,26 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
-            con.setAutoCommit(false);
-            rollback = true;
+            con.setAutoCommit(false); // BEGIN
+            rollback = 1;
 
             create.perform(con);
 
-            con.commit();
-            rollback = false;
+            con.commit(); // COMMIT
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

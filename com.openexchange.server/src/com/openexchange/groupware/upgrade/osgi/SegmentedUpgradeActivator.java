@@ -58,6 +58,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * {@link SegmentedUpgradeActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
 public class SegmentedUpgradeActivator extends HousekeepingActivator {
 

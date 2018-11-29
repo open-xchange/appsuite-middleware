@@ -111,7 +111,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     protected static final String MIME_TEXT_PLAIN = "text/plain";
     protected static final String MIME_IMAGE_JPG = "image/jpeg";
 
-    private Long timestamp = null;
+    protected Long timestamp = null;
 
     @Override
     @Before
@@ -142,15 +142,39 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment) throws ApiException, FileNotFoundException, IOException {
         byte[] bytes = IOTools.getBytes(new FileInputStream(file));
-        return uploadInfoItem(id, file, mimeType, versionComment, bytes, null, null);
+        return uploadInfoItem(id, file, mimeType, versionComment, bytes, null, null, null);
     }
 
-    protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize) throws ApiException {
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, file.getName(), bytes, filesize, id, file.getName(), mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset);
-        Assert.assertNull(uploadInfoItem.getError());
+    protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, String filename) throws ApiException, FileNotFoundException, IOException {
+        byte[] bytes = IOTools.getBytes(new FileInputStream(file));
+        return uploadInfoItem(id, file, mimeType, versionComment, bytes, null, null, filename);
+    }
+
+    protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
+        String name = filename==null ? file.getName() : filename;
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, filesize, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset);
+        Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
         return uploadInfoItem.getData();
+    }
+
+    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment) throws ApiException, FileNotFoundException, IOException {
+        byte[] bytes = IOTools.getBytes(new FileInputStream(file));
+        return uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, null);
+    }
+
+    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, String filename) throws ApiException, FileNotFoundException, IOException {
+        byte[] bytes = IOTools.getBytes(new FileInputStream(file));
+        return uploadInfoItemWithError(id, file, mimeType, versionComment, bytes, null, null, filename);
+    }
+
+    protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
+        String name = filename == null ? file.getName() : filename;
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, filesize, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset);
+        Assert.assertNotNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
+        timestamp = uploadInfoItem.getTimestamp();
+        return uploadInfoItem;
     }
 
     protected void rememberFile(String id, String folder) {
@@ -199,7 +223,11 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
             ConfigApi configApi = new ConfigApi(getApiClient());
             ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getApiClient().getSession());
             Object data = checkResponse(configNode);
-            privateInfostoreFolder = String.valueOf(data);
+            if (data != null && !data.toString().equalsIgnoreCase("null")) {
+                privateInfostoreFolder = String.valueOf(data);
+            } else {
+                Assert.fail("It seems that the user doesn't support drive.");
+            }
 
         }
         return privateInfostoreFolder;
@@ -218,7 +246,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     }
 
     protected void deleteInfoItems(List<InfoItemListElement> toDelete, boolean hardDelete) throws ApiException {
-        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp, toDelete, hardDelete);
+        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp == null ? System.currentTimeMillis() : timestamp, toDelete, hardDelete);
         Assert.assertNull(deleteInfoItems.getError());
         Assert.assertNotNull(deleteInfoItems.getData());
         timestamp = deleteInfoItems.getTimestamp();

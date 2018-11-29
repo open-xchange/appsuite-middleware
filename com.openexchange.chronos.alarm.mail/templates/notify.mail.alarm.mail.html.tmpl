@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            ${templating.include( "notify.appointment.styles.css.tmpl" )}
+        </style>
+    </head>
+    <body>
+        <div class="content">
+            ${templating.include( "notify.appointment.intro.html.tmpl" )}
+            ${templating.include( "notify.mail.alarm.show.html.tmpl" )}
+        </div>
+    </body>
+</html>

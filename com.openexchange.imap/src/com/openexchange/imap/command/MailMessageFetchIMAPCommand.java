@@ -1154,7 +1154,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
 
         boolean hasEmbedded(BODYSTRUCTURE bs) {
-            if ("image".equals(bs.type) && !Strings.isEmpty(bs.id)) {
+            if ("image".equals(bs.type) && Strings.isNotEmpty(bs.id)) {
                 return true;
             }
 

@@ -59,6 +59,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -233,7 +234,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      *
      * @param registry that provides the services for the registered JSON bundles
      */
-    public AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
+    protected AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
         super();
         this.services = services;
         declaredCapabilities = new ConcurrentHashMap<String, Object>(32, 0.9f, 1);
@@ -395,9 +396,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
          * Never ever re-order the apply methods!
          */
         CapabilitySet capabilities = new CapabilitySet(64);
+        Map<Capability, Boolean> forcedCapabilities = new HashMap<Capability, Boolean>(4);
         applyAutoLogin(capabilities);
         applyUserPermissions(capabilities, user, context);
-        applyConfiguredCapabilities(capabilities, user, context, allowCache);
+        applyConfiguredCapabilities(capabilities, forcedCapabilities, user, context, allowCache);
         BoolReference putIntoCache = new BoolReference(true);
         if (session == null) {
             applyDeclaredCapabilities(capabilities, ServerSessionAdapter.valueOf(userId, contextId), putIntoCache); // Code smell level: Ninja...
@@ -405,6 +407,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             applyDeclaredCapabilities(capabilities, session, putIntoCache);
         }
         applyGuestFilter(capabilities, user);
+        for (Map.Entry<Capability, Boolean> forcedCapability : forcedCapabilities.entrySet()) {
+            Capability capability = forcedCapability.getKey();
+            if (forcedCapability.getValue().booleanValue()) {
+                capabilities.add(capability);
+            } else {
+                capabilities.remove(capability);
+            }
+        }
 
         if (putIntoCache.getValue() && userId > 0 && contextId > 0 && (session == null || !session.isTransient())) {
             // Put in cache
@@ -541,13 +551,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * </ul>
      *
      * @param capabilities The capability set
+     * @param forcedCapabilities The forcibly configured capabilities
      * @param user The user; if <code>null</code>, all config cascade lookups are performed with user ID <code>-1</code>;
      *             if the user is a guest, the configure guest capability mode is considered.
      * @param context The context; if <code>null</code>, all config cascade lookups are performed with context ID <code>-1</code>
      * @param allowCache Whether caching of loaded capabilities is allowed
      * @throws OXException
      */
-    private void applyConfiguredCapabilities(CapabilitySet capabilities, User user, Context context, boolean allowCache) throws OXException {
+    private void applyConfiguredCapabilities(CapabilitySet capabilities, Map<Capability, Boolean> forcedCapabilities, User user, Context context, boolean allowCache) throws OXException {
         int userId = -1;
         int contextId = -1;
         if (context != null) {
@@ -559,7 +570,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (user.isGuest()) {
                 GuestCapabilityMode capMode = getGuestCapabilityMode(user, context);
                 if (capMode == GuestCapabilityMode.INHERIT) {
-                    applyConfigCascade(capabilities, user.getCreatedBy(), contextId);
+                    applyConfigCascade(capabilities, forcedCapabilities, user.getCreatedBy(), contextId);
                     applyContextCapabilities(capabilities, contextId, allowCache);
                     applyUserCapabilities(capabilities, user.getCreatedBy(), contextId, allowCache);
                     applyUserCapabilities(capabilities, userId, contextId, allowCache);
@@ -570,12 +581,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     applyUserCapabilities(capabilities, userId, contextId, allowCache);
                 }
             } else {
-                applyConfigCascade(capabilities, userId, contextId);
+                applyConfigCascade(capabilities, forcedCapabilities, userId, contextId);
                 applyContextCapabilities(capabilities, contextId, allowCache);
                 applyUserCapabilities(capabilities, userId, contextId, allowCache);
             }
         } else {
-            applyConfigCascade(capabilities, userId, contextId);
+            applyConfigCascade(capabilities, forcedCapabilities, userId, contextId);
             applyContextCapabilities(capabilities, contextId, allowCache);
         }
     }
@@ -590,11 +601,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * </ul>
      *
      * @param capabilities The capability set
+     * @param forcedCapabilities The forcibly configured capabilities
      * @param userId The user ID for config cascade lookups
      * @param contextId The context ID for config cascade lookups
      * @throws OXException
      */
-    private void applyConfigCascade(CapabilitySet capabilities, int userId, int contextId) throws OXException {
+    private void applyConfigCascade(CapabilitySet capabilities, Map<Capability, Boolean> forcedCapabilities, int userId, int contextId) throws OXException {
         // Permission properties
         final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
         if (configViews != null) {
@@ -627,10 +639,15 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 if (propName.startsWith("com.openexchange.capability.", 0)) {
                     boolean value = Boolean.parseBoolean(entry.getValue().get());
                     String name = toLowerCase(propName.substring(28));
-                    if (value) {
-                        capabilities.add(getCapability(name));
+                    if (name.startsWith("forced.", 0)) {
+                        name = name.substring(7);
+                        forcedCapabilities.put(getCapability(name), Boolean.valueOf(value));
                     } else {
-                        capabilities.remove(name);
+                        if (value) {
+                            capabilities.add(getCapability(name));
+                        } else {
+                            capabilities.remove(name);
+                        }
                     }
                 }
             }
@@ -746,7 +763,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
             capabilities.remove("share_links");
             capabilities.remove("invite_guests");
-            if (!Strings.isEmpty(user.getMail())) {
+            if (Strings.isNotEmpty(user.getMail())) {
                 capabilities.add(getCapability("edit_password"));
             }
             capabilities.remove("mailfilter_v2");

@@ -77,7 +77,6 @@ import java.util.Comparator;
 import java.util.Locale;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.Order;
 
 /**
  * {@link SpecialAlphanumSortContactComparator} - Sorts with respect to {@link Contact#SPECIAL_SORTING}. Considering given names, too, if
@@ -87,21 +86,14 @@ import com.openexchange.groupware.search.Order;
  */
 public class SpecialAlphanumSortContactComparator implements Comparator<Contact> {
 
-    /**
-     * The string comparator used to compare non-null strings.
-     */
-    private final Comparator<String> stringComparator;
+    private final Comparator<String> delegate;
+    private final Locale locale;
 
     /**
-     * Whether to inverse comparison result.
-     */
-    private final int inverse;
-
-    /**
-     * Initializes a new {@link SpecialAlphanumSortContactComparator}.
+     * Initializes a new {@link SpecialAlphanumSortContactComparator} with default locale {@link Locale#US}.
      */
     public SpecialAlphanumSortContactComparator() {
-        this(new AlphanumComparator(), Order.ASCENDING);
+        this(Locale.US);
     }
 
     /**
@@ -109,35 +101,24 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
      *
      * @param locale The locale
      */
-    public SpecialAlphanumSortContactComparator(final Locale locale) {
-        this(new AlphanumComparator(locale), Order.ASCENDING);
-    }
-
-    /**
-     * Initializes a new {@link SpecialAlphanumSortContactComparator}.
-     *
-     * @param stringComparator The string comparator
-     * @param sortOrder The sort order
-     */
-    public SpecialAlphanumSortContactComparator(final Comparator<String> stringComparator, final Order sortOrder) {
+    public SpecialAlphanumSortContactComparator(Locale locale) {
         super();
-        this.stringComparator = stringComparator;
-        this.inverse = sortOrder == Order.DESCENDING ? -1 : 1;
+        Locale localeToUse = null == locale ? Locale.US : locale;
+        this.delegate = new AlphanumComparator(localeToUse);
+        this.locale = localeToUse;
     }
 
     @Override
-    public int compare(final Contact contact1, final Contact contact2) {
-        String sortName1 = contact1.getSortName();
-        String sortName2 = contact2.getSortName();
-        int compared;
+    public int compare(Contact contact1, Contact contact2) {
+        String sortName1 = contact1.getSortName(locale);
+        String sortName2 = contact2.getSortName(locale);
         if (null == sortName1) {
-            compared = null == sortName2 ? 0 : -1;
-        } else if (null == sortName2) {
-            compared = 1;
-        } else {
-            compared = stringComparator.compare(sortName1, sortName2);
+            return null == sortName2 ? 0 : -1;
         }
-        return inverse * compared;
+        if (null == sortName2) {
+            return 1;
+        }
+        return delegate.compare(sortName1, sortName2);
     }
 
 }

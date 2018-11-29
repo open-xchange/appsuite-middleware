@@ -61,8 +61,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
@@ -136,10 +134,8 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
 
     /**
      * Initializes a new {@link TrustedMailServiceImpl}.
-     *
-     * @throws OXException
      */
-    public TrustedMailServiceImpl(ServiceLookup services) throws OXException {
+    public TrustedMailServiceImpl(ServiceLookup services) {
         super();
         this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>(4);
         this.fallbackTenant = new CopyOnWriteArrayList<>();
@@ -315,16 +311,6 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         }
 
         throw MailAuthenticityExceptionCodes.INVALID_IMAGE_UID.create();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#getInterests()
-     */
-    @Override
-    public Interests getInterests() {
-        return Reloadables.getInterestsForAll();
     }
 
     /////////////////////////////// HELPERS ///////////////////////////////

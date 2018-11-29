@@ -70,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -115,15 +116,18 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
             stream(session, out, calendarAccess, eventIDs, timezoneIDs);
             return null;
         }
-        
-        ThresholdFileHolder sink = new ThresholdFileHolder();
+
+        boolean success = false;
+        ThresholdFileHolder sink = null;
         try {
+            sink = new ThresholdFileHolder();
             stream(session, sink.asOutputStream(), calendarAccess, eventIDs, timezoneIDs);
+            success = true;
             return sink;
-        } catch (Throwable t) {
-            // Close stream on error
-            Streams.close(sink);
-            throw t;
+        } finally {
+            if (false == success) {
+                Streams.close(sink);
+            }
         }
     }
 
@@ -147,7 +151,10 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
          */
         try (StreamedCalendarExport streamedExport = ImportExportServices.getICalService().getStreamedExport(out, null)) {
             streamedExport.writeMethod("PUBLISH");
-            streamedExport.writeCalendarName(extractName(session, getFolderId()));
+            String name = extractName(session, getFolderId());
+            if (Strings.isNotEmpty(name)) {
+                streamedExport.writeCalendarName(extractName(session, getFolderId()));
+            }
             streamedExport.writeTimeZones(timezoneIDs);
             for (List<EventID> chunk : Lists.partition(eventIDs, 100)) {
                 /*

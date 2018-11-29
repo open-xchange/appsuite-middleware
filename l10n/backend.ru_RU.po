@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-06-29 09:37+0200\n"
+"PO-Revision-Date: 2018-11-08 14:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: ru_RU\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 2.1.1\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
@@ -161,7 +161,7 @@ msgid "Comments"
 msgstr "Комментарии"
 
 #: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
 #: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Весь день"
@@ -186,7 +186,7 @@ msgid "Undecided"
 msgstr "Не решено"
 
 #: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 msgid "Resources"
 msgstr "Ресурсы"
 
@@ -196,6 +196,18 @@ msgstr "Ресурсы"
 #: com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "Синхронизация адресной книги и контактов."
+
+#. * The displayed name for the {@link EventField#ALARMS} property of an event
+#. -
+#. * MISC
+#.
+#. Reminder
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:63
+#: com.openexchange.chronos.alarm.sms/src/com/openexchange/chronos/alarm/sms/SMSAlarmStrings.java:63
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "Reminder"
+msgstr "Напоминание"
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:62
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:67
@@ -219,10 +231,8 @@ msgid "Validation failed: %1$s"
 msgstr "Ошибка валидации: %1$s"
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:70
-msgid ""
-"Not all of the objects could be imported due to a configured limitation."
-msgstr ""
-"Вследствие настроенных ограничений некоторые объекты не были импортированы."
+msgid "Not all of the objects could be imported due to a configured limitation."
+msgstr "Вследствие настроенных ограничений некоторые объекты не были импортированы."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
 msgid ""
@@ -484,8 +494,7 @@ msgstr ""
 "серии встреч в день."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:71
-msgid ""
-"The organizer would like to cancel an appointment that could not be found."
+msgid "The organizer would like to cancel an appointment that could not be found."
 msgstr "Организатор пытается отменить несуществующую встречу."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:72
@@ -500,8 +509,7 @@ msgstr ""
 msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that was already deleted."
-msgstr ""
-"Участник пытается изменить свой статус для встречи, которая была удалена."
+msgstr "Участник пытается изменить свой статус для встречи, которая была удалена."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
 msgid ""
@@ -602,8 +610,7 @@ msgstr "%1$s отклонил предложенные изменения от �
 msgid ""
 "%1$s would like to be brought up to date about the appointment %2$s. Please "
 "send another invitation."
-msgstr ""
-"%1$s запрашивает информацию о встрече %2$s. Отправьте повторное приглашение."
+msgstr "%1$s запрашивает информацию о встрече %2$s. Отправьте повторное приглашение."
 
 #. *
 #. * Examples:
@@ -691,121 +698,132 @@ msgstr "%1$s создал(а) исключение для повторяющей
 msgid "%1$s has changed an event:"
 msgstr "%1$s изменил(а) событие:"
 
+#. %1$s
+#. E.g. Drive Client
+#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
+#. all translations or remove it from the PO file.
+#. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+#: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
+msgid "%1$s"
+msgstr "%1$s"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
 msgid "%1$s has changed an event on behalf of %2$s:"
 msgstr "%1$s изменил(а) событие от имени %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
 msgid "%1$s has changed an event on your behalf:"
 msgstr "%1$s изменил(а) событие от вашего имени:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
 msgid "When:"
 msgstr "Когда:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
 msgid "Direct link:"
 msgstr "Прямая ссылка:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
 msgid "Where:"
 msgstr "Где:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
 msgid "Participants:"
 msgstr "Участники:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
 msgid "Details:"
 msgstr "Подробности:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
 msgid "Show as:"
 msgstr "Показать как:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "Created:"
 msgstr "Создано:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
 msgid "Modified:"
 msgstr "Изменено:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr "%1$s удалил встречу от имени %2$, или ваше участие было удалено:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s удалил встречу от вашего имени:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
-msgid ""
-"%1$s has deleted an appointment, or you have been removed as a participant:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+msgid "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s удалил встречу, или ваше участие было удалено:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
 msgid "Change the subject to %1$s."
 msgstr "Измените тему на %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
 msgid "The appointment has a new subject: %1$s."
 msgstr "Новая тема встречи: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "Встреча будет показана как «%1$s»."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "Новый часовой пояс: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
 msgid "Change the location to %1$s."
 msgstr "Измените место на %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "Новое место встречи: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Use the appointment description below."
 msgstr "Заполните описание встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "The appointment description has changed."
 msgstr "Описание встречи изменено."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid "Please invite %1$s to the appointment."
 msgstr "Пригласите %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
 msgid "Add %1$s to the appointment."
 msgstr "Добавить %1$s к встрече."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid "%1$s has been invited to the appointment."
 msgstr "Пользователь %1$s приглашен на встречу."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid "Remove %1$s from the appointment."
 msgstr "Удалить %1$s из встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s удален из встречи."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:227
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:229
 msgid "%1$s has %2$s the appointment."
 msgstr "Ответ %1$s на приглашение на встречу: %2$s"
 
@@ -817,150 +835,155 @@ msgstr "Ответ %1$s на приглашение на встречу: %2$s"
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:233
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:235
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "ожидание"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:237
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
 msgid "Invite the group %1$s to the appointment."
 msgstr "Пригласить группу %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
 msgid "The group %1$s has been invited to the appointment"
 msgstr "Группа %1$s приглашена на встречу."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
 msgid "Remove the group %1$s from the appointment."
 msgstr "Удалить группу %1$s из встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
 msgid "The group %1$s has been removed from the appointment"
 msgstr "Группа %1$s удалена из встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Зарезервировать ресурс %1$s для встречи"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Зарезервировать ресурс %1$s для встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "Ресурс %1$s зарезервирован."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Удалить %1$s из встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Удалить %1$s из встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "Ресурс %1$s исключен."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr "Встреча была перенесена с %1$s на %2$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr "Часовой пояс встречи изменился с %1$s на %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr "Часовой пояс времени начала встречи изменился с %1$s на %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr "Часовой пояс времени окончания встречи изменился с %1$s на %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr "Перенести событие с %1$s на %2$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr "Перенести событие с %1$s на %2$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "New appointment: %1$s"
 msgstr "Новая встреча: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "Appointment changed: %1$s"
 msgstr "Встреча изменена: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
 msgid "Appointment canceled: %1$s"
 msgstr "Встреча отменена: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Предложенные изменения для встречи: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s изменил свой статус на «нет» для %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s приглашение: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "Resend the invitation for: %1$s"
 msgstr "Повторно отправить приглашение для %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
 msgid "Change not accepted for: %1$s"
 msgstr "Изменение не принято для: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Формат времени: %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
-msgid ""
-"%1$s has %2$s the appointment, but would like to make a counter proposal: "
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
+msgid "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s %2$s приглашение, но делает встречное предложение: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
-msgid ""
-"You have received this E-Mail because you are the chair for this appointment."
-msgstr ""
-"Вы получили это письмо, так как вы являетесь председателем этой встречи."
-
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+msgid "You have received this E-Mail because you are the chair for this appointment."
+msgstr "Вы получили это письмо, так как вы являетесь председателем этой встречи."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
-msgstr ""
-"Вы получили это письмо, так как вы являетесь организатором этой встречи."
+msgstr "Вы получили это письмо, так как вы являетесь организатором этой встречи."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr ""
 "Вы получили это письмо, так как эта встреча включает ресурс %1$s под вашим "
 "управлением."
+
+#. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:310
+msgid ""
+"You have received an E-Mail containing a reply to an appointment that you "
+"didn't organize. Best ignore it."
+msgstr ""
+"Вы получили письмо с ответом на приглашение, которое вы не отправляли. Лучше "
+"его проигнорировать."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -987,8 +1010,7 @@ msgstr "Не удалось поставить будильник: %s"
 #. * The content-id '%1$s' refers to a non-existing attachment in the body part.
 #.
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:77
-msgid ""
-"The content-id '%1$s' refers to a non-existing attachment in the body part."
+msgid "The content-id '%1$s' refers to a non-existing attachment in the body part."
 msgstr "Content-id '%1$s' ссылается на несуществующее вложение в секции body."
 
 #. *
@@ -1029,7 +1051,7 @@ msgstr ""
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
 msgid "🎂 %1$s"
-msgstr ""
+msgstr "🎂 %1$s"
 
 #. *
 #. * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
@@ -1046,11 +1068,10 @@ msgstr "* %1$s"
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
 msgid "🎂 %1$s (%2$d. birthday)"
-msgstr ""
+msgstr "🎂 %1$s (исполнилось %2$d)"
 
 #: com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
-msgid ""
-"The calendar was refreshed less than a minute ago. Please try again later."
+msgid "The calendar was refreshed less than a minute ago. Please try again later."
 msgstr "Календарь обновлялся менее минуты назад. Повторите попытку позже."
 
 #. * The name of the ICal feed calendar provider.
@@ -1068,8 +1089,7 @@ msgstr "Недействительный URI ленты. Исправьте и �
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
 msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
-msgstr ""
-"Не удалось подключиться к ленте: %1$s. Измените URI и повторите попытку."
+msgstr "Не удалось подключиться к ленте: %1$s. Измените URI и повторите попытку."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
@@ -1089,8 +1109,7 @@ msgstr "Поле «%1$s» содержит недопустимое значен
 msgid ""
 "Unfortunately your requested feed cannot be subscribed due to size "
 "limitations."
-msgstr ""
-"К сожалению, вследствие ограничений размера подписаться на ленту невозможно."
+msgstr "К сожалению, вследствие ограничений размера подписаться на ленту невозможно."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
 msgid "Unfortunately the given feed URI cannot be processed as expected."
@@ -1122,13 +1141,11 @@ msgstr ""
 msgid ""
 "Access to this calendar is restricted. Please enter your credentials and try "
 "again."
-msgstr ""
-"Доступ к календарю ограничен. Введите данные доступа и повторите попытку."
+msgstr "Доступ к календарю ограничен. Введите данные доступа и повторите попытку."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
 msgid "Authentication failed. Please enter your credentials and try again."
-msgstr ""
-"Ошибка аутентификации. Введите свои данные доступа и повторите попытку."
+msgstr "Ошибка аутентификации. Введите свои данные доступа и повторите попытку."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:89
 msgid ""
@@ -1193,16 +1210,6 @@ msgstr "Повтор"
 msgid "Description"
 msgstr "Описание"
 
-#. * The displayed name for the {@link EventField#ALARMS} property of an event
-#. -
-#. * MISC
-#.
-#. Reminder
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
-msgstr "Напоминание"
-
 #. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
 msgid "Visibility"
@@ -1261,8 +1268,7 @@ msgid "An I/O error occurred: %1$s"
 msgstr "Ошибка ввода-вывода: %1$s"
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
-msgid ""
-"The requested operation is not supported for calendar provider \"%1$s\"."
+msgid "The requested operation is not supported for calendar provider \"%1$s\"."
 msgstr "Сервис календаря «%1$s» не поддерживает эту операцию."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
@@ -1270,8 +1276,7 @@ msgid "The operation could not be completed due to insufficient permissions."
 msgstr "Недостаточно полномочий для выполнения этой операции."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
-msgid ""
-"This modification can only be performed by the organizer of the appointment."
+msgid "This modification can only be performed by the organizer of the appointment."
 msgstr "Только организатор встречи может внести такое изменение. "
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
@@ -1288,8 +1293,7 @@ msgstr ""
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
-msgstr ""
-"Указанная папка не поддерживается. Выберите другую папку и повторите попытку."
+msgstr "Указанная папка не поддерживается. Выберите другую папку и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
@@ -1312,10 +1316,8 @@ msgid "The appointment conflicts with one or more other appointments."
 msgstr "Обнаружен конфликт встречи с другими мероприятиями."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
-msgid ""
-"The field \"%1$s\" is mandatory. Please supply a valid value and try again."
-msgstr ""
-"Поле «%1$s» является обязательным. Введите значение и повторите попытку."
+msgid "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
+msgstr "Поле «%1$s» является обязательным. Введите значение и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
@@ -1358,8 +1360,7 @@ msgid ""
 msgstr "Недопустимое правило повтора. Исправьте и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
-msgid ""
-"The supplied reminder is invalid. Please correct the reminder and try again."
+msgid "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr "Недопустимое напоминание. Исправьте и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
@@ -1372,8 +1373,7 @@ msgstr "Недействительный часовой пояс. Исправь
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
-msgstr ""
-"Недействительное географическое расположение. Исправьте и повторите попытку."
+msgstr "Недействительное географическое расположение. Исправьте и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
@@ -1385,15 +1385,13 @@ msgstr "Несовместимые даты начала и окончания. 
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
-msgstr ""
-"Указанное правило повтора не поддерживается. Исправьте и повторите попытку."
+msgstr "Указанное правило повтора не поддерживается. Исправьте и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
-msgstr ""
-"Выберите действительный идентификатор повтора встречи и повторите попытку."
+msgstr "Выберите действительный идентификатор повтора встречи и повторите попытку."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
@@ -1423,8 +1421,7 @@ msgstr "Недействительный пользователь календа
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
-msgstr ""
-"Предоставлена недопустимая конфигурация. Исправьте и повторите попытку."
+msgstr "Предоставлена недопустимая конфигурация. Исправьте и повторите попытку."
 
 #. In order to accomplish the search, %1$d or more characters are required.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
@@ -1433,8 +1430,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
+msgid "In order to accomplish the search, %1$d or more characters are required."
 msgstr "Минимальное количество знаков для выполнения поиска: %1$d"
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
@@ -1525,8 +1521,7 @@ msgstr "Ошибка выполнения. Выберите другой вар�
 
 #. Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:82
-msgid ""
-"Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
+msgid "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
 msgstr ""
 "Квота для SMS превышена: SMS-сообщения могут отправляться один раз в %1$s "
 "сек."
@@ -1669,7 +1664,7 @@ msgstr "%1$s, %2$s, %3$s"
 #. %1$s on %2$s %3$s
 #. E.g. OX Mail App on Android 8.0
 #: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:85
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:96
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:105
 msgid "%1$s on %2$s %3$s"
 msgstr "%1$s, %2$s %3$s"
 
@@ -1678,11 +1673,26 @@ msgstr "%1$s, %2$s %3$s"
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr "Microsoft Exchange ActiveSync Client"
 
+#. WebDAV InfoStore
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:91
+msgid "WebDAV InfoStore"
+msgstr "WebDAV InfoStore"
+
+#. WebDAV VCard
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:94
+msgid "WebDAV VCard"
+msgstr "WebDAV VCard"
+
+#. WebDAV iCal
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:97
+msgid "WebDAV iCal"
+msgstr "WebDAV iCal"
+
 #. %1$s %2$s on %3$s %4$s
 #. E.g. OX Mail App 1.10 on Android 8.0
 #. %1$s %2$s on %3$s %4$s
 #. E.g. Drive Client 2.4.0 on Windows 10
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:92
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:101
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:65
 msgid "%1$s %2$s on %3$s %4$s"
 msgstr "%1$s %2$s, %3$s %4$s"
@@ -1691,7 +1701,7 @@ msgstr "%1$s %2$s, %3$s %4$s"
 #. E.g. OX Mail App 1.10 on Android
 #. %1$s %2$s on %3$s
 #. E.g. Drive Client 2.4.0 on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:100
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:109
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:69
 msgid "%1$s %2$s on %3$s"
 msgstr "%1$s %2$s, %3$s"
@@ -1700,10 +1710,15 @@ msgstr "%1$s %2$s, %3$s"
 #. E.g. OX Mail App on Android
 #. %1$s on %2$s
 #. E.g. Drive Client on Windows
-#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:104
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:113
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
 msgid "%1$s on %2$s"
 msgstr "%1$s, %2$s"
+
+#. Unknown client
+#: com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:116
+msgid "Unknown client"
+msgstr "Неизвестный клиент"
 
 #: com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
@@ -1733,8 +1748,7 @@ msgstr "LDAP-поиск объекта «%s» не вернул результа
 msgid ""
 "The LDAP search in distribution lists for specific attributes is not "
 "supported."
-msgstr ""
-"LDAP-поиск по индивидуальным атрибутам в списках рассылок не поддерживается."
+msgstr "LDAP-поиск по индивидуальным атрибутам в списках рассылок не поддерживается."
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
@@ -2165,8 +2179,7 @@ msgstr "Адрес (доп.)"
 msgid ""
 "No vCard could be found in the supplied file. Please use a valid vCard file "
 "and try again."
-msgstr ""
-"Недействительный файл vCard. Выберите файл с vCard и повторите попытку."
+msgstr "Недействительный файл vCard. Выберите файл с vCard и повторите попытку."
 
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:63
 msgid "Validation failed for property \"%1$s\": %2$s"
@@ -2369,8 +2382,7 @@ msgstr "Произошла ошибка DoveAdm: %1$s"
 msgid ""
 "A DoveAdm server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
-msgstr ""
-"Ошибка сервера DoveAdm с кодом HTTP-статуса %1$ с сообщением об ошибке: %2$s"
+msgstr "Ошибка сервера DoveAdm с кодом HTTP-статуса %1$ с сообщением об ошибке: %2$s"
 
 #. Invalid DoveAdm URL: %1$s
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
@@ -2388,10 +2400,10 @@ msgstr "Предоставленный ресурс DoveAdm не существ�
 msgid "Authentication failed: %1$s"
 msgstr "Не удалось идентифицировать пользователя %1$s."
 
-#. The DoveAdm resource does not exist
+#. Doveadm HTTP API communication error: 404 Not Found
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
-msgid "The DoveAdm resource does not exist"
-msgstr "Ресурс DoveAdm не существует"
+msgid "Doveadm HTTP API communication error: 404 Not Found"
+msgstr "Ошибка 404: нет связи c API Doveadm"
 
 #. A temporary failure because a subsystem is down. Please try again later.
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:83
@@ -2424,15 +2436,6 @@ msgstr ""
 msgid "%1$s %2$s"
 msgstr "%1$s %2$s"
 
-#. %1$s
-#. E.g. Drive Client
-#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
-#. all translations or remove it from the PO file.
-#: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
-#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
-msgid "%1$s"
-msgstr "%1$s"
-
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -2462,8 +2465,7 @@ msgstr "Версия файла «%1$s» не найдена в «%2$s». Пов
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
 msgid "Integrity checks failed for uploaded file \"%2$s\". Please try again."
-msgstr ""
-"Проверка целостности файла «%2$s» завершилась неудачей. Повторите попытку."
+msgstr "Проверка целостности файла «%2$s» завершилась неудачей. Повторите попытку."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
 msgid ""
@@ -2552,8 +2554,7 @@ msgid "A newer version of your client application is available for download."
 msgstr "Доступна новая версия приложения клиента."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
-msgid ""
-"The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
+msgid "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr "Недопустимый шаблон: «%1$s». Исправьте и повторите попытку."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
@@ -2563,8 +2564,7 @@ msgid ""
 msgstr "Название файла «%1$s» конфликтует с таким же названием папки в «%2$s»"
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
-msgid ""
-"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgid "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
 msgstr "Путь «%1$s» конфликтует с таким же названием файла в «%2$s»."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:91
@@ -2616,10 +2616,26 @@ msgstr "Каталог с именем «%1$s» уже существует в �
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
+#: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "Выберите существующую учетную запись"
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:62
+msgid "The total upload size (%1$s) exceeds the available free space of %2$s."
+msgstr "Размер загрузки (%1$s) превышает объем доступного места (%2$s)."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:64
+msgid "The total number of files exceeds the maximum of %1$s."
+msgstr "Общее количество файлов превышает максимально допустимые %1$s."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:66
+msgid "'%1$s' (%2$s) exceeds the allowed size of %3$s per file."
+msgstr "'%1$s' (%2$s) превышает максимально допустимый размер, составляющий %3$s."
+
+#: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:68
+msgid "You are not allowed to upload files to the given folder."
+msgstr "Вы не можете загружать файлы в эту папку."
 
 #. The name for the virtual folder containing all attachments from all messages
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
@@ -2877,15 +2893,12 @@ msgstr "Индивидуальные разрешения для учетной 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr ""
-"Учетная запись «%2$s» не поддерживает сохранение примечаний к файлу «%1$s»."
+msgstr "Учетная запись «%2$s» не поддерживает сохранение примечаний к файлу «%1$s»."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid ""
-"Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr ""
-"Учетная запись «%2$s» не поддерживает выбор категорий для файла «%1$s»."
+msgid "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr "Учетная запись «%2$s» не поддерживает выбор категорий для файла «%1$s»."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -2968,8 +2981,7 @@ msgstr "Операция не завершена: обнаружена проб�
 
 #. The e-mail address you provided is associated with more than one account
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:71
-msgid ""
-"The e-mail address you provided is associated with more than one account"
+msgid "The e-mail address you provided is associated with more than one account"
 msgstr "Указанный электронный адрес соответствует нескольким учетным записям."
 
 #. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
@@ -3118,8 +3130,7 @@ msgstr "Необходимо обновить маркер."
 #. The e-mail address you provided does not match any account on record.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
 msgid "The e-mail address you provided does not match any account on record."
-msgstr ""
-"Указанный электронный адрес не соответствует существующим учетным записям."
+msgstr "Указанный электронный адрес не соответствует существующим учетным записям."
 
 #. The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
@@ -3168,8 +3179,7 @@ msgstr "Квота достигнута. Чтобы освободить мес�
 
 #. The service you requested is currently not available. Please try again later.
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
-msgid ""
-"The service you requested is currently not available. Please try again later."
+msgid "The service you requested is currently not available. Please try again later."
 msgstr "Запрошенная служба временно недоступна. Повторите попытку позже."
 
 #. A filter for field '%1$s' is missing but is required to search in module %2$s.
@@ -3605,8 +3615,7 @@ msgstr "Модуль с ID %1$s не найден."
 msgid ""
 "The widget with the id %1$s is protected and only positional information can "
 "be updated"
-msgstr ""
-"Модуль с ID %1$s защищен. Разрешается обновить только позиционную информацию."
+msgstr "Модуль с ID %1$s защищен. Разрешается обновить только позиционную информацию."
 
 #. The string cannot be parsed to a valid URL.
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
@@ -3643,15 +3652,13 @@ msgstr "Неверное имя пользователя или пароль."
 #. This message is used if the password of the user expired and must be changed.
 #. %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:79
-msgid ""
-"Your password has expired. In order to change it, please log in to %1$s."
+msgid "Your password has expired. In order to change it, please log in to %1$s."
 msgstr "Срок действия вашего пароля истек. Чтобы его изменить, зайдите в %1$s."
 
 #. Indicates whether indicated client is allowed to perform a login
 #. E.g. 'Client "OLOX20" is not activated.'
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:83
-msgid ""
-"You do not have the appropriate permissions to login with client \"%1$s\"."
+msgid "You do not have the appropriate permissions to login with client \"%1$s\"."
 msgstr "Недостаточно разрешений для авторизации «%1$s»."
 
 #. This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
@@ -3700,6 +3707,11 @@ msgstr "Неверный пароль."
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:116
 msgid "Login denied."
 msgstr "Доступ запрещен."
+
+#. Used in case there were too many failed login attempts for an account within a certain timeframe.
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:122
+msgid "Too many login attempts. Please try again later."
+msgstr "Слишком много неудачных попыток входа. Повторите попытку позже."
 
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
@@ -3769,8 +3781,7 @@ msgstr "Ошибка чтения-записи данных в базу данн
 #. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
 #: com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
 msgid "Data cannot be stored into the database because it is too big"
-msgstr ""
-"Не удалось сохранить в базу данных: размер параметра превышает допустимый."
+msgstr "Не удалось сохранить в базу данных: размер параметра превышает допустимый."
 
 #. The request sent by the client was syntactically incorrect
 #: com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
@@ -3803,8 +3814,7 @@ msgid "The maximum number of sessions is exceeded. Please try again later."
 msgstr "Превышено максимальное число сеансов. Повторите попытку позже."
 
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:62
-msgid ""
-"The password could not be changed in the current session. Please login again."
+msgid "The password could not be changed in the current session. Please login again."
 msgstr "Пароль текущего сеанса не может быть изменен. Авторизуйтесь заново."
 
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:63
@@ -3868,16 +3878,6 @@ msgstr "Ресурс не существует"
 msgid "A JSON error occurred: %1$s"
 msgstr "Ошибка JSON: %1$s"
 
-#. No Linked-In account available.
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
-msgid "No Linked-In account available."
-msgstr "Нет учетной записи LinkedIn"
-
-#. Need an e-mail address to look up Linked-In data
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:66
-msgid "Need an e-mail address to look up Linked-In data."
-msgstr "Для поиска данных LinkedIn необходимо указать электронный адрес."
-
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.
 #: com.openexchange.halo/src/com/openexchange/halo/HaloExceptionMessages.java:63
 msgid ""
@@ -3888,8 +3888,7 @@ msgstr "Для поиска внешнего контакта необходим
 #. The HTML content is too big for being parsed and sanitized for a safe display
 #: com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:63
 msgid "The HTML content is too big and cannot be displayed"
-msgstr ""
-"HTML-содержимое имеет слишком большой размер и не может быть отображено"
+msgstr "HTML-содержимое имеет слишком большой размер и не может быть отображено"
 
 #. The HTML content seems to be corrupted/invalid and therefore fails being parsed and sanitized for a safe display
 #: com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:66
@@ -4016,16 +4015,14 @@ msgstr "Не удалось изменить флаг %1$s. Причина: %2$s
 #.
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:156
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
+msgid "Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr "Число полей поиска (%d) не соответствует числу шаблонов (%d)."
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
 msgid ""
 "IMAP search failed due to reason \"%1$s\". Switching to application-based "
 "search"
-msgstr ""
-"Ошибка поиска IMAP: %1$s. Поиск будет выполнен программными средствами."
+msgstr "Ошибка поиска IMAP: %1$s. Поиск будет выполнен программными средствами."
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
 msgid ""
@@ -4153,12 +4150,10 @@ msgstr "Сервер IMAP отказал в импорте некоторых с
 msgid ""
 "Currently not possible to establish a new connection to server %1$s with "
 "login %2$s. Please try again."
-msgstr ""
-"Отказ авторизации %2$s при подключении к серверу %1$s. Повторите попытку."
+msgstr "Отказ авторизации %2$s при подключении к серверу %1$s. Повторите попытку."
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
-msgid ""
-"Update of folder failed. Owner is required to keep administrative rights."
+msgid "Update of folder failed. Owner is required to keep administrative rights."
 msgstr ""
 "Не удалось обновить папку. Для исполнения административных действий у папки "
 "должен быть владелец."
@@ -4326,8 +4321,7 @@ msgstr "Достигнут предел импорта. Импортирован
 
 #. The character encoding \"%1$s\" is not supported. Please choose another one.
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:136
-msgid ""
-"The character encoding \"%1$s\" is not supported. Please choose another one."
+msgid "The character encoding \"%1$s\" is not supported. Please choose another one."
 msgstr "Кодировка «%1$s» не поддерживается. Выберите другую."
 
 #. The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
@@ -4335,8 +4329,7 @@ msgstr "Кодировка «%1$s» не поддерживается. Выбе�
 msgid ""
 "The contact with uid %1$s is too similar to the existing contact with uid "
 "%2$s in folder %3$s"
-msgstr ""
-"Контакт с UID %1$s совпадает с существующим контактом с UID %2$s в папке %3$s"
+msgstr "Контакт с UID %1$s совпадает с существующим контактом с UID %2$s в папке %3$s"
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
 msgid "Could not create a proper name for the export file."
@@ -4344,8 +4337,7 @@ msgstr "Не удалось подобрать имя для файла эксп
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:143
 msgid "Not all of the objects could be imported due to a configured limitation"
-msgstr ""
-"Вследствие настроенных ограничений некоторые объекты не были импортированы."
+msgstr "Вследствие настроенных ограничений некоторые объекты не были импортированы."
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:145
 msgid ""
@@ -4383,8 +4375,7 @@ msgstr "Экспорт"
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
-msgid ""
-"Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
+msgid "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
 msgstr "JSlob %1$s не может быть настроен для службы  %2$s."
 
 #: com.openexchange.mail.authenticity.impl/src/com/openexchange/mail/authenticity/impl/core/MailAuthenticityFragmentPhrases.java:61
@@ -4421,8 +4412,7 @@ msgstr "Неверная конфигурация: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
-msgid ""
-"The required service %1$s is temporary not available. Please try again later."
+msgid "The required service %1$s is temporary not available. Please try again later."
 msgstr "Обязательная служба %1$s временно недоступна. Повторите попытку позже."
 
 #. You are not allowed to change the name of the category %1$s.
@@ -4795,8 +4785,7 @@ msgstr "Недопустимая учетная запись. Создайте �
 #. The account "%1$s" is invalid, please recreate it.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
 msgid "The account \"%1$s\" is invalid, please recreate it."
-msgstr ""
-"Недействительная учетная запись «%1$s». Создайте учетную запись заново."
+msgstr "Недействительная учетная запись «%1$s». Создайте учетную запись заново."
 
 #. Please provide a display name.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
@@ -4831,8 +4820,7 @@ msgstr "Не удалось установить соединение с уда�
 #. You need to grant additional %1$s permissions to access the resource.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
 msgid "You need to grant additional %1$s permissions to access the resource."
-msgstr ""
-"Для доступа к ресурсу необходимо получить дополнительные разрешения (%1$s)."
+msgstr "Для доступа к ресурсу необходимо получить дополнительные разрешения (%1$s)."
 
 #. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
@@ -4882,8 +4870,7 @@ msgstr "Сервис OAuth «%1$s» не был подключен."
 #. * New password too short.
 #.
 #: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
-msgid ""
-"The entered password is too short. Please try again using a longer password."
+msgid "The entered password is too short. Please try again using a longer password."
 msgstr "Пароль слишком короткий. Введите другой пароль."
 
 #. *
@@ -4925,8 +4912,7 @@ msgstr "Конфигурация пользователя %1$s запрещае�
 #. * No access to mail folder %1$s
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:79
-msgid ""
-"You do not have the appropriate permissions to access the mail folder %1$s"
+msgid "You do not have the appropriate permissions to access the mail folder %1$s"
 msgstr "Недостаточно разрешений для доступа к папке %1$s."
 
 #. *
@@ -4947,24 +4933,21 @@ msgstr "Недостаточно разрешений для удаления п
 #. * No insert access on mail folder %1$s
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:91
-msgid ""
-"You do not have the appropriate permissions to insert to mail folder %1$s"
+msgid "You do not have the appropriate permissions to insert to mail folder %1$s"
 msgstr "Недостаточно разрешений для вставки в папку %1$s"
 
 #. *
 #. * No administer access on mail folder %1$s
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:95
-msgid ""
-"You do not have the appropriate permissions to administer mail folder %1$s"
+msgid "You do not have the appropriate permissions to administer mail folder %1$s"
 msgstr "Недостаточно административных разрешений для доступа к папке %1$s."
 
 #. *
 #. * No write access to POP3 folder %1$s
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
-msgid ""
-"You do not have the appropriate permissions to write to POP3 folder %1$s"
+msgid "You do not have the appropriate permissions to write to POP3 folder %1$s"
 msgstr "Недостаточно разрешений для записи в папку POP3 %1$s"
 
 #. *
@@ -5036,8 +5019,7 @@ msgstr "Не удалось создать стандартную папку POP
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:136
 msgid "Missing default %1$s folder in user mail settings"
-msgstr ""
-"Настройки пользователя не содержат используемую по умолчанию папку %1$s."
+msgstr "Настройки пользователя не содержат используемую по умолчанию папку %1$s."
 
 #. *
 #. * Update of folder %1$s failed
@@ -5067,8 +5049,7 @@ msgstr "Не удалось изменить флаг %1$s: %2$s"
 msgid ""
 "POP3 search failed due to the following reason: %1$s. Switching to "
 "application-based search"
-msgstr ""
-"Ошибка поиска POP3: %1$s. Поиск будет выполнен программными средствами."
+msgstr "Ошибка поиска POP3: %1$s. Поиск будет выполнен программными средствами."
 
 #. *
 #. * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
@@ -5112,8 +5093,7 @@ msgstr ""
 #. * Missing %1$s folder in mail move operation
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:181
-msgid ""
-"Missing %1$s folder in mail move operation. Please provide one and try again."
+msgid "Missing %1$s folder in mail move operation. Please provide one and try again."
 msgstr "Необходимо указать папку %1$s в операции переноса почты."
 
 #. *
@@ -5163,8 +5143,7 @@ msgstr "Недостаточно разрешений для чтения пап
 #. * The raw content's input stream of message %1$s in folder %2$s cannot be read
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:205
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgid "The raw content's input stream of message %1$s in folder %2$s cannot be read"
 msgstr "Ошибка чтения входного потока сообщения %1$s в папке %2$s."
 
 #. *
@@ -5259,8 +5238,7 @@ msgstr ""
 #. * Missing POP3 storage for user %1$s in context %2$s.
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:261
-msgid ""
-"The POP3 storage is missing for user %1$s. Please provide one and try again"
+msgid "The POP3 storage is missing for user %1$s. Please provide one and try again"
 msgstr ""
 "Не найдено хранилище POP3 для пользователя %1$s. Введите имя и повторите "
 "попытку."
@@ -5305,8 +5283,7 @@ msgstr "Операция перемещения не разрешена."
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s. Error message "
 "from server: %5$s"
-msgstr ""
-"Отказ авторизации при подключении %2$s к серверу %1$s. Ответ сервера: %5$s"
+msgstr "Отказ авторизации при подключении %2$s к серверу %1$s. Ответ сервера: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -5373,8 +5350,7 @@ msgstr "Уменьшенное изображение недоступно."
 msgid ""
 "The preview service for MIME type %1$s is currently not available. Please "
 "try again later"
-msgstr ""
-"Служба просмотра типа MIME %1$s временно недоступна. Повторите попытку позже."
+msgstr "Служба просмотра типа MIME %1$s временно недоступна. Повторите попытку позже."
 
 #: com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:70
 msgid "Could not load data via proxy."
@@ -5449,8 +5425,7 @@ msgstr "Сайт публикаций не найден."
 
 #. You do not have the appropriate permissions to perform the chosen action.
 #: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:66
-msgid ""
-"You do not have the appropriate permissions to perform the chosen action."
+msgid "You do not have the appropriate permissions to perform the chosen action."
 msgstr "Недостаточно прав для выполнения действия."
 
 #. The published document has been deleted in the meantime and therefore is no longer available.
@@ -5591,8 +5566,7 @@ msgstr "Неверно сформированный элемент IQ: «%1$s»"
 
 #. * No appropriate channel found for recipient %1$s with payload namespace %2$s
 #: com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
-msgid ""
-"No appropriate channel found for recipient %1$s with payload namespace %2$s"
+msgid "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr "Не найден канал для получателя %1$s с пространством имен %2$s."
 
 #. * The following needed service is missing: \"%1$s\"
@@ -6082,8 +6056,7 @@ msgstr "Заголовок не определен."
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
 msgid "Move not supported. You cannot move an appointment into that folder."
-msgstr ""
-"Перемещение не поддерживается. Вы не сможете переместить встречу в эту папку."
+msgstr "Перемещение не поддерживается. Вы не сможете переместить встречу в эту папку."
 
 #. *
 #. * Move not allowed from shared folders.
@@ -6117,8 +6090,7 @@ msgstr "Папка должна иметь тип Calendar."
 #. * Moving an appointment with private flag to a public folder is not allowed.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:148
-msgid ""
-"Moving an appointment with private flag to a public folder is not allowed."
+msgid "Moving an appointment with private flag to a public folder is not allowed."
 msgstr "Не разрешается переносить личную встречу в общую папку."
 
 #. *
@@ -6167,17 +6139,14 @@ msgstr "Вы пытаетесь создать повтор на основе и
 msgid ""
 "Moving an instance of a recurring appointment into another folder is not "
 "allowed."
-msgstr ""
-"Экземпляр повторяющейся встречи не может быть перенесен в другую папку."
+msgstr "Экземпляр повторяющейся встречи не может быть перенесен в другую папку."
 
 #. *
 #. * Moving an appointment with private flag to a shared folder is not allowed.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:183
-msgid ""
-"Moving an appointment with private flag to a shared folder is not allowed."
-msgstr ""
-"Не разрешается переносить личную встречу в папку с совместным доступом."
+msgid "Moving an appointment with private flag to a shared folder is not allowed."
+msgstr "Не разрешается переносить личную встречу в папку с совместным доступом."
 
 #. *
 #. * You can not use different private flags for one element of a recurring appointment.
@@ -6186,8 +6155,7 @@ msgstr ""
 msgid ""
 "You can not use different private flags for one element of a recurring "
 "appointment."
-msgstr ""
-"Нельзя использовать разные личные флаги для элемента повторяющейся встречи."
+msgstr "Нельзя использовать разные личные флаги для элемента повторяющейся встречи."
 
 #. *
 #. * You can not use the private flag in a non private folder.
@@ -6233,8 +6201,7 @@ msgstr "Перенос повторяющейся встречи в другую
 msgid ""
 "Cannot create that appointment. An appointment having the same unique "
 "identifier already exists."
-msgstr ""
-"Не удалось создать встречу. Встреча с таким идентификатором уже существует."
+msgstr "Не удалось создать встречу. Встреча с таким идентификатором уже существует."
 
 #. *
 #. * Cannot create that task. A task having the same unique identifier already exists.
@@ -6243,8 +6210,7 @@ msgstr ""
 msgid ""
 "Cannot create that task. A task having the same unique identifier already "
 "exists."
-msgstr ""
-"Не удалось создать задачу. Задача с таким идентификатором уже существует."
+msgstr "Не удалось создать задачу. Задача с таким идентификатором уже существует."
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -6262,8 +6228,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
-msgstr ""
-"Неверный адрес электронной почты: «%s». Укажите другой электронный адрес."
+msgstr "Неверный адрес электронной почты: «%s». Укажите другой электронный адрес."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -6728,8 +6693,7 @@ msgstr "[Без темы]"
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:153
-msgid ""
-"The available attachments for this E-Mail can be accessed via the links:"
+msgid "The available attachments for this E-Mail can be accessed via the links:"
 msgstr "Вложения для этого сообщения доступны по ссылкам:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
@@ -6740,10 +6704,8 @@ msgstr "Вложения будут удалены #DATE#."
 
 #. The text put into the description field of a published E-Mail attachment
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:160
-msgid ""
-"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
-msgstr ""
-"Файл опубликован в письме «#SUBJECT#» от #DATE#, которое было отправлено #TO#"
+msgid "This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr "Файл опубликован в письме «#SUBJECT#» от #DATE#, которое было отправлено #TO#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
@@ -8013,16 +7975,13 @@ msgstr "Недостаточно разрешений для удаления д
 
 #. In order to accomplish the search, %1$s or more characters are required.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
-msgid ""
-"In order to accomplish the search, %1$s or more characters are required."
+msgid "In order to accomplish the search, %1$s or more characters are required."
 msgstr "Минимальное число знаков для выполнения поиска: %1$s"
 
 #. The document could not be updated because it was modified. Please try again.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:110
-msgid ""
-"The document could not be updated because it was modified. Please try again."
-msgstr ""
-"Не удалось обновить документ, так как он был изменен. Повторите попытку."
+msgid "The document could not be updated because it was modified. Please try again."
+msgstr "Не удалось обновить документ, так как он был изменен. Повторите попытку."
 
 #. The file name must not contain slashes.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
@@ -8054,8 +8013,7 @@ msgstr ""
 msgid ""
 "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
 "character."
-msgstr ""
-"Неподдерживаемый символ «%1$s» в поле «%2$s». Исправьте и повторите попытку."
+msgstr "Неподдерживаемый символ «%1$s» в поле «%2$s». Исправьте и повторите попытку."
 
 #. Unsupported character. Please correct your input.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
@@ -8089,8 +8047,7 @@ msgstr ""
 #. Your search took too long in order to be accomplished.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
-msgstr ""
-"Не удалось завершить операцию, так как поиск занял слишком много времени."
+msgstr "Не удалось завершить операцию, так как поиск занял слишком много времени."
 
 #. A document's version comment
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
@@ -8153,8 +8110,7 @@ msgstr "Пользователь с адресом «%s» не найден."
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:86
 msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
-msgstr ""
-"Не удалось найти пользователя с идентификатором «%1$s» в контексте %2$d."
+msgstr "Не удалось найти пользователя с идентификатором «%1$s» в контексте %2$d."
 
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:79
 msgid "Cannot find group with identifier \"%1$s\" in context %2$d."
@@ -8226,16 +8182,14 @@ msgstr "Не удалось обновить атрибуты для польз�
 #. * Invalid password length. The password must be of minimum length %1$d.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
-msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
+msgid "Invalid password length. The password must have a minimum length of %1$d."
 msgstr "Недопустимая длина пароля. Минимальная длина: %1$d."
 
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
-msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
+msgid "Invalid password length. The password must have a maximum length of %1$d."
 msgstr "Недопустимая длина пароля. Максимальная длина: %1$d."
 
 #. *
@@ -8300,8 +8254,7 @@ msgstr "Текущий пароль не указан. Введите парол
 #. * The new password is missing. Please enter your new password and try again.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
-msgid ""
-"The new password is missing. Please enter your new password and try again."
+msgid "The new password is missing. Please enter your new password and try again."
 msgstr "Новый пароль не задан. Введите пароль и повторите попытку."
 
 #. *
@@ -8499,8 +8452,7 @@ msgid "Tasks are disabled for you."
 msgstr "Задачи для вас отключены."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
-msgid ""
-"You do not have the appropriate permissions to create tasks in that folder."
+msgid "You do not have the appropriate permissions to create tasks in that folder."
 msgstr "Недостаточно разрешений для создания задач в этой папке."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
@@ -8524,8 +8476,7 @@ msgstr ""
 "а не %d."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
-msgid ""
-"You do not have the appropriate permissions to edit tasks in that folder"
+msgid "You do not have the appropriate permissions to edit tasks in that folder"
 msgstr "Недостаточно разрешений для изменения задач в этой папке."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
@@ -8558,8 +8509,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder."
-msgstr ""
-"Задачи с установленным личным флагом не могут быть перемещены в общую папку."
+msgstr "Задачи с установленным личным флагом не могут быть перемещены в общую папку."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -8645,8 +8595,7 @@ msgstr "Не удалось обновить схему «%1$s»: «%2$s»."
 msgid ""
 "Blocking tasks (\"%1$s\") must be executed before background tasks can be "
 "executed (\"%2$s\")."
-msgstr ""
-"Задачи блокирования («%1$s») должны выполняться до фоновых задач («%2$s»)."
+msgstr "Задачи блокирования («%1$s») должны выполняться до фоновых задач («%2$s»)."
 
 #: com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:80
 msgid "Unknown task: \"%1$s\"."
@@ -8686,8 +8635,7 @@ msgstr "Неизвестное значение операции: «%1$s»."
 #. Header "content-type" does not indicate multipart content
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:79
 msgid "Header \"content-type\" does not indicate multipart content."
-msgstr ""
-"Заголовок «content-type» не содержит определение для составного сообщения."
+msgstr "Заголовок «content-type» не содержит определение для составного сообщения."
 
 #. Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:82
@@ -8929,8 +8877,7 @@ msgid "No reply on multiple messages possible."
 msgstr "Вы не можете сразу ответить на несколько сообщений."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:106
-msgid ""
-"Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
+msgid "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
 msgstr "Не найдено вложение «%1$s» в сообщении «%2$s» в папке «%3$s»."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:108
@@ -8976,8 +8923,7 @@ msgstr "Типы указанных источников данных не по�
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
-msgstr ""
-"Не удалось выполнить разбор почты: недействительные или неполные данные."
+msgstr "Не удалось выполнить разбор почты: недействительные или неполные данные."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "Mail folder cannot be created/renamed. Empty folder name."
@@ -8993,8 +8939,7 @@ msgstr "Нет доступа создания к папке «%1$s»."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid "Mail account \"%1$s\" with ID \"%2$s\" does not support mail transport."
-msgstr ""
-"Учетная запись «%1$s» с ID «%2$s» не поддерживает протокол доставки почты."
+msgstr "Учетная запись «%1$s» с ID «%2$s» не поддерживает протокол доставки почты."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
 msgid "Mail folder could not be found."
@@ -9029,8 +8974,7 @@ msgid "Mail could not be found in folder \"%1$s\" by message identifier."
 msgstr "Не удалось найти почту в папке «%1$s» по идентификатору."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:154
-msgid ""
-"Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
+msgid "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
 msgstr ""
 "Превышена квота на отправление. Вы можете отправлять одно сообщение в %1$s "
 "сек."
@@ -9039,8 +8983,7 @@ msgstr ""
 msgid ""
 "Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
 "'Send' again."
-msgstr ""
-"Сократите число получателей до %1$s (включая CC и BCC) и нажмите «Отправить»."
+msgstr "Сократите число получателей до %1$s (включая CC и BCC) и нажмите «Отправить»."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid "Unable to parse mail server URI \"%1$s\"."
@@ -9102,8 +9045,7 @@ msgid "Maximum message size is exceeded. Max. is %1$s."
 msgstr "Превышен максимальный размер сообщения (%1$s)."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
-msgid ""
-"Re-sending message denied because message is not located in \"%1$s\" folder."
+msgid "Re-sending message denied because message is not located in \"%1$s\" folder."
 msgstr "Сообщение не может быть отправлено, так как его нет в папке  «%1$s»."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
@@ -9126,8 +9068,7 @@ msgstr "Доступ к почте отключен контекстным ад�
 msgid ""
 "The maximum number of files that may be attached to an E-Mail is exceeded. "
 "Max. is %1$s."
-msgstr ""
-"Вы пытаетесь присоединить слишком большое число файлов. Максимум: %1$s."
+msgstr "Вы пытаетесь присоединить слишком большое число файлов. Максимум: %1$s."
 
 #. The client request is not permitted.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:194
@@ -9175,10 +9116,8 @@ msgstr "Недопустимое значение параметра: %1$s"
 
 #. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:220
-msgid ""
-"The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
-msgstr ""
-"Недопустимое название флага: %1$s. Флаги не могут начинаться со знака «\\»."
+msgid "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
+msgstr "Недопустимое название флага: %1$s. Флаги не могут начинаться со знака «\\»."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
 msgid ""
@@ -9194,8 +9133,7 @@ msgstr ""
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "You are not allowed to compose a message containing share links"
-msgstr ""
-"Вам  не разрешено составлять сообщения с ссылками для предоставления доступа"
+msgstr "Вам  не разрешено составлять сообщения с ссылками для предоставления доступа"
 
 #. User wants to compose a share message but does not specify an expiration date which is required
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
@@ -9449,8 +9387,7 @@ msgstr "Недопустимое выражение поиска: «%1$s»"
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:125
 msgid "Message could not be sent because it is too large."
-msgstr ""
-"Сообщение не может быть отправлено, так как его размер превышает допустимый."
+msgstr "Сообщение не может быть отправлено, так как его размер превышает допустимый."
 
 #. *
 #. * Message could not be sent because it is too large.
@@ -9477,8 +9414,7 @@ msgstr "Не удалось отправить сообщение адресат
 #. * Message could not be sent. Error message from mail transport server: %1$s
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
-msgid ""
-"Message could not be sent. Error message from mail transport server: %1$s"
+msgid "Message could not be sent. Error message from mail transport server: %1$s"
 msgstr "Не удалось отправить сообщение. Ошибка сервера: %1$s."
 
 #. *
@@ -9528,8 +9464,7 @@ msgstr "Время ожидания ответа сервера %1$s истек�
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
-msgid ""
-"Mail server %1$s unexpectedly closed connection. Please try again later."
+msgid "Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr "Почтовый сервер %1$s закрыл соединение. Повторите попытку позже."
 
 #. *
@@ -9540,11 +9475,11 @@ msgid "The allowed quota on mail server exceeded."
 msgstr "Превышена квота на почтовом сервере."
 
 #. *
-#. * The allowed quota on mail server "%1$s" exceeded.
+#. * The allowed storage limit for your account \"%6$s\" was exceeded.
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-msgid "The allowed quota on mail server \"%1$s\" exceeded."
-msgstr "Превышена квота на почтовом сервере «%1$s»."
+msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
+msgstr "Пространство, выделенное для аккаунта %6$s, заполнено."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -9622,8 +9557,7 @@ msgstr ""
 #. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
 msgid "Access to mail server is not permitted due to a lack of privacy."
-msgstr ""
-"Доступ к почтовому серверу запрещен вследствие отсутствия конфиденциальности."
+msgstr "Доступ к почтовому серверу запрещен вследствие отсутствия конфиденциальности."
 
 #. The message advertising that everything is fine with checked account
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -9667,8 +9601,7 @@ msgstr "Учетная запись пользователя «%2$s» не на�
 #. Shown when a mail account that already exists should be created
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
 msgid "Found two mail accounts with same identifier %1$s for user %2$s."
-msgstr ""
-"Обнаружены две учетные записи с идентификатором %1$s для пользователя  %2$s."
+msgstr "Обнаружены две учетные записи с идентификатором %1$s для пользователя  %2$s."
 
 #. Shown when the requested host cannot be resolved
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
@@ -9745,8 +9678,7 @@ msgstr "Учетная запись для пользователя %1$s в ко
 msgid ""
 "Could not connect to mail server \"%1$s\" for login %2$s. Please review your "
 "settings."
-msgstr ""
-"%2$s не смог подключиться к почтовому серверу «%1$s». Проверьте настройки."
+msgstr "%2$s не смог подключиться к почтовому серверу «%1$s». Проверьте настройки."
 
 #. Shown when a connection to the mail transport server is not possible for the given login
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:107
@@ -9906,13 +9838,11 @@ msgid "Folders of module \"%2$s\" can't be created below this folder."
 msgstr "Создание папок модуля «%2$s» в этой папке не разрешено."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
-msgid ""
-"Only one user may have administrative permission roles in a private folder."
+msgid "Only one user may have administrative permission roles in a private folder."
 msgstr "Только один пользователь может быть администратором личной папки."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:82
-msgid ""
-"Administrative permissions for a group are not allowed in a private folder."
+msgid "Administrative permissions for a group are not allowed in a private folder."
 msgstr ""
 "Не разрешается определять административные разрешения для группы в личной "
 "папке."
@@ -9923,8 +9853,7 @@ msgstr "Только владелец личной папки может име�
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:84
 msgid "At least one user with administrative permissions is required."
-msgstr ""
-"Требуется как минимум один пользователь с административными разрешениями."
+msgstr "Требуется как минимум один пользователь с административными разрешениями."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
 msgid "The folder is a default folder and cannot be moved."
@@ -9975,8 +9904,7 @@ msgid "The folder cannot be be moved to one of its subfolders."
 msgstr "Папка не может быть перемещена в свою вложенную папку."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
-msgid ""
-"Folders of module \"%1$s\" cannot be moved to folders of module \"%2$s\"."
+msgid "Folders of module \"%1$s\" cannot be moved to folders of module \"%2$s\"."
 msgstr "Папки модуля «%1$s» не могут быть перемещены в папки модуля «%2$s»."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
@@ -10015,8 +9943,7 @@ msgstr "Владелец исходной папки должен иметь а�
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
 msgid "You do not have appropriate permissions to share the folder."
-msgstr ""
-"Недостаточно разрешений для предоставления совместного доступа к папке."
+msgstr "Недостаточно разрешений для предоставления совместного доступа к папке."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
 msgid "It is not possible to apply the changes due to limited permissions"
@@ -10026,8 +9953,7 @@ msgstr "Невозможно применить изменения в силу �
 msgid ""
 "It is not possible to apply the changes as a result of restricted "
 "permissions of the user \"%1$s\"."
-msgstr ""
-"Пользователь «%1$s» имеет недостаточно разрешений для сохранения изменений."
+msgstr "Пользователь «%1$s» имеет недостаточно разрешений для сохранения изменений."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
@@ -10116,8 +10042,7 @@ msgstr "Вам не разрешено открывать совместный �
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
-msgstr ""
-"Вы не можете изменить разрешения доступа к корзине и ее вложенным папкам."
+msgstr "Вы не можете изменить разрешения доступа к корзине и ее вложенным папкам."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -10146,8 +10071,7 @@ msgstr ""
 "форматы включают JPG, GIF, BMP и PNG."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:67
-msgid ""
-"The requested operation requires a valid session. Please login and try again."
+msgid "The requested operation requires a valid session. Please login and try again."
 msgstr "Для выполнения выбранной операции необходимо авторизоваться."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
@@ -10853,8 +10777,7 @@ msgstr ""
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
+msgid "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) предоставляет вам доступ к файлу «%3$s». Сообщение:"
 
 #. * $username ($user_email) has shared $number_of_files files with you and left you a message:
@@ -10864,8 +10787,7 @@ msgstr "%1$s (%2$s) предоставляет вам доступ к %3$s фа�
 
 #. * $username ($user_email) has shared photo "$filename" with you and left you a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:192
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
+msgid "%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) предоставляет вам доступ к изображению «%3$s». Сообщение:"
 
 #. * $username ($user_email) has shared $number_of_images images with you and left you a message:
@@ -10875,20 +10797,17 @@ msgstr "%1$s (%2$s) предоставляет вам доступ к %3$s из�
 
 #. * $username ($user_email) has shared a folder with you and left you a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:198
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
+msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) предоставляет вам доступ к папке «%3$s». Сообщение:"
 
 #. * $username ($user_email) has shared a calendar with you and left you a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:201
-msgid ""
-"%1$s (%2$s) has shared the calendar \"%3$s\" with you and left you a message:"
+msgid "%1$s (%2$s) has shared the calendar \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) предоставляет вам доступ к календарю «%3$s». Сообщение:"
 
 #. * $username ($user_email) has shared item "$filename" with you.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:204
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
+msgid "%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) предоставляет вам доступ к «%3$s». Сообщение:"
 
 #. * $username ($user_email) has shared $number_of_items items with you.
@@ -10911,15 +10830,12 @@ msgstr "%1$s (%2$s) предоставляет вам доступ к %3$s ка�
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
-msgstr ""
-"%1$s (%2$s) открыл доступ к файлу «%3$s» группе «%4$s» и оставил сообщение:"
+msgstr "%1$s (%2$s) открыл доступ к файлу «%3$s» группе «%4$s» и оставил сообщение:"
 
 #. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:219
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) открыл доступ к %3$s файлам группе «%4$s» и оставил сообщение:"
+msgid "%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
+msgstr "%1$s (%2$s) открыл доступ к %3$s файлам группе «%4$s» и оставил сообщение:"
 
 #. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:222
@@ -10944,47 +10860,40 @@ msgstr ""
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
 "a message:"
-msgstr ""
-"%1$s (%2$s) открыл доступ к папке «%3$s» группе «%4$s» и оставил сообщение:"
+msgstr "%1$s (%2$s) открыл доступ к папке «%3$s» группе «%4$s» и оставил сообщение:"
 
 #. * $username ($user_email) has shared a calendar with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:231
 msgid ""
 "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\" and "
 "left a message:"
-msgstr ""
-"%1$s (%2$s) открыл(а) группе «%4$s» доступ к календарю «%3$s». Сообщение:"
+msgstr "%1$s (%2$s) открыл(а) группе «%4$s» доступ к календарю «%3$s». Сообщение:"
 
 #. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:234
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
-msgstr ""
-"%1$s (%2$s) открыл доступ к объекту «%3$s» группе «%4$s» и оставил сообщение:"
+msgstr "%1$s (%2$s) открыл доступ к объекту «%3$s» группе «%4$s» и оставил сообщение:"
 
 #. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:237
-msgid ""
-"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) открыл доступ к %3$s объектам группе «%4$s» и оставил сообщение:"
+msgid "%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
+msgstr "%1$s (%2$s) открыл доступ к %3$s объектам группе «%4$s» и оставил сообщение:"
 
 #. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:240
 msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
 "message:"
-msgstr ""
-"%1$s (%2$s) открыл доступ к %3$s папкам группе «%4$s» и оставил сообщение:"
+msgstr "%1$s (%2$s) открыл доступ к %3$s папкам группе «%4$s» и оставил сообщение:"
 
 #. * $username ($user_email) has shared $number_of_folder calendars with the group "Sales Dept." and left a message:
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:243
 msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\" and left a "
 "message:"
-msgstr ""
-"%1$s (%2$s) открыл(а) группе «%4$s» доступ к %3$s календарям. Сообщение:"
+msgstr "%1$s (%2$s) открыл(а) группе «%4$s» доступ к %3$s календарям. Сообщение:"
 
 #. button with label
 #. * View image
@@ -11029,8 +10938,7 @@ msgstr "Просмотр объектов"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:280
-msgid ""
-"This link is password protected. You need the following password to open it:"
+msgid "This link is password protected. You need the following password to open it:"
 msgstr "Ссылка защищена паролем. Чтобы ее открыть, надо ввести пароль:"
 
 #.
@@ -11111,8 +11019,7 @@ msgid "An error occurred, we were unable to send out the notification mails."
 msgstr "Ошибка: не удалось отправить уведомления."
 
 #: com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:70
-msgid ""
-"You don't have sufficient permissions to send notifications for this share."
+msgid "You don't have sufficient permissions to send notifications for this share."
 msgstr ""
 "У вас недостаточно разрешений для того, чтобы отправлять уведомления для "
 "этого общего ресурса."
@@ -11128,8 +11035,7 @@ msgstr ""
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
-msgid ""
-"SMS limits apply. You can only send one more message in the next %1$s hours"
+msgid "SMS limits apply. You can only send one more message in the next %1$s hours"
 msgstr ""
 "Действуют ограничения на SMS. В течение следующих %1$s часов вы сможете "
 "отправить только одно сообщение."
@@ -11146,8 +11052,7 @@ msgstr "Неизвестная метка страны: %1$s"
 
 #. Message is too long (%1$s characters). Maximum length is %2$s characters.
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:70
-msgid ""
-"Message is too long (%1$s characters). Maximum length is %2$s characters."
+msgid "Message is too long (%1$s characters). Maximum length is %2$s characters."
 msgstr ""
 "Сообщение содержит %1$s знак(ов), что превышает максимально допустимую длину "
 "(%2$s)."
@@ -11180,8 +11085,7 @@ msgstr "Изображение для подписи превышает макс
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
-msgid ""
-"The maximum allowed number of '%1$s' images in the signature is reached."
+msgid "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "Достигнуто максимально допустимое число изображений в подписи (%1$s)."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
@@ -11562,14 +11466,12 @@ msgstr "Комментарий не может содержать больше 6
 
 #. The status message size exceeds the maximum allowed number of 600 characters.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:104
-msgid ""
-"The status message size exceeds the maximum allowed number of 420 characters."
+msgid "The status message size exceeds the maximum allowed number of 420 characters."
 msgstr "Статус не может содержать больше 420 знаков."
 
 #. The status message size exceeds the maximum allowed number of 600 characters.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:107
-msgid ""
-"The text message size exceeds the maximum allowed number of 140 characters."
+msgid "The text message size exceeds the maximum allowed number of 140 characters."
 msgstr "Сообщение не может содержать больше 140 знаков."
 
 #. The mandatory parameter \"%1$s\ is missing in the request body.
@@ -13732,6 +13634,18 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Зулу"
+
+#~ msgid "The DoveAdm resource does not exist"
+#~ msgstr "Ресурс DoveAdm не существует"
+
+#~ msgid "No Linked-In account available."
+#~ msgstr "Нет учетной записи LinkedIn"
+
+#~ msgid "Need an e-mail address to look up Linked-In data."
+#~ msgstr "Для поиска данных LinkedIn необходимо указать электронный адрес."
+
+#~ msgid "The allowed quota on mail server \"%1$s\" exceeded."
+#~ msgstr "Превышена квота на почтовом сервере «%1$s»."
 
 #~ msgid "???? %1$s"
 #~ msgstr "???? %1$s"

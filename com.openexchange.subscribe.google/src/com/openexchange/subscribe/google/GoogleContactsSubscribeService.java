@@ -89,6 +89,8 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
+    public static final String SOURCE_ID = KnownApi.GOOGLE.getFullName() + ".contact";
+
     /**
      * The Google Contacts' feed URL
      */
@@ -96,9 +98,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
     private static final String APP_NAME = "ox-appsuite";
     private static final int CHUNK_SIZE = 25;
 
-    private final ContactsService googleContactsService;
     private final ServiceLookup services;
-    private final ContactParser parser;
 
     /**
      * Initialises a new {@link GoogleContactsSubscribeService}.
@@ -107,10 +107,9 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @param services The {@link ServiceLookup}
      */
     public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
-        super(oauthServiceMetadata, KnownApi.GOOGLE.getFullName() + ".contact", FolderObject.CONTACT, "Google Contacts", services);
+        super(oauthServiceMetadata, SOURCE_ID, FolderObject.CONTACT, "Google", services);
         this.services = services;
-        googleContactsService = new ContactsService(APP_NAME);
-        parser = new ContactParser(googleContactsService);
+
     }
 
     /*
@@ -122,6 +121,8 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
         OAuthAccount oauthAccount = GoogleApiClients.reacquireIfExpired(session, true, getOAuthAccount(session, subscription));
+        ContactsService googleContactsService = new ContactsService(APP_NAME);
+        ContactParser parser = new ContactParser(googleContactsService);
         googleContactsService.setOAuth2Credentials(GoogleApiClients.getCredentials(oauthAccount, session));
 
         try {
@@ -140,9 +141,9 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
             FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
             if (threadPool == null || folderUpdater == null) {
-                return fetchInForeground(cQuery, feed, firstBatch);
+                return fetchInForeground(cQuery, feed, firstBatch, googleContactsService, parser);
             }
-            scheduleInBackground(subscription, cQuery, total, startOffset, threadPool, folderUpdater);
+            scheduleInBackground(subscription, cQuery, total, startOffset, threadPool, folderUpdater, googleContactsService, parser);
             return firstBatch;
         } catch (IOException e) {
             LOG.error("", e);
@@ -163,7 +164,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @throws IOException if an I/O error is occurred
      * @throws ServiceException if a remote service error is occurred
      */
-    private List<Contact> fetchInForeground(Query cQuery, ContactFeed feed, List<Contact> firstBatch) throws IOException, ServiceException {
+    private List<Contact> fetchInForeground(Query cQuery, ContactFeed feed, List<Contact> firstBatch, ContactsService googleContactsService, ContactParser parser) throws IOException, ServiceException {
         int total = feed.getTotalResults();
         int offset = firstBatch.size();
 
@@ -191,7 +192,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @param threadPool the {@link ThreadPoolService}
      * @param folderUpdater The {@link FolderUpdaterService}
      */
-    private void scheduleInBackground(Subscription subscription, Query cQuery, int total, int startOffset, ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater) {
+    private void scheduleInBackground(Subscription subscription, Query cQuery, int total, int startOffset, ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater, ContactsService googleContactsService, ContactParser parser) {
         // Schedule task for remainder...
         threadPool.submit(new AbstractTask<Void>() {
 

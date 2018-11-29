@@ -110,7 +110,7 @@ public class MailValidator {
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
-                    if (!Strings.isEmpty(cipherSuites)) {
+                    if (Strings.isNotEmpty(cipherSuites)) {
                         props.put("mail.imap.ssl.ciphersuites", cipherSuites);
                     }
                 }
@@ -168,7 +168,7 @@ public class MailValidator {
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.pop3.ssl.ciphersuites", "").trim();
-                    if (!Strings.isEmpty(cipherSuites)) {
+                    if (Strings.isNotEmpty(cipherSuites)) {
                         props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
                     }
                 }
@@ -241,7 +241,7 @@ public class MailValidator {
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.smtp.ssl.ciphersuites", "").trim();
-                    if (!Strings.isEmpty(cipherSuites)) {
+                    if (Strings.isNotEmpty(cipherSuites)) {
                         props.put("mail.smtp.ssl.ciphersuites", cipherSuites);
                     }
                 }

@@ -127,7 +127,7 @@ public enum DriveClientType {
      * @return The drive client type, or {@link #UNKNOWN} if unknown.
      */
     public static DriveClientType parse(String clientString) {
-        if (false == Strings.isEmpty(clientString)) {
+        if (Strings.isNotEmpty(clientString)) {
             for (DriveClientType driveClient : DriveClientType.values()) {
                 if (clientString.equals(driveClient.clientString)) {
                     return driveClient;

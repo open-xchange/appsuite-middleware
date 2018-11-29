@@ -192,6 +192,10 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage {
 
+    private static final String DEL_OXFOLDER_PERMISSIONS = "del_oxfolder_permissions";
+
+    private static final String DEL_OXFOLDER_TREE = "del_oxfolder_tree";
+
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
@@ -219,15 +223,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
         private final ConnectionMode connection;
 
-        //private final DatabaseService databaseService;
-
-        //private final int contextId;
-
-        protected NonClosingConnectionProvider(final ConnectionMode connection/* , final DatabaseService databaseService, final int contextId */) {
+        protected NonClosingConnectionProvider(final ConnectionMode connection) {
             super();
             this.connection = connection;
-            //this.databaseService = databaseService;
-            //this.contextId = contextId;
         }
 
         @Override
@@ -457,7 +455,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             final int folderId = Integer.parseInt(folderIdentifier);
             final Context context = storageParameters.getContext();
-            FolderObject.loadFolderObjectFromDB(folderId, context, con, false, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            FolderObject.loadFolderObjectFromDB(folderId, context, con, false, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
             /*
              * From backup to working table
              */
@@ -483,8 +481,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private Permission[] getConfiguredDefaultPermissionsFor(String parentId, int userId, int contextId) throws OXException {
         return ConfiguredDefaultPermissions.getInstance().getConfiguredDefaultPermissionsFor(parentId, userId, contextId);
     }
-
-    // private static final TIntSet SPECIALS = new TIntHashSet(new int[] { FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID });
 
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
@@ -967,45 +963,28 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
-            final User user = storageParameters.getUser();
-            final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+            final DatabaseFolder retval = loadFolder(folderIdentifier, storageType, storageParameters, con, treeId);
+            
+            if (storageParameters.getUser().isAnonymousGuest()) {
+                handleAnonymousUser(retval, treeId, storageType, storageParameters, con);
+            }
+            return retval;
+        } finally {
+            provider.close();
+        }
+    }
 
-            final DatabaseFolder retval;
-
-            if (StorageType.WORKING.equals(storageType)) {
-                if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, ctx);
-                } else {
-                    /*
-                     * A numeric folder identifier
-                     */
-                    final int folderId = getUnsignedInteger(folderIdentifier);
-
-                    if (folderId < 0) {
-                        throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
-                    }
-
-                    if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
-                        retval = SystemRootFolder.getSystemRootFolder();
-                    } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                        /*
-                         * A virtual database folder
-                         */
-                        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                        retval = VirtualListFolder.getVirtualListFolder(folderId, altNames);
-                    } else {
-                        /*
-                         * A non-virtual database folder
-                         */
-                        final FolderObject fo = getFolderObject(folderId, ctx, con, storageParameters);
-                        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                        retval = DatabaseFolderConverter.convert(fo, user, userPermissionBits, ctx, storageParameters.getSession(), altNames, con);
-                    }
-                }
+    private DatabaseFolder loadFolder(final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters, final Connection con, final String treeId) throws OXException {
+        final DatabaseFolder retval;
+        final User user = storageParameters.getUser();
+        final Context ctx = storageParameters.getContext();
+        final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+        if (StorageType.WORKING.equals(storageType)) {
+            if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+                retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, ctx);
             } else {
                 /*
-                 * Get from backup tables
+                 * A numeric folder identifier
                  */
                 final int folderId = getUnsignedInteger(folderIdentifier);
 
@@ -1013,16 +992,130 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                 }
 
-                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
-                retval = new DatabaseFolder(fo);
+                if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                    retval = SystemRootFolder.getSystemRootFolder();
+                } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                    /*
+                     * A virtual database folder
+                     */
+                    final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                    retval = VirtualListFolder.getVirtualListFolder(folderId, altNames);
+                } else {
+                    /*
+                     * A non-virtual database folder
+                     */
+                    final FolderObject fo = getFolderObject(folderId, ctx, con, storageParameters);
+                    final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                    retval = DatabaseFolderConverter.convert(fo, user, userPermissionBits, ctx, storageParameters.getSession(), altNames, con);
+                }
             }
-            retval.setTreeID(treeId);
-            // TODO: Subscribed?
+        } else {
+            /*
+             * Get from backup tables
+             */
+            final int folderId = getUnsignedInteger(folderIdentifier);
 
-            return retval;
-        } finally {
-            provider.close();
+            if (folderId < 0) {
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
+            }
+
+            final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
+            retval = new DatabaseFolder(fo);
         }
+        retval.setTreeID(treeId);
+        return retval;
+    }
+    
+    /**
+     * Adjusts the parent folder and subfolders of the given folder. Only folder ids of folders for which the user has
+     * non system permissions will be present.
+     * 
+     * @param folder - The folder to adjust
+     * @param treeId - The tree id, needed to load folders
+     * @param storageType - The storage type to use
+     * @param storageParameters - The storage parameters with needed user information
+     * @param con - The connection to use for storage operations
+     * @throws OXException - If loading a folder fails
+     */
+    private void handleAnonymousUser(final DatabaseFolder folder, final String treeId, final StorageType storageType, final StorageParameters storageParameters, final Connection con) throws OXException {
+        final Type type = folder.getType();
+        if (SystemType.getInstance().equals(type)) {
+            return;
+        }
+        if (PublicType.getInstance().equals(type) && folder.isDefault() == false) {
+            folder.setParentID(getFirstNonSystemVisibleParent(folder, treeId, storageType, storageParameters, con).getID());
+        }
+        folder.setSubfolderIDs(getNonHiddenSubfolders(folder, treeId, storageType, storageParameters).stream().map(f -> f.getID()).toArray(String[]::new));
+        folder.setCacheable(false);
+    }
+
+    /**
+     * Get the parent Folder for the given folder that references a system folder, a default folder or the next higher
+     * folder for which the user has a non system permission.
+     * 
+     * @param folder - The folder to adjust
+     * @param treeId - The tree id, needed to load folders
+     * @param storageType - The storage type to use
+     * @param storageParameters - The storage parameters with needed user information
+     * @param con - The connection to use for storage operations
+     * @return The first visible folder without system permissions
+     * @throws OXException - If loading a folder fails
+     */
+    private DatabaseFolder getFirstNonSystemVisibleParent(final DatabaseFolder folder, final String treeId, final StorageType storageType, final StorageParameters storageParameters, final Connection con) throws OXException {
+        DatabaseFolder parentFolder = loadFolder(folder.getParentID(), storageType, storageParameters, con, treeId);
+        final String parentID = parentFolder.getParentID();
+        for (int max = 256; max-- > 0 && !FolderStorage.ROOT_ID.equals(parentID) && null != parentID && parentFolder.isHidden();) {
+            parentFolder = loadFolder(parentFolder.getParentID(), storageType, storageParameters, con, treeId);
+        }
+        return parentFolder;
+    }
+    
+    /**
+     * Get the subfolders for the given folder, for which 
+     * the current user has not only visible but other non system permissions.
+     * 
+     * @param folder - The folder to start with
+     * @param treeId - The tree id, needed to load folders
+     * @param storageType - The storage type to use
+     * @param storageParameters - The storage parameters with needed user information
+     * @return Return a list of all folders that are visible to the user with non system permissions or an empty list
+     * @throws OXException - If loading a folder fails
+     */
+    private List<Folder> getNonHiddenSubfolders(Folder folder, String treeId, StorageType storageType, StorageParameters storageParameters) throws OXException {
+        /*
+         * gather all subfolder identifiers
+         */
+        String[] subfolderIDs = folder.getSubfolderIDs();
+        if (null == subfolderIDs) {
+            SortableId[] sortableIds = getSubfolders(treeId, folder.getID(), storageParameters);
+            subfolderIDs = new String[sortableIds.length];
+            for (int i = 0; i < sortableIds.length; i++) {
+                subfolderIDs[i] = sortableIds[i].getId();                    
+            }                
+        } 
+        if (0 == subfolderIDs.length) {
+            return Collections.emptyList();
+        }        
+        /*
+         * collect all non-hidden subfolders recursively
+         */
+        List<Folder> resultingSubfolders = new ArrayList<>();
+        for (Folder subfolder : getFolders(treeId, Arrays.asList(folder.getSubfolderIDs()), storageType, storageParameters)) {
+            if (DatabaseFolder.class.isInstance(subfolder) && ((DatabaseFolder) subfolder).isHidden()) {
+                /*
+                 * this subfolder is hidden, recursively collect remaining non-hidden folders from subtree  
+                 */   
+                if (((DatabaseFolder) subfolder).isVisibleThroughSystemPermissions()) {
+                    resultingSubfolders.addAll(getNonHiddenSubfolders(subfolder, treeId, storageType, storageParameters));
+                }
+            } else {
+                /*
+                 * add non-hidden subfolder
+                 */
+                resultingSubfolders.add(subfolder);
+            }
+        }
+        return resultingSubfolders;
     }
 
     @Override
@@ -1144,7 +1237,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             provider = getConnection(Mode.READ, storageParameters);
             final Connection con = provider.getConnection();
-            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toArray(), ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
             provider.close();
             provider = null;
             final int size = folders.size();
@@ -2011,7 +2104,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 if (folderId < 0) {
                     retval = false;
                 } else {
-                    retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
+                    retval = OXFolderSQL.exists(folderId, con, ctx, DEL_OXFOLDER_TREE);
                 }
             }
             return retval;

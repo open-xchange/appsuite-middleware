@@ -141,6 +141,13 @@ public class EventPatches {
     /** The "empty" trigger used in Apple default alarms (<code>19760401T005545Z</code>) */
     private static final Trigger EMPTY_ALARM_TRIGGER = new Trigger(new Date(197168145000L));  // 19760401T005545Z
 
+    /** Extended properties that are derived from others and injected on a per-client basis */
+    private static final String[] DERIVED_X_PROPERTIES = {
+        "X-MICROSOFT-CDO-ALLDAYEVENT", "X-MICROSOFT-CDO-BUSYSTATUS",
+        "X-CALENDARSERVER-PRIVATE-COMMENT", "X-CALENDARSERVER-ATTENDEE-COMMENT",
+        "X-MOZ-SNOOZE", "X-MOZ-SNOOZE-TIME*", "X-MOZ-LASTACK"
+    };
+
     /**
      * Initializes a new {@link EventPatches}.
      */
@@ -199,6 +206,26 @@ public class EventPatches {
     private static Event removeAttachmentsFromExceptions(EventResource resource, Event event) {
         if (null != event.getAttachments() && DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) && (isSeriesException(event) || null != event.getRecurrenceId())) {
             event.removeAttachments();
+        }
+        return event;
+    }
+
+    /**
+     * Removes all extended properties from an event that are derived from others.
+     * 
+     * @param event The event to strip the derived extended properties from
+     * @return The passed event reference
+     */
+    private static Event stripDerivedProperties(Event event) {
+        ExtendedProperties extendedProperties = event.getExtendedProperties();
+        if (null != extendedProperties && 0 < extendedProperties.size()) {
+            List<ExtendedProperty> propertiesToRemove = new ArrayList<ExtendedProperty>();
+            for (String name : DERIVED_X_PROPERTIES) {
+                propertiesToRemove.addAll(CalendarUtils.findExtendedProperties(extendedProperties, name));
+            }
+            if (false == propertiesToRemove.isEmpty()) {
+                extendedProperties.removeAll(propertiesToRemove);
+            }
         }
         return event;
     }
@@ -263,21 +290,30 @@ public class EventPatches {
         }
 
         /**
-         * Strips extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the calendar
-         * user's point of view.
+         * Strips any extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the 
+         * calendar user's point of view.
+         * <p/>
+         * Otherwise, all known and handled extended properties are removed to avoid ambigiouties, as they will be derived from other 
+         * properties upon the next export. 
          *
          * @param eventResource The event resource
          * @param importedEvent The event
          */
-        private void stripExtendedProperties(EventResource eventResource, Event importedEvent) {
-            int calendarUserId;
+        private void stripExtendedPropertiesFromAttendeeSchedulingResource(EventResource eventResource, Event importedEvent) {
+            ExtendedProperties extendedProperties = importedEvent.getExtendedProperties();
+            if (null == extendedProperties) {
+                return;
+            }
+            int calendarUserId = -1;
             try {
                 calendarUserId = eventResource.getParent().getCalendarUser().getId();
             } catch (OXException e) {
                 LOG.warn("Error deriving calendar user from collection", e);
-                return;
             }
             if (null != eventResource.getEvent() && CalendarUtils.isAttendeeSchedulingResource(eventResource.getEvent(), calendarUserId)) {
+                /*
+                 * strip all extended properties from attendee scheduling resources
+                 */
                 importedEvent.removeExtendedProperties();
             }
         }
@@ -372,7 +408,7 @@ public class EventPatches {
                                 .considerUnset(true)
                                 .ignoreDefaults(true)
                             .build();
-                            if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
+                            if (false == eventUpdate.getAlarmUpdates().isEmpty() && eventUpdate.getUpdatedFields().size() == 1) {
                                 snoozedAlarm.setUid(originalAlarm.getUid());
                                 snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", originalAlarm.getUid()));
                                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(originalOccurrence.getAlarms().size());
@@ -663,7 +699,7 @@ public class EventPatches {
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null);
                 applyManagedAttachments(importedEvent);
-                stripExtendedProperties(resource, importedEvent);
+                stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -675,7 +711,18 @@ public class EventPatches {
                     adjustAlarms(resource, importedChangeException, importedEvent);
                     applyManagedAttachments(importedChangeException);
                     removeAttachmentsFromExceptions(resource, importedChangeException);
-                    stripExtendedProperties(resource, importedChangeException);
+                    stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
+                }
+            }
+            /*
+             * strip not wanted, derived extended properties in a 2nd step afterwards
+             */
+            if (null != importedEvent) {
+                stripDerivedProperties(importedEvent);
+            }
+            if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
+                for (Event importedChangeException : importedChangeExceptions) {
+                    stripDerivedProperties(importedChangeException);
                 }
             }
             return new CalDAVImport(resource.getUrl(), caldavImport.getCalender(), importedEvent, importedChangeExceptions);
@@ -895,6 +942,7 @@ public class EventPatches {
          * @return The patched event
          */
         public Event applyAll(EventResource resource, Event exportedEvent) {
+            exportedEvent = stripDerivedProperties(exportedEvent);
             exportedEvent = removeImplicitAttendee(resource, exportedEvent);
             exportedEvent = adjustProposedTimePrefixes(exportedEvent);
             exportedEvent = applyAttendeeComments(resource, exportedEvent);

@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AttendeeStorage;
@@ -102,8 +102,13 @@ public class RdbAttendeeStorage extends RdbResilientStorage implements AttendeeS
     }
 
     @Override
-    public Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException {
-        return delegate.loadPartStats(eventIds, attendee);
+    public Map<String, Integer> loadAttendeeCounts(String[] eventIds, Boolean internal) throws OXException {
+        return delegate.loadAttendeeCounts(eventIds, internal);
+    }
+
+    @Override
+    public Map<String, Attendee> loadAttendee(String[] eventIds, Attendee attendee, AttendeeField[] fields) throws OXException {
+        return delegate.loadAttendee(eventIds, attendee, fields);
     }
 
     @Override

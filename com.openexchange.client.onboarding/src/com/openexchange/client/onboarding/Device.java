@@ -150,7 +150,7 @@ public enum Device implements Entity {
      */
     public boolean hasScenarios(Session session) throws OXException {
         String proprSceanrios = OnboardingUtility.getValueFromProperty(scenariosProperty, null, session);
-        return (false == Strings.isEmpty(proprSceanrios));
+        return (Strings.isNotEmpty(proprSceanrios));
     }
 
     /**

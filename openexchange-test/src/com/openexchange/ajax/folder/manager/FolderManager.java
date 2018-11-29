@@ -96,7 +96,7 @@ public class FolderManager {
     }
 
     public FoldersVisibilityData getAllFolders(String contentType, String columns) throws ApiException {
-        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree);
+        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null);
         checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
         return visibleFolders.getData();
     }
@@ -133,7 +133,7 @@ public class FolderManager {
      *
      */
     public FolderData getFolder(String id) throws ApiException {
-        FolderResponse folderResponse = folderApi.getFoldersApi().getFolder(getSession(), id, tree, null);
+        FolderResponse folderResponse = folderApi.getFoldersApi().getFolder(getSession(), id, tree, null, null);
         checkResponse(folderResponse.getError(), folderResponse.getErrorDesc(), folderResponse.getData());
         if (folderResponse.getTimestamp() != null && folderResponse.getTimestamp() > lastTimestamp) {
             lastTimestamp = folderResponse.getTimestamp();

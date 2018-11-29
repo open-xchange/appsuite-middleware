@@ -49,6 +49,10 @@
 
 package com.openexchange.database.internal;
 
+import java.util.Properties;
+import java.util.function.Function;
+import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
+import com.openexchange.pooling.PoolConfig;
 
 /**
  * Creates the pools for the configuration database connections.
@@ -57,29 +61,45 @@ package com.openexchange.database.internal;
  */
 public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
-    private final ConnectionPool configDBWrite;
+    private final ConfigPoolAdapter configDBWrite;
 
-    private final ConnectionPool configDBRead;
+    private final ConfigPoolAdapter configDBRead;
 
-    ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer) {
+    ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader) {
         super();
-        configDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
+
+        configDBWrite = new ConfigPoolAdapter(Constants.CONFIGDB_WRITE_ID, configuration, (Configuration c) -> {
+            return c.getWriteUrl();
+        }, (Configuration c) -> {
+            return c.getConfigDbWriteProps();
+        }, (Configuration c) -> {
+            return c.getPoolConfig();
+        });
         timer.addTask(configDBWrite.getCleanerTask());
         management.addPool(Constants.CONFIGDB_WRITE_ID, configDBWrite);
-        configDBRead = new ConnectionPool(configuration.getReadUrl(), configuration.getReadProps(), configuration.getPoolConfig());
+        reloader.setConfigurationListener(configDBWrite);
+
+        configDBRead = new ConfigPoolAdapter(Constants.CONFIGDB_READ_ID, configuration, (Configuration c) -> {
+            return c.getReadUrl();
+        }, (Configuration c) -> {
+            return c.getConfigDbReadProps();
+        }, (Configuration c) -> {
+            return c.getPoolConfig();
+        });
         timer.addTask(configDBRead.getCleanerTask());
         management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
+        reloader.setConfigurationListener(configDBRead);
     }
 
     @Override
     public ConnectionPool create(final int poolId) {
         switch (poolId) {
-        case Constants.CONFIGDB_WRITE_ID:
-            return configDBWrite;
-        case Constants.CONFIGDB_READ_ID:
-            return configDBRead;
-        default:
-            return null;
+            case Constants.CONFIGDB_WRITE_ID:
+                return configDBWrite;
+            case Constants.CONFIGDB_READ_ID:
+                return configDBRead;
+            default:
+                return null;
         }
     }
 
@@ -87,5 +107,22 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
     public boolean destroy(final int poolId) {
         // Pools to configuration database will not be destroyed.
         return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;
+    }
+
+    private static class ConfigPoolAdapter extends AbstractConfigurationListener<Configuration> implements ConfigDBListener {
+
+        ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toConnectionArguments, Function<Configuration, PoolConfig> toConf) {
+            super(poolId, configuration, toUrl, toConnectionArguments, toConf);
+        }
+
+        @Override
+        public void notify(Configuration configuration) {
+            update(configuration);
+        }
+
+        @Override
+        public int getPriority() {
+            return 1;
+        }
     }
 }

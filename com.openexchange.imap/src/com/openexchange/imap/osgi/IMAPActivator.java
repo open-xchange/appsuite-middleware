@@ -65,7 +65,6 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.charset.CharsetService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -210,7 +209,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 ConversationCache.initInstance(this);
             }
             /*
-             * Register reloadbale
+             * Register reloadable
              */
             registerService(Reloadable.class, IMAPReloadable.getInstance());
             /*
@@ -395,30 +394,20 @@ public final class IMAPActivator extends HousekeepingActivator {
         }
     }
 
-    /**
-     *
-     * {@link IMAPPropertiesReloader} reloads the imap properties
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.0
-     */
+    // ----------------------------------------------------- Helper classes ----------------------------------------------------------------
+
     private static final class IMAPPropertiesReloader implements ForcedReloadable {
 
         /**
          * Initializes a new {@link IMAPPropertiesReloader}.
          */
-        public IMAPPropertiesReloader() {
+        IMAPPropertiesReloader() {
             super();
         }
 
         @Override
         public void reloadConfiguration(ConfigurationService configService) {
             IMAPProperties.invalidateCache();
-        }
-
-        @Override
-        public Interests getInterests() {
-            return null;
         }
     }
 

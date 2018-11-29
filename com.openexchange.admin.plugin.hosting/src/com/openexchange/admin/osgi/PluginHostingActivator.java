@@ -51,6 +51,8 @@ package com.openexchange.admin.osgi;
 
 import com.openexchange.admin.PluginStarter;
 import com.openexchange.admin.daemons.AdminDaemonService;
+import com.openexchange.admin.monitoring.Monitor;
+import com.openexchange.admin.monitoring.MonitorMBean;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -69,6 +71,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -114,7 +117,7 @@ public class PluginHostingActivator extends HousekeepingActivator {
         track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(I18nService.class, new I18nServiceCustomizer(context));
-        track(ManagementService.class, new ManagementCustomizer(context));
+        track(ManagementService.class, new HousekeepingManagementTracker(context, MonitorMBean.MBEAN_NAME, MonitorMBean.MBEAN_DOMAIN, new Monitor()));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(DatabaseService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));

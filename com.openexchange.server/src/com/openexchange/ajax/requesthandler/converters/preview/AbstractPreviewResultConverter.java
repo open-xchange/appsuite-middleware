@@ -156,7 +156,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
             }
             final String eTag = requestData.getETag();
-            final boolean isValidEtag = !Strings.isEmpty(eTag);
+            final boolean isValidEtag = Strings.isNotEmpty(eTag);
             final String previewLanguage = getUserLanguage(session);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
@@ -597,7 +597,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     public static CachedResource getCachedResourceForContext(ServerSession session, String cacheKey, ResourceCache resourceCache) {
         CachedResource cachedResource= null;
         final int contextId = session.getContextId();
-        if(!Strings.isEmpty(cacheKey)) {
+        if(Strings.isNotEmpty(cacheKey)) {
             if(resourceCache != null) {
                 try {
                     cachedResource = resourceCache.get(cacheKey, 0, contextId);
@@ -961,10 +961,10 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * Check if the ETag is valid iow. non empty
      *
      * @param eTag The ETag to check
-     * @return True if !Strings.isEmpty(eTag)
+     * @return True if Strings.isNotEmpty(eTag)
      */
     public static boolean isValidETag(String eTag) {
-        return !Strings.isEmpty(eTag);
+        return Strings.isNotEmpty(eTag);
     }
 
     /**

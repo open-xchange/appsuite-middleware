@@ -55,7 +55,7 @@ package com.openexchange.admin.tools.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Vector;
+import java.util.List;
 
 /**
  *
@@ -97,11 +97,11 @@ public interface DataFetcher {
      * Returns an unsorted list of tables with their data.<br>
      * Perhaps tables must be sorted cause of contraints etc.
      */
-    public Vector<TableObject> fetchTableObjects() throws SQLException;
+    public List<TableObject> fetchTableObjects() throws SQLException;
 
     /**
      * Returns an sorted list of tables with their data.<br>
      * Needed for contraints and primarys etc.
      */
-    public Vector<TableObject> sortTableObjects() throws SQLException;
+    public List<TableObject> sortTableObjects() throws SQLException;
 }

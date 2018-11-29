@@ -107,6 +107,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
+    private static final String ERROR_DURING_RAMP_UP = "Error during {} ramp-up";
     /** The logger constant */
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAppSuiteLoginRampUp.class);
 
@@ -176,11 +177,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 AJAXRequestData requestData = request().session(session).module(getModule()).action(getAction()).params(getParams()).format("json").build(loginRequest);
                 requestResult = ox.perform(requestData, null, session);
                 return requestResult.getResultObject();
-            } catch (OXException x) {
-                // Omit result on error. Let the UI deal with this
-                exc = x;
-                throw x;
-            } catch (RuntimeException x) {
+            } catch (OXException | RuntimeException x) {
                 // Omit result on error. Let the UI deal with this
                 exc = x;
                 throw x;
@@ -252,9 +249,9 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         if (OXExceptions.isCategory(Category.CATEGORY_PERMISSION_DENIED, e)) {
             LOG.debug("Permission error during {} ramp-up", key, e);
         } else if (OXExceptions.isCategory(Category.CATEGORY_USER_INPUT, e)) {
-            LOG.debug("Error during {} ramp-up", key, e);
+            LOG.debug(ERROR_DURING_RAMP_UP, key, e);
         } else {
-            LOG.error("Error during {} ramp-up", key, e);
+            LOG.error(ERROR_DURING_RAMP_UP, key, e);
         }
 
         // Check for special mail error that standard folders cannot be created due to an "over quota" error
@@ -264,7 +261,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     }
 
     static void handleException(Exception e, String key) {
-        LOG.error("Error during {} ramp-up", key, e);
+        LOG.error(ERROR_DURING_RAMP_UP, key, e);
     }
 
     /** The ramp-up keys. Keep order! */
@@ -315,8 +312,12 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         AJAXRequestResult requestResult = ox.perform(requestData, null, session);
         long dur = System.currentTimeMillis() - st;
         if (dur >= thresholdMillis) {
-            String infoToLog = null == info ? "" : (new StringBuilder(info.length() + 1).append(' ').append(info).toString());
-            LOG.debug("Ramp-up call \"{}\"{} took {}msec for session {}", rampUpKey.key, infoToLog, Long.valueOf(dur), session.getSessionID());
+            if (null == info) {
+                LOG.debug("Ramp-up call \"{}\" took {}msec for session {}", rampUpKey.key, Long.valueOf(dur), session.getSessionID());
+            } else {
+                Object infoToLog = new StringBuilder(info.length() + 1).append(' ').append(info);
+                LOG.debug("Ramp-up call \"{}\"{} took {}msec for session {}", rampUpKey.key, infoToLog, Long.valueOf(dur), session.getSessionID());
+            }
         }
         return requestResult;
     }

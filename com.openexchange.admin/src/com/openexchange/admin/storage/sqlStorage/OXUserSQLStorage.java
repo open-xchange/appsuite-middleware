@@ -67,7 +67,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
      * This class provides a mapper which maps the name of the field in the user object to the name of the field in the database and the
      * other way around
      */
-    protected static class Mapper {
+    public static class Mapper {
 
         public final static String PASSWORD_EXPIRED = "Password_expired";
 

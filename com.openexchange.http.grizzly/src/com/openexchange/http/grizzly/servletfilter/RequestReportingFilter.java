@@ -93,7 +93,7 @@ public class RequestReportingFilter implements Filter {
             List<String> ignoreEas = configService.getProperty("com.openexchange.requestwatcher.eas.ignore.cmd", "ping,sync", ",");
             ImmutableSet.Builder<String> ignoredEasCommands = ImmutableSet.builder();
             for (String command : ignoreEas) {
-                if (false == Strings.isEmpty(command)) {
+                if (Strings.isNotEmpty(command)) {
                     ignoredEasCommands.add(Strings.asciiLowerCase(command));
                 }
             }
@@ -104,7 +104,7 @@ public class RequestReportingFilter implements Filter {
             List<String> ignoreUsm = configService.getProperty("com.openexchange.requestwatcher.usm.ignore.path", "/syncupdate", ",");
             ImmutableSet.Builder<String> ignoredUsmCommands = ImmutableSet.builder();
             for (String command : ignoreUsm) {
-                if (false == Strings.isEmpty(command)) {
+                if (Strings.isNotEmpty(command)) {
                     ignoredUsmCommands.add(Strings.asciiLowerCase(command));
                 }
             }

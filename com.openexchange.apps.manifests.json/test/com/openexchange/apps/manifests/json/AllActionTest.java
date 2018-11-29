@@ -56,7 +56,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -109,7 +109,7 @@ public class AllActionTest {
         // BEHAVIOUR
         Mockito.when(this.serverSession.isAnonymous()).thenReturn(false);
         Mockito.when(serviceLookup.getService(CapabilityService.class)).thenReturn(this.capabilityService);
-        Mockito.when(this.capabilityService.getCapabilities(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyBoolean(), Matchers.anyBoolean())).thenReturn(
+        Mockito.when(this.capabilityService.getCapabilities(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyBoolean())).thenReturn(
             new CapabilitySet(0));
         Mockito.when(this.manifestContributorTracker.getServiceList()).thenReturn(Collections.<ManifestContributor> emptyList());
     }

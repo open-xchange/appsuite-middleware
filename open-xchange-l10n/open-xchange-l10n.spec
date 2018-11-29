@@ -13,7 +13,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -510,7 +510,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_GB en_US es_ES es_MX et_EE eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_GB en_US es_ES es_MX et_EE eu_ES fi_FI fr_CA fr_FR gl_ES he_HE hi_IN hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW; do \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
 
@@ -600,11 +600,23 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_FR*
 
+%files gl-es
+%defattr(-,root,root)
+%dir /opt/open-xchange/
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*gl_ES*
+
 %files he-he
 %defattr(-,root,root)
 %dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*he_HE*
+
+%files hi-in
+%defattr(-,root,root)
+%dir /opt/open-xchange/
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*hi_IN*
 
 %files hu-hu
 %defattr(-,root,root)
@@ -715,26 +727,14 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
-* Mon Nov 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-11-19 (4966)
-* Mon Oct 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-11-05 (4933)
-* Mon Oct 08 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-10-15 (4918)
-* Tue Sep 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-10-01 (4897)
-* Mon Sep 24 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-09-21 (4900)
-* Mon Sep 10 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-09-17 (4882)
-* Mon Aug 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-09-03 (4870)
-* Wed Aug 15 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-08-20 (4863)
-* Thu Aug 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-08-13 (4853)
-* Fri Jul 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-07-25 (4835)
+* Fri Nov 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
+RC 1 for 7.10.1 release
+* Fri Nov 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.1 release
+* Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.1 release
+* Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>

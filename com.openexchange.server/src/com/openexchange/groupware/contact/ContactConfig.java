@@ -110,7 +110,7 @@ public class ContactConfig {
 
     /**
      * Gets the value of a property from the file.
-     * 
+     *
      * @param key name of the property.
      * @return the value of the property.
      */
@@ -121,7 +121,7 @@ public class ContactConfig {
 
     /**
      * Gets the value of a property from the file.
-     * 
+     *
      * @param key name of the property.
      * @return the value of the property.
      */
@@ -192,31 +192,31 @@ public class ContactConfig {
         /**
          * Defines the width of scaled contact images
          */
-        SCALED_IMAGE_WIDTH("com.openexchange.contact.image.maxWidth", "250"),
+        SCALED_IMAGE_WIDTH("com.openexchange.contact.image.maxWidth", "600"),
 
         /**
          * Defines the height of scaled contact images
          */
-        SCALED_IMAGE_HEIGHT("com.openexchange.contact.image.maxHeight", "250"),
+        SCALED_IMAGE_HEIGHT("com.openexchange.contact.image.maxHeight", "800"),
 
         /**
          * Defines the scale type
          */
-        SCALE_TYPE("com.openexchange.contact.image.scaleType", "2");
+        SCALE_TYPE("com.openexchange.contact.image.scaleType", "1");
 
         /**
          * Name of the property in the participant.properties file.
          */
-        private String propertyName;
+        private final String propertyName;
 
         /**
          * Default value of the property.
          */
-        private String defaultValue;
+        private final String defaultValue;
 
         /**
          * Default constructor.
-         * 
+         *
          * @param keyName Name of the property in the participant.properties
          *            file.
          * @param value Default value of the property.

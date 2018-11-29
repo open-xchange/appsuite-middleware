@@ -99,7 +99,6 @@ import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -156,7 +155,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     protected AbstractOIDCBackend() {
         super();
-        loginConfigurationReference = new AtomicReference<LoginConfiguration>(null);
+        loginConfigurationReference = new AtomicReference<>(null);
     }
 
     @Override
@@ -255,8 +254,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         String login = userID + "@" + contextID;
         LOG.trace("getLoginRequest(...) login: {}", login);
         String defaultClient = loginConfiguration.getDefaultClient();
-        LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
-        return parseLogin;
+        return LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
     }
 
     @Override
@@ -312,7 +310,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("unable to get a valid subject.");
         }
         AuthenticationInfo resultInfo = this.loadUserFromServer(subject);
-        resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
+        resultInfo.setProperty(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
         return resultInfo;
     }
 
@@ -357,7 +355,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public boolean updateOauthTokens(Session session) throws OXException {
         LOG.trace("updateOauthTokens(Session session: {})", session.getSessionID());
         AccessTokenResponse accessToken = this.loadAccessToken(session);
-        if (accessToken == null || accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
+        if (accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
             return false;
         }
         Map<String, String> tokenMap = new HashMap<>();
@@ -389,9 +387,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
                 throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(errorResponse.getErrorObject().getHTTPStatusCode() + " " + errorResponse.getErrorObject().getDescription());
             }
             return (AccessTokenResponse) response;
-        } catch (com.nimbusds.oauth2.sdk.ParseException e) {
-            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
-        } catch (IOException e) {
+        } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
         }
     }
@@ -571,13 +567,13 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LOG.trace("loginUser(HttpServletRequest request: {}, final Context context: {}, final User user: {}, final Map<String, String> state.size: {}, final String oidcAutologinCookieValue: {})", request.getRequestURI(), context.getContextId(), user.getId(), state.size(), oidcAutologinCookieValue);
         final LoginRequest loginRequest = this.getLoginRequest(request, user.getId(), context.getContextId(), getLoginConfiguration());
 
-        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
+        return LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
 
             @Override
             public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
                 Authenticated authenticated = enhanceAuthenticated(getDefaultAuthenticated(context, user), state);
 
-                EnhancedAuthenticated enhanced = new EnhancedAuthenticated(authenticated) {
+                return new EnhancedAuthenticated(authenticated) {
 
                     @Override
                     protected void doEnhanceSession(Session session) {
@@ -592,12 +588,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
                         session.setParameter(OIDCTools.BACKEND_PATH, getPath());
                     }
                 };
-
-                return enhanced;
             }
         });
-
-        return loginResult;
     }
 
     private Authenticated getDefaultAuthenticated(final Context context, final User user) {

@@ -38,3 +38,14 @@ properties:
       file: cache.properties
       packageName: open-xchange-core
       tags: ["Caching", "Folder", "Session"]
+    - key: com.openexchange.caching.events.ms.topicCount
+      description: |
+        Number of topics to distribute cache events. Multiple topics cause a better usage of hazelcast workers (default is 5 workers) dispatching the events. 
+      defaultValue: 5
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: cache.properties
+      packageName: open-xchange-core
+      tags: ["Caching", "Hazelcast", "Event"]

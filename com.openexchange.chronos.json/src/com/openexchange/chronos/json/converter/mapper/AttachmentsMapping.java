@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -80,7 +79,7 @@ public abstract class AttachmentsMapping<O> extends ListItemMapping<Attachment, 
     }
 
     @Override
-    protected Attachment deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+    protected Attachment deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException {
         JSONObject jsonObject = array.getJSONObject(index);
         return deserialize(jsonObject, timeZone);
     }

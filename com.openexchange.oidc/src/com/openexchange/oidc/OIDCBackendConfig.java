@@ -51,6 +51,7 @@ package com.openexchange.oidc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.authentication.AuthenticationService;
 
 /**
@@ -101,12 +102,14 @@ public interface OIDCBackendConfig {
             return this.value;
         }
 
-        private static final Map<String, AutologinMode> lookup = new HashMap<String, AutologinMode>();
+        private static final Map<String, AutologinMode> lookup;
 
         static {
+            Map<String, AutologinMode> tmp = new HashMap<>();
             for (AutologinMode mode : AutologinMode.values()) {
-                lookup.put(mode.getValue(), mode);
+                tmp.put(mode.getValue(), mode);
             }
+            lookup = ImmutableMap.copyOf(tmp);
         }
 
         public static AutologinMode get(String mode) {

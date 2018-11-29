@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -106,7 +107,7 @@ public class RangeTest extends AbstractAJAXSession {
         final int targetId = aInsertR.getId();
         Date timestamp = aInsertR.getTimestamp();
         try {
-            final ReminderObject[] reminderObj = Executor.execute(client, new RangeRequest(new Date(c.getTime().getTime()))).getReminder(timeZone);
+            final ReminderObject[] reminderObj = Executor.execute(client, new RangeRequest(new Date(c.getTime().getTime() + TimeUnit.MINUTES.toMillis(1)))).getReminder(timeZone);
 
             int pos = -1;
             for (int a = 0; a < reminderObj.length; a++) {

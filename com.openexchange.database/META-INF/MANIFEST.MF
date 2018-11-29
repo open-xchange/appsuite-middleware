@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database Connection Pooling
 Bundle-SymbolicName: com.openexchange.database
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
@@ -12,6 +12,7 @@ Import-Package: com.google.common.base,
  com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.config.cascade,
+ com.openexchange.context,
  com.openexchange.database.migration,
  com.openexchange.database.migration.resource.accessor,
  com.openexchange.exception,
@@ -22,17 +23,15 @@ Import-Package: com.google.common.base,
  com.openexchange.log,
  com.openexchange.management,
  com.openexchange.monitoring,
+ com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.timer,
- gnu.trove,
  gnu.trove.iterator,
- gnu.trove.iterator.hash,
  gnu.trove.list,
  gnu.trove.list.array,
  gnu.trove.list.linked,
  gnu.trove.map,
- gnu.trove.map.custom_hash,
  gnu.trove.map.hash,
  gnu.trove.set,
  gnu.trove.set.hash,

@@ -33,7 +33,7 @@ package net.fortuna.ical4j.extensions.caldav.property;
 
 import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerAttendeeRef;
 import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerDtStamp;
-import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Escapable;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactory;
@@ -49,7 +49,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author probert
  *
  */
-public class CalendarServerAttendeeComment extends Property {
+public class CalendarServerAttendeeComment extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
   
@@ -104,10 +104,12 @@ public class CalendarServerAttendeeComment extends Property {
 
     private static final long serialVersionUID = 2099427445505899578L;
 
+    @Override
     public Property createProperty(String name) {
       return new CalendarServerAttendeeComment(this);
     }
 
+    @Override
     public Property createProperty(String name, ParameterList parameters, String value) {
       CalendarServerAttendeeComment property = null;
       property = new CalendarServerAttendeeComment(parameters, this, value);

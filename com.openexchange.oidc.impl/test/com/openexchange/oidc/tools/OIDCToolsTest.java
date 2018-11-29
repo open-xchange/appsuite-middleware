@@ -64,7 +64,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -123,6 +123,7 @@ public class OIDCToolsTest {
 
     @Before
     public void setUp() {
+        new File(TESTFILES_PATH).mkdir();
         MockitoAnnotations.initMocks(this);
 
         Mockito.when(mockedHostnameService.getHostname(-1, -1)).thenReturn(HOSTNAME);
@@ -164,7 +165,7 @@ public class OIDCToolsTest {
     public void validateSession_ValidTest() throws Exception {
         Mockito.when(mockedSession.getSessionID()).thenReturn("SessionID");
         PowerMockito.mockStatic(SessionUtility.class);
-        PowerMockito.doNothing().when(SessionUtility.class, "checkIP", Matchers.any(Session.class), Matchers.any(String.class));
+        PowerMockito.doNothing().when(SessionUtility.class, "checkIP", ArgumentMatchers.any(Session.class), ArgumentMatchers.any(String.class));
         PowerMockito.when(mockedSession.getHash()).thenReturn("");
         PowerMockito.mockStatic(Cookies.class);
         Map<String, Cookie> cookieMap = new HashMap<>();
@@ -184,7 +185,7 @@ public class OIDCToolsTest {
     public void validateSession_SecretCookieNullTest() throws Exception {
         Mockito.when(mockedSession.getSessionID()).thenReturn("SessionID");
         PowerMockito.mockStatic(SessionUtility.class);
-        PowerMockito.doNothing().when(SessionUtility.class, "checkIP", Matchers.any(Session.class), Matchers.any(String.class));
+        PowerMockito.doNothing().when(SessionUtility.class, "checkIP", ArgumentMatchers.any(Session.class), ArgumentMatchers.any(String.class));
         try {
             OIDCTools.validateSession(mockedSession, mockedRequest);
         } catch (OXException e) {
@@ -196,7 +197,7 @@ public class OIDCToolsTest {
     public void validateSession_WrongSecretTest() throws Exception {
         Mockito.when(mockedSession.getSessionID()).thenReturn("SessionID");
         PowerMockito.mockStatic(SessionUtility.class);
-        PowerMockito.doNothing().when(SessionUtility.class, "checkIP", Matchers.any(Session.class), Matchers.any(String.class));
+        PowerMockito.doNothing().when(SessionUtility.class, "checkIP", ArgumentMatchers.any(Session.class), ArgumentMatchers.any(String.class));
         PowerMockito.when(mockedSession.getHash()).thenReturn("");
         PowerMockito.mockStatic(Cookies.class);
         Map<String, Cookie> cookieMap = new HashMap<>();

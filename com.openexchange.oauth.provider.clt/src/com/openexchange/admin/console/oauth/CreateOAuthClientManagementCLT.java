@@ -223,6 +223,7 @@ public class CreateOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     fis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 
@@ -230,6 +231,7 @@ public class CreateOAuthClientManagementCLT extends AbstractOAuthCLT {
                 try {
                     bis.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
 

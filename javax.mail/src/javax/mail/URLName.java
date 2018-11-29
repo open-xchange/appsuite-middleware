@@ -412,7 +412,13 @@ public class URLName {
      * @exception	MalformedURLException if the URL is malformed
      */
     public URL getURL() throws MalformedURLException {
-        return new URL(getProtocol(), getHost(), getPort(), getFile());
+    // URL expects the file to include the separating "/"
+    String f = getFile();
+    if (f == null)
+        f = "";
+    else
+        f = "/" + f;
+        return new URL(getProtocol(), getHost(), getPort(), f);
     }
 
     /**

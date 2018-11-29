@@ -128,6 +128,7 @@ public class DefaultItemUpdate<O, E extends Enum<E>> implements ItemUpdate<O, E>
     @Override
     public boolean containsAnyChangeOf(E[] fields) {
         if (null != fields) {
+            Set<E> updatedFields = getUpdatedFields();
             for (E field : fields) {
                 if (updatedFields.contains(field)) {
                     return true;

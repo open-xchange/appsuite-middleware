@@ -64,7 +64,7 @@ public enum OptionsProperty implements Property {
 
     private static final String PREFIX = "com.openexchange.mail.filter.options.";
     private final String fqn;
-    private Object defaultValue;
+    private final Object defaultValue;
 
     /**
      *

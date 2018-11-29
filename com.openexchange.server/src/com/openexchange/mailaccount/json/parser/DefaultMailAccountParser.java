@@ -196,28 +196,28 @@ public class DefaultMailAccountParser extends DataParser {
         if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_PORT)) {
+            if (!account.isMailPortSet() && json.hasAndNotNull(MailAccountFields.MAIL_PORT)) {
                 final int mailPort = json.optInt(MailAccountFields.MAIL_PORT, -1);
                 if (mailPort > 0 && mailPort != account.getMailPort()) {
                     account.setMailPort(mailPort);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_PROTOCOL)) {
+            if (Strings.isEmpty(account.getMailProtocol()) && json.hasAndNotNull(MailAccountFields.MAIL_PROTOCOL)) {
                 final String mailProtocol = json.optString(MailAccountFields.MAIL_PROTOCOL, null);
-                if (!Strings.isEmpty(mailProtocol) && !mailProtocol.equals(account.getMailProtocol())) {
+                if (Strings.isNotEmpty(mailProtocol) && !mailProtocol.equals(account.getMailProtocol())) {
                     account.setMailProtocol(mailProtocol);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_SERVER)) {
+            if (Strings.isEmpty(account.getMailServer()) && json.hasAndNotNull(MailAccountFields.MAIL_SERVER)) {
                 final String mailServer = json.optString(MailAccountFields.MAIL_SERVER, null);
-                if (!Strings.isEmpty(mailServer) && !mailServer.equals(account.getMailServer())) {
+                if (Strings.isNotEmpty(mailServer) && !mailServer.equals(account.getMailServer())) {
                     account.setMailServer(mailServer);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_SECURE)) {
+            if (!account.isMailSecureSet() && json.hasAndNotNull(MailAccountFields.MAIL_SECURE)) {
                 final boolean mailSecure = json.optBoolean(MailAccountFields.MAIL_SECURE, account.isMailSecure());
                 if (mailSecure != account.isMailSecure()) {
                     account.setMailSecure(mailSecure);
@@ -229,7 +229,7 @@ public class DefaultMailAccountParser extends DataParser {
         } else {
             final SetSwitch setSwitch = new SetSwitch(account);
             for (final Attribute attribute : Attribute.MAIL_URL_ATTRIBUTES) {
-                if (json.hasAndNotNull(attribute.getName())) {
+                if (json.has(attribute.getName())) {
                     setSwitch.setValue(json.get(attribute.getName()));
                     attribute.doSwitch(setSwitch);
                     attributes.add(attribute);
@@ -259,28 +259,28 @@ public class DefaultMailAccountParser extends DataParser {
         if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {
             account.parseTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL).trim());
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PORT)) {
+            if (!account.isTransportPortSet() && json.hasAndNotNull(MailAccountFields.TRANSPORT_PORT)) {
                 final int transportPort = json.optInt(MailAccountFields.TRANSPORT_PORT, -1);
                 if (transportPort > 0 && transportPort != account.getTransportPort()) {
                     account.setTransportPort(transportPort);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PROTOCOL)) {
+            if (Strings.isEmpty(account.getTransportProtocol()) && json.hasAndNotNull(MailAccountFields.TRANSPORT_PROTOCOL)) {
                 final String transportProtocol = json.optString(MailAccountFields.TRANSPORT_PROTOCOL, null);
-                if (!Strings.isEmpty(transportProtocol) && !transportProtocol.equals(account.getTransportProtocol())) {
+                if (Strings.isNotEmpty(transportProtocol) && !transportProtocol.equals(account.getTransportProtocol())) {
                     account.setTransportProtocol(transportProtocol);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SERVER)) {
+            if (Strings.isEmpty(account.getTransportServer()) && json.hasAndNotNull(MailAccountFields.TRANSPORT_SERVER)) {
                 final String transportServer = json.optString(MailAccountFields.TRANSPORT_SERVER, null);
-                if (!Strings.isEmpty(transportServer) && !transportServer.equals(account.getTransportServer())) {
+                if (Strings.isNotEmpty(transportServer) && !transportServer.equals(account.getTransportServer())) {
                     account.setTransportServer(transportServer);
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SECURE)) {
+            if (!account.isTransportSecureSet() && json.hasAndNotNull(MailAccountFields.TRANSPORT_SECURE)) {
                 final boolean transportSecure = json.optBoolean(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
                 if (transportSecure != account.isTransportSecure()) {
                     account.setTransportSecure(transportSecure);
@@ -292,7 +292,7 @@ public class DefaultMailAccountParser extends DataParser {
         } else {
             final SetSwitch setSwitch = new SetSwitch(account);
             for (final Attribute attribute : Attribute.TRANSPORT_URL_ATTRIBUTES) {
-                if (json.hasAndNotNull(attribute.getName())) {
+                if (json.has(attribute.getName())) {
                     setSwitch.setValue(json.get(attribute.getName()));
                     attribute.doSwitch(setSwitch);
                     attributes.add(attribute);
@@ -321,62 +321,62 @@ public class DefaultMailAccountParser extends DataParser {
         }
 
         // Other fields
-        if (json.hasAndNotNull(MailAccountFields.NAME)) {
+        if (json.has(MailAccountFields.NAME)) {
             account.setName(parseString(json, MailAccountFields.NAME));
             attributes.add(Attribute.NAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.PRIMARY_ADDRESS)) {
+        if (json.has(MailAccountFields.PRIMARY_ADDRESS)) {
             final String string = parseString(json, MailAccountFields.PRIMARY_ADDRESS);
             account.setPrimaryAddress(null == string ? string : string.trim());
             attributes.add(Attribute.PRIMARY_ADDRESS_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.PERSONAL)) {
+        if (json.has(MailAccountFields.PERSONAL)) {
             account.setPersonal(parseString(json, MailAccountFields.PERSONAL));
             attributes.add(Attribute.PERSONAL_LITERAL);
         }
         final Map<String, String> props = new HashMap<String, String>(8);
-        if (json.hasAndNotNull(MailAccountFields.REPLY_TO)) {
+        if (json.has(MailAccountFields.REPLY_TO)) {
             account.setReplyTo(parseString(json, MailAccountFields.REPLY_TO));
             props.put("replyto", json.getString(MailAccountFields.REPLY_TO).trim());
             attributes.add(Attribute.REPLY_TO_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.SPAM_HANDLER)) {
+        if (json.has(MailAccountFields.SPAM_HANDLER)) {
             final String string = parseString(json, MailAccountFields.SPAM_HANDLER);
             account.setSpamHandler(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_HANDLER_LITERAL);
         }
         // Folder names
-        if (json.hasAndNotNull(MailAccountFields.TRASH)) {
+        if (json.has(MailAccountFields.TRASH)) {
             final String string = parseString(json, MailAccountFields.TRASH);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.ARCHIVE)) {
+        if (json.has(MailAccountFields.ARCHIVE)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE);
             account.setArchive(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.SENT)) {
+        if (json.has(MailAccountFields.SENT)) {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.DRAFTS)) {
+        if (json.has(MailAccountFields.DRAFTS)) {
             final String string = parseString(json, MailAccountFields.DRAFTS);
             account.setDrafts(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.SPAM)) {
+        if (json.has(MailAccountFields.SPAM)) {
             final String string = parseString(json, MailAccountFields.SPAM);
             account.setSpam(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.CONFIRMED_SPAM)) {
+        if (json.has(MailAccountFields.CONFIRMED_SPAM)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM);
             account.setConfirmedSpam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.CONFIRMED_HAM)) {
+        if (json.has(MailAccountFields.CONFIRMED_HAM)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_HAM);
             account.setConfirmedHam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
@@ -385,37 +385,37 @@ public class DefaultMailAccountParser extends DataParser {
             account.setUnifiedINBOXEnabled(parseBoolean(json, MailAccountFields.UNIFIED_INBOX_ENABLED));
             attributes.add(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.TRASH_FULLNAME)) {
+        if (json.has(MailAccountFields.TRASH_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.TRASH_FULLNAME);
             account.setTrashFullname(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.ARCHIVE_FULLNAME)) {
+        if (json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE_FULLNAME);
             account.setArchiveFullname(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.SENT_FULLNAME)) {
+        if (json.has(MailAccountFields.SENT_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.SENT_FULLNAME);
             account.setSentFullname(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_FULLNAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.DRAFTS_FULLNAME)) {
+        if (json.has(MailAccountFields.DRAFTS_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.DRAFTS_FULLNAME);
             account.setDraftsFullname(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.SPAM_FULLNAME)) {
+        if (json.has(MailAccountFields.SPAM_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.SPAM_FULLNAME);
             account.setSpamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.CONFIRMED_SPAM_FULLNAME)) {
+        if (json.has(MailAccountFields.CONFIRMED_SPAM_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM_FULLNAME);
             account.setConfirmedSpamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
         }
-        if (json.hasAndNotNull(MailAccountFields.CONFIRMED_HAM_FULLNAME)) {
+        if (json.has(MailAccountFields.CONFIRMED_HAM_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_HAM_FULLNAME);
             account.setConfirmedHamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);

@@ -159,14 +159,13 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (requiresRootFolderID() && Strings.isEmpty(rootFolderID)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
         }
-        int apiVersion = requestData.containsParameter("apiVersion") ? requestData.getParameter("apiVersion", Integer.class).intValue() : 0;
-        DefaultDriveSession driveSession = new DefaultDriveSession(
-            session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData), extractLocale(requestData));
+        int apiVersion = getAPIVersion(requestData);
+        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData), extractLocale(requestData));
         /*
          * extract device name information if present
          */
         String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
+        if (Strings.isNotEmpty(device)) {
             driveSession.setDeviceName(device);
         }
         /*
@@ -179,21 +178,21 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * extract push token if present
          */
         String pushToken = requestData.getParameter("pushToken");
-        if (false == Strings.isEmpty(pushToken)) {
+        if (Strings.isNotEmpty(pushToken)) {
             session.setParameter(DriveSession.PARAMETER_PUSH_TOKEN, pushToken);
         }
         /*
          * extract diagnostics parameter if present
          */
         String diagnostics = requestData.getParameter("diagnostics");
-        if (false == Strings.isEmpty(diagnostics)) {
+        if (Strings.isNotEmpty(diagnostics)) {
             driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
         }
         /*
          * extract columns parameter to fields if present
          */
         String columnsValue = requestData.getParameter("columns");
-        if (false == Strings.isEmpty(columnsValue)) {
+        if (Strings.isNotEmpty(columnsValue)) {
             String[] splitted = Strings.splitByComma(columnsValue);
             int[] columnIDs = new int[splitted.length];
             for (int i = 0; i < splitted.length; i++) {
@@ -209,6 +208,28 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * perform
          */
         return doPerform(requestData, driveSession);
+    }
+
+    /**
+     * Extracts the value of the 'apiVersion' URL parameter if present.
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @return The value of the 'apiVersion' URL parameter. If the parameter is absent 0 is returned.
+     * @throws OXException if value coercion fails or if the parameter contains an invalid value
+     */
+    private int getAPIVersion(AJAXRequestData requestData) throws OXException {
+        if (false == requestData.containsParameter("apiVersion")) {
+            return 0;
+        }
+        String apiVersion = requestData.getParameter("apiVersion");
+        if (null == apiVersion) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(apiVersion);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("apiVersion", "\"" + apiVersion + "\"");
+        }
     }
 
     private static DriveClientVersion extractClientVersion(AJAXRequestData requestData) throws OXException {
@@ -350,7 +371,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
     protected void enableUnlimitedBodySize(AJAXRequestData requestData) {
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
         if (servletRequest instanceof CountingHttpServletRequest) {
-            ((CountingHttpServletRequest)servletRequest).setMax(-1);
+            ((CountingHttpServletRequest) servletRequest).setMax(-1);
         }
     }
 

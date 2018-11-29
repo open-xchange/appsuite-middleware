@@ -57,7 +57,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -66,14 +65,12 @@ import org.scribe.builder.api.Api;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -117,7 +114,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Initialises a new {@link OAuthServiceImpl}.
-     * 
+     *
      * @param registry the {@link OAuthServiceMetaDataRegistry}
      * @param oauthAccountStorage The {@link OAuthAccountStorage}
      * @param cbRegistry The {@link CallbackRegistryImpl}
@@ -131,7 +128,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getMetaDataRegistry()
      */
     @Override
@@ -141,7 +138,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getAccounts(com.openexchange.session.Session)
      */
     @Override
@@ -151,7 +148,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, com.openexchange.session.Session, int, int)
      */
     @Override
@@ -161,7 +158,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String, com.openexchange.oauth.HostInfo, com.openexchange.session.Session, java.util.Set)
      */
     @Override
@@ -192,7 +189,7 @@ public class OAuthServiceImpl implements OAuthService {
                 if (isDeferrerAvailable(ds, userId, contextId)) {
                     String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
-                        cbUrl = currentHost.injectRoute(deferredURL);
+                        cbUrl = deferredURL;
                         deferred = true;
                     }
                 }
@@ -200,50 +197,20 @@ public class OAuthServiceImpl implements OAuthService {
                     // Not yet deferred, but wants to
                 }
             }
-            // Get token & authorisation URL
-            boolean tokenRegistered = false;
+
+            // Get token & authorization URL
             Token scribeToken;
             StringBuilder authorizationURL;
-            if (metaData.registerTokenBasedDeferrer() && metaData.needsRequestToken()) {
-                try {
-                    URI uri = new URI(cbUrl);
-
-                    String path;
-                    {
-                        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-                        StringBuilder pathBuilder = new StringBuilder(prefixService.getPrefix()).append("defer");
-                        if (pathBuilder.charAt(0) != '/') {
-                            pathBuilder.insert(0, '/');
-                        }
-                        path = pathBuilder.toString();
-                    }
-
-                    String prevCbUrl = cbUrl;
-                    String deferredBaseURL = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
-                    // For the Twitter API we need to inject the route as URL parameter instead of path segment, see Bug 59098
-                    cbUrl = KnownApi.TWITTER.getServiceId().equals(serviceMetaData) ? currentHost.injectRouteAsParameter(deferredBaseURL) : currentHost.injectRoute(deferredBaseURL);
-
-                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
-                    scribeToken = service.getRequestToken();
-                    authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
-
-                    callbackRegistry.add(scribeToken.getToken(), prevCbUrl);
-                    tokenRegistered = true;
-                } catch (URISyntaxException e) {
-                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
-                    scribeToken = service.getRequestToken();
-                    authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
-                }
-            } else {
+            {
                 org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                 scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
                 authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
             }
 
-            // Process authorisation URL
+            // Process authorization URL
             final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString(), session), cbUrl);
             // Register deferrer
-            if (!tokenRegistered && metaData.registerTokenBasedDeferrer()) {
+            if (metaData.registerTokenBasedDeferrer()) {
                 // Register by token
                 if (null != scribeToken) {
                     registerTokenForDeferredAccess(scribeToken.getToken(), cbUrl, ds, userId, contextId);
@@ -272,7 +239,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
      */
     @Override
@@ -298,7 +265,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
      */
     @Override
@@ -307,7 +274,6 @@ public class OAuthServiceImpl implements OAuthService {
         OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
 
-        HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
 
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
@@ -329,7 +295,7 @@ public class OAuthServiceImpl implements OAuthService {
              * Background information: When initialising an account's oauth access, the underlying logic
              * checks for the user identity and if it's missing it will be fetched from the respective
              * OAuth provider and the account will be updated accordingly
-             * 
+             *
              * Therefore this edge case can only happen after an upgrade and only if the user has explicitly revoked
              * the access from the third party OAuth provider.In that case there is nothing that can be
              * done from the middleware's point of view, since a hint is required to somehow identify the
@@ -357,7 +323,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
      */
     @Override
@@ -372,7 +338,6 @@ public class OAuthServiceImpl implements OAuthService {
             String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             account.setDisplayName(displayName);
 
-            HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
             obtainToken(type, arguments, account, scopes);
 
             account.setEnabledScopes(scopes);
@@ -411,7 +376,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
      */
     @Override
@@ -422,7 +387,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
     @Override
@@ -432,7 +397,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getAccount(int, com.openexchange.session.Session, int, int)
      */
     @Override
@@ -442,7 +407,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getDefaultAccount(com.openexchange.oauth.API, com.openexchange.session.Session)
      */
     @Override
@@ -469,7 +434,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
      */
     @Override
@@ -499,7 +464,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Get the existing account for the specified user identity or account id
-     * 
+     *
      * @param session The {@link Session}
      * @param userIdentity The user identity
      * @param serviceMetaData The service id
@@ -520,7 +485,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Registers the specified OAuth token for deferred access (i.e. for the provider's call-back)
-     * 
+     *
      * @param token The token to register
      * @param cbUrl the call-back URL
      * @param ds The {@link DeferringURLService}
@@ -543,7 +508,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Checks whether the {@link DeferringURLService} is available for the specified user in the specified context
-     * 
+     *
      * @param ds The {@link DeferringURLService}
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -556,7 +521,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Posts an OSGi delete {@link Event} for the specified account
-     * 
+     *
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -581,7 +546,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Retrieves a {@link Session} for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link Session} or <code>null</code> if none exists
@@ -604,7 +569,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Obtains an OAuth {@link Token} with the specified interaction type for the specified account
-     * 
+     *
      * @param type The {@link OAuthInteractionType}
      * @param arguments The arguments
      * @param account The {@link OAuthAccount}
@@ -626,7 +591,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Obtains a token via {@link OAuthInteractionType#CALLBACK}
-     * 
+     *
      * @param arguments The arguments
      * @param account The {@link OAuthAccount}
      * @param scopes The {@link OAuthScope}s
@@ -638,7 +603,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Obtains a token via {@link OAuthInteractionType#OUT_OF_BAND}
-     * 
+     *
      * @param arguments The arguments
      * @param account The {@link OAuthAccount}
      * @param scopes The {@link OAuthScope}s
@@ -673,7 +638,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Retrieves the {@link org.scribe.oauth.OAuthService} for the specified provider
-     * 
+     *
      * @param metaData The service provider's metadata
      * @param callbackUrl The call-back URL
      * @param session The {@link Session}
@@ -710,7 +675,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Handles the specified {@link OAuthException}
-     * 
+     *
      * @param e The {@link OAuthException} to handle
      * @return An {@link OXException}
      */
@@ -745,7 +710,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Converts specified HTML content to plain text via the {@link HtmlService}
-     * 
+     *
      * @param msg the message to convert
      * @return The converted message
      */
@@ -762,7 +727,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     /**
      * Checks the specified {@link Map} with arguments for <code>null</code> values of the specified fields
-     * 
+     *
      * @param arguments The {@link Map} with the arguments
      * @param fields The fields to check
      * @throws OXException if an argument is missing or has a <code>null</code> value

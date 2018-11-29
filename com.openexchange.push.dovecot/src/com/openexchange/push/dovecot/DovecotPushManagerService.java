@@ -50,8 +50,6 @@
 package com.openexchange.push.dovecot;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,17 +59,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.ReentrantLockAccessControl;
-import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
@@ -117,8 +112,8 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @return The new instance
      * @throws OXException If initialization fails
      */
-    public static DovecotPushManagerService newInstance(String endPoint, DovecotPushClusterLock clusterLock, ServiceLookup services) throws OXException {
-        DovecotPushManagerService newi = new DovecotPushManagerService(endPoint, clusterLock, services);
+    public static DovecotPushManagerService newInstance(DovecotPushClusterLock clusterLock, ServiceLookup services) {
+        DovecotPushManagerService newi = new DovecotPushManagerService(clusterLock, services);
         instance = newi;
         return newi;
     }
@@ -149,44 +144,17 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     private final ServiceLookup services;
     private final Map<SimpleKey, DovecotPushListener> listeners;
     private final DovecotPushClusterLock clusterLock;
-    private final String authLogin;
-    private final String authPassword;
-    private final URI uri;
     private final AccessControl globalLock;
 
     /**
      * Initializes a new {@link DovecotPushManagerService}.
      */
-    private DovecotPushManagerService(String endPoint, DovecotPushClusterLock clusterLock, ServiceLookup services) throws OXException {
+    private DovecotPushManagerService(DovecotPushClusterLock clusterLock, ServiceLookup services) {
         super();
         name = "Dovecot Push Manager";
         this.services = services;
         this.clusterLock = clusterLock;
         listeners = new ConcurrentHashMap<SimpleKey, DovecotPushListener>(512, 0.9F, 1);
-
-        // Parse auth data
-        {
-            ConfigurationService service = services.getService(ConfigurationService.class);
-            String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
-            String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
-            if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
-                LOGGER.error("Denied initialization due to unset Basic-Auth configuration. Please set properties 'com.openexchange.rest.services.basic-auth.login' and 'com.openexchange.rest.services.basic-auth.password' appropriately.");
-                throw ServiceExceptionCode.absentService(ConfigurationService.class);
-            }
-            this.authLogin = authLogin.trim();
-            this.authPassword = authPassword.trim();
-        }
-
-        // Parse URL
-        if (Strings.isEmpty(endPoint)) {
-            uri = null;
-        } else {
-            try {
-                uri = new URI(endPoint);
-            } catch (URISyntaxException e) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, null == endPoint ? "<empty>" : endPoint);
-            }
-        }
 
         // The fall-back lock
         globalLock = new ReentrantLockAccessControl();
@@ -336,7 +304,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @throws OXException If operation fails
      */
     public DovecotPushListener injectAnotherListenerUsing(RegistrationContext registrationContext, boolean permanent) {
-        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, registrationContext, permanent, this, services);
+        DovecotPushListener listener = new DovecotPushListener(registrationContext, permanent, this, services);
         // Replace old/existing one
         listeners.put(SimpleKey.valueOf(registrationContext.getUserId(), registrationContext.getContextId()), listener);
         return listener;
@@ -465,7 +433,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 try {
                     lock.acquireGrant();
                     if (false == listeners.containsKey(key)) {
-                        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, registrationContext, false, this, services);
+                        DovecotPushListener listener = new DovecotPushListener(registrationContext, false, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
                         String reason = listener.initateRegistration();
@@ -578,7 +546,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                     lock.acquireGrant();
                     DovecotPushListener current = listeners.get(key);
                     if (null == current) {
-                        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, registrationContext, true, this, services);
+                        DovecotPushListener listener = new DovecotPushListener(registrationContext, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
                         String reason = listener.initateRegistration();
@@ -594,7 +562,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                     } else if (!current.isPermanent()) {
                         // Cancel current & replace
                         current.unregister(false);
-                        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, registrationContext, true, this, services);
+                        DovecotPushListener listener = new DovecotPushListener(registrationContext, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
                         String reason = listener.initateRegistration();
@@ -655,7 +623,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     }
 
     @Override
-    public List<PushUserInfo> getAvailablePushUsers() throws OXException {
+    public List<PushUserInfo> getAvailablePushUsers() {
         List<PushUserInfo> l = new LinkedList<PushUserInfo>();
         for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
             SimpleKey key = entry.getKey();

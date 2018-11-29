@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.json;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,6 +85,8 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_FOLDERID);
 
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_PUSH_TOKEN);
+
     /**
      * Initializes a new {@link SnoozeAction}.
      *
@@ -99,6 +102,11 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
     }
 
     @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         Date now = new Date();
         int alarmId = ((Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true)).intValue();
@@ -109,6 +117,9 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
 
         EventID eventID = parseIdParameter(requestData);
         Event event = calendarAccess.getEvent(eventID);
+        if(event.containsAlarms() == false || event.getAlarms() == null) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_ALARM_ID, "The event doesn't contain a alarm with this id.");
+        }
         List<Alarm> alarms = new ArrayList<Alarm>(event.getAlarms());
 
         Alarm oldAlarmToSnooze = null;

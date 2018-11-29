@@ -51,11 +51,8 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
-import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import com.openexchange.chronos.Event;
@@ -96,7 +93,7 @@ public class GetPerformer extends AbstractQueryPerformer {
      */
     public Event perform(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         /*
-         * load event data & check permissions
+         * load event data
          */
         CalendarFolder folder = getFolder(session, folderId, false);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
@@ -104,37 +101,35 @@ public class GetPerformer extends AbstractQueryPerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
+        if (null != recurrenceId && isSeriesMaster(event) && contains(event.getChangeExceptionDates(), recurrenceId)) {
+            Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, new EventField[] { EventField.ID });
+            if (null == exceptionEvent) {
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
+            }
+            return perform(folderId, exceptionEvent.getId(), recurrenceId);
+        }
         event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
-        event = Check.eventIsVisible(folder, event);
-        event.setFolderId(Check.eventIsInFolder(event, folder));
-        event.setFlags(getFlags(event, getCalendarUserId(folder), session.getUserId()));
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, getCalendarUserId(folder));
+        /*
+         * check permissions & userize event
+         */
+        Check.eventIsVisible(folder, event);
+        Check.eventIsInFolder(event, folder);
+        event = postProcessor().process(event, folder).getFirstEvent();
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
         /*
-         * retrieve targeted event occurrence if specified (either existing change exception or resolved occurrence)
+         * retrieve targeted event occurrence if specified
          */
         if (null != recurrenceId) {
             if (isSeriesMaster(event)) {
-                if (contains(event.getChangeExceptionDates(), recurrenceId)) {
-                    Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
-                    if (null != exceptionEvent) {
-                        exceptionEvent = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), exceptionEvent, fields);
-                        exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
-                        event = exceptionEvent;
-                    }
-                } else {
-                    event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
-                }
+                event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
             }
             if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
             }
         }
-        /*
-         * return event, anonymized as needed
-         */
-        return anonymizeIfNeeded(session, event);
+        return event;
     }
 
 }

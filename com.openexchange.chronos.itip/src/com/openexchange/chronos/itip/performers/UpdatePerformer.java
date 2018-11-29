@@ -268,6 +268,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             // Update from attributes
             if (null != confirm) {
                 attendee.setPartStat(confirm);
+                attendee.setRsvp(false);
             }
             if (Strings.isNotEmpty(message)) {
                 attendee.setComment(message);

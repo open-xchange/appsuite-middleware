@@ -1,0 +1,5 @@
+type: object
+properties:
+  data:
+    $ref: "#/definitions/FolderCheckLimitsResponseData"
+  $ref: ../common/CommonResponseData.yaml

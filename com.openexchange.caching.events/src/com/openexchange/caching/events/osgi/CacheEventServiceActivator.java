@@ -53,10 +53,12 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventConfigurationImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceLookup;
-import com.openexchange.caching.events.monitoring.ManagementRegisterer;
+import com.openexchange.caching.events.monitoring.CacheEventMBean;
+import com.openexchange.caching.events.monitoring.CacheEventMBeanImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -111,7 +113,7 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class));
         this.service = service;
 
-        track(ManagementService.class, new ManagementRegisterer(service, context));
+        track(ManagementService.class, new HousekeepingManagementTracker(context, CacheEventMBean.NAME, CacheEventMBean.DOMAIN, new CacheEventMBeanImpl(service)));
         openTrackers();
 
         registerService(CacheEventService.class, service);

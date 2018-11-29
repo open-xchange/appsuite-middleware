@@ -17,9 +17,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -123,7 +123,7 @@ public class DovecotPushRESTService {
                         }
 
                         @Override
-                        public boolean accepts(Session session) {
+                        public boolean accepts(Session session_tmp) {
                             return true;
                         }}
                     );

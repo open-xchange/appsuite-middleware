@@ -146,7 +146,7 @@ public interface Category extends Serializable {
     };
 
     /**
-     * The default category for a permission-denied issue using debug log level.
+     * The default category for a permission-denied issue using error log level.
      */
     public static final Category CATEGORY_PERMISSION_DENIED = new Category() {
 
@@ -291,7 +291,7 @@ public interface Category extends Serializable {
     };
 
     /**
-     * The default category for conflicting data using debug log level.
+     * The default category for conflicting data using error log level.
      */
     public static final Category CATEGORY_CONFLICT = new Category() {
 

@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Google Contacts Subscription
 Bundle-SymbolicName: com.openexchange.subscribe.google
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Automatic-Module-Name: com.openexchange.subscribe.google
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis.auth.oauth2,
- com.google.common.collect,
+ com.google.common.collect;version="25.0.0",
  com.google.gdata.client,
  com.google.gdata.client.contacts,
  com.google.gdata.data,
@@ -26,8 +26,13 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.groupware.generic,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.oauth,
+ com.openexchange.oauth.access,
+ com.openexchange.oauth.association,
+ com.openexchange.oauth.google,
+ com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
@@ -35,8 +40,8 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.subscribe.oauth,
  com.openexchange.threadpool,
  com.openexchange.tools.iterator,
- org.apache.commons.io,
- org.osgi.framework,
- org.osgi.util.tracker,
- org.slf4j
+ org.apache.commons.io;version="2.2.0",
+ org.osgi.framework;version="1.9.0",
+ org.osgi.util.tracker;version="1.5.2",
+ org.slf4j;version="1.7.25"
 Bundle-Activator: com.openexchange.subscribe.google.osgi.GoogleContactsActivator

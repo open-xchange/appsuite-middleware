@@ -66,10 +66,11 @@ public interface ManagedFile {
      * Constructs an URL to the resource held by this managed file.
      *
      * @param session The session
+     * @param withRoute <code>true</code> to inject the load-balancing route information into generated URL; otherwise <code>false</code>
      * @return The URL to managed resource
      * @throws OXException If URL cannot be constructed
      */
-    public String constructURL(Session session) throws OXException;
+    public String constructURL(Session session, boolean withRoute) throws OXException;
 
     /**
      * Gets the (optional) file name.

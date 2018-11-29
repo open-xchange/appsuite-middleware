@@ -154,7 +154,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @param session The associated session
      * @return <code>true</code> to suppress <i>Unified Mail</i>; otherwise <code>false</code>
      */
-    protected static Boolean isSuppressUnifiedMail(final AJAXRequestData request, final ServerSession session) {
+    protected static Boolean isSuppressUnifiedMail(final ServerSession session) {
         return Boolean.valueOf(isUsmEas(session.getClient()));
     }
 
@@ -294,7 +294,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         /*
          * collect allowed content types matching supplied module strings
          */
-        List<ContentType> allowedContentTypes = new ArrayList<ContentType>();
+        List<ContentType> allowedContentTypes = new ArrayList<>();
         for (String module : PAT.split(allowedModules, 0)) {
             List<ContentType> matchingContentTypes = getMatchingContentTypes(availableContentTypes, module);
             if (null == matchingContentTypes || matchingContentTypes.isEmpty()) {
@@ -334,7 +334,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         /*
          * get content types by module name
          */
-        List<ContentType> matchingContentTypes = new ArrayList<ContentType>();
+        List<ContentType> matchingContentTypes = new ArrayList<>();
         for (List<ContentType> contentTypes : availableContentTypes.values()) {
             for (ContentType contentType : contentTypes) {
                 if (moduleString.equals(contentType.toString())) {
@@ -368,6 +368,10 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     }
 
     static final class OAuthContentTypes {
+        
+        private OAuthContentTypes() {
+            throw new IllegalStateException("Utility class");
+        }
 
         static Set<ContentType> contentTypesForReadScope(String scope) {
             switch (scope) {
@@ -383,7 +387,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                     return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 default:
-                    return null;
+                    return Collections.emptySet();
             }
         }
 
@@ -402,7 +406,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                     return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 default:
-                    return null;
+                    return Collections.emptySet();
             }
         }
 
@@ -503,7 +507,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         contentTypes.add(SystemContentType.getInstance());
         for (String scope : oauthAccess.getScope().get()) {
             Set<ContentType> contentType = OAuthContentTypes.contentTypesForReadScope(scope);
-            if (contentType != null && !contentType.isEmpty()) {
+            if (!contentType.isEmpty()) {
                 contentTypes.addAll(contentType);
             }
         }
@@ -553,7 +557,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         if (length % 2 != 0) {
             throw new IllegalArgumentException("Eden number of objects required");
         }
-        final Map<String, Object> ret = new HashMap<String, Object>(length >> 1);
+        final Map<String, Object> ret = new HashMap<>(length >> 1);
         for (int i = 0; i < length; i += 2) {
             ret.put(objects[i].toString(), objects[i+1]);
         }

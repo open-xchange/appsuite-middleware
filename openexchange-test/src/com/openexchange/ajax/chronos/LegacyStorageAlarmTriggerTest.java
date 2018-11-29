@@ -106,7 +106,7 @@ public class LegacyStorageAlarmTriggerTest extends AbstractAlarmTriggerTest {
         event.setStartDate(DateTimeUtil.incrementDateTimeData(eventSeries.getStartDate(), TimeUnit.HOURS.toMillis(1)));
         event.setEndDate(DateTimeUtil.incrementDateTimeData(eventSeries.getEndDate(), TimeUnit.HOURS.toMillis(1)));
         event.setRecurrenceId(recurrence);
-        eventManager.updateOccurenceEvent(event, recurrence);
+        eventManager.updateOccurenceEvent(event, recurrence, true);
 
         AlarmTriggerData triggerData = getAndCheckAlarmTrigger(2);
 

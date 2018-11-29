@@ -57,7 +57,6 @@ package com.openexchange.mail.filter.json.v2.osgi;
  * @since v7.8.4
  */
 public enum MailFilterExtensionCapabilities {
-
     copy,
     subaddress,
     regex,
@@ -69,5 +68,4 @@ public enum MailFilterExtensionCapabilities {
     date,
     envelope,
     reject
-
 }

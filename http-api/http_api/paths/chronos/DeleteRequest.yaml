@@ -30,18 +30,27 @@
         required: false
       - $ref: "#/parameters/QueryParamChronosExpand"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosPushToken"
       - in: body
-        name: body
+        name: deleteBody
         description: A JSON array of JSON objects with the id and optionally the recurrence position of the event.
         required: true
         schema:
-          type: array
-          items: 
-            $ref: "#/definitions/EventId"
+          type: object
+          properties:
+            events:
+              type: array
+              items: 
+                $ref: "#/definitions/EventId"
+            comment:
+              type: string
+              description: |
+                Optional comment for the user to provide information about the deletion of the event. This will not be peristed and is just used to inform the attendees via notifications and invitation mails.
     responses:
       200:
         description: |
-          An json object containing the deleted event if the deletion was successfull. In case of errors the responsible fields in the response are
+          An json object containing the deleted event if the deletion was successful. In case of errors the responsible fields in the response are
           filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ChronosMultipleCalendarResultResponse"

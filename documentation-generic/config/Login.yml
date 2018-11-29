@@ -294,7 +294,7 @@ properties:
     tags: ["Login"]
   - key: com.openexchange.ajax.login.rateLimitByLogin.permits
     description: |
-      Specified the number of available permits for the rate limiter based on user names for login.
+      Specifies the number of available permits for the rate limiter based on user names for login.
     defaultValue: 3
     version: 7.10.1
     reloadable: false
@@ -305,7 +305,7 @@ properties:
     tags: ["Login"]
   - key: com.openexchange.ajax.login.rateLimitByLogin.timeFrameInSeconds
     description: |
-      Specified the time frame in seconds for the rate limiter based on user names for login.
+      Specifies the time frame in seconds for the rate limiter based on user names for login.
     defaultValue: 30
     version: 7.10.1
     reloadable: false

@@ -54,16 +54,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.Device;
+import com.openexchange.client.onboarding.Icon;
+import com.openexchange.client.onboarding.Link;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.download.DownloadParameters;
@@ -78,6 +84,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.webdav.WebDavServlet;
 
@@ -108,8 +115,9 @@ public class PListDownloadServlet extends WebDavServlet {
 
     }
 
+    @SuppressWarnings("resource")
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         InputStream filestream = null;
         ThresholdFileHolder fileHolder = null;
         try {
@@ -157,7 +165,17 @@ public class PListDownloadServlet extends WebDavServlet {
             PListDict plist = null;
             try {
                 OnboardingService onboardingService = lookup.getService(OnboardingService.class);
-                scenario = onboardingService.getScenario(scenarioId, ClientDevice.IMPLIES_ALL, device, userId, contextId);
+                try {
+                    scenario = onboardingService.getScenario(scenarioId, ClientDevice.IMPLIES_ALL, device, userId, contextId);
+                }
+                catch (OXException e) {
+                    if (e.getPrefix().equals(OnboardingExceptionCodes.NO_SUCH_SCENARIO.getPrefix()) && e.getCode() == OnboardingExceptionCodes.NO_SUCH_SCENARIO.getNumber()) {
+                        scenario = getDirectDownloadScenario(scenarioId, onboardingService);
+                    } else {
+                        throw e;
+                    }
+                }
+
                 String hostName = determineHostName(req, userId, contextId);
 
                 for (OnboardingProvider provider : scenario.getProviders(userId, contextId)) {
@@ -214,6 +232,97 @@ public class PListDownloadServlet extends WebDavServlet {
         } finally {
             Streams.close(filestream, fileHolder);
         }
+    }
+
+    private Scenario getDirectDownloadScenario(String scenarioId, OnboardingService onboardingService) throws OXException {
+        final List<OnboardingProvider> providers = new ArrayList<>(2);
+        switch (scenarioId) {
+            case "caldav":
+                providers.add(onboardingService.getProvider(BuiltInProvider.CALDAV.getId()));
+                break;
+            case "carddav":
+                providers.add(onboardingService.getProvider(BuiltInProvider.CARDDAV.getId()));
+                break;
+            case "dav":
+                providers.add(onboardingService.getProvider(BuiltInProvider.CALDAV.getId()));
+                providers.add(onboardingService.getProvider(BuiltInProvider.CARDDAV.getId()));
+                break;
+            default:
+                throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+        Scenario scenario = new Scenario() {
+
+            @Override
+            public boolean isEnabled(int userId, int contextId) {
+                return true;
+            }
+
+            @Override
+            public boolean isEnabled(Session session) {
+                return true;
+            }
+
+            @Override
+            public String getId() {
+                return scenarioId;
+            }
+
+            @Override
+            public Icon getIcon(Session session) {
+                return null;
+            }
+
+            @Override
+            public String getDisplayName(Session session) {
+                return scenarioId;
+            }
+
+            @Override
+            public String getDisplayName(int userId, int contextId) {
+                return scenarioId;
+            }
+
+            @Override
+            public String getDescription(Session session) {
+                return null;
+            }
+
+            @Override
+            public OnboardingType getType() {
+                return OnboardingType.PLIST;
+            }
+
+            @Override
+            public List<OnboardingProvider> getProviders(int userId, int contextId) {
+                return providers;
+            }
+
+            @Override
+            public List<OnboardingProvider> getProviders(Session session) {
+                return providers;
+            }
+
+            @Override
+            public Link getLink() {
+                return null;
+            }
+
+            @Override
+            public List<String> getCapabilities(int userId, int contextId) {
+                return null;
+            }
+
+            @Override
+            public List<String> getCapabilities(Session session) {
+                return null;
+            }
+
+            @Override
+            public List<Scenario> getAlternatives(Session session) {
+                return null;
+            }
+        };
+        return scenario;
     }
 
     private String determineHostName(final HttpServletRequest req, int userId, int contextId) {

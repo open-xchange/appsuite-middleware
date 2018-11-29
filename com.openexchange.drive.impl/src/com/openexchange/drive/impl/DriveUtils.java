@@ -415,7 +415,7 @@ public class DriveUtils {
      */
     public static String determineMimeType(File file) {
         String mimeType = null;
-        if (false == Strings.isEmpty(file.getFileName())) {
+        if (Strings.isNotEmpty(file.getFileName())) {
             mimeType = MimeType2ExtMap.getContentType(file.getFileName(), null);
         }
         if (null == mimeType) {

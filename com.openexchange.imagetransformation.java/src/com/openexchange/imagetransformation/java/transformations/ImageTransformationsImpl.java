@@ -558,6 +558,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         InputStream inputStream = null;
         try {
             inputStream = imageFile.getStream();
+            inputStream = maxSize > 0 ? new CountingInputStream(inputStream, maxSize, IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR) : inputStream;
             /*
              * create reader from image input stream
              */

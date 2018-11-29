@@ -27,8 +27,12 @@ public class ConfirmTest extends AppointmentTest {
     @Override
     public void tearDown() throws Exception {
         try {
-            ctm2.cleanUp();
-            ftm2.cleanUp();
+            if (ctm2 != null) {
+                ctm2.cleanUp();
+            }
+            if (ftm2 != null) {
+                ftm2.cleanUp();
+            }
         } finally {
             super.tearDown();
         }

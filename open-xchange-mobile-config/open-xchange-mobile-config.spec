@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 20
+%define        ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -57,26 +57,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Mon Nov 19 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-11-19 (4966)
-* Mon Oct 29 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-11-05 (4933)
-* Mon Oct 08 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-10-15 (4918)
-* Tue Sep 25 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-10-01 (4897)
-* Mon Sep 24 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-09-21 (4900)
-* Mon Sep 10 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-09-17 (4882)
-* Mon Aug 27 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-09-03 (4870)
-* Wed Aug 15 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-08-20 (4863)
-* Thu Aug 02 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-08-13 (4853)
-* Fri Jul 20 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2018-07-25 (4835)
+* Fri Nov 23 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+RC 1 for 7.10.1 release
+* Fri Nov 02 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second preview for 7.10.1 release
+* Thu Oct 11 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First candidate for 7.10.1 release
+* Thu Sep 06 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>

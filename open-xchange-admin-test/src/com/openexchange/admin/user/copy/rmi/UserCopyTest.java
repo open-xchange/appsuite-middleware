@@ -51,73 +51,55 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
+/**
+ * {@link UserCopyTest}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class UserCopyTest extends AbstractRMITest {
 
-    private OXContextInterface ci;
-
-    private OXUserInterface ui;
-
     private Context srcCtx;
-
     private Context dstCtx;
 
-    private User admin;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        AJAXConfig.init();
-        ci = getContextInterface();
-        ui = getUserInterface();
+    /**
+     * Initialises a new {@link UserCopyTest}.
+     */
+    public UserCopyTest() {
+        super();
     }
 
     @Before
     public final void setupContexts() throws Exception {
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
-        srcCtx = TestTool.createContext(ci, "UserCopySourceCtx_", admin, "all", superAdminCredentials);
-        dstCtx = TestTool.createContext(ci, "UserCopyDestinationCtx_", admin, "all", superAdminCredentials);
+        srcCtx = TestTool.createContext(getContextManager(), "UserCopySourceCtx_", contextAdmin, "all", superAdminCredentials);
+        dstCtx = TestTool.createContext(getContextManager(), "UserCopyDestinationCtx_", contextAdmin, "all", superAdminCredentials);
     }
 
     @After
     public final void tearDownContexts() throws Exception {
-        if (srcCtx != null) {
-            ci.delete(srcCtx, superAdminCredentials);
-        }
-        if (dstCtx != null) {
-            ci.delete(dstCtx, superAdminCredentials);
-        }
+        getContextManager().cleanUp();
     }
 
     @Test
     public final void testMoveUser() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         User srcUser = createUser(srcCtx);
-        oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
+        getUserManager().copy(srcUser, srcCtx, dstCtx);
     }
 
     @Test
     public final void testMoveUserNoUser() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         try {
-            oxu.copyUser(null, srcCtx, dstCtx, superAdminCredentials);
+            getUserManager().copy(null, srcCtx, dstCtx);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("The given source user object is null", e.getMessage());
@@ -126,10 +108,9 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoUserId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User();
         try {
-            oxu.copyUser(user, srcCtx, dstCtx, superAdminCredentials);
+            getUserManager().copy(user, srcCtx, dstCtx);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("One userobject has no userid or username", e.getMessage());
@@ -138,11 +119,10 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoSrcContext() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = null;
         try {
-            oxu.copyUser(user, src, dstCtx, superAdminCredentials);
+            getUserManager().copy(user, src, dstCtx);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("Client sent invalid source context data object", e.getMessage());
@@ -151,11 +131,10 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoSrcContextId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context();
         try {
-            oxu.copyUser(user, src, dstCtx, superAdminCredentials);
+            getUserManager().copy(user, src, dstCtx);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("Client sent invalid source context data object", e.getMessage());
@@ -164,11 +143,10 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoDestContext() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context dest = null;
         try {
-            oxu.copyUser(user, srcCtx, dest, superAdminCredentials);
+            getUserManager().copy(user, srcCtx, dest);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
@@ -177,11 +155,10 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoDestContextId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context dest = new Context();
         try {
-            oxu.copyUser(user, srcCtx, dest, superAdminCredentials);
+            getUserManager().copy(user, srcCtx, dest);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
@@ -190,11 +167,10 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testUserExists() throws Exception {
-        final OXUserCopyInterface oxu = getUserCopyClient();
         final User srcUser = createUser(srcCtx);
-        final User dstUser = createUser(dstCtx);
+        createUser(dstCtx);
         try {
-            oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
+            getUserManager().copy(srcUser, srcCtx, dstCtx);
             fail("No exception thrown");
         } catch (Exception e) {
             assertTrue("No UserExistsException thrown.", e instanceof UserExistsException);
@@ -202,12 +178,12 @@ public class UserCopyTest extends AbstractRMITest {
         }
     }
 
-    private User createUser(Context ctx) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        User user = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+    private User createUser(Context ctx) throws Exception {
+        User user = UserFactory.createUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
-        ui.create(ctx, user, getCredentials());
+        getUserManager().create(ctx, user, contextAdminCredentials);
         return user;
     }
 }

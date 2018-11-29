@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
@@ -79,6 +80,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
@@ -97,6 +99,7 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
@@ -174,7 +177,8 @@ public class CalendarUtils {
     /** A collection of identifying meta fields */
     private static final Set<EventField> IDENTIFYING_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.UID, EventField.FILENAME,
-        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE
+        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.START_DATE, EventField.END_DATE,
+        EventField.SEQUENCE, EventField.MODIFIED_BY, EventField.CLASSIFICATION, EventField.RECURRENCE_RULE
     )));
 
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
@@ -591,6 +595,9 @@ public class CalendarUtils {
      * @return The maximum timestamp as {@link Date}, or <code>null</code> if the supplied collection was <code>null</code> or empty
      */
     public static Date getMaximumTimestamp(Collection<Event> events) {
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
         long maximumTimestamp = Integer.MIN_VALUE;
         for (Event event : events) {
             if (null != event) {
@@ -686,6 +693,60 @@ public class CalendarUtils {
         } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
         }
+    }
+
+    /**
+     * Gets a value indicating whether an updated recurrence rule would produce further, additional occurrences compared to the original
+     * rule.
+     *
+     * @param originalRRule The original recurrence rule, or <code>null</code> if there was none
+     * @param updatedRRule The original recurrence rule, or <code>null</code> if there is none
+     * @return <code>true</code> if the updated rule yields further occurrences or unsure, <code>false</code>, otherwise
+     */
+    public static boolean hasFurtherOccurrences(String originalRRule, String updatedRRule) throws OXException {
+        if (null == originalRRule) {
+            return null != updatedRRule;
+        }
+        if (null == updatedRRule) {
+            return false;
+        }
+        RecurrenceRule originalRule = initRecurrenceRule(originalRRule);
+        RecurrenceRule updatedRule = initRecurrenceRule(updatedRRule);
+        /*
+         * check if only UNTIL was changed
+         */
+        RecurrenceRule checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setUntil(originalRule.getUntil());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
+        }
+        /*
+         * check if only COUNT was changed
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        if (null == originalRule.getCount()) {
+            checkedRule.setUntil(null);
+        } else {
+            checkedRule.setCount(i(originalRule.getCount()));
+        }
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
+            int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
+            return updatedCount > originalCount;
+        }
+        /*
+         * check if only the INTERVAL was extended
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setInterval(originalRule.getInterval());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 0 != updatedRule.getInterval() % originalRule.getInterval();
+        }
+        /*
+         * check if each BY... part is equally or more restrictive
+         */
+        //TODO
+        return true;
     }
 
     /**
@@ -888,7 +949,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the event is <i>floating</i>, <code>false</code>, otherwise
      */
     public static boolean isFloating(Event event) {
-        return event.getStartDate().isFloating();
+        return null != event.getStartDate() && event.getStartDate().isFloating();
     }
 
     /**
@@ -1035,6 +1096,77 @@ public class CalendarUtils {
          */
         long offset = updatedSeriesStart.getTimestamp() - originalSeriesStart.getTimestamp();
         return new DefaultRecurrenceId(new DateTime(originalRecurrenceId.getValue().getTimestamp() + offset));
+    }
+
+    /**
+     * Gets a value indicating whether a specific recurrence identifier represents the <i>first</i> occurrence of a recurring event series
+     * or not.
+     *
+     * @param recurrenceId The recurrence identifier to check
+     * @param recurrenceData The associated recurrence data
+     * @param recurrenceService A reference to the recurrence service
+     * @return <code>true</code> if the recurrence identifier represents the <i>first</i> occurrence of a recurring event series, <code>false</code>, otherwise
+     * @see {@link EventFlag#FIRST_OCCURRENCE}
+     */
+    public static boolean isFirstOccurrence(RecurrenceId recurrenceId, RecurrenceData recurrenceData, RecurrenceService recurrenceService) throws OXException {
+        if (null == recurrenceData || null == recurrenceId) {
+            return false;
+        }
+        /*
+         * not the first occurrence if there is a prior exception date
+         */
+        long[] exceptionDates = recurrenceData.getExceptionDates();
+        if (null != exceptionDates && 0 < exceptionDates.length && exceptionDates[0] < recurrenceId.getValue().getTimestamp()) {
+            return false;
+        }
+        /*
+         * first occurrence if it matches the first occurrence produced by the recurrence rule
+         */
+        DefaultRecurrenceData plainRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart());
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(plainRecurrenceData);
+        return iterator.hasNext() && iterator.next().equals(recurrenceId);
+    }
+
+    /**
+     * Gets a value indicating whether a specific recurrence identifier represents the <i>last</i> occurrence of a recurring event series
+     * or not.
+     *
+     * @param recurrenceId The recurrence identifier to check
+     * @param recurrenceData The associated recurrence data
+     * @param recurrenceService A reference to the recurrence service
+     * @return <code>true</code> if the recurrence identifier represents the <i>last</i> occurrence of a recurring event series, <code>false</code>, otherwise
+     * @see {@link EventFlag#LAST_OCCURRENCE}
+     */
+    public static boolean isLastOccurrence(RecurrenceId recurrenceId, RecurrenceData recurrenceData, RecurrenceService recurrenceService) throws OXException {
+        if (null == recurrenceData || null == recurrenceId) {
+            return false;
+        }
+        /*
+         * not the last occurrence if there is a later exception date
+         */
+        long[] exceptionDates = recurrenceData.getExceptionDates();
+        if (null != exceptionDates && 0 < exceptionDates.length && exceptionDates[exceptionDates.length - 1] > recurrenceId.getValue().getTimestamp()) {
+            return false;
+        }
+        /*
+         * not the last occurrence if rule is unlimited
+         */
+        if (recurrenceService.isUnlimited(recurrenceData.getRecurrenceRule())) {
+            return false;
+        }
+        /*
+         * last occurrence if it matches the last occurrence produced by the recurrence rule
+         */
+        DefaultRecurrenceData plainRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart());
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(plainRecurrenceData);
+        RecurrenceId lastRecurrenceId = null;
+        while (iterator.hasNext()) {
+            lastRecurrenceId = iterator.next();
+            if (lastRecurrenceId.getValue().after(recurrenceId.getValue())) {
+                break;
+            }
+        }
+        return null != lastRecurrenceId && lastRecurrenceId.equals(recurrenceId);
     }
 
     /**
@@ -1261,6 +1393,35 @@ public class CalendarUtils {
     }
 
     /**
+     * Optionally gets an e-mail address from the supplied URI string. Decoding of sequences of escaped octets is performed implicitly,
+     * which includes decoding of percent-encoded scheme-specific parts. Additionally, any ASCII-encoded parts of the address string are
+     * decoded back to their unicode representation.
+     * <p/>
+     * Examples:<br/>
+     * <ul>
+     * <li>For input string <code>horst@xn--mller-kva.de</code>, the mail address <code>horst@m&uuml;ller.de</code> is extracted</li>
+     * <li>For input string <code>mailto:horst@m%C3%BCller.de</code>, the mail address <code>horst@m&uuml;ller</code> is extracted</li>
+     * </ul>
+     *
+     * @param value The URI address string to extract the e-mail address from
+     * @return The extracted e-mail address, or <code>null</code> if no valid e-mail address could be extracted
+     */
+    public static String optEMailAddress(String value) {
+        String address = extractEMailAddress(value);
+        if (Strings.isNotEmpty(address)) {
+            CalendarUser calendarUser = new CalendarUser();
+            calendarUser.setUri(getURI(address));
+            try {
+                Check.requireValidEMail(calendarUser);
+                return address;
+            } catch (OXException e) {
+                // ignore
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets a string representation of the <code>mailto</code>-URI for the supplied e-mail address.
      * <p/>
      * Non-ASCII characters are encoded implicitly as per {@link URI#toASCIIString()}.
@@ -1272,7 +1433,7 @@ public class CalendarUtils {
     public static String getURI(String emailAddress) {
         if (Strings.isNotEmpty(emailAddress)) {
             try {
-                return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
+                return new URI("mailto", extractEMailAddress(emailAddress), null).toASCIIString();
             } catch (URISyntaxException e) {
                 getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
             }
@@ -1604,8 +1765,62 @@ public class CalendarUtils {
         return optExtendedProperty(event.getExtendedProperties(), name);
     }
 
+    /**
+     * Gets all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     *
+     * @param extendedProperties The extended properties to check
+     * @param name The property name to match
+     * @return All matching properties, or an empty list if there are none
+     */
+    public static List<ExtendedProperty> findExtendedProperties(ExtendedProperties extendedProperties, String name) {
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (-1 == name.indexOf('*') && -1 == name.indexOf('?')) {
+            return extendedProperties.getAll(name);
+        }
+        List<ExtendedProperty> matchingProperties = new ArrayList<ExtendedProperty>();
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(name));
+        for (ExtendedProperty property : extendedProperties) {
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                matchingProperties.add(property);
+            }
+        }
+        return matchingProperties;
+    }
+
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property parameter with a specific name.
+     *
+     * @param parameters The parameters to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to get
+     * @return The value of the extended property parameter, or <code>null</code> if not set
+     */
+    public static String optExtendedParameterValue(List<ExtendedPropertyParameter> parameters, String name) {
+        ExtendedPropertyParameter parameter = optExtendedParameter(parameters, name);
+        return null != parameter ? parameter.getValue() : null;
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property parameter with a specific name.
+     *
+     * @param parameters The parameters to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to get
+     * @return The value of the extended property parameter, or <code>null</code> if not set
+     */
+    public static ExtendedPropertyParameter optExtendedParameter(List<ExtendedPropertyParameter> parameters, String name) {
+        if (null != parameters) {
+            for (ExtendedPropertyParameter parameter : parameters) {
+                if (name.equals(parameter.getName())) {
+                    return parameter;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -1969,9 +2184,23 @@ public class CalendarUtils {
      * @param event The event to get the flags for
      * @param calendarUser The identifier of the calendar user to get flags for
      * @param user The identifier of the current user, in case he is different from the calendar user
+     * @param additionals Additional event flags to include
      * @return The event flags
      */
     public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user) {
+        return getFlags(event, calendarUser, user, false);
+    }
+
+    /**
+     * Generates the flags for a specific event (see {@link EventFlag}).
+     *
+     * @param event The event to get the flags for
+     * @param calendarUser The identifier of the calendar user to get flags for
+     * @param user The identifier of the current user, in case he is different from the calendar user
+     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise 
+     * @return The event flags
+     */
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, boolean publicFolder) {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
@@ -1983,13 +2212,12 @@ public class CalendarUtils {
             flags.add(EventFlag.SCHEDULED);
         }
         if (isOrganizerSchedulingResource(event, calendarUser)) {
-            flags.add(EventFlag.ORGANIZER);
-            flags.add(EventFlag.ATTENDEE);
-        } else if (isAttendeeSchedulingResource(event, calendarUser)) {
-            flags.add(EventFlag.ATTENDEE);
+            flags.add(calendarUser == user ? EventFlag.ORGANIZER : EventFlag.ORGANIZER_ON_BEHALF);
+        } else if (publicFolder) {
+            flags.add(EventFlag.ORGANIZER_ON_BEHALF);
         }
-        if (calendarUser != user) {
-            flags.add(EventFlag.ON_BEHALF);
+        if (isAttendeeSchedulingResource(event, calendarUser)) {
+            flags.add(calendarUser == user ? EventFlag.ATTENDEE : EventFlag.ATTENDEE_ON_BEHALF);
         }
         if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
             flags.add(EventFlag.CONFIDENTIAL);

@@ -49,8 +49,6 @@
 
 package com.openexchange.imageconverter.api;
 
-import com.openexchange.exception.OXException;
-
 
 /**
  * {@link MetadataException}
@@ -58,7 +56,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
  * @since v7.10
  */
-public class MetadataException extends OXException {
+public class MetadataException extends Exception {
 
     /**
      * serialVersionUID
@@ -78,7 +76,7 @@ public class MetadataException extends OXException {
      * @param e
      */
     public MetadataException(final String displayMessage) {
-        super(OXException.general(displayMessage));
+        super(displayMessage);
     }
 
     /**
@@ -96,6 +94,6 @@ public class MetadataException extends OXException {
      * @param e
      */
     public MetadataException(final String displayMessage, final Throwable e) {
-        super(OXException.general(displayMessage, e));
+        super(displayMessage, e);
     }
 }

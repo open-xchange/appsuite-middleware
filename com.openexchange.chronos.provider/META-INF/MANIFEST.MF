@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Chronos calendar provider service defintions
 Bundle-SymbolicName: com.openexchange.chronos.provider
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io,
@@ -29,6 +29,7 @@ Import-Package: com.google.common.io,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
+ org.osgi.util.tracker;version="1.5.2",
  org.slf4j
 Export-Package: com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,

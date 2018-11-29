@@ -194,7 +194,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
             .put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames"))
             .put("autorename", request.getParameter("autorename"))
-            .put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
+            .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
             .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
             .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
             .put(id, folderService);
@@ -226,7 +226,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
     }
 
     private static String getFolderNameSafe(Session session, Folder folder, String folderID, String treeID, FolderService folderService) {
-        if (null != folder && false == Strings.isEmpty(folder.getName())) {
+        if (null != folder && Strings.isNotEmpty(folder.getName())) {
             return folder.getName();
         }
         String id = null != folderID ? folderID : null != folder ? folder.getID() : null;

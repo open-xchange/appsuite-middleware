@@ -411,7 +411,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } else {
                 mailConfig.setAuthType(accountDescription.getAuthType());
             }
-            if (!Strings.isEmpty(accountDescription.getLogin())) {
+            if (Strings.isNotEmpty(accountDescription.getLogin())) {
                 mailConfig.setLogin(accountDescription.getLogin());
             }
             if (!isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId()))) {

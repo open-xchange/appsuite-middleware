@@ -18,21 +18,21 @@ properties:
             title: Types
             description: The change type.
             enum:
-              - ACCEPT
-              - DECLINE
-              - TENTATIVE
-              - DELEGATE
-              - COUNTER
-              - ACCEPT_AND_IGNORE_CONFLICTS
-              - DELETE
-              - IGNORE
-              - ACCEPT_AND_REPLACE
-              - REFRESH
-              - SEND_APPOINTMENT
-              - ACCEPT_PARTY_CRASHER
-              - UPDATE
-              - DECLINECOUNTER
-              - CREATE
+              - accept
+              - decline
+              - tentative
+              - delegate
+              - counter
+              - accept_and_ignore_conflicts
+              - delete
+              - ignore
+              - accept_and_replace
+              - refresh
+              - send_appointment
+              - accept_party_crasher
+              - update
+              - declinecounter
+              - create
         annotations:
           type: array
           description: Annotations to be displayed to the user.

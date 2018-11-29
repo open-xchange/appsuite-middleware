@@ -51,13 +51,23 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertTrue;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.java.Strings;
+import com.openexchange.testing.httpclient.models.ContactData;
+import com.openexchange.testing.httpclient.models.ContactListElement;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.InfoItemExport;
+import com.openexchange.testing.httpclient.modules.ContactsApi;
 import com.openexchange.testing.httpclient.modules.ExportApi;
 import com.openexchange.testing.httpclient.modules.ImportApi;
 
@@ -73,13 +83,26 @@ public class AbstractImportExportTest extends AbstractChronosTest {
 
     protected ImportApi importApi;
     protected ExportApi exportApi;
+    protected ContactsApi contactsApi;
+    private Set<ContactListElement> contactsToDelete;
+    private String contactsFolder = "";
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         importApi = new ImportApi(getApiClient());
         exportApi = new ExportApi(getApiClient());
+        contactsApi = new ContactsApi(getApiClient());
+
         importExportManager = new ICalImportExportManager(exportApi, importApi);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        if (contactsToDelete != null) {
+            contactsApi.deleteContacts(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(contactsToDelete));
+        }
+        super.tearDown();
     }
 
     protected String getImportResponse(String fileName) throws Exception {
@@ -97,6 +120,29 @@ public class AbstractImportExportTest extends AbstractChronosTest {
         return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
     }
 
+    protected void createContactWithBirthdayEvent(String session) throws Exception {
+        if (Strings.isEmpty(contactsFolder)) {
+            contactsFolder = getDefaultContactFolder();
+        }
+        rememberContact(contactsApi.createContact(session, createContactData()).getData().getId());
+    }
+
+    private ContactData createContactData() {
+        final Calendar c = Calendar.getInstance();
+        c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        ContactData contact = new ContactData();
+        contact.setFirstName("Peter");
+        contact.setLastName("Paul Rubens"+UUID.randomUUID());
+        contact.setBirthday(c.getTimeInMillis());
+        contact.setFolderId(contactsFolder);
+        return contact;
+    }
+
     protected void assertEventData(List<EventData> eventData, String iCalExport) {
         for (EventData event : eventData) {
             assertTrue(iCalExport.contains(event.getUid()));
@@ -109,6 +155,16 @@ public class AbstractImportExportTest extends AbstractChronosTest {
         item.folderId(folderId);
         item.id(objectId);
         itemList.add(item);
+    }
+
+    protected void rememberContact(String contactId) {
+        if (contactsToDelete == null) {
+            contactsToDelete = new HashSet<>();
+        }
+        ContactListElement element = new ContactListElement();
+        element.setFolder(contactsFolder);
+        element.setId(contactId);
+        contactsToDelete.add(element);
     }
 
 }

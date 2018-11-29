@@ -95,6 +95,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
 
     private HttpHost targetHost;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -106,7 +107,6 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
     public void testBasicAuth() throws Exception {
         DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
-
             HttpGet getXML = new HttpGet("/ajax/drive/client/windows/v1/update.xml");
             HttpResponse response = httpClient.execute(targetHost, getXML);
             HttpEntity entity = response.getEntity();
@@ -117,7 +117,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             response = httpClient.execute(targetHost, getXML);
             entity = response.getEntity();
             EntityUtils.consume(entity);
-            assertTrue("Expected 200.", response.getStatusLine().getStatusCode() == 200);
+            assertEquals("Expected 200 but was: " + response.getStatusLine().getReasonPhrase(), 200, response.getStatusLine().getStatusCode());
 
             List<Cookie> cookies = httpClient.getCookieStore().getCookies();
             boolean foundCookie = false;

@@ -107,6 +107,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FileStorageFolderStorage implements SubfolderListingFolderStorage {
 
+    private static final String ALT_NAMES = "altNames";
+
     /**
      * <code>"infostore"</code>
      */
@@ -162,7 +164,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                 /*
                  * enqueue in managed transaction if possible, otherwise signal that we started the transaction ourselves
                  */
-                if (false == TransactionManager.isManagedTransaction(parameters)) {
+                if (!TransactionManager.isManagedTransaction(parameters)) {
                     return true;
                 }
                 TransactionManager transactionManager = TransactionManager.getTransactionManager(parameters);
@@ -248,7 +250,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
 
     @Override
     public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
-        if (false == FileStorageContentType.class.isInstance(contentType)) {
+        if (!FileStorageContentType.class.isInstance(contentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
         IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
@@ -285,7 +287,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         // Permissions
         final Permission[] permissions = folder.getPermissions();
         if (null != permissions && permissions.length > 0) {
-            final List<FileStoragePermission> fsPermissions = new ArrayList<FileStoragePermission>(permissions.length);
+            final List<FileStoragePermission> fsPermissions = new ArrayList<>(permissions.length);
             for (final Permission permission : permissions) {
                 final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
                 fsPerm.setEntity(permission.getEntity());
@@ -414,10 +416,10 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         }
 
         IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-        boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+        boolean altNames = StorageParametersUtility.getBoolParameter(ALT_NAMES, storageParameters);
         Session session = storageParameters.getSession();
 
-        List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+        List<Folder> ret = new ArrayList<>(folderIds.size());
         for (String folderId : folderIds) {
             FolderID fid = new FolderID(folderId);
             FileStorageFolder fsFolder = folderAccess.getFolder(fid);
@@ -447,7 +449,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         FolderID fid = new FolderID(folderId);
         IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
         FileStorageFolder fsFolder = folderAccess.getFolder(fid);
-        boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+        boolean altNames = StorageParametersUtility.getBoolParameter(ALT_NAMES, storageParameters);
         String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
         Session session = storageParameters.getSession();
         FileStorageFolderImpl retval;
@@ -494,7 +496,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                 return new SortableId[0];
             }
 
-            List<SortableId> list = new ArrayList<SortableId>(size);
+            List<SortableId> list = new ArrayList<>(size);
             if (isRealTree) {
                 int index = 0;
                 for (int j = 0; j < size; j++) {
@@ -517,7 +519,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
          * Sort
          */
         Collections.sort(children, new SimpleFileStorageFolderComparator(storageParameters.getUser().getLocale()));
-        final List<SortableId> list = new ArrayList<SortableId>(children.size());
+        final List<SortableId> list = new ArrayList<>(children.size());
         final int size = children.size();
         for (int j = 0; j < size; j++) {
             final FileStorageFolder cur = children.get(j);
@@ -556,8 +558,8 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                 return new Folder[0];
             }
 
-            boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-            List<Folder> list = new ArrayList<Folder>(size);
+            boolean altNames = StorageParametersUtility.getBoolParameter(ALT_NAMES, storageParameters);
+            List<Folder> list = new ArrayList<>(size);
             if (isRealTree) {
                 for (int j = 0; j < size; j++) {
                     FileStorageFolder fsFolder = rootFolders[j];
@@ -602,8 +604,8 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         Collections.sort(children, new SimpleFileStorageFolderComparator(storageParameters.getUser().getLocale()));
 
         // Return listing
-        boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-        List<Folder> list = new ArrayList<Folder>(children.size());
+        boolean altNames = StorageParametersUtility.getBoolParameter(ALT_NAMES, storageParameters);
+        List<Folder> list = new ArrayList<>(children.size());
         int size = children.size();
         for (int j = 0; j < size; j++) {
             FileStorageFolder fsFolder = children.get(j);
@@ -651,8 +653,8 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         if (null == includeContentTypes || includeContentTypes.length == 0) {
             return new String[0];
         }
-        final List<String> ret = new ArrayList<String>();
-        final Set<ContentType> supported = new HashSet<ContentType>(Arrays.asList(getSupportedContentTypes()));
+        final List<String> ret = new ArrayList<>();
+        final Set<ContentType> supported = new HashSet<>(Arrays.asList(getSupportedContentTypes()));
         for (final ContentType includeContentType : includeContentTypes) {
             if (supported.contains(includeContentType)) {
                 final SortableId[] subfolders = getSubfolders(FolderStorage.REAL_TREE_ID, PRIVATE_FOLDER_ID, storageParameters);
@@ -685,7 +687,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
             boolean rename;
             boolean permissions;
             {
-                Reference<FileStorageFolder> originalFolder = new Reference<FileStorageFolder>(null);
+                Reference<FileStorageFolder> originalFolder = new Reference<>(null);
                 UpdateOperation updateOperation = UpdateOperation.optUpdateOperation(storageParameters);
                 if (null != updateOperation) {
                     move = UpdateOperation.MOVE == updateOperation;
@@ -694,7 +696,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
                     move = null != folderToUpdate.getParentId() && false == getFolder(originalFolder, folder.getID(), folderAccess).getParentId().equals(folderToUpdate.getParentId());
                     rename = null != folderToUpdate.getName() && false == getFolder(originalFolder, folder.getID(), folderAccess).getName().equals(folderToUpdate.getName());
                 }
-                permissions = null != folderToUpdate.getPermissions() && 0 < folderToUpdate.getPermissions().size() && false == folderToUpdate.getPermissions().equals(getFolder(originalFolder, folder.getID(), folderAccess).getPermissions());
+                permissions = null != folderToUpdate.getPermissions() && !folderToUpdate.getPermissions().isEmpty() && false == folderToUpdate.getPermissions().equals(getFolder(originalFolder, folder.getID(), folderAccess).getPermissions());
             }
             /*
              * perform move and/or rename operation
@@ -779,21 +781,6 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         }
     } // End of SimpleFileStorageFolderComparator
 
-    private static final class SimpleIdAndNameComparator implements Comparator<IdAndName> {
-
-        private final Collator collator;
-
-        SimpleIdAndNameComparator(final Locale locale) {
-            super();
-            collator = Collators.getSecondaryInstance(locale);
-        }
-
-        @Override
-        public int compare(final IdAndName o1, final IdAndName o2) {
-            return collator.compare(o1.getName(), o2.getName());
-        }
-    } // End of SimpleFileStorageFolderComparator
-
     /**
      * Create a file storage folder equivalent to the supplied folder.
      *
@@ -806,7 +793,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
         fileStorageFolder.setId(folder.getID());
         fileStorageFolder.setParentId(folder.getParentID());
         fileStorageFolder.setName(folder.getName());
-        if (false == SetterAwareFolder.class.isInstance(fileStorageFolder) || ((SetterAwareFolder) folder).containsSubscribed()) {
+        if (!SetterAwareFolder.class.isInstance(fileStorageFolder) || ((SetterAwareFolder) folder).containsSubscribed()) {
             fileStorageFolder.setSubscribed(folder.isSubscribed());
         }
         fileStorageFolder.setPermissions(getfFileStoragePermissions(folder.getPermissions()));
@@ -823,7 +810,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
      */
     private static List<FileStoragePermission> getfFileStoragePermissions(Permission[] permissions) {
         if (null != permissions && 0 < permissions.length) {
-            List<FileStoragePermission> fileStoragePermissions = new ArrayList<FileStoragePermission>(permissions.length);
+            List<FileStoragePermission> fileStoragePermissions = new ArrayList<>(permissions.length);
             for (Permission permission : permissions) {
                 fileStoragePermissions.add(getfFileStoragePermissions(permission));
             }
@@ -856,7 +843,7 @@ public final class FileStorageFolderStorage implements SubfolderListingFolderSto
      */
     private static void addWarnings(StorageParameters storageParameters, WarningsAware warningsAware) {
         List<OXException> list = warningsAware.getAndFlushWarnings();
-        if (null != list && false == list.isEmpty()) {
+        if (null != list && !list.isEmpty()) {
             for (OXException warning : list) {
                 storageParameters.addWarning(warning);
             }

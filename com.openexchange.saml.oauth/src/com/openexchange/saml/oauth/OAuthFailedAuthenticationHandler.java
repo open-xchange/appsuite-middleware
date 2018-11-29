@@ -78,9 +78,10 @@ import com.openexchange.sessiond.SessiondService;
  */
 public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
+
     private final ServiceLookup services;
     private final OAuthAccessTokenService tokenService;
-    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
 
     /**
      * Initializes a new {@link OAuthFailedAuthenticationHandler}.

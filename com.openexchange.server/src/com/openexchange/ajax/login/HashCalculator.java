@@ -144,23 +144,33 @@ public class HashCalculator {
      */
     public String getHash(final HttpServletRequest req, final String userAgent, final String client, String...additionals) {
         try {
+            StringBuilder traceBuilder = LOG.isTraceEnabled() ? new StringBuilder("md5 ( ") : null;
             MessageDigest md = MessageDigest.getInstance("MD5");
 
             // Update digest with User-Agent info
             {
                 String effectiveUserAgent = null == userAgent ? parseClientUserAgent(req, "") : userAgent;
                 md.update(effectiveUserAgent.getBytes(Charsets.UTF_8));
+                if (null != traceBuilder) {
+                    traceBuilder.append("effectiveUserAgent=").append(effectiveUserAgent);
+                }
             }
 
             // Update digest with client info
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
+                if (null != traceBuilder) {
+                    traceBuilder.append(", client=").append(client);
+                }
             }
 
             // Update digest with additional info (if any)
             if (null != additionals) {
                 for (String value : additionals) {
                     md.update(value.getBytes(Charsets.UTF_8));
+                    if (null != traceBuilder) {
+                        traceBuilder.append(", additional=").append(value);
+                    }
                 }
             }
 
@@ -171,6 +181,9 @@ public class HashCalculator {
                     final String header = null == field || 0 == field.length() ? null : req.getHeader(field);
                     if (!isEmpty(header)) {
                         md.update(header.getBytes(Charsets.UTF_8));
+                        if (null != traceBuilder) {
+                            traceBuilder.append(", ").append(field).append('=').append(field);
+                        }
                     }
                 }
             }
@@ -179,10 +192,18 @@ public class HashCalculator {
             byte[] salt = this.salt;
             if (null != salt) {
                 md.update(salt);
+                if (null != traceBuilder) {
+                    traceBuilder.append(", salt=***");
+                }
             }
 
             // Calculate hash & create its string representation
-            return removeNonWordCharactersFrom(Base64.encode(md.digest()));
+            String hash = removeNonWordCharactersFrom(Base64.encode(md.digest()));
+            if (null != traceBuilder) {
+                traceBuilder.append(") -> ").append(hash);
+                LOG.trace(traceBuilder.toString());
+            }
+            return hash;
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("", e);
         }

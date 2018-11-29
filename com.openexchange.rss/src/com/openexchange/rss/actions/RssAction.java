@@ -99,6 +99,8 @@ import com.sun.syndication.io.ParsingFeedException;
  */
 public class RssAction implements AJAXActionService {
 
+    private static final String COULD_NOT_LOAD_RSS_FEED_FROM = "Could not load RSS feed from: {}";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RssAction.class);
 
     private static final int NOT_FOUND = 404;
@@ -135,12 +137,11 @@ public class RssAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        List<OXException> warnings = new LinkedList<OXException>();
+        List<OXException> warnings = new LinkedList<>();
         List<SyndFeed> feeds = null;
 
         try {
-            List<URL> urls = getUrls(request);
-            feeds = getAcceptedFeeds(urls, warnings);
+            feeds = getAcceptedFeeds(getUrls(request), warnings);
         } catch (IllegalArgumentException | MalformedURLException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER.create(e, e.getMessage());
         } catch (JSONException e) {
@@ -151,7 +152,7 @@ public class RssAction implements AJAXActionService {
             return new AJAXRequestResult(new ArrayList<RssResult>(), "rss").addWarnings(warnings);
         }
 
-        List<RssResult> results = new ArrayList<RssResult>(feeds.size());
+        List<RssResult> results = new ArrayList<>(feeds.size());
         boolean dropExternalImages = AJAXRequestDataTools.parseBoolParameter("drop_images", request, true);
         RssPreprocessor preprocessor = new SanitizingPreprocessor(dropExternalImages);
         Date now = new Date();
@@ -196,27 +197,7 @@ public class RssAction implements AJAXActionService {
                 results.add(result);
 
                 @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
-                if (contents.isEmpty()) {
-                    /* Change for bug 52689: If no content is available at least display description */
-                    SyndContent description = entry.getDescription();
-                    if (null != description) {
-                        result.setBody(sanitiseString(description.getValue())).setFormat("text/html");
-                    }
-                } else {
-                    boolean foundHtml = false;
-                    for (SyndContent content : contents) {
-                        String type = content.getType();
-                        if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
-                            foundHtml = true;
-                            String htmlContent = preprocessor.process(content.getValue(), result);
-                            result.setBody(htmlContent).setFormat("text/html");
-                            break;
-                        }
-                        if (!foundHtml) {
-                            result.setBody(content.getValue()).setFormat(type);
-                        }
-                    }
-                }
+                handleContents(preprocessor, entry, result, contents);
             }
         }
 
@@ -237,6 +218,26 @@ public class RssAction implements AJAXActionService {
         }
 
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
+    }
+
+    private void handleContents(RssPreprocessor preprocessor, SyndEntry entry, RssResult result, List<SyndContent> contents) throws OXException {
+        if (contents.isEmpty()) {
+            /* Change for bug 52689: If no content is available at least display description */
+            SyndContent description = entry.getDescription();
+            if (null != description) {
+                result.setBody(sanitiseString(description.getValue())).setFormat("text/html");
+            }
+        } else {
+            for (SyndContent content : contents) {
+                String type = content.getType();
+                if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
+                    String htmlContent = preprocessor.process(content.getValue(), result);
+                    result.setBody(htmlContent).setFormat("text/html");
+                    break;
+                }
+                result.setBody(content.getValue()).setFormat(type);
+            }
+        }
     }
 
     /**
@@ -260,7 +261,7 @@ public class RssAction implements AJAXActionService {
             urls = Collections.singletonList(new URL(prepareUrlString(urlString)));
         } else {
             final int length = test.length();
-            urls = new ArrayList<URL>(length);
+            urls = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
                 urlString = test.getString(i);
                 urls.add(new URL(prepareUrlString(urlString)));
@@ -278,7 +279,7 @@ public class RssAction implements AJAXActionService {
      * @throws OXException
      */
     protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings) throws OXException {
-        List<SyndFeed> feeds = new LinkedList<SyndFeed>();
+        List<SyndFeed> feeds = new LinkedList<>();
 
         for (URL url : urls) {
             if (RssProperties.isDenied(url.getProtocol(), url.getHost(), url.getPort())) {
@@ -311,7 +312,7 @@ public class RssAction implements AJAXActionService {
                 Throwable t = parsingException.getCause();
                 if (t != null && t instanceof IOException) {
                     String exceptionMessage = t.getMessage();
-                    if (!Strings.isEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
+                    if (Strings.isNotEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
                         ConfigurationService configService = Services.getService(ConfigurationService.class);
                         int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
                         OXException oxe = RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
@@ -328,12 +329,12 @@ public class RssAction implements AJAXActionService {
                 oxe.setCategory(Category.CATEGORY_WARNING);
                 warnings.add(oxe);
             } catch (FeedException e) {
-                LOG.warn("Could not load RSS feed from: {}", url, e);
+                LOG.warn(COULD_NOT_LOAD_RSS_FEED_FROM, url, e);
             } catch (FetcherException e) {
                 int responseCode = e.getResponseCode();
                 if (responseCode <= 0) {
                     // No response code available
-                    LOG.warn("Could not load RSS feed from: {}", url, e);
+                    LOG.warn(COULD_NOT_LOAD_RSS_FEED_FROM, url, e);
                 }
                 if (NOT_FOUND == responseCode) {
                     LOG.debug("Resource could not be found: {}", url, e);
@@ -347,7 +348,7 @@ public class RssAction implements AJAXActionService {
                     oxe.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(oxe);
                 } else {
-                    LOG.warn("Could not load RSS feed from: {}", url, e);
+                    LOG.warn(COULD_NOT_LOAD_RSS_FEED_FROM, url, e);
                 }
             } catch (IllegalArgumentException e) {
                 String exceptionMessage = e.getMessage();
@@ -355,7 +356,7 @@ public class RssAction implements AJAXActionService {
                     throw AjaxExceptionCodes.INVALID_PARAMETER.create(e, exceptionMessage);
                 }
                 // There is no parser for current document
-                LOG.warn("Could not load RSS feed from: {}", url);
+                LOG.warn(COULD_NOT_LOAD_RSS_FEED_FROM, url);
             }
         }
         return feeds;

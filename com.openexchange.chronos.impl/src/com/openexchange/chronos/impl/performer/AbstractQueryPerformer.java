@@ -105,7 +105,7 @@ public abstract class AbstractQueryPerformer {
         this.storage = storage;
     }
 
-    protected SelfProtection getSelfProtection() throws OXException{
+    protected SelfProtection getSelfProtection() {
         if(selfProtection==null){
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
             selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
@@ -177,6 +177,15 @@ public abstract class AbstractQueryPerformer {
      */
     protected List<Event> sortEvents(List<Event> events) throws OXException {
         return CalendarUtils.sortEvents(events, new SearchOptions(session).getSortOrders(), Utils.getTimeZone(session));
+    }
+
+    /**
+     * Initializes a new event post processor for this performed.
+     * 
+     * @return The event post processor
+     */
+    protected EventPostProcessor postProcessor() throws OXException {
+        return new EventPostProcessor(session, storage, getSelfProtection());
     }
 
 }

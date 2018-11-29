@@ -2583,13 +2583,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             lock(con);
 
             if (isMaster) {
-                stmt = con.prepareStatement("DELETE db_pool FROM db_pool JOIN db_cluster WHERE db_pool.db_pool_id=db_cluster.read_db_pool_id AND db_cluster.write_db_pool_id=?");
-                stmt.setInt(1, dbId);
-                stmt.executeUpdate();
-                closeSQLStuff(stmt);
-                stmt = null;
-
-                stmt = con.prepareStatement("DELETE FROM db_cluster WHERE write_db_pool_id=?");
+                stmt = con.prepareStatement("DELETE db_pool, db_cluster FROM db_pool INNER JOIN db_cluster ON db_pool.db_pool_id = db_cluster.write_db_pool_id OR db_pool.db_pool_id = db_cluster.read_db_pool_id WHERE db_cluster.write_db_pool_id=?");
                 stmt.setInt(1, dbId);
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
@@ -2633,13 +2627,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;
-            }
 
-            stmt = con.prepareStatement("DELETE FROM db_pool WHERE db_pool_id=?");
-            stmt.setInt(1, dbId);
-            stmt.executeUpdate();
-            closeSQLStuff(stmt);
-            stmt = null;
+                stmt = con.prepareStatement("DELETE FROM db_pool WHERE db_pool_id=?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+            }
 
             con.commit();
             rollback = false;

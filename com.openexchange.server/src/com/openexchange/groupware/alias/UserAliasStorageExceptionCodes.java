@@ -72,7 +72,7 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
      */
     SQL_ERROR("An SQL error occurred: %1$s.", CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
-     * {@value #DUPLICATE_ALIAS_MSG}
+     * The alias %1$s already exists. Please note that the alias is case insensitive
      */
     DUPLICATE_ALIAS("The alias %1$s already exists. Please note that the alias is case insensitive!", CATEGORY_ERROR, 3)
     ;

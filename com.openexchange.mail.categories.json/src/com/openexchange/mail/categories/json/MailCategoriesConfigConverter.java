@@ -110,10 +110,9 @@ public class MailCategoriesConfigConverter implements ResultConverter {
      * @param requestData The AJAX request data
      * @param result The AJAX result
      * @param session The associated session
-     * @throws OXException If an error occurs
      * @throws JSONException 
      */
-    public void convert2JSON(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+    public void convert2JSON(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws JSONException {
         
         Object resultObject = result.getResultObject();
         if (null == resultObject) {

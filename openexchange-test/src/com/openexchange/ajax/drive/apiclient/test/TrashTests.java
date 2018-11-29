@@ -94,7 +94,7 @@ public class TrashTests extends AbstractAPIClientSession {
 
         FoldersResponse rootFolders = folderApi.getFoldersApi().getRootFolders(folderApi.getSession(), "1,319", null, "infostore");
         rootId = getFolderId("Infostore", rootFolders);
-        FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(folderApi.getSession(), rootId, "1,319", 1, "0", "infostore", false);
+        FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(folderApi.getSession(), rootId, "1,319", 1, "0", "infostore", null, false);
         String trashId = getFolderId("Trash", subFolders);
         driveApi = new DriveApi(client);
         driveApi.emptyTrash(folderApi.getSession(), rootId);
@@ -135,9 +135,9 @@ public class TrashTests extends AbstractAPIClientSession {
         assertNotNull(data.getFiles());
         assertFalse(data.getFiles().isEmpty());
         assertEquals(1, data.getFiles().size());
-        assertNotNull(data.getFolders());
-        assertFalse(data.getFolders().isEmpty());
-        assertEquals(1, data.getFolders().size());
+        assertNotNull(data.getDirectories());
+        assertFalse(data.getDirectories().isEmpty());
+        assertEquals(1, data.getDirectories().size());
     }
 
     @Test
@@ -156,9 +156,9 @@ public class TrashTests extends AbstractAPIClientSession {
         data = trashContent.getData();
         assertNotNull(data.getFiles());
         assertTrue(data.getFiles().isEmpty());
-        assertNotNull(data.getFolders());
-        assertFalse(data.getFolders().isEmpty());
-        assertEquals(1, data.getFolders().size());
+        assertNotNull(data.getDirectories());
+        assertFalse(data.getDirectories().isEmpty());
+        assertEquals(1, data.getDirectories().size());
     }
 
     @Test
@@ -173,8 +173,7 @@ public class TrashTests extends AbstractAPIClientSession {
         assertNotNull(restoredFromTrash.getData());
         TrashContent restoreData = restoredFromTrash.getData();
         assertNotNull(restoreData.getFiles());
-        assertEquals(1, restoreData.getFiles().size());
-        assertTrue(restoreData.getFiles().get(0).getPath().isEmpty()); // Restored to root
+        assertEquals(0, restoreData.getFiles().size());
 
         trashContent = driveApi.getTrashContent(folderApi.getSession(), String.valueOf(infostoreFolder));
         assertNull(trashContent.getError());
@@ -182,9 +181,9 @@ public class TrashTests extends AbstractAPIClientSession {
         data = trashContent.getData();
         assertNotNull(data.getFiles());
         assertTrue(data.getFiles().isEmpty());
-        assertNotNull(data.getFolders());
-        assertFalse(data.getFolders().isEmpty());
-        assertEquals(1, data.getFolders().size());
+        assertNotNull(data.getDirectories());
+        assertFalse(data.getDirectories().isEmpty());
+        assertEquals(1, data.getDirectories().size());
     }
 
     protected String getChecksum(byte[] bytes) throws Exception {

@@ -210,6 +210,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "uri VARCHAR(512) COLLATE utf8mb4_bin NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
                 "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "hidden BOOLEAN DEFAULT NULL," +
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
@@ -232,6 +233,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "uri VARCHAR(512) COLLATE utf8mb4_bin NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
                 "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "hidden BOOLEAN DEFAULT NULL," +
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
@@ -279,9 +281,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
                 "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +
+                "processed BIGINT(20) NOT NULL DEFAULT 0," +
                 "PRIMARY KEY (cid,account,alarm)," +
                 "KEY triggerDate (cid,account,user,triggerDate)," +
-                "KEY event (cid,account,user,eventId)" +
+                "KEY event (cid,account,user,eventId)," +
+                "KEY action (action, triggerDate)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
 

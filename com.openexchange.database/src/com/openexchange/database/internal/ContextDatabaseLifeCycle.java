@@ -51,8 +51,6 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,12 +58,13 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Function;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.ExhaustedActions;
+import com.openexchange.pooling.PoolConfig;
 
 /**
  * Handles the life cycle of database connection pools for contexts databases.
@@ -74,40 +73,52 @@ import com.openexchange.pooling.ExhaustedActions;
  */
 public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
-    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
-
     private static final String SELECT = "SELECT url,driver,login,password,hardlimit,max,initial FROM db_pool WHERE db_pool_id=?";
 
     private final Management management;
 
     private final Timer timer;
 
+    private final ConnectionReloaderImpl reloader;
+
     private final ConfigDatabaseService configDatabaseService;
 
-    private final ConnectionPool.Config defaultPoolConfig;
+    private final PoolConfig defaultPoolConfig;
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
-    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, final ConfigDatabaseService configDatabaseService) {
+    private final Properties jdbcProperties;
+
+    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService) {
         super();
         this.management = management;
         this.timer = timer;
+        this.reloader = reloader;
         this.configDatabaseService = configDatabaseService;
         this.defaultPoolConfig = configuration.getPoolConfig();
+        this.jdbcProperties = configuration.getJdbcProps();
     }
 
     @Override
     public ConnectionPool create(final int poolId) throws OXException {
-        final ConnectionData data = loadPoolData(poolId);
+        final ConnectionData data = loadPoolData(poolId, jdbcProperties);
         try {
             Class.forName(data.driverClass);
         } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
         }
-        final ConnectionPool retval = new ConnectionPool(data.url, data.props, getConfig(data));
+        final ContextPoolAdapter retval = new ContextPoolAdapter(poolId, data, (ConnectionData c) -> {
+            return c.url;
+        }, (ConnectionData c) -> {
+            return c.props;
+        }, (ConnectionData c) -> {
+            return getConfig(c);
+        });
+
         pools.put(I(poolId), retval);
         timer.addTask(retval.getCleanerTask());
         management.addPool(poolId, retval);
+        reloader.setConfigurationListener(retval);
         return retval;
     }
 
@@ -119,72 +130,92 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         }
         management.removePool(poolId);
         timer.removeTask(toDestroy.getCleanerTask());
+        reloader.removeConfigurationListener(poolId);
         toDestroy.destroy();
         return true;
     }
 
-    private ConnectionPool.Config getConfig(final ConnectionData data) {
-        final ConnectionPool.Config retval = defaultPoolConfig.clone();
-        retval.maxActive = data.max;
+    private PoolConfig getConfig(final ConnectionData data) {
+        final PoolConfig.Builder retval = PoolConfig.builder(defaultPoolConfig);
+        retval.withMaxActive(data.max);
         if (data.block) {
-            retval.exhaustedAction = ExhaustedActions.BLOCK;
+            retval.withExhaustedAction(ExhaustedActions.BLOCK);
         } else {
-            retval.exhaustedAction = ExhaustedActions.GROW;
+            retval.withExhaustedAction(ExhaustedActions.GROW);
         }
-        return retval;
+        return retval.build();
     }
 
-    private static void parseUrlToProperties(final ConnectionData retval) throws OXException {
-        final int paramStart = retval.url.indexOf('?');
-        if (-1 != paramStart) {
-            final Matcher matcher = pattern.matcher(retval.url);
-            retval.url = retval.url.substring(0, paramStart);
-            while (matcher.find()) {
-                final String name = matcher.group(1);
-                final String value = matcher.group(2);
-                if (name != null && name.length() > 0 && value != null && value.length() > 0) {
-                    try {
-                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        throw DBPoolingExceptionCodes.PARAMETER_PROBLEM.create(e, value);
-                    }
-                }
-            }
+    ConnectionData loadPoolData(int poolId, Properties jdbcProperties) throws OXException {
+        Connection con = configDatabaseService.getReadOnly();
+        try {
+            return loadPoolData(poolId, jdbcProperties, con);
+        } finally {
+            configDatabaseService.backReadOnly(con);
         }
     }
 
-    ConnectionData loadPoolData(final int poolId) throws OXException {
-        ConnectionData retval = null;
-        final Connection con = configDatabaseService.getReadOnly();
+    ConnectionData loadPoolData(int poolId, Properties jdbcProperties, Connection con) throws OXException {
+        if (null == con) {
+            return loadPoolData(poolId, jdbcProperties);
+        }
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(SELECT);
             stmt.setInt(1, poolId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                retval = new ConnectionData();
-                Properties defaults = new Properties();
-                retval.props = defaults;
-                defaults.put("useSSL", "false");
-                int pos = 1;
-                retval.url = result.getString(pos++);
-                retval.driverClass = result.getString(pos++);
-                defaults.put("user", result.getString(pos++));
-                defaults.put("password", result.getString(pos++));
-                retval.block = result.getBoolean(pos++);
-                retval.max = result.getInt(pos++);
-                retval.min = result.getInt(pos++);
-            } else {
+            if (false == result.next()) {
                 throw DBPoolingExceptionCodes.NO_DBPOOL.create(I(poolId));
             }
-        } catch (final SQLException e) {
+
+            ConnectionData.Builder conDataBuilder = ConnectionData.builder();
+            Properties defaults = new Properties();
+
+            // Apply arguments read from database
+            String url = result.getString(1);
+            conDataBuilder.withDriverClass(result.getString(2));
+            defaults.put("user", result.getString(3));
+            defaults.put("password", result.getString(4));
+            conDataBuilder.withBlock(result.getBoolean(5));
+            conDataBuilder.withMax(result.getInt(6));
+            conDataBuilder.withMin(result.getInt(7));
+
+            // Apply JDBC properties (and drop any parameters from JDBC URL)
+            url = JdbcProperties.removeParametersFromJdbcUrl(url);
+            conDataBuilder.withUrl(url);
+
+            defaults.putAll(jdbcProperties);
+            conDataBuilder.withProps(defaults);
+
+            return conDataBuilder.build();
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            configDatabaseService.backReadOnly(con);
         }
-        parseUrlToProperties(retval);
-        return retval;
+    }
+
+    private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
+
+        ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
+            super(poolId, data, toURL, toConnectionArguments, toConfig);
+        }
+
+        @Override
+        public void notify(Configuration configuration) {
+            ConnectionData data = null;
+            try {
+                data = loadPoolData(getPoolId(), configuration.getJdbcProps());
+                Class.forName(data.driverClass);
+                update(data);
+            } catch (OXException oxe) {
+                LOG.error("Unable to load pool data.", oxe);
+            } catch (final ClassNotFoundException e) {
+                OXException exception = DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
+                LOG.error("Unable to reload configuration", exception);
+            }
+        }
     }
 }

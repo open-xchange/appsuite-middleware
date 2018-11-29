@@ -128,7 +128,7 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
     protected static String getSelectClause(ContactField[] fields, boolean withTable, int forUser) throws OXException {
         return getSelectClause(fields, withTable, forUser, true);
     }
-    
+
     protected static String getSelectClause(ContactField[] fields, boolean withTable, int forUser, boolean includeObjectUseCount) throws OXException {
         StringBuilder sb = new StringBuilder(256);
         sb.append("SELECT ");
@@ -174,7 +174,20 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
         return sb.toString();
     }
 
-	protected static String getFolderIDsClause(int[] folderIDs) throws OXException {
+    protected static final String IMG_CLAUSE;
+
+    static {
+	    StringBuilder builder = new StringBuilder();
+        try {
+            builder.append(Table.CONTACTS.getName()).append(".").append(Mappers.CONTACT.get(ContactField.NUMBER_OF_IMAGES).getColumnLabel()).append(" > 0");
+        } catch (OXException e) {
+            // Should not occur
+            builder.setLength(0);
+        }
+        IMG_CLAUSE = builder.toString();
+	}
+
+    protected static String getFolderIDsClause(int[] folderIDs) throws OXException {
         String columnlabel = Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel();
         if (1 == folderIDs.length) {
             return columnlabel + "=" + folderIDs[0];

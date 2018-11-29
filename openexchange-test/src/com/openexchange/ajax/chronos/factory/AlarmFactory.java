@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.activation.MimetypesFileTypeMap;
 import com.openexchange.testing.httpclient.models.Alarm;
-import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.Trigger;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
@@ -66,12 +65,12 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 public final class AlarmFactory {
 
     public enum AlarmAction {
-        DISPLAY, AUDIO, MAIL;
+        DISPLAY, AUDIO, EMAIL;
     }
 
     /**
      * Creates a new single display {@link Alarm} with the specified duration and {@link RelatedEnum#START} trigger
-     * 
+     *
      * @param duration The duration of the {@link Alarm}
      * @return The new {@link Alarm}
      */
@@ -81,7 +80,7 @@ public final class AlarmFactory {
 
     /**
      * Creates an audio alarm with the specified duration and {@link RelatedEnum}
-     * 
+     *
      * @param duration The duration of the {@link Alarm}
      * @param audioFileUri The URI for the audio file to be played when the alarm is triggered
      * @return The new {@link Alarm}
@@ -104,30 +103,23 @@ public final class AlarmFactory {
 
     /**
      * Creates an e-mail alarm with the specified duration, description and summary
-     * 
+     *
      * @param duration The duration of the {@link Alarm}
-     * @param mailAddress The e-mail address to send the notification
      * @param description The description of the alarm (used as the body of the mail notification)
      * @param summary The summary of the alarm (used as the subject in the email notification)
      * @return the new {@link Alarm}
      */
-    public static Alarm createMailAlarm(String duration, String mailAddress, String description, String summary) {
-        List<Attendee> attendees = new ArrayList<>(1);
-        Attendee attendee = new Attendee();
-        attendee.setUri("mailto:" + mailAddress);
-        attendee.setEmail(mailAddress);
-        attendees.add(attendee);
-
-        Alarm mailAlarm = createAlarm(duration, AlarmAction.MAIL);
+    public static Alarm createMailAlarm(String duration, String description, String summary) {
+        Alarm mailAlarm = createAlarm(duration, AlarmAction.EMAIL);
         mailAlarm.setDescription(description);
         mailAlarm.setSummary(summary);
-        mailAlarm.setAttendees(attendees);
+        mailAlarm.setAttendees(null);
         return mailAlarm;
     }
 
     /**
      * Creates a new single display {@link Alarm} with the specified duration and {@link RelatedEnum} trigger
-     * 
+     *
      * @param duration The duration of the {@link Alarm}
      * @param related The {@link RelatedEnum} trigger
      * @return The new {@link Alarm}
@@ -138,7 +130,7 @@ public final class AlarmFactory {
 
     /**
      * Creates a new single {@link Alarm} with the specified {@link AlarmAction}, duration and {@link RelatedEnum#START} trigger
-     * 
+     *
      * @param duration The duration of the {@link Alarm}
      * @param alarmAction The {@link AlarmAction}
      * @return The new {@link Alarm}
@@ -149,7 +141,7 @@ public final class AlarmFactory {
 
     /**
      * Creates a new single display {@link Alarm} with the specified duration and {@link RelatedEnum} trigger
-     * 
+     *
      * @param duration The duration of the {@link Alarm}
      * @param related The {@link RelatedEnum} trigger
      * @param alarmAction The {@link AlarmAction}

@@ -387,8 +387,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_UID = "uid";
 
-    public static final String PARAMETER_SHOW_PRIVATE_APPOINTMENTS = "showPrivate";
-
     public static final String PARAMETER_OCCURRENCE = "occurrence";
 
     public static final String PARAMETER_USERNAME = "name";
@@ -535,6 +533,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         doService(req, resp, true);
     }
 
+    private static final String METHOD_PATCH = "PATCH";
+
     /**
      * Receives standard HTTP requests from the public <code>service</code> method and dispatches them to the <code>do</code><i>XXX</i>
      * methods defined in this class.
@@ -558,12 +558,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 
-            if (checkRateLimit) {
-                // Enable rate limit on request instance
-                super.service(enableRateLimitCheckFor(req), resp);
+            // Optionally enable rate limit on request instance
+            HttpServletRequest requestToPass = checkRateLimit ? enableRateLimitCheckFor(req) : req;
+            if (req.getMethod().equals(METHOD_PATCH)) {
+                doPut(requestToPass, resp);
             } else {
-                // No rate limit check
-                super.service(req, resp);
+                super.service(requestToPass, resp);
             }
         } catch (RateLimitedException e) {
             e.send(resp);

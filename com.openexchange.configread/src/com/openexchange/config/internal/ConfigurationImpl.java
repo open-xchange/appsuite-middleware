@@ -71,6 +71,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.Iterators;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
@@ -161,6 +162,26 @@ public final class ConfigurationImpl implements ConfigurationService {
             return file.getName().equals(filename);
         }
     };
+
+    private static final AtomicReference<ConfigurationImpl> CONFIG_REFERENCE = new AtomicReference<>(null);
+
+    /**
+     * Sets the config reference to the initialized instance to provide static access
+     *
+     * @param config The initialized config instance
+     */
+    public static void setConfigReference(ConfigurationImpl config) {
+        CONFIG_REFERENCE.set(config);
+    }
+
+    /**
+     * Gets the config reference for the initialized instance to provide static access
+     *
+     * @return The initialized config instance or <code>null</code>
+     */
+    public static ConfigurationImpl getConfigReference() {
+        return CONFIG_REFERENCE.get();
+    }
 
     /*-
      * -------------------------------------------------- Member stuff ---------------------------------------------------------
@@ -918,6 +939,64 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
          *
          */
+    }
+
+    /**
+     * Propagates the reloaded configuration among registered listeners for certain properties.
+     *
+     * @param propertyNames The names of the properties that have been changed
+     */
+    public void reloadConfigurationFor(String... propertyNames) {
+        if (null == propertyNames || propertyNames.length <= 0) {
+            return;
+        }
+
+        LOG.info("Propagating change for the following configuration properties: {}", Arrays.toString(propertyNames));
+
+        Set<Reloadable> toTrigger = new LinkedHashSet<>(32);
+
+        // Collect forced ones
+        for (ForcedReloadable reloadable : forcedReloadables) {
+            toTrigger.add(reloadable);
+        }
+
+        // Collect the ones interested in all
+        for (Reloadable reloadable : matchingAllProperties) {
+            toTrigger.add(reloadable);
+        }
+
+        // Collect the ones interested in properties
+        for (String propertyName : propertyNames) {
+            // Now check for prefix matches
+            if (!matchingPrefixProperty.isEmpty()) {
+                int pos = propertyName.lastIndexOf('.');
+                while (pos > 0) {
+                    String prefix = propertyName.substring(0, pos);
+                    List<Reloadable> interestedReloadables = matchingPrefixProperty.get(prefix);
+                    if (null != interestedReloadables) {
+                        toTrigger.addAll(interestedReloadables);
+                    }
+                    pos = prefix.lastIndexOf('.');
+                }
+            }
+
+            // Add the subscriptions for matching topic names
+            {
+                List<Reloadable> interestedReloadables = matchingProperty.get(propertyName);
+                if (null != interestedReloadables) {
+                    toTrigger.addAll(interestedReloadables);
+                }
+            }
+        }
+
+        // Trigger collected ones
+        for (Reloadable reloadable : toTrigger) {
+            try {
+                reloadable.reloadConfiguration(this);
+            } catch (Exception e) {
+                LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
+            }
+        }
     }
 
     private boolean isInterestedInAll(String[] propertiesOfInterest) {

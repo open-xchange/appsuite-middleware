@@ -65,6 +65,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.BasicAuthenticationService;
@@ -225,25 +226,34 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
                     AddSessionParameterImpl sessionToAdd = new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context);
                     final Map<String, String> additionals = null != targetPath ? targetPath.getAdditionals() : null;
-                    if (null != additionals && 0 < additionals.size()) {
-                        sessionToAdd.setEnhancement(new SessionEnhancement() {
+                    final SessionEnhancement sessionEnhancement = SessionEnhancement.class.isInstance(authenticated) ? (SessionEnhancement) authenticated : null;
+                    {
+                        SessionEnhancement effectiveEnhancement = new SessionEnhancement() {
 
                             @Override
                             public void enhanceSession(Session session) {
-                                for (Map.Entry<String, String> entry : additionals.entrySet()) {
-                                    session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
+                                // Add optional additionals (if any)
+                                if (null != additionals) {
+                                    for (Map.Entry<String, String> entry : additionals.entrySet()) {
+                                        session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
+                                    }
+                                }
+
+                                // Set guest marker
+                                session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
+
+                                // Apply SessionEnhancement (if not null)
+                                if (null != sessionEnhancement) {
+                                    sessionEnhancement.enhanceSession(session);
                                 }
                             }
-                        });
+                        };
+                        sessionToAdd.setEnhancement(effectiveEnhancement);
                     }
                     session = sessiondService.addSession(sessionToAdd);
                     if (null == session) {
                         // Session could not be created
                         throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                    }
-                    session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
-                    if (SessionEnhancement.class.isInstance(authenticated)) {
-                        ((SessionEnhancement) authenticated).enhanceSession(session);
                     }
                     LogProperties.putSessionProperties(session);
                 }
@@ -414,22 +424,37 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             @Override
             public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {
                 /*
+                 * drop by existent secret cookie if auto-login is disabled
+                 */
+                String expectedSecretCookieName = SECRET_PREFIX + session.getHash();
+                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+                if (false == conf.isSessiondAutoLogin(request.getServerName(), session)) {
+                    Cookie cookie = cookies.get(expectedSecretCookieName);
+                    if (null != cookie && !session.getSecret().equals(cookie.getValue())) {
+                        // The same client already initiated a session, but performed another login. Drop the old session.
+                        SessionUtility.removeSessionBySecret(cookie.getValue(), session.getUserId(), session.getContextId());
+                    }
+                }
+                /*
                  * set secret & share cookies
                  */
-                response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
+                response.addCookie(configureCookie(new Cookie(expectedSecretCookieName, session.getSecret()), request, loginConfig));
                 if (loginConfig.isSessiondAutoLogin(httpRequest.getServerName(), session)) {
                     response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
                 }
                 /*
                  * set public session cookie if not yet present
                  */
-                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-                Cookie cookie = cookies.get(getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
-                if (null == cookie) {
+                String[] additionals = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+                Cookie publicSessionCookie = cookies.get(getPublicSessionCookieName(request, additionals));
+                if (null == publicSessionCookie) {
+                    /*
+                     * missing public session cookie
+                     */
                     String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                     if (null != altId) {
-                        response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }),
-                            altId), request, loginConfig));
+                        publicSessionCookie = new Cookie(getPublicSessionCookieName(request, additionals), altId);
+                        response.addCookie(configureCookie(publicSessionCookie, request, loginConfig));
                     }
                 }
             }

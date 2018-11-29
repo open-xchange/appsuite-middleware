@@ -66,7 +66,7 @@ public class MBeanNamer {
     public static ObjectName getName() throws MalformedObjectNameException, NullPointerException {
         ObjectName name = MBeanNamer.name;
         if (name == null) {
-            name = new ObjectName("com.openexchange.consistency.Consistency", "name", "FilestoreConsistency");
+            name = new ObjectName(ConsistencyMBean.MBEAN_DOMAIN, "name", ConsistencyMBean.MBEAN_NAME);
             MBeanNamer.name = name;
         }
         return name;

@@ -154,11 +154,12 @@ public class IPCheckers {
      * @param session The session to apply to
      * @param whiteListedClient <code>true</code> if session-associated client has been excluded from IP check; otherwise <code>false</code> if IP check happened
      */
-    public static void updateIPAddress(String current, Session session, boolean whiteListedClient) {
+    public static boolean updateIPAddress(String current, Session session, boolean whiteListedClient) {
         if (whiteListedClient || false == isUsmEas(session.getClient())) { // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
             // Change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
-            updateIPAddress(current, session);
+            return updateIPAddress(current, session);
         }
+        return false;
     }
 
     /**
@@ -167,22 +168,29 @@ public class IPCheckers {
      * @param current The current IP address to set
      * @param session The session to apply to
      */
-    private static void updateIPAddress(String current, Session session) {
+    private static boolean updateIPAddress(String current, Session session) {
         if (null == current) {
-            return;
+            return false;
         }
 
         SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != service) {
-            String oldIP = session.getLocalIp();
-            if (!current.equals(oldIP)) {
-                try {
-                    service.setLocalIp(session.getSessionID(), current);
-                } catch (OXException e) {
-                    LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, current, e);
-                }
-            }
+        if (null == service) {
+            LOG.debug("The '{}' is absent. The session was not updated with the current IP '{}'", SessiondService.class.getSimpleName(), current);
+            return false;
         }
+        String oldIP = session.getLocalIp();
+        if (current.equals(oldIP)) {
+            LOG.debug("The session's IP '{}' is already up-to-date", current);
+            return false;
+        }
+        try {
+            service.setLocalIp(session.getSessionID(), current);
+            LOG.debug("Successfully updated the session's IP address to '{}'", current);
+            return true;
+        } catch (OXException e) {
+            LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, current, e);
+        }
+        return false;
     }
 
     private static boolean isUsmEas(String clientId) {
@@ -205,5 +213,4 @@ public class IPCheckers {
         LOG.info("Request to server denied (IP check activated) for session: {}. Client login IP changed from {} to {} and is not covered by IP white-list or netmask.", session.getSessionID(), session.getLocalIp(), (null == current ? "<missing>" : current));
         throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
     }
-
 }

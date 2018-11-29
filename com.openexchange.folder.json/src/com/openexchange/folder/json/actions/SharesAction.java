@@ -112,7 +112,7 @@ public class SharesAction extends AbstractFolderAction {
             .setAllowedContentTypes(collectAllowedContentTypes(request))
             .put("mailRootFolders", request.getParameter("mailRootFolders"))
             .put("altNames", request.getParameter("altNames"))
-            .put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
+            .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
         ;
         /*
          * get shares from folder service

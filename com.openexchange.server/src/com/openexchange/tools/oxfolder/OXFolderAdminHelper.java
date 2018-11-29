@@ -80,7 +80,6 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -274,9 +273,6 @@ public final class OXFolderAdminHelper {
                     }
                     if (FolderQueryCacheManager.isInitialized()) {
                         FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
-                    }
-                    if (CalendarCache.isInitialized()) {
-                        CalendarCache.getInstance().invalidateGroup(cid);
                     }
                 } catch (final OXException e) {
                     LOG.error("", e);
@@ -528,9 +524,6 @@ public final class OXFolderAdminHelper {
                     CacheFolderStorage.getInstance().clearCache(-1, ctx.getContextId());
                     if (FolderQueryCacheManager.isInitialized()) {
                         FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
-                    }
-                    if (CalendarCache.isInitialized()) {
-                        CalendarCache.getInstance().invalidateGroup(cid);
                     }
                     final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
                     if (null != service) {

@@ -285,6 +285,8 @@ public interface InfostoreRequest {
 
     boolean hasUploads() throws OXException;
 
+    void uploadFinished() throws OXException;
+
     InputStream getUploadedFileData() throws OXException;
 
     /**

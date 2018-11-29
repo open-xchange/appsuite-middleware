@@ -2116,6 +2116,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setConvertDriveUserFolders(bool_tmp.booleanValue());
         }
 
+        bool_tmp = soapUser.isLoadRemoteMailContentByDefault();
+        if (bool_tmp != null) {
+            user.setLoadRemoteMailContentByDefault(bool_tmp);
+        }
+
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
         if (null != userAttributes) {
             user.setUserAttributes(soap2MapMap(userAttributes));
@@ -2287,6 +2292,8 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
         soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
+        soapUser.setConvertDriveUserFolders(Boolean.valueOf(user.isConvertDriveUserFolders()));
+        soapUser.setLoadRemoteMailContentByDefault(user.isLoadRemoteMailContentByDefault());
         return soapUser;
     }
 

@@ -115,40 +115,36 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                 List<ArchiveDataWrapper> retval = mailInterface.archiveMultipleMail(paraList, session, useDefaultName, createIfAbsent);
                 if (retval == null) {
                     return new AJAXRequestResult(Boolean.TRUE, "native");
-                } else {
-                    JSONArray json = new JSONArray();
-                    for (ArchiveDataWrapper obj : retval) {
-                        JSONObject tmp = new JSONObject();
-                        tmp.put("id", obj.getId());
-                        tmp.put("created", obj.isCreated());
-                        json.put(tmp);
-                    }
-                    return new AJAXRequestResult(json, "json");
                 }
-
-            } else {
-                ArrayList<String> ids = new ArrayList<String>(length);
-                for (int i = 0; i < length; i++) {
-                    ids.add(jArray.getString(i));
+                JSONArray json = new JSONArray();
+                for (ArchiveDataWrapper obj : retval) {
+                    JSONObject tmp = new JSONObject();
+                    tmp.put("id", obj.getId());
+                    tmp.put("created", obj.isCreated());
+                    json.put(tmp);
                 }
-                /*
-                 * Get mail interface
-                 */
-                final MailServletInterface mailInterface = getMailInterface(req);
-                List<ArchiveDataWrapper> retval = mailInterface.archiveMail(folderId, ids, session, useDefaultName, createIfAbsent);
-                if (retval == null) {
-                    return new AJAXRequestResult(Boolean.TRUE, "native");
-                } else {
-                    JSONArray json = new JSONArray();
-                    for (ArchiveDataWrapper obj : retval) {
-                        JSONObject tmp = new JSONObject();
-                        tmp.put("id", obj.getId());
-                        tmp.put("created", obj.isCreated());
-                        json.put(tmp);
-                    }
-                    return new AJAXRequestResult(json, "json");
-                }
+                return new AJAXRequestResult(json, "json");
             }
+            ArrayList<String> ids = new ArrayList<String>(length);
+            for (int i = 0; i < length; i++) {
+                ids.add(jArray.getString(i));
+            }
+            /*
+             * Get mail interface
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            List<ArchiveDataWrapper> retval = mailInterface.archiveMail(folderId, ids, session, useDefaultName, createIfAbsent);
+            if (retval == null) {
+                return new AJAXRequestResult(Boolean.TRUE, "native");
+            }
+            JSONArray json = new JSONArray();
+            for (ArchiveDataWrapper obj : retval) {
+                JSONObject tmp = new JSONObject();
+                tmp.put("id", obj.getId());
+                tmp.put("created", obj.isCreated());
+                json.put(tmp);
+            }
+            return new AJAXRequestResult(json, "json");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {

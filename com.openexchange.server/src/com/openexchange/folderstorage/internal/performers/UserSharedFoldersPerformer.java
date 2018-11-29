@@ -174,7 +174,7 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
             /*
              * Collect by folder storage
              */
-            final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
+            final Map<FolderStorage, TIntList> map = new HashMap<>(4);
             for (int i = 0; i < size; i++) {
                 final String id = allFolderIds.get(i).getId();
                 final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
@@ -194,10 +194,10 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
             final CompletionService<Object> completionService;
             final StorageParametersProvider paramsProvider;
             if (1 == map.size()) {
-                completionService = new CallerRunsCompletionService<Object>();
+                completionService = new CallerRunsCompletionService<>();
                 paramsProvider = new InstanceStorageParametersProvider(storageParameters);
             } else {
-                completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
+                completionService = new ThreadPoolCompletionService<>(getInstance().getService(ThreadPoolService.class, true));
                 paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
             }
             int taskCount = 0;
@@ -211,7 +211,7 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
                     @Override
                     public Object call() throws Exception {
                         final StorageParameters newParameters = paramsProvider.getStorageParameters();
-                        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                        final List<FolderStorage> openedStorages = new ArrayList<>(2);
                         if (tmp.startTransaction(newParameters, false)) {
                             openedStorages.add(tmp);
                         }
@@ -221,7 +221,7 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
                              */
                             List<Folder> folders;
                             try {
-                                final List<String> ids = new ArrayList<String>(indexes.length);
+                                final List<String> ids = new ArrayList<>(indexes.length);
                                 for (final int index : indexes) {
                                     ids.add(allFolderIds.get(index).getId());
                                 }

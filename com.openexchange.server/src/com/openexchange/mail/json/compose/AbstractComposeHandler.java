@@ -590,7 +590,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
         {
             String fileName = jAttachment.optString(ATTACHMENT_FILE_NAME, null);
-            if (!Strings.isEmpty(fileName)) {
+            if (Strings.isNotEmpty(fileName)) {
                 properties.put(DataProperties.PROPERTY_NAME, fileName);
             }
         }
@@ -849,7 +849,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                         /*
                          * Any other value
                          */
-                        composedMail.setDispositionNotification(null);
+                        composedMail.removeDispositionNotification();
                     } else {
                         /*
                          * Valid email address
@@ -953,7 +953,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
     }
 
     private static InternetAddress getEmailAddress(String addrStr) {
-        if (com.openexchange.java.Strings.isEmpty(addrStr)) {
+        if (com.openexchange.java.Strings.isEmpty(addrStr) || "false".equalsIgnoreCase(addrStr)) {
             return null;
         }
         try {

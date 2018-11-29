@@ -558,7 +558,7 @@ properties:
       tags: ["Mail"]
     - key: com.openexchange.mail.maxMailSize
       description: |
-        Specifies the max. mail size allowed being transported.
+        Specifies the max. mail size in bytes allowed being transported.
         A value of <code>0</code> or less means infinite.
       defaultValue: -1
       version: 
@@ -866,6 +866,24 @@ properties:
         An image is considered as inline if Content-Disposition is simply set to "inline" and there is no file name information.
       defaultValue: true
       version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.remoteContentPerDefault
+      description: |
+        This option specifies whether content from remote servers will be loaded per default when displaying HTML mails.
+        
+        Setting this option to <code>true</code> means that content from remote server will be loaded and displayed in HTML mails. This can e.g.
+        mean that a user can be tracked.
+        
+        Setting this option to <code>false</code> means that no content from remote servers is loaded. This will e.g. block pictures embedded in
+        the mail. The client still is capable to load the content on its own.
+         
+      defaultValue: false
+      version: 7.10.1
       reloadable: true
       configcascadeAware: true
       related:

@@ -51,14 +51,11 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
-import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -125,23 +122,15 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         int calendarUserId = session.getUserId();
         event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, null);
         String folderId = CalendarUtils.getFolderView(event, calendarUserId);
+        CalendarFolder folder = getFolder(session, folderId, false);
         if (false == hasReadPermission(event)) {
-            CalendarFolder folder = getFolder(session, folderId);
             if (false == matches(event.getCreatedBy(), session.getUserId())) {
                 requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
             } else {
                 requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
             }
         }
-        event.setFolderId(folderId);
-        event.setFlags(getFlags(event, calendarUserId, session.getUserId()));
-        /*
-         * return event, anonymized as needed
-         */
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, calendarUserId);
-        }
-        return anonymizeIfNeeded(session, event);
+        return postProcessor().process(event, folder).getFirstEvent();
     }
 
     /**
@@ -350,7 +339,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             return null;
         }
         try {
-            return new EventPostProcessor(session, storage, false).process(events, folder).getEventsResult();
+            return postProcessor().process(events, folder).getEventsResult();
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }

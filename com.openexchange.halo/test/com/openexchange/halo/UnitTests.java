@@ -52,7 +52,7 @@ package com.openexchange.halo;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.halo.internal.ContactHaloImplTest;
+import com.openexchange.halo.contacts.ContactDataSourceTest;
 
 
 /**
@@ -62,7 +62,7 @@ import com.openexchange.halo.internal.ContactHaloImplTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    ContactHaloImplTest.class    
+    ContactDataSourceTest.class    
 })
 public class UnitTests {
 }

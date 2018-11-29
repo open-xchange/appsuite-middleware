@@ -426,7 +426,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
      * @param existingAccounts The accounts to check against the registered auto-provisioning calendar providers
      * @return The auto-provisioning calendar providers where no calendar account was found
      */
-    private List<AutoProvisioningCalendarProvider> getProvidersRequiringProvisioning(Session session, List<CalendarAccount> existingAccounts) throws OXException {
+    List<AutoProvisioningCalendarProvider> getProvidersRequiringProvisioning(Session session, List<CalendarAccount> existingAccounts) throws OXException {
         CalendarProviderRegistry providerRegistry = getProviderRegistry();
         List<AutoProvisioningCalendarProvider> unprovisionedProviders = new ArrayList<AutoProvisioningCalendarProvider>();
         for (AutoProvisioningCalendarProvider calendarProvider : providerRegistry.getAutoProvisioningCalendarProviders()) {
@@ -478,7 +478,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
      * @param maxAccounts The maximum number of accounts allowed for this provider and user
      * @return The new calendar account
      */
-    private CalendarAccount insertAccount(CalendarAccountStorage storage, String providerId, int userId, JSONObject internalConfig, JSONObject userConfig, int maxAccounts) throws OXException {
+    CalendarAccount insertAccount(CalendarAccountStorage storage, String providerId, int userId, JSONObject internalConfig, JSONObject userConfig, int maxAccounts) throws OXException {
         int accountId;
         if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
             accountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
@@ -547,13 +547,13 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         initAccountStorage(contextId, null).invalidateAccount(userId, accountId);
     }
 
-    private int getMaxAccounts(CalendarProvider provider, int contextId, int userId) throws OXException {
+    int getMaxAccounts(CalendarProvider provider, int contextId, int userId) throws OXException {
         int defaultValue = provider.getDefaultMaxAccounts();
         ConfigView view = requireService(ConfigViewFactory.class, services).getView(userId, contextId);
         return ConfigViews.getDefinedIntPropertyFrom(CalendarProviders.getMaxAccountsPropertyName(provider), defaultValue, view);
     }
 
-    private void checkMaxAccountsNotReached(CalendarStorage storage, CalendarProvider provider, int userId, int maxAccounts) throws OXException {
+    void checkMaxAccountsNotReached(CalendarStorage storage, CalendarProvider provider, int userId, int maxAccounts) throws OXException {
         if (0 < maxAccounts) {
             int numAccounts = storage.getAccountStorage().loadAccounts(new int[] { userId }, provider.getId()).size();
             if (maxAccounts <= numAccounts) {
@@ -575,7 +575,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         return capabilities.contains(capabilityName);
     }
 
-    private static List<CalendarAccount> sort(List<CalendarAccount> accounts) throws OXException {
+    private static List<CalendarAccount> sort(List<CalendarAccount> accounts) {
         if (null != accounts && 1 < accounts.size()) {
             accounts.sort(ACCOUNT_COMPARATOR);
         }

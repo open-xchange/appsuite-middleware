@@ -126,10 +126,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     private void applyEventData(final CalendarSession session, CalendarStorage storage, Event event) throws OXException {
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
-        for (Attendee attendee : event.getAttendees()) {
-            if (attendee.getEntity() == session.getUserId()) {
-                event.setFolderId(attendee.getFolderId());
-            }
+        Attendee attendee = CalendarUtils.find(event.getAttendees(), session.getUserId());
+        if (null != attendee) {
+            event.setFolderId(attendee.getFolderId());
         }
         if (event.getFolderId() == null) {
             event.setFolderId(getFolderIdForUser(session.getSession(), event.getId(), session.getUserId()));
@@ -144,19 +143,6 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     @Override
     public Event loadEvent(final Event event, final CalendarSession session) throws OXException {
         return load(session, event.getId());
-    }
-
-    @Override
-    public void createEvent(final Event event, final CalendarSession session) throws OXException {
-        session.getCalendarService().createEvent(session, event.getFolderId(), event);
-    }
-
-    @Override
-    public void updateEvent(final Event event, final CalendarSession session, final Date clientLastModified) throws OXException {
-        Event loadEvent = getStorage(session).getEventStorage().loadEvent(event.getId(), null);
-        loadEvent = getStorage(session).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
-        String folder = CalendarUtils.getFolderView(loadEvent, session.getUserId());
-        session.getCalendarService().updateEvent(session, new EventID(folder, event.getId()), event, clientLastModified.getTime());
     }
 
     @Override
@@ -180,29 +166,6 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             }
         }
         return retval;
-    }
-
-    @Override
-    public void changeConfirmationForExternalParticipant(Event event, ConfirmationChange change, CalendarSession session) throws OXException {
-        Attendee external = null;
-        if (event.getAttendees() == null) {
-            event = getStorage(session).getUtilities().loadAdditionalEventData(session.getUserId(), event, null);
-        }
-        for (Attendee attendee : event.getAttendees()) {
-            if (change.getIdentifier().equals(attendee.getEMail())) {
-                external = attendee;
-                break;
-            }
-        }
-
-        if (external == null) {
-            return;
-        }
-
-        external.setComment(change.getNewMessage());
-        external.setPartStat(change.getNewStatus());
-
-        session.getCalendarService().updateAttendee(session, new EventID(event.getFolderId(), event.getId()), external, null, event.getLastModified().getTime());
     }
 
     @Override

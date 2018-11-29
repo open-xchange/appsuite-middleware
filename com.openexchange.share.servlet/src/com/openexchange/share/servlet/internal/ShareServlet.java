@@ -217,7 +217,7 @@ public class ShareServlet extends AbstractShareServlet {
         } catch (RateLimitedException e) {
             e.send(response);
         } catch (OXException e) {
-            handleException(request, response, translator, e);
+           handleException(request, response, translator, e);
         }
     }
 
@@ -225,7 +225,7 @@ public class ShareServlet extends AbstractShareServlet {
      * Passes the resolved share to the most appropriate handler and lets him serve the request.
      *
      * @param shareRequest The share request
-     *            isn't existing or accessible.
+     * isn't existing or accessible.
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
@@ -242,7 +242,7 @@ public class ShareServlet extends AbstractShareServlet {
 
     /**
      * Handles the specified OXException
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @param response The {@link HttpServletResponse}
      * @param translator The {@link Translator} for translating the error message
@@ -256,8 +256,8 @@ public class ShareServlet extends AbstractShareServlet {
         }
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.debug("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
             try {
+                SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class, true);
                 String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
                 if (Strings.isEmpty(migrationRedirectURL)) {
                     LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
@@ -284,6 +284,7 @@ public class ShareServlet extends AbstractShareServlet {
         LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
         LoginLocationRegistry.getInstance().putAndRedirect(location, response);
     }
+
 
     /**
      * Sends a redirect with an {@link ShareServletStrings#SHARE_NOT_FOUND appropriate error message} for a not found share.
@@ -317,7 +318,11 @@ public class ShareServlet extends AbstractShareServlet {
         /*
          * send generic "not found" (via web interface) by default
          */
-        LoginLocation location = new LoginLocation().status(status).parameter("status", status).loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(displayMessage));
+        LoginLocation location = new LoginLocation()
+            .status(status)
+            .parameter("status", status)
+            .loginType(LoginType.MESSAGE)
+            .message(MessageType.ERROR, translator.translate(displayMessage));
         LoginLocationRegistry.getInstance().putAndRedirect(location, response);
     }
 

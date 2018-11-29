@@ -56,5 +56,5 @@ package com.openexchange.chronos.itip.generators;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum ArgumentType {
-    PARTICIPANT, ORIGINAL, UPDATED, STATUS, NONE, EMPHASIZED, REFERENCE, SHOWN_AS
+    PARTICIPANT, ORIGINAL, UPDATED, STATUS, NONE, EMPHASIZED, REFERENCE, SHOWN_AS, ITALIC
 }

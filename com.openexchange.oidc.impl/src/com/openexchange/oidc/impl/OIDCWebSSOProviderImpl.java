@@ -66,8 +66,10 @@ import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
@@ -210,7 +212,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return null;
     }
 
-    private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
+    private String getRedirectLocationForSession(HttpServletRequest request, Session session) {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
         return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
     }
@@ -288,8 +290,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
 
         URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getOpTokenEndpoint());
-
-        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
+        
+        Scope scope = this.backend.getScope();
+        if (codeGrant.getType() == GrantType.AUTHORIZATION_CODE) {
+            scope = null;
+        }
+        
+        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, scope);
         return this.backend.getTokenRequest(tokenRequest);
     }
 

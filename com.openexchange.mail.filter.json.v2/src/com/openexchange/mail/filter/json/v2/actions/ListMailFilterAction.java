@@ -92,7 +92,7 @@ public class ListMailFilterAction extends AbstractMailFilterAction{
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         final Map<String, String> parameters = request.getParameters();
-        final Credentials credentials = new Credentials(session);
+        final Credentials credentials = getCredentials(session, request);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final String flag = parameters.get(FLAG_PARAMETER);
         FilterType filterType;

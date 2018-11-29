@@ -1060,7 +1060,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
                         throw e;
                     }
-                    
+
                     // Grab from copied IMAP message
                     useGetPart = false;
                 }
@@ -1075,6 +1075,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         // Appropriate part found -- check for special content
                         final ContentType contentType = part.getContentType();
                         if (!isTNEFMimeType(contentType) && !isUUEncoded(part, contentType)) {
+                            if (!part.containsSequenceId()) {
+                                part.setSequenceId(sequenceId);
+                            }
                             return part;
                         }
                     }
@@ -1102,6 +1105,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final MailPart mailPart = handler.getMailPart();
             if (mailPart == null) {
                 throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(msgUID), fullName);
+            }
+            if (!mailPart.containsSequenceId()) {
+                mailPart.setSequenceId(sequenceId);
             }
             return mailPart;
         } catch (final MessagingException e) {
@@ -1167,7 +1173,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     if (!"Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
                         throw e;
                     }
-                    
+
                     // Grab from copied IMAP message
                     msg = MimeMessageUtility.newMimeMessage(((IMAPMessage) msg).getMimeStream(), null);
                     useGetPart = false;
@@ -1225,7 +1231,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean considerAsImage = false;
             if (null == ct) {
                 realFilename = getRealFilename(part);
-                if (false == Strings.isEmpty(realFilename) && MimeType2ExtMap.getContentType(realFilename, "").startsWith("image/")) {
+                if (Strings.isNotEmpty(realFilename) && MimeType2ExtMap.getContentType(realFilename, "").startsWith("image/")) {
                     considerAsImage = true;
                 }
             } else if (ct.startsWith("image/")) {

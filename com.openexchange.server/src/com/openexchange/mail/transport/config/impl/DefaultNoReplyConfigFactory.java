@@ -85,7 +85,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         return loadNoReplyConfig(contextId);
     }
 
-    public NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
+    private NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
 
         /*-

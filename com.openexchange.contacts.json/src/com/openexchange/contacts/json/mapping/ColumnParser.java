@@ -116,54 +116,12 @@ public class ColumnParser {
         int[] columnIDs = new int[splitted.length];
         try {
             for (int i = 0; i < splitted.length; i++) {
-                columnIDs[i] = replaceObsoleteColumnID(Integer.valueOf(splitted[i]));
+                columnIDs[i] = Integer.valueOf(splitted[i]);
             }
         } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", commaSeparated);
         }
         return columnIDs;
-    }
-
-    /**
-     * Replaces any obsolete column ID in the supplied array with it's correct one in case it indicates an outdated column ID.<p/>
-     * See also Bug #25300.
-     *
-     * @param columnIDs The column IDs
-     * @return The array containing valid column ID
-     */
-    public static int[] replaceObsoleteColumnIDs(int[] columnIDs) throws OXException {
-        if (null != columnIDs) {
-            for (int i = 0; i < columnIDs.length; i++) {
-                columnIDs[i] = replaceObsoleteColumnID(columnIDs[i]);
-            }
-        }
-        return columnIDs;
-    }
-
-    /**
-     * Replaces the supplied column ID with the correct one in case it indicates an outdated column ID.<p/>
-     * See also Bug #25300.
-     *
-     * @param columnID The column ID
-     * @return The replaced column ID in case a replacement is necessary, or the ID itself, otherwise
-     */
-    private static int replaceObsoleteColumnID(int columnID) {
-        switch (columnID) {
-        case 610:
-            return Contact.YOMI_FIRST_NAME;
-        case 611:
-            return Contact.YOMI_LAST_NAME;
-        case 612:
-            return Contact.YOMI_COMPANY;
-        case 613:
-            return Contact.ADDRESS_HOME;
-        case 614:
-            return Contact.ADDRESS_BUSINESS;
-        case 615:
-            return Contact.ADDRESS_OTHER;
-        default:
-            return columnID;
-        }
     }
 
     /**

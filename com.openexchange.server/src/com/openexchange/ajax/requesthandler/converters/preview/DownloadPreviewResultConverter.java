@@ -123,7 +123,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
             } finally {
                 Streams.close(fos);
             }
-            managedFile = fileManagement.createManagedFile(tempFile);
+            managedFile = fileManagement.createManagedFile(tempFile, -1, true);
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
@@ -136,7 +136,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
         /*
          * Set result object
          */
-        result.setResultObject(managedFile.constructURL(session), getOutputFormat());
+        result.setResultObject(managedFile.constructURL(session, false), getOutputFormat());
     }
 
 }

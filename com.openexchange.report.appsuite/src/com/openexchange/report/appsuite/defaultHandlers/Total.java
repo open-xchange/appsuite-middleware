@@ -75,7 +75,7 @@ public class Total implements ContextReportCumulator{
         long contexts = report.get(Report.TOTAL, Report.CONTEXTS, 0l, Long.class);
         long contextsDisabled = report.get(Report.TOTAL, Report.CONTEXTS_DISABLED, 0l, Long.class);
         
-        if (contextReport.getContext().isEnabled() == false) {
+        if (!contextReport.getContext().isEnabled()) {
             contextsDisabled++;
         }
         
@@ -118,7 +118,7 @@ public class Total implements ContextReportCumulator{
             report.set(Report.TOTAL, Report.LINKS, links);
             
         }
-        report.set(Report.TOTAL, "report-format", "appsuite-short");// TODO QS: what does this parameter say and what is it good for?
+        report.set(Report.TOTAL, "report-format", "appsuite-short");
         Long reportMax = report.get(Report.TOTAL, Report.CONTEXT_USERS_MAX, 0l, Long.class);
         Long reportMin = report.get(Report.TOTAL, Report.CONTEXT_USERS_MIN, 0l, Long.class);
         

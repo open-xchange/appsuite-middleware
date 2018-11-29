@@ -50,9 +50,12 @@
 package com.openexchange.consistency.osgi;
 
 import org.slf4j.Logger;
+import com.openexchange.consistency.ConsistencyMBean;
+import com.openexchange.consistency.OsgiOXConsistency;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -74,7 +77,7 @@ public final class ConsistencyActivator extends HousekeepingActivator {
         LOG.info("starting bundle: com.openexchange.consistency");
         ConsistencyServiceLookup.set(this);
 
-        track(ManagementService.class, new MBeanRegisterer(context));
+        track(ManagementService.class, new HousekeepingManagementTracker(context, ConsistencyMBean.MBEAN_NAME, ConsistencyMBean.MBEAN_DOMAIN,  new OsgiOXConsistency()));
         trackService(VCardStorageMetadataStore.class);
         trackService(DatabaseService.class);
 

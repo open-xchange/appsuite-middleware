@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.contacts;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,16 +59,15 @@ import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.Picture;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 public class ContactDataSource implements HaloContactDataSource, HaloContactImageSource {
@@ -78,24 +78,24 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         this.services = services;
     }
 
-	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-		List<Contact> mergedContacts = query.getMergedContacts();
-		List<Contact> allContacts = new ArrayList<Contact>(mergedContacts.size() + 1);
-		allContacts.add(query.getContact());
-		allContacts.addAll(mergedContacts);
-		return new AJAXRequestResult(allContacts, "contact");
-	}
+    @Override
+    public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) {
+        List<Contact> mergedContacts = query.getMergedContacts();
+        List<Contact> allContacts = new ArrayList<Contact>(mergedContacts.size() + 1);
+        allContacts.add(query.getContact());
+        allContacts.addAll(mergedContacts);
+        return new AJAXRequestResult(allContacts, "contact");
+    }
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.contacts";
-	}
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.contacts";
+    }
 
-	@Override
-	public boolean isAvailable(ServerSession session) {
-		return true;
-	}
+    @Override
+    public boolean isAvailable(ServerSession session) {
+        return true;
+    }
 
     @Override
     public int getPriority() {
@@ -103,22 +103,29 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     }
 
     @Override
-    public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
-        return getPicture0(contactQuery, session, true);
+    public ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        final ContactPicture picture = getPicture0(contactQuery, session, true);
+        if (null == picture) {
+            return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null));
+        }
+        return picture;
     }
 
     @Override
     public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
-        final Picture picture = getPicture0(contactQuery, session, true);
-        return null == picture ? null : picture.getEtag();
+        final ContactPicture picture = getPicture0(contactQuery, session, true);
+        if (null == picture) {
+            return services.getServiceSafe(ContactPictureService.class).getETag(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null));
+        }
+        return picture.getETag();
     }
 
-    private Picture getPicture0(HaloContactQuery contactQuery, ServerSession session, boolean withBytes) throws OXException {
+    private ContactPicture getPicture0(HaloContactQuery contactQuery, ServerSession session, boolean withBytes) throws OXException {
         List<Contact> mergedContacts = contactQuery.getCopyOfMergedContacts();
         if (mergedContacts == null) {
             mergedContacts = new ArrayList<>(0);
         }
-        Collections.sort(mergedContacts,  new ImagePrecedence());
+        Collections.sort(mergedContacts, new ImagePrecedence());
 
         for (final Contact contact : mergedContacts) {
             if (contact.getImage1() != null) {
@@ -131,7 +138,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
                     holder = null;
                 }
 
-                return new Picture(buildETagFor(contact), holder);
+                return new ContactPicture(buildETagFor(contact), holder, contact.getImageLastModified());
             }
         }
 
@@ -148,83 +155,11 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
                     holder = null;
                 }
 
-                return new Picture(buildETagFor(contact), holder);
+                return new ContactPicture(buildETagFor(contact), holder, contact.getImageLastModified());
             }
-        }
-
-        Contact contact = contactQuery.getContact();
-
-        Picture p = searchByMailAddress(session, contact.getEmail1(), withBytes);
-        if (p != null) {
-            return p;
-        }
-
-        p = searchByMailAddress(session, contact.getEmail2(), withBytes);
-        if (p != null) {
-            return p;
-        }
-
-        p = searchByMailAddress(session, contact.getEmail3(), withBytes);
-        if (p != null) {
-            return p;
-        }
-        // Give up
-
-        return null;
-    }
-
-    private Picture searchByMailAddress(ServerSession session, String email, boolean withBytes) throws OXException {
-        if (email == null) {
-            return null;
-        }
-        ContactSearchObject cso = new ContactSearchObject();
-        cso.setEmail1(email);
-        cso.setEmail2(email);
-        cso.setEmail3(email);
-        cso.setOrSearch(true);
-
-        SearchIterator<Contact> result = services.getService(ContactService.class).searchContacts(session, cso, new ContactField[]{ContactField.FOLDER_ID, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.LAST_MODIFIED});
-        if (result == null) {
-            return null;
-        }
-
-        List<Contact> contacts = new ArrayList<Contact>();
-        while(result.hasNext()) {
-            Contact contact = result.next();
-
-            if (contact.getImage1() != null && (checkEmail(contact, email))) {
-                contacts.add(contact);
-            }
-        }
-        Collections.sort(contacts, new ImagePrecedence());
-
-        for (Contact contact : contacts) {
-            final ByteArrayFileHolder holder;
-            if (withBytes) {
-                holder = new ByteArrayFileHolder(contact.getImage1());
-                holder.setContentType(contact.getImageContentType());
-                holder.setName("image");
-            } else {
-                holder = null;
-            }
-
-            return new Picture(buildETagFor(contact), holder);
         }
 
         return null;
-    }
-
-    private boolean checkEmail(Contact c, String email) {
-        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email)) {
-            return true;
-        }
-        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email)) {
-            return true;
-        }
-        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email)) {
-            return true;
-        }
-        return false;
     }
 
     private Contact getContact(ServerSession session, String folderId, String id) throws OXException {
