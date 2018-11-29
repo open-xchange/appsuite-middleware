@@ -99,7 +99,7 @@ public class CachingCalendarUtils {
      * @return <code>true</code> if accounts from this provider can be used for synchronization, <code>false</code> otherwise
      */
     public static boolean canBeUsedForSync(String providerId, Session session) {
-        DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.FALSE);
+        DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.TRUE);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         if (null == leanConfigurationService) {
             LOG.warn("Unable to access configuration service, assuming '{}' for '{}'.", property.getDefaultValue(), property.getFQPropertyName());

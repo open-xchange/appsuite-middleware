@@ -102,6 +102,7 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.exception.BasicCachingCalendarExceptionCodes;
