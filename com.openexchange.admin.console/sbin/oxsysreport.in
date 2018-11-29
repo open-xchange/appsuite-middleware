@@ -612,7 +612,7 @@ exclude_secret_entries() {
     local _separator='@SEPARATOR@'
     local _pattern='[[:blank:]]*(=|:)'
     local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|secretSource'
-    local _blacklist="pass(word|wd)*${_pattern}"
+    local _blacklist="pass(word|wd|crypt)*${_pattern}"
     local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
     local _blacklist="${_blacklist}|key${_pattern}"
     local _blacklist="${_blacklist}|salt${_pattern}"
@@ -620,13 +620,17 @@ exclude_secret_entries() {
     local _blacklist="${_blacklist}|(${_separator}|\.|[[:blank:]]|=)user(name)*${_pattern}"
 
     # strip all comments, remove empty files and delete empty files
-    for config in $(find "${_config_copy}" -type f); do
-        sed -E -i '/^[[:blank:]]*(#|$)/d' ${config}
+    IFS_BA=${IFS}
+    IFS='
+'
+    for config in $(find "${_config_copy}" -type f | sed 's|[[:blank:]]|\ |g'); do
+        sed -i '/^[[:blank:]]*#/d' ${config}
+        sed -i '/^[[:blank:]]*$/d' ${config}
         if [ ! -s "${config}" ] ; then
             rm ${config}
         fi
     done
-
+    IFS=${IFS_BA}
     find "${_config_copy}" -type f | \
         sed 's|[[:blank:]]|\\ |g' | \
         xargs egrep -iHrIv "${_whitelist}" | \
@@ -642,10 +646,17 @@ exclude_secret_entries() {
         # com.openexchange.oauth.msn.apiSecret=secret
         local _original_line=$(echo "${line}" | \
             sed "s|^${_file}${_separator}||g")
-        # com.openexchange.oauth.msn.apiSecret=
-        local _plain_property=$(echo "${_original_line}" | \
-            sed 's|=.*$|=|g' | \
-            sed 's|:.*$|:|g')
+
+        if [ -n "$(echo ${_file} | grep 'listconfigdiff' || true)" ]; then
+            # com.openexchange.oauth.msn.apiSecret=
+            local _plain_property=$(echo "${_original_line}" | sed 's|=.*$|=|g')
+        else
+            # com.openexchange.oauth.msn.apiSecret=
+            local _plain_property=$(echo "${_original_line}" | \
+                sed 's|=.*$|=|g' | \
+                sed 's|:.*$|:|g')
+        fi
+
         # secret
         local _secret_part=$(echo "${_original_line}" | \
             sed "s|${_plain_property}||g" | \
@@ -658,16 +669,12 @@ exclude_secret_entries() {
             sed 's|\||.|g' | \
             sed 's|\*|.|g' | \
             sed "s|'|.|g")
-        local _original_line=$(echo "${_original_line}" | \
-            sed 's|\[|.|g' | \
-            sed 's|\]|.|g' | \
-            sed 's|\||.|g' | \
-            sed 's|\*|.|g' | \
-            sed "s|'|.|g")
         # com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
         if [ -n "${_secret_part}" ]; then
             local _modified_line=$(echo "${_original_line}" | \
-                sed "s|${_secret_part}|<REMOVED BY OXSYSREPORT>|g")
+                sed "s|${_secret_part}$|<REMOVED BY OXSYSREPORT>|g")
+            local _original_line=$(echo "${_original_line}" | \
+                sed "s|${_secret_part}$|${_secret_part}|g")
         else
             # set this marker also if no value was set
             local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
