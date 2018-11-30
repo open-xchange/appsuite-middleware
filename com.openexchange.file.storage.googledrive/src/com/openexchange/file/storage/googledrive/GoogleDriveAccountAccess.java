@@ -76,12 +76,19 @@ import com.openexchange.session.Session;
 public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     private final FileStorageAccount account;
+
     private final Session session;
+
     private final FileStorageService service;
+
     private volatile OAuthAccess googleDriveAccess;
 
     /**
      * Initializes a new {@link GoogleDriveAccountAccess}.
+     * 
+     * @param service The {@link FileStorageService}
+     * @param account The {@link FileStorageAccount}
+     * @param session The {@link Session}
      */
     public GoogleDriveAccountAccess(FileStorageService service, FileStorageAccount account, Session session) {
         super();
@@ -119,7 +126,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
             }
             this.googleDriveAccess = googleDriveAccess;
         } else {
-           this. googleDriveAccess = googleDriveAccess.ensureNotExpired();
+            this.googleDriveAccess = googleDriveAccess.ensureNotExpired();
         }
     }
 

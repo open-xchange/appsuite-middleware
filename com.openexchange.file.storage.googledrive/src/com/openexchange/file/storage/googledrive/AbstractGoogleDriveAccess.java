@@ -49,23 +49,14 @@
 
 package com.openexchange.file.storage.googledrive;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
-import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.File.Labels;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
-import com.openexchange.java.Strings;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
 /**
@@ -79,12 +70,19 @@ public abstract class AbstractGoogleDriveAccess {
     // private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
 
     protected final GoogleDriveOAuthAccess googleDriveAccess;
+
     protected final Session session;
+
     protected final FileStorageAccount account;
+
     protected String rootFolderIdentifier;
 
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
+     * 
+     * @param googleDriveAccess The {@link GoogleDriveAccountAccess} to use
+     * @param account The {@link FileStorageAccount}
+     * @param session The {@link Session}
      */
     protected AbstractGoogleDriveAccess(final GoogleDriveOAuthAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
         super();
@@ -109,8 +107,6 @@ public abstract class AbstractGoogleDriveAccess {
                     Drive drive = googleDriveAccess.<Drive> getClient().client;
                     rootFolderId = drive.files().get("root").execute().getId();
                     session.setParameter(key, rootFolderId);
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(null, e);
                 } catch (IOException e) {
                     throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
@@ -118,103 +114,6 @@ public abstract class AbstractGoogleDriveAccess {
             rootFolderIdentifier = rootFolderId;
         }
         return rootFolderId;
-    }
-
-    /** Status code (400) indicating the request sent by the client was syntactically incorrect. */
-    protected static final int SC_BAD_REQUEST = 400;
-
-    /** Status code (401) indicating that the request requires HTTP authentication. */
-    protected static final int SC_UNAUTHORIZED = 401;
-
-    /** Status code (403) indicating the server understood the request but refused to fulfill it. */
-    protected static final int SC_FORBIDDEN = 403;
-
-    /** Status code (404) indicating that the requested resource is not available. */
-    protected static final int SC_NOT_FOUND = 404;
-
-    /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
-    protected static final int SC_CONFLICT = 409;
-
-    /**
-     * Handles given HTTP response error.
-     *
-     * @param identifier The option identifier for associated Google Drive resource
-     * @param e The HTTP error
-     * @return The resulting exception
-     */
-    public OXException handleHttpResponseError(String identifier, HttpResponseException e) {
-        if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
-            return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
-        }
-
-        if (SC_CONFLICT == e.getStatusCode()) {
-            return FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
-        }
-
-        if (SC_BAD_REQUEST == e.getStatusCode()) {
-            if (hasInvalidGrant(e)) {
-                return createInvalidAccessTokenException();
-            }
-            return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
-        }
-
-        if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            if (hasInvalidGrant(e)) {
-                return createInvalidAccessTokenException();
-            }
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), GoogleDriveConstants.ID, e.getMessage());
-        }
-
-        if (SC_FORBIDDEN == e.getStatusCode()) {
-            // See https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors
-            if (e.getMessage().indexOf("userRateLimitExceeded") > 0) {
-                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
-            }
-            if (e.getMessage().indexOf("insufficientPermissions") > 0) {
-                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, KnownApi.GOOGLE.getDisplayName(), OXScope.drive.getDisplayName());
-            }
-        }
-
-        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
-    }
-
-    /**
-     * Creates an access token invalid {@link OXException}
-     *
-     * @return The {@link OXException}
-     */
-    private OXException createInvalidAccessTokenException() {
-        OAuthAccount oAuthAccount = googleDriveAccess.getOAuthAccount();
-        API api = oAuthAccount.getAPI();
-        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
-    }
-
-    /**
-     * Determines whether the specified {@link HttpResponseException} is caused due to an 'invalid_grant'.
-     *
-     * @param e The {@link HttpResponseException}
-     * @return <code>true</code> if the exception was caused due to an 'invalid_grant'; <code>false</code>
-     *         otherwise
-     */
-    private boolean hasInvalidGrant(HttpResponseException e) {
-        String content = e.getContent();
-        return Strings.isNotEmpty(content) && content.contains("invalid_grant");
-    }
-
-    /**
-     * Checks if specified {@link HttpResponseException} instance denoted a rate limit exception.
-     *
-     * @param e The exception to check
-     * @return <code>true</code> if user hit a rate limit exception; otherwise <code>false</code>
-     */
-    protected static boolean isUserRateLimitExceeded(HttpResponseException e) {
-        if (SC_FORBIDDEN == e.getStatusCode()) {
-            // See https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors
-            if (e.getMessage().indexOf("userRateLimitExceeded") > 0) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -226,22 +125,11 @@ public abstract class AbstractGoogleDriveAccess {
      * @throws IOException If check fails
      */
     protected static boolean isTrashed(String id, Drive drive) throws IOException {
-        Labels labels = drive.files().get(id).setFields("labels/trashed").execute().getLabels();
-        if (null == labels) {
+        File file = drive.files().get(id).setFields("trashed").execute();
+        if (null == file.getTrashed()) {
             return false;
         }
-        Boolean trashed = labels.getTrashed();
-        return null != trashed && trashed.booleanValue();
-    }
-
-    /**
-     * Checks if given file is a directory.
-     *
-     * @param file The file to check
-     * @return <code>true</code> if file is a directory, otherwise <code>false</code>
-     */
-    protected static boolean isDir(File file) {
-        return MIME_TYPE_DIRECTORY.equals(file.getMimeType());
+        return file.getTrashed().booleanValue();
     }
 
     /**
@@ -255,6 +143,27 @@ public abstract class AbstractGoogleDriveAccess {
         if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(file.getId(), "");
         }
+    }
+
+    /**
+     * Moves the given file to the trash
+     * 
+     * @param drive The client API
+     * @param fileId The identifier of the file to trash
+     * @throws IOException On error
+     */
+    protected void trashFile(Drive drive, String fileId) throws IOException {
+        drive.files().update(fileId, new com.google.api.services.drive.model.File().setTrashed(Boolean.TRUE)).execute();
+    }
+
+    /**
+     * Checks if given file is a directory.
+     *
+     * @param file The file to check
+     * @return <code>true</code> if file is a directory, otherwise <code>false</code>
+     */
+    protected static boolean isDir(File file) {
+        return MIME_TYPE_DIRECTORY.equals(file.getMimeType());
     }
 
     /**
