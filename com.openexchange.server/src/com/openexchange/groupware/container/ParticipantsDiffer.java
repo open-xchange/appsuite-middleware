@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.container;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Arrays;
 
 /**
  * {@link ParticipantsDiffer}

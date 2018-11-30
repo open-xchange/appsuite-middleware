@@ -53,8 +53,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -71,8 +73,6 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FreeBusyBody;
 import com.openexchange.testing.httpclient.models.FreeBusyTime;
-import edu.emory.mathcs.backport.java.util.Collections;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  *

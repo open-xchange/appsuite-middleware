@@ -51,13 +51,13 @@ package com.openexchange.test.pool;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link TestContext}

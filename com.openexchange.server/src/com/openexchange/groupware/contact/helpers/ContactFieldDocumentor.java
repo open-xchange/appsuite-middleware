@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ContactFieldDocumentor {
 
