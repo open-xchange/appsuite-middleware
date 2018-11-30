@@ -402,7 +402,12 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public Collection<JSlob> get(final Session session) throws OXException {
+    public Collection<JSlob> get(Session session) throws OXException {
+        return get(true, session);
+    }
+
+    @Override
+    public Collection<JSlob> get(boolean allowInjectingConfigTreeSettings, Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
 
@@ -414,7 +419,7 @@ public final class ConfigJSlobService implements JSlobService {
             Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
             ret = new ArrayList<JSlob>(list.size() << 1);
             for (final JSlob jSlob : list) {
-                addConfigTreeToJslob(session, DefaultJSlob.copyOf(jSlob));
+                addConfigTreeToJslob(DefaultJSlob.copyOf(jSlob), allowInjectingConfigTreeSettings, session);
                 ret.add(get(jSlob.getId().getId(), session));
                 if (jSlob.getId().getId().equals(CORE)) {
                     coreIncluded = true;
@@ -426,13 +431,13 @@ public final class ConfigJSlobService implements JSlobService {
         {
             ConfigView view = getConfigViewFactory().getView(userId, contextId);
             ConcurrentMap<String, Map<String, AttributedProperty>> preferenceItems = preferenceItemsReference.get();
-            for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
+            for (final Map.Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
                 final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
                 jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
 
-                addConfigTreeToJslob(session, jSlob);
+                addConfigTreeToJslob(jSlob, allowInjectingConfigTreeSettings, session);
 
-                for (final Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
+                for (final Map.Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
                     add2JSlob(entry2.getValue(), jSlob, view);
                 }
 
@@ -446,11 +451,11 @@ public final class ConfigJSlobService implements JSlobService {
 
         // Append registered JSlob entries
         {
-            for (Entry<String, Map<String, JSlobEntryWrapper>> entry : jSlobEntryRegistry.getAvailableJSlobEntries().entrySet()) {
+            for (Map.Entry<String, Map<String, JSlobEntryWrapper>> entry : jSlobEntryRegistry.getAvailableJSlobEntries().entrySet()) {
                 DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
                 jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
 
-                for (final Entry<String, JSlobEntryWrapper> entry2 : entry.getValue().entrySet()) {
+                for (final Map.Entry<String, JSlobEntryWrapper> entry2 : entry.getValue().entrySet()) {
                     add2JSlob(entry2.getValue(), jSlob, session);
                 }
 
@@ -465,7 +470,7 @@ public final class ConfigJSlobService implements JSlobService {
         if (!coreIncluded) {
             final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
             jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
-            addConfigTreeToJslob(session, jSlob);
+            addConfigTreeToJslob(jSlob, allowInjectingConfigTreeSettings, session);
         }
 
         // Search for shared jslobs and merge them if necessary
@@ -489,7 +494,12 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public JSlob get(final String id, final Session session) throws OXException {
+    public JSlob get(String id, Session session) throws OXException {
+        return get(id, true, session);
+    }
+
+    @Override
+    public JSlob get(String id, boolean allowInjectingConfigTreeSettings, Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
 
@@ -507,7 +517,7 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
         // Append config tree settings
-        addConfigTreeToJslob(session, jsonJSlob);
+        addConfigTreeToJslob(jsonJSlob, allowInjectingConfigTreeSettings, session);
 
         // Append config cascade settings
         ConcurrentMap<String, Map<String, AttributedProperty>> preferenceItems = preferenceItemsReference.get();
@@ -536,6 +546,11 @@ public final class ConfigJSlobService implements JSlobService {
 
     @Override
     public List<JSlob> get(List<String> ids, Session session) throws OXException {
+        return get(ids, true, session);
+    }
+
+    @Override
+    public List<JSlob> get(List<String> ids, boolean allowInjectingConfigTreeSetting, Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         final int size = ids.size();
@@ -564,7 +579,7 @@ public final class ConfigJSlobService implements JSlobService {
             }
 
             // Append config tree settings
-            addConfigTreeToJslob(session, jsonJSlob);
+            addConfigTreeToJslob(jsonJSlob, allowInjectingConfigTreeSetting, session);
 
             // Append config cascade settings
             ConcurrentMap<String, Map<String, AttributedProperty>> preferenceItems = preferenceItemsReference.get();
@@ -610,14 +625,18 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     /**
-     * Adds data from config-tree to jslob mappings.
+     * Adds settings from config-tree to jslob mappings.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The {@link DefaultJSlob} instance.
+     * @param jsLob The JSlob to enhance by possible settings from config-tree
+     * @param allowInjectingConfigTreeSettings <code>true</code> to allow injecting settings from config-tree; otherwise <code>false</code>
+     * @param session The session providing user data
      * @throws OXException If operation fails
      */
-    private void addConfigTreeToJslob(final Session session, final DefaultJSlob jsLob) throws OXException {
+    private void addConfigTreeToJslob(final DefaultJSlob jsLob, final boolean allowInjectingConfigTreeSettings, final Session session) throws OXException {
+        if (false == allowInjectingConfigTreeSettings) {
+            return;
+        }
+
         try {
             ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = configTreeEquivalentsReference.get();
             final ConfigTreeEquivalent equiv = configTreeEquivalents.get(jsLob.getId().getId());
