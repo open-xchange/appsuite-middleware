@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import java.rmi.server.UID;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +72,6 @@ import com.openexchange.testing.httpclient.models.UserData;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link MailAlarmTriggerTest}
