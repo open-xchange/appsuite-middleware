@@ -188,7 +188,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical.ical4j"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.9.9.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.10.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
