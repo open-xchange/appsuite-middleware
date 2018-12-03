@@ -49,7 +49,7 @@
 
 package com.openexchange.policy.retry;
 
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link LinearRetryPolicy}
