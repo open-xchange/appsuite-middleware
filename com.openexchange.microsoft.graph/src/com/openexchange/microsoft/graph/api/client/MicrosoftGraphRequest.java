@@ -56,7 +56,7 @@ import com.openexchange.rest.client.v2.RESTMethod;
  * {@link MicrosoftGraphRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MicrosoftGraphRequest extends AbstractRESTRequest {
 

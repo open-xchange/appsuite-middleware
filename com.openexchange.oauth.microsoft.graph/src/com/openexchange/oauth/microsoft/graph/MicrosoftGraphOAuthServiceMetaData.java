@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link MicrosoftGraphOAuthServiceMetaData}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MicrosoftGraphOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 

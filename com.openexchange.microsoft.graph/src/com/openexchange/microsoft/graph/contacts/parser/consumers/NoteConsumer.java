@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.Contact;
  * {@link NoteConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class NoteConsumer implements BiConsumer<JSONObject, Contact> {
 

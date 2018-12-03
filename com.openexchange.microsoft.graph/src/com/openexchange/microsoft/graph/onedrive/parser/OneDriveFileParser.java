@@ -63,7 +63,7 @@ import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
  * {@link OneDriveFileParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class OneDriveFileParser {
 

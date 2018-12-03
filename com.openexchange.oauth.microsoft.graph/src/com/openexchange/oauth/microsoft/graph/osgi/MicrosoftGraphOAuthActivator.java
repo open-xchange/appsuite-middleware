@@ -62,7 +62,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  * {@link MicrosoftGraphOAuthActivator} - The activator for the Microsoft Graph OAuth service.
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public final class MicrosoftGraphOAuthActivator extends AbstractOAuthActivator {
 

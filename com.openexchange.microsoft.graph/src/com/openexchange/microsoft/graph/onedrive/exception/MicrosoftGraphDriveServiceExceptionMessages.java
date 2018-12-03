@@ -55,7 +55,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link MicrosoftGraphDriveServiceExceptionMessages}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MicrosoftGraphDriveServiceExceptionMessages implements LocalizableStrings {
 

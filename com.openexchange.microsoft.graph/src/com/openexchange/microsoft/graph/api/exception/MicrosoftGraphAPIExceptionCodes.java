@@ -64,7 +64,7 @@ import com.openexchange.java.Strings;
  * the Microsoft Graph endpoint might return.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/errors#code-property">Basic Error Codes</a>
  */
 public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCode {

@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.Contact;
  * {@link OccupationConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class OccupationConsumer implements BiConsumer<JSONObject, Contact> {
 

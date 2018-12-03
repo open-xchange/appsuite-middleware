@@ -60,7 +60,7 @@ import com.openexchange.file.storage.TypeAware;
  * {@link OneDriveFolder}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class OneDriveFolder extends DefaultFileStorageFolder implements TypeAware {
 

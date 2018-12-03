@@ -55,7 +55,7 @@ import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
  * {@link MicrosoftGraphAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MicrosoftGraphAPI {
 

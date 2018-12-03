@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.Contact;
  * we only fetch the first three we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
 

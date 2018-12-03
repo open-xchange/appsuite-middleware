@@ -59,7 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link MicrosoftGraphDriveServiceExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public enum MicrosoftGraphDriveServiceExceptionCodes implements DisplayableOXExceptionCode {
     /**

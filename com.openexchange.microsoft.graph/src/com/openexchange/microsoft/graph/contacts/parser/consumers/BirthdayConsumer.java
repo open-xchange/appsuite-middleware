@@ -63,7 +63,7 @@ import com.openexchange.java.util.TimeZones;
  * {@link BirthdayConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class BirthdayConsumer implements BiConsumer<JSONObject, Contact> {
 

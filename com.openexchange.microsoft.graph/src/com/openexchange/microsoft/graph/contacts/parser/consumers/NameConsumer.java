@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.Contact;
  * along with their yomi representations if available.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class NameConsumer implements BiConsumer<JSONObject, Contact> {
 

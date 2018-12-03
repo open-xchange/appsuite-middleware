@@ -66,7 +66,7 @@ import com.openexchange.oauth.KnownApi;
  * the old MSLive subscriptions to the new Microsoft Graph serviceId.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MigrateMSLiveSubscriptionsTask implements UpdateTaskV2 {
 

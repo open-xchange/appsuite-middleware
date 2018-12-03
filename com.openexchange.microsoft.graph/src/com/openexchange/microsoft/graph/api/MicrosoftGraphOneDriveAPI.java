@@ -82,7 +82,7 @@ import com.openexchange.rest.client.v2.entity.JSONObjectEntity;
  * {@link MicrosoftGraphOneDriveAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 

@@ -60,7 +60,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * {@link MicrosoftGraphAPIActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class MicrosoftGraphAPIActivator extends HousekeepingActivator {
 
