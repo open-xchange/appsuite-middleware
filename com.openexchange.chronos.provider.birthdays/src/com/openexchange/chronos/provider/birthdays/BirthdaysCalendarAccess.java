@@ -299,7 +299,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     @Override
     public String getCTag() throws OXException {
-        return Long.toString(getLastModified().getTime());
+        return getLastModifiedChecksum();
     }
 
     private List<Event> postProcess(List<Event> events, boolean master) throws OXException {
@@ -483,9 +483,9 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         return folderIds;
     }
 
-    private static final ContactField[] LAST_MODIFIED_FIELDS = new ContactField[] {ContactField.LAST_MODIFIED, ContactField.BIRTHDAY};
+    private static final ContactField[] LAST_MODIFIED_FIELDS = new ContactField[] {ContactField.LAST_MODIFIED};
 
-    private Date getLastModified() throws OXException {
+    private String getLastModifiedChecksum() throws OXException {
         Date lastModified = new Date(0);
         List<String> folders = getAllContactFolderIds();
 
@@ -493,13 +493,13 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         sortOptions.setLimit(1);
         ContactService contactService = services.getService(ContactService.class);
 
+        int foldersHash = 1;
         for (String folder : folders) {
+            foldersHash = 31 * foldersHash + folder.hashCode(); 
             try (SearchIterator<Contact> searchIterator = contactService.getModifiedContacts(session, folder, lastModified, LAST_MODIFIED_FIELDS, sortOptions)) {
                 if (searchIterator.hasNext()) {
                     Contact contact = searchIterator.next();
-                    if (contact.getBirthday() != null) {
-                        lastModified = lastModified.after(contact.getLastModified()) ? lastModified : contact.getLastModified();
-                    }
+                    lastModified = lastModified.after(contact.getLastModified()) ? lastModified : contact.getLastModified();
                 }
             }
             try (SearchIterator<Contact> searchIterator = contactService.getDeletedContacts(session, folder, lastModified, LAST_MODIFIED_FIELDS, sortOptions)) {
@@ -509,7 +509,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 }
             }
         }
-        return lastModified;
+        return lastModified.getTime() + "-" + foldersHash;
     }
 
     protected Date getFrom() {

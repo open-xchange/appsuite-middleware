@@ -59,6 +59,12 @@ import com.openexchange.exception.OXException;
  */
 public interface BasicCTagAware extends CTagAware {
 
+    /**
+     * Returns a cTag.
+     * 
+     * @return The cTag.
+     * @throws OXException
+     */
     String getCTag() throws OXException;
 
 }

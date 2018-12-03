@@ -51,6 +51,7 @@ package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,31 +63,33 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.dav.mixins.SyncToken;
+import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link BirthdaysCollection}
+ * {@link CTagEventCollection}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.2
  */
-public class BirthdaysCollection extends EventCollection {
+public class CTagEventCollection extends EventCollection {
 
     /**
-     * Initializes a new {@link BirthdaysCollection}.
+     * Initializes a new {@link CTagEventCollection}.
      * 
      * @param factory The factory
      * @param url The WebDAV path
      * @param folder The underlying folder, or <code>null</code> if it not yet exists
      * @param order The calendar order to use, or {@value #NO_ORDER} for no specific order
      */
-    public BirthdaysCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
+    public CTagEventCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
 
         // Do not support 'sync-collection' and SyncToken.
@@ -163,6 +166,11 @@ public class BirthdaysCollection extends EventCollection {
     @Override
     protected WebdavPath constructPathForChildResource(Event object) {
         return constructPathForChildResource(object.getId() + getFileExtension());
+    }
+
+    @Override
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+        throw new UnsupportedOperationException();
     }
 
 }

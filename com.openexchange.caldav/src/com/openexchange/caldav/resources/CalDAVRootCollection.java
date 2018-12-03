@@ -53,6 +53,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
@@ -61,6 +62,7 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.caldav.mixins.SupportedReportSet;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.Privilege;
@@ -118,11 +120,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
         super(factory, "Calendars");
         this.factory = factory;
-        super.includeProperties(
-            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet(),
-            new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
-        );
+        super.includeProperties(new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet(), new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND));
     }
 
     @Override
@@ -191,24 +189,15 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
             return factory.mixin(new TaskCollection(factory, constructPathForChildResource(folder), folder, order));
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            if (isBirthdaysFolder(folder)) {
-                return factory.mixin(new BirthdaysCollection(factory, constructPathForChildResource(folder), folder, order));
-            } else {
+            if (folder.getSupportedCapabilities().contains(CalendarCapability.SYNC.getName())) {
                 return factory.mixin(new EventCollection(factory, constructPathForChildResource(folder), folder, order));
             }
-        } else {
-            throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
+            if (folder.getSupportedCapabilities().contains(CalendarCapability.CTAG.getName())) {
+                return factory.mixin(new CTagEventCollection(factory, constructPathForChildResource(folder), folder, order));
+            }
+            throw new UnsupportedOperationException("Folder " + folder.getID() + " is not available via CalDAV.");
         }
-    }
-
-    private boolean isBirthdaysFolder(UserizedFolder folder) {
-        if (folder.getProperties() == null) {
-            return false;
-        }
-        if (folder.getProperties().get(CalendarFolderConverter.CALENDAR_PROVIDER_FIELD) == null) {
-            return false;
-        }
-        return folder.getProperties().get(CalendarFolderConverter.CALENDAR_PROVIDER_FIELD).getValue().equals("birthdays");
+        throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
     }
 
     @Override
@@ -283,8 +272,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
      */
     private List<UserizedFolder> getSynchronizedFolders(Type type, ContentType contentType) throws OXException {
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
-        FolderResponse<UserizedFolder[]> visibleFoldersResponse = getFolderService().getVisibleFolders(
-                getTreeID(), contentType, type, false, factory.getSession(), null);
+        FolderResponse<UserizedFolder[]> visibleFoldersResponse = getFolderService().getVisibleFolders(getTreeID(), contentType, type, false, factory.getSession(), null);
         UserizedFolder[] response = visibleFoldersResponse.getResponse();
         for (UserizedFolder folder : response) {
             if (isUsedForSync(folder)) {
@@ -307,6 +295,10 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (isTrashFolder(folder)) {
             return false;
         }
+        Set<String> caps = folder.getSupportedCapabilities();
+        if (!caps.contains(CalendarCapability.SYNC.getName()) && !caps.contains(CalendarCapability.CTAG.getName())) {
+            return false;
+        }
         Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
         return null == value || Boolean.parseBoolean(String.valueOf(value));
     }
@@ -319,8 +311,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
     private String getTrashFolderID() {
         if (null == trashFolderID) {
             try {
-                trashFolderID = getFolderService().getDefaultFolder(factory.getUser(), OUTLOOK_TREE_ID,
-                        TrashContentType.getInstance(), factory.getSession(), null).getID();
+                trashFolderID = getFolderService().getDefaultFolder(factory.getUser(), OUTLOOK_TREE_ID, TrashContentType.getInstance(), factory.getSession(), null).getID();
             } catch (OXException e) {
                 LOG.warn("unable to determine default trash folder", e);
             }
@@ -338,15 +329,13 @@ public class CalDAVRootCollection extends DAVRootCollection {
      * @throws OXException
      */
     private boolean isTrashFolder(UserizedFolder folder) throws OXException {
-        if (OUTLOOK_TREE_ID.equals(getTreeID()) && PrivateType.getInstance().equals(folder.getType()) &&
-            ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits().hasOLOX20()) {
+        if (OUTLOOK_TREE_ID.equals(getTreeID()) && PrivateType.getInstance().equals(folder.getType()) && ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits().hasOLOX20()) {
             String trashFolderId = this.getTrashFolderID();
             if (null != trashFolderId) {
                 if (trashFolderId.equals(folder.getParentID())) {
                     return true;
                 }
-                FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(
-                        OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
+                FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
                 UserizedFolder[] response = pathResponse.getResponse();
                 for (UserizedFolder parentFolder : response) {
                     if (trashFolderId.equals(parentFolder.getID())) {
