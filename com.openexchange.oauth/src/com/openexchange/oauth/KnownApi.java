@@ -117,12 +117,6 @@ public enum KnownApi implements API {
      */
     BOX_COM("Box.com", "com.openexchange.oauth.boxcom", "boxcom", BoxApi.class),
     /**
-     * Microsoft Live Connect
-     * 
-     * @deprecated Use {@link #MICROSOFT_GRAPH} instead
-     */
-    MS_LIVE_CONNECT("MS Live", "com.openexchange.oauth.msliveconnect", "msliveconnect", MsLiveConnectApi.class),
-    /**
      * Copy.com
      */
     COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom", CopyApi.class),
