@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -56,7 +57,6 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
-import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link MailProvider} - The main intention of the provider class is to make the implementing classes available which define the abstract

@@ -16,8 +16,7 @@
 	<classpathentry kind="lib" path="lib/js.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.4-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-core-2.9.7.jar" sourcepath="/com.openexchange.bundles/source/jackson-core-2.9.7-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-databind-2.9.7.jar" sourcepath="/com.openexchange.bundles/source/jackson-databind-2.9.7-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201404270220.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201404270220.jar"/>
@@ -189,7 +188,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical.ical4j"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.9.9.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.10.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
