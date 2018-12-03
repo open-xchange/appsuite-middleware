@@ -126,7 +126,7 @@ public class OAuthAddScopeColumnTask extends AbstractOAuthUpdateTask {
         BOXCOM(KnownApi.BOX_COM.getServiceId(), OXScope.drive),
         DROPBOX(KnownApi.DROPBOX.getServiceId(), OXScope.drive),
         GOOGLE(KnownApi.GOOGLE.getServiceId(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
-        MSLIVE_CONNECT(KnownApi.MS_LIVE_CONNECT.getServiceId(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        MS_GRAPH(KnownApi.MICROSOFT_GRAPH.getServiceId(), OXScope.contacts_ro, OXScope.drive),
         LINKEDIN(KnownApi.LINKEDIN.getServiceId(), OXScope.contacts_ro),
         VKONTAKTE(KnownApi.VKONTAKTE.getServiceId(), OXScope.contacts_ro),
         XING(KnownApi.XING.getServiceId(), OXScope.contacts_ro),
