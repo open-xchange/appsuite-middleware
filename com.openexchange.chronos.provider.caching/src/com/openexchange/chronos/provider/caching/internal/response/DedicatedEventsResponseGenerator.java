@@ -64,7 +64,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -87,21 +87,19 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
 
     final List<EventID> eventIDs;
 
-    public DedicatedEventsResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, List<EventID> eventIDs) {
+    public DedicatedEventsResponseGenerator(AlarmAwareCachingCalendarAccess cachedCalendarAccess, List<EventID> eventIDs) {
         super(cachedCalendarAccess);
         this.eventIDs = eventIDs;
     }
 
     public List<Event> generate() throws OXException {
         return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
-
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
                 List<Event> readEvents = readEvents(storage);
                 EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
                 return storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), readEvents, fields);
             }
-
         }.executeQuery();
     }
 

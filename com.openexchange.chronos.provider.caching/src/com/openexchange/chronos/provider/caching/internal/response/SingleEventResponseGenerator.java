@@ -57,7 +57,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -76,7 +76,7 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
     final String eventId;
     final RecurrenceId recurrenceId;
 
-    public SingleEventResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, String eventId, RecurrenceId recurrenceId) {
+    public SingleEventResponseGenerator(AlarmAwareCachingCalendarAccess cachedCalendarAccess, String eventId, RecurrenceId recurrenceId) {
         super(cachedCalendarAccess);
         this.eventId = eventId;
         this.recurrenceId = recurrenceId;

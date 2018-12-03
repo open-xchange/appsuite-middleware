@@ -56,9 +56,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.provider.caching.basic.BasicAlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
 import com.openexchange.chronos.provider.common.AlarmHelper;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
@@ -79,7 +83,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesCalendarAccess extends BasicAlarmAwareCachingCalendarAccess {
+public class BasicSchedJoulesCalendarAccess extends AlarmAwareCachingCalendarAccess {
 
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
@@ -113,7 +117,22 @@ public class BasicSchedJoulesCalendarAccess extends BasicAlarmAwareCachingCalend
     }
 
     @Override
-    protected long getRefreshInterval() throws OXException {
+    public CalendarSettings getSettings() {
+        JSONObject internalConfig = account.getInternalConfiguration();
+        ExtendedProperties extendedProperties = getExtendedProperties();
+        if (CachingCalendarUtils.canBeUsedForSync(BasicSchedJoulesCalendarProvider.PROVIDER_ID, session)) {
+            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
+        } else {
+            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        }
+
+        CalendarSettings settings = getCalendarSettings(extendedProperties);
+        settings.setSubscribed(true);
+        return settings;
+    }
+
+    @Override
+    protected long getRefreshInterval() {
         return account.getUserConfiguration().optLong(SchedJoulesFields.REFRESH_INTERVAL, 0);
     }
 

@@ -49,7 +49,13 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
+import static com.openexchange.osgi.Tools.requireService;
+import java.util.List;
 import org.json.JSONObject;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.UserConfigWrapper;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -58,6 +64,7 @@ import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -73,7 +80,25 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
     @Override
     public final JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         //Nothing caching specific to do
-        return configureAccountOpt(session, settings, parameters);
+        JSONObject result = configureAccountOpt(session, settings, parameters);
+        checkAlarms(result);
+        return result;
+    }
+
+    private void checkAlarms(JSONObject result) throws OXException {
+        /*
+         * check default alarm
+         */
+        try {
+            UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, Services.getServiceLookup()), result);
+            List<Alarm> defaultAlarm = configWrapper.getDefaultAlarmDate();
+            if (null != defaultAlarm) {
+                Check.alarmsAreValid(defaultAlarm);
+                Check.haveReleativeTriggers(defaultAlarm);
+            }
+        } catch (OXException e) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(result));
+        }
     }
 
     /**
@@ -121,6 +146,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
         if (reconfigureAccountOpt == null) { // make sure changes from caching will be used
             return internalConfiguration;
         }
+        checkAlarms(reconfigureAccountOpt);
         return reconfigureAccountOpt;
     }
 

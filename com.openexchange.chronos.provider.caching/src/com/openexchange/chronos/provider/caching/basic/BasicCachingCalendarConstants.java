@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 public class BasicCachingCalendarConstants {
 
     /**
-     * The minimum interval (in seconds) that is allowed to be configured when implementing {@link BasicCachingCalendarAccess#getRetryAfterErrorInterval(OXException)}
+     * The minimum interval (in seconds) that is allowed to be configured when implementing {@link AlarmAwareCachingCalendarAccess#getRetryAfterErrorInterval(OXException)}
      */
     public static final int MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL = 2;
 

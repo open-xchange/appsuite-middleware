@@ -292,7 +292,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
         AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getOptionalService(CalendarUtilities.class), alarms);
-        UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
+        UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms, false);
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);
     }

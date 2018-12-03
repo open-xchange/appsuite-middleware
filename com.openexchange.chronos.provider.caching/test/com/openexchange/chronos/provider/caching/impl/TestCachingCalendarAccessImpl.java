@@ -69,14 +69,14 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
 
     private boolean configSaved = false;
 
-    public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) {
         super(session, account, parameters);
     }
 
     boolean cacheUpdated = false;
 
     @Override
-    protected void update() throws OXException {
+    protected void update() {
         cacheUpdated = true;
     }
 
@@ -111,7 +111,7 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
-    public ExternalCalendarResult getAllEvents() throws OXException {
+    public ExternalCalendarResult getAllEvents() {
         return new ExternalCalendarResult(false, Collections.emptyList());
     }
 
@@ -137,7 +137,8 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected boolean acquireUpdateLock() throws OXException {
+    protected boolean acquireUpdateLock() {
         return true;
     }
+
 }

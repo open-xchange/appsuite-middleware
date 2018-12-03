@@ -61,7 +61,7 @@ import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventsResult;
@@ -189,7 +189,7 @@ public class SyncHandler extends AbstractExtensionHandler {
                     try {
                         List<Event> events = resolveResource(storage, resourceName);
                         if (null == events || 0 == events.size()) {
-                            OXException e = CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(BasicCachingCalendarAccess.FOLDER_ID, resourceName);
+                            OXException e = CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(AlarmAwareCachingCalendarAccess.FOLDER_ID, resourceName);
                             eventsResults.put(resourceName, new DefaultEventsResult(e));
                         } else {
                             eventsResults.put(resourceName, new DefaultEventsResult(events));

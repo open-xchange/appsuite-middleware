@@ -58,7 +58,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.provider.caching.basic.BasicAlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
 import com.openexchange.chronos.provider.common.AlarmHelper;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
@@ -84,7 +84,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class BasicICalCalendarAccess extends BasicAlarmAwareCachingCalendarAccess {
+public class BasicICalCalendarAccess extends AlarmAwareCachingCalendarAccess {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicICalCalendarAccess.class);
 

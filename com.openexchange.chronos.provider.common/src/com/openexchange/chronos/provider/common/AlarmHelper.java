@@ -73,23 +73,30 @@ import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
+import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -100,6 +107,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link AlarmHelper}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since 7.10.0
  */
 public class AlarmHelper {
@@ -112,6 +120,9 @@ public class AlarmHelper {
 
     /**
      * Initializes a new {@link AlarmHelper}.
+     *
+     * The passed service lookup reference should yield the {@link ContextService}, the {@link DatabaseService} and the
+     * {@link CalendarStorageFactory}, and optionally the {@link CalendarUtilities} service.
      *
      * @param services The service lookup reference to use
      * @param context The context
@@ -219,7 +230,23 @@ public class AlarmHelper {
      */
     public boolean hasDefaultAlarms() {
         List<Alarm> defaultAlarms = getDefaultAlarms();
-        return null != defaultAlarms && 0 < defaultAlarms.size();
+        List<Alarm> defaultDateAlarms = getDateDefaultAlarms();
+        return (null != defaultAlarms && !defaultAlarms.isEmpty()) || (defaultDateAlarms != null && !defaultDateAlarms.isEmpty());
+    }
+
+    /**
+     * Gets the default alarms for date events configured in the calendar account.
+     *
+     * @return The default alarms, or <code>null</code> if none are defined
+     */
+    public List<Alarm> getDateDefaultAlarms() {
+        try {
+            UserConfigWrapper configWrapper = new UserConfigWrapper(Tools.requireService(ConversionService.class, services), account.getUserConfiguration());
+            return configWrapper.getDefaultAlarmDate();
+        } catch (Exception e) {
+            LOG.warn("Error getting default alarm from user configuration \"{}\": {}", account.getUserConfiguration(), e.getMessage(), e);
+            return null;
+        }
     }
 
     /**
@@ -230,7 +257,7 @@ public class AlarmHelper {
     public List<Alarm> getDefaultAlarms() {
         try {
             UserConfigWrapper configWrapper = new UserConfigWrapper(Tools.requireService(ConversionService.class, services), account.getUserConfiguration());
-            return configWrapper.getDefaultAlarmDate();
+            return configWrapper.getDefaultAlarmDateTime();
         } catch (Exception e) {
             LOG.warn("Error getting default alarm from user configuration \"{}\": {}", account.getUserConfiguration(), e.getMessage(), e);
             return null;
@@ -253,17 +280,33 @@ public class AlarmHelper {
      */
     public void insertDefaultAlarms(final List<Event> events) throws OXException {
         final List<Alarm> defaultAlarms = getDefaultAlarms();
-        if (null == defaultAlarms || 0 == defaultAlarms.size()) {
+        final List<Alarm> defaultDateAlarms = getDateDefaultAlarms();
+        if ((null == defaultAlarms || defaultAlarms.isEmpty()) && (null == defaultDateAlarms || defaultDateAlarms.isEmpty())) {
             return;
         }
         new OSGiCalendarStorageOperation<Void>(services, context.getContextId(), account.getAccountId()) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
-                insertDefaultAlarms(storage, defaultAlarms, events);
+                insertDefaultAlarms(storage, defaultAlarms, defaultDateAlarms, events);
                 return null;
             }
         }.executeUpdate();
+    }
+
+    /**
+     * Inserts the configured default alarms and sets up corresponding triggers list of events.
+     *
+     * @param storage The {@link CalendarStorage} to use
+     * @param events The events to insert the default alarms for
+     */
+    public void insertDefaultAlarms(CalendarStorage storage, final List<Event> events) throws OXException {
+        final List<Alarm> defaultAlarms = getDefaultAlarms();
+        final List<Alarm> defaultDateAlarms = getDateDefaultAlarms();
+        if ((null == defaultAlarms || defaultAlarms.isEmpty()) && (null == defaultDateAlarms || defaultDateAlarms.isEmpty())) {
+            return;
+        }
+        insertDefaultAlarms(storage, defaultAlarms, defaultDateAlarms, events);
     }
 
     public List<AlarmTrigger> getAlarmTriggers(Date until, Set<String> actions) throws OXException {
@@ -284,7 +327,7 @@ public class AlarmHelper {
      * @param updatedAlarms The updated alarms
      * @return The update result
      */
-    public UpdateResult updateAlarms(final Event event, final List<Alarm> updatedAlarms) throws OXException {
+    public UpdateResult updateAlarms(final Event event, final List<Alarm> updatedAlarms, boolean touchEvent) throws OXException {
         return new OSGiCalendarStorageOperation<UpdateResult>(services, context.getContextId(), account.getAccountId()) {
 
             @Override
@@ -296,6 +339,11 @@ public class AlarmHelper {
                 if (false == updateAlarms(storage, event, originalAlarms, updatedAlarms)) {
                     return null;
                 }
+                Event updated = event;
+                if (touchEvent) {
+                    touch(storage, event.getId());
+                    updated = storage.getEventStorage().loadEvent(event.getId(), null);
+                }
                 /*
                  * (re)-schedule any alarm triggers & return appropriate update result
                  */
@@ -306,11 +354,36 @@ public class AlarmHelper {
                     storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
                 }
                 storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
-                return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(event, newAlarms));
+
+                return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(updated, newAlarms));
             }
         }.executeUpdate();
     }
     
+    /**
+     * <i>Touches</i> an event in the storage by setting it's last modification timestamp and modified-by property to the current
+     * timestamp and calendar user.
+     *
+     * @param storage The {@link CalendarStorage} to use
+     * @param id The identifier of the event to <i>touch</i>
+     */
+    protected void touch(CalendarStorage storage, String id) throws OXException {
+        Event eventUpdate = new Event();
+        eventUpdate.setId(id);
+        setModified(services.getServiceSafe(CalendarUtilities.class).getEntityResolver(context.getContextId()), new Date(), eventUpdate, account.getUserId());
+        storage.getEventStorage().updateEvent(eventUpdate);
+    }
+
+    public static void setModified(EntityResolver resolver, Date lastModified, Event event, int modifiedBy) throws OXException {
+        setModified(lastModified, event, resolver.applyEntityData(new CalendarUser(), modifiedBy));
+    }
+
+    public static void setModified(Date lastModified, Event event, CalendarUser modifiedBy) {
+        event.setLastModified(lastModified);
+        event.setModifiedBy(modifiedBy);
+        event.setTimestamp(lastModified.getTime());
+    }
+
     public void updateAlarmTriggers(final Event event) throws OXException {
         new OSGiCalendarStorageOperation<UpdateResult>(services, context.getContextId(), account.getAccountId()) {
 
@@ -363,6 +436,13 @@ public class AlarmHelper {
         }.executeQuery();
     }
 
+    public void updateAlarmTriggers(CalendarStorage storage, final Event event) throws OXException {
+        List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
+        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+        storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
+        storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
+    }
+
     boolean updateAlarms(CalendarStorage storage, Event event, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
@@ -409,14 +489,27 @@ public class AlarmHelper {
             }
             storage.getAlarmStorage().insertAlarms(event, account.getUserId(), newAlarms);
         }
+        
         return true;
     }
 
-    int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Event> events) throws OXException {
+    int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Alarm> defaultDateAlarms, List<Event> events) throws OXException {
         int count = 0;
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<String, Map<Integer, List<Alarm>>>(events.size());
         for (Event event : events) {
-            List<Alarm> newAlarms = prepareNewAlarms(storage, defaultAlarms);
+            List<Alarm> newAlarms;
+            if (CalendarUtils.isAllDay(event)) {
+                if (defaultDateAlarms == null || defaultDateAlarms.isEmpty()) {
+                    continue;
+                }
+                newAlarms = prepareNewAlarms(storage, defaultDateAlarms);
+            } else {
+                if (defaultAlarms == null || defaultAlarms.isEmpty()) {
+                    continue;
+                }
+                newAlarms = prepareNewAlarms(storage, defaultAlarms);
+            }
+            event.setAlarms(newAlarms);
             alarmsByUserByEventId.put(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
             count += newAlarms.size();
         }
