@@ -240,8 +240,12 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
             boolean existsAttributeStrings = Tools.tableExists(con, GENCONF_ATTRIBUTES_STRINGS);
             boolean existsAttributeBools = Tools.tableExists(con, GENCONF_ATTRIBUTES_BOOLS);
             for (Entry<Integer, List<Integer>> entry : confIds.entrySet()) {
-                deleteFromTable(con, entry, GENCONF_ATTRIBUTES_STRINGS, existsAttributeStrings);
-                deleteFromTable(con, entry, GENCONF_ATTRIBUTES_BOOLS, existsAttributeBools);
+                if (existsAttributeStrings) {
+                    deleteFromTable(con, entry, GENCONF_ATTRIBUTES_STRINGS);
+                }
+                if (existsAttributeBools) {
+                    deleteFromTable(con, entry, GENCONF_ATTRIBUTES_BOOLS);
+                }
             }
 
             // Nothing to log, just remove the table
@@ -298,29 +302,26 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
      * Deletes entries from given table name
      * 
      * @param con The {@link Connection} to use
-     * @param entry The entries to remove, sorted by context
+     * @param entry The context and its entries which shall be removed
      * @param tableName The name of the table
-     * @param exists <code>true</code> if the table exists and data can be deleted
      * @throws SQLException In case data can't be removed
      */
-    private void deleteFromTable(Connection con, Entry<Integer, List<Integer>> entry, String tableName, boolean exists) throws SQLException {
-        if (exists) {
-            PreparedStatement stmt = null;
-            try {
-                stmt = con.prepareStatement(Databases.getIN("DELETE FROM " + tableName + " WHERE cid=? and id IN (", entry.getValue().size()));
-                if (null != entry.getKey()) {
-                    stmt.setInt(1, entry.getKey().intValue());
-                    int i = 2;
-                    for (Integer p : entry.getValue()) {
-                        stmt.setInt(i++, p.intValue());
-                    }
+    private void deleteFromTable(Connection con, Entry<Integer, List<Integer>> entry, String tableName) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(Databases.getIN("DELETE FROM " + tableName + " WHERE cid=? and id IN (", entry.getValue().size()));
+            if (null != entry.getKey()) {
+                stmt.setInt(1, entry.getKey().intValue());
+                int i = 2;
+                for (Integer p : entry.getValue()) {
+                    stmt.setInt(i++, p.intValue());
                 }
-
-                int result = stmt.executeUpdate();
-                LOGGER.debug("The statement has been executed successfully. Result was {}", I(result));
-            } finally {
-                Databases.closeSQLStuff(stmt);
             }
+
+            int result = stmt.executeUpdate();
+            LOGGER.debug("The statement has been executed successfully. Result was {}", I(result));
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
