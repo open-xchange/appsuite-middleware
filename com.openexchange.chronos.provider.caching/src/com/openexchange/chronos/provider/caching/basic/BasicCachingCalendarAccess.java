@@ -87,6 +87,7 @@ import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
+import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -100,7 +101,6 @@ import com.openexchange.chronos.provider.caching.internal.response.AccountRespon
 import com.openexchange.chronos.provider.caching.internal.response.ChangeExceptionsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
-import com.openexchange.chronos.provider.common.AlarmHelper;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
@@ -311,6 +311,7 @@ public abstract class BasicCachingCalendarAccess extends AlarmAwareCachingCalend
      *
      * @param warnings The warnings to add, or <code>null</code> to ignore
      */
+    @Override
     protected void addWarnings(Collection<OXException> warnings) {
         if (null != warnings && 0 < warnings.size()) {
             warnings.addAll(warnings);
@@ -346,6 +347,7 @@ public abstract class BasicCachingCalendarAccess extends AlarmAwareCachingCalend
      * @param storage The initialized calendar storage to use
      * @param externalCalendarResult The external calendar result
      */
+    @Override
     protected void updateCache(CalendarStorage storage, ExternalCalendarResult externalCalendarResult) throws OXException {
         List<Event> existingEvents = this.getExistingEvents();
         EventUpdates diff = null;
@@ -421,18 +423,21 @@ public abstract class BasicCachingCalendarAccess extends AlarmAwareCachingCalend
         calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
     }
 
+    @Override
     protected SortedSet<RecurrenceId> getChangeExceptionDates(CalendarStorage calendarStorage, String seriesId) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(CalendarUtils.getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(CalendarUtils.getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
         List<Event> changeExceptions = calendarStorage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 
+    @Override
     protected void deleteExceptions(CalendarStorage calendarStorage, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
         for (Event originalExceptionEvent : loadExceptionData(calendarStorage, seriesID, exceptionDates)) {
             delete(calendarStorage, originalExceptionEvent);
         }
     }
 
+    @Override
     protected List<Event> loadExceptionData(CalendarStorage calendarStorage, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
@@ -464,10 +469,12 @@ public abstract class BasicCachingCalendarAccess extends AlarmAwareCachingCalend
         }
     }
 
+    @Override
     protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate) throws OXException {
         update(calendarStorage, eventUpdate, true);
     }
 
+    @Override
     protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate, boolean updateAlarms) throws OXException {
         Event persistedEvent = eventUpdate.getOriginal();
         Event updatedEvent = eventUpdate.getUpdate();

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.common;
+package com.openexchange.chronos.provider.caching;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
