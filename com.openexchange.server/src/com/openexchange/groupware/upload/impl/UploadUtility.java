@@ -306,7 +306,6 @@ public final class UploadUtility {
      */
     private static FileItemIterator createFileItemIteratorFor(HttpServletRequest req, long maxFileSize, long maxOverallSize, String action) throws UploadException {
         // Parse the upload request
-        FileItemIterator iter;
         try {
             // Get file upload...
             // ... and add some "extra space" as Apache Fileupload considers the maximum allowed size of a complete request (incl. form fields)

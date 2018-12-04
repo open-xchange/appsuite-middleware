@@ -184,7 +184,7 @@ public class DirectLinkGenerator {
         String mimeType = DriveUtils.determineMimeType(file);
         if (Strings.isNotEmpty(mimeType) && 0 < file.getFileSize()) {
             // patterns borrowed from web interface
-            if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
+            if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff|heif|heic))$")) {
                 return DriveConfig.getInstance().getImageLinkImageFile()
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
