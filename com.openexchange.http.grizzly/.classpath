@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-monitoring-2.4.3.jar" sourcepath="lib/source/grizzly-http-server-monitoring-2.4.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-monitoring-2.4.3.jar" sourcepath="lib/source/grizzly-http-monitoring-2.4.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-all-2.4.3.jar" sourcepath="lib/source/grizzly-http-all-2.4.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-monitoring-2.4.3.jar" sourcepath="lib/source/grizzly-framework-monitoring-2.4.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-monitoring-2.4.3.1.jar" sourcepath="lib/source/grizzly-framework-monitoring-2.4.3.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-all-2.4.3.1.jar" sourcepath="lib/source/grizzly-http-all-2.4.3.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-monitoring-2.4.3.1.jar" sourcepath="lib/source/grizzly-http-monitoring-2.4.3.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-monitoring-2.4.3.1.jar" sourcepath="lib/source/grizzly-http-server-monitoring-2.4.3.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-basic-4.0.0-b004.jar" sourcepath="lib/source/pfl-basic-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-basic-tools-4.0.0-b004.jar" sourcepath="lib/source/pfl-basic-tools-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-tf-tools-4.0.0-b004.jar" sourcepath="lib/source/pfl-tf-tools-4.0.0-b004-sources.jar"/>
