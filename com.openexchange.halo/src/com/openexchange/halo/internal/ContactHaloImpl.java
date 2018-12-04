@@ -251,6 +251,47 @@ public class ContactHaloImpl implements ContactHalo {
                     // Don't care. This is all best effort anyway.
                 }
             }
+        } else {
+            // Global address book is NOT accessible
+            int userId = resultContact.getInternalUserId();
+            if (userId > 0 && userId == session.getUserId()) {
+                // Requests his own contact picture
+                user = userService.getUser(userId, session.getContext());
+            }
+
+            // Try to find a user with a given eMail address and verify that matching user is session-associated user
+            if (user == null && resultContact.containsEmail1()) {
+                try {
+                    User match = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
+                    if (match != null && match.getId() == session.getUserId()) {
+                        user = match;
+                    }
+                } catch (final OXException x) {
+                    // Don't care. This is all best effort anyway.
+                }
+            }
+
+            if (user == null && resultContact.containsEmail2()) {
+                try {
+                    User match = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
+                    if (match != null && match.getId() == session.getUserId()) {
+                        user = match;
+                    }
+                } catch (final OXException x) {
+                    // Don't care. This is all best effort anyway.
+                }
+            }
+
+            if (user == null && resultContact.containsEmail3()) {
+                try {
+                    User match = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
+                    if (match != null && match.getId() == session.getUserId()) {
+                        user = match;
+                    }
+                } catch (final OXException x) {
+                    // Don't care. This is all best effort anyway.
+                }
+            }
         }
 
         contactQueryBuilder.withUser(user);

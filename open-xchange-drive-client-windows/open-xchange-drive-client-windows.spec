@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 21
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,6 +63,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/sbin/*
 
 %changelog
+* Mon Nov 26 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Build for patch 2018-12-03 (4993)
 * Mon Nov 19 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Build for patch 2018-11-19 (4966)
 * Mon Oct 29 2018 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
