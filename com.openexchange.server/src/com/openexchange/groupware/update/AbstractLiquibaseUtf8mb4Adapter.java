@@ -80,7 +80,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter extends AbstractConvertUtf
 
         Connection con = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         try {
-            String schemaName = con.getCatalog() != null && Strings.isNotEmpty(con.getCatalog()) ? con.getCatalog() : (database.getDefaultCatalogName() != null && Strings.isNotEmpty(database.getDefaultCatalogName()) ? database.getDefaultCatalogName() : getDefaultSchemaName());
+            String schemaName = getSchemaName(con, database);
 
             before(con, schemaName);
             innerPerform(con, schemaName);
@@ -92,6 +92,16 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter extends AbstractConvertUtf
             logger.error("Failed to convert schema to utf8mb4", e);
             throw new CustomChangeException("Runtime error", e);
         }
+    }
+
+    private String getSchemaName(Connection connection, Database database) throws SQLException {
+        String catalogName = connection.getCatalog();
+        if (catalogName != null && Strings.isNotEmpty(catalogName)) {
+            return catalogName;
+        }
+
+        String defaultCatalogName = database.getDefaultCatalogName();
+        return (defaultCatalogName != null && Strings.isNotEmpty(defaultCatalogName) ? defaultCatalogName : getDefaultSchemaName());
     }
 
     protected abstract String getDefaultSchemaName();
