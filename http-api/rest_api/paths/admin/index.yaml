@@ -1,2 +1,5 @@
 requests:
   - PasswdChanges.yaml
+  - CloseSessionsByContext.yaml
+  - CloseSessionsById.yaml
+  - CloseSessionsByUser.yaml

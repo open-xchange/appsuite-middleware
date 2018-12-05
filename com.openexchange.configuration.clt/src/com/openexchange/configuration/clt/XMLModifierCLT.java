@@ -49,11 +49,7 @@
 
 package com.openexchange.configuration.clt;
 
-import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
@@ -78,83 +74,74 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import com.openexchange.cli.AbstractCLI;
 import com.openexchange.configuration.clt.scr.Logback;
 import com.openexchange.configuration.clt.scr.SCRException;
 
 /**
- * {@link XMLModifierCLT} is a command line tool to maintain XML configuration files. Currently it only allows to add new XML fragments at
- * defined positions in the existing XML configuration file.
+ * {@link XMLModifierCLT} is a command line tool to maintain XML configuration files.
+ * Currently it only allows to add new XML fragments at defined positions in the
+ * existing XML configuration file.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class XMLModifierCLT {
+public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
 
+    private static final String SYNTAX = "xmlModifier [-i <input>] [-o <output] [[-x <xpath>] [-a <file>] [-r <>file>] [-m <file>] [-d <attribute> [-z] [-s <scr>]] | [-h]";
+    private static final String HEADER = "Can modify XML configuration files. Currently only allows to add XML fragments.";
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    private static final TransformerFactory     tf  = TransformerFactory.newInstance();
-    private static final XPathFactory           xf  = XPathFactory.newInstance();
+    private static final TransformerFactory tf = TransformerFactory.newInstance();
+    private static final XPathFactory xf = XPathFactory.newInstance();
 
-    public XMLModifierCLT() {
+    /**
+     * Entry point
+     * 
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        Integer retVal = new XMLModifierCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
+    }
+
+    /**
+     * Initialises a new {@link XMLModifierCLT}.
+     */
+    private XMLModifierCLT() {
         super();
     }
 
-    public static void main(String[] args) {
-        System.exit(configureXML(args));
-    }
-
-    private static int configureXML(String[] args) {
-        Options options = new Options();
-        options.addOption(createOption("h", "help", false, "Prints a help text.", false));
-        options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
-        options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
-        options.addOption(createOption("x", "xpath", true, "XPath to the elements that should be modified.", false));
-        options.addOption(createOption("a", "add", true, "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("r", "replace", true, "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("m", "remove", true, "XML file that should remove the elements denoted by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
-        options.addOption(createOption("z", "zap", false, "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
-        options.addOption(createOption("s", "scr", true, "Specifies which scr should be executed on the xml document selected via -i", false));
-
-        CommandLineParser parser = new PosixParser();
-        final CommandLine cmd;
-        try {
-            cmd = parser.parse(options, args, true);
-        } catch (ParseException e) {
-            System.err.println("Parsing the command line failed: " + e.getMessage());
-            return 1;
-        }
-        if (cmd.hasOption('h') || 0 == args.length) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("xmlModifier", "Can modify XML configuration files. Currently only allows to add XML fragments.", options, null, false);
-            return 0;
-        }
-        final Transformer transformer;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
+     */
+    @Override
+    protected Integer invoke(Options option, CommandLine cmd, Void context) throws Exception {
+        Transformer transformer;
         try {
             transformer = tf.newTransformer();
         } catch (TransformerConfigurationException e) {
             System.err.println("Can not configure XML writer: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
         Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
         if (null == document) {
-            return 1;
+            return Integer.valueOf(1);
         }
         Document copy = copyDocument(document);
         if (null == copy) {
-            return 1;
+            return Integer.valueOf(1);
         }
         try {
             if (cmd.hasOption('s')) {
@@ -192,9 +179,9 @@ public class XMLModifierCLT {
             boolean differences = diff(document, copy, diffs);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             if (differences) {
-                final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+                final OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
                 if (null == os) {
-                    return 1;
+                    return Integer.valueOf(1);
                 }
                 try {
                     transformer.transform(new DOMSource(document), new StreamResult(os));
@@ -205,26 +192,96 @@ public class XMLModifierCLT {
         } catch (XPathExpressionException e) {
             System.err.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (TransformerException e) {
             System.err.println("Can not write XML document" + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (IOException e) {
             System.err.println("Can not read XML file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (SCRException e) {
             System.err.println("Error whily trying to apply Software Change Request: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
-        return 0;
+        return Integer.valueOf(0);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
+     */
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption(createArgumentOption("i", "in", "input", "XML document is read from this file.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "Modified XML document is written to this file.", false));
+        options.addOption(createArgumentOption("x", "xpath", "xpath", "XPath to the elements that should be modified.", false));
+        options.addOption(createArgumentOption("a", "add", "filename", "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createArgumentOption("r", "replace", "filename", "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createArgumentOption("m", "remove", "filename", "XML file that should remove the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createArgumentOption("d", "id", "attribute", "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
+        options.addOption(createSwitch("z", "zap", "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
+        options.addOption(createArgumentOption("s", "scr", "scr", "Specifies which scr should be executed on the xml document selected via -i", false));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
+     */
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // nothing to check
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getHeader()
+     */
+    @Override
+    protected String getHeader() {
+        return HEADER;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
+    @Override
+    protected String getName() {
+        return SYNTAX;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
+
+    //////////////////////////////////////// HELPERS //////////////////////////////////////
 
     private static Node findParentNode(Document document, XPathExpression expression, Document insert) throws XPathExpressionException {
         NodeList insertList = (NodeList) expression.evaluate(insert, XPathConstants.NODESET);
@@ -312,7 +369,7 @@ public class XMLModifierCLT {
                 } else {
                     parentNode = findParentNode(document, expression, replace);
                 }
-                if(parentNode == null) {
+                if (parentNode == null) {
                     throw new Exception("Unable to find parent node!");
                 }
                 parentNode.appendChild(imported);
@@ -368,56 +425,8 @@ public class XMLModifierCLT {
         return retval;
     }
 
-    /**
-     * Creates a commandline option
-     *
-     * @param shortOpt The short version of the argumente e.g.: -h
-     * @param longOpt The long version of the argument e.g.: --help
-     * @param hasArg true If the option needs an argument or not e.g. --input /tmp/somefile
-     * @param description The description of the command option
-     * @param required If the command option is mandatory or optional
-     * @return The new option
-     */
-    static Option createOption(String shortOpt, String longOpt, boolean hasArg, String description, boolean required) {
-        Option option = new Option(shortOpt, longOpt, hasArg, description);
-        option.setRequired(required);
-        return option;
-    }
-
-    static Document parseInput(boolean stdin, String filename) {
-        return parseInput(determineInput(stdin, filename));
-    }
-
-    static Document parseInput(InputStream is) {
-        if (null == is) {
-            return null;
-        }
-        final DocumentBuilder db;
-        try {
-            db = dbf.newDocumentBuilder();
-            db.setEntityResolver(new ClassloaderEntityResolver());
-        } catch (ParserConfigurationException e) {
-            System.err.println("Can not configure XML parser: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-        final Document document;
-        try {
-            try {
-                document = db.parse(is);
-            } finally {
-                is.close();
-            }
-        } catch (SAXException e) {
-            System.err.println("Can not parse XML document: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        } catch (IOException e) {
-            System.err.println("Can not read XML file: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-        return document;
+    private static Document parseInput(boolean stdin, String filename) {
+        return XMLUtil.parseInput(IOUtil.determineInput(stdin, filename));
     }
 
     /**
@@ -450,27 +459,6 @@ public class XMLModifierCLT {
         return retval;
     }
 
-    static InputStream determineInput(boolean stdin, String filename) {
-        final InputStream is;
-        if (!stdin) {
-            File input = new File(filename);
-            if (!input.exists() || !input.isFile() || !input.canRead()) {
-                System.err.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
-                return null;
-            }
-            try {
-                is = new FileInputStream(input);
-            } catch (IOException e) {
-                System.err.println("Can not read input file: " + e.getMessage());
-                e.printStackTrace();
-                return null;
-            }
-        } else {
-            is = System.in;
-        }
-        return is;
-    }
-
     private static boolean diff(Node node1, Node node2, List<String> diffs) {
         if (diffNodeExists(node1, node2, diffs)) {
             return true;
@@ -478,7 +466,7 @@ public class XMLModifierCLT {
         diffNodeType(node1, node2, diffs);
         diffNodeValue(node1, node2, diffs);
         diffAttributes(node1, node2, diffs);
-        diffNodes( node1, node2, diffs);
+        diffNodes(node1, node2, diffs);
         return diffs.size() > 0;
     }
 
@@ -616,7 +604,7 @@ public class XMLModifierCLT {
         do {
             path.insert(0, tmp.getNodeName());
             path.insert(0, "/");
-        } while((tmp = tmp.getParentNode()) != null);
+        } while ((tmp = tmp.getParentNode()) != null);
         return path.toString();
     }
 

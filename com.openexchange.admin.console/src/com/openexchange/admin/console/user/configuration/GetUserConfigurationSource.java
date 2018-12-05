@@ -250,7 +250,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getFooter() {
-        return null;
+        return "";
     }
 
     /**
@@ -258,6 +258,6 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "getuserconfigurationsource";
+        return "getuserconfigurationsource -c <contextId> -u <userId> [-a | -o <userConfiguration>] " + BASIC_MASTER_ADMIN_USAGE;
     }
 }

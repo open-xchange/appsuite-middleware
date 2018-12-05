@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
@@ -87,7 +86,7 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      * Initialises a new {@link ListExecutedTasksCLT}.
      */
     public ListExecutedTasksCLT() {
-        super("listExecutedTasks", "Lists executed update tasks of a schema.");
+        super("listExecutedTasks -n <schemaName>" + BASIC_MASTER_ADMIN_USAGE, "Lists executed update tasks of a schema.");
     }
 
     /*
@@ -97,9 +96,7 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        Option schemaOption = new Option("n", "name", true, "A valid schema name.");
-        schemaOption.setType(String.class);
-        options.addOption(schemaOption);
+        options.addOption(createArgumentOption("n", "name", "schemaName", String.class, "A valid schema name.", false));
     }
 
     /*

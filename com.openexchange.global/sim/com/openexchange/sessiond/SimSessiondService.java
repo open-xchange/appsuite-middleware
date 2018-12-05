@@ -64,7 +64,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
-
 /**
  * {@link SimSessiondService}
  *
@@ -133,6 +132,11 @@ public class SimSessiondService implements SessiondService {
     @Override
     public void removeUserSessionsGlobally(int userId, int contextId) throws OXException {
         removeUserSessions(userId, contextId);
+    }
+
+    @Override
+    public Collection<String> removeSessions(SessionFilter filter) throws OXException {
+        return filterSessionIds(filter, true);
     }
 
     @Override

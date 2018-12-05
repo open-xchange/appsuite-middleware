@@ -58,7 +58,6 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.report.internal.ReportingInit;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.servlet.ratelimit.monitoring.RateLimiterMBean;
 import com.openexchange.tools.servlet.ratelimit.monitoring.RateLimiterMBeanImpl;
 
@@ -69,7 +68,6 @@ import com.openexchange.tools.servlet.ratelimit.monitoring.RateLimiterMBeanImpl;
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
-    private volatile ObjectName gadObjectName;
     private volatile ObjectName rateLimiterObjectName;
 
     /**
@@ -91,7 +89,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             /*
              * Add all mbeans since management service is now available
              */
-            gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
             ObjectName rateLimiterObjectName = getObjectName(RateLimiterMBean.NAME, true);
             managementService.registerMBean(rateLimiterObjectName, new RateLimiterMBeanImpl());
@@ -114,10 +111,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
              * Remove all mbeans since management service now disappears
              */
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
-            final ObjectName gadObjectName = this.gadObjectName;
-            if (null != gadObjectName) {
-                OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
-            }
             ObjectName rateLimiterObjectName = this.rateLimiterObjectName;
             if (null != rateLimiterObjectName) {
                 managementService.unregisterMBean(rateLimiterObjectName);
@@ -129,7 +122,6 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } finally {
-            this.gadObjectName = null;
             this.rateLimiterObjectName = null;
         }
     }
