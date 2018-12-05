@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -104,7 +105,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.tools.sql.DBUtils;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link ConsistencyServiceImpl}
