@@ -125,7 +125,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
          */
         String schema = null != assignment.getSchema() ? assignment.getSchema() : "configdb";
         DBMigration migration = new DBMigration(connectionProvider, CONFIGDB_CHANGE_LOG, localResourceAccessor, schema);
-        migrationService.registerMBean(migration);
+        migrationService.register(migration);
         return migrationService.scheduleDBMigration(migration);
     }
 

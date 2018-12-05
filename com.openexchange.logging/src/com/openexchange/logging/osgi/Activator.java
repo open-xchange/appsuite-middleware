@@ -69,9 +69,9 @@ import com.openexchange.logging.LogLevelService;
 import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.internal.LogLevelServiceImpl;
 import com.openexchange.logging.internal.LogbackConfigurationRMIServiceImpl;
-import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -150,7 +150,7 @@ public class Activator implements BundleActivator, Reloadable {
 
         // Register services
         final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
-        registerLoggingConfigurationMBean(context, loggerContext, rankingAwareTurboFilterList, serviceImpl);
+        registerLogstashAppenderMBean(context);
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
         registerIncludeStackTraceService(serviceImpl, context);
         reloadable = context.registerService(Reloadable.class, this, null);
@@ -282,17 +282,17 @@ public class Activator implements BundleActivator, Reloadable {
     /**
      * Register the LoggingConfigurationMBean
      */
-    protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
+    protected void registerLogstashAppenderMBean(BundleContext context) {
         try {
-            LogbackConfigurationMBeanRegisterer logbackConfigurationMBeanRegisterer = new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl);
-            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logbackConfigurationMBeanRegisterer);
+            LogbackSocketAppenderMBeanRegisterer logstashAppenderRegistration = new LogbackSocketAppenderMBeanRegisterer(context);
+            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logstashAppenderRegistration);
             this.managementTracker = tracker;
             tracker.open();
         } catch (final Exception e) {
-            LOGGER.error("Could not register LogbackConfigurationMBean", e);
+            LOGGER.error("Could not register LogstashAppenderMBean", e);
         }
 
-        LOGGER.info("LoggingConfigurationMBean successfully registered.");
+        LOGGER.info("LogstashAppenderMBean successfully registered.");
     }
 
     /**

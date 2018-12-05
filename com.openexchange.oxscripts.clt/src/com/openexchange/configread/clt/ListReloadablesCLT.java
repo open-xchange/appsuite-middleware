@@ -90,12 +90,12 @@ public class ListReloadablesCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return null;
+        return "";
     }
 
     @Override
     protected String getName() {
-        return "listreloadableoptions";
+        return "listreloadableoptions " + BASIC_USAGE;
     }
 
     @Override

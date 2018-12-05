@@ -85,7 +85,7 @@ public final class UpdateTaskRunUpdateCLT extends AbstractUpdateTasksCLT<Void> {
      * Initializes a new {@link UpdateTaskRunUpdateCLT}.
      */
     private UpdateTaskRunUpdateCLT() {
-        super("runUpdate", "Runs the schema's update.");
+        super("runUpdate [-c <contextId> | -n <schemaName>] " + BASIC_MASTER_ADMIN_USAGE, "Runs the schema's update.");
     }
 
     /*
