@@ -57,9 +57,9 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.NAME;
-import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.REFRESH_INTERVAL;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.URI;
+import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.EnumSet;
