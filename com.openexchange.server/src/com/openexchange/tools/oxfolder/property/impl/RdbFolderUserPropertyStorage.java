@@ -100,8 +100,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
     public void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys) throws OXException {
         Connection connection = null;
         DatabaseService dbService = null;
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
 
         // Acquire write connection
@@ -110,21 +109,20 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
 
         try {
             Databases.startTransaction(connection);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             deleteFolderProperties(contextId, folderId, userId, propertyKeys, connection);
             modified = true;
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
                 Databases.autocommit(connection);
             }
             if (modified) {

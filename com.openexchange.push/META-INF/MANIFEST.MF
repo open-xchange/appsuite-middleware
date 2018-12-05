@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Push Bundle
 Bundle-SymbolicName: com.openexchange.push
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -30,4 +30,4 @@ Import-Package: com.google.common.annotations,
 Bundle-Activator: com.openexchange.push.osgi.PushActivator
 Export-Package: com.openexchange.push,
  com.openexchange.push.credstorage,
- com.openexchange.push.mbean
+ com.openexchange.push.rmi

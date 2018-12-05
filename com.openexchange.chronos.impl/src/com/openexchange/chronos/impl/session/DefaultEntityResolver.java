@@ -552,7 +552,7 @@ public class DefaultEntityResolver implements EntityResolver {
         attendee.setCn(Strings.isNotEmpty(attendee.getCn()) ? attendee.getCn() : user.getDisplayName());
         if (Strings.isEmpty(attendee.getUri())) {
             attendee.setUri(getCalAddress(user));
-            attendee.setUri(getEMail(user));
+            attendee.setEMail(getEMail(user));
         } else {
             attendee.setUri(Check.calendarAddressMatches(attendee.getUri(), context.getContextId(), user));
             String email = optEMailAddress(attendee.getUri());
@@ -577,6 +577,7 @@ public class DefaultEntityResolver implements EntityResolver {
         attendee.setComment(resource.getDescription());
         attendee.setPartStat(ParticipationStatus.ACCEPTED);
         attendee.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
+        attendee.setEMail(resource.getMail());
         return attendee;
     }
 

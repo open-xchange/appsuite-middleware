@@ -119,15 +119,14 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
             json.put(DataFields.ID, objectId);
             json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
             return json;
-        } else {
-            JSONArray jsonArray = new JSONArray();
-            for (final int id : objectIds) {
-                JSONObject json = new JSONObject();
-                json.put(DataFields.ID, id);
-                json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-            }
-            return jsonArray;
         }
+        JSONArray jsonArray = new JSONArray();
+        for (final int id : objectIds) {
+            JSONObject json = new JSONObject();
+            json.put(DataFields.ID, id);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+        }
+        return jsonArray;
     }
 
     /**

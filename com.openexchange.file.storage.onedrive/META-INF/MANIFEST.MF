@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Microsoft OneDrive file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.onedrive
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.annotation,
@@ -24,6 +24,7 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.openexchange.file.storage,
  com.openexchange.file.storage.generic,
  com.openexchange.file.storage.oauth,
+ com.openexchange.file.storage.oauth.osgi,
  com.openexchange.file.storage.search,
  com.openexchange.groupware,
  com.openexchange.groupware.results,
@@ -32,14 +33,18 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.mail.mime,
+ com.openexchange.microsoft.graph.api.exception,
+ com.openexchange.microsoft.graph.onedrive,
+ com.openexchange.microsoft.graph.onedrive.exception,
  com.openexchange.mime,
  com.openexchange.net.ssl.exception,
  com.openexchange.oauth,
  com.openexchange.oauth.access,
+ com.openexchange.oauth.api,
  com.openexchange.oauth.association,
  com.openexchange.oauth.association.spi,
  com.openexchange.oauth.impl.access.impl,
- com.openexchange.oauth.msliveconnect,
+ com.openexchange.oauth.microsoft.graph,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.policy.retry,

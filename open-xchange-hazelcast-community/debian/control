@@ -2,13 +2,13 @@ Source: open-xchange-hazelcast-community
 Section: web
 Priority: optional
 Maintainer: Martin Schneider <martin.schneider@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless
+Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-osgi (>= @OXVERSION@)
 Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-hazelcast-community
 Architecture: all
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@)
 Conflicts: open-xchange-hazelcast-enterprise
 Replaces: open-xchange-core (<< 7.10.1)
 Breaks: open-xchange-core (<< 7.10.1)

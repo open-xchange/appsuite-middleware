@@ -82,6 +82,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionDescription;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -811,11 +812,20 @@ public final class SessionHandler {
         checkMaxSessPerClient(client, userId, contextId, false);
         checkAuthId(login, authId);
 
-        // Create new session instance
-        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
-        if (null != enhancement) {
-            enhancement.enhanceSession(newSession);
+        // Create and optionally enhance new session instance
+        SessionImpl newSession;
+        {
+            if (null == enhancement) {
+                newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
+            } else {
+                // Create intermediate SessionDescription instance to offer more flexibility to possible SessionEnhancement implementations
+                SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
+                enhancement.enhanceSession(sessionDescription);
+                newSession = new SessionImpl(sessionDescription);
+                sessionDescription = null;
+            }
         }
+
         if (Strings.isNotEmpty(userAgent)) {
             newSession.setParameter(Session.PARAM_USER_AGENT, userAgent);
         }
@@ -872,6 +882,41 @@ public final class SessionHandler {
         SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient);
 
         // Return...
+        return newSession;
+    }
+
+    /**
+     * Creates a new instance of {@code SessionDescription} from specified arguments
+     *
+     * @param userId The user identifier
+     * @param loginName The login name
+     * @param password The password
+     * @param contextId The context identifier
+     * @param clientHost The client host name or IP address
+     * @param login The login; e.g. <code>"someone@invalid.com"</code>
+     * @param authId The authentication identifier
+     * @param hash The hash string
+     * @param client The client identifier
+     * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @return The newly created {@code SessionDescription} instance
+     * @throws OXException If create attempt fails
+     */
+    private static SessionDescription createSessionDescription(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
+        // Generate identifier, secret, and random
+        SessionIdGenerator sessionIdGenerator = SessionIdGenerator.getInstance();
+        String sessionId = sessionIdGenerator.createSessionId(loginName);
+        String secret = sessionIdGenerator.createSecretId(loginName);
+        String randomToken = sessionIdGenerator.createRandomId();
+
+        // Create instance
+        SessionDescription newSession = new SessionDescription(userId, contextId, login, password, sessionId, secret, UUIDSessionIdGenerator.randomUUID());
+        newSession.setLoginName(loginName);
+        newSession.setLocalIp(clientHost);
+        newSession.setAuthId(authId);
+        newSession.setTransient(tranzient);
+        newSession.setClient(client);
+        newSession.setRandomToken(randomToken);
+        newSession.setHash(hash);
         return newSession;
     }
 

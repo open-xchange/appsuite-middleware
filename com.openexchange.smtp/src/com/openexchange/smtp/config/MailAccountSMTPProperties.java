@@ -161,7 +161,8 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return lookUpProperty("com.openexchange.smtp.smtpLocalhost", SMTPProperties.getInstance().getSmtpLocalhost());
+        smtpLocalhostStr = lookUpProperty("com.openexchange.smtp.smtpLocalhost", SMTPProperties.getInstance().getSmtpLocalhost());
+        return (smtpLocalhostStr == null) || (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
     }
 
     @Override

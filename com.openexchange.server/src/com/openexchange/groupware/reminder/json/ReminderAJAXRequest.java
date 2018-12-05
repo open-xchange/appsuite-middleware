@@ -50,6 +50,7 @@
 package com.openexchange.groupware.reminder.json;
 
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -75,6 +76,7 @@ public final class ReminderAJAXRequest {
     private final AJAXRequestData request;
 
     private TimeZone timeZone;
+    private final List<Integer> optModules;
 
     /**
      * Initializes a new {@link ReminderAJAXRequest}.
@@ -82,11 +84,12 @@ public final class ReminderAJAXRequest {
      * @param session The session
      * @param request The request
      */
-    public ReminderAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+    public ReminderAJAXRequest(final AJAXRequestData request, final ServerSession session, List<Integer> optModules) {
         super();
         this.request = request;
         this.session = session;
         timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        this.optModules = optModules;
     }
 
     /**
@@ -134,6 +137,15 @@ public final class ReminderAJAXRequest {
      */
     public <V> V getData() {
         return (V) request.getData();
+    }
+
+    /**
+     * Gets the optional requested modules.
+     *
+     * @return The modules or null to to request all modules
+     */
+    public List<Integer> getOptModules() {
+        return optModules;
     }
 
     /**

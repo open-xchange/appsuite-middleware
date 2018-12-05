@@ -94,7 +94,7 @@ public class AddressTestCommandParser implements CommandParser<TestCommand> {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         String matchType = command.getMatchType() == null ? "is" : command.getMatchType().substring(1);
         jsonObject.put(AddressTestField.comparison.name(), matchType);

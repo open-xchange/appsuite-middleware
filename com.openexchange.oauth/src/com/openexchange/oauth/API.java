@@ -65,17 +65,16 @@ public interface API {
     String getServiceId();
 
     /**
-     * Gets the name
+     * Gets the display name
      *
-     * @return The name
+     * @return The display name
      */
-    String getName();
+    String getDisplayName();
 
     /**
-     * Gets the short name for displaying purposes.
-     *
-     * @return The short name
+     * Returns the capability name
+     * 
+     * @return the capability name
      */
-    String getShortName();
-
+    String getCapability();
 }

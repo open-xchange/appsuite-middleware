@@ -1592,11 +1592,12 @@ public class UserTest extends AbstractRMITest {
             String obj_method_name = obj_map.getMethodName();
             for (Method method : theMethods) {
                 String meth_name = method.getName();
-                if (meth_name.startsWith("get")) {
-                    if (meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3))) {
-                        obj_map.setGetter(method);
-                        break;
-                    }
+                if (isGetter(obj_method_name, meth_name)) {
+                    obj_map.setGetter(method);
+                    break;
+                } else if (isBooleanGetter(obj_method_name, method, meth_name)) {
+                    obj_map.setGetter(method);
+                    break;
                 }
             }
         }
@@ -1604,6 +1605,14 @@ public class UserTest extends AbstractRMITest {
         // now fill the getter in the map obj
 
         return tmplist.toArray(new MethodMapObject[tmplist.size()]);
+    }
+
+    private boolean isGetter(String obj_method_name, String meth_name) {
+        return meth_name.startsWith("get") && meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3));
+    }
+
+    private boolean isBooleanGetter(String obj_method_name, Method method, String meth_name) {
+        return method.getReturnType().isAssignableFrom(Boolean.class) && meth_name.startsWith("is") && meth_name.substring(2).equalsIgnoreCase(obj_method_name.substring(3));
     }
 
     /////////////////////// NESTED CLASSES ////////////////////////

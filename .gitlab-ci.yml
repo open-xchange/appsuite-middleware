@@ -35,6 +35,7 @@ build documentation:
     - develop
     - master
     - /^master-.*$/
+    - /^release-.*$/
 
 deploy documentation:
   stage: deploy
@@ -42,6 +43,7 @@ deploy documentation:
     GIT_STRATEGY: none
   script:
     - export VERSION=`ls doku --sort=time | cut -f1 | head -n1`
+    - mkdir -p /var/www/documentation/$VERSION/middleware
     - rsync -aHAX --delete doku/$VERSION/middleware/ /var/www/documentation/$VERSION/middleware
     - rm -rf doku/$VERSION/middleware/
     - find /var/www/documentation -user gitlab-runner -exec chmod g+w '{}' \;
@@ -55,3 +57,4 @@ deploy documentation:
     - develop
     - master
     - /^master-.*$/
+    - /^release-.*$/

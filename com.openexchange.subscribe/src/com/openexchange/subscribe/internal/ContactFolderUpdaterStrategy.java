@@ -185,11 +185,11 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         List<Contact> contacts = new ArrayList<Contact>();
         Object sqlInterface = getFromSession(SQL_INTERFACE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
-        if (sqlInterface instanceof ContactService && targetFolderSession instanceof TargetFolderSession) {
+        if (sqlInterface instanceof ContactService && targetFolderSession instanceof Session) {
             SearchIterator<Contact> searchIterator = null;
             try {
                 searchIterator = ((ContactService)sqlInterface).getAllContacts(
-                    (TargetFolderSession)targetFolderSession, target.getFolderId(), COMPARISON_FIELDS);
+                    (Session)targetFolderSession, target.getFolderId(), COMPARISON_FIELDS);
                 if (null != searchIterator) {
                     while (searchIterator.hasNext()) {
                         contacts.add(searchIterator.next());
@@ -218,11 +218,11 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public void save(final Contact newElement, final Object session, Collection<OXException> errors) throws OXException {
         Object sqlInterface = getFromSession(SQL_INTERFACE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
-        if ((sqlInterface instanceof ContactService) && (targetFolderSession instanceof TargetFolderSession)) {
+        if ((sqlInterface instanceof ContactService) && (targetFolderSession instanceof Session)) {
             TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
             newElement.setParentFolderID(target.getFolderIdAsInt());
             ContactService contactService = (ContactService)sqlInterface;
-            TargetFolderSession tfs = (TargetFolderSession)targetFolderSession;
+            Session tfs = (Session)targetFolderSession;
 
             int MAX_RETRIES = 5;
             for (int i = 0; i < MAX_RETRIES; i++) {
@@ -265,13 +265,13 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
         Object sqlInterface = getFromSession(SQL_INTERFACE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
-        if (sqlInterface instanceof ContactService && targetFolderSession instanceof TargetFolderSession) {
+        if (sqlInterface instanceof ContactService && targetFolderSession instanceof Session) {
             update.setParentFolderID(original.getParentFolderID());
             update.setObjectID(original.getObjectID());
             update.setLastModified(new Date(System.currentTimeMillis()));
             // We need to carry over the UUID to keep existing relations
             update.setUserField20(original.getUserField20());
-            ((ContactService)sqlInterface).updateContact((TargetFolderSession)targetFolderSession,
+            ((ContactService)sqlInterface).updateContact((Session)targetFolderSession,
                 String.valueOf(update.getParentFolderID()), String.valueOf(update.getObjectID()), update, update.getLastModified());
         }
     }

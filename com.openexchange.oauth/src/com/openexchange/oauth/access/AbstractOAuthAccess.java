@@ -124,7 +124,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         // Verify that the account has an access token
         if (Strings.isEmpty(account.getToken())) {
             API api = account.getAPI();
-            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), account.getId(), session.getUserId(), session.getContextId());
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), account.getId(), session.getUserId(), session.getContextId());
         }
 
         // Verify that scopes are available and enabled
@@ -163,6 +163,8 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     protected boolean isExpired() {
         long now = System.currentTimeMillis();
+        // FIXME: Should use the TTL returned when acquiring the token
+        //        instead of a static value like RECHECK_THRESHOLD_MILLIS
         return (now - lastAccessedMillis) > RECHECK_THRESHOLD_MILLIS;
     }
 

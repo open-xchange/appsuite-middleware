@@ -193,6 +193,7 @@ public class Utils {
         .put("Taipei Standard Time", "Asia/Taipei")
         .put("UTC-02", "Etc/GMT+2")
         .put("West Bank Standard Time", "Asia/Hebron")
+        .put("Sao Tome Standard Time", "Africa/Sao_Tome")
         .put("Alaskan Standard Time", "America/Anchorage")
         .put("Omsk Standard Time", "Asia/Omsk")
         .put("Eastern Standard Time", "America/New_York")
@@ -225,6 +226,7 @@ public class Utils {
         .put("Vladivostok Standard Time", "Asia/Vladivostok")
         .put("Haiti Standard Time", "America/Port-au-Prince")
         .put("North Asia East Standard Time", "Asia/Irkutsk")
+        .put("Sudan Standard Time", "Africa/Khartoum")
         .put("Jordan Standard Time", "Asia/Amman")
         .put("Bangladesh Standard Time", "Asia/Dhaka")
         .put("Venezuela Standard Time", "America/Caracas")
@@ -620,7 +622,7 @@ public class Utils {
      * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
      */
     public static boolean isInFolder(Event event, CalendarFolder folder) {
-        if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event)) {
+        if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event) && null != event.getFolderId()) {
             return folder.getId().equals(event.getFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());

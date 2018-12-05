@@ -50,10 +50,8 @@
 package com.openexchange.ajax.chronos;
 
 import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -63,7 +61,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -71,7 +68,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarUser;
-import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DeleteBody;
@@ -148,17 +144,8 @@ public class BasicCommentTest extends AbstractChronosTest {
 
         eventData = eventManager.createEvent(eventData);
 
-        Asset asset = assetManager.getRandomAsset(AssetType.pdf);
-        File file = new File(asset.getAbsolutePath());
-        Assert.assertTrue(file.exists());
-        ChronosAttachment attachment = new ChronosAttachment();
-        attachment.setFilename(file.getName());
-        attachment.setUri("cid:file_0");
-        attachment.setFmtType("application/pdf");
-        eventData.setAttachments(Collections.singletonList(attachment));
-
-        String html = chronosApi.updateEventWithAttachments(apiClient.getSession(), getFolderId(), eventData.getId(), Long.valueOf(System.currentTimeMillis()), buildJSON(), file, null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE);
-        Assert.assertFalse("Should not contain errors", html.contains("error"));
+        // Update with attachment
+        eventManager.updateEventWithAttachmentAndNotification(eventData, assetManager.getRandomAsset(AssetType.pdf), UPDATE);
 
         validateMailInSecondUsersInbox("Appointment changed: " + summary, UPDATE);
     }
@@ -184,8 +171,6 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void validateMailInSecondUsersInbox(String mailSubject, String comment) throws OXException, ApiException, Exception {
-        Thread.sleep(3000);
-
         ApiClient apiClient2 = generateApiClient(testUser2);
         rememberClient(apiClient2);
         MailApi mailApi = new MailApi(apiClient2);
@@ -198,29 +183,26 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private String getMailId(ApiClient apiClient2, MailApi mailApi, String summary) throws Exception {
-        MailsResponse mailsResponse = mailApi.getAllMails(apiClient2.getSession(), INBOX, COLUMNS, null, Boolean.FALSE, Boolean.FALSE, "600", "desc", null, null, I(10), null);
-        List<List<String>> data = mailsResponse.getData();
-        Assert.assertThat("No mails found", I(data.size()), not(I(0)));
+        int max = 5;
         String mailId = null;
-        for (List<String> singleMailData : data) {
-            // Indices based on COLUMNS
-            if (summary.equals(singleMailData.get(3))) {
-                mailId = singleMailData.get(1);
-                break;
+        while (max > 0 && mailId == null) {
+            max--;
+            Thread.sleep(10000);
+            MailsResponse mailsResponse = mailApi.getAllMails(apiClient2.getSession(), INBOX, COLUMNS, null, Boolean.FALSE, Boolean.FALSE, "600", "desc", null, null, I(100), null);
+            List<List<String>> data = mailsResponse.getData();
+            if (data.size() == 0) {
+                continue;
+            }
+            for (List<String> singleMailData : data) {
+                // Indices based on COLUMNS
+                if (summary.equals(singleMailData.get(3))) {
+                    mailId = singleMailData.get(1);
+                    break;
+                }
             }
         }
         Assert.assertThat("No update/cancel mail found", mailId, notNullValue());
         return mailId;
-    }
-
-    private String buildJSON() {
-        StringBuilder sb = new StringBuilder("{\"events\":");
-        sb.append(eventData.toJson());
-        sb.append(", ");
-        sb.append("\"comment\":");
-        sb.append("\"").append(UPDATE).append("\"");
-        sb.append("}");
-        return sb.toString();
     }
 
     private EventId getEventId() {

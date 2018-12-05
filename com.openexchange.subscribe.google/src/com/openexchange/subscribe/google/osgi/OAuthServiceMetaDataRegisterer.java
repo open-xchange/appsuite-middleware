@@ -58,10 +58,12 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
 import com.openexchange.subscribe.google.groupware.GoogleSubscriptionsOAuthAccountDeleteListener;
+import com.openexchange.subscribe.google.oauth.GoogleContactsOAuthAccountAssociationProvider;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -76,6 +78,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     private final BundleContext context;
     private volatile ServiceRegistration<SubscribeService> contactsRegistration;
     private volatile ServiceRegistration<OAuthAccountDeleteListener> deleteListenerRegistration;
+    private volatile ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration;
 
     /**
      * Initialises a new {@link OAuthServiceMetaDataRegisterer}.
@@ -87,7 +90,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         super();
         this.services = services;
         this.context = context;
-        oauthIdentifier = KnownApi.GOOGLE.getFullName();
+        oauthIdentifier = KnownApi.GOOGLE.getServiceId();
     }
 
     @Override
@@ -99,6 +102,10 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
             GoogleContactsSubscribeService subscribeService = new GoogleContactsSubscribeService(oAuthServiceMetaData, services);
             contactsRegistration = context.registerService(SubscribeService.class, subscribeService, null);
             deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new GoogleSubscriptionsOAuthAccountDeleteListener(subscribeService, services), null);
+
+            if (associationProviderRegistration == null) {
+                associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new GoogleContactsOAuthAccountAssociationProvider(services, subscribeService), null);
+            }
         }
         return oAuthServiceMetaData;
     }
@@ -126,6 +133,13 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
                 if (null != registration) {
                     registration.unregister();
                     this.deleteListenerRegistration = null;
+                }
+            }
+            {
+                ServiceRegistration<OAuthAccountAssociationProvider> registration = this.associationProviderRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.associationProviderRegistration = null;
                 }
             }
         }

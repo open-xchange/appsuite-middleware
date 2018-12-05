@@ -217,7 +217,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             return false;
         }
         try {
-            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getFullName(), session.getUserId(), session.getContextId());
+            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getServiceId(), session.getUserId(), session.getContextId());
             return metaData == null ? false : metaData.isEnabled(session.getUserId(), session.getContextId());
         } catch (OXException e) {
             return false;
@@ -305,22 +305,22 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
     }
 
     @Override
-    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // Nothing to do
     }
 
     @Override
-    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // Nothing to do
     }
 
     @Override
-    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // Nothing to do
     }
 
     @Override
-    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) {
         // Nothing to do
     }
 
@@ -333,9 +333,8 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
         try {
             if (newUserConfiguration.hasAndNotNull(GoogleCalendarConfigField.FOLDER) && originUserConfiguration.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 return !newUserConfiguration.get(GoogleCalendarConfigField.FOLDER).equals(originUserConfiguration.get(GoogleCalendarConfigField.FOLDER));
-            } else {
-                return newUserConfiguration.get(GoogleCalendarConfigField.FOLDER) != null;
             }
+            return newUserConfiguration.get(GoogleCalendarConfigField.FOLDER) != null;
         } catch (JSONException e) {
             LOG.debug("Error while comparing configured folder names: " + e.getMessage());
             return false;

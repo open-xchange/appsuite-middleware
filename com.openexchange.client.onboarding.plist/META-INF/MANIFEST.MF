@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The On-Boarding Bundle for composing plist profiles
 Bundle-SymbolicName: com.openexchange.client.onboarding.plist
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
@@ -137,6 +137,16 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.apache.commons.lang.reflect,
  org.apache.commons.lang.text,
  org.apache.commons.lang.time,
+ org.bouncycastle.asn1,
+ org.bouncycastle.asn1.cms,
+ org.bouncycastle.asn1.x509,
+ org.bouncycastle.cert,
+ org.bouncycastle.cert.jcajce,
+ org.bouncycastle.cms,
+ org.bouncycastle.cms.jcajce,
+ org.bouncycastle.operator,
+ org.bouncycastle.operator.jcajce,
+ org.bouncycastle.util,
  org.codehaus.stax2;version="3.1.1",
  org.codehaus.stax2.evt;version="3.1.1",
  org.codehaus.stax2.io;version="3.1.1",
@@ -162,6 +172,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax.helpers
 Export-Package: com.openexchange.client.onboarding.plist
 Bundle-Activator: com.openexchange.client.onboarding.plist.osgi.OnboardingPlistActivator
-Bundle-ClassPath: lib/bcpkix-jdk15on-152.jar,
- lib/bcprov-jdk15on-152.jar,
- .
+Bundle-ClassPath: .

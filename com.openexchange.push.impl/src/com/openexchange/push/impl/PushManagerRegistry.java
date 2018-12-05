@@ -71,6 +71,7 @@ import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -479,6 +480,13 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public boolean registerPermanentListenerFor(Session session, String clientId) throws OXException {
+        if (MailAccounts.isGuest(session)) {
+            /*
+             * It's a guest
+             */
+            LOG.debug("Denied registration of a permanent push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            return false;
+        }
         if (false == hasWebMail(session)) {
             /*
              * No "webmail" permission granted
@@ -802,8 +810,15 @@ public final class PushManagerRegistry implements PushListenerService {
     @Override
     public PushListener startListenerFor(Session session) {
         /*
-         * Check session's client identifier
+         * Check session
          */
+        if (MailAccounts.isGuest(session)) {
+            /*
+             * It's a guest
+             */
+            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            return null;
+        }
         if (false == hasWebMail(session)) {
             /*
              * No "webmail" permission granted

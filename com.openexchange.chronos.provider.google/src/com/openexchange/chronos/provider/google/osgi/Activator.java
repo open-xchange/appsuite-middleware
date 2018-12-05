@@ -54,6 +54,7 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
 import com.openexchange.chronos.provider.google.migration.GoogleSubscriptionsMigrationTask;
+import com.openexchange.chronos.provider.google.oauth.GoogleCalendarOAuthAccountAssociationProvider;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -67,6 +68,7 @@ import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.user.UserService;
@@ -91,6 +93,7 @@ public class Activator extends HousekeepingActivator {
         registerService(CalendarProvider.class, new GoogleCalendarProvider(this));
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new GoogleSubscriptionsMigrationTask()));
         registerService(OAuthAccountDeleteListener.class, new com.openexchange.chronos.provider.google.access.OAuthAccountDeleteListener());
+        registerService(OAuthAccountAssociationProvider.class, new GoogleCalendarOAuthAccountAssociationProvider());
     }
 
 }

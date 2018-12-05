@@ -49,10 +49,8 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -111,7 +109,7 @@ public class ThreadedAllRequest implements AJAXRequest<ConversationResponse> {
     }
 
     @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
+    public Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<>();
         list.add(new Parameter(PARAMETER_ACTION, ACTION_THREADED_ALL));
 
@@ -139,7 +137,7 @@ public class ThreadedAllRequest implements AJAXRequest<ConversationResponse> {
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return null;
     }
 

@@ -8,7 +8,11 @@ properties:
         A comma seperated list of enabled oauth modules. 
         This list can be configured for each individual oauth provider. 
         To identify the oauth provider replace [oauth_provider] with the last part of the provider id.  
-        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google  
+        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google
+
+        Please be aware that some of the modules are exklusive to one another (e.g. <code>calendar</code> and <code>calendar_ro</code>) and 
+        that not all modules are available for all providers. The valid modules can be found in the respective documentation of the provider.
+
         Available modules are:
           <table>
             <tr>

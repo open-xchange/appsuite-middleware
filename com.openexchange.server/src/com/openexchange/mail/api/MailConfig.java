@@ -91,6 +91,7 @@ import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.Password;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -175,23 +176,6 @@ public abstract class MailConfig {
          */
         TRUE("true");
 
-        /**
-         * Parses given capability value. If given value equals ignore-case to string <code>true</code>, constant {@link #TRUE} will be
-         * returned. Else if given value equals ignore-case to string <code>auto</code>, constant {@link #AUTO} will be returned. Otherwise
-         * {@link #FALSE} will be returned.
-         *
-         * @param capVal - the string value to parse
-         * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
-         */
-        public final static BoolCapVal parseBoolCapVal(final String capVal) {
-            if (TRUE.str.equalsIgnoreCase(capVal)) {
-                return TRUE;
-            } else if (AUTO.str.equalsIgnoreCase(capVal)) {
-                return AUTO;
-            }
-            return FALSE;
-        }
-
         private final String str;
 
         private BoolCapVal(final String str) {
@@ -201,6 +185,23 @@ public abstract class MailConfig {
         @Override
         public String toString() {
             return str;
+        }
+
+        /**
+         * Parses given capability value. If given value equals ignore-case to string <code>true</code>, constant {@link #TRUE} will be
+         * returned. Else if given value equals ignore-case to string <code>auto</code>, constant {@link #AUTO} will be returned. Otherwise
+         * {@link #FALSE} will be returned.
+         *
+         * @param capVal - the string value to parse
+         * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
+         */
+        public static BoolCapVal parseBoolCapVal(String capVal) {
+            if (TRUE.str.equalsIgnoreCase(capVal)) {
+                return TRUE;
+            } else if (AUTO.str.equalsIgnoreCase(capVal)) {
+                return AUTO;
+            }
+            return FALSE;
         }
     }
 
@@ -219,22 +220,6 @@ public abstract class MailConfig {
          */
         USER_NAME("name");
 
-        /**
-         * Parses specified string into a login source.
-         *
-         * @param loginSourceStr The string to parse to a login source
-         * @return An appropriate login source or <code>null</code> if string could not be parsed to a login source
-         */
-        public static final LoginSource parse(final String loginSourceStr) {
-            final LoginSource[] values = LoginSource.values();
-            for (final LoginSource loginSource : values) {
-                if (loginSource.str.equalsIgnoreCase(loginSourceStr)) {
-                    return loginSource;
-                }
-            }
-            return null;
-        }
-
         private final String str;
 
         private LoginSource(final String str) {
@@ -244,6 +229,25 @@ public abstract class MailConfig {
         @Override
         public String toString() {
             return str;
+        }
+
+        /**
+         * Parses specified string into a login source.
+         *
+         * @param loginSourceStr The string to parse to a login source
+         * @return An appropriate login source or <code>null</code> if string could not be parsed to a login source
+         */
+        public static LoginSource parse(String loginSourceStr) {
+            if (Strings.isEmpty(loginSourceStr)) {
+                return null;
+            }
+
+            for (LoginSource loginSource : LoginSource.values()) {
+                if (loginSource.str.equalsIgnoreCase(loginSourceStr)) {
+                    return loginSource;
+                }
+            }
+            return null;
         }
     }
 
@@ -258,22 +262,6 @@ public abstract class MailConfig {
          */
         SESSION("session");
 
-        /**
-         * Parses specified string into a password source.
-         *
-         * @param passwordSourceStr The string to parse to a password source
-         * @return An appropriate password source or <code>null</code> if string could not be parsed to a password source
-         */
-        public static final PasswordSource parse(final String passwordSourceStr) {
-            final PasswordSource[] values = PasswordSource.values();
-            for (final PasswordSource passwordSource : values) {
-                if (passwordSource.str.equalsIgnoreCase(passwordSourceStr)) {
-                    return passwordSource;
-                }
-            }
-            return null;
-        }
-
         private final String str;
 
         private PasswordSource(final String str) {
@@ -284,6 +272,26 @@ public abstract class MailConfig {
         public String toString() {
             return str;
         }
+
+        /**
+         * Parses specified string into a password source.
+         *
+         * @param passwordSourceStr The string to parse to a password source
+         * @return An appropriate password source or <code>null</code> if string could not be parsed to a password source
+         */
+        public static PasswordSource parse(String passwordSourceStr) {
+            if (Strings.isEmpty(passwordSourceStr)) {
+                return null;
+            }
+
+            for (PasswordSource passwordSource : PasswordSource.values()) {
+                if (passwordSource.str.equalsIgnoreCase(passwordSourceStr)) {
+                    return passwordSource;
+                }
+            }
+            return null;
+        }
+
     }
 
     public static enum ServerSource {
@@ -297,22 +305,6 @@ public abstract class MailConfig {
          */
         USER("user");
 
-        /**
-         * Parses specified string into a server source.
-         *
-         * @param serverSourceStr The string to parse to a server source
-         * @return An appropriate server source or <code>null</code> if string could not be parsed to a server source
-         */
-        public static final ServerSource parse(final String serverSourceStr) {
-            final ServerSource[] values = ServerSource.values();
-            for (final ServerSource serverSource : values) {
-                if (serverSource.str.equalsIgnoreCase(serverSourceStr)) {
-                    return serverSource;
-                }
-            }
-            return null;
-        }
-
         private final String str;
 
         private ServerSource(final String str) {
@@ -322,6 +314,25 @@ public abstract class MailConfig {
         @Override
         public String toString() {
             return str;
+        }
+
+        /**
+         * Parses specified string into a server source.
+         *
+         * @param serverSourceStr The string to parse to a server source
+         * @return An appropriate server source or <code>null</code> if string could not be parsed to a server source
+         */
+        public static ServerSource parse(String serverSourceStr) {
+            if (Strings.isEmpty(serverSourceStr)) {
+                return null;
+            }
+
+            for (ServerSource serverSource : ServerSource.values()) {
+                if (serverSource.str.equalsIgnoreCase(serverSourceStr)) {
+                    return serverSource;
+                }
+            }
+            return null;
         }
     }
 
@@ -357,7 +368,7 @@ public abstract class MailConfig {
         UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount, userId, contextId);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
             }
             throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(" in context ").append(contextId).toString());
@@ -450,7 +461,7 @@ public abstract class MailConfig {
         if (!mailAccount.isDefaultAccount()) {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
-        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(mailAccount)))) {
             return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
@@ -467,8 +478,10 @@ public abstract class MailConfig {
     public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
+            if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+            }
         }
 
         MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
@@ -616,7 +629,7 @@ public abstract class MailConfig {
                 userIds = new TIntHashSet(accounts.length);
                 for (final MailAccount candidate : accounts) {
                     final String shouldMatch;
-                    switch (MailProperties.getInstance().getMailServerSource(iUserId, ctx.getContextId())) {
+                    switch (MailProperties.getInstance().getMailServerSource(iUserId, ctx.getContextId(), MailAccounts.isGuestAccount(candidate))) {
                     case USER:
                         shouldMatch = toSocketAddrString(candidate.generateMailServerURL(), 143);
                         break;

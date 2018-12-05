@@ -68,6 +68,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
@@ -446,9 +447,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public Set<String> hasTriggers(int userId, String[] eventIds) throws OXException {
+        // not implemented in legacy storage
+        return Collections.emptySet();
     }
 
     private List<AlarmTrigger> selectTriggers(Connection connection, int contextID, int userID, Date until) throws SQLException, OXException {
@@ -688,6 +689,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @return the number of changed items
      */
     private int deleteReminderTriggersById(Connection con, int contextId, List<Integer> alarmIds) throws SQLException {
+        if (null == alarmIds || 0 == alarmIds.size()) {
+            return 0;
+        }
         StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(getPlaceholders(alarmIds.size())).append(';');
         try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;

@@ -89,11 +89,14 @@ import com.openexchange.rest.client.exception.HTTPResponseCodes;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.session.Session;
 import com.openexchange.rest.client.session.Session.ProxyInfo;
+import com.openexchange.rest.client.v2.AbstractRESTClient;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link RESTExecutor}. Used to create, execute and parse the responses of REST requests to any REST API.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated Use {@link AbstractRESTClient} instead.
  */
 public class RESTExecutor {
 
@@ -120,37 +123,37 @@ public class RESTExecutor {
         final HttpRequestBase req;
         final String requestURL = buildURL(restRequest.getHost(), restRequest.getAPIVersion(), restRequest.getPath(), restRequest.getParams());
         switch (restRequest.getMethod()) {
-        case PUT: {
-            final HttpPut put = new HttpPut(requestURL);
-            final JSONObject requestInformation = restRequest.getRequestBody();
-            if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), -1L, ContentType.APPLICATION_JSON));
-            }
-            req = put;
-        }
-            break;
-        case POST: {
-            final HttpPost post = new HttpPost(requestURL);
-            final JSONObject requestInformation = restRequest.getRequestBody();
-            if (null != requestInformation) {
-                try {
-                    final int contentLength = requestInformation.toString().getBytes(CharEncoding.UTF_8).length;
-                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), contentLength, ContentType.APPLICATION_JSON));
-                } catch (UnsupportedEncodingException e) {
-                    throw RESTExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
+            case PUT: {
+                final HttpPut put = new HttpPut(requestURL);
+                final JSONObject requestInformation = restRequest.getRequestBody();
+                if (null != requestInformation) {
+                    put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), -1L, ContentType.APPLICATION_JSON));
                 }
+                req = put;
             }
-            req = post;
-        }
-            break;
-        case GET:
-            req = new HttpGet(requestURL);
-            break;
-        case DELETE:
-            req = new HttpDelete(requestURL);
-            break;
-        default:
-            throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(restRequest.getMethod());
+                break;
+            case POST: {
+                final HttpPost post = new HttpPost(requestURL);
+                final JSONObject requestInformation = restRequest.getRequestBody();
+                if (null != requestInformation) {
+                    try {
+                        final int contentLength = requestInformation.toString().getBytes(CharEncoding.UTF_8).length;
+                        post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), contentLength, ContentType.APPLICATION_JSON));
+                    } catch (UnsupportedEncodingException e) {
+                        throw RESTExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
+                    }
+                }
+                req = post;
+            }
+                break;
+            case GET:
+                req = new HttpGet(requestURL);
+                break;
+            case DELETE:
+                req = new HttpDelete(requestURL);
+                break;
+            default:
+                throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(restRequest.getMethod());
         }
         // Sign request
         restRequest.getSession().sign(req);
@@ -158,10 +161,10 @@ public class RESTExecutor {
         final List<Integer> expectedStatusCodes = restRequest.getExpectedStatusCodes();
         final HttpResponse resp = execute(restRequest.getSession(), req, -1, expectedStatusCodes);
         final int statusCode = resp.getStatusLine().getStatusCode();
-        final RESTResponse restResponse = new RESTResponse(statusCode, resp);
+        final RESTResponse restResponse = new RESTResponse(statusCode, resp.getStatusLine().getReasonPhrase());
 
         if (expectResponseBody) {
-            final JSONValue json = parseAsJSON(restResponse.getResponse(), restRequest.getExpectedStatusCodes());
+            final JSONValue json = parseAsJSON(resp, restRequest.getExpectedStatusCodes());
             restResponse.setResponseBody(json);
         }
 

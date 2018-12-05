@@ -44,12 +44,20 @@ Requires:      mysql-client >= 5.0.0
 %if 0%{?fedora_version} || 0%{?rhel_version}
 Requires:      mysql >= 5.0.0
 %endif
-Requires:      bzip2
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 Requires:      util-linux-ng
 %else
 Requires:      util-linux
 %endif
+Requires:      bzip2
+Requires:      coreutils
+Requires:      gawk
+Requires:      grep
+Requires:      gzip
+Requires:      file
+Requires:      findutils
+Requires:      sed
+Requires:      tar
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
@@ -180,6 +188,10 @@ ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
+* Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>

@@ -28,7 +28,7 @@ jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.OXFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXFolderCache.elementattributes.IsEternal=false
-jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.OXFolderCache.elementattributes.IdleTime=360
 jcs.region.OXFolderCache.elementattributes.IsSpool=false
 jcs.region.OXFolderCache.elementattributes.IsRemote=false
@@ -62,7 +62,7 @@ jcs.region.OXFolderQueryCache.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.OXFolderQueryCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXFolderQueryCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXFolderQueryCache.elementattributes.IsEternal=false
-jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.OXFolderQueryCache.elementattributes.IdleTime=360
 # NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
 jcs.region.OXFolderQueryCache.elementattributes.IsSpool=false
@@ -188,23 +188,6 @@ jcs.region.OXDBPoolCache.elementattributes.IsSpool=false
 jcs.region.OXDBPoolCache.elementattributes.IsRemote=false
 jcs.region.OXDBPoolCache.elementattributes.IsLateral=false
 
-# Pre-defined region for Calendar metadata
-jcs.region.CalendarCache=
-jcs.region.CalendarCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.CalendarCache.cacheattributes.MaxObjects=100000
-jcs.region.CalendarCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds=300
-jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds=60
-jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun=500
-jcs.region.CalendarCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.CalendarCache.elementattributes.IsEternal=false
-jcs.region.CalendarCache.elementattributes.MaxLifeSeconds=600
-jcs.region.CalendarCache.elementattributes.IdleTime=300
-jcs.region.CalendarCache.elementattributes.IsSpool=false
-jcs.region.CalendarCache.elementattributes.IsRemote=false
-jcs.region.CalendarCache.elementattributes.IsLateral=false
-
 # Pre-defined cache region for mail account
 jcs.region.MailAccount=LTCP
 jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
@@ -236,7 +219,7 @@ jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=360
 jcs.region.GlobalFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.GlobalFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.GlobalFolderCache.elementattributes.IsEternal=false
-jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.GlobalFolderCache.elementattributes.IdleTime=360
 jcs.region.GlobalFolderCache.elementattributes.IsSpool=false
 jcs.region.GlobalFolderCache.elementattributes.IsRemote=false

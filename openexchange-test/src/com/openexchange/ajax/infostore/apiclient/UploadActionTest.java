@@ -2,10 +2,8 @@
 package com.openexchange.ajax.infostore.apiclient;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +13,7 @@ import org.junit.Test;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.InfoItemData;
+import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.tools.io.IOTools;
 
 /**
@@ -72,12 +71,8 @@ public class UploadActionTest extends InfostoreApiClientTest {
             }
         }
 
-        try {
-            uploadInfoItem(file, MIME_TEXT_PLAIN);
-            fail();
-        } catch (Throwable e) {
-            assertFalse(e instanceof AssertionError);
-        }
+        InfoItemUpdateResponse response = uploadInfoItemWithError(null, file, MIME_TEXT_PLAIN, null);
+        Assert.assertEquals("FLS-0003", response.getCode());
     }
 
     // Bug 3928

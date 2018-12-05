@@ -2,25 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange box.com OAuth Bundle
 Bundle-SymbolicName: com.openexchange.oauth.boxcom
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.capabilities,
- com.openexchange.config,
- com.openexchange.dispatcher,
+Import-Package: com.openexchange.config,
  com.openexchange.exception,
- com.openexchange.groupware.ldap,
- com.openexchange.http.deferrer,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.oauth,
+ com.openexchange.oauth.common.osgi,
  com.openexchange.oauth.impl,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.session,
- com.openexchange.tools.session,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,

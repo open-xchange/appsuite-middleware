@@ -170,23 +170,25 @@ public class SchemaStoreImpl extends SchemaStore {
 
     static SchemaUpdateState loadSchema(int poolId, String schemaName, Connection con) throws OXException {
         final SchemaUpdateState retval;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             checkForTable(con);
             retval = loadSchemaStatus(poolId, schemaName, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
         return retval;
     }
@@ -305,16 +307,16 @@ public class SchemaStoreImpl extends SchemaStore {
     public void unlockSchema(final Schema schema, final boolean background) throws OXException {
         int poolId = schema.getPoolId();
         Connection con = Database.get(poolId, schema.getSchema());
-        boolean rollback = false;
+        int rollback = 0;
         try {
             // End of update process, so unlock schema
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             // Delete lock
             deleteLock(con, schema, background ? Idiom.BACKGROUND : Idiom.LOCKED);
             // Everything went fine. Schema is marked as unlocked
             con.commit();
-            rollback = false;
+            rollback = 2;
             // Invalidate
             invalidateCache(schema);
         } catch (final SQLException e) {
@@ -322,10 +324,12 @@ public class SchemaStoreImpl extends SchemaStore {
         } catch (final OXException e) {
             throw e;
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(poolId, con);
         }
     }

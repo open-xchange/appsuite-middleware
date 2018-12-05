@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isFirstOccurrence;
@@ -66,20 +65,24 @@ import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -112,6 +115,10 @@ public class EventPostProcessor {
     private final SelfProtection selfProtection;
 
     private long maximumTimestamp;
+    private Set<String> eventIdsWithAttachment;
+    private Set<String> alarmTriggersPerEventId;
+    private Map<String, Integer> attendeeCountsPerEventId;
+    private Map<String, Attendee> userAttendeePerEventId;
 
     /**
      * Initializes a new {@link EventPostProcessor}.
@@ -128,6 +135,50 @@ public class EventPostProcessor {
         this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
+    }
+
+    /**
+     * Sets a map holding additional hints to assign the {@link EventFlag#ATTACHMENTS} when processing the events.
+     * 
+     * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one attachment stored
+     * @return A self reference
+     */
+    EventPostProcessor setAttachmentsFlagInfo(Set<String> eventIdsWithAttachment) {
+        this.eventIdsWithAttachment = eventIdsWithAttachment;
+        return this;
+    }
+
+    /**
+     * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
+     * 
+     * @param alarmTriggersPerEventId A set holding the identifiers of those events where at least one alarm trigger is stored for the user
+     * @return A self reference
+     */
+    EventPostProcessor setAlarmsFlagInfo(Set<String> alarmTriggersPerEventId) {
+        this.alarmTriggersPerEventId = alarmTriggersPerEventId;
+        return this;
+    }
+
+    /**
+     * Sets a map holding additional hints to assign the {@link EventFlag#SCHEDULED} when processing the events.
+     * 
+     * @param attendeeCountsPerEventId The number of attendees, mapped to the identifiers of the corresponding events
+     * @return A self reference
+     */
+    EventPostProcessor setScheduledFlagInfo(Map<String, Integer> attendeeCountsPerEventId) {
+        this.attendeeCountsPerEventId = attendeeCountsPerEventId;
+        return this;
+    }
+
+    /**
+     * Sets a map holding essential information about the calendar user attendee when processing the events.
+     * 
+     * @param userAttendeePerEventId The calendar user attendees, mapped to the identifiers of the corresponding events
+     * @return A self reference
+     */
+    EventPostProcessor setUserAttendeeInfo(Map<String, Attendee> userAttendeePerEventId) {
+        this.userAttendeePerEventId = userAttendeePerEventId;
+        return this;
     }
 
     /**
@@ -148,7 +199,28 @@ public class EventPostProcessor {
      */
     public EventPostProcessor process(Collection<Event> events, CalendarFolder inFolder) throws OXException {
         for (Event event : events) {
-            doProcess(event, inFolder);
+            doProcess(injectUserAttendeeData(event), inFolder);
+            checkResultSizeNotExceeded();
+        }
+        return this;
+    }
+
+    /**
+     * Post-processes a list of event tombstones prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
+     * <li>applying the folder identifier from the passed folder</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param inFolder The parent folder representing the view on the events
+     * @return A self reference
+     */
+    public EventPostProcessor processTombstones(Collection<Event> events, CalendarFolder inFolder) throws OXException {
+        for (Event event : events) {
+            doProcessTombstone(injectUserAttendeeData(event), inFolder.getId());
             checkResultSizeNotExceeded();
         }
         return this;
@@ -171,7 +243,7 @@ public class EventPostProcessor {
      * @return A self reference
      */
     public EventPostProcessor process(Event event, CalendarFolder inFolder) throws OXException {
-        doProcess(event, inFolder);
+        doProcess(injectUserAttendeeData(event), inFolder);
         checkResultSizeNotExceeded();
         return this;
     }
@@ -190,13 +262,43 @@ public class EventPostProcessor {
      *
      * @param events The events to post-process
      * @param forUser The identifier of the user to apply the parent folder identifier for
-     * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
-     * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return A self reference
      */
     public EventPostProcessor process(Collection<Event> events, int forUser) throws OXException {
         for (Event event : events) {
-            doProcess(event, getFolder(session, getFolderView(event, forUser), false));
+            doProcess(event, getFolder(session, getFolderView(injectUserAttendeeData(event), forUser), false));
+            checkResultSizeNotExceeded();
+        }
+        return this;
+    }
+
+    /**
+     * Post-processes a list of event tombstones prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param forUser The identifier of the user to apply the parent folder identifier for
+     * @return A self reference
+     */
+    public EventPostProcessor processTombstones(Collection<Event> events, int forUser) throws OXException {
+        for (Event event : events) {
+            event = injectUserAttendeeData(event);
+            String folderId;
+            try {
+                folderId = getFolderView(injectUserAttendeeData(event), forUser);
+            } catch (OXException e) {
+                /*
+                 * orphaned folder information in tombstone event, add warning but continue
+                 */
+                session.addWarning(e);
+                continue;
+            }
+            doProcessTombstone(event, folderId);
             checkResultSizeNotExceeded();
         }
         return this;
@@ -262,7 +364,7 @@ public class EventPostProcessor {
         }
         event.setFolderId(folder.getId());
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
-            event = applyFlags(event, folder);
+            event.setFlags(getFlags(event, folder));
         }
         maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);
@@ -296,8 +398,35 @@ public class EventPostProcessor {
         return events.add(event);
     }
 
-    private Event applyFlags(Event event, CalendarFolder folder) throws OXException {
-        EnumSet<EventFlag> flags = getFlags(event, folder.getCalendarUserId(), session.getUserId(), PublicType.getInstance().equals(folder.getType()));
+    private boolean doProcessTombstone(Event event, String folderId) throws OXException {
+        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
+            /*
+             * excluded if classified as private for the session user
+             */
+            return false;
+        }
+        event.setFolderId(folderId);
+        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+        event = anonymizeIfNeeded(session, event);
+        if (isSeriesMaster(event) && false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+            /*
+             * exclude series master event if there are no occurrences in requested range
+             */
+            return false;
+        } else if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+            /*
+             * excluded if not in requested range
+             */
+            return false;
+        }
+        return events.add(event);
+    }
+
+    protected EnumSet<EventFlag> getFlags(Event event, CalendarFolder folder) throws OXException {
+        /*
+         * get default flags for event data & derive recurrence position info
+         */
+        EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, folder.getCalendarUserId(), session.getUserId(), PublicType.getInstance().equals(folder.getType()));
         if (isSeriesException(event)) {
             RecurrenceData recurrenceData = optRecurrenceData(event);
             if (null != recurrenceData) {
@@ -309,8 +438,22 @@ public class EventPostProcessor {
                 }
             }
         }
-        event.setFlags(flags);
-        return event;
+        /*
+         * inject additional flags based on available data
+         */
+        if (null != eventIdsWithAttachment && eventIdsWithAttachment.contains(event.getId())) {
+            flags.add(EventFlag.ATTACHMENTS);
+        }
+        if (null != alarmTriggersPerEventId && alarmTriggersPerEventId.contains(event.getId())) {
+            flags.add(EventFlag.ALARMS);
+        }
+        if (null != attendeeCountsPerEventId) {
+            Integer attendeeCount = attendeeCountsPerEventId.get(event.getId());
+            if (null != attendeeCount && 1 < i(attendeeCount)) {
+                flags.add(EventFlag.SCHEDULED);
+            }
+        }
+        return flags;
     }
 
     private RecurrenceData optRecurrenceData(Event event) throws OXException {
@@ -352,6 +495,25 @@ public class EventPostProcessor {
             }
         }
         return list;
+    }
+
+    /**
+     * Injects essential information about the calendar user attendee prior processing the event, in case it is available.
+     * 
+     * @param event The event to enrich with essential information about the calendar user attendee
+     * @return The event, enriched with data about the calendar user attendee if available
+     */
+    private Event injectUserAttendeeData(Event event) {
+        if (null != userAttendeePerEventId) {
+            /*
+             * inject data for attendee of underlying calendar user
+             */
+            Attendee attendee = userAttendeePerEventId.get(event.getId());
+            if (null != attendee) {
+                event.setAttendees(Collections.singletonList(attendee));
+            }
+        }
+        return event;
     }
 
 }

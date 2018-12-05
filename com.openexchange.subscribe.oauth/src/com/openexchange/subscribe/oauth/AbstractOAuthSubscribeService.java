@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -204,7 +204,7 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
      * @throws OXException if the {@link OAuthService} is absent or any other error occurs
      */
     protected OAuthAccount getOAuthAccount(Session session, Subscription subscription) throws OXException {
-        OAuthService oAuthService = services.getService(OAuthService.class);
+        OAuthService oAuthService = getServices().getService(OAuthService.class);
         if (null == oAuthService) {
             throw ServiceExceptionCode.absentService(OAuthService.class);
         }
@@ -214,16 +214,6 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
             return oAuthService.getDefaultAccount(getKnownApi(), session);
         }
         return oAuthService.getAccount(session, Autoboxing.a2i(accountId));
-    }
-
-    /**
-     * Converts the specified accountId to its String representation
-     * 
-     * @param accountId The account identifier
-     * @return The string representation of the account identifier
-     */
-    private String toString(Object accountId) {
-        return accountId instanceof Integer ? (Integer.toString((Integer) accountId)) : accountId.toString();
     }
 
     /**
@@ -253,5 +243,14 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
         source.setFormDescription(form);
 
         return source;
+    }
+
+    /**
+     * Gets the services
+     *
+     * @return The services
+     */
+    public ServiceLookup getServices() {
+        return services;
     }
 }

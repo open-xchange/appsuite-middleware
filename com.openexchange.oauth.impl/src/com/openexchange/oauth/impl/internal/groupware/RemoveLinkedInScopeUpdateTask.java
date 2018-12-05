@@ -75,7 +75,7 @@ public class RemoveLinkedInScopeUpdateTask extends AbstractOAuthUpdateTask {
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM oauthAccounts WHERE serviceId=? OR serviceId=?")) {
-            stmt.setString(1, KnownApi.LINKEDIN.getFullName());
+            stmt.setString(1, KnownApi.LINKEDIN.getDisplayName());
             stmt.setString(2, "com.openexchange.socialplugin.linkedin");
             stmt.execute();
         }

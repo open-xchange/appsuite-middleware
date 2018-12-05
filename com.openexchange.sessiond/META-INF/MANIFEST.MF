@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -34,7 +34,11 @@ Import-Package: com.google.common.annotations,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.management,
+ com.openexchange.management.osgi,
  com.openexchange.osgi,
+ com.openexchange.rest.client.endpointpool,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
@@ -54,8 +58,11 @@ Import-Package: com.google.common.annotations,
  gnu.trove.set,
  gnu.trove.set.hash,
  javax.management,
+ javax.ws.rs,
+ javax.ws.rs.core,
  org.apache.commons.lang,
  org.apache.commons.logging,
+ org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,

@@ -12,6 +12,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
+BuildRequires: open-xchange-osgi >= @OXVERSION@
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -22,6 +23,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Community implementation of open-xchange-hazelcast
 Autoreqprov:   no
+Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-hazelcast
 Conflicts:     open-xchange-hazelcast-enterprise
 Conflicts:     open-xchange-core < 7.10.1
@@ -58,7 +60,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/com.hazelcast.ini
 
 %changelog
-* Thu Sep 06 2018 Martin Schneider <martin.schneider@open-xchange.com>
-prepare for 7.10.1 release
+* Thu Oct 18 2018 Martin Schneider <martin.schneider@open-xchange.com>
+prepare for 7.10.2 release
+* Thu Oct 11 2018 Martin Schneider <martin.schneider@open-xchange.com>
+First candidate for 7.10.1 release
 * Mon Aug 13 2018 Martin Schneider <martin.schneider@open-xchange.com>
 Initial release

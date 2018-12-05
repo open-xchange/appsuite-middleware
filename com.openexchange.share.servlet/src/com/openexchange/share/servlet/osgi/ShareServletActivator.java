@@ -58,6 +58,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.guest.GuestService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -99,6 +100,7 @@ public class ShareServletActivator extends HousekeepingActivator {
         trackService(HostnameService.class);
         trackService(DatabaseService.class);
         trackService(ShareNotificationService.class);
+        trackService(SegmentedUpdateService.class);
 
         // Dependently registers Servlets
         {

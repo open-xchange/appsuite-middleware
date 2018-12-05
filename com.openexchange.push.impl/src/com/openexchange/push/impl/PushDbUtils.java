@@ -338,10 +338,10 @@ public class PushDbUtils {
 
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             boolean inserted = insertPushRegistration(userId, contextId, clientId, con);
             if (inserted) {
@@ -349,7 +349,7 @@ public class PushDbUtils {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             return inserted;
         } catch (SQLException e) {
@@ -357,10 +357,12 @@ public class PushDbUtils {
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             service.backWritable(contextId, con);
         }
     }
@@ -433,10 +435,10 @@ public class PushDbUtils {
     public static DeleteResult deleteAllPushRegistrations(int userId, int contextId) throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             boolean[] unmark = new boolean[1];
             unmark[0] = false;
@@ -452,7 +454,7 @@ public class PushDbUtils {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             return deleteResult;
         } catch (SQLException e) {
@@ -460,10 +462,12 @@ public class PushDbUtils {
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             service.backWritable(contextId, con);
         }
     }
@@ -515,10 +519,10 @@ public class PushDbUtils {
     public static DeleteResult deletePushRegistration(int userId, int contextId, String clientId) throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             boolean[] unmark = new boolean[1];
             unmark[0] = false;
@@ -534,7 +538,7 @@ public class PushDbUtils {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             return deleteResult;
         } catch (SQLException e) {
@@ -542,10 +546,12 @@ public class PushDbUtils {
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             service.backWritable(contextId, con);
         }
     }

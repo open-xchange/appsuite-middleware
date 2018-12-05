@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.4-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logging"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201404270220.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201404270220.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-classic-1.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-core-1.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.25-sources.jar"/>

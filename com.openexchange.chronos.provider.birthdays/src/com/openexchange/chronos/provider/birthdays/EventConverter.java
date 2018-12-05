@@ -150,9 +150,7 @@ public class EventConverter {
         List<Event> events = new ArrayList<>(contacts.size());
         for (Contact contact : contacts) {
             Event seriesMaster = getSeriesMaster(contact);
-            if (isInRange(seriesMaster, from, until, timeZone)) {
-                events.add(seriesMaster);
-            }
+            events.add(seriesMaster);
         }
         return events;
     }

@@ -99,7 +99,6 @@ import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -318,12 +317,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
         LOG.trace("loadUserFromServer(String subject: {})", subject);
         ContextService contextService = Services.getService(ContextService.class);
+        UserService userService = Services.getService(UserService.class);
         String[] userData = subject.split("@");
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
         }
         int contextId = contextService.getContextId(userData[1]);
-        return new AuthenticationInfo(contextId, Integer.parseInt(userData[0]));
+        int userId = userService.getUserId(userData[0], contextService.getContext(contextId));
+        return new AuthenticationInfo(contextId, userId);
     }
 
     @Override

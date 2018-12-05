@@ -49,20 +49,13 @@
 
 package com.openexchange.file.storage.onedrive.access;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.MsLiveConnectApi;
+import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
@@ -71,11 +64,12 @@ import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.onedrive.AbstractOneDriveResourceAccess;
 import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
+import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
@@ -84,9 +78,9 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.api.MicrosoftGraphApi;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
-import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -108,15 +102,22 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         this.fsAccount = fsAccount;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.AbstractOAuthAccess#dispose()
+     */
     @Override
     public void dispose() {
-        OAuthClient<HttpClient> oAuthClient = this.<HttpClient> getOAuthClient();
-        if (null != oAuthClient) {
-            HttpClients.shutDown(oAuthClient.client);
-        }
+        // Nothing to dispose
         super.dispose();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialize()
+     */
     @Override
     public void initialize() throws OXException {
         synchronized (this) {
@@ -134,38 +135,41 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 liveconnectOAuthAccount = newAccount;
             }
             verifyAccount(liveconnectOAuthAccount, oAuthService, OXScope.drive);
-            setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
+            setOAuthClient(new OAuthClient<>(Services.getService(MicrosoftGraphDriveService.class), getOAuthAccount().getToken()));
         }
-        
+
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
     @Override
     public boolean ping() throws OXException {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpGet request = null;
+            protected Boolean doPerform() throws OXException {
+                MicrosoftGraphDriveService client = (MicrosoftGraphDriveService) getOAuthClient().client;
                 try {
-                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-                    qparams.add(new BasicNameValuePair("access_token", getOAuthAccount().getToken()));
-                    request = new HttpGet(AbstractOneDriveResourceAccess.buildUri("/me/skydrive", qparams));
-                    HttpResponse httpResponse = httpClient.execute(request);
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
-                    if (401 == statusCode || 403 == statusCode) {
+                    client.getRootFolderId(getOAuthAccount().getToken());
+                } catch (OXException e) {
+                    if (MicrosoftGraphAPIExceptionCodes.ACCESS_DENIED.equals(e) || MicrosoftGraphAPIExceptionCodes.UNAUTHENTICATED.equals(e)) {
                         return Boolean.FALSE;
                     }
-
-                    AbstractOneDriveResourceAccess.handleHttpResponse(httpResponse, JSONObject.class);
-                    return Boolean.TRUE;
-                } finally {
-                    AbstractOneDriveResourceAccess.reset(request);
                 }
+                return Boolean.TRUE;
             }
         };
-        return closure.perform(null, this.<HttpClient> getClient().client, getSession()).booleanValue();
+        return closure.perform(null, getSession()).booleanValue();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
     @Override
     public int getAccountId() throws OXException {
         try {
@@ -175,6 +179,11 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         if (isExpired()) {
@@ -190,29 +199,40 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     /**
      * Re-creates the token if expired
      *
-     * @param liveconnectOAuthAccount
-     * @param session
-     * @return
-     * @throws OXException
+     * @param oauthAccount The OAuth account
+     * @param session The groupware session
+     * @return The updated OAuth account if the token is expired; <code>null</code> otherwise
+     * @throws OXException if an error is occurred
      */
-    private OAuthAccount recreateTokenIfExpired(OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
+    private OAuthAccount recreateTokenIfExpired(OAuthAccount oauthAccount, Session session) throws OXException {
         // Check expiration
-        if (isExpired(liveconnectOAuthAccount, session)) {
+        if (isExpired(oauthAccount, session)) {
             // Expired...
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-            return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, liveconnectOAuthAccount), new ExponentialBackOffRetryPolicy());
+            return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, oauthAccount), new ExponentialBackOffRetryPolicy());
         }
         return null;
     }
 
-    private boolean isExpired(OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
+    /**
+     * Checks whether the token is expired
+     * 
+     * @param oauthAccount The OAuth account
+     * @param session The groupware session
+     * @return <code>true</code> if the token is expired, <code>false</code> otherwise
+     * @throws OXException if an error is occurred
+     */
+    private boolean isExpired(OAuthAccount oauthAccount, Session session) throws OXException {
         // Create Scribe Microsoft OneDrive OAuth service
-        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
-        serviceBuilder.apiKey(liveconnectOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(liveconnectOAuthAccount.getMetaData().getAPISecret(session));
-        MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
-        return scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken());
+        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MicrosoftGraphApi.class);
+        serviceBuilder.apiKey(oauthAccount.getMetaData().getAPIKey(session)).apiSecret(oauthAccount.getMetaData().getAPISecret(session));
+        MicrosoftGraphApi.MicrosoftGraphService scribeOAuthService = (MicrosoftGraphApi.MicrosoftGraphService) serviceBuilder.build();
+        return scribeOAuthService.isExpired(oauthAccount.getToken());
     }
 
+    /**
+     * {@link OneDriveReauthorizeClusterTask} - The reauthorise cluster task
+     */
     private static class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
         /**
@@ -238,9 +258,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cachedAccount.getDisplayName(), cachedAccount.getId(), session.getUserId(), session.getContextId());
             }
 
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+            ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MicrosoftGraphApi.class);
             serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
-            MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
+            MicrosoftGraphApi.MicrosoftGraphService scribeOAuthService = (MicrosoftGraphApi.MicrosoftGraphService) serviceBuilder.build();
 
             try {
                 Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), null);
@@ -254,11 +274,19 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         }
     }
 
+    /**
+     * Handles the specified {@link OAuthException}
+     * 
+     * @param e The exception to handle
+     * @param oauthAccount The {@link OAuthAccount}
+     * @param session The groupware {@link Session}
+     * @return the appropriate {@link OXException}
+     */
     static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e, OAuthAccount oauthAccount, Session session) {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
             List<Object> displayArgs = new ArrayList<>(2);
             displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
-            displayArgs.add("apis.live.net");
+            displayArgs.add("graph.microsoft.com");
             return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
         }
 
@@ -276,6 +304,12 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
     }
 
+    /**
+     * Parses the errors from the specified message
+     * 
+     * @param message The message to parse errors from
+     * @return The parsed error message, or <code>null</code> if no message could be parsed
+     */
     private static String parseErrorFrom(String message) {
         if (Strings.isEmpty(message)) {
             return null;
@@ -295,5 +329,4 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             return null;
         }
     }
-
 }

@@ -379,25 +379,25 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         }
 
         Connection con = databaseService.getWritable(contextId);
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
         try {
             Databases.startTransaction(con);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
+
             for (PushSubscription subscription : subscriptions) {
                 modified |= (null != removeSubscription(subscription, con));
             }
+
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
             if (modified) {
@@ -565,13 +565,11 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
         int contextId = subscription.getContextId();
         Connection con = databaseService.getWritable(contextId);
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
         try {
             Databases.startTransaction(con);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             PushSubscriptionResult result = registerSubscription(subscription, con);
             if (PushSubscriptionResult.Status.OK == result.getStatus()) {
@@ -579,15 +577,15 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             return result;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
             if (modified) {
@@ -781,25 +779,27 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
         int contextId = subscription.getContextId();
         Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         PushSubscription deleted = null;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             deleted = removeSubscription(subscription, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             return deleted;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             if (null != deleted) {
                 databaseService.backWritable(contextId, con);
             } else {
@@ -956,34 +956,33 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         }
 
         int removed = 0;
-        for (Integer contextId : contextService.getDistinctContextsPerSchema()) {
+        for (Integer iContextId : contextService.getDistinctContextsPerSchema()) {
             // Delete for whole schema using connection for representative context
+            int contextId = iContextId.intValue();
             Connection con = databaseService.getWritable(contextId);
-            boolean startedTransaction = false;
-            boolean rollback = false;
+            int rollback = 0;
             boolean modified = false;
             try {
                 List<byte[]> ids = getSubscriptionIds(contextId, token, transportId, con);
 
                 if (false == ids.isEmpty()) {
                     Databases.startTransaction(con);
-                    startedTransaction = true;
-                    rollback = true;
+                    rollback = 1;
 
                     int numDeleted = deleteSubscription(ids, con);
                     modified = numDeleted > 0;
                     removed += numDeleted;
 
                     con.commit();
-                    rollback = false;
+                    rollback = 2;
                 }
             } catch (SQLException e) {
                 throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                if (rollback) {
-                    Databases.rollback(con);
-                }
-                if (startedTransaction) {
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
                     Databases.autocommit(con);
                 }
                 if (modified) {

@@ -55,7 +55,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * This suite is meant to be used with a running OX.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 @RunWith(ParallelSuite.class)
@@ -63,7 +63,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ICalTestSuite.class,
     VCardTestSuite.class,
     Bug9475Test.class,
-    
+
     //CSV
     CSVImportExportServletTest.class,
     Bug18482Test_ByteOrderMarkOnUtf8.class,
@@ -73,8 +73,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug32994Test.class,
     Bug34499Test.class,
     Bug36687Test.class,
-    Bug36943Test.class,
-    
+
     // Overall bug tests.
     Bug6825Test.class,
     Bug9209Test.class,

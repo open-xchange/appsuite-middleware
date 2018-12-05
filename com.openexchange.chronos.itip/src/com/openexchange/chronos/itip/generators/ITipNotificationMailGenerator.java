@@ -171,6 +171,9 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                 this.actor = participant;
             }
         }
+
+        recipients.removeIf(r -> r.isHidden());
+
         if (this.actor == null) {
             throw new IllegalStateException("Resolver didn't resolve the acting user");
         }

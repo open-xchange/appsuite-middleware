@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.osgi;
 
+import java.rmi.Remote;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -58,6 +59,7 @@ import com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
+import com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIServiceImpl;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
 import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
@@ -68,7 +70,6 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
-import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
 
@@ -102,20 +103,15 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             registerService(ContactUserStorage.class, service);
 
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.contact.fulltextAutocomplete", false)) {
-                registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-                    new AddFulltextIndexTask()
-                ));
+                registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFulltextIndexTask()));
             }
 
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-                new AddFilenameColumnTask(),
-                new CorrectNumberOfImagesTask()
-            ));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(), new CorrectNumberOfImagesTask()));
 
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
             registerService(Reloadable.class, FulltextAutocompleteAdapter.RELOADABLE);
+            registerService(Remote.class, new ContactStorageRMIServiceImpl());
             track(I18nService.class, new I18nTracker(context));
-            track(ManagementService.class, new ManagementRegisterer(context));
             trackService(ImageMetadataService.class);
             openTrackers();
         } catch (Exception e) {

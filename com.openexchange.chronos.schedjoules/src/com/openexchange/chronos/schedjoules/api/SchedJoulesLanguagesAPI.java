@@ -49,15 +49,17 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import org.apache.http.HttpHeaders;
 import org.json.JSONArray;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage.SchedJoulesPageBuilder;
-import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.rest.client.v2.RESTResponseUtil;
 
 /**
  * {@link SchedJoulesLanguagesAPI}
@@ -82,8 +84,8 @@ public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
     public SchedJoulesPage listLanguages() throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages);
 
-        SchedJoulesResponse response = client.executeRequest(request);
-        return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();
+        RESTResponse response = client.executeRequest(request);
+        return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getHeader(HttpHeaders.ETAG)).lastModified(RESTResponseUtil.getLastModified(response)).build();
     }
 
     /**
@@ -96,7 +98,7 @@ public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
      */
     public boolean isModified(String etag, long lastModified) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages.getAbsolutePath());
-        SchedJoulesResponse response = client.executeRequest(request, HttpMethod.HEAD, etag, lastModified);
+        RESTResponse response = client.executeRequest(request, RESTMethod.HEAD, etag, lastModified);
         return response.getStatusCode() != 304;
     }
 }

@@ -115,11 +115,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         return this.trustManager.getAcceptedIssuers();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
@@ -134,11 +129,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         Set<String> hosts = new HashSet<String>();
@@ -169,11 +159,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(engine.getSession().getPeerHost())) {
@@ -310,21 +295,35 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             String sep = Strings.getLineSeparator();
             for (int i = 0; i < chain.length; i++) {
                 X509Certificate cert = chain[i];
-                builder.append("{}Certificate ").append((i + 1)); args.add(sep);
-                builder.append("{}     Common Name......: ").append(cert.getSubjectDN()); args.add(sep);
-                builder.append("{}     Issued by........: ").append(cert.getIssuerDN()); args.add(sep);
-                builder.append("{}     Issued on........: ").append(cert.getNotBefore()); args.add(sep);
-                builder.append("{}     Expiration Date..: ").append(cert.getNotAfter()); args.add(sep);
-                builder.append("{}     Serial Number....: ").append(cert.getSerialNumber().toString(16)); args.add(sep);
-                builder.append("{}     Signature........: ").append(toHex(cert.getSignature())); args.add(sep);
-                builder.append("{}  Public Key Info"); args.add(sep);
+                builder.append("{}Certificate ").append((i + 1));
+                args.add(sep);
+                builder.append("{}     Common Name......: ").append(cert.getSubjectDN());
+                args.add(sep);
+                builder.append("{}     Issued by........: ").append(cert.getIssuerDN());
+                args.add(sep);
+                builder.append("{}     Issued on........: ").append(cert.getNotBefore());
+                args.add(sep);
+                builder.append("{}     Expiration Date..: ").append(cert.getNotAfter());
+                args.add(sep);
+                builder.append("{}     Serial Number....: ").append(cert.getSerialNumber().toString(16));
+                args.add(sep);
+                builder.append("{}     Signature........: ").append(toHex(cert.getSignature()));
+                args.add(sep);
+                builder.append("{}  Public Key Info");
+                args.add(sep);
                 PublicKey pk = cert.getPublicKey();
-                builder.append("{}     Algorithm........: ").append(pk.getAlgorithm()); args.add(sep);
-                builder.append("{}     Format...........: ").append(pk.getFormat()); args.add(sep);
-                builder.append("{}   ").append(pk); args.add(sep);
-                builder.append("{}  Fingerprint"); args.add(sep);
-                builder.append("{}     SHA-256..........: ").append(getFingerprint(cert)); args.add(sep);
-                builder.append("{}"); args.add(sep);
+                builder.append("{}     Algorithm........: ").append(pk.getAlgorithm());
+                args.add(sep);
+                builder.append("{}     Format...........: ").append(pk.getFormat());
+                args.add(sep);
+                builder.append("{}   ").append(pk);
+                args.add(sep);
+                builder.append("{}  Fingerprint");
+                args.add(sep);
+                builder.append("{}     SHA-256..........: ").append(getFingerprint(cert));
+                args.add(sep);
+                builder.append("{}");
+                args.add(sep);
             }
             LOG.debug(builder.toString(), args.toArray(new Object[args.size()]));
         }
@@ -531,8 +530,10 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         try {
             // Create the certificate
             String fingerprint = getFingerprint(cert);
-            long expirationTimestamp = cert.getNotAfter().getTime();
-            DefaultCertificate.Builder certificate = DefaultCertificate.builder().fingerprint(fingerprint).commonName(getHostFromPrincipal(cert)).hostName(Strings.isEmpty(hostname) ? getHostFromPrincipal(cert) : hostname).expirationTimestamp(expirationTimestamp).issuedOnTimestamp(cert.getNotBefore().getTime()).issuer(cert.getIssuerDN().toString()).serialNumber(cert.getSerialNumber().toString(16)).signature(toHex(cert.getSignature())).trusted(false).expired(expirationTimestamp < System.currentTimeMillis()).failureReason(failureReason.getDetail());
+
+            long expirationTimestamp = cert.getNotAfter() == null ? -1 : cert.getNotAfter().getTime();
+            long issuedOnTimestamp = cert.getNotBefore() == null ? -1 : cert.getNotBefore().getTime();
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder().fingerprint(fingerprint).commonName(getHostFromPrincipal(cert)).hostName(Strings.isEmpty(hostname) ? getHostFromPrincipal(cert) : hostname).expirationTimestamp(expirationTimestamp).issuedOnTimestamp(issuedOnTimestamp).issuer(cert.getIssuerDN().toString()).serialNumber(cert.getSerialNumber().toString(16)).signature(toHex(cert.getSignature())).trusted(false).expired(expirationTimestamp < System.currentTimeMillis()).failureReason(failureReason.getDetail());
 
             // Cache it
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
@@ -574,8 +575,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws IllegalArgumentException If the specified byte array is <code>null</code>
      */
     private static String toHex(byte[] bytes) {
-        if (bytes.length == 0) {
-            throw new IllegalArgumentException("The specified byte array cannot be empty");
+        if (bytes == null || bytes.length == 0) {
+            throw new IllegalArgumentException("The specified byte array can neither be empty nor null");
         }
         char[] hexChars = new char[bytes.length << 1];
         for (int j = 0; j < bytes.length; j++) {

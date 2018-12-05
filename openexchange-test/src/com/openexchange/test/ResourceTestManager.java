@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import static org.junit.Assert.fail;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
@@ -66,7 +67,6 @@ import com.openexchange.ajax.resource.actions.ResourceSearchRequest;
 import com.openexchange.ajax.resource.actions.ResourceSearchResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * This was just a quick&dirty implementation to get other tests running that use resources.

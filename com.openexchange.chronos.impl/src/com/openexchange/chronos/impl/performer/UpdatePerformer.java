@@ -235,7 +235,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * add change exception date to series master & track results
              */
             resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            addChangeExceptionDate(originalSeriesMaster, recurrenceId);
+            addChangeExceptionDate(originalSeriesMaster, recurrenceId, true);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
             /*
@@ -496,12 +496,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (0 < updatedItems.size()) {
             List<Attendee> attendeesToUpdate = new ArrayList<Attendee>(updatedItems.size());
             for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : updatedItems) {
+                requireWritePermissions(originalEvent, attendeeToUpdate, assumeExternalOrganizerUpdate);
                 Attendee originalAttendee = attendeeToUpdate.getOriginal();
                 Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
                 AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.HIDDEN, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
                 attendeesToUpdate.add(newAttendee);
             }
-            requireWritePermissions(originalEvent, attendeesToUpdate, assumeExternalOrganizerUpdate);
             storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
         }
         /*

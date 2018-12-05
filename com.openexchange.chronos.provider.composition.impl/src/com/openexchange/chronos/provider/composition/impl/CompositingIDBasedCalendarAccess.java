@@ -115,8 +115,10 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingC
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventsResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingImportResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
+import com.openexchange.chronos.provider.extensions.BasicCTagAware;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
+import com.openexchange.chronos.provider.extensions.CTagAware;
 import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -756,6 +758,21 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
     }
 
+    @Override
+    public String getCTag(String folderID) throws OXException {
+        CalendarAccount account = getAccount(getAccountId(folderID), true);
+        try {
+            CalendarAccess access = getAccess(account.getAccountId(), CTagAware.class);
+            if (BasicCTagAware.class.isInstance(access)) {
+                return ((BasicCTagAware) access).getCTag();
+            } else {
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+            }
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+
     /**
      * Gets all visible folders of a certain type in a specific calendar account.
      * <p/>
@@ -1006,7 +1023,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
         if (null != events) {
             for (Event event : events) {
-                if (null != event && folderId.equals(event.getFolderId()) && eventId.equals(event.getId())) {
+                if (null != event && eventId.equals(event.getId()) && 
+                    (folderId.equals(event.getFolderId()) || folderId.equals(BasicCalendarAccess.FOLDER_ID) && null == event.getFolderId())) { 
                     if (null == recurrenceId || recurrenceId.equals(event.getRecurrenceId())) {
                         return event;
                     }

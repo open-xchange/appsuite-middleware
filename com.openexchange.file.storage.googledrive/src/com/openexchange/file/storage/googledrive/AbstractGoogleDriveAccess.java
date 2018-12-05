@@ -171,7 +171,7 @@ public abstract class AbstractGoogleDriveAccess {
                 return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
             }
             if (e.getMessage().indexOf("insufficientPermissions") > 0) {
-                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, KnownApi.GOOGLE.getShortName(), OXScope.drive.getDisplayName());
+                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, KnownApi.GOOGLE.getDisplayName(), OXScope.drive.getDisplayName());
             }
         }
 
@@ -186,7 +186,7 @@ public abstract class AbstractGoogleDriveAccess {
     private OXException createInvalidAccessTokenException() {
         OAuthAccount oAuthAccount = googleDriveAccess.getOAuthAccount();
         API api = oAuthAccount.getAPI();
-        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
     }
 
     /**

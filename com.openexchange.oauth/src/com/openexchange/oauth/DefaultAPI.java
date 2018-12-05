@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth;
 
-
 /**
  * {@link DefaultAPI} - The default API implementation.
  *
@@ -60,33 +59,33 @@ package com.openexchange.oauth;
 public class DefaultAPI implements API {
 
     private final String serviceId;
-    private final String name;
+    private final String displayName;
     private final int hash;
+    private final String capability;
 
     /**
      * Initializes a new {@link DefaultAPI}.
      *
      * @param serviceId The service identifier
-     * @param name The API's name
+     * @param displayName The API's name
+     * @param aliases The optional aliases of the provider
      */
-    public DefaultAPI(String serviceId, String name){
-        this.serviceId=serviceId;
-        this.name=name;
+    public DefaultAPI(String serviceId, String displayName, String capability) {
+        this.serviceId = serviceId;
+        this.displayName = displayName;
+        this.capability = capability;
+
         int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        result = prime * result + ((capability == null) ? 0 : capability.hashCode());
         hash = result;
     }
 
     @Override
     public String getServiceId() {
         return serviceId;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -106,11 +105,11 @@ public class DefaultAPI implements API {
             return false;
         }
         DefaultAPI other = (DefaultAPI) obj;
-        if (name == null) {
-            if (other.name != null) {
+        if (displayName == null) {
+            if (other.displayName != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!displayName.equals(other.displayName)) {
             return false;
         }
         if (serviceId == null) {
@@ -130,16 +129,28 @@ public class DefaultAPI implements API {
         if (serviceId != null) {
             builder.append("serviceId=").append(serviceId).append(", ");
         }
-        if (name != null) {
-            builder.append("name=").append(name);
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName);
+        }
+        if (capability != null) {
+            builder.append("capability=").append(capability);
         }
         builder.append("]");
         return builder.toString();
     }
 
     @Override
-    public String getShortName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.API#getCapability()
+     */
+    @Override
+    public String getCapability() {
+        return capability;
+    }
 }

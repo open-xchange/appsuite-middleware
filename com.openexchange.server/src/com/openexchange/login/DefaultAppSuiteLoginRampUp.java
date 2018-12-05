@@ -312,8 +312,12 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         AJAXRequestResult requestResult = ox.perform(requestData, null, session);
         long dur = System.currentTimeMillis() - st;
         if (dur >= thresholdMillis) {
-            String infoToLog = null == info ? "" : (new StringBuilder(info.length() + 1).append(' ').append(info).toString());
-            LOG.debug("Ramp-up call \"{}\"{} took {}msec for session {}", rampUpKey.key, infoToLog, Long.valueOf(dur), session.getSessionID());
+            if (null == info) {
+                LOG.debug("Ramp-up call \"{}\" took {}msec for session {}", rampUpKey.key, Long.valueOf(dur), session.getSessionID());
+            } else {
+                Object infoToLog = new StringBuilder(info.length() + 1).append(' ').append(info);
+                LOG.debug("Ramp-up call \"{}\"{} took {}msec for session {}", rampUpKey.key, infoToLog, Long.valueOf(dur), session.getSessionID());
+            }
         }
         return requestResult;
     }

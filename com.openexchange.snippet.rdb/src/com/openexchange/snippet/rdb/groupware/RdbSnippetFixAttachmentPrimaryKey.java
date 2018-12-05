@@ -56,7 +56,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -73,40 +72,34 @@ public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
         super();
     }
 
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (final RuntimeException e) {
-            throw new OXException(e);
-        }
-    }
-
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             if (Tools.existsPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" })) {
                 return;
             }
 
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             Tools.dropPrimaryKey(con, "snippetAttachment");
             Tools.createPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" }, new int[] { 0, 0, 0, 64 });
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

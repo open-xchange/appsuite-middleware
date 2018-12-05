@@ -69,8 +69,9 @@ public interface FileLimitService {
      * @param folderId The folderId of the change.
      * @param files The files to check.
      * @param type The type to check. This depends on the availability of one or more registered {@link TypeLimitChecker}
+     * @return A listing of exceptions indicating possible limitation constraint violations or an empty list
      * @throws OXException If the check fails.
      */
-    List<OXException> checkLimits(Session session, String folderId, List<File> files, String type) throws OXException;
+    List<OXException> checkLimits(Session session, String folderId, List<LimitFile> files, String type) throws OXException;
 
 }

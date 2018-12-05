@@ -55,7 +55,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.msliveconnect.MSLiveConnectOAuthScope;
+import com.openexchange.oauth.microsoft.graph.MicrosoftGraphOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -71,7 +71,7 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      * Initializes a new {@link BoxFileStorageService}.
      */
     public OneDriveFileStorageService(ServiceLookup services) {
-        super(services, KnownApi.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
+        super(services, KnownApi.MICROSOFT_GRAPH, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      * @param compositeFileStorageAccountManagerProvider
      */
     public OneDriveFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, KnownApi.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
+        super(services, KnownApi.MICROSOFT_GRAPH, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override
@@ -97,6 +97,6 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      */
     @Override
     protected OAuthScope getScope() {
-        return MSLiveConnectOAuthScope.drive;
+        return MicrosoftGraphOAuthScope.drive;
     }
 }

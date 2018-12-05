@@ -188,11 +188,10 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
-        } else {
-            for (ArrayList<?> folder : privateList) {
-                if ((Boolean) folder.get(1)) {
-                    return (String) folder.get(0);
-                }
+        }
+        for (ArrayList<?> folder : privateList) {
+            if ((Boolean) folder.get(1)) {
+                return (String) folder.get(0);
             }
         }
         throw new Exception("Unable to find default contact folder!");

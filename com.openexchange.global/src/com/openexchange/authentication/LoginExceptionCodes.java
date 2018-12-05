@@ -156,7 +156,7 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      * Thrown on login attempts that target a disabled authentication mechanism. I.e. a proprietary login mechanism is used that bypasses
      * the authentication service. In those cases an authentication service can be registered that always throws this exception, which
      * in turn leads to responses that denote the unavailability of the used login mechanism (e.g. '403 Forbidden' for WebDAV requests).
-     *
+     * <p>
      * Authentication via this method is disabled.
      */
     AUTHENTICATION_DISABLED("Authentication via this method is disabled.", LoginExceptionMessages.AUTHENTICATION_DISABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 24),
@@ -176,6 +176,12 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      * %1$s
      */
     LOGIN_DENIED_WITH_MESSAGE("%1$s", LoginExceptionMessages.LOGIN_DENIED_WITH_MESSAGE_MSG, Category.CATEGORY_PERMISSION_DENIED, 27),
+    /**
+     * Thrown in case the login was rate limited due to too many failed login attempts associated with login name.
+     * <p>
+     * Too many login attempts for login "%1$s".
+     */
+    TOO_MANY_LOGIN_ATTEMPTS("Too many login attempts for login \"%1$s\".", LoginExceptionMessages.TOO_MANY_LOGIN_ATTEMPTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 28),
     ;
 
     private static final String PREFIX = "LGI";

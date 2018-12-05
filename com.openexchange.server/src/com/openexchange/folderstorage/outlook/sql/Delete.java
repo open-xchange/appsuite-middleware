@@ -94,20 +94,22 @@ public final class Delete {
     public static void hardDeleteFolder(int cid, int tree, int user, String folderId, boolean global, boolean recursive) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection con = databaseService.getWritable(cid);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             hardDeleteFolder(cid, tree, user, folderId, global, recursive, con);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con); // ROLLBACK
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con); // ROLLBACK
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }

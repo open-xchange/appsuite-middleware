@@ -75,24 +75,26 @@ public class AddOriginColumnToInfostoreDocumentTables extends UpdateTaskAdapter 
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
             Column col = new Column("origin", "VARCHAR(255) DEFAULT NULL");
-            Tools.addColumns(con, "infostore", col);
-            Tools.addColumns(con, "del_infostore", col);
-            Tools.addColumns(con, "oxfolder_tree", col);
-            Tools.addColumns(con, "del_oxfolder_tree", col);
+            Tools.checkAndAddColumns(con, "infostore", col);
+            Tools.checkAndAddColumns(con, "del_infostore", col);
+            Tools.checkAndAddColumns(con, "oxfolder_tree", col);
+            Tools.checkAndAddColumns(con, "del_oxfolder_tree", col);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

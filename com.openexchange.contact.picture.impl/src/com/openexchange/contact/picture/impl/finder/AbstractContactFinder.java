@@ -62,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractContactFinder} - Abstract class for all {@link ContactService} related searches for contact pictures.
@@ -165,23 +164,12 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     private Contact getContact0(Session session, PictureSearchData data, SearchFields fields) {
         Contact contact = null;
-        if (isApplicable(session)) {
-            try {
-                contact = getContact(session, data, fields.getContactFields());
-            } catch (OXException e) {
-                handleException(data, e);
-            }
+        try {
+            contact = getContact(session, data, fields.getContactFields());
+        } catch (OXException e) {
+            handleException(data, e);
         }
         return contact;
-    }
-
-    private boolean isApplicable(Session session) {
-        try {
-            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact();
-        } catch (OXException e) {
-            LOGGER.trace("Unable to get user permissions. Therefore can't allow to access contacts.", e);
-        }
-        return false;
     }
 
 }

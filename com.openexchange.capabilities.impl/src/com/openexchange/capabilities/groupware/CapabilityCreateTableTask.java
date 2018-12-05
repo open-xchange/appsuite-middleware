@@ -78,12 +78,11 @@ public class CapabilityCreateTableTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean restoreAutoCommit = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            restoreAutoCommit = true;
-            rollback = true;
+            rollback = 1;
+
             final String[] tableNames = CapabilityCreateTableService.getTablesToCreate();
             final String[] createStmts = CapabilityCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -97,18 +96,19 @@ public class CapabilityCreateTableTask extends UpdateTaskAdapter {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
+
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             closeSQLStuff(stmt);
-            if (restoreAutoCommit) {
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
         }

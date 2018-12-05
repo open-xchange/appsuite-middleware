@@ -110,20 +110,22 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
     @Override
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry registry = service.get(KnownApi.MS_LIVE_CONNECT.getFullName());
+        OAuthAccessRegistry registry = service.get(KnownApi.MICROSOFT_GRAPH.getServiceId());
         int accountId = OAuthUtil.getAccountId(account.getConfiguration());
+
         OAuthAccess oneDriveAccess = registry.get(session.getContextId(), session.getUserId(), accountId);
-        if (oneDriveAccess == null) {
-            OneDriveOAuthAccess access = new OneDriveOAuthAccess(account, session);
-            oneDriveAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), accountId, access);
-            if (oneDriveAccess == null) {
-                access.initialize();
-                oneDriveAccess = access;
-            }
-            this.oneDriveAccess = oneDriveAccess;
-        } else {
+        if (oneDriveAccess != null) {
             this.oneDriveAccess = oneDriveAccess.ensureNotExpired();
+            return;
         }
+
+        OneDriveOAuthAccess access = new OneDriveOAuthAccess(account, session);
+        oneDriveAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), accountId, access);
+        if (oneDriveAccess == null) {
+            access.initialize();
+            oneDriveAccess = access;
+        }
+        this.oneDriveAccess = oneDriveAccess;
     }
 
     @Override

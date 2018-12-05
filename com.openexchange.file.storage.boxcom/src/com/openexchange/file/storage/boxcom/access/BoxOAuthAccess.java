@@ -227,7 +227,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
                             if (null != error) {
                                 if ("invalid_grant".equals(error)) {
                                     API api = oAuthAccount.getAPI();
-                                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+                                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                                 }
 
                                 throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, oAuthAccount.getDisplayName(), I(oAuthAccount.getId()));

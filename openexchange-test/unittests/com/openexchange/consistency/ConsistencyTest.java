@@ -53,22 +53,23 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.management.MBeanException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.consistency.internal.ConsistencyServiceImpl;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
-import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.InMemoryAttachmentBase;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -76,25 +77,39 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
+ * {@link ConsistencyTest}
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ConsistencyServiceImpl.class)
 public class ConsistencyTest {
 
     private final InMemoryInfostoreDatabase database = new InMemoryInfostoreDatabase();
-    private InMemoryFileStorage storage = null;
     private final InMemoryAttachmentBase attachments = new InMemoryAttachmentBase();
+    private InMemoryFileStorage storage = null;
+    private InMemoryFileStorage storage2 = null;
     private SimQuotaFileStorageService quotaFileStorageService = null;
+
+    private UserImpl admin = null;
 
     private ContextImpl ctx = null;
     private ContextImpl ctx2 = null;
     private ContextImpl ctx3 = null;
+
+    private Entity entity = null;
+    private Entity entity2 = null;
+    private Entity entity3 = null;
+
+    private ConsistencyServiceImpl consistency = null;
 
     private final Map<Integer, Context> contexts = new HashMap<Integer, Context>();
 
@@ -124,19 +139,28 @@ public class ConsistencyTest {
 
     @Before
     public void setUp() throws Exception {
-
         storage = new InMemoryFileStorage();
+        storage2 = new InMemoryFileStorage();
         quotaFileStorageService = new SimQuotaFileStorageService(storage);
         FileStorages.setQuotaFileStorageService(quotaFileStorageService);
 
+        admin = new UserImpl();
+        admin.setId(1);
+
         ctx = new ContextImpl(1);
         ctx.setFilestoreId(1);
+        storage.setContext(ctx);
+        entity = new EntityImpl(ctx);
 
         ctx2 = new ContextImpl(2);
         ctx2.setFilestoreId(1);
+        storage.setContext(ctx2);
+        entity2 = new EntityImpl(ctx2);
 
         ctx3 = new ContextImpl(3);
         ctx3.setFilestoreId(2);
+        storage2.setContext(ctx3);
+        entity3 = new EntityImpl(ctx3);
 
         contexts.put(I(ctx.getContextId()), ctx);
         contexts.put(I(ctx2.getContextId()), ctx2);
@@ -145,17 +169,56 @@ public class ConsistencyTest {
         simulateBrokenContext(ctx);
         simulateBrokenContext(ctx2);
         simulateBrokenContext(ctx3);
+
+        ServiceLookup services = PowerMockito.mock(ServiceLookup.class);
+
+        consistency = PowerMockito.spy(new ConsistencyServiceImpl(services));
+        PowerMockito.doReturn(ctx).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(1);
+        PowerMockito.doReturn(ctx2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(2);
+        PowerMockito.doReturn(ctx3).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(3);
+
+        PowerMockito.doReturn(database).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getDatabase")).withNoArguments();
+        PowerMockito.doReturn(attachments).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAttachments")).withNoArguments();
+
+        PowerMockito.doReturn(Arrays.asList(ctx, ctx2)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForFilestore", int.class)).withArguments(1);
+        PowerMockito.doReturn(Arrays.asList(ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForFilestore", int.class)).withArguments(2);
+
+        PowerMockito.doReturn(Arrays.asList(ctx, ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForDatabase", int.class)).withArguments(Matchers.anyInt());
+        PowerMockito.doReturn(Arrays.asList(ctx, ctx2, ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAllContexts")).withNoArguments();
+
+        PowerMockito.doReturn(admin).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAdmin", Context.class)).withArguments(Matchers.any(Context.class));
+
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx);
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx2);
+        PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx3);
+
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx, admin);
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx2, admin);
+        PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx3, admin);
+
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity);
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity2);
+        PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity3);
+
+        PowerMockito.doReturn(Arrays.asList(entity, entity2)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getEntitiesForFilestore", int.class)).withArguments(1);
+        PowerMockito.doReturn(Arrays.asList(entity3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getEntitiesForFilestore", int.class)).withArguments(2);
+
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
     }
 
     // Tests //
 
     @Test
-    public void testListMissingFilesInContext() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final List<String> missing = consistency.listMissingFilesInContext(ctx.getContextId());
+    public void testListMissingFilesInContext() throws OXException {
+        List<String> missing = consistency.listMissingFilesInContext(ctx.getContextId());
         assertNotNull(missing);
 
-        final Set<String> expected = new HashSet<String>(MISSING);
+        Set<String> expected = new HashSet<String>(MISSING);
 
         assertEquals(missing.toString(), expected.size(), missing.size());
         expected.removeAll(missing);
@@ -163,33 +226,32 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testListMissingFilesInFilestore() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>> missing = consistency.listMissingFilesInFilestore(1);
+    public void testListMissingFilesInFilestore() throws OXException {
+        Map<Entity, List<String>> missing = consistency.listMissingFilesInFilestore(1);
         assertContextEntities(missing, MISSING, ctx, ctx2);
     }
 
     @Test
-    public void testListMissingFilesInDatabase() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>> missing = consistency.listMissingFilesInDatabase(1);
+    public void testListMissingFilesInDatabase() throws OXException {
+
+        Map<Entity, List<String>> missing = consistency.listMissingFilesInDatabase(1);
         assertContextEntities(missing, MISSING, ctx, ctx3);
     }
 
     @Test
-    public void testListAllMissingFiles() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>> missing = consistency.listAllMissingFiles();
+    public void testListAllMissingFiles() throws OXException {
+
+        Map<Entity, List<String>> missing = consistency.listAllMissingFiles();
         assertContextEntities(missing, MISSING, ctx, ctx2, ctx3);
     }
 
     @Test
-    public void testListUnassignedFilesInContext() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final List<String> unassigned = consistency.listUnassignedFilesInContext(ctx.getContextId());
+    public void testListUnassignedFilesInContext() throws OXException {
+
+        List<String> unassigned = consistency.listUnassignedFilesInContext(ctx.getContextId());
         assertNotNull(unassigned);
 
-        final Set<String> expected = new HashSet<String>(UNASSIGNED);
+        Set<String> expected = new HashSet<String>(UNASSIGNED);
 
         assertEquals(unassigned.toString(), expected.size(), unassigned.size());
         expected.removeAll(unassigned);
@@ -198,42 +260,42 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testListUnassignedFilesInFilestore() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>> unassigned = consistency.listUnassignedFilesInFilestore(1);
+    public void testListUnassignedFilesInFilestore() throws OXException {
+
+        Map<Entity, List<String>> unassigned = consistency.listUnassignedFilesInFilestore(1);
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2);
     }
 
     @Test
-    public void testListUnassignedFilesInDatabase() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>> unassigned = consistency.listUnassignedFilesInDatabase(1);
+    public void testListUnassignedFilesInDatabase() throws OXException {
+
+        Map<Entity, List<String>> unassigned = consistency.listUnassignedFilesInDatabase(1);
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx3);
     }
 
     @Test
-    public void testListAllUnassignedFiles() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>> unassigned = consistency.listAllUnassignedFiles();
+    public void testListAllUnassignedFiles() throws OXException {
+
+        Map<Entity, List<String>> unassigned = consistency.listAllUnassignedFiles();
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
     }
 
     @Test
-    public void testCreateDummyFilesForInfoitems() throws MBeanException, OXException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        database.forgetChanges(ctx);
-        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_infoitem : create_dummy");
+    public void testCreateDummyFilesForInfoitems() throws OXException, OXException {
 
-        final List<DocumentMetadata> changes = database.getChanges(ctx);
+        database.forgetChanges(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), RepairPolicy.MISSING_FILE_FOR_INFOITEM, RepairAction.CREATE_DUMMY);
+
+        List<DocumentMetadata> changes = database.getChanges(ctx);
         assertEquals(2, changes.size());
         storage.setContext(ctx);
-        for (final DocumentMetadata version : changes) {
+        for (DocumentMetadata version : changes) {
             assertEquals("\nCaution! The file has changed", version.getDescription());
             assertEquals("text/plain", version.getFileMIMEType());
             //try {
             assertNotNull(storage.getFile(version.getFilestoreLocation()));
             /*
-             * } catch (final OXException e) {
+             * } catch (OXException e) {
              * fail(e.toString());
              */
             //}
@@ -241,20 +303,20 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testCreateDummyFilesForAttachments() throws MBeanException, OXException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        attachments.forgetChanges(ctx);
-        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_attachment : create_dummy");
+    public void testCreateDummyFilesForAttachments() throws OXException, OXException {
 
-        final List<AttachmentMetadata> changes = attachments.getChanges(ctx);
+        attachments.forgetChanges(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), RepairPolicy.MISSING_FILE_FOR_ATTACHMENT, RepairAction.CREATE_DUMMY);
+
+        List<AttachmentMetadata> changes = attachments.getChanges(ctx);
         assertEquals(1, changes.size());
 
-        for (final AttachmentMetadata attachment : changes) {
+        for (AttachmentMetadata attachment : changes) {
             assertEquals("\nCaution! The file has changed", attachment.getComment());
             assertEquals("text/plain", attachment.getFileMIMEType());
             //try {
             assertNotNull(storage.getFile(attachment.getFileId()));
-            //} catch (final OXException e) {
+            //} catch (OXException e) {
             //  fail(e.toString());
             //}
         }
@@ -262,16 +324,16 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testDeleteStaleInfoitems() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        database.forgetDeletions(ctx);
-        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_infoitem : delete");
+    public void testDeleteStaleInfoitems() throws OXException {
 
-        final List<DocumentMetadata> deletions = database.getDeletions(ctx);
+        database.forgetDeletions(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), RepairPolicy.MISSING_FILE_FOR_INFOITEM, RepairAction.DELETE);
+
+        List<DocumentMetadata> deletions = database.getDeletions(ctx);
         assertEquals(2, deletions.size());
 
-        final Set<String> missing = new HashSet<String>(MISSING);
-        for (final DocumentMetadata document : deletions) {
+        Set<String> missing = new HashSet<String>(MISSING);
+        for (DocumentMetadata document : deletions) {
             assertTrue(missing.remove(document.getFilestoreLocation()));
         }
         assertEquals(1, missing.size());
@@ -279,38 +341,38 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testDeleteStaleAttachments() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        attachments.forgetDeletions(ctx);
-        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_attachment : delete");
+    public void testDeleteStaleAttachments() throws OXException {
 
-        final List<AttachmentMetadata> deletions = attachments.getDeletions(ctx);
+        attachments.forgetDeletions(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), RepairPolicy.MISSING_FILE_FOR_ATTACHMENT, RepairAction.CREATE_DUMMY);
+
+        List<AttachmentMetadata> deletions = attachments.getDeletions(ctx);
         assertEquals(1, deletions.size());
 
-        final Set<String> missing = new HashSet<String>(MISSING);
-        for (final AttachmentMetadata document : deletions) {
+        Set<String> missing = new HashSet<String>(MISSING);
+        for (AttachmentMetadata document : deletions) {
             assertTrue(missing.remove(document.getFileId()));
         }
         assertEquals(2, missing.size());
     }
 
     @Test
-    public void testCreateInfoitemForUnassignedFile() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        database.forgetCreated(ctx);
-        consistency.repairFilesInContext(1, "missing_entry_for_file : create_admin_infoitem");
+    public void testCreateInfoitemForUnassignedFile() throws OXException {
 
-        final List<DocumentMetadata> created = database.getCreated(ctx);
+        database.forgetCreated(ctx);
+        consistency.repairFilesInContext(1, RepairPolicy.MISSING_ENTRY_FOR_FILE, RepairAction.CREATE_ADMIN_INFOITEM);
+
+        List<DocumentMetadata> created = database.getCreated(ctx);
         assertEquals(UNASSIGNED.size(), created.size());
 
-        final Set<String> unassigned = new HashSet<String>(UNASSIGNED);
-        for (final DocumentMetadata document : created) {
-            final String location = document.getFilestoreLocation();
+        Set<String> unassigned = new HashSet<String>(UNASSIGNED);
+        for (DocumentMetadata document : created) {
+            String location = document.getFilestoreLocation();
             assertTrue(unassigned.remove(location));
             if (location != null) {
-                final String description = "This file needs attention";
-                final String title = "Restoredfile";
-                final String fileName = "Restoredfile";
+                String description = "This file needs attention";
+                String title = "Restoredfile";
+                String fileName = "Restoredfile";
 
                 assertEquals(description, document.getDescription());
                 assertEquals(title, document.getTitle());
@@ -320,30 +382,30 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testDeleteUnassignedFile() throws MBeanException {
-        final ConsistencyMBean consistency = getConsistencyTool();
-        storage.forgetDeleted(ctx);
-        consistency.repairFilesInContext(1, "missing_entry_for_file : delete");
+    public void testDeleteUnassignedFile() throws OXException {
 
-        final List<String> deleted = storage.getDeleted(ctx);
+        storage.forgetDeleted(ctx);
+        consistency.repairFilesInContext(1, RepairPolicy.MISSING_ENTRY_FOR_FILE, RepairAction.DELETE);
+
+        List<String> deleted = storage.getDeleted(ctx);
 
         assertEquals(UNASSIGNED.size(), deleted.size());
 
-        final Set<String> unassigned = new HashSet<String>(UNASSIGNED);
+        Set<String> unassigned = new HashSet<String>(UNASSIGNED);
         unassigned.removeAll(deleted);
         assertTrue(unassigned.isEmpty());
     }
 
-    protected void assertContextEntities(final Map<MBeanEntity, List<String>> missing, final Set<String> expect, final Context... testContexts) {
+    protected void assertContextEntities(Map<Entity, List<String>> missing, Set<String> expect, Context... testContexts) {
         assertNotNull(missing);
-        final Set<MBeanEntity> entities = new HashSet<MBeanEntity>(missing.keySet());
+        Set<Entity> entities = new HashSet<Entity>(missing.keySet());
         assertEquals(entities.toString(), testContexts.length, entities.size());
-        for (final Context context : testContexts) {
-            MBeanEntity entity = new MBeanEntity(context.getContextId());
-            final List<String> ids = missing.get(entity);
+        for (Context context : testContexts) {
+            Entity entity = new EntityImpl(context);
+            List<String> ids = missing.get(entity);
             assertNotNull(ids);
 
-            final Set<String> expected = new HashSet<String>(expect);
+            Set<String> expected = new HashSet<String>(expect);
 
             assertEquals(ids.toString(), expected.size(), ids.size());
             expected.removeAll(ids);
@@ -356,13 +418,9 @@ public class ConsistencyTest {
 
     }
 
-    private ConsistencyMBean getConsistencyTool() {
-        return new TestConsistency(database, attachments, storage, contexts);
-    }
-
     // Simulation //
 
-    protected void simulateBrokenContext(final Context context) {
+    protected void simulateBrokenContext(Context context) {
         simulateBrokenOlderVersionInInfostore(context);
         simulateBrokenCurrentVersionInInfostore(context);
         simulateWholeInfostoreEntry(context);
@@ -372,26 +430,26 @@ public class ConsistencyTest {
 
     }
 
-    private void simulateFileStoreEntryWithoutDatabaseEntry(final Context context) {
-        final String unassignedEntry = "00/04/04";
+    private void simulateFileStoreEntryWithoutDatabaseEntry(Context context) {
+        String unassignedEntry = "00/04/04";
         createFilestoreEntry(context, unassignedEntry, "unassigned");
     }
 
-    private void simulateWholeAttachment(final Context context) {
-        final String attachmentEntry = "00/00/01";
+    private void simulateWholeAttachment(Context context) {
+        String attachmentEntry = "00/00/01";
         createAttachment(context, attachmentEntry);
         createFilestoreEntry(context, attachmentEntry, "wholeAttachment");
     }
 
-    private void simulateBrokenAttachment(final Context context) {
-        final String brokenAttachment = "00/01/01";
+    private void simulateBrokenAttachment(Context context) {
+        String brokenAttachment = "00/01/01";
         createAttachment(context, brokenAttachment);
     }
 
-    private void simulateWholeInfostoreEntry(final Context context) {
-        final String version1 = "00/00/02";
-        final String version2 = "00/00/03";
-        final int dmId = createInfostoreDocument(context);
+    private void simulateWholeInfostoreEntry(Context context) {
+        String version1 = "00/00/02";
+        String version2 = "00/00/03";
+        int dmId = createInfostoreDocument(context);
         createVersion(context, dmId, version1);
         createVersion(context, dmId, version2);
 
@@ -400,10 +458,10 @@ public class ConsistencyTest {
 
     }
 
-    private void simulateBrokenCurrentVersionInInfostore(final Context context) {
-        final String version1 = "00/01/02";
-        final String version2 = "00/01/03";
-        final int dmId = createInfostoreDocument(context);
+    private void simulateBrokenCurrentVersionInInfostore(Context context) {
+        String version1 = "00/01/02";
+        String version2 = "00/01/03";
+        int dmId = createInfostoreDocument(context);
         createVersion(context, dmId, version1);
         createVersion(context, dmId, version2);
 
@@ -411,22 +469,22 @@ public class ConsistencyTest {
 
     }
 
-    private void simulateBrokenOlderVersionInInfostore(final Context context) {
-        final String version1 = "00/02/02";
-        final String version2 = "00/02/03";
-        final int dmId = createInfostoreDocument(context);
+    private void simulateBrokenOlderVersionInInfostore(Context context) {
+        String version1 = "00/02/02";
+        String version2 = "00/02/03";
+        int dmId = createInfostoreDocument(context);
         createVersion(context, dmId, version1);
         createVersion(context, dmId, version2);
 
         createFilestoreEntry(context, version2, "brokenOlderVersionV2");
     }
 
-    private void createFilestoreEntry(final Context context, final String filestoreId, final String content) {
+    private void createFilestoreEntry(Context context, String filestoreId, String content) {
         storage.put(context, filestoreId, content.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
-    private void createAttachment(final Context context, final String filestorePath) {
-        final AttachmentMetadata attachment = new AttachmentImpl();
+    private void createAttachment(Context context, String filestorePath) {
+        AttachmentMetadata attachment = new AttachmentImpl();
         attachment.setFileId(filestorePath);
         attachment.setId(id++);
         attachment.setFilename("attachment.bin");
@@ -436,10 +494,10 @@ public class ConsistencyTest {
 
     }
 
-    private int createInfostoreDocument(final Context context) {
-        final int istoreId = id++;
+    private int createInfostoreDocument(Context context) {
+        int istoreId = id++;
 
-        final DocumentMetadata dm = new DocumentMetadataImpl();
+        DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setId(istoreId);
         dm.setVersion(0);
         dm.setCreatedBy(1);
@@ -449,8 +507,8 @@ public class ConsistencyTest {
         return istoreId;
     }
 
-    private void createVersion(final Context context, final int dmId, final String filestoreLocation) {
-        final DocumentMetadata dm = new DocumentMetadataImpl();
+    private void createVersion(Context context, int dmId, String filestoreLocation) {
+        DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setId(dmId);
         dm.setFilestoreLocation(filestoreLocation);
         dm.setVersion(database.getNextVersionNumber(context, dmId));
@@ -458,126 +516,4 @@ public class ConsistencyTest {
 
         database.put(context, dm);
     }
-
-    private static final class TestConsistency extends Consistency {
-
-        private InMemoryInfostoreDatabase database = new InMemoryInfostoreDatabase();
-        private InMemoryFileStorage storage = null;
-        private InMemoryAttachmentBase attachments = new InMemoryAttachmentBase();
-
-        private Map<Integer, Context> contexts = null;
-
-        TestConsistency(final InMemoryInfostoreDatabase database, final InMemoryAttachmentBase attachments, final InMemoryFileStorage storage, final Map<Integer, Context> contexts) {
-            this.database = database;
-            this.storage = storage;
-            this.attachments = attachments;
-            this.contexts = contexts;
-        }
-
-        @Override
-        protected Context getContext(final int contextId) {
-            return contexts.get(I(contextId));
-        }
-
-        @Override
-        protected DatabaseImpl getDatabase() {
-            return database;
-        }
-
-        @Override
-        protected AttachmentBase getAttachments() {
-            return attachments;
-        }
-
-        @Override
-        protected List<Context> getContextsForFilestore(final int filestoreId) {
-            final List<Context> retval = new ArrayList<Context>();
-            for (final Context context : contexts.values()) {
-                if (context.getFilestoreId() == filestoreId) {
-                    retval.add(context);
-                }
-            }
-            return retval;
-        }
-
-        @Override
-        protected List<Context> getContextsForDatabase(final int datbaseId) {
-            return Arrays.asList(contexts.get(I(1)), contexts.get(I(3)));
-        }
-
-        @Override
-        protected List<Context> getAllContexts() {
-            return new ArrayList<Context>(contexts.values());
-        }
-
-        @Override
-        protected User getAdmin(final Context ctx) {
-            UserImpl usr = new UserImpl();
-            usr.setId(1);
-            return usr;
-        }
-
-        @Override
-        protected FileStorage getFileStorage(final Context ctx) {
-            storage.setContext(ctx);
-            FileStorage retval = storage;
-            return retval;
-        }
-
-        @Override
-        protected FileStorage getFileStorage(Context ctx, User usr) throws OXException {
-            storage.setContext(ctx);
-            FileStorage retval = storage;
-            return retval;
-        }
-
-        @Override
-        protected FileStorage getFileStorage(Entity entity) throws OXException {
-            storage.setContext(entity.getContext());
-            FileStorage retval = storage;
-            return retval;
-        }
-
-        @Override
-        protected List<Entity> getEntitiesForFilestore(int filestoreId) throws OXException {
-            final List<Entity> retval = new ArrayList<Entity>();
-            for (final Context context : contexts.values()) {
-                if (context.getFilestoreId() == filestoreId) {
-                    retval.add(new EntityImpl(context));
-                }
-            }
-            return retval;
-        }
-
-        @Override
-        protected SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
-            return new TreeSet<String>();
-        }
-
-        @Override
-        protected SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
-            return new TreeSet<String>();
-        }
-
-        @Override
-        protected SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
-            return new TreeSet<String>();
-        }
-
-        @Override
-        protected SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
-            return new TreeSet<String>();
-        }
-
-        @Override
-        protected SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
-            return new TreeSet<String>();
-        }
-
-        @Override
-        protected SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
-            return new TreeSet<String>();
-        }
-    }
-
 }

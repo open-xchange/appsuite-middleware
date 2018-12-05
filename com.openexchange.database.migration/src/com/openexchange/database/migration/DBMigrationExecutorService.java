@@ -68,12 +68,12 @@ import liquibase.resource.ResourceAccessor;
 public interface DBMigrationExecutorService {
 
     /**
-     * Registers a database migration for management via an utility MBean.
+     * Registers a database migration for management via an RMI utility.
      *
      * @param migration The migration to register for monitoring
      * @return <code>true</code> if the migration was added, <code>false</code>, otherwise
      */
-    boolean registerMBean(DBMigration migration);
+    boolean register(DBMigration migration);
 
     /**
      * Schedules a database migration based on the given file location and {@link ResourceAccessor}.

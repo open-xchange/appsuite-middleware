@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Management
 Bundle-SymbolicName: com.openexchange.management
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
@@ -21,5 +21,8 @@ Import-Package: com.openexchange.exception,
  javax.management.remote.rmi,
  javax.management.timer,
  org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.management
+Export-Package: com.openexchange.management,
+ com.openexchange.management.osgi

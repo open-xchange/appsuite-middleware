@@ -107,6 +107,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.ConnectionReloaderImpl;
 import com.openexchange.databaseold.Database;
@@ -192,7 +193,9 @@ import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
+import com.openexchange.threadpool.CorePoolSize;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.CorePoolSize.Behavior;
 import com.openexchange.threadpool.internal.DelegateExecutorService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
@@ -586,7 +589,7 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior(), 60000, 20000);
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(new CorePoolSize(props.getCorePoolSize(), props.isEnforceCorePoolSize() ? Behavior.AS_IS : Behavior.ADJUST_IF_NEEDED), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior(), 60000, 20000);
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
@@ -787,6 +790,7 @@ public final class Init {
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configurationService);
+            JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
             ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
             final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null, ServiceListings.emptyList(), configuration, reloader);
             services.put(DatabaseService.class, dbService);

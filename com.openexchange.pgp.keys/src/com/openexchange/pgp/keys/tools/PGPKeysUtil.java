@@ -376,11 +376,14 @@ public final class PGPKeysUtil {
     public static PGPPublicKeyRing addUID(PGPPublicKeyRing publicKeyRing, PGPPrivateKey privateKey, String userId) throws PGPException {
         PGPPublicKey publicMasterKey = publicKeyRing.getPublicKey();
         PGPPublicKey newPublicMasterKey = addUID(publicMasterKey, privateKey, userId);
-        publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, publicMasterKey);
-        if (null != publicKeyRing) {
-            publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
+
+        ModifyingPGPPublicKeyRing modifyingPGPPublicKeyRing = new ModifyingPGPPublicKeyRing(publicKeyRing);
+        if(modifyingPGPPublicKeyRing.removePublicKey(publicMasterKey)) {
+            modifyingPGPPublicKeyRing.addPublicKey(newPublicMasterKey);
+            publicKeyRing = modifyingPGPPublicKeyRing.getRing();
+            return publicKeyRing;
         }
-        return publicKeyRing;
+        return null;
     }
 
     /**
@@ -416,6 +419,41 @@ public final class PGPKeysUtil {
         generator.setHashedSubpackets(signhashgen.generate());
         PGPSignature certification = generator.generateCertification(userId, publicKey);
         return PGPPublicKey.addCertification(publicKey, userId, certification);
+    }
+
+
+    /**
+     * Checks if a public key contains the specified user ID
+     *
+     * @param publicKey The key
+     * @param userId The user ID
+     * @return true, if the key contains the given ID, false otherwise
+     */
+    public static boolean containsUID(PGPPublicKey publicKey, String userId) {
+        userId = userId.toUpperCase();
+        for(Iterator<String> ids = publicKey.getUserIDs(); ids.hasNext();) {
+            String keyUserId = ids.next().toUpperCase();
+            if(keyUserId.contains(userId) || userId.contains(keyUserId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a public key ring contains the specified user ID
+     *
+     * @param publicKey The key ring
+     * @param userId The user ID
+     * @return true, if the and of the ring's keys contain the ID, false otherwise
+     */
+    public static boolean containsUID(PGPPublicKeyRing publicKeyring, String userId) {
+       for(Iterator<PGPPublicKey> keys = publicKeyring.getPublicKeys(); keys.hasNext();) {
+          if(containsUID(keys.next(), userId)){
+             return true;
+          }
+       }
+       return false;
     }
 
     /**

@@ -83,13 +83,13 @@ public class OAuthProxyRequest {
 	private final ServerSession session;
 
 	protected Map<String, List<Pattern>> whitelist = new HashMap<String,List<Pattern>>(){{
-		put(KnownApi.LINKEDIN.getFullName(), 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
-		put(KnownApi.TWITTER.getFullName(),	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
-		put(KnownApi.YAHOO.getFullName(), 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
-		put(KnownApi.TUMBLR.getFullName(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
-		put(KnownApi.FLICKR.getFullName(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
-		put(KnownApi.XING.getFullName(), Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
-		put(KnownApi.GOOGLE.getFullName(), Arrays.asList(Pattern.compile("^https:\\/\\/www\\.googleapis\\.com")));
+		put(KnownApi.LINKEDIN.getServiceId(), 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
+		put(KnownApi.TWITTER.getServiceId(),	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
+		put(KnownApi.YAHOO.getServiceId(), 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
+		put(KnownApi.TUMBLR.getServiceId(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
+		put(KnownApi.FLICKR.getServiceId(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
+		put(KnownApi.XING.getServiceId(), Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
+		put(KnownApi.GOOGLE.getServiceId(), Arrays.asList(Pattern.compile("^https:\\/\\/www\\.googleapis\\.com")));
 	}};
 
 	public static enum HTTPMethod {

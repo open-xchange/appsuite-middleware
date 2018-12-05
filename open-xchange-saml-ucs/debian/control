@@ -1,0 +1,16 @@
+Source: open-xchange-saml-ucs
+Section: web
+Priority: optional
+Maintainer: Felix Marx <felix.marx@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-core (>= @OXVERSION@), open-xchange-authentication-ucs-common (>= @OXVERSION@), open-xchange-saml-core (>= @OXVERSION@)
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-saml-ucs
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-authentication-ucs-common (>= @OXVERSION@), open-xchange-saml-core (>= @OXVERSION@)
+Provides: open-xchange-saml-backend
+Description: Module for authenticating users on a Univention Corporate Server installation via SAML
+ This package installs the OSGi bundle implementing the OSGi SamlBackend for the backend. The implementation uses Univention
+ Corporate Server to authenticate login requests.

@@ -349,10 +349,14 @@ public class RdbContextStorage extends ContextStorage {
         try {
             stmt = con.prepareStatement("SELECT cid FROM context");
             result = stmt.executeQuery();
-            List<Integer> retval = new ArrayList<Integer>();
-            while (result.next()) {
-                retval.add(Integer.valueOf(result.getInt(1)));
+            if (!result.next()) {
+                return Collections.emptyList();
             }
+
+            List<Integer> retval = new ArrayList<Integer>();
+            do {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            } while (result.next());
             return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -439,12 +443,37 @@ public class RdbContextStorage extends ContextStorage {
 
     @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
-        if (null == contextIds || contextIds.isEmpty()) {
+        if (null == contextIds) {
+            return Collections.emptyMap();
+        }
+
+        int size = contextIds.size();
+        if (size <= 0) {
             return Collections.emptyMap();
         }
 
         Connection con = DBPool.pickup();
         try {
+            if (size == 1) {
+                // Only one context identifier given
+                Integer contextId = contextIds.get(0);
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    stmt = con.prepareStatement("SELECT write_db_pool_id, db_schema FROM context_server2db_pool WHERE cid=?");
+                    stmt.setInt(1, contextId.intValue());
+                    result = stmt.executeQuery();
+                    if (false == result.next()) {
+                        return Collections.emptyMap();
+                    }
+
+                    PoolAndSchema pas = new PoolAndSchema(result.getInt(1)/*write_db_pool_id*/, result.getString(2)/*db_schema*/);
+                    return Collections.singletonMap(pas, Collections.singletonList(contextId));
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+            }
+
             // Use a map to group by database schema association
             Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>(contextIds.size() >> 1, 0.9F);
             for (Set<Integer> chunk : Sets.partition(new LinkedHashSet<>(contextIds), Databases.IN_LIMIT)) {
@@ -491,10 +520,14 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id = ?");
             stmt.setInt(1, filestoreId);
             result = stmt.executeQuery();
-            List<Integer> retval = new ArrayList<Integer>();
-            while (result.next()) {
-                retval.add(Integer.valueOf(result.getInt(1)));
+            if (!result.next()) {
+                return Collections.emptyList();
             }
+
+            List<Integer> retval = new ArrayList<Integer>();
+            do {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            } while (result.next());
             return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -558,10 +591,10 @@ public class RdbContextStorage extends ContextStorage {
     private static void insertOrUpdateAttribute(String name, String newValue, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
             stmt = con.prepareStatement("SELECT value FROM contextAttribute WHERE cid=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setString(2, name);
@@ -598,17 +631,19 @@ public class RdbContextStorage extends ContextStorage {
                 }
             }
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(stmt);
-            Databases.autocommit(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
         }
     }
 }

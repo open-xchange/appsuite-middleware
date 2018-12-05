@@ -57,7 +57,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -89,7 +88,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testCreateSingleAlarmTrigger() throws Exception {
-        int currentTriggers = getAlarmTriggers().size();
         // Create an event with alarm
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
@@ -101,10 +99,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Test alarm/until action with different time-slots
         // 1. Get alarms within the next hour
-        getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0); // No triggers
+        AlarmTriggerData andCheckAlarmTrigger = getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0); // No triggers
+        Assert.assertFalse(containsAlarm(andCheckAlarmTrigger, folderId, null, event.getId()));
 
         // 2. Get alarms within the next two days
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // One trigger
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // At least one trigger
 
         AlarmTrigger alarmTrigger = null;
         for (AlarmTrigger trigger : triggers) {
@@ -116,13 +115,13 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         assertTrue(alarmTrigger.getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
-        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0 + currentTriggers); // No triggers
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0); // No triggers
+        Assert.assertFalse(containsAlarm(triggers, folderId, alarmTrigger.getAlarmId(), alarmTrigger.getEventId()));
 
     }
 
     @Test
     public void testSingleEventAlarmTriggerTime() throws Exception {
-        int currentTriggers = getAlarmTriggers().size();
 
         // Create an event tomorrow 12 o clock
         Calendar cal = DateTimeUtil.getUTCCalendar();
@@ -140,7 +139,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         today.setTime(new Date());
 
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // At least one trigger
 
         AlarmTrigger alarmTrigger = null;
         for (AlarmTrigger trigger : triggers) {
@@ -156,7 +155,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testSingleEventAlarmTriggerTimeAfterUpdate() throws Exception {
-        int currentTriggers = getAlarmTriggers().size();
 
         // Create an event tomorrow 12 o clock
         Calendar cal = DateTimeUtil.getUTCCalendar();
@@ -174,7 +172,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         today.setTime(new Date());
 
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers);
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1);
         Calendar trigger1 = (Calendar) cal.clone();
         trigger1.add(Calendar.MINUTE, -15);
 
@@ -192,7 +190,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         eventManager.shiftEvent(event.getId(), null, event, cal, TimeUnit.HOURS, 1, eventManager.getLastTimeStamp());
 
         // Check if trigger time changed accordingly
-        triggers = getAndCheckAlarmTrigger(1 + currentTriggers);
+        triggers = getAndCheckAlarmTrigger(1);
         Calendar trigger2 = (Calendar) cal.clone();
         trigger2.add(Calendar.HOUR, 1);
         trigger2.add(Calendar.MINUTE, -15);
@@ -241,7 +239,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testEventSeriesAlarmTriggerTimeRoundtripForSingleUser() throws Exception {
-        int currentTriggers = getAlarmTriggers().size();
         /*
          * 1. Create an event series and test if the time is correct
          */
@@ -262,7 +259,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // The created alarm
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // The created alarm
         AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
         Calendar eventTime = Calendar.getInstance(UTC);
         eventTime.setTimeInMillis(cal.getTimeInMillis());
@@ -287,7 +284,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         EventData exceptionEvent = updateResult.getCreated().get(0);
 
         // Check if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(2 + currentTriggers); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
         AlarmTrigger trigger = findTrigger(exceptionEvent.getId(), triggers);
@@ -312,7 +309,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         eventManager.deleteEvent(toDelete);
 
         // Check the normal alarm
-        triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(1); // Only the alarm of the series
+        Assert.assertFalse(containsAlarm(triggers, folderId, null, exceptionEvent.getId()));
         checkAlarmTime(findTrigger(event.getId(), triggers), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         /*
@@ -324,32 +322,23 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         eventManager.deleteEvent(toDelete);
 
         // Check the normal alarm
-        getAndCheckAlarmTrigger(0 + currentTriggers); // No upcoming triggers
-    }
-
-    private AlarmTrigger findTrigger(String eventId, List<AlarmTrigger> triggers) {
-        for(AlarmTrigger trigger: triggers) {
-            if(trigger.getEventId().equals(eventId)) {
-                return trigger;
-            }
-        }
-        Assert.fail("Alarm trigger not found.");
-        return null;
+        AlarmTriggerData emptyTriggers = getAndCheckAlarmTrigger(0); // No upcoming triggers
+        Assert.assertFalse(containsAlarm(emptyTriggers, folderId, null, null));
     }
 
     @Test
     public void testFloatingEventAlarmTriggerTime() throws Exception {
         try {
-            TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
-            changeTimezone(timeZone);
+            TimeZone tmpTimeZone = TimeZone.getTimeZone("Europe/Berlin");
+            changeTimezone(tmpTimeZone);
             // Create an event tomorrow 12 o clock
 
             // Set floating date one day after the summer time change
             int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-            Calendar cal = DateTimeUtil.getDaylightSavingDate(timeZone, currentYear + 1);
+            Calendar cal = DateTimeUtil.getDaylightSavingDate(tmpTimeZone, currentYear + 1);
             cal.add(Calendar.DAY_OF_MONTH, 3);
 
-            long offset = timeZone.getOffset(cal.getTimeInMillis());
+            long offset = tmpTimeZone.getOffset(cal.getTimeInMillis());
 
             // Create an floating event with an alarm 3 days earlier
             DateTimeData startDate = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
@@ -370,13 +359,15 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             instance.add(Calendar.DAY_OF_MONTH, -3);
 
             long triggerTime = instance.getTimeInMillis();
-            checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
+            AlarmTrigger trigger = findTrigger(event.getId(), triggers);
+            checkAlarmTime(trigger, event.getId(), triggerTime);
 
             // change timezone
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
             AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
-            Date parse = DateTimeUtil.parseZuluDateTime(triggers2.get(0).getTime());
+            AlarmTrigger trigger2 = findTrigger(event.getId(), triggers2);
+            Date parse = DateTimeUtil.parseZuluDateTime(trigger2.getTime());
             assertNotEquals(triggerTime, parse.getTime());
 
             int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(cal.getTimeInMillis());

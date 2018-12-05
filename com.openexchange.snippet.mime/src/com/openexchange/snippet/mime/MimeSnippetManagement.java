@@ -1011,7 +1011,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             {
                 Connection con = databaseService.getWritable(contextId);
                 PreparedStatement stmt = null;
-                boolean rollback = false;
+                int rollback = 0;
                 try {
                     /*-
                      * Update DB, too
@@ -1022,7 +1022,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                      */
                     final String dummyId = "--" + identifier;
                     con.setAutoCommit(false); // BEGIN
-                    rollback = true;
+                    rollback = 1;
                     stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ", ?)");
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
@@ -1064,13 +1064,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     stmt.setString(++pos, dummyId);
                     stmt.executeUpdate();
                     con.commit(); // COMMIT
-                    rollback = false;
+                    rollback = 2;
                 } finally {
-                    if (rollback) {
-                        Databases.rollback(con);
-                    }
                     Databases.closeSQLStuff(stmt);
-                    Databases.autocommit(con);
+                    if (rollback > 0) {
+                        if (rollback == 1) {
+                            Databases.rollback(con);
+                        }
+                        Databases.autocommit(con);
+                    }
                     databaseService.backWritable(contextId, con);
                 }
             }

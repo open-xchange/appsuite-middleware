@@ -63,10 +63,11 @@ public enum ContactProperty implements Property {
      * The department will only be shown for entries that are in the Global Address Book.
      * Default: <code>false</code>
      */
-    showDepartments(false);
+    showDepartments(Boolean.FALSE);
 
     private static final String PREFIX = "com.openexchange.contact.";
-    private Object defaultValue;
+
+    private final Object defaultValue;
 
     /**
      * Initialises a new {@link ContactProperty}.
@@ -75,23 +76,14 @@ public enum ContactProperty implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;
     }
+
 }

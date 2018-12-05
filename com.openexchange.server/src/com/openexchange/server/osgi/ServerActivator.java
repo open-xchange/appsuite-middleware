@@ -60,9 +60,9 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.json.FileBackedJSONStringProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -164,6 +164,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.ShardingSubdomains;
+import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.guest.GuestService;
@@ -221,6 +222,7 @@ import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -259,6 +261,7 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -325,7 +328,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class };
+        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -520,27 +523,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Authenticator
         track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));
-        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
-
-            @Override
-            public void added(ServiceReference<ManagementService> ref, ManagementService management) {
-                try {
-                    ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
-                    management.registerMBean(objectName, new AuthenticatorMBeanImpl());
-                } catch (Exception e) {
-                    LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
-                }
-            }
-
-            @Override
-            public void removed(ServiceReference<ManagementService> ref, ManagementService management) {
-                try {
-                    management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
-                } catch (Exception e) {
-                    LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
-                }
-            }
-        });
+        track(ManagementService.class, new HousekeepingManagementTracker(context, AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN, new AuthenticatorMBeanImpl()));
         {
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put("RMIName", RemoteAuthenticator.RMI_NAME);
@@ -692,7 +675,9 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
-
+        
+        registerService(Remote.class, new GABRestorerRMIServiceImpl());
+        
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
@@ -930,7 +915,6 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);

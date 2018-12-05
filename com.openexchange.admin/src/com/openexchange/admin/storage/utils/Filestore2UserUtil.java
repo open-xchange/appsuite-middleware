@@ -392,7 +392,7 @@ public class Filestore2UserUtil {
      */
     public static void addFilestore2UserEntry(int contextId, int userId, int filestoreId, AdminCacheExtended cache) throws StorageException {
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getWriteConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
@@ -407,14 +407,14 @@ public class Filestore2UserUtil {
 
             // Start database transaction
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             // Insert entry
             insertEntry(new FilestoreEntry(contextId, userId, filestoreId), con);
 
             // Commit
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
@@ -423,10 +423,12 @@ public class Filestore2UserUtil {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
@@ -446,7 +448,7 @@ public class Filestore2UserUtil {
      */
     public static void removeFilestore2UserEntry(int contextId, int userId, AdminCache cache) throws StorageException {
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getWriteConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
@@ -461,14 +463,14 @@ public class Filestore2UserUtil {
 
             // Start database transaction
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             // Insert entry
             deleteEntry(new FilestoreEntry(contextId, userId, 0), con);
 
             // Commit
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
@@ -477,10 +479,12 @@ public class Filestore2UserUtil {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
@@ -499,7 +503,7 @@ public class Filestore2UserUtil {
      */
     public static void removeFilestore2UserEntries(int contextId, AdminCache cache) throws StorageException {
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getWriteConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
@@ -514,14 +518,14 @@ public class Filestore2UserUtil {
 
             // Start database transaction
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             // Insert entry
             deleteEntries(contextId, con);
 
             // Commit
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
@@ -530,10 +534,12 @@ public class Filestore2UserUtil {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
@@ -554,7 +560,7 @@ public class Filestore2UserUtil {
      */
     public static void replaceFilestore2UserEntry(int contextId, int userId, int filestoreId, AdminCacheExtended cache) throws StorageException {
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = cache.getWriteConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
@@ -569,14 +575,14 @@ public class Filestore2UserUtil {
 
             // Start database transaction
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             // Insert entry
             replaceEntry(new FilestoreEntry(contextId, userId, filestoreId), con);
 
             // Commit
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
@@ -585,10 +591,12 @@ public class Filestore2UserUtil {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
@@ -610,7 +618,7 @@ public class Filestore2UserUtil {
      */
     public static void copyFilestore2UserEntry(int contextId, int userId, int destContext, int destUserId, AdminCache adminCache) throws StorageException {
         Connection con = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con = adminCache.getWriteConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
@@ -625,7 +633,7 @@ public class Filestore2UserUtil {
 
             // Start database transaction
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             int filestoreId = selectEntry(new FilestoreEntry(contextId, userId, 0), con);
 
@@ -636,7 +644,7 @@ public class Filestore2UserUtil {
 
             // Commit
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
@@ -645,10 +653,12 @@ public class Filestore2UserUtil {
             throw new StorageException(e);
         } finally {
             if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(con);
+                    }
+                    Databases.autocommit(con);
                 }
-                Databases.autocommit(con);
                 try {
                     adminCache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
@@ -950,10 +960,11 @@ public class Filestore2UserUtil {
     private static boolean replaceEntry(FilestoreEntry filestoreEntry, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("REPLACE INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE filestore_id=?");
             stmt.setInt(1, filestoreEntry.cid);
             stmt.setInt(2, filestoreEntry.user);
             stmt.setInt(3, filestoreEntry.filestoreId);
+            stmt.setInt(4, filestoreEntry.filestoreId);
             try {
                 stmt.executeUpdate();
                 return true;

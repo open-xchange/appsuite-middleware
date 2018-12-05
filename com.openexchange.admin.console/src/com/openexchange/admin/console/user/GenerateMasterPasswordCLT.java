@@ -53,14 +53,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.cli.AbstractCLI;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.passwordmechs.PasswordMech;
@@ -87,26 +90,21 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
     }
 
     private static final String SYNTAX = "generatempasswd [-A <adminuser>] [-P <adminpassword>] [-e <encryption>] [-f </path/for/mpasswdfile>]";
-    private static final String FOOTER = "\n\nValid encryption/hashing algorithms: " + getValidEncHashAlgos();
+    private static final String FOOTER = "Valid encryption/hashing algorithms: " + getValidEncHashAlgos();
 
     enum Parameter {
         adminuser, adminpass, encryption, mpasswdfile
     }
 
-    private final Map<Parameter, String> parameters = new HashMap<Parameter, String>();
+    private final Map<Parameter, String> parameters = new EnumMap<>(GenerateMasterPasswordCLT.Parameter.class);
 
     /**
-     * Initialises a new {@link GenerateMasterPasswordCLT}.
+     * Initializes a new {@link GenerateMasterPasswordCLT}.
      */
     public GenerateMasterPasswordCLT() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
-     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, Map<Parameter, String> context) throws Exception {
         File file = new File(context.get(Parameter.mpasswdfile));
@@ -133,25 +131,15 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("A", "adminuser", true, "Account name of superadmin (Default: oxadminmaster)", false));
-        options.addOption(createOption("P", "adminpass", true, "Password of superadmin", false));
+        options.addOption(createOption("A", "adminuser", true, "master Admin user name (Default: oxadminmaster)", false));
+        options.addOption(createOption("P", "adminpass", true, "master Admin password", false));
         options.addOption(createOption("f", "mpasswdfile", true, "Path to mpasswd (Default: /opt/open-xchange/etc/mpasswd)", false));
         options.addOption(createOption("e", "encryption", true, "Encryption algorithm to use for the password (Default: bcrypt)", false));
         options.addOption(createOption("h", "help", false, "Prints this help text", false));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         initParameters();
@@ -207,31 +195,16 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return FOOTER;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected Map<Parameter, String> getContext() {
         return parameters;
@@ -239,8 +212,17 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     ///////////////////////////////////// HELPERS ////////////////////////////////
 
+    /**
+     * Reads the specified password file
+     *
+     * @param file The file to read
+     * @param context a map with the command line values for adminuser, encryption and adminpass
+     * @return A {@link List} with the lines of the file
+     * @throws FileNotFoundException If the file is not found
+     * @throws IOException if an I/O error is occurred
+     */
     private List<String> readPasswordFile(File file, Map<Parameter, String> context) throws FileNotFoundException, IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.UTF_8))) {
             List<String> lines = new LinkedList<String>();
             boolean updated = false;
             StringBuilder builder = new StringBuilder(96);
@@ -261,12 +243,30 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
         }
     }
 
-    private void writePasswordFile(File file, List<String> lines) throws FileNotFoundException {
-        try (PrintWriter writer = new PrintWriter(file)) {
+    /**
+     * Writes the specified lines to the specified file
+     *
+     * @param file The file to write to
+     * @param lines The lines to write to the file
+     */
+    private void writePasswordFile(File file, List<String> lines) {
+        boolean error = true;
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));) {
             for (String line : lines) {
-                writer.println(line);
+                writer.append(line).append(Strings.getLineSeparator());
             }
             writer.flush();
+            error = false;
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Unsupported encoding: 'UTF-8'");
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: '" + file.getAbsolutePath() + "'");
+        } catch (IOException e) {
+            System.err.println("I/O error occurred: '" + e.getMessage() + "'");
+        } finally {
+            if (error) {
+                System.exit(-1);
+            }
         }
     }
 

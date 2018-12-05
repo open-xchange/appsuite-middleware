@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Thread Pool Bundle
 Bundle-SymbolicName: com.openexchange.threadpool
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.eaio.util.text,
@@ -11,6 +11,7 @@ Import-Package: com.eaio.util.text,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.management,
+ com.openexchange.management.osgi,
  com.openexchange.marker,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,

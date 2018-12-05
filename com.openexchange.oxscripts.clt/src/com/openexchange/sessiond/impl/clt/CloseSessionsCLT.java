@@ -49,21 +49,32 @@
 
 package com.openexchange.sessiond.impl.clt;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
+import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.sessiond.mbean.SessiondMBean;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.sessiond.rmi.SessiondRMIService;
 
 /**
  * {@link CloseSessionsCLT} - Command-Line access clear all sessions belonging to a given context.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
+public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
+    private static final String SYNTAX = "closesessions -c <contextId> [-u <userId>] [-g] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+
+    private int contextId;
+    private int userId;
+    private boolean global;
+
+    /**
+     * Entry point
+     * 
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         new CloseSessionsCLT().execute(args);
     }
@@ -79,52 +90,29 @@ public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // No more options to check
+        if (false == cmd.hasOption('c')) {
+            System.err.println("Missing context identifier.");
+            printHelp(options);
+            System.exit(1);
+        }
+
+        contextId = parseInt('c', -1, cmd, options);
+        if (cmd.hasOption('u')) {
+            userId = parseInt('u', -1, cmd, options);
+        }
+        global = cmd.hasOption('g');
     }
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("c", "context", true, "A valid context identifier");
-    }
-
-    @Override
-    protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        // Parse context identifier
-        if (!cmd.hasOption('c')) {
-            System.err.println("Missing context identifier.");
-            printHelp(options);
-            System.exit(1);
-            return null;
-        }
-        final int contextId;
-        {
-            final String optionValue = cmd.getOptionValue('c');
-            try {
-                contextId = Integer.parseInt(optionValue.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Context identifier parameter is not a number: " + optionValue);
-                printHelp(options);
-                System.exit(1);
-                return null;
-            }
-        }
-
-        // Invoke MBean method
-        final String[] signature = new String[] { int.class.getName() };
-        final Object[] params = new Object[] { Integer.valueOf(contextId) };
-        mbsc.invoke(getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN), "clearContextSessions", params, signature);
-        System.out.println("Cleared sessions for context " + contextId);
-        return null;
+        options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier", true));
+        options.addOption(createArgumentOption("u", "user", "userId", "A valid user identifier", false));
+        options.addOption(createSwitch("g", "global", "Switch instructing the tool to perform a global session clean-up ", false));
     }
 
     @Override
     protected boolean requiresAdministrativePermission() {
         return true;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
     }
 
     @Override
@@ -134,7 +122,44 @@ public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getName() {
-        return "closesessions";
+        return SYNTAX;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
+     */
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        authenticator.doAuthentication(login, password);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
+     */
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        SessiondRMIService rmiService = getRmiStub(optRmiHostName, SessiondRMIService.RMI_NAME);
+        if (userId > 0) {
+            if (global) {
+                rmiService.clearUserSessionsGlobally(contextId, userId);
+                System.out.println("Globally cleared sessions for user " + userId + " in context " + contextId);
+            } else {
+                rmiService.clearUserSessions(contextId, userId);
+                System.out.println("Locally cleared sessions for user " + userId + " in context " + contextId);
+            }
+            return null;
+        }
+        if (global) {
+            rmiService.clearContextSessionsGlobally(contextId);
+            System.out.println("Globally cleared sessions for context " + contextId);
+        } else {
+            rmiService.clearContextSessions(contextId);
+            System.out.println("Locally cleared sessions for context " + contextId);
+        }
+        return null;
+    }
 }

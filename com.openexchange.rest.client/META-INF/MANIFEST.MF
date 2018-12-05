@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Rest Client Bundle
 Bundle-SymbolicName: com.openexchange.rest.client
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -14,6 +14,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
  com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.net.ssl,
@@ -31,6 +32,7 @@ Import-Package: com.fasterxml.jackson.core,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.net,
+ org.apache.commons.io;version="2.2.0",
  org.apache.http,
  org.apache.http.auth,
  org.apache.http.client,
@@ -69,5 +71,8 @@ Export-Package: com.openexchange.rest.client,
  com.openexchange.rest.client.exception,
  com.openexchange.rest.client.httpclient,
  com.openexchange.rest.client.session,
- com.openexchange.rest.client.session.pair
+ com.openexchange.rest.client.session.pair,
+ com.openexchange.rest.client.v2,
+ com.openexchange.rest.client.v2.entity,
+ com.openexchange.rest.client.v2.parser
 Bundle-Activator: com.openexchange.rest.client.osgi.RestClientActivator

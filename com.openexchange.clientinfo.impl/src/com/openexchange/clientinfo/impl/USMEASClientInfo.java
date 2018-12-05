@@ -62,6 +62,26 @@ import com.openexchange.clientinfo.ClientInfoType;
  */
 public class USMEASClientInfo implements ClientInfo {
 
+    private static USMEASClientInfo INSTANCE = new USMEASClientInfo();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instances
+     */
+    public static USMEASClientInfo getInstance() {
+        return INSTANCE;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link USMEASClientInfo}.
+     */
+    private USMEASClientInfo() {
+        super();
+    }
+
     @Override
     public ClientInfoType getType() {
         return ClientInfoType.EAS;

@@ -59,8 +59,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -145,7 +145,7 @@ public class TemplateServiceImplTest {
         PowerMockito.mockStatic(ServerSessionAdapter.class);
 
         Mockito.when(this.configService.getProperty(TemplateServiceImpl.PATH_PROPERTY)).thenReturn("thePath");
-        PowerMockito.when(ServerSessionAdapter.valueOf((Session) Matchers.anyObject())).thenReturn(serverSession);
+        PowerMockito.when(ServerSessionAdapter.valueOf((Session) ArgumentMatchers.anyObject())).thenReturn(serverSession);
     }
 
     @Test
@@ -307,12 +307,12 @@ public class TemplateServiceImplTest {
         };
         this.templateService.setOXFolderHelper(folders);
         this.templateService.setInfostoreHelper(infostore);
-        Mockito.when(folders.getGlobalTemplateFolder((ServerSession) Matchers.any())).thenReturn(new FolderObject());
+        Mockito.when(folders.getGlobalTemplateFolder((ServerSession) ArgumentMatchers.any())).thenReturn(new FolderObject());
 
         OXTemplate template = this.templateService.loadTemplate(this.userDefinedTemplateName, this.defaultTemplateName, this.session, true);
 
         Assert.assertNotNull(template);
-        Mockito.verify(folders, Mockito.times(1)).getPrivateTemplateFolder((ServerSession) Matchers.any());
+        Mockito.verify(folders, Mockito.times(1)).getPrivateTemplateFolder((ServerSession) ArgumentMatchers.any());
     }
 
     @Test
@@ -336,7 +336,7 @@ public class TemplateServiceImplTest {
         };
         this.templateService.setOXFolderHelper(folders);
         this.templateService.setInfostoreHelper(infostore);
-        Mockito.when(folders.getGlobalTemplateFolder((ServerSession) Matchers.any())).thenReturn(new FolderObject());
+        Mockito.when(folders.getGlobalTemplateFolder((ServerSession) ArgumentMatchers.any())).thenReturn(new FolderObject());
 
         OXTemplateImpl template = (OXTemplateImpl) this.templateService.loadTemplate(this.userDefinedTemplateName, this.defaultTemplateName, this.session, true);
 
@@ -364,7 +364,7 @@ public class TemplateServiceImplTest {
         };
         this.templateService.setOXFolderHelper(folders);
         this.templateService.setInfostoreHelper(infostore);
-        Mockito.when(folders.getGlobalTemplateFolder((ServerSession) Matchers.any())).thenReturn(new FolderObject());
+        Mockito.when(folders.getGlobalTemplateFolder((ServerSession) ArgumentMatchers.any())).thenReturn(new FolderObject());
 
         OXTemplateImpl template = (OXTemplateImpl) this.templateService.loadTemplate(this.userDefinedTemplateName, this.defaultTemplateName, this.session, true);
 

@@ -1619,46 +1619,54 @@ public class Strings {
             len--;
         }
 
-        if ((st > 0) || (len < sb.length())) {
-            for (int i = sb.length(); i > len; i--) {
-                sb.deleteCharAt(i - 1);
-            }
-            for (int i = st; i-- > 0;) {
-                sb.deleteCharAt(0);
-            }
+        // First delete trailing, then leading ones
+        if (len < sb.length()) {
+            sb.delete(len, sb.length());
         }
+        if (st > 0) {
+            sb.delete(0, st);
+        }
+
 
         return sb;
     }
 
     /**
+     * Generates a whitespace-separated string from given string array.
      *
-     * @param array
-     * @return
+     * @param strings The strings to concatenate
+     * @return The resulting string
      */
-    public static String toWhitespaceSeparatedList(String[] array) {
-        StringBuilder sb = new StringBuilder();
-        if (null != array && array.length > 0) {
-            for (String s : array) {
-                sb.append(s).append(" ");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        return sb.toString();
+    public static String toWhitespaceSeparatedList(String[] strings) {
+        return toDelimiterSeparatedList(strings, ' ');
     }
 
     /**
+     * Generates a comma-separated string from given string array.
      *
-     * @param array
-     * @return
+     * @param strings The strings to concatenate
+     * @return The resulting string
      */
-    public static String toCommaSeparatedList(String[] array) {
-        StringBuilder sb = new StringBuilder();
-        if (null != array && array.length > 0) {
-            for (String s : array) {
-                sb.append(s).append(",");
-            }
-            sb.deleteCharAt(sb.length() - 1);
+    public static String toCommaSeparatedList(String[] strings) {
+        return toDelimiterSeparatedList(strings, ',');
+    }
+
+    /**
+     * Generates a delimiter-separated string from given string array.
+     *
+     * @param strings The strings to concatenate
+     * @param delim The delimiter to use
+     * @return The resulting string
+     */
+    public static String toDelimiterSeparatedList(String[] strings, char delim) {
+        if (null == strings || strings.length <= 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(strings.length << 3);
+        sb.append(strings[0]);
+        for (int i = 1; i < strings.length; i++) {
+            sb.append(delim).append(strings[i]);
         }
         return sb.toString();
     }

@@ -49,13 +49,10 @@
 
 package com.openexchange.ajax.framework.config.util;
 
-import java.io.IOException;
 import java.util.Map;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
 /**
@@ -64,7 +61,7 @@ import com.openexchange.ajax.framework.Header;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements AJAXRequest<ChangePropertiesResponse> {
+public class ChangePropertiesRequest implements AJAXRequest<ChangePropertiesResponse> {
 
     private Map<String, String> properties;
     private static final String CONFIG_URL = "/ajax/changeConfigForTest";
@@ -92,12 +89,11 @@ public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements 
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         if (reloadables != null) {
             return new Parameter[] { new Parameter("scope", scope), new Parameter("reload", reloadables) };
-        } else {
-            return new Parameter[] { new Parameter("scope", scope) };
         }
+        return new Parameter[] { new Parameter("scope", scope) };
     }
 
     @Override
@@ -106,7 +102,7 @@ public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements 
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public Object getBody() {
         return new JSONObject(properties);
     }
 

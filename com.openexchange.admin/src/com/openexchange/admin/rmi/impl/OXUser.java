@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
@@ -113,6 +112,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -1772,7 +1772,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
 
             } catch (OXException e) {
-                LOGGER.error("Unable to set special use check property!");
+                LOGGER.error("Unable to set special use check property!", e);
             }
         }
 
@@ -1849,8 +1849,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
 
             }
+
+            ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (destUser == null) { // Move to ctx store
                 for (User filestoreOwner : filestoreOwners) {
+                    // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                    disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+
+                    // Move files...
                     LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
                     moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
@@ -1865,9 +1871,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                     User masterUser = new User(destUser.intValue());
                     for (User filestoreOwner : filestoreOwners) {
+                        // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                        disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+
+                        // Move files...
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
                         moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
-                        LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                        LOGGER.info("Moved all files from user {} to filestore of user {}.", filestoreOwner.getId(), masterUser.getId());
                     }
                 }
             }
@@ -1968,13 +1978,30 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    private void disableUnifiedQuotaIfEnabled(User user, Context ctx, ConfigViewFactory optConfigViewFactory) {
+        if (null != optConfigViewFactory) {
+            try {
+                ConfigView view = optConfigViewFactory.getView(user.getId().intValue(), ctx.getId().intValue());
+                String property = "com.openexchange.unifiedquota.enabled";
+                Boolean enabled = view.opt(property, Boolean.class, Boolean.FALSE);
+                if (enabled != null && enabled.booleanValue()) {
+                    ConfigProperty<Boolean> prop = view.property("user", property, Boolean.class);
+                    prop.set(Boolean.FALSE);
+                    user.setUserAttribute("config", property, Boolean.FALSE.toString());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Failed to disable Unified Quota for user {} in context {}", user.getId(), ctx.getId(), e);
+            }
+        }
+    }
+
     private String mapToString(Map<Integer, List<Integer>> map) {
         StringBuilder builder = new StringBuilder();
-        for (Entry<Integer, List<Integer>> cidEntry : map.entrySet()) {
+        for (Map.Entry<Integer, List<Integer>> cidEntry : map.entrySet()) {
             builder.append("\nCID: ").append(cidEntry.getKey()).append(", User IDs: ");
             List<Integer> ids = cidEntry.getValue();
             for (Integer id : ids) {
-                builder.append(id).append(",");
+                builder.append(id).append(',');
             }
             builder.setLength(builder.length() - 1);
         }
@@ -2338,7 +2365,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * @param ctx The {@link Context}
      * @param newuser The {@link User}
      * @param dbuser The database {@link User}
-     * @param prop Additional {@link PropertyHandler} 
+     * @param prop Additional {@link PropertyHandler}
      * @throws StorageException If user can't be found
      * @throws InvalidDataException If data already exists or is flawed
      */
@@ -2391,66 +2418,78 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             newuser.setPasswordMech(dbuser.getPasswordMech());
         }
 
-        if (mailCheckNeeded && !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
-            // checks below throw InvalidDataException
-            tool.checkValidEmailsInUserObject(newuser);
-            Set<String> useraliases = newuser.getAliases();
-            if (useraliases == null) {
-                useraliases = dbuser.getAliases();
-            }
-            if (null != useraliases) {
-                Set<String> tmp = new HashSet<String>(useraliases.size());
-                for (String email : useraliases) {
-                    tmp.add(IDNA.toIDN(email));
+        if (mailCheckNeeded) {
+            // Check if E-Mail addresses should be checked for context administrator, too (default is false)
+            boolean enableAdminMailChecks = false;
+            {
+                ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null != configService) {
+                    enableAdminMailChecks = configService.getBoolProperty(AdminProperties.User.ENABLE_ADMIN_MAIL_CHECKS, enableAdminMailChecks);
                 }
-                useraliases = tmp;
-            } else {
-                useraliases = new HashSet<String>(1);
             }
 
-            if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
-                // primary mail value must be same with email1
-                throw new InvalidDataException("email1 not equal with primarymail!");
-            }
-
-            String check_primary_mail;
-            String check_email1;
-            String check_default_sender_address;
-            if (newPrimaryEmail != null) {
-                check_primary_mail = IDNA.toIDN(newPrimaryEmail);
-                if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                    tool.primaryMailExists(ctx, newPrimaryEmail);
+            // Validate E-Mail addresses for either all users (com.openexchange.admin.enableAdminMailChecks=true) or only non-admin users
+            if (enableAdminMailChecks || !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
+                // checks below throw InvalidDataException
+                tool.checkValidEmailsInUserObject(newuser);
+                Set<String> useraliases = newuser.getAliases();
+                if (useraliases == null) {
+                    useraliases = dbuser.getAliases();
                 }
-            } else {
-                final String email = dbuser.getPrimaryEmail();
-                check_primary_mail = email == null ? email : IDNA.toIDN(email);
-            }
+                if (null != useraliases) {
+                    Set<String> tmp = new HashSet<String>(useraliases.size());
+                    for (String email : useraliases) {
+                        tmp.add(IDNA.toIDN(email));
+                    }
+                    useraliases = tmp;
+                } else {
+                    useraliases = new HashSet<String>(1);
+                }
 
-            if (newEmail1 != null) {
-                check_email1 = IDNA.toIDN(newEmail1);
-            } else {
-                final String s = dbuser.getEmail1();
-                check_email1 = s == null ? s : IDNA.toIDN(s);
-            }
-            if (newDefaultSenderAddress != null) {
-                check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
-            } else {
-                final String s = dbuser.getDefaultSenderAddress();
-                check_default_sender_address = s == null ? s : IDNA.toIDN(s);
-            }
+                if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
+                    // primary mail value must be same with email1
+                    throw new InvalidDataException("email1 not equal with primarymail!");
+                }
 
-            final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-            final boolean found_email1 = useraliases.contains(check_email1);
-            final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+                String check_primary_mail;
+                String check_email1;
+                String check_default_sender_address;
+                if (newPrimaryEmail != null) {
+                    check_primary_mail = IDNA.toIDN(newPrimaryEmail);
+                    if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
+                        tool.primaryMailExists(ctx, newPrimaryEmail);
+                    }
+                } else {
+                    final String email = dbuser.getPrimaryEmail();
+                    check_primary_mail = email == null ? email : IDNA.toIDN(email);
+                }
 
-            if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
-            }
-            // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
-            // which is not very good when just changing the displayname for example
-            if (newPrimaryEmail != null && newEmail1 == null) {
-                throw new InvalidDataException("email1 not sent but required!");
+                if (newEmail1 != null) {
+                    check_email1 = IDNA.toIDN(newEmail1);
+                } else {
+                    final String s = dbuser.getEmail1();
+                    check_email1 = s == null ? s : IDNA.toIDN(s);
+                }
+                if (newDefaultSenderAddress != null) {
+                    check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
+                } else {
+                    final String s = dbuser.getDefaultSenderAddress();
+                    check_default_sender_address = s == null ? s : IDNA.toIDN(s);
+                }
 
+                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
+                final boolean found_email1 = useraliases.contains(check_email1);
+                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+
+                if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
+                    throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+                }
+                // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+                // which is not very good when just changing the displayname for example
+                if (newPrimaryEmail != null && newEmail1 == null) {
+                    throw new InvalidDataException("email1 not sent but required!");
+
+                }
             }
         }
 

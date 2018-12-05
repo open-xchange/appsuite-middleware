@@ -85,7 +85,9 @@ public class ITipAnalysis {
     }
 
     public void addChange(ITipChange change) {
-        changes.add(change);
+        if (null != change) {
+            changes.add(change);
+        }
     }
 
     public List<ITipAnnotation> getAnnotations() {

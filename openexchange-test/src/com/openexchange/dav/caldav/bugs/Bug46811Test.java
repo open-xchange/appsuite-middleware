@@ -52,7 +52,6 @@ package com.openexchange.dav.caldav.bugs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -71,7 +70,6 @@ import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
 
@@ -195,14 +193,14 @@ public class Bug46811Test extends CalDAVTest {
             release(get);
         }
         /*
-         * verify appointment exception on server as user b
+         * verify appointment exception on server as user b (user a appears as 'declined')
          */
         Appointment updatedException = manager2.get(exception);
         assertNotNull(updatedException);
-        assertNotNull(updatedException.getParticipants());
-        for (Participant participant : updatedException.getParticipants()) {
+        assertNotNull(updatedException.getUsers());
+        for (UserParticipant participant : updatedException.getUsers()) {
             if (getClient().getValues().getUserId() == participant.getIdentifier()) {
-                fail("User is still participant");
+                assertEquals("Wrong participation status", Appointment.DECLINE, participant.getConfirm());
             }
         }
     }

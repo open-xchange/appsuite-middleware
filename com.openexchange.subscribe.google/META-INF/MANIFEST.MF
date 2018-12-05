@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Google Contacts Subscription
 Bundle-SymbolicName: com.openexchange.subscribe.google
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Automatic-Module-Name: com.openexchange.subscribe.google
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.api.client.auth.oauth2,
@@ -20,6 +20,7 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.context,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
+ com.openexchange.folderstorage,
  com.openexchange.google.api.client,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
@@ -31,6 +32,7 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.oauth,
  com.openexchange.oauth.access,
  com.openexchange.oauth.association,
+ com.openexchange.oauth.association.spi,
  com.openexchange.oauth.google,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,

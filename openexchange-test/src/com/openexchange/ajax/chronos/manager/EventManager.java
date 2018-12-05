@@ -61,6 +61,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -71,11 +72,13 @@ import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.configuration.asset.Asset;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
+import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
@@ -107,7 +110,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Initializes a new {@link EventManager}.
-     * 
+     *
      * @param userApi The {@link UserApi}
      * @param defaultFolder The default Folder
      */
@@ -217,7 +220,44 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException On JSON errors
      */
     public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+        prepareEventAttachment(eventData, asset);
         return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
+    }
+
+    /**
+     * Update the specified event and attach the specified {@link Asset}. Notifies attendees of the event.
+     *
+     * @param eventData The event
+     * @param asset The {@link Asset} to attach
+     * @param comment The comment to set in the notification mail
+     * @return The updated {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException On JSON errors
+     */
+    public JSONObject updateEventWithAttachmentAndNotification(EventData eventData, Asset asset, String comment) throws ApiException, ChronosApiException {
+        prepareEventAttachment(eventData, asset);
+        StringBuilder sb = new StringBuilder();
+        if (Strings.isNotEmpty(comment)) {
+            sb.append("{\"event\":");
+            sb.append(eventData.toJson());
+            sb.append(", ");
+            sb.append("\"comment\":");
+            sb.append("\"").append(comment).append("\"");
+            sb.append("}");
+        } else {
+            sb.append(eventData.toJson());
+        }
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), sb.toString(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
+    }
+    
+    private void prepareEventAttachment(EventData eventData, Asset asset) {
+        if (eventData.getAttachments() == null || eventData.getAttachments().isEmpty()) {
+            ChronosAttachment attachment = new ChronosAttachment();
+            attachment.setFilename(asset.getFilename());
+            attachment.setFmtType(asset.getAssetType().name());
+            attachment.setUri("cid:file_0");
+            eventData.setAttachments(Collections.singletonList(attachment));
+        }
     }
 
     private String getFolder(EventData eventData) {
@@ -243,9 +283,8 @@ public class EventManager extends AbstractManager {
         if (expectException) {
             assertNotNull("An error was expected", eventsResponse.getError());
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
-        } else {
-            assertNull(eventsResponse.getError());
         }
+        assertNull(eventsResponse.getError());
         setLastTimeStamp(eventsResponse.getTimestamp());
         return eventsResponse.getData();
     }
@@ -459,9 +498,8 @@ public class EventManager extends AbstractManager {
      *
      * @param eventId The {@link EventId}
      * @throws ApiException if an API error is occurred
-     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public void deleteEvent(EventId eventId) throws ApiException, ChronosApiException {
+    public void deleteEvent(EventId eventId) throws ApiException {
         deleteEvent(eventId, System.currentTimeMillis());
     }
 
@@ -605,7 +643,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData acknowledgeAlarm(String eventId, int alarmId, String folderId) throws ApiException {
-        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), Boolean.FALSE);
+        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), Boolean.FALSE, null);
         CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getCategories(), acknowledgeAlarm.getData());
         assertEquals(1, checkResponse.getUpdated().size());
         EventData updated = checkResponse.getUpdated().get(0);
@@ -626,7 +664,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData snoozeAlarm(String eventId, int alarmId, long snoozeTime, String folderId) throws ApiException {
-        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), L(snoozeTime), Boolean.FALSE);
+        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(userApi.getSession(), eventId, folderId != null ? folderId : defaultFolder, I(alarmId), L(snoozeTime), Boolean.FALSE, null);
         CalendarResult snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getCategories(), snoozeResponse.getData());
         assertEquals(1, snoozeResult.getUpdated().size());
         EventData updatedEvent = snoozeResult.getUpdated().get(0);

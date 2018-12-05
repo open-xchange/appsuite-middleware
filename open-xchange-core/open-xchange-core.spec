@@ -549,6 +549,13 @@ EOF
         ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
     fi
 
+    # SoftwareChange_Request-236
+    PFILE=/opt/open-xchange/etc/cache.ccf
+    NAMES=( jcs.region.CalendarCache jcs.region.CalendarCache.cacheattributes jcs.region.CalendarCache.cacheattributes.MaxObjects jcs.region.CalendarCache.cacheattributes.MemoryCacheName jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun jcs.region.CalendarCache.elementattributes jcs.region.CalendarCache.elementattributes.IsEternal jcs.region.CalendarCache.elementattributes.MaxLifeSeconds jcs.region.CalendarCache.elementattributes.IdleTime jcs.region.CalendarCache.elementattributes.IsSpool jcs.region.CalendarCache.elementattributes.IsRemote jcs.region.CalendarCache.elementattributes.IsLateral )
+    for I in $(seq 1 ${#NAMES[@]}); do
+      ox_remove_property ${NAMES[$I-1]} $PFILE
+    done
+
     # SoftwareChange_Request-240
     pfile=/opt/open-xchange/etc/contact.properties
     image_k=com.openexchange.contact.scaleVCardImages
@@ -563,6 +570,67 @@ EOF
       ox_set_property ${width_k} "600" ${pfile}
       ox_set_property ${height_k} "800" ${pfile}
     fi
+
+    # SoftwareChange_Request-287
+    pfile=/opt/open-xchange/etc/contact.properties
+    scale_k=com.openexchange.contact.image.scaleType
+    scale_v=$(ox_read_property ${scale_k} ${pfile})
+    if [ -n "${scale_v}" ]
+    then
+      if [ "2" == "${scale_v}" ]
+      then
+        ox_set_property ${scale_k} "1" ${pfile}
+      else
+        ox_set_property ${scale_k} ${scale_v} ${pfile}
+      fi
+    fi
+
+    SCR=SCR-208
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/configdb.properties
+
+      declare -A dmap
+      dmap[3]="useUnicode=true"
+      dmap[4]="characterEncoding=UTF-8"
+      dmap[5]="autoReconnect=false"
+      dmap[6]="useServerPrepStmts=false"
+      dmap[7]="useTimezone=true"
+      dmap[8]="serverTimezone=UTC"
+      dmap[9]="connectTimeout=15000"
+      dmap[10]="socketTimeout=15000"
+
+      for x in {3..10}
+      do
+        default_val=${dmap[$x]}
+        for prop_type in readProperty writeProperty
+        do
+          prop=${prop_type}.${x}
+          curr_val=$(ox_read_property ${prop} ${pfile})
+          if [ -n "${curr_val}" ]
+          then
+            if [ "${default_val}" == "${curr_val}" ]
+            then
+              ox_remove_property ${prop} ${pfile}
+            fi
+          fi
+        done
+      done
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-299
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/cache.ccf
+      for region in OXFolderCache OXFolderQueryCache GlobalFolderCache
+      do
+        curr_val=$(ox_read_property jcs.region.${region}.elementattributes.MaxLifeSeconds ${pfile})
+        if [ "-1" = "${curr_val}" ]
+        then
+          ox_set_property jcs.region.${region}.elementattributes.MaxLifeSeconds 3600 ${pfile}
+        fi
+      done
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -611,6 +679,10 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
+* Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>

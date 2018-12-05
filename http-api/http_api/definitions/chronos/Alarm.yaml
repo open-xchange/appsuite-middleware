@@ -3,6 +3,10 @@ properties:
   uid: 
     type: string
     description: The uid of the alarm.
+  id:
+    type: integer
+    format: int32
+    description: The id of the alarm.
   action:
     type: string
     description: The action of the alarm.

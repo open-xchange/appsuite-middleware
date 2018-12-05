@@ -68,7 +68,7 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
+import com.openexchange.admin.storage.utils.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.Databases;
@@ -232,10 +232,10 @@ public class OXUtilMySQLStorageCommon {
         Connection con = getSimpleSQLConnectionFor(db);
         boolean error = true;
         boolean created = false;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
@@ -251,15 +251,17 @@ public class OXUtilMySQLStorageCommon {
             createSchemaCountEntry(db, configdbCon);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
             error = false;
         } catch (final SQLException e) {
             throw new StorageException(e.toString());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
             if (error && created) {
                 deleteDatabaseSchema(con, db);
             }
@@ -282,24 +284,26 @@ public class OXUtilMySQLStorageCommon {
 
     private static void createSchemaCountEntry(Database db) throws SQLException, StorageException {
         Connection configdbCon = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             configdbCon = cache.getWriteConnectionForConfigDB();
             configdbCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             createSchemaCountEntry(db, configdbCon);
 
             configdbCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e.toString(), e);
         } finally {
-            if (rollback) {
-                rollback(configdbCon);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(configdbCon);
+                }
+                autocommit(configdbCon);
             }
-            autocommit(configdbCon);
             try {
                 cache.pushWriteConnectionForConfigDB(configdbCon);
             } catch (PoolException e) {
@@ -420,22 +424,24 @@ public class OXUtilMySQLStorageCommon {
             throw new StorageException(e);
         }
 
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             deleteDatabase(con, db, configdbCon);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw new StorageException(e.toString(), e);
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
             cache.closeSimpleConnection(con);
         }
     }
@@ -472,26 +478,28 @@ public class OXUtilMySQLStorageCommon {
 
     private static void deleteSchemaCountEntry(Database db) throws StorageException {
         Connection configdbCon = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             configdbCon = cache.getWriteConnectionForConfigDB();
             configdbCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             deleteSchemaCountEntry(db, configdbCon);
 
             configdbCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e.toString(), e);
         } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
         } finally {
-            if (rollback) {
-                rollback(configdbCon);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(configdbCon);
+                }
+                autocommit(configdbCon);
             }
-            autocommit(configdbCon);
             try {
                 cache.pushWriteConnectionForConfigDB(configdbCon);
             } catch (PoolException e) {

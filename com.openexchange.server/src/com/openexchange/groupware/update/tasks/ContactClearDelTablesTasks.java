@@ -87,10 +87,10 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             LOG.info("Clearing obsolete fields in 'del_dlist'...");
             int cleared = clearDeletedDistributionLists(connection);
@@ -103,16 +103,18 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
             LOG.info("Cleared {} rows in 'del_contacts'.", cleared);
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
     }
 

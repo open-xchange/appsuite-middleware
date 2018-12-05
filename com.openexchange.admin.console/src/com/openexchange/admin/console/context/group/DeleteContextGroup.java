@@ -51,7 +51,6 @@ package com.openexchange.admin.console.context.group;
 
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.admin.rmi.OXContextGroupInterface;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
@@ -86,9 +85,7 @@ public class DeleteContextGroup extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        Option option = new Option("g", "context-group-id", true, "The context group identifier");
-        option.setRequired(true);
-        options.addOption(option);
+        options.addOption(createArgumentOption("g", "context-group-id", "contextGroupId", "The context group identifier", false));
     }
 
     @Override
@@ -124,7 +121,7 @@ public class DeleteContextGroup extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getName() {
-        return "deletecontextgroup";
+        return "deletecontextgroup -g <contextGroupId> " + BASIC_MASTER_ADMIN_USAGE;
     }
 
 }

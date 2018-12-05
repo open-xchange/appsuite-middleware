@@ -94,13 +94,13 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         ProgressState state = params.getProgressState();
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             IntReference count = new IntReference();
             Map<Integer, List<Integer>> users = loadUsersInSchema(params.getContextsInSameSchema(), count, con);
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             state.setTotal(count.getValue());
             int i = 0;
@@ -115,14 +115,16 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-               Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

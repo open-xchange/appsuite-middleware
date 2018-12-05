@@ -49,11 +49,12 @@
 
 package com.openexchange.osgi.osgi;
 
-import com.openexchange.management.ManagementService;
+import java.rmi.Remote;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.console.ServiceStateLookup;
 import com.openexchange.osgi.console.osgi.ConsoleActivator;
+import com.openexchange.osgi.rmi.DeferredActivatorRMIServiceImpl;
 
 /**
  * {@link OsgiActivator} - Activator for OSGi-Bundle
@@ -82,7 +83,7 @@ public class OsgiActivator extends HousekeepingActivator {
         logger.info("starting bundle: com.openexchange.osgi");
         try {
             registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            track(ManagementService.class, new ManagementRegisterer(context));
+            registerService(Remote.class, new DeferredActivatorRMIServiceImpl());
             openTrackers();
             final ConsoleActivator consoleActivator = new ConsoleActivator();
             consoleActivator.start(context);
@@ -109,5 +110,4 @@ public class OsgiActivator extends HousekeepingActivator {
             throw e;
         }
     }
-
 }

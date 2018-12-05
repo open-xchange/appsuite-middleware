@@ -125,7 +125,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             boolean mailUUIDExists = Tools.tableExists(con, "mailUUID");
             boolean headersAsBlobExists = Tools.tableExists(con, "headersAsBlob");
@@ -134,7 +134,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
             }
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             if (!mailUUIDExists) {
                 createTable("mailUUID", getCreateMailUUIDTable(), con);
@@ -144,16 +144,18 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

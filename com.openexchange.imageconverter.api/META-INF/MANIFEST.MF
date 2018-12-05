@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange ImageConverterAPI
 Bundle-SymbolicName: com.openexchange.imageconverter.api
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -11,6 +11,7 @@ Import-Package:
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.imagetransformation,
+ com.openexchange.management,
  com.openexchange.osgi.annotation,
  org.apache.commons.lang,
  org.json,

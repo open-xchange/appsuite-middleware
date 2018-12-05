@@ -114,8 +114,8 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
     }
 
     @Override
-    protected int getId(T object) {
-        return null != object ? object.getObjectID() : 0;
+    protected String getId(T object) {
+        return object == null ? null : Integer.toString(object.getObjectID());
     }
 
     @Override

@@ -108,23 +108,25 @@ public class ReminderHandler implements ReminderSQLInterface {
     @Override
     public int insertReminder(final ReminderObject reminderObj, Context context) throws OXException {
         Connection writeCon = DBPool.pickupWriteable(context);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             int objectId = insertReminder(reminderObj, writeCon, context);
 
             writeCon.commit();
-            rollback = false;
+            rollback = 2;
             return objectId;
         } catch (final SQLException exc) {
             throw ReminderExceptionCode.INSERT_EXCEPTION.create(exc);
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
             }
-            Databases.autocommit(writeCon);
             DBPool.closeWriterSilent(context, writeCon);
         }
     }
@@ -183,22 +185,24 @@ public class ReminderHandler implements ReminderSQLInterface {
     @Override
     public void updateReminder(final ReminderObject reminder, Context context) throws OXException {
         Connection con = DBPool.pickupWriteable(context);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             updateReminder(reminder, con, context);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw ReminderExceptionCode.UPDATE_EXCEPTION.create(e);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             DBPool.closeWriterSilent(context, con);
         }
     }
@@ -310,22 +314,24 @@ public class ReminderHandler implements ReminderSQLInterface {
     @Override
     public void deleteReminder(final int targetId, final int userId, final int module, Context context) throws OXException {
         Connection writeCon = DBPool.pickupWriteable(context);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             deleteReminder(targetId, userId, module, writeCon, context);
 
             writeCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException exc) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
             }
-            Databases.autocommit(writeCon);
             DBPool.closeWriterSilent(context, writeCon);
         }
     }
@@ -360,22 +366,24 @@ public class ReminderHandler implements ReminderSQLInterface {
     @Override
     public void deleteReminder(final int targetId, final int module, Context context) throws OXException {
         Connection con = DBPool.pickupWriteable(context);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             deleteReminder(targetId, module, con, context);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             DBPool.closeWriterSilent(context, con);
         }
     }

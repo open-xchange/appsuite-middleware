@@ -67,29 +67,29 @@ import com.openexchange.tools.update.Tools;
  */
 public class MessageAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
 
-    private static final String TABLE = "calendar_alarm_trigger";
-
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
             Column col = new Column("processed", "bigint(20) NOT NULL DEFAULT 0");
-            Tools.checkAndAddColumns(con, TABLE , col);
-            Tools.createIndex(con, TABLE, "action", new String[] {"action", "triggerDate"}, false);
+            Tools.checkAndAddColumns(con, "calendar_alarm_trigger" , col);
+            Tools.createIndex(con, "calendar_alarm_trigger", "action", new String[] {"action", "triggerDate"}, false);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
 
     }

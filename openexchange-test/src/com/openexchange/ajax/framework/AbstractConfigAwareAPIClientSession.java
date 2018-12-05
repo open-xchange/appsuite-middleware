@@ -87,7 +87,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
+            ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
             ChangePropertiesResponse response = getClient().execute(req);
             if (oldData != null) {
                 oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
@@ -124,7 +124,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
             if (map.isEmpty()) {
                 return;
             }
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, getScope(), getReloadables());
+            ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, getScope(), getReloadables());
             ChangePropertiesResponse response = getClient().execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse());
         } finally {

@@ -138,21 +138,23 @@ public class GlobalDbInit {
             Connection connection = null;
             boolean modified = false;
 
-            boolean rollback = false;
+            int rollback = 0;
             try {
                 connection = monitor.checkFallback(pools, firstAssignment, true, true, true);
                 connection.setAutoCommit(false); // BEGIN
-                rollback = true;
+                rollback = 1;
                 modified = prepare(connection, dbConfig.getSchema());
                 connection.commit(); // COMMIT
-                rollback = false;
+                rollback = 2;
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                if (rollback) {
-                    Databases.rollback(connection);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(connection);
+                    }
+                    Databases.autocommit(connection);
                 }
-                Databases.autocommit(connection);
 
                 if (null != connection) {
                     ConnectionState connectionState = new ConnectionState(!modified);
@@ -280,7 +282,7 @@ public class GlobalDbInit {
             if (groupName.length() > maxGroupNameLength) {
                 throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group name \'" + groupName + "\' has more character than the allowed " + maxGroupNameLength + " one.");
             }
-            if (!CharMatcher.ASCII.matchesAllOf(groupName)) {
+            if (!CharMatcher.ascii().matchesAllOf(groupName)) {
                 throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group name \'" + groupName + "\' does contain non ascii characters.");
             }
         }

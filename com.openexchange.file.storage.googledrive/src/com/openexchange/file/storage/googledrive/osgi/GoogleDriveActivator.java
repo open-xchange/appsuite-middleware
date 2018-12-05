@@ -49,25 +49,18 @@
 
 package com.openexchange.file.storage.googledrive.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
+import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
@@ -76,8 +69,9 @@ import com.openexchange.tools.session.SessionHolder;
  * {@link GoogleDriveActivator} - Activator for Google Drive bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class GoogleDriveActivator extends HousekeepingActivator {
+public final class GoogleDriveActivator extends AbstractCloudStorageActivator {
 
     /**
      * Initialises a new {@link GoogleDriveActivator}.
@@ -93,34 +87,8 @@ public final class GoogleDriveActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(GoogleDriveActivator.class);
-        try {
-            Services.setServiceLookup(this);
-            /*
-             * Some initialization stuff
-             */
-            final BundleContext context = this.context;
-            /*
-             * Register tracker
-             */
-            final GoogleDriveServiceRegisterer registerer = new GoogleDriveServiceRegisterer(context);
-            rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer));
-            openTrackers();
-            /*
-             * Register event handler
-             */
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, KnownApi.GOOGLE), serviceProperties);
-        } catch (final Exception e) {
-            logger.error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
+        Services.setServiceLookup(this);
+        super.startBundle();
     }
 
     @Override
@@ -129,4 +97,23 @@ public final class GoogleDriveActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
+     */
+    @Override
+    protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
+        return new OAuthServiceMetaDataRegisterer(context, this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
+     */
+    @Override
+    protected KnownApi getAPI() {
+        return KnownApi.GOOGLE;
+    }
 }

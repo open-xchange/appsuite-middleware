@@ -60,7 +60,6 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -83,7 +82,7 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
     }
 
     @Override
-    protected Attendee deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+    protected Attendee deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException {
         JSONObject jsonObject = array.getJSONObject(index);
         return deserialize(jsonObject, timeZone);
     }

@@ -435,6 +435,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
          *
          * @return The off
          */
+        @SuppressWarnings("unused")
         public long getOff() {
             return off;
         }

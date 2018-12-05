@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
@@ -56,14 +57,18 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
-import com.openexchange.database.migration.mbean.MBeanRegisterer;
+import com.openexchange.database.migration.rmi.DBMigrationRMIServiceImpl;
 import com.openexchange.exception.OXException;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
@@ -81,7 +86,8 @@ import liquibase.exception.ValidationFailedException;
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
     private final DBMigrationExecutor executor;
-    private MBeanRegisterer registerer;
+    private DBMigrationRMIServiceImpl rmiService;
+    private final Map<Class<? extends Exception>, Function<Exception, OXException>> exceptionSpawners;
 
     /**
      * Initializes a new {@link DBMigrationExecutorServiceImpl}.
@@ -89,15 +95,31 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     public DBMigrationExecutorServiceImpl() {
         super();
         executor = new DBMigrationExecutor();
+        exceptionSpawners = initialiseExceptionSpawners();
     }
 
     /**
-     * Sets the MBean registerer instance to use.
-     *
-     * @param registerer The MBean registerer
+     * Initialises the {@link OXException} spawners
+     * 
+     * @return An unmodifiable {@link Map} with {@link OXException} spawners
      */
-    public void setRegisterer(MBeanRegisterer registerer) {
-        this.registerer = registerer;
+    private Map<Class<? extends Exception>, Function<Exception, OXException>> initialiseExceptionSpawners() {
+        Map<Class<? extends Exception>, Function<Exception, OXException>> m = new HashMap<>(8);
+        m.put(OXException.class, (x) -> DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(x));
+        m.put(SQLException.class, (x) -> DBMigrationExceptionCodes.SQL_ERROR.create(x));
+        m.put(LockException.class, (x) -> DBMigrationExceptionCodes.READING_LOCK_ERROR.create(x));
+        m.put(LiquibaseException.class, (x) -> DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(x));
+        m.put(ValidationFailedException.class, (x) -> DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(x));
+        return Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Sets the DBMigrationRMIRegisterer instance to use.
+     *
+     * @param registerer The {@link DBMigrationRMIRegisterer}
+     */
+    public void setRegisterer(DBMigrationRMIServiceImpl rmiService) {
+        this.rmiService = rmiService;
     }
 
     @Override
@@ -111,8 +133,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     }
 
     @Override
-    public boolean registerMBean(DBMigration migration) {
-        return null != registerer && registerer.register(migration);
+    public boolean register(DBMigration migration) {
+        return null != rmiService && rmiService.register(migration);
     }
 
     @Override
@@ -135,19 +157,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
-            if (exception instanceof OXException) {
-                throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
-            } else if (exception instanceof ValidationFailedException) {
-                throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
-            } else if (exception instanceof LiquibaseException) {
-                throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
-            } else if (exception instanceof SQLException) {
-                throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
-            } else if (exception instanceof LockException) {
-                throw DBMigrationExceptionCodes.READING_LOCK_ERROR.create(exception);
-            } else {
+            Function<Exception, OXException> x = exceptionSpawners.get(exception.getClass());
+            if (x == null) {
                 throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
             }
+            throw x.apply(exception);
         } finally {
             LiquibaseHelper.cleanUpLiquibase(liquibase);
             if (null != connection) {

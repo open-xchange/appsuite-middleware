@@ -63,9 +63,12 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.config.mbean.ConfigReloadMBean;
+import com.openexchange.config.mbean.ConfigReloadMBeanImpl;
 import com.openexchange.config.rmi.RemoteConfigurationService;
 import com.openexchange.config.rmi.impl.RemoteConfigurationServiceImpl;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -134,7 +137,7 @@ public final class ConfigActivator extends HousekeepingActivator {
             // Add & open service trackers
             track(Reloadable.class, new ReloadableServiceTracker(context, configService));
             track(ForcedReloadable.class, new ForcedReloadableServiceTracker(context, configService));
-            track(ManagementService.class, new ManagementServiceTracker(context, configService));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN, new ConfigReloadMBeanImpl(ConfigReloadMBean.class, configService)));
             track(ConfigProviderService.class, configProviderServiceTracker);
             openTrackers();
         } catch (Throwable t) {

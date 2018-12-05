@@ -3,21 +3,27 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
+
+    private int appointmentId;
 
     @Rule
     public TestRule timeout = new DisableOnDebug(new Timeout(2000000000, TimeUnit.MILLISECONDS));
@@ -65,6 +71,18 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         "END:VCALENDAR";
     // @formatter:on
 
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (appointmentId > 0) {
+                getClient().execute(new DeleteRequest(appointmentId, folder.getObjectID(), new Date(System.currentTimeMillis()), true));
+            }
+        } finally {
+            super.tearDown();
+        }
+    }
+
     @Test
     public void testReminderTwoWeeksBefore() throws Exception {
         ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical);
@@ -72,14 +90,13 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
         ImportResult[] imports = importResponse.getImports();
         assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
+        appointmentId = Integer.parseInt(imports[0].getObjectId());
         TimeZone tz = getClient().getValues().getTimeZone();
 
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
-        Calendar alarm = Calendar.getInstance(TimeZone.getTimeZone(actual.getTimezone()));
-        alarm.setTime(actual.getStartDate());
-        alarm.add(Calendar.DAY_OF_YEAR, -(2 * 7));
-        assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm());
+        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), appointmentId)).getAppointment(tz);
+        int alarmMinutes = getAlarmMinutes(actual, 14);
+
+        assertEquals("Wrong alarm value.", alarmMinutes, actual.getAlarm());
     }
 
     @Test
@@ -89,14 +106,13 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
         ImportResult[] imports = importResponse.getImports();
         assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
+        appointmentId = Integer.parseInt(imports[0].getObjectId());
         TimeZone tz = getClient().getValues().getTimeZone();
 
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
-        Calendar alarm = Calendar.getInstance(TimeZone.getTimeZone(actual.getTimezone()));
-        alarm.setTime(actual.getStartDate());
-        alarm.add(Calendar.DAY_OF_YEAR, -4);
-        assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm());
+        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), appointmentId)).getAppointment(tz);
+        int alarmMinutes = getAlarmMinutes(actual, 4);
+
+        assertEquals("Wrong alarm value.", alarmMinutes, actual.getAlarm());
     }
 
     @Test
@@ -106,15 +122,13 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
         ImportResult[] imports = importResponse.getImports();
         assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
+        appointmentId = Integer.parseInt(imports[0].getObjectId());
         TimeZone tz = getClient().getValues().getTimeZone();
 
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
+        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), appointmentId)).getAppointment(tz);
+        int alarmMinutes = getAlarmMinutes(actual, 28);
 
-        Calendar alarm = Calendar.getInstance(TimeZone.getTimeZone(actual.getTimezone()));
-        alarm.setTime(actual.getStartDate());
-        alarm.add(Calendar.DAY_OF_YEAR, -(4 * 7));
-        assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm());
+        assertEquals("Wrong alarm value.", alarmMinutes, actual.getAlarm());
     }
 
     @Test
@@ -124,17 +138,19 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
         ImportResult[] imports = importResponse.getImports();
         assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
+        appointmentId = Integer.parseInt(imports[0].getObjectId());
         TimeZone tz = getClient().getValues().getTimeZone();
 
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
+        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), appointmentId)).getAppointment(tz);
 
-        Calendar alarm = Calendar.getInstance(TimeZone.getTimeZone(actual.getTimezone()));
-        alarm.setTime(actual.getStartDate());
-        alarm.add(Calendar.DAY_OF_YEAR, -(1 * 7 + 2));
-        alarm.add(Calendar.HOUR_OF_DAY, -3);
-        alarm.add(Calendar.MINUTE, -4);
-        assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm()); //NOTE: No seconds.
+        Date alarmDate = CalendarUtils.add(actual.getStartDate(), Calendar.DATE, -9);
+        alarmDate = CalendarUtils.add(alarmDate, Calendar.HOUR, -3);
+        alarmDate = CalendarUtils.add(alarmDate, Calendar.MINUTE, -4);
+        alarmDate = CalendarUtils.add(alarmDate, Calendar.SECOND, -5);
+
+        int alarmMinutes = (int) ((actual.getStartDate().getTime() - alarmDate.getTime()) / 60000L);
+
+        assertEquals("Wrong alarm value.", alarmMinutes, actual.getAlarm());
     }
 
     @Test
@@ -144,14 +160,21 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
         ImportResult[] imports = importResponse.getImports();
         assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
+        appointmentId = Integer.parseInt(imports[0].getObjectId());
         TimeZone tz = getClient().getValues().getTimeZone();
 
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
+        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), appointmentId)).getAppointment(tz);
+        int alarmMinutes = getAlarmMinutes(actual, 42);
 
-        Calendar alarm = Calendar.getInstance(TimeZone.getTimeZone(actual.getTimezone()));
-        alarm.setTime(actual.getStartDate());
-        alarm.add(Calendar.DAY_OF_YEAR, -(6 * 7));
-        assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm());
+        assertEquals("Wrong alarm value.", alarmMinutes, actual.getAlarm());
     }
+
+    // -----------------------------------------------------------------------------------
+
+    private int getAlarmMinutes(Appointment actual, int days) {
+        Date alarmDate = CalendarUtils.add(actual.getStartDate(), Calendar.DATE, -1 * days);
+        int alarmMinutes = (int) ((actual.getStartDate().getTime() - alarmDate.getTime()) / 60000L);
+        return alarmMinutes;
+    }
+
 }

@@ -260,6 +260,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the {@link ConfigurationService} or the default value
      */
+    @SuppressWarnings("unchecked")
     private <T> T getProperty(Property property, Class<T> coerceTo, Map<String, String> optionals) {
         T defaultValue = null;
         String value = null;
@@ -273,6 +274,11 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             }
 
             PropertyValueParser<?> propertyValueParser = valueParsers.get(coerceTo);
+            if (propertyValueParser == null) {
+                defaultValue = property.getDefaultValue(coerceTo);
+                LOGGER.debug("Cannot find an appropriate value parser for '{}'. Returning default value '{}' instead.", coerceTo, defaultValue);
+                return defaultValue;
+            }
 
             return (T) propertyValueParser.parse(value);
         } catch (Exception e) {
@@ -298,12 +304,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             ConfigView view = factory.getView(userId, contextId);
 
             ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(optionals), coerceTo);
-            if (!p.isDefined()) {
-                defaultValue = property.getDefaultValue(coerceTo);
-                return defaultValue;
-            }
-
-            return p.get();
+            return p.isDefined() ? p.get() : property.getDefaultValue(coerceTo);
         } catch (Exception e) {
             defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, I(userId), I(contextId), defaultValue, e);

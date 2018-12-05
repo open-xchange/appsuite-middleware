@@ -52,7 +52,6 @@ package com.openexchange.chronos.alarm.json;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -79,7 +78,7 @@ public class AlarmActionFactory implements AJAXActionServiceFactory {
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
+    public AJAXActionService createActionService(String action) {
         return actions.get(action);
     }
 

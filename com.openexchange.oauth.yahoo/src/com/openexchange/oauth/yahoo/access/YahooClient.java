@@ -179,7 +179,7 @@ public class YahooClient {
         scribeService.signRequest(accessToken, request);
         final Response response = execute(request);
         if (response.getCode() == 403) {
-            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.YAHOO.getShortName(), OXScope.contacts_ro.getDisplayName());
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.YAHOO.getDisplayName(), OXScope.contacts_ro.getDisplayName());
         }
         final String contentType = response.getHeader("Content-Type");
         if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {

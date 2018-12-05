@@ -111,7 +111,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/deferrer.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/microsoftgraphoauth.properties
 %config(noreplace) /opt/open-xchange/etc/oauth.properties
 %config(noreplace) /opt/open-xchange/etc/twitteroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
@@ -120,6 +120,10 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Thu Oct 18 2018 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
+* Thu Oct 11 2018 Steffen Templin <marcus.klein@open-xchange.com>
+First candidate for 7.10.1 release
 * Thu Sep 06 2018 Steffen Templin <marcus.klein@open-xchange.com>
 prepare for 7.10.1 release
 * Fri Jun 29 2018 Steffen Templin <marcus.klein@open-xchange.com>

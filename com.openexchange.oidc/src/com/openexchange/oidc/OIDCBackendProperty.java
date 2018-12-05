@@ -113,7 +113,7 @@ public enum OIDCBackendProperty implements Property {
      * redirectURIPostSSOLogout - The location where the Browser should be redirected after logout
      * from OP
      */
-    rpRedirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    rpRedirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * ssoLogout - Whether to redirect to the OP on logout trigger from client or not
      */
@@ -147,25 +147,26 @@ public enum OIDCBackendProperty implements Property {
      * backendPath - This backends servlet path, which is appended to the default /oidc/ path.
      */
     backendPath(OIDCProperty.PREFIX, ""),
-    
+
     /**
      * hosts - This contains a comma separated list of hosts, that this backend supports.
      */
     hosts(OIDCProperty.PREFIX, "all");
-    
+
     private final String fqn;
     private final Object defaultValue;
-    
+
     private OIDCBackendProperty(String fqn, Object defaultValue) {
         this.fqn = fqn;
         this.defaultValue = defaultValue;
     }
-    
+
     @Override
     public String getFQPropertyName() {
         return fqn + name();
     }
 
+    @Override
     public Object getDefaultValue() {
         return this.defaultValue;
     }

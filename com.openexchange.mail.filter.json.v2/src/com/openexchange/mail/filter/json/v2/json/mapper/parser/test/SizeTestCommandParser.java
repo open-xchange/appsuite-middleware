@@ -87,7 +87,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws SieveException, OXException {
         String commandName = Commands.SIZE.getCommandName();
         String size = CommandParserJSONUtil.getString(jsonObject, SizeTestField.size.name(), commandName);
         try {
@@ -161,11 +161,10 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
                 argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
                 argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
                 return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>()));
-            } else {
-                argList.add(ArgumentUtil.createTagArgument(matcher));
-                argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
-                return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
             }
+            argList.add(ArgumentUtil.createTagArgument(matcher));
+            argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
+            return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
         } catch (NumberFormatException e) {
             throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, commandName);
         }
@@ -178,7 +177,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandName());
 
         String matchType = command.getMatchType();

@@ -50,16 +50,15 @@
 package com.openexchange.database;
 
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyByte;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyFloat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyShort;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyByte;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -225,7 +224,7 @@ public class DatabaseMocking {
             doAnswer(this).when(stmt).setLong(anyInt(), anyLong());
             doAnswer(this).when(stmt).setBoolean(anyInt(), anyBoolean());
             doAnswer(this).when(stmt).setString(anyInt(), anyString());
-            doAnswer(this).when(stmt).setObject(anyInt(), anyObject());
+            doAnswer(this).when(stmt).setObject(anyInt(), any(Object.class));
             doAnswer(this).when(stmt).setBytes(anyInt(), any(byte[].class));
         }
 

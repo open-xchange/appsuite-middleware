@@ -49,9 +49,10 @@
 
 package com.openexchange.admin.tools.database;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * A simple POJO that holds metadata information about an SQL table
@@ -66,9 +67,9 @@ public class TableObject implements Comparable<String> {
 
     private HashSet<String> xreferencetables = null;
     private HashSet<String> referencedby = null;
-    private Vector<TableColumnObject> columns = null;
+    private List<TableColumnObject> columns = null;
     // all rows in table
-    private Vector<TableRowObject> table_rows = null;
+    private List<TableRowObject> table_rows = null;
 
     // Holds all infos about a table
     public TableObject(String tableName) {
@@ -78,10 +79,10 @@ public class TableObject implements Comparable<String> {
 
     // Holds all infos about a table
     public TableObject() {
-        table_rows = new Vector<TableRowObject>();
+        table_rows = new ArrayList<TableRowObject>();
         xreferencetables = new HashSet<String>();
         referencedby = new HashSet<String>();
-        columns = new Vector<TableColumnObject>();
+        columns = new ArrayList<TableColumnObject>();
     }
 
     public String getName() {
@@ -96,7 +97,7 @@ public class TableObject implements Comparable<String> {
         this.columns.remove(to);
     }
 
-    public Vector<TableColumnObject> getColumns() {
+    public List<TableColumnObject> getColumns() {
         return this.columns;
     }
 

@@ -65,19 +65,19 @@ public class Rate {
      * @param timeframe The time frame in milliseconds, in which the defined amount of permits are available.
      * @return The new rate
      */
-    public static Rate create(int amount, long timeframe) {
+    public static Rate create(long amount, long timeframe) {
         return new Rate(amount, timeframe);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private final int amount;
+    private final long amount;
     private final long timeframe;
 
     /**
      * Initializes a new {@link Rate}.
      */
-    private Rate(int amount, long timeframe) {
+    private Rate(long amount, long timeframe) {
         this.amount = amount;
         this.timeframe = timeframe;
     }
@@ -87,7 +87,7 @@ public class Rate {
      *
      * @return The amount
      */
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
 

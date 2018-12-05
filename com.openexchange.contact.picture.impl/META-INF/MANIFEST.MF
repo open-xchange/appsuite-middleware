@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The bundle implementing avatar services
 Bundle-SymbolicName: com.openexchange.contact.picture.impl
 Automatic-Module-Name: com.openexchange.contact.picture.impl
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.contact.picture.impl.osgi.ContactPictureActivator
@@ -15,12 +15,14 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.contact,
  com.openexchange.contact.picture,
  com.openexchange.contact.picture.finder,
+ com.openexchange.contact.storage,
  com.openexchange.exception,
  com.openexchange.functions,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.search,
+ com.openexchange.groupware.tools.alias,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
  com.openexchange.osgi,

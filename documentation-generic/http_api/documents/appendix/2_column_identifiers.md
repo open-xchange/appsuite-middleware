@@ -498,7 +498,7 @@ specific field data of single or multiple objects.
 
 |Name | Type | Value |
 |:----|:-----|:------|
-| bits | Number | A number as described in Object Permission flags.|
+| bits | Number | A number as described in [Object Permission flags](#object-permission-flags).|
 | entity | Number | User ID of the user or group to which this permission applies.|
 | group | Boolean | true if entity refers to a group, false if it refers to a user.|
 | type | String | The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).|
@@ -514,7 +514,7 @@ specific field data of single or multiple objects.
 |Name | Type | Value |
 |:----|:-----|:------|
 |entity | Number | Identifier of the permission entity (i.e. user-, group- or guest-ID). |
-|bits | Number | A number as described in Object Permission flags. |
+|bits | Number | A number as described in [Object Permission flags](#object-permission-flags). |
 |type | String | "user" for an internal user, "group" for a group, "guest" for a guest, or "anonymous" for an anonymous permission entity. |
 |display_name | String | A display name for the permission entity. |
 |contact | Object | A (reduced) set of Detailed contact data for "user" and "guest" entities. |
@@ -522,7 +522,12 @@ specific field data of single or multiple objects.
 |password | String | The optionally set password for "anonymous" entities. |
 |expiry_date | Date | The optionally set expiry date for "anonymous" entities. |
 
+### Object permission flags
 
+|Bits | Value |
+|0    |The numerical value indicating no object permissions.|
+|1    | The numerical value indicating read object permissions.|
+|2    | The numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask).|
 
 ## Attachment object
 

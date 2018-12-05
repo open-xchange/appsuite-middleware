@@ -127,5 +127,6 @@ public class AdminProperties {
         public static final String USERNAME_CHANGEABLE = "USERNAME_CHANGEABLE";
         public static final String DEFAULT_PASSWORD_MECHANISM = "DEFAULT_PASSWORD_MECHANISM";
         public static final String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
+        public static final String ENABLE_ADMIN_MAIL_CHECKS = "com.openexchange.admin.enableAdminMailChecks";
     }
 }

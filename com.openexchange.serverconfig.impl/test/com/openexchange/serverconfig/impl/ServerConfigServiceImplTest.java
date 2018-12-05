@@ -63,7 +63,7 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -145,13 +145,13 @@ public class ServerConfigServiceImplTest {
         languageProperties.put("fr_FR", "Francais");
 
         PowerMockito.when(this.serviceLookup.getService(ConfigurationService.class)).thenReturn(this.configurationService);
-        PowerMockito.when(this.configurationService.getYaml(Matchers.eq("as-config.yml"))).thenReturn(asConfig);
-        PowerMockito.when(this.configurationService.getYaml(Matchers.eq("as-config-defaults.yml"))).thenReturn(asConfigDefaults);
-        PowerMockito.when(this.configurationService.getPropertiesInFolder(Matchers.eq("languages/appsuite"))).thenReturn(languageProperties);
+        PowerMockito.when(this.configurationService.getYaml(ArgumentMatchers.eq("as-config.yml"))).thenReturn(asConfig);
+        PowerMockito.when(this.configurationService.getYaml(ArgumentMatchers.eq("as-config-defaults.yml"))).thenReturn(asConfigDefaults);
+        PowerMockito.when(this.configurationService.getPropertiesInFolder(ArgumentMatchers.eq("languages/appsuite"))).thenReturn(languageProperties);
 
 
         PowerMockito.when(this.serviceLookup.getService(ConfigViewFactory.class)).thenReturn(this.configViewFactory);
-        PowerMockito.when(this.configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(this.configView);
+        PowerMockito.when(this.configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(this.configView);
         PowerMockito.when(this.configView.all()).thenReturn(composedConfigPropertyMap);
 
         PowerMockito.when(this.defaultingProperty.get()).thenReturn("<as-config>");

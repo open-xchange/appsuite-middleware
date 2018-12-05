@@ -509,9 +509,9 @@ public final class Tools {
         }
         String filename = null;
 
-        if (detector.isMSIE()) {
+        if (null != detector && detector.isMSIE()) {
             filename = Helper.encodeFilenameForIE(fileName, Charsets.UTF_8);
-        } else if (detector.isSafari5()) {
+        } else if (null != detector && detector.isSafari5()) {
             /*-
              * On socket layer characters are casted to byte values.
              *
@@ -816,12 +816,33 @@ public final class Tools {
      * @throws IOException If an I/O error occurs
      */
     public static PrintWriter getWriterFrom(HttpServletResponse resp) throws IOException {
+        return getWriterFrom(resp, true);
+    }
+
+    /**
+     * Attempts to obtain the <code>PrintWriter</code> from specified <code>HttpServletResponse</code> instance.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Catches a possible <code>IllegalStateException</code>, that occurs in case <code>getOutputStream()</code> has already been called
+     * before.
+     * </div>
+     * <p>
+     *
+     * @param resp The instance to get the <code>PrintWriter</code> from
+     * @param logErrorOnISE Whether an ERROR message should be logged in case obtaining the writer throws a
+     *                      <tt>java.lang.IllegalStateException</tt> (the <code>getOutputStream</code> method has already been called)
+     * @return The writer or <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static PrintWriter getWriterFrom(HttpServletResponse resp, boolean logErrorOnISE) throws IOException {
         try {
             return null == resp ? null : resp.getWriter();
         } catch (IllegalStateException e) {
             // Apparently getOutputStream() has already been called before.
             // There is nothing we can do about it here.
-            LOG.error("", e);
+            if (logErrorOnISE) {
+                LOG.error("Failed to obtain writer from given response object", e);
+            }
             return null;
         }
     }

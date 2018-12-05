@@ -71,11 +71,13 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -108,7 +110,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         this.api = api;
 
         setId(api.getServiceId());
-        setDisplayName(api.getShortName());
+        setDisplayName(api.getDisplayName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<>();
@@ -166,7 +168,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
      */
     @Override
@@ -196,7 +198,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getContentType()
      */
     @Override
@@ -207,7 +209,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
     /**
      * Compiles the pattern that will be used to extract the identity of the user
      * from the identity response.
-     * 
+     *
      * @param fieldName The field name that contains the identity of the user in the identity response
      * @return The compiled {@link Pattern}
      */
@@ -267,7 +269,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
         /**
          * Returns the instance of the {@link RequestTuner}
-         * 
+         *
          * @return the instance of the {@link RequestTuner}
          */
         static final RequestTuner getInstance() {
@@ -285,6 +287,11 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         public void tune(Request request) {
             request.setConnectTimeout(5, TimeUnit.SECONDS);
             request.setReadTimeout(30, TimeUnit.SECONDS);
+
+            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+            if (null != factoryProvider) {
+                request.setSSLSocketFactory(factoryProvider.getDefault());
+            }
         }
     }
 }

@@ -78,6 +78,7 @@ import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -184,7 +185,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             return this;
         }
 
-        public MessageAlarmDeliveryWorker build() throws OXException {
+        public MessageAlarmDeliveryWorker build() {
             return new MessageAlarmDeliveryWorker( storage,
                                                 calendarStorageFactory,
                                                 dbService,
@@ -233,7 +234,6 @@ public class MessageAlarmDeliveryWorker implements Runnable {
      * @param administrativeCalendarAccountService The {@link AdministrativeCalendarAccountService}
      * @param lookAhead The time value in minutes the worker is looking ahead.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
-     * @throws OXException If not administrative storage could be created.
      */
     protected MessageAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
                                     CalendarStorageFactory factory,
@@ -246,7 +246,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                     AdministrativeCalendarAccountService administrativeCalendarAccountService,
                                     RateLimiterFactory rateLimitFactory,
                                     int lookAhead,
-                                    int overdueWaitTime) throws OXException {
+                                    int overdueWaitTime) {
         this.storage = storage;
         this.dbservice = dbservice;
         this.ctxService = ctxService;
@@ -270,11 +270,20 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         try {
             List<Integer> ctxIds = ctxService.getDistinctContextsPerSchema();
             Calendar currentUTCTime = Calendar.getInstance(UTC);
-            for (Integer ctxId : ctxIds) {
+            NextCtxId: for (Integer iCtxId : ctxIds) {
                 // Test if schema is ready
-                UpdateStatus status = Updater.getInstance().getStatus(ctxId);
-                if (!status.isExecutedSuccessfully(MessageAlarmDeliveryWorkerUpdateTask.class.getName()) || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
-                    continue;
+                int ctxId = iCtxId.intValue();
+                try {
+                    UpdateStatus status = Updater.getInstance().getStatus(ctxId);
+                    if (!status.isExecutedSuccessfully(MessageAlarmDeliveryWorkerUpdateTask.class.getName()) || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
+                        continue NextCtxId;
+                    }
+                } catch (OXException e) {
+                    if (false == DBPoolingExceptionCodes.RESOLVE_FAILED.equals(e)) {
+                        throw e;
+                    }
+                    // Context is located in another server. Skip it.
+                    continue NextCtxId;
                 }
                 Connection readCon = null;
                 Connection writeCon = null;
@@ -304,10 +313,10 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                         if (Thread.interrupted()) {
                             throw new InterruptedException();
                         }
-                        continue;
+                        continue NextCtxId;
                     }
                     readOnly = false;
-                    storage.setProcessingStatus(writeCon, lockedTriggers, currentUTCTime.getTimeInMillis());
+                    storage.setProcessingStatus(writeCon, lockedTriggers, Long.valueOf(currentUTCTime.getTimeInMillis()));
                     writeCon.commit();
                     successful = true;
                 } catch (SQLException e) {
