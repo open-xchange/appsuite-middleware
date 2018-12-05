@@ -53,15 +53,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaMetadataKeys;
-import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeTypeException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -86,8 +83,6 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
 
     private final TikaConfig config;
 
-    private final Set<MediaType> imageTypes;
-
     /**
      * Initializes a new {@link FileEmbeddedDocumentExtractor}.
      *
@@ -99,16 +94,6 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
         fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
         count = 1;
         config = TikaConfig.getDefaultConfig();
-        /*
-         * Image type
-         */
-        imageTypes = new HashSet<MediaType>();
-        imageTypes.add(MediaType.image("bmp"));
-        imageTypes.add(MediaType.image("gif"));
-        imageTypes.add(MediaType.image("jpg"));
-        imageTypes.add(MediaType.image("jpeg"));
-        imageTypes.add(MediaType.image("png"));
-        imageTypes.add(MediaType.image("tiff"));
     }
 
     @Override

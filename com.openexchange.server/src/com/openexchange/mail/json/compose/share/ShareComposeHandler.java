@@ -565,6 +565,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             case "image/jpeg":
             case "image/gif":
             case "image/svg":
+            case "image/heif":
+            case "image/heic":
                 thumbnailName = THUMBNAIL_IMAGE;
                 break;
             case "application/pdf":
