@@ -49,13 +49,13 @@
 
 package com.openexchange.consistency.osgi;
 
+import java.rmi.Remote;
 import org.slf4j.Logger;
-import com.openexchange.consistency.ConsistencyMBean;
-import com.openexchange.consistency.OsgiOXConsistency;
+import com.openexchange.consistency.ConsistencyService;
+import com.openexchange.consistency.internal.ConsistencyServiceImpl;
+import com.openexchange.consistency.rmi.ConsistencyRMIServiceImpl;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -76,10 +76,12 @@ public final class ConsistencyActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.consistency");
         ConsistencyServiceLookup.set(this);
+        registerService(ConsistencyService.class, new ConsistencyServiceImpl(this));
+        registerService(Remote.class, new ConsistencyRMIServiceImpl(this));
 
-        track(ManagementService.class, new HousekeepingManagementTracker(context, ConsistencyMBean.MBEAN_NAME, ConsistencyMBean.MBEAN_DOMAIN,  new OsgiOXConsistency()));
         trackService(VCardStorageMetadataStore.class);
         trackService(DatabaseService.class);
+        trackService(ConsistencyService.class);
 
         openTrackers();
     }

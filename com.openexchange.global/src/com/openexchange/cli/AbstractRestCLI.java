@@ -57,7 +57,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -84,6 +83,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
     protected static final String USER_LONG = "api-user";
     protected static final String USER_SHORT = "U";
 
+    private Builder executionContext;
+
     /**
      * Initializes a new {@link AbstractRestCLI}.
      */
@@ -98,16 +99,14 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
      * @return The return value
      */
     @Override
-    public R execute(final String[] args) {
-        final Options options = newOptions();
+    public R execute(String[] args) {
+        Options options = newOptions();
         boolean error = true;
         try {
             // Option for help
-            options.addOption("h", "help", false, "Prints a help text");
+            options.addOption(createSwitch("h", "help", "Prints this help text", false));
             if (requiresAdministrativePermission()) {
-                Option user = new Option(USER_SHORT, USER_LONG, true, "Username and password to use for API authentication (user:password).");
-                user.setRequired(true);
-                options.addOption(user);
+                options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for API authentication (user:password).", true));
             }
 
             // Add other options
@@ -121,8 +120,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
 
             // Initialize command-line parser & parse arguments
-            final CommandLineParser parser = new PosixParser();
-            final CommandLine cmd = parser.parse(options, args);
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             checkArguments(cmd);
 
@@ -134,41 +133,41 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
                 return null;
             }
 
-            Builder request = endpoint.request();
+            executionContext = endpoint.request();
             if (requiresAdministrativePermission()) {
                 String authString = cmd.getOptionValue(USER_SHORT);
                 String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
-                request.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
+                executionContext.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
             }
-            R retval = invoke(options, cmd, request);
+            R retval = invoke(options, cmd, executionContext);
             error = false;
             return retval;
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final javax.ws.rs.NotAuthorizedException e) {
+        } catch (javax.ws.rs.NotAuthorizedException e) {
             System.err.println("Authorization not possible. Please check the provided credentials.");
-        } catch (final javax.ws.rs.ProcessingException e) {
+        } catch (javax.ws.rs.ProcessingException e) {
             System.err.println("Unable to reach provided endpoint: " + e.getMessage());
-        } catch (final javax.ws.rs.InternalServerErrorException e) {
+        } catch (javax.ws.rs.InternalServerErrorException e) {
             System.err.println("An error occurred on endpoint side. Please check the server logs.");
-        } catch (final javax.ws.rs.BadRequestException e) {
+        } catch (javax.ws.rs.BadRequestException e) {
             System.err.println(printClientException(e, "The provided request parameters seem to be invalid. Please check them and additionally the server logs for further information."));
-        } catch (final javax.ws.rs.NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             System.err.println(printClientException(e, "The requested resource cannot be found. Please check the provided parameters and additionally the server logs for further information."));
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Error e) {
+        } catch (Error e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             String message = t.getMessage();
             String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
@@ -209,6 +208,14 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
         }
         return false;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Builder getContext() {
+        return executionContext;
     }
 
     protected abstract void checkArguments(CommandLine cmd);

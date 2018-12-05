@@ -49,9 +49,6 @@
 
 package com.openexchange.configuration.clt;
 
-import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
-import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
-import static com.openexchange.configuration.clt.XMLModifierCLT.parseInput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,77 +64,77 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import com.openexchange.cli.AbstractCLI;
 
 /**
  * {@link ExtractLog4JModificationsCLT}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ExtractLog4JModificationsCLT {
+public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
 
+    private static final String SYNTAX = "log4JModifications [-i <input>] [-o <output>] | -h";
+    private static final String HEADER = "Reads a log4j.xml and outputs modified logger levels as JUL properties format.";
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     private static final XPathFactory xf = XPathFactory.newInstance();
 
-    public ExtractLog4JModificationsCLT() {
+    /**
+     * Entry point
+     * 
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        Integer retVal = new ExtractLog4JModificationsCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
+    }
+
+    /**
+     * Initialises a new {@link ExtractLog4JModificationsCLT}.
+     */
+    private ExtractLog4JModificationsCLT() {
         super();
     }
 
-    public static void main(String[] args) {
-        System.exit(writeLog4JModifications(args));
-    }
-
-    private static int writeLog4JModifications(String[] args) {
-        Options options = new Options();
-        options.addOption(createOption("h", "help", false, "Prints a help text.", false));
-        options.addOption(createOption("i", "in", true, "XML document is read from this file. If omitted the input will be read from STDIN.", false));
-        options.addOption(createOption("o", "out", true, "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
-        CommandLineParser parser = new PosixParser();
-        final CommandLine cmd;
-        try {
-            cmd = parser.parse(options, args, true);
-        } catch (ParseException e) {
-            System.err.println("Parsing the command line failed: " + e.getMessage());
-            return 1;
-        }
-        if (cmd.hasOption('h')) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("log4JModifications", "Reads a log4j.xml and outputs modified logger levels as JUL properties format.", options, null, false);
-            return 0;
-        }
-        final DocumentBuilder db;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
+     */
+    @Override
+    protected Integer invoke(Options option, CommandLine cmd, Void context) throws Exception {
+        DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();
             db.setEntityResolver(new ClassloaderEntityResolver());
         } catch (ParserConfigurationException e) {
             System.err.println("Can not configure XML parser: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
         try {
             InputStream resourceAsStream = ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml");
-            final Document original;
+            Document original;
             try {
                 original = db.parse(resourceAsStream);
             } finally {
                 resourceAsStream.close();
             }
-            Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
+            Document document = XMLUtil.parseInput(IOUtil.determineInput(!cmd.hasOption('i'), cmd.getOptionValue('i')));
             // Find differences
             Properties properties = extractDifferences(original, document);
             properties.putAll(extractRootLevel(original, document));
             // Write output
-            final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+            OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
             if (os == null) {
-                return 1;
+                return Integer.valueOf(1);
             }
             try {
                 properties.store(os, "file-logging.properties");
@@ -147,20 +144,74 @@ public class ExtractLog4JModificationsCLT {
         } catch (SAXException e) {
             System.err.println("Can not parse XML document: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (XPathExpressionException e) {
             System.err.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } catch (IOException e) {
             System.err.println("Can not read XML file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         }
-        return 0;
+        return Integer.valueOf(0);
     }
 
-    private static Properties extractRootLevel(Document original, Document current) throws XPathExpressionException {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
+     */
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption(createArgumentOption("i", "in", "input", "XML document is read from this file. If omitted the input will be read from STDIN.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
+     */
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // nothing to check
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getHeader()
+     */
+    @Override
+    protected String getHeader() {
+        return HEADER;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
+    @Override
+    protected String getName() {
+        return SYNTAX;
+    }
+
+    ////////////////////////////////////// HELPERS ///////////////////////////////
+
+    private Properties extractRootLevel(Document original, Document current) throws XPathExpressionException {
         Properties retval = new Properties();
         XPath path = xf.newXPath();
         XPathExpression expression = path.compile("/configuration/root/level/@value");
@@ -174,7 +225,7 @@ public class ExtractLog4JModificationsCLT {
         return retval;
     }
 
-    private static Properties extractDifferences(Document original, Document current) throws XPathExpressionException {
+    private Properties extractDifferences(Document original, Document current) throws XPathExpressionException {
         Properties retval = new Properties();
         Set<Logger> origLogger = parseLogger(original);
         Set<Logger> configuredLogger = parseLogger(current);
@@ -196,7 +247,7 @@ public class ExtractLog4JModificationsCLT {
         return retval;
     }
 
-    private static Set<Logger> parseLogger(Document original) throws XPathExpressionException {
+    private Set<Logger> parseLogger(Document original) throws XPathExpressionException {
         XPath path = xf.newXPath();
         NodeList list = (NodeList) path.compile("/configuration/logger/@name").evaluate(original, XPathConstants.NODESET);
         Set<Logger> retval = new HashSet<Logger>(list.getLength());
@@ -210,7 +261,7 @@ public class ExtractLog4JModificationsCLT {
         return retval;
     }
 
-    private static String convertLevel(String log4JLevel) {
+    private String convertLevel(String log4JLevel) {
         String retval = log4JLevel;
         // OFF
         if ("ERROR".equals(log4JLevel) || "FATAL".equals(log4JLevel)) {
@@ -228,5 +279,15 @@ public class ExtractLog4JModificationsCLT {
         }
         // ALL
         return retval;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
     }
 }

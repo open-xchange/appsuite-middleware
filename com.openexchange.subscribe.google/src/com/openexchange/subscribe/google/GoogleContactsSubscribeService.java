@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -121,9 +121,8 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
         OAuthAccount oauthAccount = GoogleApiClients.reacquireIfExpired(session, true, getOAuthAccount(session, subscription));
-        ContactsService googleContactsService = new ContactsService(APP_NAME);
+        ContactsService googleContactsService = createContactsService(session, oauthAccount);
         ContactParser parser = new ContactParser(googleContactsService);
-        googleContactsService.setOAuth2Credentials(GoogleApiClients.getCredentials(oauthAccount, session));
 
         try {
             Query cQuery = new Query(new URL(FEED_URL));
@@ -152,6 +151,38 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             LOG.error("", e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Pings the contact service
+     * 
+     * @throws OXException
+     */
+    public void ping(Session session, OAuthAccount account) throws OXException {
+        try {
+            Query cQuery = new Query(new URL(FEED_URL));
+            cQuery.setMaxResults(1);
+            createContactsService(session, account).query(cQuery, ContactFeed.class);
+        } catch (IOException e) {
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        } catch (ServiceException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
+        }
+
+    }
+
+    /**
+     * Creates a new {@link ContactsService} for the specified oauth account
+     * 
+     * @param session The {@link Session}
+     * @param oauthAccount The {@link OAuthAccount}
+     * @return The {@link ContactsService}
+     * @throws OXException if the {@link ContactsService} cannot be initialised
+     */
+    private ContactsService createContactsService(Session session, OAuthAccount oauthAccount) throws OXException {
+        ContactsService googleContactsService = new ContactsService(APP_NAME);
+        googleContactsService.setOAuth2Credentials(GoogleApiClients.getCredentials(oauthAccount, session));
+        return googleContactsService;
     }
 
     /**

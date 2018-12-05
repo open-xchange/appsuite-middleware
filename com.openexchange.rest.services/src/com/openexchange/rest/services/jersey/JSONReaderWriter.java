@@ -46,19 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rest.services.jersey;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -67,6 +66,7 @@ import javax.ws.rs.ext.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.rest.services.CommonMediaType;
 
 /**
  * A converter for request and response bodies producing/writing JSON objects
@@ -79,6 +79,13 @@ import org.json.JSONValue;
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 public class JSONReaderWriter implements MessageBodyReader<JSONValue>, MessageBodyWriter<JSONValue> {
+
+    /**
+     * Initialises a new {@link JSONReaderWriter}.
+     */
+    public JSONReaderWriter() {
+        super();
+    }
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -95,13 +102,13 @@ public class JSONReaderWriter implements MessageBodyReader<JSONValue>, MessageBo
         try {
             return JSONObject.parse(new InputStreamReader(entityStream, charset));
         } catch (JSONException e) {
-            throw convertJSONException(e);
+            throw JSONParserUtil.convertJSONException(e);
         }
     }
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return MediaType.APPLICATION_JSON_TYPE.equals(mediaType) && JSONValue.class.isAssignableFrom(type);
+        return JSONParserUtil.isApplicable(type, mediaType, MediaType.APPLICATION_JSON_TYPE);
     }
 
     @Override
@@ -111,29 +118,6 @@ public class JSONReaderWriter implements MessageBodyReader<JSONValue>, MessageBo
 
     @Override
     public void writeTo(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-        httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + ";charset=UTF-8");
-
-        OutputStreamWriter writer = new OutputStreamWriter(entityStream, "UTF-8");
-        try {
-            t.write(writer);
-        } catch (JSONException e) {
-            throw convertJSONException(e);
-        } finally {
-            writer.flush();
-        }
+        JSONParserUtil.writeTo(t, CommonMediaType.APPLICATION_JSON + ";charset=UTF-8", httpHeaders, entityStream);
     }
-
-    private static IOException convertJSONException(JSONException e) {
-        Throwable cause = e.getCause();
-        if (cause == null) {
-            return new IOException(e);
-        }
-
-        if (IOException.class.isAssignableFrom(cause.getClass())) {
-            return (IOException) cause;
-        }
-
-        return new IOException(cause);
-    }
-
 }

@@ -59,7 +59,7 @@ import java.lang.annotation.Target;
 /**
  * Specifies the {@link Role role} permitted to access certain REST end-points.
  * <p>
- * This annotation may be used in favor of {@link javax.annotation.security.RolesAllowed} annotation to work with enum-based constants.
+ * This annotation may be used in favour of {@link javax.annotation.security.RolesAllowed} annotation to work with enum-based constants.
  * <p>
  * Example:
  * <pre>

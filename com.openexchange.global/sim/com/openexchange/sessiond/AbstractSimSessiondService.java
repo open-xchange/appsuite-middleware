@@ -168,7 +168,9 @@ public class AbstractSimSessiondService implements SessiondService {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.sessiond.SessiondService#removeContextSessions(int)
      */
     @Override
@@ -183,6 +185,11 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<String> removeSessions(SessionFilter filter) throws OXException {
         return Collections.emptyList();
     }
 

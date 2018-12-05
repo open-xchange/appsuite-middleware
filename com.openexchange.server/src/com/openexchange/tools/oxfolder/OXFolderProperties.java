@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -62,7 +61,6 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -95,7 +93,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private boolean enableFolderCache = true;
 
-    /*private boolean ignoreSharedAddressbook = false; */ // finally dropped
+    /* private boolean ignoreSharedAddressbook = false; */ // finally dropped
 
     volatile boolean enableInternalUsersEdit = true;
 
@@ -167,7 +165,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         enableSharedFolderCaching = true;
         enableDBGrouping = true;
         enableFolderCache = true;
-        /*ignoreSharedAddressbook = false;*/
+        /* ignoreSharedAddressbook = false; */
         enableInternalUsersEdit = true;
     }
 
@@ -322,43 +320,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     /*-
      * ############################# MBEAN STUFF #############################
      */
-
-    /**
-     * Registers the global address book restorer MBean.
-     *
-     * @param managementService The management service
-     * @return The object name of registered MBean
-     */
-    public static ObjectName registerRestorerMBean(final ManagementService managementService) {
-        try {
-            final ObjectName objectName = getObjectName(GABRestorerMBeanImpl.class.getName(), GABRestorerMBean.GAB_DOMAIN);
-            managementService.registerMBean(objectName, new GABRestorerMBeanImpl());
-            return objectName;
-        } catch (final MalformedObjectNameException e) {
-            LOG.error("", e);
-        } catch (final NotCompliantMBeanException e) {
-            LOG.error("", e);
-        } catch (final OXException e) {
-            LOG.error("", e);
-        }
-        return null;
-    }
-
-    /**
-     * Unregisters the global address book restorer MBean.
-     *
-     * @param objectName The object name of registered MBean
-     * @param managementService The management service
-     */
-    public static void unregisterRestorerMBean(final ObjectName objectName, final ManagementService managementService) {
-        if (objectName != null) {
-            try {
-                managementService.unregisterMBean(objectName);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-    }
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.

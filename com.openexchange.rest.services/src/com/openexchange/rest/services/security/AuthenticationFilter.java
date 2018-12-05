@@ -49,6 +49,9 @@
 
 package com.openexchange.rest.services.security;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -71,12 +74,15 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.EndpointAuthenticator;
+import com.openexchange.rest.services.RequestContext;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.rest.services.security.authenticator.DefaultEndpointAuthenticator;
+import com.openexchange.rest.services.security.authenticator.MasterAdminEndpointAuthenticator;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
-
 
 /**
  * <p>The {@link AuthenticationFilter} sets the requests {@link SecurityContext}
@@ -84,9 +90,11 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  * are aborted.</p>
  * <br>
  * <p>Currently authentication is only based on HTTP basic authentication with the
- * credentials defined via 'com.openexchange.rest.services.basic-auth' in server.properties.</p>
+ * credentials defined via 'com.openexchange.rest.services.basic-auth' in server.properties
+ * or via the OX master admin password defined in the <code>mpasswd</code> file.</p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
 @Provider
@@ -94,31 +102,6 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
 public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
-
-    /** The authenticator using default credentials */
-    private static final class DefaultEndpointAuthenticator implements EndpointAuthenticator {
-
-        private final String authLogin;
-        private final String authPassword;
-
-        /**
-         * Initializes a new {@link EndpointAuthenticatorImplementation}.
-         */
-        DefaultEndpointAuthenticator(String authLogin, String authPassword) {
-            this.authLogin = authLogin;
-            this.authPassword = authPassword;
-        }
-
-        @Override
-        public String getRealmName() {
-            return "OX REST";
-        }
-
-        @Override
-        public boolean authenticate(String login, String password, Method invokedMethod) {
-            return authLogin.equals(login) && authPassword.equals(password);
-        }
-    }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -128,20 +111,76 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceContext resourceContext;
 
-    private final boolean doFail;
     private final EndpointAuthenticator defaultAuthenticator;
+    private final EndpointAuthenticator masterAdminAuthenticator;
 
-    public AuthenticationFilter(String authLogin, String authPassword) {
-        super();
-        if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
-            doFail = true;
-            defaultAuthenticator = null;
-        } else {
-            doFail = false;
-            defaultAuthenticator = new DefaultEndpointAuthenticator(authLogin.trim(), authPassword.trim());
-        }
+    /**
+     * Initialises a new {@link AuthenticationFilter}.
+     * 
+     * @param configurationService The {@link ConfigurationService} instance
+     */
+    public AuthenticationFilter(ConfigurationService configurationService) {
+        defaultAuthenticator = initialiseDefaultAuthenticator(configurationService);
+        masterAdminAuthenticator = initialiseMasterAdminAuthenticator(configurationService);
     }
 
+    /**
+     * Initialises the master admin authenticator
+     * 
+     * @param configurationService The {@link ConfigurationService}
+     * @return The master admin {@link EndpointAuthenticator}
+     */
+    // Shamelessly copied from AdminCache. Maybe we need a MasterAdminAuthService?
+    private EndpointAuthenticator initialiseMasterAdminAuthenticator(ConfigurationService configurationService) {
+        File file = configurationService.getFileByName("mpasswd");
+        if (null == file) {
+            return null;
+        }
+
+        try (BufferedReader bf = new BufferedReader(new FileReader(file), 2048)) {
+            String line = null;
+            while ((line = bf.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                if (line.indexOf(':') < 0) {
+                    continue;
+                }
+                // Ok seems to be a line with user:pass entry
+                String[] user_pass_combination = line.split(":");
+                if (user_pass_combination.length != 3) {
+                    LOG.warn("Invalid mpasswd format.");
+                }
+                return new MasterAdminEndpointAuthenticator();
+            }
+        } catch (IOException e) {
+            LOG.warn("Error processing master auth file: mpasswd", e);
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * Initialises the default {@link EndpointAuthenticator}
+     * 
+     * @param configurationService The {@link ConfigurationService}
+     * @return The default {@link EndpointAuthenticator}
+     */
+    private EndpointAuthenticator initialiseDefaultAuthenticator(ConfigurationService configurationService) {
+        String authLogin = configurationService.getProperty("com.openexchange.rest.services.basic-auth.login");
+        String authPassword = configurationService.getProperty("com.openexchange.rest.services.basic-auth.password");
+        if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
+            return null;
+        }
+        return new DefaultEndpointAuthenticator(authLogin.trim(), authPassword.trim());
+    }
+
+    /**
+     * Gets the {@link Annotation} from the specified class
+     * 
+     * @param annotationClass The class containing the annotation
+     * @return The {@link Annotation} {@link A}
+     */
     private <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         A annotation = resourceInfo.getResourceMethod().getAnnotation(annotationClass);
         if (null != annotation) {
@@ -154,6 +193,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return null;
     }
 
+    /**
+     * Acquires the {@link EndpointAuthenticator} from the {@link ResourceContext}
+     * 
+     * @return The {@link EndpointAuthenticator}
+     */
     private EndpointAuthenticator acquireAuthenticator() {
         Object resourceInstance = resourceContext.getResource(resourceInfo.getResourceClass());
         if (EndpointAuthenticator.class.isInstance(resourceInstance)) {
@@ -163,6 +207,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.ws.rs.container.ContainerRequestFilter#filter(javax.ws.rs.container.ContainerRequestContext)
+     */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // Check if all is permitted
@@ -179,26 +228,34 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             RoleAllowed roleAllowed = getAnnotation(RoleAllowed.class);
             if (null != roleAllowed) {
                 Role role = roleAllowed.value();
-                if (Role.BASIC_AUTHENTICATED == role) {
-                    basicAuth(requestContext);
-                    return;
-                }
-                if (Role.INDIVIDUAL_BASIC_AUTHENTICATED == role) {
-                    EndpointAuthenticator authenticator = acquireAuthenticator();
-                    if (null == authenticator) {
-                        LOG.warn("Detected role '{}' in class {}, but that end-point does not implement interface {}", Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), resourceInfo.getResourceClass().getName(), EndpointAuthenticator.class.getName());
+                switch (role) {
+                    case BASIC_AUTHENTICATED:
+                        basicAuth(requestContext);
+                        return;
+                    case INDIVIDUAL_BASIC_AUTHENTICATED:
+                        EndpointAuthenticator authenticator = acquireAuthenticator();
+                        if (null == authenticator) {
+                            LOG.warn("Detected role '{}' in class {}, but that end-point does not implement interface {}", Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), resourceInfo.getResourceClass().getName(), EndpointAuthenticator.class.getName());
+                            deny(requestContext);
+                            return;
+                        }
+
+                        authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
+                        return;
+                    case MASTER_ADMIN_AUTHENTICATED:
+                        if (null == masterAdminAuthenticator) {
+                            LOG.warn("Unable to perform master authentication");
+                            deny(requestContext);
+                            return;
+                        }
+                        masterAuth(requestContext, resourceInfo.getResourceMethod());
+                        return;
+                    default:
+                        // Role unknown...
+                        LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
                         deny(requestContext);
                         return;
-                    }
-
-                    authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
-                    return;
                 }
-
-                // Role unknown...
-                LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
-                deny(requestContext);
-                return;
             }
         }
 
@@ -220,6 +277,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     }
 
                     authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
+                    return;
+                }
+                if (hasRole(Role.MASTER_ADMIN_AUTHENTICATED.getId(), roles)) {
+                    if (null == masterAdminAuthenticator) {
+                        LOG.warn("Unable to perform master authentication");
+                        deny(requestContext);
+                        return;
+                    }
+                    masterAuth(requestContext, resourceInfo.getResourceMethod());
                     return;
                 }
 
@@ -244,19 +310,27 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         basicAuth(requestContext);
     }
 
+    /**
+     * Performs basic authentication with the default OX REST credentials
+     * 
+     * @param requestContext The {@link RequestContext}
+     */
     private void basicAuth(ContainerRequestContext requestContext) {
-        if (doFail) {
-            LOG.error(
-                "Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " +
-                "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " +
-                "'com.openexchange.rest.services.basic-auth.password' appropriately.",
-                new Throwable("Denied request to REST interface"));
+        if (defaultAuthenticator == null) {
+            LOG.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " + "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " + "'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
             deny(requestContext);
         } else {
             authenticatorAuth(defaultAuthenticator, requestContext, null);
         }
     }
 
+    /**
+     * Performs the authentication with the specified {@link EndpointAuthenticator}
+     * 
+     * @param authenticator The {@link EndpointAuthenticator} to perform the authenticationw ith
+     * @param requestContext The {@link RequestContext}
+     * @param invokedMethod The invoked REST method
+     */
     private void authenticatorAuth(EndpointAuthenticator authenticator, ContainerRequestContext requestContext, Method invokedMethod) {
         if (authenticator.permitAll(invokedMethod)) {
             // Nothing to do
@@ -275,33 +349,73 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return;
     }
 
-    private void reflectAuthenticated(boolean authenticated, String realm, ContainerRequestContext requestContext) {
-        if (authenticated) {
-            boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
-            Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
-            requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
+    /**
+     * Performs basic authentication with the OX master admin credentials
+     * 
+     * @param requestContext The {@link RequestContext}
+     * @param invokedMethod The invoked REST method
+     */
+    private void masterAuth(ContainerRequestContext requestContext, Method invokedMethod) {
+        if (masterAdminAuthenticator == null) {
+            LOG.error("Denied incoming HTTP request to REST interface due to misconfigured master authentication. Please review the 'mpasswd' file.", new Throwable("Denied request to REST interface"));
+            deny(requestContext);
         } else {
-            requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
-                .header(HttpHeaders.WWW_AUTHENTICATE, new StringBuilder(32).append("Basic realm=\"").append(realm).append("\", encoding=\"UTF-8\"").toString())
-                .build());
+            authenticatorAuth(masterAdminAuthenticator, requestContext, null);
         }
     }
 
+    /**
+     * Reflects the authentication status to the specified {@link RequestContext}
+     * 
+     * @param authenticated whether the authentication was successful
+     * @param realm The realm of the authentication
+     * @param requestContext The {@link RequestContext}
+     */
+    private void reflectAuthenticated(boolean authenticated, String realm, ContainerRequestContext requestContext) {
+        if (false == authenticated) {
+            requestContext.abortWith(Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, new StringBuilder(32).append("Basic realm=\"").append(realm).append("\", encoding=\"UTF-8\"").toString()).build());
+            return;
+        }
+
+        boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
+        Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
+        requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
+    }
+
+    /**
+     * Denies the request due to failed or missing authentication
+     * 
+     * @param requestContext The {@link RequestContext}
+     */
     private void deny(ContainerRequestContext requestContext) {
         requestContext.abortWith(Response.status(Status.FORBIDDEN).build());
     }
 
+    /**
+     * Checks whether the specified {@link Role} is enlisted in the specified array of roles
+     * 
+     * @param roleToCheck The role to check
+     * @param roles The array of roles
+     * @return <code>true</code> if the role is enlisted; <code>false</code> otherwise
+     */
     private boolean hasRole(String roleToCheck, String[] roles) {
-        if (null != roles) {
-            for (String role : roles) {
-                if (roleToCheck.equalsIgnoreCase(role)) {
-                    return true;
-                }
+        if (null == roles) {
+            return false;
+        }
+        for (String role : roles) {
+            if (roleToCheck.equalsIgnoreCase(role)) {
+                return true;
             }
         }
         return false;
     }
 
+    /**
+     * Extracts the credentials from the Authorization header
+     * 
+     * @param authHeader The authorization header
+     * @return The {@link Credentials}
+     */
     private Credentials acquireCredentialsFromAuthHeader(String authHeader) {
         if (null == authHeader) {
             // Authorization header missing
@@ -321,5 +435,4 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Unsupported auth scheme
         return null;
     }
-
 }

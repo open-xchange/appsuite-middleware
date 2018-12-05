@@ -82,6 +82,15 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
  */
 public class MicroformatSubscribeService extends AbstractSubscribeService {
 
+    /**
+     * The MF contacts source id
+     */
+    public static final String CONTACTS_SOURCE_ID = "com.openexchange.subscribe.microformats.contacts.http";
+    /**
+     * The infostore a.k.a. files a.k.a. drive source id
+     */
+    public static final String INFOSTORE_SOURCE_ID = "com.openexchange.subscribe.microformats.infostore.http";
+
     private MapToObjectTransformer transformer;
     private OXMFParserFactoryService parserFactory;
     private OXMFDataSource mfSource;

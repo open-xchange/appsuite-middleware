@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.osgi;
 
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -79,8 +80,7 @@ import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationU
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.database.impl.InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.infostore.mbean.FileChecksumsMBean;
-import com.openexchange.groupware.infostore.mbean.FileChecksumsMBeanImpl;
+import com.openexchange.groupware.infostore.rmi.FileChecksumsRMIServiceImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
@@ -91,8 +91,6 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.server.services.SharedInfostoreJSlob;
 
 /**
@@ -113,7 +111,6 @@ public class InfostoreActivator implements BundleActivator {
     private ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
     private ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
     private ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
-    private ServiceTracker<ManagementService, ManagementService> mgmtTracker;
     private List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings;
 
     @Override
@@ -128,8 +125,8 @@ public class InfostoreActivator implements BundleActivator {
              * Service registrations
              */
             Queue<ServiceRegistration<?>> registrations = new LinkedList<ServiceRegistration<?>>();
-//            registrations.offer(context.registerService(CreateTableService.class.getName(), task, null));
-//            registrations.offer(
+            //            registrations.offer(context.registerService(CreateTableService.class.getName(), task, null));
+            //            registrations.offer(
             registrations.offer(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
             registrations.offer(context.registerService(EventHandler.class, propertyCleaner, serviceProperties));
 
@@ -223,9 +220,7 @@ public class InfostoreActivator implements BundleActivator {
             this.qfsTracker = qfsTracker;
             qfsTracker.open();
 
-            ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new HousekeepingManagementTracker(context, FileChecksumsMBean.class.getName(), FileChecksumsMBean.DOMAIN, new FileChecksumsMBeanImpl()));
-            this.mgmtTracker = mgmtTracker;
-            mgmtTracker.open();
+            context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), null);
 
             // Register settings
             List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings = new ArrayList<ServiceRegistration<ConfigTreeEquivalent>>(4);
@@ -252,12 +247,6 @@ public class InfostoreActivator implements BundleActivator {
                 for (ServiceRegistration<ConfigTreeEquivalent> serviceRegistration : registeredSettings) {
                     serviceRegistration.unregister();
                 }
-            }
-
-            ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
-            if (null != mgmtTracker) {
-                mgmtTracker.close();
-                this.mgmtTracker = null;
             }
 
             ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker = this.tracker;
