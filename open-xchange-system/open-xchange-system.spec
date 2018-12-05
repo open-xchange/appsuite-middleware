@@ -47,6 +47,9 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}/opt/open-xchange/lib
+# for %ghost file
+mkdir %{buildroot}/opt/open-xchange/etc
+touch %{buildroot}/opt/open-xchange/etc/scr_db
 
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
@@ -60,10 +63,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/
+%dir /opt/open-xchange/etc
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%ghost /opt/open-xchange/etc/scr_db
 
 %changelog
 * Tue Jan 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
