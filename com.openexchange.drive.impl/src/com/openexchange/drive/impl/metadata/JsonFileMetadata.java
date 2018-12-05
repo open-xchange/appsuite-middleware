@@ -258,7 +258,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                         jumpActions.add("edit");
                     }
                 }
-            } else if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$") ||
+            } else if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff|heic|heif))$") ||
                 mimeType.matches("(?i)^audio\\/(mpeg|m4a|m4b|mp3|ogg|oga|opus|x-m4a)$")) {
                 jumpActions.add("preview");
             }
