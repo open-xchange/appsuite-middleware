@@ -52,20 +52,21 @@ package com.openexchange.groupware.update.tools.console;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
-import com.openexchange.groupware.update.tools.console.comparators.LastModifiedComparator;
+import com.openexchange.groupware.update.tools.console.comparators.NameComparator;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
 import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
 /**
- * {@link ListExecutedTasksCLT}
+ * {@link ListUpdateTasksCLT}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @deprecated Use {@link ListUpdateTasksCLT} instead. Scheduled to be removed on the next release.
+ * @since 7.10.2
  */
-public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
+public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
     /**
      * Entry point
@@ -73,20 +74,28 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new ListExecutedTasksCLT().execute(args);
+        new ListUpdateTasksCLT().execute(args);
     }
 
-    private static final ColumnFormat[] FORMATS = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
+    private static final ColumnFormat[] FORMATS_PENDING = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
+    private static final String[] COLUMNS_PENDING = { "taskName", "state" };
 
-    private static final String[] COLUMNS = { "taskName", "successful", "lastModified" };
+    private static final ColumnFormat[] FORMATS_EXECUTED = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
+    private static final String[] COLUMNS_EXECUTED = { "taskName", "successful", "lastModified" };
 
+    private boolean excludedViaProperties;
+    private boolean excludedViaNamespace;
+    private boolean pending;
+    private boolean run;
+    private ColumnFormat[] formats;
+    private String[] columns;
     private String schemaName;
 
     /**
-     * Initialises a new {@link ListExecutedTasksCLT}.
+     * Initialises a new {@link ListUpdateTasksCLT}.
      */
-    public ListExecutedTasksCLT() {
-        super("listExecutedTasks -n <schemaName>" + BASIC_MASTER_ADMIN_USAGE, "Lists executed update tasks of a schema. This command line tool is due to deprecation with the next release. Use the 'listUpdateTasks' instead.");
+    public ListUpdateTasksCLT() {
+        super("listUpdateTasks [[-a | -g | -e | -x | -xf | -xn] -A <adminUser> -P <adminPassword> [-p <port> -s <server> --responsetime <responseTime>]] | -h", "Lists executed, pending and excluded update tasks of a schema. The switches '-a', '-e', '-g', '-x', '-xf' and '-xn' are mutually exclusive AND mandatory.\n\n An overall database status of all schemata can be retrieved via the 'checkdatabase' command line tool.");
     }
 
     /*
@@ -96,7 +105,19 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createArgumentOption("n", "name", "schemaName", String.class, "A valid schema name.", false));
+        Option schemaOption = new Option("n", "name", true, "A valid schema name.");
+        schemaOption.setType(String.class);
+        options.addOption(schemaOption);
+
+        OptionGroup optionGroup = new OptionGroup();
+        optionGroup.addOption(createOption("a", "all", false, "Lists all pending and excluded update tasks (both via excludedupdate.properties' file and namespace)", false));
+        optionGroup.addOption(createOption("g", "pending", false, "Lists only the pending update tasks", false));
+        optionGroup.addOption(createOption("x", "excluded", false, "Lists only the update tasks excluded both via excludedupdate.properties' file and namespace", false));
+        optionGroup.addOption(createOption("xf", "excluded-via-file", false, "Lists only the update tasks excluded via 'excludedupdate.properties' file", false));
+        optionGroup.addOption(createOption("xn", "excluded-via-namespace", false, "Lists only the update tasks excluded via namespace", false));
+        optionGroup.addOption(createOption("e", "executed", false, "Lists all executed (ran at least once) update tasks of a schema", false));
+        optionGroup.setRequired(true);
+        options.addOptionGroup(optionGroup);
     }
 
     /*
@@ -107,8 +128,8 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
-        List<Map<String, Object>> executedTasksList = updateTaskService.getExecutedTasksList(schemaName);
-        writeCompositeList(executedTasksList, COLUMNS, FORMATS, new LastModifiedComparator());
+        List<Map<String, Object>> taskList = run ? updateTaskService.getExecutedTasksList(schemaName) : updateTaskService.getPendingTasksList(schemaName, pending, excludedViaProperties, excludedViaNamespace);
+        writeCompositeList(taskList, columns, formats, new NameComparator());
         return null;
     }
 
@@ -124,6 +145,28 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
             printHelp();
             System.exit(1);
         }
+
+        columns = COLUMNS_PENDING;
+        formats = FORMATS_PENDING;
         schemaName = cmd.getOptionValue('n');
+
+        if (cmd.hasOption('r')) {
+            run = true;
+            columns = COLUMNS_EXECUTED;
+            formats = FORMATS_EXECUTED;
+            return;
+        }
+
+        if (cmd.hasOption('a')) {
+            pending = excludedViaProperties = excludedViaNamespace = true;
+            return;
+        }
+
+        pending = cmd.hasOption('e');
+        excludedViaProperties = cmd.hasOption("xf");
+        excludedViaNamespace = cmd.hasOption("xn");
+        if (cmd.hasOption('x')) {
+            excludedViaProperties = excludedViaNamespace = true;
+        }
     }
 }

@@ -53,10 +53,14 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,6 +76,7 @@ import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateTaskService;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkitJob;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.CanceledTimerTaskException;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -89,10 +94,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private ScheduledTimerTask timerTask; // Guarded by synchronized
-
-    private enum TaskMetadata {
-        taskName, successful, lastModified, uuid, schema, className;
-    }
 
     /**
      * Initialises a new {@link UpdateTaskServiceImpl}.
@@ -232,14 +233,81 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             }
             List<Map<String, Object>> executedTasks = new ArrayList<>(tasks.length);
             for (ExecutedTask task : tasks) {
-                Map<String, Object> taskMap = new HashMap<>();
-                taskMap.put(TaskMetadata.taskName.name(), task.getTaskName());
-                taskMap.put(TaskMetadata.successful.name(), Boolean.toString(task.isSuccessful()));
-                taskMap.put(TaskMetadata.lastModified.name(), task.getLastModified());
-                taskMap.put(TaskMetadata.uuid.name(), task.getUUID().toString());
-                executedTasks.add(taskMap);
+                executedTasks.add(new TaskMetadataBuilder().withTaskName(task.getTaskName()).withSuccess(Boolean.valueOf(task.isSuccessful())).withLastModified(task.getLastModified()).withUUID(task.getUUID().toString()).build());
             }
             return executedTasks;
+        } catch (OXException e) {
+            LOG.error("", e);
+            throw new RemoteException(e.getPlainLogMessage(), e);
+        } catch (RuntimeException | Error e) {
+            LOG.error("", e);
+            throw e;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskService#getPendingTasksList(java.lang.String, boolean, boolean)
+     */
+    @Override
+    public List<Map<String, Object>> getPendingTasksList(String schemaName, boolean pending, boolean excluded, boolean namespaceAware) throws RemoteException {
+        SchemaStore store = SchemaStore.getInstance();
+        try {
+            SchemaInfo schemaInfo = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
+            ExecutedTask[] tasks = store.getExecutedTasks(schemaInfo.getPoolId(), schemaName);
+            if (null == tasks) {
+                tasks = new ExecutedTask[0];
+            } else {
+                Arrays.sort(tasks);
+            }
+
+            List<Map<String, Object>> pendingTasks = new LinkedList<>();
+
+            // First get the successfully executed tasks
+            Set<String> executedTasks = new HashSet<>();
+            for (ExecutedTask task : tasks) {
+                if (task.isSuccessful()) {
+                    executedTasks.add(task.getTaskName());
+                }
+            }
+
+            // Then collect all tasks from the different sets
+            if (pending) {
+                // Add all update tasks that are not in the executed set
+                Set<String> registeredTasks = UpdateTaskToolkit.getRegisteredUpdateTasks();
+                for (String r : registeredTasks) {
+                    if (executedTasks.contains(r)) {
+                        continue;
+                    }
+                    pendingTasks.add(new TaskMetadataBuilder().withTaskName(r).withTaskState("pending").build());
+                }
+            }
+
+            // Consider excluded via properties
+            if (excluded) {
+                for (String s : UpdateTaskToolkit.getExcludedUpdateTasks()) {
+                    if (executedTasks.contains(s)) {
+                        continue;
+                    }
+                    pendingTasks.add(new TaskMetadataBuilder().withTaskName(s).withTaskState("excluded via file 'excludedupdatetask.properties'").build());
+                }
+            }
+
+            // Consider excluded via namespace
+            if (namespaceAware) {
+                for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
+                    String state = "excluded via namespace '" + entry.getKey() + "'";
+                    for (String s : entry.getValue()) {
+                        if (executedTasks.contains(s)) {
+                            continue;
+                        }
+                        pendingTasks.add(new TaskMetadataBuilder().withTaskName(s).withTaskState(state).build());
+                    }
+                }
+            }
+
+            return pendingTasks;
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
@@ -363,12 +431,143 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         List<Map<String, Object>> failuresList = new ArrayList<>(failures.size());
         for (TaskInfo taskInfo : failures) {
-            Map<String, Object> failuresMap = new HashMap<>();
-            failuresMap.put(TaskMetadata.taskName.name(), taskInfo.getTaskName());
-            failuresMap.put(TaskMetadata.className.name(), taskInfo.getClass().getName());
-            failuresMap.put(TaskMetadata.schema.name(), taskInfo.getSchema());
-            failuresList.add(failuresMap);
+            failuresList.add(new TaskMetadataBuilder().withTaskName(taskInfo.getTaskName()).withClassName(taskInfo.getClass().getName()).withSchema(taskInfo.getSchema()).build());
         }
         return failuresList;
+    }
+
+    /////////////////////////////////// METADATA BUILDER ////////////////////////////////////////
+
+    private enum TaskMetadata {
+        taskName, state, successful, lastModified, uuid, schema, className;
+    }
+
+    /**
+     * {@link TaskMetadataBuilder}
+     */
+    private static final class TaskMetadataBuilder {
+
+        private String taskName;
+        private String taskState;
+        private String className;
+        private String schema;
+        private Boolean isSuccessful;
+        private Date lastModified;
+        private String uuid;
+
+        /**
+         * Initialises a new {@link UpdateTaskServiceImpl.TaskMetadataBuilder}.
+         */
+        TaskMetadataBuilder() {
+            super();
+        }
+
+        /**
+         * Sets the specified task name
+         * 
+         * @param taskName The task name to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withTaskName(String taskName) {
+            this.taskName = taskName;
+            return this;
+        }
+
+        /**
+         * Sets the specified task state
+         * 
+         * @param taskState The task state to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withTaskState(String taskState) {
+            this.taskState = taskState;
+            return this;
+        }
+
+        /**
+         * Sets the specified task class name
+         * 
+         * @param className The task class name to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withClassName(String className) {
+            this.className = className;
+            return this;
+        }
+
+        /**
+         * Sets the specified schema name
+         * 
+         * @param schema The schema name to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withSchema(String schema) {
+            this.schema = schema;
+            return this;
+        }
+
+        /**
+         * Sets whether the task was executed successfully
+         * 
+         * @param successful whether the task was executed successfully
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withSuccess(Boolean successful) {
+            this.isSuccessful = successful;
+            return this;
+        }
+
+        /**
+         * Sets whether the last modified date of the task
+         * 
+         * @param lastModified the last modified date of the task
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withLastModified(Date lastModified) {
+            this.lastModified = lastModified;
+            return this;
+        }
+
+        /**
+         * Sets the specified task UUID
+         * 
+         * @param uuid The task uuid to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withUUID(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        /**
+         * Builds an unmodifiable {@link Map} with the {@link TaskMetadata}
+         * 
+         * @return an unmodifiable {@link Map} with the {@link TaskMetadata}
+         */
+        Map<String, Object> build() {
+            Map<String, Object> taskMap = new HashMap<>(8);
+            if (Strings.isNotEmpty(taskName)) {
+                taskMap.put(TaskMetadata.taskName.name(), taskName);
+            }
+            if (Strings.isNotEmpty(taskState)) {
+                taskMap.put(TaskMetadata.state.name(), taskState);
+            }
+            if (Strings.isNotEmpty(className)) {
+                taskMap.put(TaskMetadata.className.name(), className);
+            }
+            if (Strings.isNotEmpty(schema)) {
+                taskMap.put(TaskMetadata.schema.name(), schema);
+            }
+            if (null != isSuccessful) {
+                taskMap.put(TaskMetadata.successful.name(), isSuccessful);
+            }
+            if (null != lastModified) {
+                taskMap.put(TaskMetadata.lastModified.name(), lastModified);
+            }
+            if (Strings.isNotEmpty(uuid)) {
+                taskMap.put(TaskMetadata.uuid.name(), uuid);
+            }
+            return Collections.unmodifiableMap(taskMap);
+        }
     }
 }

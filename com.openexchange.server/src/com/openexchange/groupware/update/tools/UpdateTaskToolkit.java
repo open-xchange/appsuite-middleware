@@ -76,6 +76,7 @@ import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicSet;
+import com.openexchange.groupware.update.internal.ExcludedSet;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.threadpool.ThreadPools;
@@ -89,6 +90,7 @@ public final class UpdateTaskToolkit {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
+
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
     }
 
@@ -278,16 +280,39 @@ public final class UpdateTaskToolkit {
 
         for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
             NamespaceAwareUpdateTask annotation = updateTask.getClass().getAnnotation(NamespaceAwareUpdateTask.class);
-            if (annotation != null) {
-                Set<String> set = namespaceAware.get(annotation.namespace());
-                if (set == null) {
-                    set = new HashSet<>();
-                }
-                set.add(updateTask.getClass().getName());
-                namespaceAware.put(annotation.namespace(), set);
+            if (annotation == null) {
+                continue;
             }
+            Set<String> set = namespaceAware.get(annotation.namespace());
+            if (set == null) {
+                set = new HashSet<>();
+            }
+            set.add(updateTask.getClass().getName());
+            namespaceAware.put(annotation.namespace(), set);
         }
         return Collections.unmodifiableMap(namespaceAware);
+    }
+
+    /**
+     * Returns an unmodifiable {@link Set} with all registered update tasks
+     * 
+     * @return an unmodifiable {@link Set} with all registered update tasks
+     */
+    public static Set<String> getRegisteredUpdateTasks() {
+        Set<String> registered = new HashSet<>();
+        for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
+            registered.add(updateTask.getClass().getName());
+        }
+        return Collections.unmodifiableSet(registered);
+    }
+
+    /**
+     * Returns an unmodifiable {@link Set} with all excluded update tasks
+     * 
+     * @return an unmodifiable {@link Set} with all excluded update tasks
+     */
+    public static Set<String> getExcludedUpdateTasks() {
+        return Collections.unmodifiableSet(ExcludedSet.getInstance().getTaskSet());
     }
 
     /**

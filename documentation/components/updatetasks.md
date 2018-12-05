@@ -26,7 +26,7 @@ Furthermore, an administrator may (re-)execute certain update tasks through usin
 
 # Excluding update tasks
 
-In certain scenarios, specific update tasks may be forcibly excluded from being executed. In order to do so, the update task's name needs to be uncommented or entered in the configuration file ``excludedupdatetasks.properties``. Update tasks and their identifying names used to be announced in the release notes. Newly introduced update tasks will be added in the following overview instead.
+In certain scenarios, specific update tasks may be forcibly excluded from being executed. In order to do so, the update task's name needs to be entered in the configuration file ``excludedupdatetasks.properties``. Update tasks and their identifying names are announced in the release notes.
 
 # Core update tasks
 
@@ -205,6 +205,92 @@ com.openexchange.share.limit.rdb.FileAccessCreateTableTask                      
 com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask   true       2016-05-30 11:31:40 CEST
 com.openexchange.download.limit.rdb.FileAccessCreateTableTask                          true       2016-06-08 16:51:59 CEST
 com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask true       2016-06-23 11:57:13 CEST
+```
+
+## List pending and excluded update tasks for a schema
+
+The ``listPendingUpdateTasks`` command line tool can be used to list all pending and excluded update tasks, i.e. the tasks that were either not executed yet, or were excluded via the ``excludedupdatetasks.properties`` file or via a namespace.
+
+### Parameters
+
+ - ``-A,--adminuser <arg>``
+ The master admin username
+ - ``-a,--all``
+ Lists all pending and excluded update tasks (both via excludedupdate.properties' file and namespace)
+ - ``-e,--pending``
+ Lists only the pending update tasks
+ - ``-h,--help``
+ Prints a help text
+ - ``-n,--name <arg>``
+ A valid schema name.
+ - ``-p,--port <arg>``
+ The optional RMI port (default:1099)
+ -  ``-P,--adminpass <arg>``
+ The master admin password
+ - ``--responsetimeout <arg>``
+ The optional response timeout in seconds when reading data from server (default: 0s; infinite)
+ - ``-s,--server <arg>``
+ The optional RMI server (default: localhost)
+ - ``-x,--excluded``
+ Lists only the update tasks excluded both via excludedupdate.properties' file and namespace
+ - ``-xf,--excluded-via-file``
+ Lists only the update tasks excluded via 'excludedupdate.properties' file
+ - ``-xn,--excluded-via-namespace``
+ Lists only the update tasks excluded via namespace
+ 
+ The switches ``-a``, ``-e``, ``-x``, ``-xf`` and ``-xn`` are mutually exclusive AND mandatory.
+
+### Examples
+
+```
+./listPendingUpdateTasks -A oxadminmaster -P secret -a -n oxdatabase_1337
+taskName                                                                                                state                                            
+com.openexchange.oauth.impl.internal.groupware.RemoveLinkedInScopeUpdateTask                            pending                                          
+com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectRangesTask                           pending                                          
+com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions                                     pending                                          
+com.openexchange.groupware.contexts.impl.sql.ChangePrimaryKeyForContextAttribute                        pending                                          
+com.openexchange.chronos.storage.rdb.groupware.CalendarAttendeeAddHiddenColumnTask                      pending                                          
+com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions                                     excluded via file 'excludedupdatetask.properties'
+com.openexchange.groupware.update.tasks.ResourceTablesUtf8Mb4UpdateTask                                 excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.oauth.impl.internal.groupware.OAuthAccountsTableUtf8Mb4UpdateTaskV2                    excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.download.limit.rdb.FileAccessConvertUtf8ToUtf8mb4UpdateTask                            excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4                                  excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.AdminTablesUtf8Mb4UpdateTask                                    excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.SettingsConvertUtf8ToUtf8mb4Task                                excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4                                       excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.IDConvertToUtf8mb4Task                                          excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.ContactTablesUtf8Mb4UpdateTask                                  excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.oauth.provider.impl.groupware.OAuthGrantConvertUtf8ToUtf8mb4Task                       excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.snippet.mime.groupware.MimeSnippetTablesUtf8Mb4UpdateTask                              excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4                                   excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.capabilities.groupware.CapabilityConvertUtf8ToUtf8mb4Task                              excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.InfostoreConvertUtf8ToUtf8mb4Task                               excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.AttachmentConvertUtf8ToUtf8mb4Task                              excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.oauth.impl.internal.groupware.OAuthAccountsTableUtf8Mb4UpdateTask                      excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.AggregatingContactsConvertUtf8ToUtf8mb4Task                     excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.snippet.rdb.groupware.RdbSnippetTablesUtf8Mb4UpdateTask                                excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.oauth.provider.impl.groupware.AuthCodeConvertUtf8ToUtf8mb4Task                         excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.FolderConvertUtf8ToUtf8mb4Task                                  excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.subscribe.database.SubscriptionsTablesUtf8Mb4UpdateTask                                excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.messaging.generic.groupware.MessagingGenericConvertToUtf8mb4                           excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.TaskConvertUtf8ToUtf8mb4Task                                    excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.push.impl.credstorage.rdb.groupware.CredConvertUtf8ToUtf8mb4Task                       excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.publish.database.PublicationsTablesUtf8Mb4UpdateTask                                   excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.tools.oxfolder.property.sql.OXFolderUserPropertyConvertUtf8ToUtf8mb4Task               excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.LdapConvertUtf8ToUtf8mb4Task                                    excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.jslob.storage.db.groupware.JsonStorageTableUtf8Mb4UpdateTask                           excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.LegacyCalendarTablesUtf8Mb4UpdateTask                           excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.SequenceTablesUtf8Mb4UpdateTask                                 excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewTableUtf8Mb4UpdateTask   excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.ObjectUseCountPermissionTableUtf8Mb4UpdateTask                  excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.datatypes.genericonf.storage.impl.GenConfConvertUtf8ToUtf8mb4UpdateTask                excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.MailAccountConvertUtf8ToUtf8mb4Task                             excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.MiscConvertUtf8ToUtf8mb4Task                                    excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.ReminderTableUtf8Mb4UpdateTask                                  excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.infostore.database.impl.InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.file.storage.rdb.groupware.FileStorageConvertUtf8ToUtf8mb4Task                         excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.net.ssl.management.storage.SSLCertificateManagementTableUtf8Mb4UpdateTask              excluded via namespace 'groupware.utf8mb4'       
+com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task                        excluded via namespace 'groupware.utf8mb4'   
 ```
 
 ## Trigger all pending update tasks for a specific schema
