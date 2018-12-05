@@ -55,3 +55,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.scribe.utils,
  org.slf4j
 Bundle-Activator: com.openexchange.oauth.xing.osgi.XingOAuthActivator
+Export-Package: com.openexchange.oauth.xing

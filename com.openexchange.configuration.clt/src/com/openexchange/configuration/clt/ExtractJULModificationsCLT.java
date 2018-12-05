@@ -49,55 +49,54 @@
 
 package com.openexchange.configuration.clt;
 
-import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
-import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import com.openexchange.cli.AbstractCLI;
 
 /**
  * {@link ExtractJULModificationsCLT}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ExtractJULModificationsCLT {
+public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
 
-    public ExtractJULModificationsCLT() {
+    private static final String SYNTAX = "extractJULModifications [-i <input>] [-o <output>] | -h";
+    private static final String HEADER = "Extracts modified logger levels from file-logging.properties.";
+
+    /**
+     * Entry point
+     * 
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        Integer retVal = new ExtractJULModificationsCLT().execute(args);
+        if (retVal == null) {
+            retVal = Integer.valueOf(1);
+        }
+        System.exit(retVal);
+    }
+
+    /**
+     * Initialises a new {@link ExtractJULModificationsCLT}.
+     */
+    private ExtractJULModificationsCLT() {
         super();
     }
 
-    public static void main(String[] args) {
-        System.exit(writeJULModifications(args));
-    }
-
-    private static int writeJULModifications(String[] args) {
-        Options options = new Options();
-        options.addOption(createOption("h", "help", false, "Prints a help text.", false));
-        options.addOption(createOption("i", "in", true, "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
-        options.addOption(createOption("o", "out", true, "Added JUL logger will be written as properties configuration to this file. If this option is omitted the output will be written to STDOUT.", false));
-        CommandLineParser parser = new PosixParser();
-        final CommandLine cmd;
-        try {
-            cmd = parser.parse(options, args, true);
-        } catch (ParseException e) {
-            System.err.println("Parsing the command line failed: " + e.getMessage());
-            return 1;
-        }
-        if (cmd.hasOption('h')) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("extractJULModifications", "Extracts modified logger levels from file-logging.properties.", options, null, false);
-            return 0;
-        }
-        Properties properties = ConvertJUL2LogbackCLT.parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
+     */
+    @Override
+    protected Integer invoke(Options option, CommandLine cmd, Void context) throws Exception {
+        Properties properties = XMLUtil.parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
         if (null == properties) {
-            return 1;
+            return Integer.valueOf(1);
         }
 
         InputStream resourceStream = null;
@@ -118,9 +117,9 @@ public class ExtractJULModificationsCLT {
                 }
             }
             // Write output
-            final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
-            if(os == null) {
-                return 1;
+            OutputStream os = IOUtil.determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+            if (os == null) {
+                return Integer.valueOf(1);
             }
             try {
                 added.store(os, "added loggers in file-logging.properties");
@@ -130,7 +129,7 @@ public class ExtractJULModificationsCLT {
         } catch (IOException e) {
             System.err.println("Can not read file: " + e.getMessage());
             e.printStackTrace();
-            return 1;
+            return Integer.valueOf(1);
         } finally {
             if (null != resourceStream) {
                 try {
@@ -140,6 +139,67 @@ public class ExtractJULModificationsCLT {
                 }
             }
         }
-        return 0;
+        return Integer.valueOf(0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
+     */
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption(createArgumentOption("i", "in", "input", "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "Added JUL logger will be written as properties configuration to this file. If this option is omitted the output will be written to STDOUT.", false));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
+     */
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // nothing to check
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getHeader()
+     */
+    @Override
+    protected String getHeader() {
+        return HEADER;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
+    @Override
+    protected String getName() {
+        return SYNTAX;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
     }
 }

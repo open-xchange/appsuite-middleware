@@ -55,8 +55,10 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
 
@@ -74,7 +76,11 @@ public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class };
+        //@formatter:off
+        return new Class<?>[] { OAuthService.class, OAuthServiceMetaDataRegistry.class, ContextService.class, 
+            ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class, 
+            SSLSocketFactoryProvider.class };
+        //@formatter:on
     }
 
     @Override

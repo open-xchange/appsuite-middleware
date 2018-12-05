@@ -131,6 +131,6 @@ public class ListBrandings extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getName() {
-        return "listdriveclients";
+        return "listdriveclients [-o | -v] " + BASIC_MASTER_ADMIN_USAGE;
     }
 }

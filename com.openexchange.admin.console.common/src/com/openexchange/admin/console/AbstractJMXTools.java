@@ -130,75 +130,86 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     }
 
     protected static StringBuffer getStats(MBeanServerConnection con, String objectName) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
-        final StringBuffer retval = new StringBuffer();
-        for (final ObjectInstance instance : con.queryMBeans(new ObjectName(objectName), null)) {
-            final ObjectName obj = instance.getObjectName();
+        StringBuffer retval = new StringBuffer();
+        for (ObjectInstance instance : con.queryMBeans(new ObjectName(objectName), null)) {
+            ObjectName obj = instance.getObjectName();
             if (null == obj) {
                 continue;
             }
-            final MBeanInfo info;
+            MBeanInfo info;
             try {
                 info = con.getMBeanInfo(obj);
             } catch (InstanceNotFoundException e) {
                 return retval;
             }
-            final String ocname = obj.getCanonicalName();
-            final MBeanAttributeInfo[] attrs = info.getAttributes();
-            if (attrs.length > 0) {
-                for (final MBeanAttributeInfo element : attrs) {
-                    try {
-                        final Object o = con.getAttribute(obj, element.getName());
-                        if (o != null) {
-                            final StringBuilder sb = new StringBuilder(ocname).append(",").append(element.getName()).append(" = ");
-                            if (o instanceof CompositeDataSupport) {
-                                final CompositeDataSupport c = (CompositeDataSupport) o;
-                                sb.append("[init=").append(c.get("init")).append(",max=").append(c.get("max")).append(",committed=").append(c.get("committed")).append(",used=").append(c.get("used")).append("]");
-                                retval.append(sb.append(LINE_SEPARATOR));
-                            } else {
-                                if (o instanceof String[]) {
-                                    final String[] c = (String[]) o;
-                                    retval.append(sb.append(Arrays.toString(c)).append(LINE_SEPARATOR));
-                                } else if (o instanceof long[]) {
-                                    final long[] l = (long[]) o;
-                                    retval.append(sb.append(Arrays.toString(l)).append(LINE_SEPARATOR));
-                                } else {
-                                    retval.append(sb.append(o.toString()).append(LINE_SEPARATOR));
-                                }
-                            }
-                        }
-                    } catch (final RuntimeMBeanException e) {
-                        // If there was an error getting the attribute we just omit that attribute
-                    }
-                }
+            String ocname = obj.getCanonicalName();
+            MBeanAttributeInfo[] attrs = info.getAttributes();
+            if (attrs.length == 0) {
+                continue;
             }
+            processAttributes(con, retval, obj, ocname, attrs);
         }
         return retval;
     }
 
-    protected static String getStats(final MBeanServerConnection mbc, final String domain, final String key, final String name) throws JMException, NullPointerException, IOException, IllegalStateException {
-        final ObjectName objectName = new ObjectName(domain, key, name);
-        final MBeanInfo info;
+    private static void processAttributes(MBeanServerConnection con, StringBuffer retval, ObjectName obj, String ocname, MBeanAttributeInfo[] attrs) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException {
+        for (MBeanAttributeInfo element : attrs) {
+            processElement(con, retval, obj, ocname, element);
+        }
+    }
+
+    private static void processElement(MBeanServerConnection con, StringBuffer retval, ObjectName obj, String ocname, MBeanAttributeInfo element) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException {
+        try {
+            Object o = con.getAttribute(obj, element.getName());
+            if (o == null) {
+                return;
+            }
+            StringBuilder sb = new StringBuilder(ocname).append(",").append(element.getName()).append(" = ");
+            if (o instanceof CompositeDataSupport) {
+                CompositeDataSupport c = (CompositeDataSupport) o;
+                sb.append("[init=").append(c.get("init")).append(",max=").append(c.get("max")).append(",committed=").append(c.get("committed")).append(",used=").append(c.get("used")).append("]");
+                retval.append(sb.append(LINE_SEPARATOR));
+                return;
+            }
+
+            if (o instanceof String[]) {
+                String[] c = (String[]) o;
+                retval.append(sb.append(Arrays.toString(c)).append(LINE_SEPARATOR));
+            } else if (o instanceof long[]) {
+                long[] l = (long[]) o;
+                retval.append(sb.append(Arrays.toString(l)).append(LINE_SEPARATOR));
+            } else {
+                retval.append(sb.append(o.toString()).append(LINE_SEPARATOR));
+            }
+        } catch (RuntimeMBeanException e) {
+            // If there was an error getting the attribute we just omit that attribute
+        }
+    }
+
+    protected static String getStats(MBeanServerConnection mbc, String domain, String key, String name) throws JMException, NullPointerException, IOException, IllegalStateException {
+        ObjectName objectName = new ObjectName(domain, key, name);
+        MBeanInfo info;
         try {
             info = mbc.getMBeanInfo(objectName);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return "";
         }
-        final MBeanAttributeInfo[] attrs = info.getAttributes();
-        final StringBuilder retval = new StringBuilder();
+        MBeanAttributeInfo[] attrs = info.getAttributes();
+        StringBuilder retval = new StringBuilder();
         if (attrs.length > 0) {
-            for (final MBeanAttributeInfo element : attrs) {
+            for (MBeanAttributeInfo element : attrs) {
                 try {
-                    final Object o = mbc.getAttribute(objectName, element.getName());
+                    Object o = mbc.getAttribute(objectName, element.getName());
                     if (o != null) {
                         retval.append(objectName.getCanonicalName()).append(',').append(element.getName()).append(" = ");
                         if (o instanceof int[]) {
-                            final int[] i = (int[]) o;
+                            int[] i = (int[]) o;
                             retval.append(Arrays.toString(i)).append(LINE_SEPARATOR);
                         } else {
                             retval.append(o.toString()).append(LINE_SEPARATOR);
                         }
                     }
-                } catch (final RuntimeMBeanException e) {
+                } catch (RuntimeMBeanException e) {
                     // If there was an error getting the attribute we just omit that attribute
                 }
             }
@@ -206,20 +217,20 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         return retval.toString();
     }
 
-    protected MBeanServerConnection initConnection(final Map<String, String[]> env) throws InterruptedException, IOException {
+    protected MBeanServerConnection initConnection(Map<String, String[]> env) throws InterruptedException, IOException {
         // Set timeout here, it is given in ms
-        final JMXServiceURL serviceurl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + hostname + ':' + port + "/server");
-        final IOException[] exc = new IOException[1];
-        final RuntimeException[] excr = new RuntimeException[1];
-        final Thread t = new Thread() {
+        JMXServiceURL serviceurl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + hostname + ':' + port + "/server");
+        IOException[] exc = new IOException[1];
+        RuntimeException[] excr = new RuntimeException[1];
+        Thread t = new Thread() {
 
             @Override
             public void run() {
                 try {
                     c = JMXConnectorFactory.connect(serviceurl, env);
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     exc[0] = e;
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     excr[0] = e;
                 }
             }
@@ -239,7 +250,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         return c.getMBeanServerConnection();
     }
 
-    protected void setOptions(final AdminParser parser) {
+    protected void setOptions(AdminParser parser) {
         this.hostOption = setShortLongOpt(parser, OPT_HOST_SHORT, OPT_HOST_LONG, "host", "specifies the host", false);
         this.portOption = setShortLongOpt(parser, OPT_PORT_SHORT, OPT_PORT_LONG, "port", "specifies the port", false);
         this.timeoutOption = setShortLongOpt(parser, OPT_TIMEOUT_SHORT, OPT_TIMEOUT_LONG, "timeout in seconds for the connection creation to the backend (default 15s)", true, NeededQuadState.notneeded);
@@ -250,35 +261,35 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected abstract void setFurtherOptions(AdminParser parser);
 
-    protected static String doOperationReturnString(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, InvalidDataException {
-            Object opObject = doOperation(mbc, fullqualifiedoperationname);
-            if (null != opObject) {
-                final StringBuilder retval = new StringBuilder();
-                retval.append(fullqualifiedoperationname).append(" = ");
-                return retval.append(opObject).append(LINE_SEPARATOR).toString();
-            } else {
-                return "";
-            }
+    protected static String doOperationReturnString(MBeanServerConnection mbc, String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, InvalidDataException {
+        Object opObject = doOperation(mbc, fullqualifiedoperationname);
+        if (null != opObject) {
+            StringBuilder retval = new StringBuilder();
+            retval.append(fullqualifiedoperationname).append(" = ");
+            return retval.append(opObject).append(LINE_SEPARATOR).toString();
+        } else {
+            return "";
+        }
     }
 
-    protected static Object doOperation(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
-        final String[] split = fullqualifiedoperationname.split("!");
+    protected static Object doOperation(MBeanServerConnection mbc, String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
+        String[] split = fullqualifiedoperationname.split("!");
         if (2 == split.length) {
-            final ObjectName objectName = new ObjectName(split[0]);
-            final Object result = mbc.invoke(objectName, split[1], null, null);
+            ObjectName objectName = new ObjectName(split[0]);
+            Object result = mbc.invoke(objectName, split[1], null, null);
             if (result instanceof Object[]) {
                 return Arrays.toString((Object[]) result);
             }
             return result;
         } else if (2 <= split.length) {
-            final ObjectName objectName = new ObjectName(split[0]);
-            final String[] param = new String[split.length - 2];
+            ObjectName objectName = new ObjectName(split[0]);
+            String[] param = new String[split.length - 2];
             System.arraycopy(split, 2, param, 0, split.length - 2);
-            final String[] signature = new String[split.length - 2];
+            String[] signature = new String[split.length - 2];
             for (int i = 0; i < signature.length; i++) {
                 signature[i] = "java.lang.String";
             }
-            final Object result = mbc.invoke(objectName, split[1], param, signature);
+            Object result = mbc.invoke(objectName, split[1], param, signature);
             if (result instanceof Object[]) {
                 return Arrays.toString((Object[]) result);
             }
@@ -288,23 +299,23 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
     }
 
-    protected Map<String, String[]> setCreds(final AdminParser parser) throws CLIIllegalOptionValueException {
-        final String userValue = (String) parser.getOptionValue(this.jmxuser);
-        final String passValue = (String) parser.getOptionValue(this.jmxpass);
+    protected Map<String, String[]> setCreds(AdminParser parser) throws CLIIllegalOptionValueException {
+        String userValue = (String) parser.getOptionValue(this.jmxuser);
+        String passValue = (String) parser.getOptionValue(this.jmxpass);
 
         if (userValue != null && userValue.trim().length() > 0) {
             if (passValue == null) {
                 throw new CLIIllegalOptionValueException(this.jmxpass, null);
             }
             Map<String, String[]> env = new HashMap<String, String[]>();
-            final String[] creds = new String[] { userValue, passValue };
+            String[] creds = new String[] { userValue, passValue };
             env.put(JMXConnector.CREDENTIALS, creds);
             return env;
         }
         return null;
     }
 
-    protected void readAndApplyOptions(final AdminParser parser) throws CLIIllegalOptionValueException {
+    protected void readAndApplyOptions(AdminParser parser) throws CLIIllegalOptionValueException {
         String value = (String) parser.getOptionValue(this.hostOption);
         if (null != value) {
             hostname = value;
@@ -330,8 +341,8 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
     }
 
-    public void start(final String args[], final String commandlinetoolname) {
-        final AdminParser parser = new AdminParser(commandlinetoolname);
+    public void start(String args[], String commandlinetoolname) {
+        AdminParser parser = new AdminParser(commandlinetoolname);
 
         setOptions(parser);
 
@@ -343,53 +354,53 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
             readAndApplyOptions(parser);
 
             furtherOptionsHandling(parser, env);
-        } catch (final CLIParseException e) {
+        } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final CLIIllegalOptionValueException e) {
+        } catch (CLIIllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final CLIUnknownOptionException e) {
+        } catch (CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
+        } catch (MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final InstanceNotFoundException e) {
+        } catch (InstanceNotFoundException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final AttributeNotFoundException e) {
+        } catch (AttributeNotFoundException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final IntrospectionException e) {
+        } catch (IntrospectionException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final MBeanException e) {
+        } catch (MBeanException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final ReflectionException e) {
+        } catch (ReflectionException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             printServerException(e, parser);
             sysexit(1);
         } catch (JMException e) {

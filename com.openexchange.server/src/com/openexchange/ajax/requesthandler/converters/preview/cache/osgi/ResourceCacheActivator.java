@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.converters.preview.cache.osgi;
 
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.CACHE_TYPE;
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.ServiceReference;
@@ -60,8 +61,6 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.RdbResourceCacheImpl;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBeanImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.AddRefIdForPreviewCacheTable;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.ChangeDataToLongblob;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.ChangeFileNameAndTypeLength;
@@ -72,6 +71,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.P
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewTableUtf8Mb4UpdateTask;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.CreateTableService;
@@ -80,13 +80,10 @@ import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
-
 
 /**
  * {@link ResourceCacheActivator} - Activator for resource cache.
@@ -109,9 +106,9 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        // Trackers
-        track(ManagementService.class, new HousekeepingManagementTracker(context, ResourceCacheMBean.class.getName(), ResourceCacheMBean.DOMAIN, new ResourceCacheMBeanImpl()));
+        registerService(Remote.class, new ResourceCacheRMIServiceImpl());
         track(TimerService.class, new SimpleRegistryListener<TimerService>() {
+
             @Override
             public void added(ServiceReference<TimerService> ref, TimerService service) {
                 addService(TimerService.class, service);
@@ -139,7 +136,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
                 eventHandler = fileStorePreviewCache;
             }
         }
-        ResourceCacheMBeanImpl.CACHE_REF.set(cache);
+        ResourceCacheRMIServiceImpl.CACHE_REF.set(cache);
         // Register stuff
         registerService(ResourceCache.class, cache);
         registerService(Reloadable.class, cache);
@@ -155,14 +152,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
          */
         registerService(CreateTableService.class, new PreviewCacheCreateTableService());
         registerService(CreateTableService.class, new PreviewCacheCreateDataTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-            new PreviewCacheCreateTableTask(),
-            new AddRefIdForPreviewCacheTable(),
-            new PreviewCacheCreateDataTableTask(),
-            new DropDataFromPreviewCacheTable(),
-            new ChangeFileNameAndTypeLength(),
-            new ChangeDataToLongblob(),
-            new PreviewTableUtf8Mb4UpdateTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask(), new AddRefIdForPreviewCacheTable(), new PreviewCacheCreateDataTableTask(), new DropDataFromPreviewCacheTable(), new ChangeFileNameAndTypeLength(), new ChangeDataToLongblob(), new PreviewTableUtf8Mb4UpdateTask()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 

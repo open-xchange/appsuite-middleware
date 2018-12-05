@@ -76,7 +76,7 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      * Initializes a new {@link UpdateTaskRunAllUpdateCLT}.
      */
     private UpdateTaskRunAllUpdateCLT() {
-        super("runallupdate", "Runs the update on all schemas.");
+        super("runallupdate [-e] " + BASIC_MASTER_ADMIN_USAGE, "Runs the update on all schemas.");
     }
 
     /*
@@ -86,7 +86,7 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("e", "error", false, "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.");
+        options.addOption(createSwitch("e", "error", "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.", false));
     }
 
     /*

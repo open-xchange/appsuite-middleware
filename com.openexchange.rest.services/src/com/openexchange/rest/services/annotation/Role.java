@@ -59,7 +59,7 @@ public enum Role {
 
     /**
      * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth.
+     * {@link javax.annotation.security.RolesAllowed} annotation respectively signalling to perform basic-auth.
      * <p>
      * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and
      * <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
@@ -74,6 +74,13 @@ public enum Role {
      * </div>
      */
     INDIVIDUAL_BASIC_AUTHENTICATED("Individual-Basic-Authenticated"),
+
+    /**
+     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
+     * {@link javax.annotation.security.RolesAllowed} annotation respectively signalling to perform basic-auth
+     * with the OX master administrator credentials.
+     */
+    MASTER_ADMIN_AUTHENTICATED("Master-Admin-Basic-Authenticated"),
 
     ;
 

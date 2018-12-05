@@ -126,5 +126,4 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
             lock.unlock();
         }
     }
-
 }

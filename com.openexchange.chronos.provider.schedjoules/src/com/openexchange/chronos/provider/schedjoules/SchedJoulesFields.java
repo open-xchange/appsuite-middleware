@@ -64,11 +64,6 @@ final class SchedJoulesFields {
     static final String ITEM_ID = "itemId";
 
     /**
-     * The user configuration's key for the folder's name
-     */
-    static final String NAME = "name";
-
-    /**
      * The user configuration's key for all available/visible folders
      */
     static final String FOLDERS = "folders";
@@ -91,24 +86,9 @@ final class SchedJoulesFields {
     static final String LOCALE = "locale";
 
     /**
-     * The folder's color
-     */
-    static final String COLOR = "color";
-
-    /**
-     * Flag indicating whether the folder is used for sync
-     */
-    static final String USED_FOR_SYNC = "usedForSync";
-
-    /**
      * The schedule transparency property
      */
     static final String SCHEDULE_TRANSP = "scheduleTransp";
-
-    /**
-     * The folder's description
-     */
-    static final String DESCRIPTION = "description";
 
     /**
      * The unique user key
@@ -123,7 +103,7 @@ final class SchedJoulesFields {
     /**
      * The lastModified of a calendar. The timestamp represents
      * the last time the events were modified and not the attributes
-     * of the calendar folder, e.g. color or name.
+     * of the calendar folder, e.g. colour or name.
      */
     static final String LAST_MODIFIED = "lastModified";
 }

@@ -51,6 +51,7 @@ package com.openexchange.subscribe.yahoo.osgi;
 
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooService;
@@ -65,13 +66,14 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, YahooService.class };
+        return new Class[] { OAuthService.class, ContextService.class, YahooService.class, FolderService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        rememberTracker(new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this)));
+        ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData> metaDataTracker = new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
+        rememberTracker(metaDataTracker);
         openTrackers();
     }
 }

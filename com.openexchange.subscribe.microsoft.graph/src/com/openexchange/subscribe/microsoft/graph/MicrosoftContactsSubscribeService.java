@@ -80,7 +80,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
 public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftContactsSubscribeService.class);
-    private static final String SOURCE_ID = KnownApi.MICROSOFT_GRAPH.getServiceId() + ".contact";
+    public static final String SOURCE_ID = KnownApi.MICROSOFT_GRAPH.getServiceId() + ".contact";
     private static final int CHUNK_SIZE = 25;
 
     /**

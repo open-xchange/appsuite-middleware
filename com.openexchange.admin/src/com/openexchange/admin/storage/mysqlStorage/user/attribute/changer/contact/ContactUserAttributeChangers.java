@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -247,7 +247,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
             statement.setInt(collectedMethods.size() + 1, contextId);
             statement.setInt(collectedMethods.size() + 2, userId);
             statement.executeUpdate();
-        } catch (SQLException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+        } catch (SQLException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
             throw new StorageException(e);
         }
 
@@ -301,7 +301,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    private boolean isAttributeSet(Method method, User userData) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private boolean isAttributeSet(Method method, User userData) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         String methodName = "is" + method.getName().substring(3) + "set";
         Method retVal = User.class.getMethod(methodName);
         return ((Boolean) retVal.invoke(userData, (Object[]) null)).booleanValue();
@@ -335,12 +335,11 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
          * @param query The SQL query builder
          * @param collectedMethods The connected methods so far
          * @throws NoSuchMethodException
-         * @throws SecurityException
          * @throws IllegalAccessException
          * @throws IllegalArgumentException
          * @throws InvocationTargetException
          */
-        void append(User userData, MethodMetadata method, StringBuilder query, List<MethodMetadata> collectedMethods) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+        void append(User userData, MethodMetadata method, StringBuilder query, List<MethodMetadata> collectedMethods) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
     }
 
     /**
@@ -361,8 +360,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
          * @throws InvocationTargetException
          * @throws SQLException
          * @throws NoSuchMethodException
-         * @throws SecurityException
          */
-        void set(User userData, Method method, PreparedStatement preparedStatement, int parameterIndex) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, SQLException, NoSuchMethodException, SecurityException;
+        void set(User userData, Method method, PreparedStatement preparedStatement, int parameterIndex) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, SQLException, NoSuchMethodException;
     }
 }

@@ -63,6 +63,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.microsoft.graph.MicrosoftContactsSubscribeService;
 import com.openexchange.subscribe.microsoft.graph.groupware.MicrosoftSubscriptionsOAuthAccountDeleteListener;
+import com.openexchange.subscribe.microsoft.graph.oauth.MicrosoftContactsOAuthAccountAssociationProvider;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -111,7 +112,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
                 deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new MicrosoftSubscriptionsOAuthAccountDeleteListener(msContactsSubService, services), null);
             }
             if (associationProviderRegistration == null) {
-                //associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new MicrosoftContactsOAuthAccountAssociationProvider(services), null);
+                associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new MicrosoftContactsOAuthAccountAssociationProvider(services), null);
             }
         } catch (Throwable t) {
             logger.error("", t);

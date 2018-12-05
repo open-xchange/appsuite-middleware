@@ -99,6 +99,11 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public class XingSubscribeService extends AbstractOAuthSubscribeService {
 
+    /**
+     * The subscription source id
+     */
+    public static final String SOURCE_ID = "com.openexchange.subscribe.xing";
+
     /** The logger constant */
     static final Logger LOG = LoggerFactory.getLogger(XingSubscribeService.class);
 

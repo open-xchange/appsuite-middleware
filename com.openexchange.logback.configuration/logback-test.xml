@@ -42,8 +42,8 @@
     </appender>
 
     <!-- Logstash appender -->
-   	
-<!-- 	<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="false" />
+   	<!--
+	<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="false" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.socketTimeout" value="60" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
     <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
@@ -53,19 +53,19 @@
         <eventDelayLimit>30000</eventDelayLimit>
         <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
         <queueSize>2048</queueSize>
-    </appender> -->
-	
+    </appender>
+	-->
 
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
         <discardingThreshold>0</discardingThreshold>
         <includeCallerData>true</includeCallerData>
         <appender-ref ref="CONSOLE" />
+        <!-- <appender-ref ref="LOGSTASH" /> -->
     </appender>
 
     <root level="INFO">
         <appender-ref ref="ASYNC" />
-        <!-- <appender-ref ref="LOGSTASH" /> -->
     </root>
 
     <!--
@@ -107,4 +107,7 @@
 
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
+    
+    <logger name="com.openexchange.file.storage.dropbox" level="DEBUG" />
+
 </configuration>

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -86,8 +86,8 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     }
 
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
-    private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
-    private static final String FOOTER = "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
+    private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -e <sessionid>] [-l <logger_name>=<logger_level> ...]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] " + BASIC_MASTER_ADMIN_USAGE;
+    private static final String FOOTER = "The flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
 
     /**
      * Initialises a new {@link LogbackConfigurationCLT}.
@@ -103,27 +103,28 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      */
     @Override
     protected void addOptions(Options options) {
-        Option add = createOption("a", "add", false, "Flag to add the filter", true);
-        Option del = createOption("d", "delete", false, "Flag to delete the filter", true);
+        Option add = createSwitch("a", "add", "Flag to add the filter", true);
+        Option del = createSwitch("d", "delete", "Flag to delete the filter", true);
 
         OptionGroup og = new OptionGroup();
         og.addOption(add).addOption(del);
         options.addOptionGroup(og);
 
-        options.addOption(createOption("u", "user", true, "The user id for which to enable logging", false));
-        options.addOption(createOption("c", "context", true, "The context id for which to enable logging", false));
-        options.addOption(createOption("oec", "override-exception-categories", true, "Override the exception categories to be suppressed", false));
-        options.addOption(createOption("s", "session", true, "The session id for which to enable logging", false));
+        options.addOption(createArgumentOption("u", "user", "userId", "The user id for which to enable logging", false));
+        options.addOption(createArgumentOption("c", "context", "contextId", "The context id for which to enable logging", false));
+        options.addOption(createArgumentOption("oec", "override-exception-categories", "exceptionCategories", "Override the exception categories to be suppressed", false));
+        options.addOption(createArgumentOption("e", "session", "sessionId", "The session id for which to enable logging", false));
 
+        // The following option 'level' is a "polymorphic" option that can be used either as a switch or an argument option depending on other present options and switches.
         Option o = createOption("l", "level", false, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
         options.addOption(o);
 
-        options.addOption(createOption("ll", "list-loggers", false, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
-        options.addOption(createOption("lf", "list-filters", false, "Get a list with all logging filters of the system", false));
-        options.addOption(createOption("cf", "clear-filters", false, "Clear all logging filters", false));
-        options.addOption(createOption("le", "list-exception-category", false, "Get a list with all supressed exception categories", false));
-        options.addOption(createOption("la", "list-appenders", false, "Lists all root appenders and any available statistics", false));
+        options.addOption(createSwitch("ll", "list-loggers", "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
+        options.addOption(createSwitch("lf", "list-filters", "Get a list with all logging filters of the system", false));
+        options.addOption(createSwitch("cf", "clear-filters", "Clear all logging filters", false));
+        options.addOption(createSwitch("le", "list-exception-category", "Get a list with all supressed exception categories", false));
+        options.addOption(createSwitch("la", "list-appenders", "Lists all root appenders and any available statistics", false));
 
     }
 
@@ -135,35 +136,8 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         LogbackConfigurationRMIService logbackConfigService = getRmiStub(optRmiHostName, LogbackConfigurationRMIService.RMI_NAME);
-        try {
-            if (cmd.hasOption('s')) {
-                CommandLineExecutor.SESSION.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
-                CommandLineExecutor.CONTEXT.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption('u')) {
-                CommandLineExecutor.USER.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption('l')) {
-                CommandLineExecutor.MODIFY.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("le")) {
-                CommandLineExecutor.LIST_CATEGORIES.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("lf")) {
-                CommandLineExecutor.LIST_FILTERS.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("ll")) {
-                CommandLineExecutor.LIST_LOGGERS.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("oec")) {
-                CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("cf")) {
-                CommandLineExecutor.CLEAR_FILTERS.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("la")) {
-                CommandLineExecutor.ROOT_APPENDER_STATS.executeWith(cmd, logbackConfigService);
-            } else {
-                printHelp(options);
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            printHelp(options);
-        }
-
+        CommandLineExecutor executor = getCommandLineExecutor(options, cmd);
+        executor.executeWith(cmd, logbackConfigService);
         return null;
     }
 
@@ -179,8 +153,8 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
             printHelp();
         }
 
-        if (cmd.hasOption('s') && (cmd.hasOption('u') || cmd.hasOption('c'))) {
-            System.err.println("The '-s' and -u,-c options are mutually exclusive.");
+        if (cmd.hasOption('e') && (cmd.hasOption('u') || cmd.hasOption('c'))) {
+            System.err.println("The '-e' and -u,-c options are mutually exclusive.");
             printHelp();
         }
     }
@@ -317,6 +291,48 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         }
     }
 
+    /**
+     * Retrieves the appropriate {@link CommandLineExecutor} according to the set {@link Options} in the {@link CommandLine} tool.
+     * If no valid {@link CommandLineExecutor} is found then the usage of this tool is printed and the JVM is terminated.
+     * 
+     * @param options The available {@link Options} of the command line tool
+     * @param cmd The {@link CommandLine}
+     * @return The {@link CommandLineExecutor}
+     */
+    private CommandLineExecutor getCommandLineExecutor(Options options, CommandLine cmd) {
+        try {
+            if (cmd.hasOption('e')) {
+                return CommandLineExecutor.SESSION;
+            } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
+                return CommandLineExecutor.CONTEXT;
+            } else if (cmd.hasOption('u')) {
+                return CommandLineExecutor.USER;
+            } else if (cmd.hasOption('l')) {
+                return CommandLineExecutor.MODIFY;
+            } else if (cmd.hasOption("le")) {
+                return CommandLineExecutor.LIST_CATEGORIES;
+            } else if (cmd.hasOption("lf")) {
+                return CommandLineExecutor.LIST_FILTERS;
+            } else if (cmd.hasOption("ll")) {
+                return CommandLineExecutor.LIST_LOGGERS;
+            } else if (cmd.hasOption("oec")) {
+                return CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES;
+            } else if (cmd.hasOption("cf")) {
+                return CommandLineExecutor.CLEAR_FILTERS;
+            } else if (cmd.hasOption("la")) {
+                return CommandLineExecutor.ROOT_APPENDER_STATS;
+            } else {
+                printHelp(options);
+                System.exit(0);
+            }
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            printHelp(options);
+            System.exit(1);
+        }
+        return null;
+    }
+
     //////////////////////////////// NESTED /////////////////////////////////
 
     /**
@@ -360,7 +376,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
             @Override
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
-                String sessionId = commandLine.getOptionValue('s');
+                String sessionId = commandLine.getOptionValue('e');
                 LogbackRemoteResponse response = null;
                 if (commandLine.hasOption('a')) {
                     response = logbackConfigService.filterSession(sessionId, getLoggerMap(commandLine.getOptionValues('l')));
@@ -452,6 +468,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
          * @param commandLine The {@link CommandLine} containing the arguments
          * @param logbackConfigService The {@link LogbackConfigurationRMIService}
          * @throws RemoteException if an error is occurred
+         * @throws IllegalArgumentException if an invalid argument is specified
          */
         abstract void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException;
     }

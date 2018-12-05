@@ -49,22 +49,25 @@
 
 package com.openexchange.file.storage.clt;
 
+import java.rmi.RemoteException;
 import java.util.List;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.groupware.infostore.mbean.FileChecksumsMBean;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService;
 
 /**
  * {@link FileChecksumsCLT}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class FileChecksumsCLT extends AbstractMBeanCLI<Void> {
+public class FileChecksumsCLT extends AbstractRmiCLI<Void> {
+
+    private static final String SYNTAX = "calculatefilechecksums [-d <databaseId> | -c <contextId>] [-C] " + BASIC_MASTER_ADMIN_USAGE;
+    private static final String FOOTER = "Command-line tool to calculate missing file checksums";
 
     public static void main(String[] args) {
         new FileChecksumsCLT().execute(args);
@@ -78,60 +81,10 @@ public class FileChecksumsCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        if (cmd.hasOption('c')) {
-            authenticator.doAuthentication(login, password, parseInt('c', 0, cmd, options));
-        } else {
-            authenticator.doAuthentication(login, password);
-        }
-    }
-
-    @Override
     protected void addOptions(Options options) {
-        options.addOption("c", "context", true, "The identifier of the context to determine/calculate missing checksums in");
-        options.addOption("d", "database", true, "The database pool identifier to determine/calculate missing checksums in");
-        options.addOption("C", "calculate", false, "Calculate and store missing checksums (if not specified, files with missing checksums are printed out only)");
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        FileChecksumsMBean fileChecksumsMBean = getMBean(mbsc, FileChecksumsMBean.class, FileChecksumsMBean.DOMAIN);
-        int contextId = parseInt('c', 0, cmd, option);
-        int databaseId = parseInt('d', 0, cmd, option);
-        boolean calculate = cmd.hasOption('C');
-        List<String> result;
-        if (calculate) {
-            if (0 < contextId) {
-                result = fileChecksumsMBean.calculateMissingChecksumsInContext(contextId);
-            } else if (0 < databaseId) {
-                result = fileChecksumsMBean.calculateMissingChecksumsInDatabase(databaseId);
-            } else {
-                checkOptions(cmd, option);
-                return null;
-            }
-        } else {
-            if (0 < contextId) {
-                result = fileChecksumsMBean.listFilesWithoutChecksumInContext(contextId);
-            } else if (0 < databaseId) {
-                result = fileChecksumsMBean.listFilesWithoutChecksumInDatabase(databaseId);
-            } else {
-                checkOptions(cmd, option);
-                return null;
-            }
-        }
-        if (result.isEmpty()) {
-            System.out.println("No files with missing checksums found.");
-        } else {
-            if (calculate) {
-                System.out.println("Missing file checksums calculated for " +  result.size() + " files:" + System.lineSeparator());
-            } else {
-                System.out.println("Missing file checksums detected for " +  result.size() + " files:" + System.lineSeparator());
-            }
-            for (String item : result) {
-                System.out.println("  " + item);
-            }
-        }
-        return null;
+        options.addOption(createArgumentOption("c", "context", "contextId", "The identifier of the context to determine/calculate missing checksums in", false));
+        options.addOption(createArgumentOption("d", "database", "databaseId", "The database pool identifier to determine/calculate missing checksums in", false));
+        options.addOption(createSwitch("C", "calculate", "Calculate and store missing checksums (if not specified, files with missing checksums are printed out only)", false));
     }
 
     @Override
@@ -158,12 +111,71 @@ public class FileChecksumsCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Command-line tool to calculate missing file checksums";
+        return FOOTER;
     }
 
     @Override
     protected String getName() {
-        return "calculatefilechecksums";
+        return SYNTAX;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
+     */
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        if (cmd.hasOption('c')) {
+            authenticator.doAuthentication(login, password, parseInt('c', 0, cmd, options));
+        } else {
+            authenticator.doAuthentication(login, password);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
+     */
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        FileChecksumsRMIService rmiService = getRmiStub(optRmiHostName, FileChecksumsRMIService.RMI_NAME);
+        int contextId = parseInt('c', 0, cmd, options);
+        int databaseId = parseInt('d', 0, cmd, options);
+        boolean calculate = cmd.hasOption('C');
+        List<String> result;
+        if (calculate) {
+            if (0 < contextId) {
+                result = rmiService.calculateMissingChecksumsInContext(contextId);
+            } else if (0 < databaseId) {
+                result = rmiService.calculateMissingChecksumsInDatabase(databaseId);
+            } else {
+                checkOptions(cmd, options);
+                return null;
+            }
+        } else {
+            if (0 < contextId) {
+                result = rmiService.listFilesWithoutChecksumInContext(contextId);
+            } else if (0 < databaseId) {
+                result = rmiService.listFilesWithoutChecksumInDatabase(databaseId);
+            } else {
+                checkOptions(cmd, options);
+                return null;
+            }
+        }
+        if (result.isEmpty()) {
+            System.out.println("No files with missing checksums found.");
+        } else {
+            if (calculate) {
+                System.out.println("Missing file checksums calculated for " + result.size() + " files:" + System.lineSeparator());
+            } else {
+                System.out.println("Missing file checksums detected for " + result.size() + " files:" + System.lineSeparator());
+            }
+            for (String item : result) {
+                System.out.println("  " + item);
+            }
+        }
+        return null;
+    }
 }
