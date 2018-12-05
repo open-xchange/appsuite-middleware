@@ -149,7 +149,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Converts all tables in to the specified schema
+     * Converts all tables in the specified schema
      *
      * @param con The {@link Connection} to use
      * @param schema The name of the schema
