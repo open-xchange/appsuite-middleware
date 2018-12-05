@@ -79,22 +79,25 @@ public final class YahooAccessEventHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            try {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(KnownApi.YAHOO.getServiceId());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("Yahoo session removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
+        if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+            return;
+        }
+        try {
+            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+            if (null == contextId) {
+                return;
             }
+            Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+            if (null == userId) {
+                return;
+            }
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry registry = registryService.get(KnownApi.YAHOO.getServiceId());
+            if (registry.removeIfLast(contextId, userId)) {
+                LOG.debug("Yahoo session removed for user {} in context {}", userId, contextId);
+            }
+        } catch (final Exception e) {
+            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }
 }
