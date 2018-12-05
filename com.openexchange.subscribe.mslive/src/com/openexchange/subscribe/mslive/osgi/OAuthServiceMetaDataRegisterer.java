@@ -56,12 +56,15 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.mslive.MSLiveContactsSubscribeService;
 import com.openexchange.subscribe.mslive.groupware.MSLiveSubscriptionsOAuthAccountDeleteListener;
+import com.openexchange.subscribe.mslive.oauth.MSLiveContactsOAuthAccountAssociationProvider;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -77,6 +80,8 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     private final BundleContext context;
 
     private volatile ServiceRegistration<SubscribeService> contactsRegistration;
+    private volatile ServiceRegistration<OAuthAccountDeleteListener> deleteListenerRegistration;
+    private volatile ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
@@ -88,27 +93,31 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         super();
         this.services = services;
         this.context = context;
-        oauthIdentifier = "com.openexchange.oauth.msliveconnect";
+        oauthIdentifier = KnownApi.MS_LIVE_CONNECT.getFullName();
     }
 
     @Override
     public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> ref) {
-        final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
-        final OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
-        if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
-            logger.info("Registering MS Live subscription services.");
-            final MSLiveContactsSubscribeService msliveSubService = new MSLiveContactsSubscribeService(oAuthServiceMetaData, services);
-            contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
+        OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
+        if (!oauthIdentifier.equals(oAuthServiceMetaData.getId()) || contactsRegistration != null) {
+            return oAuthServiceMetaData;
+        }
 
-            ContextService contextService = services.getService(ContextService.class);
+        Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
+        logger.info("Registering MS Live subscription services.");
+        MSLiveContactsSubscribeService msliveSubService = new MSLiveContactsSubscribeService(oAuthServiceMetaData, services);
+        contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
 
-            try {
-                context.registerService(OAuthAccountDeleteListener.class, new MSLiveSubscriptionsOAuthAccountDeleteListener(
-                    msliveSubService,
-                    contextService), null);
-            } catch (final Throwable t) {
-                logger.error("", t);
+        try {
+            if (deleteListenerRegistration == null) {
+                ContextService contextService = services.getService(ContextService.class);
+                deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new MSLiveSubscriptionsOAuthAccountDeleteListener(msliveSubService, contextService), null);
             }
+            if (associationProviderRegistration == null) {
+                associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new MSLiveContactsOAuthAccountAssociationProvider(services), null);
+            }
+        } catch (Throwable t) {
+            logger.error("", t);
         }
         return oAuthServiceMetaData;
     }
@@ -120,17 +129,32 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
     @Override
     public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
-        final Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         if (service.getId().equals(oauthIdentifier)) {
+            Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
             logger.info("Unregistering MS Live subscription services.");
 
-            ServiceRegistration<SubscribeService> registration = this.contactsRegistration;
-            if (null != registration) {
-                registration.unregister();
-                this.contactsRegistration = null;
+            {
+                ServiceRegistration<SubscribeService> registration = this.contactsRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.contactsRegistration = null;
+                }
+            }
+            {
+                ServiceRegistration<OAuthAccountDeleteListener> registration = this.deleteListenerRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.deleteListenerRegistration = null;
+                }
+            }
+            {
+                ServiceRegistration<OAuthAccountAssociationProvider> registration = this.associationProviderRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.associationProviderRegistration = null;
+                }
             }
         }
         context.ungetService(ref);
     }
-
 }

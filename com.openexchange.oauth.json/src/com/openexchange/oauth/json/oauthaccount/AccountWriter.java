@@ -49,12 +49,17 @@
 
 package com.openexchange.oauth.json.oauthaccount;
 
+import java.util.Collection;
+import java.util.Collections;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.json.AbstractOAuthWriter;
 import com.openexchange.session.Session;
 
@@ -76,18 +81,72 @@ public class AccountWriter extends AbstractOAuthWriter {
      * Writes specified account as a JSON object.
      *
      * @param account The account
+     * @param session The session
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
      * @throws OXException
      */
     public static JSONObject write(final OAuthAccount account, Session session) throws JSONException, OXException {
-        final JSONObject jAccount = new JSONObject(5);
+        return write(account, Collections.emptyList(), session);
+    }
+
+    /**
+     * Writes specified account as a JSON object.
+     *
+     * @param account The account
+     * @param associations The OAuth account associations
+     * @param session The session
+     * @return The JSON object
+     * @throws JSONException If writing to JSON fails
+     * @throws OXException
+     */
+    public static JSONObject write(final OAuthAccount account, Collection<OAuthAccountAssociation> associations, Session session) throws JSONException, OXException {
+        final JSONObject jAccount = new JSONObject(8);
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
         jAccount.put(AccountField.ENABLED_SCOPES.getName(), write(account.getEnabledScopes()));
         jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes(session.getUserId(), session.getContextId())));
+        writeAssociationsFor(jAccount, associations);
         return jAccount;
+    }
+
+    /**
+     * Writes the specified associations to the specified {@link JSONObject}
+     *
+     * @param jAccount The oauth account as json object
+     * @param associations The {@link OAuthAccountAssociation}s to write
+     * @throws JSONException if a JSON error occurs
+     */
+    private static void writeAssociationsFor(JSONObject jAccount, Collection<OAuthAccountAssociation> associations) throws JSONException {
+        if (associations == null || associations.isEmpty()) {
+            jAccount.put(AccountField.ASSOCIATIONS.getName(), JSONArray.EMPTY_ARRAY);
+            return;
+        }
+        JSONArray jAssociations = new JSONArray(associations.size());
+        for (OAuthAccountAssociation association : associations) {
+            jAssociations.put(writeAssociation(association));
+        }
+        jAccount.put(AccountField.ASSOCIATIONS.getName(), jAssociations);
+    }
+
+    /**
+     * Writes the specified {@link OAuthAccountAssociation} as a {@link JSONObject}
+     *
+     * @param association The {@link OAuthAccountAssociation}
+     * @return The {@link JSONObject} with the association
+     * @throws JSONException if a JSON error occurs
+     */
+    private static JSONObject writeAssociation(OAuthAccountAssociation association) throws JSONException {
+        JSONObject jAssociation = new JSONObject(8);
+        jAssociation.put(AssociationField.ID.getName(), association.getId());
+        jAssociation.put(AssociationField.NAME.getName(), association.getDisplayName());
+        jAssociation.put(AssociationField.SCOPES.getName(), association.getScopes());
+        jAssociation.put(AssociationField.MODULE.getName(), association.getModule());
+        if (Strings.isNotEmpty(association.getFolder())) {
+            jAssociation.put(AssociationField.FOLDER.getName(), association.getFolder());
+        }
+        return jAssociation;
     }
 
     /**

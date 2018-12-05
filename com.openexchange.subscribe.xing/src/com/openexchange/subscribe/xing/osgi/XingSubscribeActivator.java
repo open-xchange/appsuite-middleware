@@ -52,12 +52,14 @@ package com.openexchange.subscribe.xing.osgi;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.SubscribeService;
@@ -65,6 +67,7 @@ import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.xing.Services;
 import com.openexchange.subscribe.xing.XingSubscribeService;
 import com.openexchange.subscribe.xing.groupware.XingSubscriptionsOAuthAccountDeleteListener;
+import com.openexchange.subscribe.xing.oauth.XingContactsOAuthAccountAssociationProvider;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 
@@ -76,6 +79,7 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
 public final class XingSubscribeActivator extends HousekeepingActivator {
 
     private ServiceRegistration<SubscribeService> serviceRegistration;
+    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration;
     private ServiceRegistration<OAuthAccountDeleteListener> deleteListenerRegistration;
 
     /**
@@ -87,7 +91,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class, ThreadPoolService.class };
+        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class, ThreadPoolService.class, FolderService.class };
     }
 
     @Override
@@ -100,7 +104,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         /*
          * Register update task
          */
-        final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
+        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
         registerService(UpdateTaskProviderService.class.getName(), providerService);
     }
 
@@ -116,14 +120,19 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      */
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
-            final XingSubscribeService xingSubscribeService = new XingSubscribeService(getService(OAuthServiceMetaData.class), this);
+            XingSubscribeService xingSubscribeService = new XingSubscribeService(getService(OAuthServiceMetaData.class), this);
             serviceRegistration = context.registerService(SubscribeService.class, xingSubscribeService, null);
             org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
 
-            // Register the delete listener
-            final ContextService contextService = Services.getService(ContextService.class);
-            final XingSubscriptionsOAuthAccountDeleteListener deleteListener = new XingSubscriptionsOAuthAccountDeleteListener(xingSubscribeService, contextService);
-            deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, deleteListener, null);
+            if (deleteListenerRegistration == null) {
+                // Register the delete listener
+                ContextService contextService = Services.getService(ContextService.class);
+                XingSubscriptionsOAuthAccountDeleteListener deleteListener = new XingSubscriptionsOAuthAccountDeleteListener(xingSubscribeService, contextService);
+                deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, deleteListener, null);
+            }
+        }
+        if (associationProviderRegistration == null) {
+            associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new XingContactsOAuthAccountAssociationProvider(this), null);
         }
     }
 
@@ -131,15 +140,24 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      * Un-registers the subscribe service.
      */
     public synchronized void unregisterSubscribeService() {
-        final ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
+        ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
         }
-        final ServiceRegistration<OAuthAccountDeleteListener> deleteRegistration = this.deleteListenerRegistration;
-        if (null != deleteRegistration) {
-            deleteRegistration.unregister();
-            this.deleteListenerRegistration = null;
+        {
+            ServiceRegistration<OAuthAccountDeleteListener> deleteRegistration = this.deleteListenerRegistration;
+            if (null != deleteRegistration) {
+                deleteRegistration.unregister();
+                this.deleteListenerRegistration = null;
+            }
+        }
+        {
+            ServiceRegistration<OAuthAccountAssociationProvider> registration = this.associationProviderRegistration;
+            if (null != registration) {
+                registration.unregister();
+                this.associationProviderRegistration = null;
+            }
         }
         org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
     }
@@ -152,5 +170,4 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
     public void setOAuthServiceMetaData(final OAuthServiceMetaData oAuthServiceMetaData) {
         addService(OAuthServiceMetaData.class, oAuthServiceMetaData);
     }
-
 }

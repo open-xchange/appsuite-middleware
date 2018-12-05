@@ -217,16 +217,6 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
     }
 
     /**
-     * Converts the specified accountId to its String representation
-     * 
-     * @param accountId The account identifier
-     * @return The string representation of the account identifier
-     */
-    private String toString(Object accountId) {
-        return accountId instanceof Integer ? (Integer.toString((Integer) accountId)) : accountId.toString();
-    }
-
-    /**
      * Get the {@link KnownApi}
      * 
      * @return the {@link KnownApi}

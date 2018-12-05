@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,68 @@
  *
  */
 
-package com.openexchange.oauth.association;
+package com.openexchange.subscribe.yahoo.oauth;
+
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
+import com.openexchange.oauth.association.Module;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.yahoo.YahooOAuthScope;
+import com.openexchange.oauth.yahoo.access.YahooOAuthAccess;
+import com.openexchange.session.Session;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociation;
 
 /**
- * {@link Type} - The type for an OAuth association.
+ * {@link YahooContactsOAuthAccountAssociation}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public enum Type {
+public class YahooContactsOAuthAccountAssociation extends AbstractSubscribeOAuthAccountAssociation {
 
     /**
-     * The association is of type file storage.
+     * Initialises a new {@link YahooContactsOAuthAccountAssociation}.
+     * 
+     * @param accountId The subscription's identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param displayName The association's display name
+     * @param subscription The subscription
      */
-    FILE_STORAGE("filestorage"),
-    /**
-     * The association is of type mail.
-     */
-    MAIL("mail"),
-    ;
-
-    private final String id;
-
-    private Type(String id) {
-        this.id = id;
+    public YahooContactsOAuthAccountAssociation(int accountId, int userId, int contextId, String displayName, Subscription subscription) {
+        super(accountId, userId, contextId, displayName, subscription);
     }
 
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
      */
-    public String getId() {
-        return id;
+    @Override
+    public String getModule() {
+        return Module.CONTACTS.getModuleName();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
+     */
+    @Override
+    public List<OAuthScope> getScopes() {
+        return Collections.singletonList(YahooOAuthScope.contacts_ro);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
+     */
+    @Override
+    protected AbstractOAuthAccess newAccess(Session session) throws OXException {
+        return new YahooOAuthAccess(session, getOAuthAccountId());
+    }
 }

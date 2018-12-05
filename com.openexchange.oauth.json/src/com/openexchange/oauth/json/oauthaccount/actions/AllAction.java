@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.association.OAuthAccountAssociationService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -77,32 +78,20 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         try {
-            /*
-             * Parse parameters
-             */
-            final String serviceId = request.getParameter("serviceId");
-            /*
-             * Request accounts
-             */
-            final OAuthService oAuthService = getOAuthService();
-            final List<OAuthAccount> accounts;
-            if (null == serviceId) {
-                accounts = oAuthService.getAccounts(session);
-            } else {
-                accounts = oAuthService.getAccounts(session, serviceId);
+            // Parse parameters
+            String serviceId = request.getParameter("serviceId");
+            // Request accounts
+            OAuthService oAuthService = getOAuthService();
+            List<OAuthAccount> accounts = (null == serviceId) ? oAuthService.getAccounts(session) : oAuthService.getAccounts(session, serviceId);
+            OAuthAccountAssociationService associationService = getOAuthAccountAssociationService();
+            // Write accounts as a JSON array
+            JSONArray jsonArray = new JSONArray();
+            for (OAuthAccount oAuthAccount : accounts) {
+                jsonArray.put(AccountWriter.write(oAuthAccount, associationService.getAssociationsFor(oAuthAccount.getId(), session), session));
             }
-            /*
-             * Write accounts as a JSON array
-             */
-            final JSONArray jsonArray = new JSONArray();
-            for (final OAuthAccount oAuthAccount : accounts) {
-                jsonArray.put(AccountWriter.write(oAuthAccount, session));
-            }
-            /*
-             * Return appropriate result
-             */
+            // Return appropriate result
             return new AJAXRequestResult(jsonArray);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
