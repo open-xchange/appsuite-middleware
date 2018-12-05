@@ -514,7 +514,7 @@ The SchedJoules calendar provider provides the ability to subscribe public calen
 
 ### Google Calendar
 
-The google calendar provider provides the possibility to subscribe to the primary calendar of a google account. The only requirement is a working google oauth account with the 'calendar_ro' scope.
+The google calendar provider provides the possibility to subscribe to the primary calendar of a google account. The only requirement is a working google oauth account with the 'calendar_ro' scope. Please note that the google provider is a read only calendar provider and therefore doesn't work when the 'calendar' scope is used instead of 'calendar_ro'.
 To reduce the amount of data transported from google to the the middleware the google provider uses the incremental update feature of the google calendar. After the initial synchronization the google provider only requests the changes from the google server. This allows the use of a shorter refresh interval and therefore leads to more up-to-date data.
 
 Please also note that old google subscription are migrated and removed afterwards. So they are lost in case of a downgrade.
