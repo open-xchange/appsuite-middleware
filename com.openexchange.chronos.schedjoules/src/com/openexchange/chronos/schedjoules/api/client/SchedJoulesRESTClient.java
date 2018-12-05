@@ -59,6 +59,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -504,8 +505,8 @@ public class SchedJoulesRESTClient implements Closeable {
      * @param schedjoulesResponse The {@link SchedJoulesResponse}
      */
     private void parseHeaders(HttpResponse httpResponse, SchedJoulesResponse schedjoulesResponse) {
-        for (String key : headerParsers.keySet()) {
-            headerParsers.get(key).accept(schedjoulesResponse, httpResponse);
+        for (Entry<String, BiConsumer<SchedJoulesResponse, HttpResponse>> entry : headerParsers.entrySet()) {
+            entry.getValue().accept(schedjoulesResponse, httpResponse);
         }
     }
 
