@@ -30,4 +30,4 @@ Import-Package: com.google.common.annotations,
 Bundle-Activator: com.openexchange.push.osgi.PushActivator
 Export-Package: com.openexchange.push,
  com.openexchange.push.credstorage,
- com.openexchange.push.mbean
+ com.openexchange.push.rmi

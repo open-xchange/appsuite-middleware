@@ -60,7 +60,9 @@ import org.apache.commons.cli.PosixParser;
 
 /**
  * {@link AbstractCLI} - The basic super class for command-line tools.
- *
+ * 
+ * @param <R> - The return type
+ * @param <C> - The execution context type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCLI<R, C> {
@@ -81,23 +83,23 @@ public abstract class AbstractCLI<R, C> {
      * @param args The arguments
      * @return The return value
      */
-    public R execute(final String[] args) {
+    public R execute(String[] args) {
         Options options = newOptions();
         boolean error = true;
         try {
             // Option for help
-            options.addOption("h", "help", false, "Prints a help text");
+            options.addOption(createSwitch("h", "help", "Prints this help text", false));
 
             // Add other options
             addOptions(options);
 
             // Initialize command-line parser & parse arguments
-            final CommandLineParser parser = new PosixParser();
-            final CommandLine cmd = parser.parse(options, args);
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check if help output is requested
             if (cmd.hasOption('h')) {
-                printHelp(options);
+                printHelp(options, 120, true);
                 System.exit(0);
                 return null;
             }
@@ -115,18 +117,18 @@ public abstract class AbstractCLI<R, C> {
 
             error = false;
             return retval;
-        } catch (final ExecutionFault e) {
-            final Throwable t = e.getCause();
-            final String message = t.getMessage();
+        } catch (ExecutionFault e) {
+            Throwable t = e.getCause();
+            String message = t.getMessage();
             System.err.println(null == message ? "An error occurred." : message);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             String message = t.getMessage();
             String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
@@ -143,11 +145,11 @@ public abstract class AbstractCLI<R, C> {
      *
      * @param option The options
      * @param cmd The command line providing parameters/options
-     * @param context The execution context; always <code>null</code>
+     * @param executionContext The execution context
      * @return The return value
      * @throws Exception If invocation fails
      */
-    protected abstract R invoke(Options option, CommandLine cmd, C context) throws Exception;
+    protected abstract R invoke(Options option, CommandLine cmd, C executionContext) throws Exception;
 
     /**
      * Creates an initially empty {@link ReservedOptions} instance.
@@ -186,7 +188,6 @@ public abstract class AbstractCLI<R, C> {
      * Checks other mandatory options.
      *
      * @param cmd The command line
-     * @param options The associated options
      */
     protected abstract void checkOptions(CommandLine cmd);
 
@@ -205,7 +206,7 @@ public abstract class AbstractCLI<R, C> {
      *
      * @param options The help output
      */
-    protected void printHelp(final Options options) {
+    protected void printHelp(Options options) {
         printHelp(options, HelpFormatter.DEFAULT_WIDTH);
     }
 
@@ -216,8 +217,19 @@ public abstract class AbstractCLI<R, C> {
      * @param width The width of the help screen
      */
     protected void printHelp(Options options, int width) {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(width, getName(), getHeader(), options, getFooter(), false);
+        printHelp(options, width, false);
+    }
+
+    /**
+     * Prints the <code>--help</code> text.
+     *
+     * @param options The help output
+     * @param width The width of the help screen
+     * @param usage Whether to automatically generate the usage line
+     */
+    protected void printHelp(Options options, int width, boolean usage) {
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp(width, getName(), getHeader(), options, formatFooter(), usage);
     }
 
     /**
@@ -237,11 +249,9 @@ public abstract class AbstractCLI<R, C> {
     /**
      * Returns the execution context {@link C}
      * 
-     * @return the execution context {@link C}
+     * @return the execution context {@link C} C
      */
-    protected C getContext() {
-        return null;
-    }
+    protected abstract C getContext();
 
     /**
      * Returns the command line tool's header
@@ -255,6 +265,15 @@ public abstract class AbstractCLI<R, C> {
     // -----------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Prepends two new lines for the footer
+     * 
+     * @return The footer with two new lines prepended
+     */
+    private String formatFooter() {
+        return "\n\n" + getFooter();
+    }
+
+    /**
      * Parses & validates the port value for given option.
      * <p>
      * Exits gracefully if port value is invalid.
@@ -265,18 +284,20 @@ public abstract class AbstractCLI<R, C> {
      * @param options The options
      * @return The port value
      */
-    protected int parsePort(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
+    protected int parsePort(char opt, int defaultValue, CommandLine cmd, Options options) {
         int port = defaultValue;
         // Check option & parse if present
-        final String sPort = cmd.getOptionValue(opt);
-        if (null != sPort) {
-            try {
-                port = Integer.parseInt(sPort.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Port parameter is not a number: " + sPort);
-                printHelp(options);
-                System.exit(1);
-            }
+        String sPort = cmd.getOptionValue(opt);
+        if (null == sPort) {
+            return port;
+        }
+
+        try {
+            port = Integer.parseInt(sPort.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Port parameter is not a number: " + sPort);
+            printHelp(options);
+            System.exit(1);
         }
         if (port < 1 || port > 65535) {
             System.err.println("Port argument '-" + opt + "' is out of range: " + sPort + ". Valid range is from 1 to 65535.");
@@ -297,14 +318,14 @@ public abstract class AbstractCLI<R, C> {
      * @param options The options
      * @return The <code>int</code> value
      */
-    protected int parseInt(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
+    protected int parseInt(char opt, int defaultValue, CommandLine cmd, Options options) {
         int i = defaultValue;
         // Check option & parse if present
-        final String sInt = cmd.getOptionValue(opt);
+        String sInt = cmd.getOptionValue(opt);
         if (null != sInt) {
             try {
                 i = Integer.parseInt(sInt.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 System.err.println("Integer option '-" + opt + "' is not a number: " + sInt);
                 printHelp(options);
                 System.exit(1);
@@ -324,20 +345,64 @@ public abstract class AbstractCLI<R, C> {
      * @param options The options
      * @return The <code>int</code> value
      */
-    protected int parseInt(final String longOpt, final int defaultValue, final CommandLine cmd, final Options options) {
+    protected int parseInt(String longOpt, int defaultValue, CommandLine cmd, Options options) {
         int i = defaultValue;
         // Check option & parse if present
-        final String sInt = cmd.getOptionValue(longOpt);
-        if (null != sInt) {
-            try {
-                i = Integer.parseInt(sInt.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Integer option '--" + longOpt + "' is not a number: " + sInt);
-                printHelp(options);
-                System.exit(1);
-            }
+        String sInt = cmd.getOptionValue(longOpt);
+        if (null == sInt) {
+            return i;
+        }
+
+        try {
+            i = Integer.parseInt(sInt.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Integer option '--" + longOpt + "' is not a number: " + sInt);
+            printHelp(options);
+            System.exit(1);
         }
         return i;
+    }
+
+    /**
+     * Creates a switch {@link Option} with no arguments
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     * @return the new {@link Option}
+     */
+    protected Option createSwitch(String shortName, String longName, String description, boolean mandatory) {
+        return createOption(shortName, longName, false, description, mandatory);
+    }
+
+    /**
+     * Creates an {@link Option} with arguments
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argumentName The argument's name
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     * @return the new {@link Option}
+     */
+    protected Option createArgumentOption(String shortName, String longName, String argumentName, String description, boolean mandatory) {
+        return createOption(shortName, longName, argumentName, true, description, mandatory);
+    }
+
+    /**
+     * Creates an {@link Option} with arguments
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argumentName The argument's name
+     * @param argumentType The argument's type
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     * @return the new {@link Option}
+     */
+    protected Option createArgumentOption(String shortName, String longName, String argumentName, Class<?> argumentType, String description, boolean mandatory) {
+        return createOption(shortName, longName, argumentName, true, argumentType, description, mandatory);
     }
 
     /**
@@ -350,10 +415,46 @@ public abstract class AbstractCLI<R, C> {
      * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
      */
     protected Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
+        return createOption(shortName, longName, "arg", hasArgs, description, mandatory);
+    }
+
+    /**
+     * Create an {@link Option} with the {@link OptionBuilder}
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argName The argument's name
+     * @param hasArgs boolean flag to indicate whether or not the option has arguments
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     */
+    protected Option createOption(String shortName, String longName, String argName, boolean hasArgs, String description, boolean mandatory) {
         OptionBuilder.withLongOpt(longName);
         OptionBuilder.hasArg(hasArgs);
+        OptionBuilder.withArgName(argName);
         OptionBuilder.withDescription(description);
         OptionBuilder.isRequired(mandatory);
+        return OptionBuilder.create(shortName);
+    }
+
+    /**
+     * Create an {@link Option} with the {@link OptionBuilder}
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argName The argument's name
+     * @param hasArgs boolean flag to indicate whether or not the option has arguments
+     * @param type The argument's type
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     */
+    protected Option createOption(String shortName, String longName, String argName, boolean hasArgs, Class<?> type, String description, boolean mandatory) {
+        OptionBuilder.withLongOpt(longName);
+        OptionBuilder.hasArg(hasArgs);
+        OptionBuilder.withArgName(argName);
+        OptionBuilder.withDescription(description);
+        OptionBuilder.isRequired(mandatory);
+        OptionBuilder.withType(type);
         return OptionBuilder.create(shortName);
     }
 }

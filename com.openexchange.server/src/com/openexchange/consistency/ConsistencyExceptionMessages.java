@@ -61,6 +61,9 @@ public final class ConsistencyExceptionMessages implements LocalizableStrings {
     // The policy you have entered is malformed. It should look like \"condition:action\"
     public static final String MALFORMED_POLICY_MSG_DISPLAY = "The policy you have entered is malformed. It should look like \"condition:action\"";
 
+    // The policy '%s' you have specified is unknonw/unsupported.
+    public static final String UNKNOWN_POLICY_MSG_DISPLAY = "The policy '%s' you have specified is unknonw/unsupported.";
+
     private ConsistencyExceptionMessages() {
         super();
     }

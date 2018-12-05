@@ -80,7 +80,7 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
      * Initializes a new {@link UpdateTaskForceCLT}.
      */
     private UpdateTaskForceCLT() {
-        super("forceupdatetask", FOOTER);
+        super("forceupdatetask -t <taskName> [-c <contextId> | -n <schemaName>] " + BASIC_MASTER_ADMIN_USAGE, FOOTER);
     }
 
     /*
@@ -90,17 +90,17 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("t", "task", true, "The update task's class name");
+        options.addOption(createArgumentOption("t", "task", "taskName", "The update task's class name", false));
 
         StringBuilder sb = new StringBuilder(128);
         sb.append("A valid context identifier contained in target schema;");
         sb.append(" if missing and '-n/--name' option is also absent all schemas are considered.");
-        options.addOption("c", "context", true, sb.toString());
+        options.addOption(createArgumentOption("c", "context", "contextId", sb.toString(), false));
 
         sb.setLength(0);
         sb.append("A valid schema name. This option is a substitute for '-c/--context' option.");
         sb.append(" If both are present '-c/--context' is preferred. If both absent all schemas are considered.");
-        options.addOption("n", "name", true, sb.toString());
+        options.addOption(createArgumentOption("n", "name", "schemaName", sb.toString(), false));
     }
 
     /*

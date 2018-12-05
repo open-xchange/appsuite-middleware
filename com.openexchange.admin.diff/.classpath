@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/xmlunit-1.5.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
+	<classpathentry kind="src" path="/com.openexchange.global"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

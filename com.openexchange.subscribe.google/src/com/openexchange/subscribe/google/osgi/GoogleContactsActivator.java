@@ -51,6 +51,7 @@ package com.openexchange.subscribe.google.osgi;
 
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.context.ContextService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -70,7 +71,7 @@ public class GoogleContactsActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class };
+        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class };
     }
 
     @Override

@@ -714,16 +714,16 @@ public class DatabaseImpl extends DBService {
      * @return A sorted set of all document file store locations for the specified context
      * @throws OXException
      */
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
+    public SortedSet<String> getDocumentFileStoreLocationsPerContext(Context ctx) throws OXException {
         Connection con = getReadConnection(ctx);
         try {
-            return getDocumentFileStoreLocationsperContext(ctx, con);
+            return getDocumentFileStoreLocationsPerContext(ctx, con);
         } finally {
             releaseReadConnection(ctx, con);
         }
     }
 
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx, Connection con) throws OXException {
+    public SortedSet<String> getDocumentFileStoreLocationsPerContext(Context ctx, Connection con) throws OXException {
         int contextId = ctx.getContextId();
         PreparedStatement stmt = null;
         ResultSet result = null;

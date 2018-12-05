@@ -1,0 +1,50 @@
+'/admin/v1/close-sessions/by-user':
+    post:
+      operationId: closeSessionsByUser
+      tags:
+        - Admin
+      summary: Close all sessions belonging to a user
+      parameters:
+        - $ref: "#/parameters/globalQuery"
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  description: Array of context/user id tuples
+                  items:
+                    type: object
+                    description: Object uniquely identifying a user
+                    properties:
+                      contextId:
+                        description: Context ID
+                        type: integer
+                      userId:
+                        description: User ID
+                        type: integer
+                      required:
+                        - contextId
+                        - userId
+                      examples:
+                        default:
+                        value: '{"contextId": 332453, "userId": 3}'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: 'Bad request, response contains error message.'
+        '401':
+          description: Not authorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found. If path is wrong. Response contains error message.
+        '500':
+          description: 'Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.'
+      security: 
+        - masterAdminAuth: []

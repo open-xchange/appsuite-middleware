@@ -155,7 +155,6 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         try {
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configService);
-
             // Check if key store was modified or configuration was changed and we need to notify
             boolean keyStoreUpdate = loadKeyStores(configuration);
             if (keyStoreUpdate || false == this.configuration.equals(configuration)) {

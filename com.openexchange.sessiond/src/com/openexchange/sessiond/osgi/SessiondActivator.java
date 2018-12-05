@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.osgi;
 
+import java.rmi.Remote;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -88,11 +89,13 @@ import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
+import com.openexchange.sessiond.impl.SessiondRMIServiceImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
 import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
+import com.openexchange.sessiond.rest.SessiondRESTService;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleanerFactory;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplierFactory;
 import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactory;
@@ -300,7 +303,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             }
 
             // Initialize service instance
-            final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
+            final SessiondService serviceImpl = /* new InvalidatedAwareSessiondService */(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
@@ -309,6 +312,8 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
+            registerService(Remote.class, new SessiondRMIServiceImpl());
+            registerService(SessiondRESTService.class, new SessiondRESTService(this));
 
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new HousekeepingManagementTracker(context, SessiondMBean.MBEAN_NAME, SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));

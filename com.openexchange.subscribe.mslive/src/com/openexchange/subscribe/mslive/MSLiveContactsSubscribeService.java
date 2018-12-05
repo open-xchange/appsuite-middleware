@@ -81,6 +81,7 @@ import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
  */
 public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeService {
 
+    public static final String SOURCE_ID = KnownApi.MS_LIVE_CONNECT.getFullName() + ".contact";
     private static final Logger LOG = LoggerFactory.getLogger(MSLiveContactsSubscribeService.class);
 
     /**
@@ -90,7 +91,7 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @param services The {@link ServiceLookup}
      */
     public MSLiveContactsSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
-        super(oAuthServiceMetaData, KnownApi.MS_LIVE_CONNECT.getFullName() + ".contact", FolderObject.CONTACT, "MS Live", services);
+        super(oAuthServiceMetaData, SOURCE_ID, FolderObject.CONTACT, "MS Live", services);
     }
 
     /*
