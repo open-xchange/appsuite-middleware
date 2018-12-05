@@ -487,7 +487,11 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     private String getLastModifiedChecksum() throws OXException {
         Date lastModified = new Date(0);
-        List<String> folders = getAllContactFolderIds();
+
+        List<String> folders = getContactFolderIds();
+        if (null == folders) {
+            folders = getAllContactFolderIds();
+        }
 
         SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
         sortOptions.setLimit(1);

@@ -51,12 +51,14 @@ package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -76,6 +78,7 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
@@ -229,10 +232,21 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
         if (settings.containsExtendedProperties()) {
+
             Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
             if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt("color"))) {
                 internalConfig.putSafe("color", colorValue);
                 changed = true;
+            }
+            if (settings.getExtendedProperties().contains(USED_FOR_SYNC_LITERAL)) {
+                Boolean value = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+                if (false == Objects.equals(value, internalConfig.opt(USED_FOR_SYNC_LITERAL))) {
+                    if (Boolean.TRUE.equals(value) && false == CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
+                        throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                    }
+                    internalConfig.putSafe(USED_FOR_SYNC_LITERAL, value);
+                    changed = true;
+                }
             }
         }
         if (settings.containsName() && Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
