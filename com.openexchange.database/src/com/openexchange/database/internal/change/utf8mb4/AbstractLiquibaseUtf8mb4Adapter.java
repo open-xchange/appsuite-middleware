@@ -116,14 +116,13 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
 
         Connection connection = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         try {
-            String schemaName = connection.getCatalog() != null && Strings.isNotEmpty(connection.getCatalog()) ? connection.getCatalog() : (database.getDefaultCatalogName() != null && Strings.isNotEmpty(database.getDefaultCatalogName()) ? database.getDefaultCatalogName() : getDefaultSchemaName());
+            String schemaName = getSchemaName(connection, database);
 
             before(connection, schemaName);
             for (String table : tablesToConvert()) {
                 changeTable(connection, schemaName, table);
             }
             after(connection, schemaName);
-
         } catch (SQLException e) {
             LOGGER.error("Failed to convert {} to utf8mb4 for GlobalDB", Strings.concat(",", tablesToConvert()), e);
             throw new CustomChangeException("SQL error", e);
@@ -133,6 +132,16 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         } finally {
             Databases.autocommit(connection);
         }
+    }
+
+    private String getSchemaName(Connection connection, Database database) throws SQLException {
+        String catalogName = connection.getCatalog();
+        if (catalogName != null && Strings.isNotEmpty(catalogName)) {
+            return catalogName;
+        }
+
+        String defaultCatalogName = database.getDefaultCatalogName();
+        return (defaultCatalogName != null && Strings.isNotEmpty(defaultCatalogName) ? defaultCatalogName : getDefaultSchemaName());
     }
 
     protected abstract List<String> tablesToConvert();
@@ -635,7 +644,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         }
         return foundIndex;
     }
-    
+
     /**
      * This method creates a new (primary) key on a table. Beware, this method is vulnerable to SQL injection because table and column names
      * can not be set through a {@link PreparedStatement}.
@@ -645,7 +654,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
      * @param columns names of the columns the key should cover.
      * @param lengths The column lengths; <code>-1</code> for full column
      * @param primary <code>true</code> if a <code>PRIMARY KEY</code> is to be created; <code>false</code> for a <code>KEY</code>
-     * @param name The name of the <code>KEY</code>. In case of a <code>PRIMARY KEY</code> the name will simply be ignored. 
+     * @param name The name of the <code>KEY</code>. In case of a <code>PRIMARY KEY</code> the name will simply be ignored.
      * @throws SQLException if some SQL problem occurs.
      */
     protected static final void createKey(final Connection con, final String table, final String[] columns, final int[] lengths, boolean primary, String name) throws SQLException {
@@ -690,7 +699,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
     /**
      * Drops the key with the specified name. Beware, this method is vulnerable to SQL injection because table and key name can
      * not be set through a {@link PreparedStatement}.
-     * 
+     *
      * @param con writable database connection.
      * @param table table name that index should be dropped.
      * @param key name of the key to drop.
