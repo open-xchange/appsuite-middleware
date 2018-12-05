@@ -127,7 +127,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public class EventCollection extends FolderCollection<Event> implements FilteringResource {
 
     /** Fields that are always retrieved when requesting event lists from the service */
-    private static final EventField[] BASIC_FIELDS = new EventField[] {
+    protected static final EventField[] BASIC_FIELDS = new EventField[] {
         EventField.UID, EventField.FILENAME, EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID, EventField.SEQUENCE,
         EventField.CREATED, EventField.CREATED_BY, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY,
         EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE

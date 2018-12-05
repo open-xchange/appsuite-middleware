@@ -120,7 +120,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
      * @param object The object to get the identifier for
      * @return The identifier
      */
-    protected abstract int getId(T object);
+    protected abstract String getId(T object);
 
     /**
      * Gets the numerical folder identifier of a collection, as used by the attachment service.
@@ -227,7 +227,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
              * store new attachment & remove previous attachment
              */
             AttachmentMetadata metadata = addAttachment(attachments, inputStream, object, contentType, fileName, size);
-            attachments.detachFromObject(getId(parent), getId(object), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
+            attachments.detachFromObject(getId(parent), parseId(getId(object)), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
                 new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
             attachments.commit();
             return metadata.getId();
@@ -256,7 +256,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
             /*
              * detach attachment
              */
-            attachments.detachFromObject(getId(parent), getId(object), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
+            attachments.detachFromObject(getId(parent), parseId(getId(object)), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
                 new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
             attachments.commit();
         } catch (OXException e) {
@@ -296,7 +296,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
      * @return The copied attachment metadata
      */
     protected AttachmentMetadata copyAttachment(AttachmentBase attachments, AttachmentMetadata originalMetadata, T targetObject) throws OXException {
-        return AttachmentUtils.copyAttachment(attachments, parent, originalMetadata, getId(targetObject));
+        return AttachmentUtils.copyAttachment(attachments, parent, originalMetadata, parseId(getId(targetObject)));
     }
 
     /**
@@ -311,7 +311,11 @@ public abstract class DAVObjectResource<T> extends DAVResource {
      * @return The added attachment's metadata
      */
     protected AttachmentMetadata addAttachment(AttachmentBase attachments, InputStream inputStream, T targetObject, String contentType, String fileName, long size) throws OXException {
-        return AttachmentUtils.addAttachment(attachments, parent, inputStream, getId(parent), getId(targetObject), contentType, fileName, size);
+        return AttachmentUtils.addAttachment(attachments, parent, inputStream, getId(parent), parseId(getId(targetObject)), contentType, fileName, size);
+    }
+    
+    private int parseId(String id) {
+        return id == null ? null : Integer.parseInt(id);
     }
 
 }

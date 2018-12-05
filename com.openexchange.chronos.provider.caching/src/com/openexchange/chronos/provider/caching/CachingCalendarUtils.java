@@ -96,16 +96,28 @@ public class CachingCalendarUtils {
      *
      * @param providerId The identifier of the provider to check
      * @param session The current user's session
+     * @param def The default value
      * @return <code>true</code> if accounts from this provider can be used for synchronization, <code>false</code> otherwise
      */
-    public static boolean canBeUsedForSync(String providerId, Session session) {
-        DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.TRUE);
+    public static boolean canBeUsedForSync(String providerId, Session session, boolean def) {
+        DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.valueOf(def));
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         if (null == leanConfigurationService) {
             LOG.warn("Unable to access configuration service, assuming '{}' for '{}'.", property.getDefaultValue(), property.getFQPropertyName());
             return property.getDefaultValue(Boolean.class).booleanValue();
         }
         return leanConfigurationService.getBooleanProperty(session.getUserId(), session.getContextId(), property);
+    }
+
+    /**
+     * Gets a value indicating whether synchronization is enabled or not for accounts of a specific calendar provider.
+     *
+     * @param providerId The identifier of the provider to check
+     * @param session The current user's session
+     * @return <code>true</code> if accounts from this provider can be used for synchronization, <code>false</code> otherwise
+     */
+    public static boolean canBeUsedForSync(String providerId, Session session) {
+        return canBeUsedForSync(providerId, session, true);
     }
 
 }

@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.chronos.provider.extensions.CTagAware;
 import com.openexchange.chronos.provider.extensions.CachedAware;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -119,6 +120,12 @@ public enum CalendarCapability {
      * @see CachedAware
      */
     CACHED("cached", CachedAware.class),
+    /**
+     * Extended functionality to support synchronization of folders based on an etag like ctag.
+     *
+     * @see CTagAware
+     */
+    CTAG("ctag", CTagAware.class),
 
     ;
 
