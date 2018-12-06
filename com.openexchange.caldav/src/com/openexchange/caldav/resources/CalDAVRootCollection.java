@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
@@ -70,7 +71,6 @@ import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.FolderCollection;
-import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ContentType;
@@ -86,7 +86,6 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.login.Interface;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -120,7 +119,13 @@ public class CalDAVRootCollection extends DAVRootCollection {
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
         super(factory, "Calendars");
         this.factory = factory;
-        super.includeProperties(new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet(), new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND));
+        includeProperties(
+            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO), 
+            new ScheduleDefaultCalendarURL(factory), 
+            new ScheduleDefaultTasksURL(factory), 
+            new SupportedReportSet(), 
+            new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
+        );
     }
 
     @Override
@@ -175,14 +180,14 @@ public class CalDAVRootCollection extends DAVRootCollection {
                 }
             }
             LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
-            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), getTreeID());
+            return new CalDAVPlaceholderCollection<>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), getTreeID());
         } catch (OXException e) {
             throw DAVProtocol.protocolException(getUrl(), e);
         }
     }
 
     private FolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
-        return createCollection(folder, CalDAVFolderCollection.NO_ORDER);
+        return createCollection(folder, CalendarOrder.NO_ORDER);
     }
 
     private FolderCollection<?> createCollection(UserizedFolder folder, int order) throws OXException {
