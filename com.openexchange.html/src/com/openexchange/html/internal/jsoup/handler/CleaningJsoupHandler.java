@@ -55,6 +55,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
+import static com.openexchange.html.internal.jsoup.JsoupHandlers.isInlineImage;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -650,7 +651,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 }
             }
             String src = attributes.getIgnoreCase("src");
-            if (Strings.isNotEmpty(src) && false == isInlineImage(src) && (src.indexOf('<') >= 0 || src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0)) {
+            if (Strings.isNotEmpty(src) && false == isInlineImage(src, false) && (src.indexOf('<') >= 0 || src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0)) {
                 // Invalid <img> tag
                 removedNodes.add(startTag);
                 return;
@@ -760,7 +761,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         }
 
         if (dropExternalImages && ("img".equals(tagName) || "input".equals(tagName)) && "src".equals(attr)) {
-            if (isInlineImage(val)) {
+            if (isInlineImage(val, true)) {
                 // Allow inline images
                 return true;
             }
@@ -916,17 +917,6 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             map.put(args[i], args[i+1]);
         }
         return map;
-    }
-
-    // --------------------------------- Image check --------------------------------------- //
-
-    private static final String CID = "cid:";
-    private static final String DATA_BASE64 = "data:;base64,";
-    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
-
-    private boolean isInlineImage(final String val) {
-        final String tmp = toLowerCase(val);
-        return tmp.startsWith(CID) || tmp.startsWith(DATA_BASE64) || PATTERN_FILENAME.matcher(tmp).matches();
     }
 
     // ----------------------------------------------------------------------------------- //
