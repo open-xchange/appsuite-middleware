@@ -53,12 +53,12 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ServerProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 
@@ -75,7 +75,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
     /**
      * Initialises a new {@link SegmentedUpdateServiceImpl}.
      */
-    public SegmentedUpdateServiceImpl(ServiceLookup services) {
+    public SegmentedUpdateServiceImpl() {
         super();
     }
 
@@ -85,31 +85,54 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
      * @see com.openexchange.tools.SegmentedUpdateService#getMigrationRedirectURL(java.lang.String)
      */
     @Override
-    public String getMigrationRedirectURL(String host) throws OXException {
-        String migrationRedirectURL = null;
-
-        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        if (serverConfigService != null && Strings.isNotEmpty(host)) {
-            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
-            for (Map<String, Object> map : customHostConfigurations) {
-                Object object = map.get(ServerProperty.migrationRedirectURL.getFQPropertyName());
-                if (object != null && object instanceof String) {
-                    migrationRedirectURL = (String) object;
-                    LOG.debug("Found the following migrationRedirectURL config for host {} in as-config.yml: {}", host, migrationRedirectURL);
-                    break;
-                }
-            }
-        }
+    public @Nullable String getMigrationRedirectURL(@Nullable String host) throws OXException {
+        String migrationRedirectURL = getFor(host);
         if (Strings.isEmpty(migrationRedirectURL)) {
-            LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
-            if (leanConfigService != null) {
-                migrationRedirectURL = leanConfigService.getProperty(ServerProperty.migrationRedirectURL);
-                LOG.debug("Use the following migrationRedirectURL taken from server configuration: {}", migrationRedirectURL);
-            }
+            migrationRedirectURL = getFromLean();
         }
         if (Strings.isEmpty(migrationRedirectURL)) {
             LOG.warn("The property '{}' is not set.", ServerProperty.migrationRedirectURL);
         }
+        return migrationRedirectURL;
+    }
+
+    /**
+     * Gets the migration URL from the yaml configuration for the specified host
+     * 
+     * @param host The host for which to retrieve the migration URL
+     * @return The migrationURL if present, <code>null</code> if not configured or if the <code>host</code> is <code>null</code>.
+     * @throws OXException if an error is occurred
+     */
+    private @Nullable String getFor(@Nullable String host) throws OXException {
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        if (serverConfigService == null || Strings.isEmpty(host)) {
+            return null;
+        }
+        List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
+        for (Map<String, Object> map : customHostConfigurations) {
+            Object object = map.get(ServerProperty.migrationRedirectURL.getFQPropertyName());
+            if (object == null || false == (object instanceof String)) {
+                continue;
+            }
+            String migrationURL = (String) object;
+            LOG.debug("Found the following migrationRedirectURL config for host {} in as-config.yml: {}", host, migrationURL);
+            return migrationURL;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the migration URL from the lean configuration
+     * 
+     * @return The migration URL or <code>null</code> if not configured.
+     */
+    private String getFromLean() {
+        LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
+        if (leanConfigService == null) {
+            return null;
+        }
+        String migrationRedirectURL = leanConfigService.getProperty(ServerProperty.migrationRedirectURL);
+        LOG.debug("Use the following migrationRedirectURL taken from server configuration: {}", migrationRedirectURL);
         return migrationRedirectURL;
     }
 }

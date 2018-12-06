@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.upgrade;
 
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 
 /**
@@ -63,9 +64,9 @@ public interface SegmentedUpdateService {
      * Returns the configured migrationRedirectURL by consulting the configuration for defined hosts (as-config.yml)
      * and falling back to server configuration (server.properties) if no URL was defined for the host.
      * 
-     * @param host The host to get the migrationRedirectURL for
+     * @param host The host for which to get the migrationRedirectURL (<code>null</code> if no host is configured)
      * @return The redirect URL for mentioned host (if configured) or <code>null</code> if no configuration can be found.
      * @throws OXException if an error is occurred
      */
-    String getMigrationRedirectURL(String host) throws OXException;
+    @Nullable String getMigrationRedirectURL(@Nullable String host) throws OXException;
 }
