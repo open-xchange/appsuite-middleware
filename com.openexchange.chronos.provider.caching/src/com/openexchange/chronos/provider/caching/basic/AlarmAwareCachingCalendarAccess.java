@@ -451,21 +451,6 @@ public abstract class AlarmAwareCachingCalendarAccess implements BasicCalendarAc
         }.executeQuery();
     }
 
-    /**
-     * Returns if all provided {@link Event}s do contain a UID
-     *
-     * @param events A list of {@link Event}s to check for the UID
-     * @return <code>true</code> if all {@link Event}s do have a UID; <code>false</code> if at least one {@link Event} is missing the UID field
-     */
-    private boolean containsUid(List<Event> events) {
-        for (Event event : events) {
-            if (!event.containsUid()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private static final EventField[] FIELDS_TO_IGNORE = new EventField[] { EventField.CREATED_BY, EventField.FOLDER_ID, EventField.ID, EventField.CALENDAR_USER, EventField.CREATED, EventField.MODIFIED_BY, EventField.EXTENDED_PROPERTIES, EventField.TIMESTAMP };
     private static final EventField[] EQUALS_IDENTIFIER = new EventField[] { EventField.UID, EventField.RECURRENCE_ID };
 
@@ -518,7 +503,7 @@ public abstract class AlarmAwareCachingCalendarAccess implements BasicCalendarAc
             null);
     }
     
-    private CalendarEvent getCreateEvent(List<Event> events) throws OXException {
+    private CalendarEvent getCreateEvent(List<Event> events) {
         List<CreateResult> creations = new ArrayList<>(events.size());
         for(Event eve: events) {
             creations.add(new CreateResultImpl(eve));
@@ -590,13 +575,6 @@ public abstract class AlarmAwareCachingCalendarAccess implements BasicCalendarAc
             return;
         }
         create(calendarStorage, diff.getAddedItems(), originalEvents);
-    }
-
-    private void create(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        if (diff.getAddedItems().isEmpty()) {
-            return;
-        }
-        create(calendarStorage, diff.getAddedItems());
     }
 
     private void update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
@@ -817,22 +795,6 @@ public abstract class AlarmAwareCachingCalendarAccess implements BasicCalendarAc
                 return;
             }
             throw e;
-        }
-    }
-
-    private void cleanupEvents(List<Event> externalEvents) {
-        List<Event> addedItems = new ArrayList<Event>(externalEvents);
-        for (Event event : addedItems) {
-            try {
-                Check.mandatoryFields(event, EventField.START_DATE);
-                // Set folder id for not group scheduled events if missing
-                if ((event.getAttendees() == null || event.getAttendees().isEmpty()) && event.getFolderId() == null) {
-                    event.setFolderId(BasicCalendarAccess.FOLDER_ID);
-                }
-            } catch (OXException e) {
-                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
-                externalEvents.remove(event);
-            }
         }
     }
 
@@ -1112,7 +1074,6 @@ public abstract class AlarmAwareCachingCalendarAccess implements BasicCalendarAc
 
     private static final List<EventField> IGNORED_FIELDS = Arrays.asList(EventField.ATTACHMENTS);
 
-    @Override
     protected EventField[] getFields() {
         EventField[] all = EventField.values();
 
@@ -1127,7 +1088,6 @@ public abstract class AlarmAwareCachingCalendarAccess implements BasicCalendarAc
      *
      * @return The timestamp of the last update, or <code>null</code> if unknown
      */
-    @Override
     protected Long optLastUpdate() {
         JSONObject cachingConfig = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
         if (null != cachingConfig) {

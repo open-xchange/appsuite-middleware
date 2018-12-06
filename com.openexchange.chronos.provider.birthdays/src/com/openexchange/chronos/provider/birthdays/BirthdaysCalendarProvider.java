@@ -362,7 +362,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     }
 
     @Override
-    public void touchEvent(Context context, CalendarAccount account, String eventId) throws OXException {
+    public void touchEvent(Context context, CalendarAccount account, String eventId) {
         // nothing to do
     }
 

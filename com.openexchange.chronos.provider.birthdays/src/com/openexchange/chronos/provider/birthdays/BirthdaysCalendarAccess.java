@@ -267,10 +267,9 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     public List<Event> getEvents() throws OXException {
         List<Contact> contacts = getBirthdayContacts();
         if (isExpandOccurrences()) {
-            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
-        } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()), false);
         }
+        return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()), true);
     }
 
     @Override
@@ -316,10 +315,9 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(filters, queries));
         if (isExpandOccurrences()) {
-            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
-        } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()), false);
         }
+        return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()), true);
     }
 
     @Override
