@@ -117,7 +117,7 @@ public class EventConverter {
         CalendarUser calendarUser = new CalendarUser();
         calendarUser.setEntity(calendarUserId);
         event.setCalendarUser(calendarUser);
-        event.setRecurrenceRule("FREQ=YEARLY");
+        event.setRecurrenceRule("FREQ=YEARLY;SKIP=BACKWARD");
         event.setTransp(TimeTransparency.TRANSPARENT);
         event.setClassification(Classification.PUBLIC);
         Calendar calendar = truncateTime(initCalendar(TimeZones.UTC, contact.getBirthday()));
