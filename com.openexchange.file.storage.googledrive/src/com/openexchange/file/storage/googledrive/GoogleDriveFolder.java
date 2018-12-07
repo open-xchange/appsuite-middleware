@@ -173,7 +173,6 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
         List list = drive.files().list();
         list.setQ(new GoogleFileQueryBuilder(QUERY_STRING_DIRECTORIES_ONLY).searchForChildren(dir.getId()).build());
         list.setPageSize(Integer.valueOf(1));
-        list.setFields("files");
         return !list.execute().getFiles().isEmpty();
     }
 
