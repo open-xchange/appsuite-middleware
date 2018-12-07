@@ -74,7 +74,7 @@ public class Bug30359Test extends CalDAVTest {
 
     @Test
     public void testExternalEntities() throws Exception {
-        String uri = getBaseUri() + "/caldav/" + getDefaultFolderID() + "/";
+        String uri = getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/";
         EntityEnclosingMethod m = new EntityEnclosingMethod(uri) {
 
             @Override

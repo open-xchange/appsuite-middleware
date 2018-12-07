@@ -122,7 +122,7 @@ public class Bug60193Test extends CalDAVTest {
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, String.valueOf(getClient2().getValues().getPrivateAppointmentFolder()), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
@@ -203,7 +203,7 @@ public class Bug60193Test extends CalDAVTest {
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, String.valueOf(getClient2().getValues().getPrivateAppointmentFolder()), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
@@ -276,7 +276,7 @@ public class Bug60193Test extends CalDAVTest {
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, String.valueOf(getClient2().getValues().getPrivateAppointmentFolder()), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
@@ -348,7 +348,7 @@ public class Bug60193Test extends CalDAVTest {
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, String.valueOf(getClient2().getValues().getPrivateAppointmentFolder()), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
