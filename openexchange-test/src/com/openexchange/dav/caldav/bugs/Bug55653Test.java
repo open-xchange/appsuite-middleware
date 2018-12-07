@@ -54,11 +54,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.Test;
+import com.google.common.io.BaseEncoding;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link Bug55653Test}
@@ -69,6 +71,11 @@ import com.openexchange.groupware.tasks.Task;
  * @since v7.10.0
  */
 public class Bug55653Test extends CalDAVTest {
+
+    @Override
+    protected String encodeFolderID(String folderID) {
+        return BaseEncoding.base64Url().omitPadding().encode(folderID.getBytes(Charsets.US_ASCII));
+    }
 
     @Test
     public void testCreateVTodoWithoutStart() throws Exception {
