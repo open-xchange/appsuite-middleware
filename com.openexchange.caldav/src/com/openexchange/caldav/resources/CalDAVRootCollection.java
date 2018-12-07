@@ -82,7 +82,6 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -100,14 +99,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class CalDAVRootCollection extends DAVRootCollection {
 
-    /**
-     * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
-     * (copied from com.openexchange.folderstorage.outlook)
-     */
-    private static final String OUTLOOK_TREE_ID = "1";
-
     private final GroupwareCaldavFactory factory;
-    private String trashFolderID;
+
     private List<UserizedFolder> subfolders;
     private String treeID;
 
@@ -297,9 +290,6 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (Permission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             return false;
         }
-        if (isTrashFolder(folder)) {
-            return false;
-        }
         if (CalendarContentType.getInstance().equals(folder.getContentType())) {
             Set<String> caps = folder.getSupportedCapabilities();
             if (!caps.contains(CalendarCapability.SYNC.getName()) && !caps.contains(CalendarCapability.CTAG.getName())) {
@@ -308,53 +298,6 @@ public class CalDAVRootCollection extends DAVRootCollection {
         }
         Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
         return null == value || Boolean.parseBoolean(String.valueOf(value));
-    }
-
-    /**
-     * Gets the id of the default trash folder
-     *
-     * @return
-     */
-    private String getTrashFolderID() {
-        if (null == trashFolderID) {
-            try {
-                trashFolderID = getFolderService().getDefaultFolder(factory.getUser(), OUTLOOK_TREE_ID, TrashContentType.getInstance(), factory.getSession(), null).getID();
-            } catch (OXException e) {
-                LOG.warn("unable to determine default trash folder", e);
-            }
-        }
-        return this.trashFolderID;
-    }
-
-    /**
-     * Checks whether the supplied folder is a trash folder, i.e. one of it's parent folders is the default trash folder.
-     * <p/>
-     * Only applicable when using the {@link #OUTLOOK_TREE_ID}.
-     *
-     * @param folder The folder to check
-     * @return <code>true</code> if the folder is a trash folder, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private boolean isTrashFolder(UserizedFolder folder) throws OXException {
-        if (OUTLOOK_TREE_ID.equals(getTreeID()) && PrivateType.getInstance().equals(folder.getType()) && ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits().hasOLOX20()) {
-            String trashFolderId = this.getTrashFolderID();
-            if (null != trashFolderId) {
-                if (trashFolderId.equals(folder.getParentID())) {
-                    return true;
-                }
-                FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
-                UserizedFolder[] response = pathResponse.getResponse();
-                for (UserizedFolder parentFolder : response) {
-                    if (trashFolderId.equals(parentFolder.getID())) {
-                        LOG.debug("Detected folder below trash: {}", folder);
-                        return true;
-                    }
-                }
-            } else {
-                LOG.warn("No config value for trash folder id found");
-            }
-        }
-        return false;
     }
 
     /**
