@@ -166,7 +166,7 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
                             Integer contextId = I(resultSet.getInt(i++));
                             Integer publicationId = I(resultSet.getInt(i++));
 
-                            PublicationUser publicationUser = new PublicationUser(resultSet.getString(i++), new Date(resultSet.getInt(i++)), new Date(resultSet.getInt(i++)));
+                            PublicationUser publicationUser = new PublicationUser(resultSet.getString(i++), new Date(resultSet.getLong(i++)), new Date(resultSet.getLong(i++)));
                             if (contextToPub.containsKey(contextId)) {
                                 // Known context
                                 Map<Integer, List<PublicationUser>> pubToUser = contextToPub.get(contextId);
@@ -309,17 +309,16 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
     private void deleteFromTable(Connection con, Entry<Integer, List<Integer>> entry, String tableName) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(Databases.getIN("DELETE FROM " + tableName + " WHERE cid=? and id IN (", entry.getValue().size()));
             if (null != entry.getKey()) {
+                stmt = con.prepareStatement(Databases.getIN("DELETE FROM " + tableName + " WHERE cid=? and id IN (", entry.getValue().size()));
                 stmt.setInt(1, entry.getKey().intValue());
                 int i = 2;
                 for (Integer p : entry.getValue()) {
                     stmt.setInt(i++, p.intValue());
                 }
+                int result = stmt.executeUpdate();
+                LOGGER.debug("The statement has been executed successfully. Result was {}", I(result));
             }
-
-            int result = stmt.executeUpdate();
-            LOGGER.debug("The statement has been executed successfully. Result was {}", I(result));
         } finally {
             Databases.closeSQLStuff(stmt);
         }
