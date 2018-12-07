@@ -89,6 +89,7 @@ public class Bug44309Test extends CalDAVTest {
     private CalendarTestManager manager2;
     private AJAXClient client3;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,6 +99,7 @@ public class Bug44309Test extends CalDAVTest {
         client3 = new AJAXClient(testContext.acquireUser());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -183,7 +185,7 @@ public class Bug44309Test extends CalDAVTest {
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.CALENDAR_DATA);
         ReportInfo reportInfo = new CalendarMultiGetReportInfo(new String[] { iCalResource.getHref() }, props);
-        MultiStatusResponse[] responses = getWebDAVClient().doReport(reportInfo, getBaseUri() + "/caldav/" + getDefaultFolderID() + "/");
+        MultiStatusResponse[] responses = getWebDAVClient().doReport(reportInfo, getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/");
         assertNotNull(responses);
         assertEquals(1, responses.length);
         MultiStatusResponse response = responses[0];

@@ -84,6 +84,8 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -138,6 +140,10 @@ public abstract class CalDAVTest extends WebDAVTest {
         return Integer.toString(folderId);
     }
 
+    protected String encodeFolderID(String folderID) {
+        return BaseEncoding.base64Url().omitPadding().encode(CalendarUtils.prependDefaultAccount(folderID).getBytes(Charsets.US_ASCII));
+    }
+
     protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
         return createFolder(ftm.getFolderFromServer(folderId), folderName);
     }
@@ -162,7 +168,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     @Override
     protected String fetchSyncToken(String folderID) throws Exception {
-        return super.fetchSyncToken("/caldav/" + folderID);
+        return super.fetchSyncToken("/caldav/" + encodeFolderID(folderID));
     }
 
     protected String fetchSyncToken() throws Exception {
@@ -171,7 +177,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     @Override
     protected SyncCollectionResponse syncCollection(SyncToken syncToken, String folderID) throws Exception {
-        return super.syncCollection(syncToken, "/caldav/" + folderID);
+        return super.syncCollection(syncToken, "/caldav/" + encodeFolderID(folderID));
     }
 
     protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
@@ -188,7 +194,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.CALENDAR_DATA);
         ReportInfo reportInfo = new CalendarMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
-        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/caldav/" + folderID + "/");
+        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/caldav/" + encodeFolderID(folderID) + "/");
         for (MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
                 String href = response.getHref();
@@ -215,7 +221,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected int putICal(String folderID, String resourceName, String iCal, Map<String, String> headers) throws Exception {
-        return putICal(getWebDAVClient(), folderID, resourceName, iCal, headers);
+        return putICal(getWebDAVClient(), encodeFolderID(folderID), resourceName, iCal, headers);
     }
 
     protected static int putICal(WebDAVClient client, String folderID, String resourceName, String iCal, Map<String, String> headers) throws Exception {
@@ -322,7 +328,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     protected int move(ICalResource iCalResource, String targetFolderID) throws Exception {
         MoveMethod move = null;
         try {
-            String targetHref = "/caldav/" + targetFolderID + "/" + iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
+            String targetHref = "/caldav/" + encodeFolderID(targetFolderID) + "/" + iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
             move = new MoveMethod(getBaseUri() + iCalResource.getHref(), getBaseUri() + targetHref, false);
             if (null != iCalResource.getETag()) {
                 move.addRequestHeader(Headers.IF_MATCH, iCalResource.getETag());
@@ -363,7 +369,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
         GetMethod get = null;
         try {
-            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            String href = "/caldav/" + encodeFolderID(folderID) + "/" + urlEncode(resourceName) + ".ics";
             get = new GetMethod(getBaseUri() + href);
             if (null != ifNoneMatchEtag) {
                 get.addRequestHeader(Headers.IF_NONE_MATCH, ifNoneMatchEtag);
@@ -391,7 +397,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws Exception {
         PutMethod put = null;
         try {
-            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            String href = "/caldav/" + encodeFolderID(folderID) + "/" + urlEncode(resourceName) + ".ics";
             put = new PutMethod(getBaseUri() + href);
             if (null != ifMatchEtag) {
                 put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
