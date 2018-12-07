@@ -300,9 +300,11 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (isTrashFolder(folder)) {
             return false;
         }
-        Set<String> caps = folder.getSupportedCapabilities();
-        if (!caps.contains(CalendarCapability.SYNC.getName()) && !caps.contains(CalendarCapability.CTAG.getName())) {
-            return false;
+        if (CalendarContentType.getInstance().equals(folder.getContentType())) {
+            Set<String> caps = folder.getSupportedCapabilities();
+            if (!caps.contains(CalendarCapability.SYNC.getName()) && !caps.contains(CalendarCapability.CTAG.getName())) {
+                return false;
+            }
         }
         Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
         return null == value || Boolean.parseBoolean(String.valueOf(value));
