@@ -52,7 +52,6 @@ package com.openexchange.chronos.provider.birthdays;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getURI;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.java.Autoboxing.I;
 import java.text.DateFormat;

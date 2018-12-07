@@ -60,9 +60,12 @@ import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -239,6 +242,25 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     @Override
+    public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
+        List<Event> events = new ArrayList<Event>(eventIDs.size());
+        Map<String, Contact> contacts = getBirthdayContacts(eventIDs);
+        for (EventID eventID : eventIDs) {
+            Contact contact = contacts.get(eventID.getObjectID());
+            if (null == contact) {
+                // log not found event, but include null in resulting list to preserve order
+                org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug("Requested event \"{}\" not found, skipping.", eventID);
+                events.add(null);
+            } else if (null != eventID.getRecurrenceID()) {
+                events.add(eventConverter.getOccurrence(contact, eventID.getRecurrenceID()));
+            } else {
+                events.add(eventConverter.getSeriesMaster(contact));
+            }
+        }
+        return events;
+    }
+
+    @Override
     public List<Event> getEvents() throws OXException {
         List<Contact> contacts = getBirthdayContacts();
         if (isExpandOccurrences()) {
@@ -342,6 +364,44 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         } catch (IllegalArgumentException | OXException e) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(e, eventId);
         }
+    }
+
+    private Map<String, Contact> getBirthdayContacts(List<EventID> eventIds) throws OXException {
+        /*
+         * separate contact ids by parent contact folder
+         */
+        Map<String, List<String>> idsPerFolderId = new HashMap<String, List<String>>();
+        for (EventID eventId : eventIds) {
+            try {
+                int[] decodedId = eventConverter.decodeEventId(eventId.getObjectID());
+                com.openexchange.tools.arrays.Collections.put(idsPerFolderId, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
+            } catch (IllegalArgumentException e) {
+                org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug("Skipping invalid event id {}", eventId, e);
+            }
+        }
+        /*
+         * get birthday contacts per folder from service
+         */
+        Map<String, Contact> contactsById = new HashMap<String, Contact>(eventIds.size());
+        for (Entry<String, List<String>> entry : idsPerFolderId.entrySet()) {
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = services.getService(ContactService.class).getContacts(
+                    session, entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]), CONTACT_FIELDS);
+                while (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    if (null == contact.getBirthday()) {
+                        org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug(
+                            "Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
+                        continue;
+                    }
+                    contactsById.put(eventConverter.getEventId(contact), contact);
+                }
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
+        }
+        return contactsById;
     }
 
     /**
