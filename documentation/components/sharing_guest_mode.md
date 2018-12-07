@@ -10,6 +10,8 @@ The main idea behind the new sharing concept is that guest users, i.e. external 
 
 The following chapters cover different topics regarding sharing and guest users and try to describe some technical background and impact where hosters, administrators or integrators might be interested in.
 
+> With the version 7.10.2 the publication mechanism along subscription done to those publications were removed.
+
 # Creating Shares
 
 Basically, creating a share means adding an additional permission entity to the shared folder or item. Previously, this was only possible for &quot;internal&quot; entities, i.e. regular users or user groups. Now, the underlying permission system has been extended to support external entities, which can be either invited guest users, or special &quot;anonymous&quot; guest users who access a shared folder or item via a secret link. Anonymous and invited guest users are explained in more detail below.
