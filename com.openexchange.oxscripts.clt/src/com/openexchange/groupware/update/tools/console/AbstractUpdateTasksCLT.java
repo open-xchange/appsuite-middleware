@@ -149,6 +149,10 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
      * @param comparator The optional sorting {@link Comparator}. If <code>null</code> the entries will not be sorted
      */
     void writeCompositeList(List<Map<String, Object>> compositeList, String[] columns, ColumnFormat[] formats, Comparator<List<Object>> sortingComparator) {
+        if (compositeList == null || compositeList.isEmpty()) {
+            System.out.println("No entries found.");
+            return;
+        }
         List<List<Object>> data = prepareData(compositeList, columns);
         if (sortingComparator != null) {
             Collections.sort(data, sortingComparator);
