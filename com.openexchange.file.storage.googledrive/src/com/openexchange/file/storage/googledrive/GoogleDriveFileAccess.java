@@ -64,7 +64,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -226,15 +225,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                          */
                         {
                             String fileName = file.getFileName();
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0);
-                            boolean found = false;
-                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
-                                    found = true;
-                                }
-                            }
-
-                            if (found) {
+                            if (containsFileName(searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0), fileName)) {
                                 throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
                             }
                         }
@@ -251,15 +242,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
                             String fileNameToTest = fileName.toString();
-                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0);
-                            boolean found = false;
-                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileNameToTest)) {
-                                    found = true;
-                                }
-                            }
-
-                            if (found) {
+                            if (containsFileName(searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0), fileNameToTest)) {
                                 fileName.advance();
                             } else {
                                 fileNameToUse = fileNameToTest;
@@ -304,11 +287,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 com.google.api.services.drive.model.File copy = new com.google.api.services.drive.model.File();
                 copy.setName(name);
                 GoogleDriveUtil.setParentFolder(copy, destId);
-                if (null != update) {
-                    if (Strings.isNotEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getName())) {
-                        copy.setName(update.getTitle());
-                    }
-                }
+                handleNameChange(update, modifiedFields, srcFile, copy);
 
                 // Copy file
                 com.google.api.services.drive.model.File copiedFile = drive.files().copy(id, copy).execute();
@@ -351,8 +330,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 // Create patch file
                 com.google.api.services.drive.model.File patch = new com.google.api.services.drive.model.File();
                 GoogleDriveUtil.setParentFolder(patch, destId);
+
                 if (null != update) {
-                    if (Strings.isNotEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getName())) {
+                    if (isFileNameChanged(update, modifiedFields, srcFile)) {
                         name = update.getTitle();
                         patch.setName(name);
                     }
@@ -459,15 +439,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                             NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                             while (null == fileNameToUse) {
                                 String fileNameToTest = fileName.toString();
-                                List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
-                                boolean found = false;
-                                for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                    if (it.next().getFileName().equals(fileNameToTest)) {
-                                        found = true;
-                                    }
-                                }
-
-                                if (found) {
+                                if (containsFileName(searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0), fileNameToTest)) {
                                     fileName.advance();
                                 } else {
                                     fileNameToUse = fileNameToTest;
@@ -503,15 +475,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                      */
                     {
                         String fileName = file.getFileName();
-                        List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0);
-                        boolean found = false;
-                        for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                            if (it.next().getFileName().equals(fileName)) {
-                                found = true;
-                            }
-                        }
-
-                        if (found) {
+                        if (containsFileName(searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0), fileName)) {
                             throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
                         }
                     }
@@ -550,31 +514,20 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 boolean hardDelete = isTrashed(fid, drive);
 
                 FileList childList = list.execute();
-                if (!childList.getFiles().isEmpty()) {
-                    for (com.google.api.services.drive.model.File child : childList.getFiles()) {
-                        if (hardDelete) {
-                            drive.files().delete(child.getId()).execute();
-                        } else {
-                            trashFile(drive, child.getId());
-                        }
-                    }
+                if (childList.getFiles().isEmpty()) {
+                    return null;
+                }
 
-                    String nextPageToken = childList.getNextPageToken();
-                    while (!isEmpty(nextPageToken)) {
-                        list.setPageToken(nextPageToken);
-                        childList = list.execute();
-                        if (!childList.getFiles().isEmpty()) {
-                            for (com.google.api.services.drive.model.File child : childList.getFiles()) {
-                                if (hardDelete) {
-                                    drive.files().delete(child.getId()).execute();
-                                } else {
-                                    trashFile(drive, child.getId());
-                                }
-                            }
-                        }
+                deleteFiles(drive, hardDelete, childList);
 
-                        nextPageToken = childList.getNextPageToken();
+                String nextPageToken = childList.getNextPageToken();
+                while (false == isEmpty(nextPageToken)) {
+                    list.setPageToken(nextPageToken);
+                    childList = list.execute();
+                    if (false == childList.getFiles().isEmpty()) {
+                        deleteFiles(drive, hardDelete, childList);
                     }
+                    nextPageToken = childList.getNextPageToken();
                 }
                 return null;
             }
@@ -604,24 +557,23 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     try {
                         if (hardDelete) {
                             drive.files().delete(id.getId()).execute();
+                            continue;
+                        }
+                        Boolean isTrashed = knownTrashFolders.get(id.getFolder());
+                        if (null == isTrashed) {
+                            isTrashed = Boolean.valueOf(isTrashed(toGoogleDriveFolderId(id.getFolder()), drive));
+                            knownTrashFolders.put(id.getFolder(), isTrashed);
+                        }
+                        if (isTrashed.booleanValue()) {
+                            drive.files().delete(id.getId()).execute();
                         } else {
-                            Boolean isTrashed = knownTrashFolders.get(id.getFolder());
-                            if (null == isTrashed) {
-                                isTrashed = Boolean.valueOf(isTrashed(toGoogleDriveFolderId(id.getFolder()), drive));
-                                knownTrashFolders.put(id.getFolder(), isTrashed);
-                            }
-                            if (isTrashed.booleanValue()) {
-                                drive.files().delete(id.getId()).execute();
-                            } else {
-                                trashFile(drive, id.getId());
-                            }
+                            trashFile(drive, id.getId());
                         }
                     } catch (final IOException e) {
-                        if (GoogleDriveConstants.SC_NOT_FOUND != GoogleDriveUtil.getStatusCode(e)) {
-                            ret.add(id);
-                        } else {
+                        if (GoogleDriveConstants.SC_NOT_FOUND == GoogleDriveUtil.getStatusCode(e)) {
                             throw e;
                         }
+                        ret.add(id);
                     }
                 }
                 return ret;
@@ -716,7 +668,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                  */
                 GoogleFileQueryBuilder builder = new GoogleFileQueryBuilder(QUERY_STRING_FILES_ONLY);
                 builder.searchForChildren(folderId);
-                
+
                 if (Long.MIN_VALUE != updateSince) {
                     builder.modificationDateGreaterThan(updateSince);
                 }
@@ -1047,7 +999,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param pattern The pattern to escape
      * @return The escaped pattern
      */
-    static String escape(String pattern) {
+    private String escape(String pattern) {
         if (null == pattern) {
             return pattern;
         }
@@ -1083,7 +1035,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @return The name of the file, eventually auto-incremented like <code>fileName(1)</code>
      * @throws IOException If listing files fails
      */
-    String getFileName(Drive drive, String destFolder, String name) throws IOException {
+    private String getFileName(Drive drive, String destFolder, String name) throws IOException {
         String fileName = name;
         String baseName;
         String ext;
@@ -1104,16 +1056,80 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             list.setQ(new GoogleFileQueryBuilder(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH).equalsName(fileName).searchForChildren(destFolder).build());
 
             FileList childList = list.execute();
-            if (!childList.getFiles().isEmpty()) {
-                fileName = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-            } else {
+            if (childList.getFiles().isEmpty()) {
                 keepOn = false;
+            } else {
+                fileName = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
             }
         }
         return fileName;
     }
 
-    boolean isFileNameChanged(Drive drive, File file) throws IOException {
+    private boolean isFileNameChanged(Drive drive, File file) throws IOException {
         return Strings.isNotEmpty(file.getFileName()) && false == drive.files().get(file.getId()).setFields(NAME.getField()).execute().getName().equals(file.getFileName());
+    }
+
+    /**
+     * Deletes the specified Files from the user's Drive.
+     * 
+     * @param drive The drive API
+     * @param hardDelete <code>true</code> to delete permanently, <code>false</code> to put them in trash
+     * @param childList The files to delete
+     * @throws IOException if an I/O error is occurred
+     */
+    private void deleteFiles(Drive drive, boolean hardDelete, FileList childList) throws IOException {
+        for (com.google.api.services.drive.model.File child : childList.getFiles()) {
+            if (hardDelete) {
+                drive.files().delete(child.getId()).execute();
+            } else {
+                trashFile(drive, child.getId());
+            }
+        }
+    }
+
+    /**
+     * Handles the file name change
+     * 
+     * @param update The updated metadata of the file
+     * @param modifiedFields The modified fields
+     * @param srcFile The source file
+     * @param toUpdate The update payload
+     */
+    private void handleNameChange(File update, List<Field> modifiedFields, com.google.api.services.drive.model.File srcFile, com.google.api.services.drive.model.File toUpdate) {
+        if (update == null) {
+            return;
+        }
+
+        if (false == isFileNameChanged(update, modifiedFields, srcFile)) {
+            return;
+        }
+        toUpdate.setName(update.getTitle());
+    }
+
+    /**
+     * Checks whether the file name was modified
+     * 
+     * @param update The updated metadata of the file
+     * @param modifiedFields The modified fields
+     * @param srcFile The source file
+     * @return <code>true</code> if the file name was modified, <code>false</code> otherwise
+     */
+    private boolean isFileNameChanged(File update, List<Field> modifiedFields, com.google.api.services.drive.model.File srcFile) {
+        return Strings.isNotEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getName());
+    }
+
+    /**
+     * Checks in the specified list with files
+     * 
+     * @param hits The list with the files
+     * @param filename The filename to search for
+     * @return <code>true</code> if the file is contained in the hits list, <code>false</code> otherwise
+     */
+    private boolean containsFileName(List<File> hits, String filename) {
+        for (File file : hits) {
+            if (file.getFileName().equals(filename))
+                return true;
+        }
+        return false;
     }
 }
