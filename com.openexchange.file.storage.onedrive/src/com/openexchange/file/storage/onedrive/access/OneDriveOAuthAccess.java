@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
+import org.scribe.model.Verifier;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
@@ -235,6 +236,8 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
      */
     private static class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
+        private static final String EMPTY_STRING = "";
+
         /**
          * Initialises a new {@link OneDriveOAuthAccess.OneDriveReauthorizeClusterTask}.
          */
@@ -263,9 +266,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             MicrosoftGraphApi.MicrosoftGraphService scribeOAuthService = (MicrosoftGraphApi.MicrosoftGraphService) serviceBuilder.build();
 
             try {
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), null);
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), new Verifier(EMPTY_STRING));
                 if (Strings.isEmpty(accessToken.getSecret())) {
-                    LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
+                    LOGGER.warn("Received invalid request_token from Microsoft Graph API: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
                 }
                 return accessToken;
             } catch (org.scribe.exceptions.OAuthException e) {
