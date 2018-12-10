@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphContactClientExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 import com.openexchange.rest.client.v2.RESTResponse;
 
@@ -142,7 +143,7 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
     public byte[] getContactPhoto(String contactId, String accessToken) throws OXException {
         String path = "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo/$value";
         RESTResponse restResponse = client.execute(createRequest(RESTMethod.GET, accessToken, path));
-        checkResponseBody(restResponse);
+        checkResponseBody(restResponse, contactId);
         return byte[].class.cast(restResponse.getResponseBody());
     }
 
@@ -152,16 +153,19 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
      * @param restResponse The {@link RESTResponse} to check
      * @throws OXException if the response body does not contain a byte array
      */
-    private void checkResponseBody(RESTResponse restResponse) throws OXException {
+    private void checkResponseBody(RESTResponse restResponse, String contactId) throws OXException {
         String contentType = restResponse.getHeader(HttpHeaders.CONTENT_TYPE);
         if (contentType.isEmpty()) {
-            throw new OXException(666, "No contact photo found.");
+            throw MicrosoftGraphContactClientExceptionCodes.NO_CONTACT_PHOTO_EMPTY_CONTENT_TYPE.create(contactId);
         }
-        if (!contentType.startsWith("image") || restResponse.getResponseBody() == null) {
-            throw new OXException(666, "No contact photo found.");
+        if (false == contentType.startsWith("image")) {
+            throw MicrosoftGraphContactClientExceptionCodes.NO_CONTACT_PHOTO_WRONG_CONTENT_TYPE.create(contactId, contentType);
         }
-        if (!(restResponse.getResponseBody() instanceof byte[])) {
-            throw new OXException(666, "No contact photo found.");
+        if (restResponse.getResponseBody() == null) {
+            throw MicrosoftGraphContactClientExceptionCodes.NO_CONTACT_PHOTO_EMPTY_RESPONSE_BODY.create(contactId);
+        }
+        if (false == (restResponse.getResponseBody() instanceof byte[])) {
+            throw MicrosoftGraphContactClientExceptionCodes.NO_CONTACT_PHOTO_WRONG_RESPONSE_BODY.create(restResponse.getResponseBody().getClass().getName());
         }
     }
 }

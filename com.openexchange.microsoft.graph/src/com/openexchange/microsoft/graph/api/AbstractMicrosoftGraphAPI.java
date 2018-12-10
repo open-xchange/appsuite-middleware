@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphClientExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 import com.openexchange.rest.client.v2.RESTResponse;
 import com.openexchange.rest.client.v2.entity.InputStreamEntity;
@@ -83,7 +84,7 @@ abstract class AbstractMicrosoftGraphAPI {
         super();
         this.client = client;
     }
-    
+
     //////////////////////////////// GET ///////////////////////////////////////
 
     /**
@@ -261,9 +262,12 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
         RESTResponse restResponse = client.execute(request);
-        if (restResponse.getResponseBody() != null && restResponse.getResponseBody() instanceof JSONObject) {
-            return JSONObject.class.cast(restResponse.getResponseBody());
+        if (restResponse.getResponseBody() == null) {
+            throw MicrosoftGraphClientExceptionCodes.NO_JSON_OBJECT_IN_RESPONSE.create();
         }
-        throw new OXException(666, "No JSONObject in response");
+        if (false == (restResponse.getResponseBody() instanceof JSONObject)) {
+            throw MicrosoftGraphClientExceptionCodes.RESPONSE_BODY_IS_NOT_JSON.create(restResponse.getResponseBody().getClass().getName());
+        }
+        return JSONObject.class.cast(restResponse.getResponseBody());
     }
 }
