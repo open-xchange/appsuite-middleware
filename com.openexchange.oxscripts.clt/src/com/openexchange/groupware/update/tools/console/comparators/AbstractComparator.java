@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tools.console.comparators;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 
@@ -58,8 +59,9 @@ import java.util.List;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-abstract class AbstractComparator implements Comparator<List<Object>> {
+abstract class AbstractComparator implements Comparator<List<Object>>, Serializable {
 
+    private static final long serialVersionUID = -2480717923936406913L;
     private final Class<?> clazz;
     private final int indexPosition;
 

@@ -59,6 +59,7 @@ import java.util.Date;
  */
 public class LastModifiedComparator extends AbstractComparator {
     
+    private static final long serialVersionUID = -7649815621234542779L;
     private static final int INDEX_POSITION = 2;
 
     /**
