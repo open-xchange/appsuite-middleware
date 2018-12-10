@@ -1,3 +1,9 @@
+open-xchange-client-onboarding (7.10.0-22) stable; urgency=medium
+
+  * Build for patch 2018-12-17 (5018)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 10 Dec 2018 15:15:20 +0100
+
 open-xchange-client-onboarding (7.10.0-21) stable; urgency=medium
 
   * Build for patch 2018-12-03 (4993)

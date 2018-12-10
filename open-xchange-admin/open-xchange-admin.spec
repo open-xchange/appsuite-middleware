@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 22
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -180,6 +180,8 @@ ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Mon Dec 10 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-12-17 (5018)
 * Mon Nov 26 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-12-03 (4993)
 * Mon Nov 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
