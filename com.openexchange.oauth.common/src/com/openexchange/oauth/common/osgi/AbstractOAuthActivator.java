@@ -77,7 +77,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public abstract class AbstractOAuthActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthActivator.class);
-    protected static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, ConfigViewFactory.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class, SSLConfigurationService.class };
+
+    //@formatter:off
+    protected static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, ConfigViewFactory.class, DeferringURLService.class, 
+        CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class, SSLConfigurationService.class };
+    //@formatter:on
 
     /**
      * Initialises a new {@link AbstractOAuthActivator}.
@@ -86,8 +90,18 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
         super();
     }
 
+    /**
+     * Creates a new {@link OAuthServiceMetaData} instance for the current service provider
+     * 
+     * @return The new {@link OAuthServiceMetaData}
+     */
     protected abstract OAuthServiceMetaData getOAuthServiceMetaData();
 
+    /**
+     * Returns an array with all valid scopes for this provider
+     * 
+     * @return an array with all valid scopes for this provider
+     */
     protected abstract OAuthScope[] getScopes();
 
     /*
@@ -124,15 +138,14 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, metadata.getAPI().getCapability());
             registerService(CapabilityChecker.class, (capability, session) -> {
-                if (metadata.getAPI().getCapability().equals(capability)) {
-                    ServerSession syntheticSession = ServerSessionAdapter.valueOf(session);
-                    if (syntheticSession.isAnonymous() || syntheticSession.getUser().isGuest()) {
-                        return false;
-                    }
-
-                    return metadata.isEnabled(session.getUserId(), session.getContextId());
+                if (false == metadata.getAPI().getCapability().equals(capability)) {
+                    return true;
                 }
-                return true;
+                ServerSession syntheticSession = ServerSessionAdapter.valueOf(session);
+                if (syntheticSession.isAnonymous() || syntheticSession.getUser().isGuest()) {
+                    return false;
+                }
+                return metadata.isEnabled(session.getUserId(), session.getContextId());
             }, properties);
 
             getService(CapabilityService.class).declareCapability(metadata.getAPI().getCapability());
@@ -142,7 +155,7 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
             scopeRegistry.registerScopes(metadata.getAPI(), scopes);
 
             LOG.info("Successfully initialized {} OAuth service", metadata.getAPI().getDisplayName());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not start-up {} OAuth service", metadata.getAPI().getDisplayName(), e);
             throw e;
         }
@@ -155,10 +168,15 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
-        //TODO: unregister 
-        // - capability checker
-        // - scopes
-        // - metadata
-        // - capability service
+        OAuthServiceMetaData metaData = getOAuthServiceMetaData();
+        OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
+        if (scopeRegistry != null) {
+            scopeRegistry.unregisterScopes(metaData.getAPI());
+        }
+
+        CapabilityService capabilityService = getService(CapabilityService.class);
+        if (capabilityService != null) {
+            capabilityService.undeclareCapability(metaData.getAPI().getCapability());
+        }
     }
 }
