@@ -999,7 +999,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param pattern The pattern to escape
      * @return The escaped pattern
      */
-    private String escape(String pattern) {
+    String escape(String pattern) {
         if (null == pattern) {
             return pattern;
         }
@@ -1035,7 +1035,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @return The name of the file, eventually auto-incremented like <code>fileName(1)</code>
      * @throws IOException If listing files fails
      */
-    private String getFileName(Drive drive, String destFolder, String name) throws IOException {
+    String getFileName(Drive drive, String destFolder, String name) throws IOException {
         String fileName = name;
         String baseName;
         String ext;
@@ -1065,7 +1065,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         return fileName;
     }
 
-    private boolean isFileNameChanged(Drive drive, File file) throws IOException {
+    boolean isFileNameChanged(Drive drive, File file) throws IOException {
         return Strings.isNotEmpty(file.getFileName()) && false == drive.files().get(file.getId()).setFields(NAME.getField()).execute().getName().equals(file.getFileName());
     }
 
@@ -1077,7 +1077,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param childList The files to delete
      * @throws IOException if an I/O error is occurred
      */
-    private void deleteFiles(Drive drive, boolean hardDelete, FileList childList) throws IOException {
+    void deleteFiles(Drive drive, boolean hardDelete, FileList childList) throws IOException {
         for (com.google.api.services.drive.model.File child : childList.getFiles()) {
             if (hardDelete) {
                 drive.files().delete(child.getId()).execute();
@@ -1095,7 +1095,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param srcFile The source file
      * @param toUpdate The update payload
      */
-    private void handleNameChange(File update, List<Field> modifiedFields, com.google.api.services.drive.model.File srcFile, com.google.api.services.drive.model.File toUpdate) {
+    void handleNameChange(File update, List<Field> modifiedFields, com.google.api.services.drive.model.File srcFile, com.google.api.services.drive.model.File toUpdate) {
         if (update == null) {
             return;
         }
@@ -1114,7 +1114,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param srcFile The source file
      * @return <code>true</code> if the file name was modified, <code>false</code> otherwise
      */
-    private boolean isFileNameChanged(File update, List<Field> modifiedFields, com.google.api.services.drive.model.File srcFile) {
+    boolean isFileNameChanged(File update, List<Field> modifiedFields, com.google.api.services.drive.model.File srcFile) {
         return Strings.isNotEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getName());
     }
 
@@ -1125,7 +1125,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param filename The filename to search for
      * @return <code>true</code> if the file is contained in the hits list, <code>false</code> otherwise
      */
-    private boolean containsFileName(List<File> hits, String filename) {
+    boolean containsFileName(List<File> hits, String filename) {
         for (File file : hits) {
             if (file.getFileName().equals(filename))
                 return true;
