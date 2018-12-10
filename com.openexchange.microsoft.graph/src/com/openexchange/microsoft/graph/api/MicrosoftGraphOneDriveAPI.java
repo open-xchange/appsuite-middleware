@@ -279,7 +279,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_copy">Copy a file or folder</a>
      */
     public String copyItemAsync(String accessToken, String itemId, JSONObject body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itmes/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.sethBodyEntity(new JSONObjectEntity(body));
@@ -469,9 +469,13 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param inputStream A stream with the actual data
      * @return A {@link JSONObject} with the metadata of the newly uploaded file.
      * @throws OXException if an error is occurred
+     * @throws IllegalArgumentException if the content length of the file is less than or equal to zero.
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_createuploadsession">Resumable Upload</a>
      */
     public JSONObject streamingUpload(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
+        if (contentLength <= 0) {
+            throw new IllegalArgumentException("The content length of the file must be greater than zero!");
+        }
         String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/createUploadSession";
         try {
             JSONObject body = new JSONObject();
