@@ -88,7 +88,7 @@ public final class PasswordChangeServlet extends SessionServlet {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PasswordChangeServlet.class);
 
-    private final ServiceLookup services;
+    private final transient ServiceLookup services;
 
     /**
      * Initializes a new {@link PasswordChangeServlet}
