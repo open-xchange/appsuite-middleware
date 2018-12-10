@@ -145,10 +145,10 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
         SessiondRMIService rmiService = getRmiStub(optRmiHostName, SessiondRMIService.RMI_NAME);
         if (userId > 0) {
             if (global) {
-                rmiService.clearUserSessionsGlobally(contextId, userId);
+                rmiService.clearUserSessionsGlobally(userId, contextId);
                 System.out.println("Globally cleared sessions for user " + userId + " in context " + contextId);
             } else {
-                rmiService.clearUserSessions(contextId, userId);
+                rmiService.clearUserSessions(userId, contextId);
                 System.out.println("Locally cleared sessions for user " + userId + " in context " + contextId);
             }
             return null;
