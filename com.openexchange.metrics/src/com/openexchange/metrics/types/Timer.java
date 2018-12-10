@@ -52,7 +52,6 @@ package com.openexchange.metrics.types;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link Timer}

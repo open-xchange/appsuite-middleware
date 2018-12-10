@@ -58,7 +58,7 @@ import com.openexchange.rest.client.session.Session;
  * {@link RESTRequest}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @deprecated
+ * @deprecated Use {@link com.openexchange.rest.client.v2.RESTRequest} instead.
  */
 public class RESTRequest {
 
