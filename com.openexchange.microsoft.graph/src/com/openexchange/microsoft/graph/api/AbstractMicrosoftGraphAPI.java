@@ -56,6 +56,8 @@ import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
@@ -74,6 +76,7 @@ import com.openexchange.rest.client.v2.entity.JSONObjectEntity;
  */
 abstract class AbstractMicrosoftGraphAPI {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMicrosoftGraphAPI.class);
     final MicrosoftGraphRESTClient client;
     static final String APPLICATION_JSON = "application/json";
 
@@ -266,6 +269,7 @@ abstract class AbstractMicrosoftGraphAPI {
             throw MicrosoftGraphClientExceptionCodes.NO_JSON_OBJECT_IN_RESPONSE.create();
         }
         if (false == (restResponse.getResponseBody() instanceof JSONObject)) {
+            LOGGER.debug("The response body does not contain a JSON object: {}", restResponse.getResponseBody());
             throw MicrosoftGraphClientExceptionCodes.RESPONSE_BODY_IS_NOT_JSON.create(restResponse.getResponseBody().getClass().getName());
         }
         return JSONObject.class.cast(restResponse.getResponseBody());

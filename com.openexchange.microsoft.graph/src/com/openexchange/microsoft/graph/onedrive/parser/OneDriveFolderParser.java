@@ -53,8 +53,11 @@ import java.text.ParseException;
 import java.util.Collections;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
+import com.openexchange.microsoft.graph.onedrive.exception.MicrosoftGraphDriveServiceExceptionCodes;
 
 /**
  * {@link OneDriveFolderParser}
@@ -77,16 +80,19 @@ public class OneDriveFolderParser {
      * Parses the specified {@link JSONObject} entity to an {@link OneDriveFolder}
      * 
      * @param userId The user identifier
+     * @param hasSubFolders Whether the specified entity has any sub-folders
      * @param entity The {@link JSONObject}
      * @return The {@link OneDriveFolder} or <code>null</code> if the entity is not a folder
+     * @throws OXException if the specified entity does not denote a folder
      */
-    public OneDriveFolder parseEntity(int userId, boolean hasSubFolders, JSONObject entity) {
-        if (!entity.hasAndNotNull("folder")) {
-            return null;
-        }
+    public @Nullable OneDriveFolder parseEntity(int userId, boolean hasSubFolders, @Nullable JSONObject entity) throws OXException {
         OneDriveFolder folder = new OneDriveFolder(userId);
         if (entity == null || entity.isEmpty()) {
             return folder;
+        }
+        if (false == entity.hasAndNotNull("folder")) {
+            LOG.debug("The entity is missing the 'folder' field: {}", entity);
+            throw MicrosoftGraphDriveServiceExceptionCodes.NOT_A_FOLDER.create();
         }
         folder.setId(entity.optString("id"));
         folder.setName(entity.optString("name"));

@@ -574,9 +574,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         for (int index = 0; index < entities.length(); index++) {
             JSONObject entity = entities.optJSONObject(index);
             String folderId = entity.optString("id");
-            OneDriveFolder folder = folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, folderId), entity);
-            if (folder != null) {
-                folders.add(folder);
+            try {
+                folders.add(folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, folderId), entity));
+            } catch (OXException e) {
+                LOG.debug("{}", e);
             }
         }
         return folders;
