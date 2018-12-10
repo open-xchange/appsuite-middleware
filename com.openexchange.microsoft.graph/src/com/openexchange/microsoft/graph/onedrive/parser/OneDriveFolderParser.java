@@ -51,6 +51,8 @@ package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
+import java.util.function.Consumer;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.annotation.Nullable;
@@ -112,21 +114,24 @@ public class OneDriveFolderParser {
 
         JSONObject fileSystemInfo = entity.optJSONObject("fileSystemInfo");
         if (fileSystemInfo != null && !fileSystemInfo.isEmpty()) {
-            String createdAt = fileSystemInfo.optString("createdDateTime");
-            try {
-                folder.setCreationDate(ISO8601DateParser.parse(createdAt));
-            } catch (ParseException e) {
-                LOG.warn("Could not parse date from: {}", createdAt, e);
-            }
-            String modifiedAt = fileSystemInfo.optString("lastModifiedDateTime");
-            try {
-                folder.setLastModifiedDate(ISO8601DateParser.parse(createdAt));
-            } catch (ParseException e) {
-                LOG.warn("Could not parse date from: {}", modifiedAt, e);
-            }
+            setDate(d -> folder.setCreationDate(d), fileSystemInfo.optString("createdDateTime"));
+            setDate(d -> folder.setLastModifiedDate(d), fileSystemInfo.optString("lastModifiedDateTime"));
             folder.setSubfolders(hasSubFolders);
             folder.setSubscribedSubfolders(hasSubFolders);
         }
         return folder;
+    }
+
+    /**
+     * Parses and sets the date via the specified consumer
+     * 
+     * @param date The date to parse and set
+     */
+    private void setDate(Consumer<Date> consumer, String date) {
+        try {
+            consumer.accept(ISO8601DateParser.parse(date));
+        } catch (ParseException e) {
+            LOG.warn("Could not parse date from: {}", date, e);
+        }
     }
 }
