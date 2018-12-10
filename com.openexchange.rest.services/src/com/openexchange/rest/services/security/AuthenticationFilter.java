@@ -51,8 +51,9 @@ package com.openexchange.rest.services.security;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -75,6 +76,7 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.RequestContext;
@@ -137,7 +139,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             return null;
         }
 
-        try (BufferedReader bf = new BufferedReader(new FileReader(file), 2048)) {
+        try (BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.UTF_8), 2048)) {
             String line = null;
             while ((line = bf.readLine()) != null) {
                 if (line.startsWith("#")) {
