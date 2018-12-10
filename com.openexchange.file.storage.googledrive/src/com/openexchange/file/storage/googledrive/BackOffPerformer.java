@@ -53,6 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -66,7 +68,7 @@ import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
 /**
- * {@link BackOffPerformer}
+ * {@link BackOffPerformer} - Implements the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/errors#backoff">exponential backoff</a> as described by Google.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
@@ -88,7 +90,7 @@ abstract class BackOffPerformer<T> {
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      */
-    public BackOffPerformer(final GoogleDriveOAuthAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
+    public BackOffPerformer(@NonNull GoogleDriveOAuthAccess googleDriveAccess, @NonNull FileStorageAccount account, @NonNull Session session) {
         super();
         this.googleDriveAccess = googleDriveAccess;
         this.account = account;
@@ -98,11 +100,30 @@ abstract class BackOffPerformer<T> {
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
+    /**
+     * Performs the actual request to the Drive API. Do <b>NOT</b> implement the backoff mechanism on your own. Use {@link #perform(String)}
+     * 
+     * @return The result for the Drive API call
+     * @throws OXException In case some rate limit is exceeded. Wraps exceptions send by Google into OXExceptions.
+     * @throws IOException In case call to Drive API fails
+     * @throws RuntimeException In case call to Drive API fails
+     */
     abstract T perform() throws OXException, IOException, RuntimeException;
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
-    protected T perform(String identifier) throws OXException {
+    /**
+     * Performs the request to the Drive API by utilizing {@link #perform()}. <p>
+     * If the request fails we try again after
+     * <code>number_off_tries * 1 second + random_milliseconds()</code>
+     * implementing the backoff mechanism described by Google.
+     * 
+     * @param identifier Identifier to use in the error {@link FileStorageExceptionCodes#FILE_NOT_FOUND}.
+     *            If not set the error {@link FileStorageExceptionCodes#PROTOCOL_ERROR} is used.
+     * @return The result for the Drive API call
+     * @throws OXException In case some rate limit is exceeded. Wraps exceptions send by Google into OXExceptions.
+     */
+    public T perform(@Nullable String identifier) throws OXException {
         try {
             return perform();
         } catch (final IOException e) {
@@ -147,12 +168,15 @@ abstract class BackOffPerformer<T> {
      * 
      * 
      * 
-     * @param identifier The identifier of the resource that was asked fore, e.g. the folder identifier
-     * @param e The {@link IOException}
+     * @param identifier The identifier of the resource that was asked fore, e.g. the folder identifier. <p>
+     *              For the error code {@link GoogleDriveConstants#SC_NOT_FOUND} following applies:
+     *              If set the exception {@link FileStorageExceptionCodes#FILE_NOT_FOUND} is used, 
+     *              If the identifier is <code>null</code> the exception {@link FileStorageExceptionCodes#PROTOCOL_ERROR} is used.
+     * @param e The {@link IOException} to handle
      * @return An fitting {@link OXException}
      */
     //@formatter:on
-    private OXException handleIOError(String identifier, IOException e) {
+    private OXException handleIOError(@Nullable String identifier, @NonNull IOException e) {
         String errorMessage = e.getMessage();
         int statusCode = GoogleDriveUtil.getStatusCode(e);
         switch (statusCode) {
@@ -207,7 +231,7 @@ abstract class BackOffPerformer<T> {
      * @return <code>true</code> if the exception was caused due to an 'invalid_grant'; <code>false</code>
      *         otherwise
      */
-    private boolean hasInvalidGrant(String content) {
+    private boolean hasInvalidGrant(@Nullable String content) {
         return Strings.isNotEmpty(content) && content.contains("invalid_grant");
     }
 
