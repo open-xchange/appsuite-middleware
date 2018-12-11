@@ -47,38 +47,46 @@
  *
  */
 
-package com.openexchange.groupware.upgrade;
+package com.openexchange.share;
 
-import com.openexchange.annotation.Nullable;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link SegmentedUpdateService}
+ * {@link ShareProperty}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
-public interface SegmentedUpdateService {
+public enum ShareProperty implements Property {
+    /**
+     * <p>Specifies the redirect URI/URL during cluster migration to which a client
+     * is redirected in case is landed on an unsuitable node (running incompatible
+     * application code).</p>
+     * <p>E.g. a user gets routed to a node running application code in version X,
+     * but that account has already been migrated to application code in version Y.</p>
+     * <p>No default value</p>
+     */
+    migrationRedirectURL(ShareProperty.EMPTY);
+
+    private static final String EMPTY = "";
+    private static final String PREFIX = "com.openexchange.share.";
+
+    private final Object defaultValue;
 
     /**
-     * Returns the configured migrationRedirectURL by consulting the configuration for defined hosts (as-config.yml)
-     * and falling back to server configuration (server.properties) if no URL was defined for the host.
-     * 
-     * @param host The host for which to get the migrationRedirectURL (<code>null</code> if no host is configured)
-     * @return The redirect URL for mentioned host (if configured) or <code>null</code> if no configuration can be found.
-     * @throws OXException if an error is occurred
+     * Initialises a new {@link ShareProperty}.
      */
-    @Nullable
-    String getMigrationRedirectURL(@Nullable String host) throws OXException;
+    private ShareProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
 
-    /**
-     * Returns the configured migrationRedirectURL for sharing by consulting the configuration for defined hosts (as-config.yml)
-     * and falling back to server configuration (server.properties) if no URL was defined for the host.
-     * 
-     * @param host The host for which to get the migrationRedirectURL (<code>null</code> if no host is configured)
-     * @return The redirect URL for mentioned host (if configured) or <code>null</code> if no configuration can be found.
-     * @throws OXException if an error is occurred
-     */
-    @Nullable
-    String getSharingMigrationRedirectURL(@Nullable String host) throws OXException;
+    @Override
+    public String getFQPropertyName() {
+        return PREFIX + name();
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 }

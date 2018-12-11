@@ -55,12 +55,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.configuration.ServerProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.share.ShareProperty;
 
 /**
  * {@link SegmentedUpdateServiceImpl}
@@ -86,12 +88,35 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
      */
     @Override
     public @Nullable String getMigrationRedirectURL(@Nullable String host) throws OXException {
-        String migrationRedirectURL = getFor(host);
+        return getProperty(host, ServerProperty.migrationRedirectURL);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.upgrade.SegmentedUpdateService#getSharingMigrationRedirectURL(java.lang.String)
+     */
+    @Override
+    public String getSharingMigrationRedirectURL(String host) throws OXException {
+        return getProperty(host, ShareProperty.migrationRedirectURL);
+    }
+
+    /**
+     * Retrieves the requested {@link Property} by first checking in the 'as-config.yaml'
+     * and then trying the lean configuration
+     * 
+     * @param host the host
+     * @param property The property to fetch
+     * @return The value of the property
+     * @throws OXException if the property cannot be retrieved or any other error is occurred
+     */
+    private String getProperty(String host, Property property) throws OXException {
+        String migrationRedirectURL = getFor(host, property);
         if (Strings.isEmpty(migrationRedirectURL)) {
-            migrationRedirectURL = getFromLean();
+            migrationRedirectURL = getFromLean(property);
         }
         if (Strings.isEmpty(migrationRedirectURL)) {
-            LOG.warn("The property '{}' is not set.", ServerProperty.migrationRedirectURL);
+            LOG.warn("The property '{}' is not set.", property);
         }
         return migrationRedirectURL;
     }
@@ -103,14 +128,14 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
      * @return The migrationURL if present, <code>null</code> if not configured or if the <code>host</code> is <code>null</code>.
      * @throws OXException if an error is occurred
      */
-    private @Nullable String getFor(@Nullable String host) throws OXException {
+    private @Nullable String getFor(@Nullable String host, Property property) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
         if (serverConfigService == null || Strings.isEmpty(host)) {
             return null;
         }
         List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
         for (Map<String, Object> map : customHostConfigurations) {
-            Object object = map.get(ServerProperty.migrationRedirectURL.getFQPropertyName());
+            Object object = map.get(property.getFQPropertyName());
             if (object == null || false == (object instanceof String)) {
                 continue;
             }
@@ -126,12 +151,12 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
      * 
      * @return The migration URL or <code>null</code> if not configured.
      */
-    private String getFromLean() {
+    private String getFromLean(Property property) {
         LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
         if (leanConfigService == null) {
             return null;
         }
-        String migrationRedirectURL = leanConfigService.getProperty(ServerProperty.migrationRedirectURL);
+        String migrationRedirectURL = leanConfigService.getProperty(property);
         LOG.debug("Use the following migrationRedirectURL taken from server configuration: {}", migrationRedirectURL);
         return migrationRedirectURL;
     }
