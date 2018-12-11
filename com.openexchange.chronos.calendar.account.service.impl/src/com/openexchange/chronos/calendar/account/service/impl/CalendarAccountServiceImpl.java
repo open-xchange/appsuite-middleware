@@ -325,6 +325,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                         JSONObject userConfig = new JSONObject();
                         JSONObject internalConfig = calendarProvider.autoConfigureAccount(session, userConfig, parameters);
                         CalendarAccount account = insertAccount(storage.getAccountStorage(), calendarProvider.getId(), session.getUserId(), internalConfig, userConfig, maxAccounts);
+                        if (account == null) {
+                            LOG.warn("Failed to auto-provision account for user '{}' in context '{}'", session.getUserId(), session.getContextId());
+                            continue;
+                        }
                         calendarProvider.onAccountCreated(session, account, parameters);
                         accounts.add(account);
                     }
