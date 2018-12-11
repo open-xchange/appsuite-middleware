@@ -260,9 +260,6 @@ public class ShareServlet extends AbstractShareServlet {
                 SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class, true);
                 String migrationRedirectURL = segmentedUpdateService.getSharingMigrationRedirectURL(request.getServerName());
                 if (Strings.isEmpty(migrationRedirectURL)) {
-                    migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
-                }
-                if (Strings.isEmpty(migrationRedirectURL)) {
                     LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
                     LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                     LoginLocationRegistry.getInstance().putAndRedirect(location, response);
