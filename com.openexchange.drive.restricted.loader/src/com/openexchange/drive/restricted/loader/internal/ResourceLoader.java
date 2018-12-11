@@ -47,53 +47,26 @@
  *
  */
 
-package com.openexchange.drive.events.gcm.osgi;
+package com.openexchange.drive.restricted.loader.internal;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.gcm.GCMKeyProvider;
-import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.drive.restricted.loader.StringsProvider;
 
 /**
- * {@link GCMActivator}
+ * {@link ResourceLoader} - Load resources from 'restricted'-fragments/bundles
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.2
  */
-public class GCMActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMActivator.class);
+public interface ResourceLoader {
 
     /**
-     * Initializes a new {@link GCMActivator}.
+     * Load resources from fragment bundle into config cascade.
      */
-    public GCMActivator() {
-        super();
-    }
+    void load(ConfigView view, StringsProvider strings);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { GCMKeyProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
-        /*
-         * register publisher
-         */
-        getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
-        super.stopBundle();
-    }
+    /**
+     * Remove resources from config cascade.
+     */
+    void unload(ConfigView view, StringsProvider provider);
 }

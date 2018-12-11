@@ -47,53 +47,37 @@
  *
  */
 
-package com.openexchange.drive.events.gcm.osgi;
+package com.openexchange.pns.loader.osgi;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.gcm.GCMKeyProvider;
-import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Stack;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.LoggerFactory;
+import com.openexchange.osgi.Tools;
+import com.openexchange.pns.loader.ClientIdentifierProvider;
 
-/**
- * {@link GCMActivator}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- */
-public class GCMActivator extends HousekeepingActivator {
+public class PnsLoaderActivator implements BundleActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMActivator.class);
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
     /**
-     * Initializes a new {@link GCMActivator}.
+     * Initializes a new {@link PnsLoaderActivator}.
      */
-    public GCMActivator() {
+    public PnsLoaderActivator() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
+    public void start(BundleContext context) {
+        LoggerFactory.getLogger(PnsLoaderActivator.class).info("Starting bundle \"com.openexchange.pns.loader\".");
+        trackers.push(new ServiceTracker<ClientIdentifierProvider, ClientIdentifierProvider>(context, ClientIdentifierProvider.class, new PushSecretsRegisterer(context)));
+        Tools.open(trackers);
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { GCMKeyProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
-        /*
-         * register publisher
-         */
-        getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
-        super.stopBundle();
+    public void stop(BundleContext context) {
+        LoggerFactory.getLogger(PnsLoaderActivator.class).info("Stopping bundle \"com.openexchange.pns.loader\".");
+        Tools.close(trackers);
     }
 }

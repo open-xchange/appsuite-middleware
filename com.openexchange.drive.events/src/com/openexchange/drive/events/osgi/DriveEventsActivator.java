@@ -61,8 +61,10 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
+import com.openexchange.drive.events.internal.DriveStringsProvider;
 import com.openexchange.drive.events.ms.MsDriveEventHandler;
 import com.openexchange.drive.events.ms.PortableDriveEventFactory;
+import com.openexchange.drive.restricted.loader.StringsProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -99,6 +101,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.drive.events\"");
         DriveEventServiceLookup.set(this);
+        registerService(StringsProvider.class, new DriveStringsProvider());
         final DriveEventServiceImpl service = new DriveEventServiceImpl();
         registerService(DriveEventService.class, service);
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,43 @@
  *
  */
 
-package com.openexchange.drive.events.gcm.osgi;
+package com.openexchange.pns.transport.apn;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.gcm.GCMKeyProvider;
-import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+
 
 /**
- * {@link GCMActivator}
+ * {@link DefaultApnOptionsProvider}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class GCMActivator extends HousekeepingActivator {
+public class DefaultApnOptionsProvider implements ApnOptionsProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMActivator.class);
+    private final Map<String, ApnOptions> options;
 
     /**
-     * Initializes a new {@link GCMActivator}.
+     * Initializes a new {@link DefaultApnOptionsProvider}.
      */
-    public GCMActivator() {
+    public DefaultApnOptionsProvider(Map<String, ApnOptions> options) {
         super();
+        this.options = options;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
+    public ApnOptions getOptions(String client) {
+        return options.get(client);
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { GCMKeyProvider.class };
+    public Collection<ApnOptionsPerClient> getAvailableOptions() {
+        Collection<ApnOptionsPerClient> col = new ArrayList<>(options.size());
+        for (Map.Entry<String, ApnOptions> entry : options.entrySet()) {
+            col.add(new ApnOptionsPerClient(entry.getKey(), entry.getValue()));
+        }
+        return col;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
-        /*
-         * register publisher
-         */
-        getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
-        super.stopBundle();
-    }
 }

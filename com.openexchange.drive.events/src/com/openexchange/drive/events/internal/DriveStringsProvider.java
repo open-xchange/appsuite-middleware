@@ -47,53 +47,74 @@
  *
  */
 
-package com.openexchange.drive.events.gcm.osgi;
+package com.openexchange.drive.events.internal;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.gcm.GCMKeyProvider;
-import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.drive.restricted.loader.StringsProvider;
 
 /**
- * {@link GCMActivator}
+ * {@link DriveStringsProvider} provides the necessary property and file names for loading Drive GCM secrets and APN certificates.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since v7.10.2
  */
-public class GCMActivator extends HousekeepingActivator {
+public class DriveStringsProvider implements StringsProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMActivator.class);
-
-    /**
-     * Initializes a new {@link GCMActivator}.
-     */
-    public GCMActivator() {
+    public DriveStringsProvider() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
+    public String getPropertiesFilename() {
+        return "drive.properties";
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { GCMKeyProvider.class };
+    public String getGCMSecretPropertyName() {
+        return "com.openexchange.drive.events.gcm.key";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
-        /*
-         * register publisher
-         */
-        getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
+    public String getGCMSecretEnabledPropertyName() {
+        return "com.openexchange.drive.events.gcm.enabled";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
-        super.stopBundle();
+    public String getAPNiOSEnabledPropertyName() {
+        return "com.openexchange.drive.events.apn.ios.enabled";
+    }
+
+    @Override
+    public String getAPNiOSKeystorePropertyName() {
+        return "com.openexchange.drive.events.apn.ios.keystore";
+    }
+
+    @Override
+    public String getAPNiOSPasswordPropertyName() {
+        return "com.openexchange.drive.events.apn.ios.password";
+    }
+
+    @Override
+    public String getAPNiOSProductionPropertyName() {
+        return "com.openexchange.drive.events.apn.ios.production";
+    }
+
+    @Override
+    public String getAPNmacOSEnabledPropertyName() {
+        return "com.openexchange.drive.events.apn.macos.enabled";
+    }
+
+    @Override
+    public String getAPNmacOSKeystorePropertyName() {
+        return "com.openexchange.drive.events.apn.macos.keystore";
+    }
+
+    @Override
+    public String getAPNmacOSPasswordPropertyName() {
+        return "com.openexchange.drive.events.apn.macos.password";
+    }
+
+    @Override
+    public String getAPNmacOSProductionPropertyName() {
+        return "com.openexchange.drive.events.apn.macos.production";
     }
 }

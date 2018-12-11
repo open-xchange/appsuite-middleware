@@ -47,46 +47,27 @@
  *
  */
 
-package com.openexchange.pns.transport.apn.internal;
+package com.openexchange.pns.mobile.api.facade.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.pns.transport.apn.ApnOptions;
-import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
-import com.openexchange.pns.transport.apn.ApnOptionsProvider;
-
+import com.openexchange.pns.loader.ClientIdentifierProvider;
 
 /**
- * {@link DefaultApnOptionsProvider}
+ * {@link DefaultMailAppIdentifier} - Provides the default client identifier for the Mail App.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.2
  */
-public class DefaultApnOptionsProvider implements ApnOptionsProvider {
-
-    private final Map<String, ApnOptions> options;
+public class OXBrandingMailApp implements ClientIdentifierProvider {
 
     /**
-     * Initializes a new {@link DefaultApnOptionsProvider}.
+     * Initializes a new {@link DefaultMailAppIdentifier}.
      */
-    public DefaultApnOptionsProvider(Map<String, ApnOptions> options) {
+    public OXBrandingMailApp() {
         super();
-        this.options = options;
     }
 
     @Override
-    public ApnOptions getOptions(String client) {
-        return options.get(client);
+    public String getClient() {
+        return "open-xchange-mobile-api-facade";
     }
-
-    @Override
-    public Collection<ApnOptionsPerClient> getAvailableOptions() {
-        Collection<ApnOptionsPerClient> col = new ArrayList<>(options.size());
-        for (Map.Entry<String, ApnOptions> entry : options.entrySet()) {
-            col.add(new ApnOptionsPerClient(entry.getKey(), entry.getValue()));
-        }
-        return col;
-    }
-
 }

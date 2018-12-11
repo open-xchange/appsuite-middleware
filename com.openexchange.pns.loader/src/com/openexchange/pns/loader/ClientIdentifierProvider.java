@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,22 @@
  *
  */
 
-package com.openexchange.drive.events.gcm.osgi;
+package com.openexchange.pns.loader;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.gcm.GCMKeyProvider;
-import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GCMActivator}
+ * {@link ClientIdentifierProvider} - Provides the identifier of the client, which is supposed to receive push notifications.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-public class GCMActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMActivator.class);
+public interface ClientIdentifierProvider {
 
     /**
-     * Initializes a new {@link GCMActivator}.
+     * Gets the identifier of the push client.
+     *
+     * @return The client identifier
      */
-    public GCMActivator() {
-        super();
-    }
+    String getClient();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { GCMKeyProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
-        /*
-         * register publisher
-         */
-        getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
-        super.stopBundle();
-    }
 }

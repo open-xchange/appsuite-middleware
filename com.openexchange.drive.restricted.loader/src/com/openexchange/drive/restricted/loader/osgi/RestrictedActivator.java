@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,46 +47,47 @@
  *
  */
 
-package com.openexchange.pns.transport.gcm.internal;
+package com.openexchange.drive.restricted.loader.osgi;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.pns.transport.gcm.GcmOptions;
-import com.openexchange.pns.transport.gcm.GcmOptionsPerClient;
-import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
-
+import java.util.Stack;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.drive.restricted.loader.StringsProvider;
+import com.openexchange.osgi.Tools;
 
 /**
- * {@link DefaultGcmOptionsProvider}
+ * {@link RestrictedActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.2
  */
-public class DefaultGcmOptionsProvider implements GcmOptionsProvider {
+public class RestrictedActivator implements BundleActivator {
 
-    private final Map<String, GcmOptions> options;
+    private static final Logger LOG = LoggerFactory.getLogger(RestrictedActivator.class);
 
-    /**
-     * Initializes a new {@link DefaultGcmOptionsProvider}.
-     */
-    public DefaultGcmOptionsProvider(Map<String, GcmOptions> options) {
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+
+    public RestrictedActivator() {
         super();
-        this.options = options;
     }
 
     @Override
-    public GcmOptions getOptions(String client) {
-        return options.get(client);
+    public void start(BundleContext context) throws Exception {
+        LOG.info("Starting bundle \"com.openexchange.restricted\".");
+        Filter filter = Tools.generateServiceFilter(context, ConfigViewFactory.class, StringsProvider.class);
+        StringsProviderCustomizer customizer = new StringsProviderCustomizer(context);
+        trackers.push(new ServiceTracker<>(context, filter, customizer));
+        Tools.open(trackers);
     }
 
     @Override
-    public Collection<GcmOptionsPerClient> getAvailableOptions() {
-        Collection<GcmOptionsPerClient> col = new ArrayList<>(options.size());
-        for (Map.Entry<String, GcmOptions> entry : options.entrySet()) {
-            col.add(new GcmOptionsPerClient(entry.getKey(), entry.getValue()));
-        }
-        return col;
+    public void stop(BundleContext context) {
+        LOG.info("Stopping bundle \"com.openexchange.restricted\".");
+        Tools.close(trackers);
     }
-
 }

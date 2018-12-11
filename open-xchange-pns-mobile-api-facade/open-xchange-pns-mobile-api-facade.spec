@@ -7,7 +7,7 @@ BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-BuildRequires: open-xchange-core
+BuildRequires: open-xchange-pns-impl
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
@@ -23,7 +23,6 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Mobile API Facade for Push Notification Service
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-pns-impl >= @OXVERSION@
 
 %description

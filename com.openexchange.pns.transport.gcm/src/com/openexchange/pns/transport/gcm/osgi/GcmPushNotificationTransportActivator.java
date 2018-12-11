@@ -67,9 +67,9 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.transport.gcm.DefaultGcmOptionsProvider;
 import com.openexchange.pns.transport.gcm.GcmOptions;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
-import com.openexchange.pns.transport.gcm.internal.DefaultGcmOptionsProvider;
 import com.openexchange.pns.transport.gcm.internal.GcmPushNotificationTransport;
 
 
