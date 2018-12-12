@@ -101,6 +101,21 @@ postFix() {
 
     # SoftwareChange_Request-147
     ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
+
+    SCR=SCR-338
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/plugin/hosting.properties
+      prop_key=CONTEXT_STORAGE
+      old_default=com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage
+      new_default=com.openexchange.admin.plugin.hosting.storage.mysqlStorage.OXContextMySQLStorage
+      curr_val=$(ox_read_property ${prop_key} ${pfile})
+      if [ "${old_default}" = "${curr_val}" ]
+      then
+        ox_set_property ${prop_key} ${new_default} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
 }
 
 setConfigFilePermissions() {
