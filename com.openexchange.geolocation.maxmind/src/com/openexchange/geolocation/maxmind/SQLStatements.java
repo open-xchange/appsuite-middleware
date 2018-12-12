@@ -47,40 +47,53 @@
  *
  */
 
-package com.openexchange.geolocation;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+package com.openexchange.geolocation.maxmind;
 
 /**
- * {@link GeoLocationService} - Provides Geographical information for a given IP address
- * or a set of GPS coordinates.
+ * {@link SQLStatements}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.8.4
+ * @since v7.10.2
  */
-public interface GeoLocationService {
+final class SQLStatements {
 
     /**
-     * Retrieves the {@link GeoInformation} of the specified IP address
-     * @param session The groupware session
-     * @param ipAddress The IP address as string
-     *
-     * @return The Geographical information for the specified IP address
-     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
-     */
-    GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException;
-
-    /**
+     * The SQL version of the <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a><br/>
      * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param accuracyRadius
-     * @return
-     * @throws OXException
+     * Selects a location by a set of GPS coordinates. Values for the parameters:
+     * <li>radius of the earth (either miles or kilometres)</li>
+     * <li>latitude</li>
+     * <li>longitude</li>
+     * <li>latitude</li>
+     * <li>distance filter (either miles or kilometres, the measuring unit have to be consistent with the earth's radius measuring unit)</li>
+     * <li>maximum results</li>
      */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException;
+    //@formatter:off
+    static String SELECT_BY_GPS_COORDINATES = "SELECT" + 
+        "    l.continent_name, l.country_name, l.city_name, l.subdivision_1_name, l.subdivision_2_name, i.postal_code, " + 
+        "    ( ? " + 
+        "      * acos( cos( radians(?) ) " + 
+        "              * cos(  radians( latitude )   ) " + 
+        "              * cos(  radians( longitude ) - radians(?) ) " + 
+        "            + sin( radians(?) ) " + 
+        "              * sin( radians( latitude ) ) " + 
+        "            ) " + 
+        "    ) " + 
+        "    AS distance " + 
+        "FROM ip_blocks AS i JOIN ip_locations AS l ON (i.geoname_id=l.geoname_id) " + 
+        "HAVING distance < ? " + 
+        "ORDER BY distance " + 
+        "LIMIT 0,?;";
+    //@formatter:on
 
+    /**
+     * Selects a country by IP
+     */
+    //@formatter:off
+    static String SELECT_BY_IP_ADDRESS = "SELECT l.continent_name, l.country_name, l.city_name, l.subdivision_1_name, l.subdivision_2_name, i.postal_code " + 
+        "FROM ip_blocks AS i JOIN ip_locations AS l ON (i.geoname_id=l.geoname_id) " + 
+        "WHERE " + 
+        "? BETWEEN i.ip_from AND i.ip_to " + 
+        "LIMIT 1;";
+    //@formatter:on
 }

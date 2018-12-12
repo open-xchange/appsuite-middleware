@@ -49,38 +49,73 @@
 
 package com.openexchange.geolocation;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.java.Strings;
 
 /**
- * {@link GeoLocationService} - Provides Geographical information for a given IP address
- * or a set of GPS coordinates.
+ * {@link GeoLocationUtils}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.8.4
+ * @since v7.10.2
  */
-public interface GeoLocationService {
+public final class GeoLocationUtils {
 
     /**
-     * Retrieves the {@link GeoInformation} of the specified IP address
-     * @param session The groupware session
-     * @param ipAddress The IP address as string
-     *
-     * @return The Geographical information for the specified IP address
-     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
+     * The first octet multiplier/divisor for the IP address, i.e. <code>16777216</code>
      */
-    GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException;
+    private static final int O1 = (int) Math.pow(2, 24);
+    /**
+     * The second octet multiplier/divisor for the IP address, i.e. <code>65536</code>
+     */
+    private static final int O2 = (int) Math.pow(2, 16);
+    /**
+     * The second octet multiplier/divisor for the IP address, i.e. <code>256</code>
+     */
+    private static final int O3 = (int) Math.pow(2, 8);
 
     /**
+     * Converts the specified IPv4 address to its integer representation
      * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param accuracyRadius
-     * @return
-     * @throws OXException
+     * @param ipAddress The IPv4 address to convert
+     * @return The integer representation of the IPv4 address
+     * @throws OXException if the specified IPv4 address is invalid
      */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException;
+    public static int convertIp(String ipAddress) throws OXException {
+        validate(ipAddress);
+        String[] split = ipAddress.split("\\.");
+        return Integer.parseInt(split[0]) * O1 + Integer.parseInt(split[1]) * O2 + Integer.parseInt(split[2]) * O3 + Integer.parseInt(split[3]);
+    }
 
+    /**
+     * Converts the specified integer to an IP address
+     * 
+     * @param ipAddress The integer version of the ip address
+     * @return The ip address as a string
+     * @throws OXException if the specified integer did not yield a valid IPv4 address
+     */
+    public static String convertIp(int ipAddress) throws OXException {
+        int p1 = (ipAddress / O1) % O3;
+        int p2 = (ipAddress / O2) % O3;
+        int p3 = (ipAddress / O3) % O3;
+        int p4 = ipAddress % O3;
+        String ipStr = Strings.concat(".", p1, p2, p3, p4);
+        validate(ipStr);
+        return ipStr;
+    }
+
+    /**
+     * Determines whether the specified IP address is valid
+     *
+     * @param ipAddress The IP address to validate
+     * @throws OXException If the specified IP address is invalid
+     */
+    private static void validate(String ipAddress) throws OXException {
+        try {
+            InetAddress.getByName(ipAddress);
+        } catch (UnknownHostException e) {
+            throw GeoLocationExceptionCodes.UNABLE_TO_RESOLVE_HOST.create(e, ipAddress);
+        }
+    }
 }

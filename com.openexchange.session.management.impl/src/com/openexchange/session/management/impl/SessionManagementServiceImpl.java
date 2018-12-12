@@ -258,7 +258,6 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
         String ipAddress = s.getLocalIp();
-
         try {
             InetAddress address = InetAddress.getByName(ipAddress);
             if (address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()) {
@@ -284,8 +283,10 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
         if (null != geoLocationService) {
             try {
-                GeoInformation geoInformation = geoLocationService.getGeoInformation(ipAddress);
-
+                GeoInformation geoInformation = geoLocationService.getGeoInformation(s, ipAddress);
+                if (null == geoInformation) {
+                    return getDefaultLocation(s);
+                }
                 StringBuilder sb = null;
                 if (geoInformation.hasCity()) {
                     sb = new StringBuilder(geoInformation.getCity());
@@ -311,5 +312,4 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         ip2locationCache.put(ipAddress, def);
         return def;
     }
-
 }

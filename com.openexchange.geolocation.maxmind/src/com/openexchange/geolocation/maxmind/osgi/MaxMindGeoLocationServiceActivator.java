@@ -49,7 +49,6 @@
 
 package com.openexchange.geolocation.maxmind.osgi;
 
-import static com.openexchange.geolocation.maxmind.MaxMindGeoLocationService.newInstance;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -95,9 +94,7 @@ public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator im
     }
 
     private void registerMaxMindGeoLocationService() throws Exception {
-        MaxMindGeoLocationService maxMindGeoLocationService = newInstance(context.getBundle(), getService(ConfigurationService.class));
-        this.maxMindGeoLocationService = maxMindGeoLocationService;
-        serviceRegistration = context.registerService(GeoLocationService.class, maxMindGeoLocationService, null);
+        serviceRegistration = context.registerService(GeoLocationService.class, new MaxMindGeoLocationService(this), null);
     }
 
     private void unregisterMaxMindGeoLocationService() {
@@ -110,7 +107,6 @@ public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator im
         MaxMindGeoLocationService maxMindGeoLocationService = this.maxMindGeoLocationService;
         if (null != maxMindGeoLocationService) {
             this.maxMindGeoLocationService = null;
-            maxMindGeoLocationService.stop();
         }
     }
 

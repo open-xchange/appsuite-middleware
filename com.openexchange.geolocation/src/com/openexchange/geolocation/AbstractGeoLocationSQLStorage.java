@@ -49,38 +49,18 @@
 
 package com.openexchange.geolocation;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link GeoLocationService} - Provides Geographical information for a given IP address
- * or a set of GPS coordinates.
+ * {@link AbstractGeoLocationSQLStorage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.8.4
+ * @since v7.10.2
  */
-public interface GeoLocationService {
+public abstract class AbstractGeoLocationSQLStorage {
 
-    /**
-     * Retrieves the {@link GeoInformation} of the specified IP address
-     * @param session The groupware session
-     * @param ipAddress The IP address as string
-     *
-     * @return The Geographical information for the specified IP address
-     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
-     */
-    GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException;
-
-    /**
-     * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param accuracyRadius
-     * @return
-     * @throws OXException
-     */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGeoLocationSQLStorage.class);
+    protected static int EARTH_RADIUS_KM = 6371;
+    protected static int EARTH_RADIUS_MILES = 3956;
 }

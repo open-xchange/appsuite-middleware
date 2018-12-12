@@ -118,8 +118,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         }
         try {
             GeoLocationService service = services.getServiceSafe(GeoLocationService.class);
-            GeoInformation geoInformationCurrent = service.getGeoInformation(current);
-            GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
+            GeoInformation geoInformationCurrent = service.getGeoInformation(session, current);
+            GeoInformation geoInformationPrevious = service.getGeoInformation(session, previous);
 
             boolean countryChanged = true;
             if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
