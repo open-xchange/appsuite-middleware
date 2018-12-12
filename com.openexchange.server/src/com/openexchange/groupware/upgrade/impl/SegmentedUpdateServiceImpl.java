@@ -97,7 +97,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
      * @see com.openexchange.groupware.upgrade.SegmentedUpdateService#getSharingMigrationRedirectURL(java.lang.String)
      */
     @Override
-    public String getSharingMigrationRedirectURL(String host) throws OXException {
+    public String getSharingMigrationRedirectURL(@Nullable String host) throws OXException {
         String url = getProperty(host, ShareProperty.migrationRedirectURL);
         if (Strings.isEmpty(url)) {
           url = getProperty(host, ServerProperty.migrationRedirectURL);
