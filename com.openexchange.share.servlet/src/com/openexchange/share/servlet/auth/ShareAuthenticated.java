@@ -126,6 +126,7 @@ public class ShareAuthenticated implements GuestAuthenticated, SessionEnhancemen
         if (null != enhancement) {
             enhancement.enhanceSession(session);
         }
+        session.setParameter(Session.PARAM_GUEST, true);  // Guest authenticated.  Set Guest parameter True
     }
 
 }
