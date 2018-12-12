@@ -49,16 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-<<<<<<< HEAD
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Tools;
-
 /**
  * {@link POP3CheckAndDropObsoleteTablesTask} - Checks and drops obsolete tables possibly created for managing POP3 accounts.
  *
