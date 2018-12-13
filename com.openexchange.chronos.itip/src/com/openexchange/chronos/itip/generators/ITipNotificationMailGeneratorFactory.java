@@ -52,12 +52,12 @@ package com.openexchange.chronos.itip.generators;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
@@ -81,12 +81,12 @@ public class ITipNotificationMailGeneratorFactory implements ITipMailGeneratorFa
     }
 
     @Override
-    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal) throws OXException {
+    public ITipMailGenerator create(Event original, Event updated, CalendarSession session, int onBehalfOfId, CalendarUser principal) throws OXException {
         return create(original, updated, session, onBehalfOfId, principal, null);
     }
 
     @Override
-    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal, String comment) throws OXException {
+    public ITipMailGenerator create(Event original, Event updated, CalendarSession session, int onBehalfOfId, CalendarUser principal, String comment) throws OXException {
         Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
         User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);

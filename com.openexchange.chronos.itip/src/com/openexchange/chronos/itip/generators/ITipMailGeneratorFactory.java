@@ -51,8 +51,8 @@ package com.openexchange.chronos.itip.generators;
 
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -68,26 +68,26 @@ public interface ITipMailGeneratorFactory {
      * 
      * @param original The original {@link Event}. Can be <code>null</code>
      * @param event The updated or new {@link Event}
-     * @param session The current {@link Session}
+     * @param session The current {@link CalendarSession}
      * @param onBehalfOfId The ID of the user to act on its behalf
      * @param principal The {@link CalendarUser}
      * @return An {@link ITipMailGenerator}
      * @throws OXException If generator or diff can't be build
      */
-    ITipMailGenerator create(Event original, Event event, Session session, int onBehalfOfId, CalendarUser principal) throws OXException;
+    ITipMailGenerator create(Event original, Event event, CalendarSession session, int onBehalfOfId, CalendarUser principal) throws OXException;
 
     /**
      * Creates an {@link ITipMailGenerator} for given events
      * 
      * @param original The original {@link Event}. Can be <code>null</code>
      * @param event The updated or new {@link Event}
-     * @param session The current {@link Session}
+     * @param session The current {@link CalendarSession}
      * @param onBehalfOfId The ID of the user to act on its behalf
      * @param principal The {@link CalendarUser}
      * @param comment An optional comment by the acting user
      * @return An {@link ITipMailGenerator}
      * @throws OXException If generator or diff can't be build
      */
-    ITipMailGenerator create(Event original, Event event, Session session, int onBehalfOfId, CalendarUser principal, String comment) throws OXException;
+    ITipMailGenerator create(Event original, Event event, CalendarSession session, int onBehalfOfId, CalendarUser principal, String comment) throws OXException;
 
 }
