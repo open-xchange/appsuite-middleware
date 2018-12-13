@@ -61,13 +61,14 @@ import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ITipITipNotificationMailGeneratorFactory}
+ * {@link ITipNotificationMailGeneratorFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipNotificationMailGeneratorFactory implements ITipMailGeneratorFactory {
 
     private final NotificationParticipantResolver resolver;
+
     private final ITipIntegrationUtility util;
 
     private final ServiceLookup services;

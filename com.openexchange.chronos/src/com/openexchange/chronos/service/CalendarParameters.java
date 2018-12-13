@@ -157,7 +157,7 @@ public interface CalendarParameters {
     static final String PARAMETER_RIGHT_HAND_LIMIT = "right_hand_limit";
 
     /**
-     * {@link String[]}
+     * {@link String}
      * <p/>
      * A collection of values that should be "ignored" when retrieving results, currently known values are <code>deleted</code> and
      * <code>changed</code> when serving the "updates" request.
