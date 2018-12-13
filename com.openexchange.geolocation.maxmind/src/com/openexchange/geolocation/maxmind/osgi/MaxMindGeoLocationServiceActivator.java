@@ -54,6 +54,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.maxmind.MaxMindGeoLocationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -78,11 +80,13 @@ public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator im
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
+        track(DBMigrationExecutorService.class, new MaxMindDBMigrationServiceTracker(this, context));
+        openTrackers();
         registerService(Reloadable.class, this);
         registerMaxMindGeoLocationService();
     }

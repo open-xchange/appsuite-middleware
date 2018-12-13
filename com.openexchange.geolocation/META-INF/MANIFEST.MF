@@ -6,9 +6,14 @@ Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.database,
+ com.openexchange.database.migration,
+ com.openexchange.database.migration.resource.accessor,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.server,
  com.openexchange.session,
+ liquibase.resource,
+ org.osgi.framework;version="1.9.0",
+ org.osgi.util.tracker;version="1.5.2",
  org.slf4j;version="1.7.25"
 Export-Package: com.openexchange.geolocation

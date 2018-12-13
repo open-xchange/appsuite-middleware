@@ -49,46 +49,25 @@
 
 package com.openexchange.geolocation.ip2location.osgi;
 
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.geolocation.ip2location.Ip2LocationGeoLocationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.geolocation.AbstractDBMigrationServiceTracker;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Ip2LocationGeoLocationServiceActivator}
+ * {@link Ip2LocationDBMigrationServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationGeoLocationServiceActivator extends HousekeepingActivator {
+public class Ip2LocationDBMigrationServiceTracker extends AbstractDBMigrationServiceTracker {
 
     /**
-     * Initialises a new {@link Ip2LocationGeoLocationServiceActivator}.
-     */
-    public Ip2LocationGeoLocationServiceActivator() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Initialises a new {@link Ip2LocationDBMigrationServiceTracker}.
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @param services
+     * @param context
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        track(DBMigrationExecutorService.class, new Ip2LocationDBMigrationServiceTracker(this, context));
-        openTrackers();
-        registerService(GeoLocationService.class, new Ip2LocationGeoLocationService(this));
+    public Ip2LocationDBMigrationServiceTracker(ServiceLookup services, BundleContext context) {
+        super(services, context, "/liquibase/ip2locationGlobalDbChangeLog.xml");
     }
 }
