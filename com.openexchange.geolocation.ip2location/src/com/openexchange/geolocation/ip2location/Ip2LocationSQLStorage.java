@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
 import com.openexchange.geolocation.DefaultGeoInformation;
 import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -64,7 +65,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage {
+public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage implements GeoLocationStorageService {
 
     /**
      * Initialises a new {@link MaxMindSQLStorage}.
@@ -73,27 +74,23 @@ public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage {
         super(services);
     }
 
-    /**
+    /*
+     * (non-Javadoc)
      * 
-     * @param session
-     * @param ipAddress
-     * @return
-     * @throws OXException
+     * @see com.openexchange.geolocation.GeoLocationStorageService#getGeoInformation(com.openexchange.session.Session, int)
      */
-    GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
+    @Override
+    public GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
         return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
     }
 
-    /**
+    /*
+     * (non-Javadoc)
      * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param radius
-     * @return
-     * @throws OXException
+     * @see com.openexchange.geolocation.GeoLocationStorageService#getGeoInformation(com.openexchange.session.Session, double, double, int)
      */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
+    @Override
+    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
         return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
     }
 

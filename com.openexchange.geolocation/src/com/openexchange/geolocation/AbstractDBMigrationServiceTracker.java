@@ -103,11 +103,11 @@ public abstract class AbstractDBMigrationServiceTracker implements ServiceTracke
             final DatabaseService databaseService = services.getService(DatabaseService.class);
             String globalDbSchemaName;
             {
-                Connection con = databaseService.getWritableForGlobal(DEFAULT); //get for 'default' group?
+                Connection con = databaseService.getReadOnlyForGlobal(DEFAULT); //get for 'default' group?
                 try {
                     globalDbSchemaName = con.getCatalog();
                 } finally {
-                    databaseService.backWritableForGlobal(DEFAULT, con);
+                    databaseService.backReadOnlyForGlobal(DEFAULT, con);
                 }
             }
 

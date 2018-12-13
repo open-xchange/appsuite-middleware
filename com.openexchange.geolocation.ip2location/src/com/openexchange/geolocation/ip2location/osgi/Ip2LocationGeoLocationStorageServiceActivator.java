@@ -51,22 +51,22 @@ package com.openexchange.geolocation.ip2location.osgi;
 
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.geolocation.ip2location.Ip2LocationGeoLocationService;
+import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.geolocation.ip2location.Ip2LocationSQLStorage;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link Ip2LocationGeoLocationServiceActivator}
+ * {@link Ip2LocationGeoLocationStorageServiceActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationGeoLocationServiceActivator extends HousekeepingActivator {
+public class Ip2LocationGeoLocationStorageServiceActivator extends HousekeepingActivator {
 
     /**
-     * Initialises a new {@link Ip2LocationGeoLocationServiceActivator}.
+     * Initialises a new {@link Ip2LocationGeoLocationStorageServiceActivator}.
      */
-    public Ip2LocationGeoLocationServiceActivator() {
+    public Ip2LocationGeoLocationStorageServiceActivator() {
         super();
     }
 
@@ -89,6 +89,6 @@ public class Ip2LocationGeoLocationServiceActivator extends HousekeepingActivato
     protected void startBundle() throws Exception {
         track(DBMigrationExecutorService.class, new Ip2LocationDBMigrationServiceTracker(this, context));
         openTrackers();
-        registerService(GeoLocationService.class, new Ip2LocationGeoLocationService(this));
+        registerService(GeoLocationStorageService.class, new Ip2LocationSQLStorage(this));
     }
 }

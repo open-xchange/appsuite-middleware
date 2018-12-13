@@ -47,57 +47,77 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
+package com.openexchange.geolocation.osgi;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
-import com.openexchange.geolocation.DefaultGeoInformation;
-import com.openexchange.geolocation.GeoInformation;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.geolocation.impl.GeoLocationServiceImpl;
 
 /**
- * {@link MaxMindSQLStorage}
+ * {@link GeoLocationServiceRegistrationTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage implements GeoLocationStorageService {
+public class GeoLocationServiceRegistrationTracker implements ServiceTrackerCustomizer<GeoLocationStorageService, GeoLocationStorageService> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationServiceRegistrationTracker.class);
+
+    private final BundleContext context;
+    private ServiceRegistration<GeoLocationService> registration;
+    private GeoLocationService service;
 
     /**
-     * Initialises a new {@link MaxMindSQLStorage}.
+     * Initialises a new {@link GeoLocationServiceRegistrationTracker}.
      */
-    public MaxMindSQLStorage(ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    public GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
-        return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
-    }
-
-    @Override
-    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
+    public GeoLocationServiceRegistrationTracker(BundleContext context) {
+        super();
+        this.context = context;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#parseResultSet(java.sql.ResultSet)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    protected GeoInformation parseResultSet(ResultSet resultSet) throws SQLException {
-        //@formatter:off
-        return DefaultGeoInformation.builder()
-            .city(resultSet.getString("city_name"))
-            .continent(resultSet.getString("continent_name"))
-            .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
-            .build();
-        //@formatter:on
+    public GeoLocationStorageService addingService(ServiceReference<GeoLocationStorageService> reference) {
+        if (service != null) {
+            LOGGER.warn("A GeoLocation service was previously registered! Check your bundles!");
+            return null;
+        }
+        GeoLocationStorageService storage = context.getService(reference);
+        service = new GeoLocationServiceImpl(storage);
+        registration = context.registerService(GeoLocationService.class, service, null);
+        LOGGER.info("Registered the GeoLocation service with the '{}' storage", storage.getClass().getName());
+        return storage;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void modifiedService(ServiceReference<GeoLocationStorageService> reference, GeoLocationStorageService service) {
+        // no-op
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void removedService(ServiceReference<GeoLocationStorageService> reference, GeoLocationStorageService service) {
+        registration.unregister();
+        context.ungetService(reference);
+        this.service = null;
     }
 }

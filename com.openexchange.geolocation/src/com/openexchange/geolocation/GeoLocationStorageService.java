@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,51 +47,39 @@
  *
  */
 
-package com.openexchange.geolocation.ip2location;
+package com.openexchange.geolocation;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.geolocation.GeoLocationUtils;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link Ip2LocationGeoLocationService} - The ip[2Location Geo location service.
+ * {@link GeoLocationStorageService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.8.4
+ * @since v7.10.2
  */
-public class Ip2LocationGeoLocationService implements GeoLocationService {
-
-    private final Ip2LocationSQLStorage storage;
+public interface GeoLocationStorageService {
 
     /**
-     * Initializes a new {@link Ip2LocationGeoLocationService}.
-     */
-    public Ip2LocationGeoLocationService(ServiceLookup services) {
-        super();
-        this.storage = new Ip2LocationSQLStorage(services);
-    }
-
-    /*
-     * (non-Javadoc)
+     * Retrieves the {@link GeoInformation} of the specified IP address from the storage
      * 
-     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
+     * @param session The groupware session
+     * @param ipAddress The IP address as string
+     * @return The Geographical information for the specified IP address
+     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
+     *             or any other error is occurred
      */
-    @Override
-    public GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException {
-        return storage.getGeoInformation(session, GeoLocationUtils.convertIp(ipAddress));
-    }
+    GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException;
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the {@link GeoInformation} of the specified geographical point within the specified radius
      * 
-     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, double, double, double)
+     * @param session The groupware session
+     * @param latitude The latitude
+     * @param longitude The longitude
+     * @param radius The radius
+     * @return The Geographical information of the closest point within the specified radius
+     * @throws OXException if Geographical information cannot be returned or any other error is occurred
      */
-    @Override
-    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return storage.getGeoInformation(session, latitude, longitude, radius);
-    }
+    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException;
 }

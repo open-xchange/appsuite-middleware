@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,51 +47,44 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
+package com.openexchange.geolocation.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.geolocation.GeoLocationUtils;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MaxMindGeoLocationService} - The MaxMind Geo location service.
+ * {@link GeoLocationActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.8.4
+ * @since v7.10.2
  */
-public class MaxMindGeoLocationService implements GeoLocationService {
-
-    private final MaxMindSQLStorage storage;
+public class GeoLocationActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link MaxMindGeoLocationService}.
+     * Initialises a new {@link GeoLocationActivator}.
      */
-    public MaxMindGeoLocationService(ServiceLookup services) {
+    public GeoLocationActivator() {
         super();
-        this.storage = new MaxMindSQLStorage(services);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
-    public GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException {
-        return storage.getGeoInformation(session, GeoLocationUtils.convertIp(ipAddress));
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, double, double, double)
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
     @Override
-    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return storage.getGeoInformation(session, latitude, longitude, radius);
+    protected void startBundle() throws Exception {
+        track(GeoLocationStorageService.class, new GeoLocationServiceRegistrationTracker(context));
+        openTrackers();
     }
 }

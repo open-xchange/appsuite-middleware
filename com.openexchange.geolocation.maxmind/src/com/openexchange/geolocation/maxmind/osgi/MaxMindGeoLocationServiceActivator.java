@@ -49,15 +49,10 @@
 
 package com.openexchange.geolocation.maxmind.osgi;
 
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.geolocation.maxmind.MaxMindGeoLocationService;
+import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.geolocation.maxmind.MaxMindSQLStorage;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -66,10 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator implements Reloadable {
-
-    private ServiceRegistration<GeoLocationService> serviceRegistration;
-    private MaxMindGeoLocationService maxMindGeoLocationService;
+public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link MaxMindGeoLocationServiceActivator}.
@@ -80,55 +72,13 @@ public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator im
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
-    protected synchronized void startBundle() throws Exception {
+    protected void startBundle() throws Exception {
         track(DBMigrationExecutorService.class, new MaxMindDBMigrationServiceTracker(this, context));
         openTrackers();
-        registerService(Reloadable.class, this);
-        registerMaxMindGeoLocationService();
+        registerService(GeoLocationStorageService.class, new MaxMindSQLStorage(this));
     }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        unregisterMaxMindGeoLocationService();
-        super.stopBundle();
-    }
-
-    private void registerMaxMindGeoLocationService() throws Exception {
-        serviceRegistration = context.registerService(GeoLocationService.class, new MaxMindGeoLocationService(this), null);
-    }
-
-    private void unregisterMaxMindGeoLocationService() {
-        ServiceRegistration<GeoLocationService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
-        }
-
-        MaxMindGeoLocationService maxMindGeoLocationService = this.maxMindGeoLocationService;
-        if (null != maxMindGeoLocationService) {
-            this.maxMindGeoLocationService = null;
-        }
-    }
-
-    @Override
-    public synchronized void reloadConfiguration(ConfigurationService configService) {
-        unregisterMaxMindGeoLocationService();
-
-        try {
-            registerMaxMindGeoLocationService();
-        } catch (Exception e) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MaxMindGeoLocationServiceActivator.class);
-            logger.error("", e);
-        }
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForProperties("com.openexchange.geolocation.maxmind.databasePath");
-    }
-
 }

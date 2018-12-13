@@ -50,6 +50,7 @@
 package com.openexchange.geolocation;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -60,10 +61,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.8.4
  */
+@SingletonService
 public interface GeoLocationService {
 
     /**
      * Retrieves the {@link GeoInformation} of the specified IP address
+     * 
      * @param session The groupware session
      * @param ipAddress The IP address as string
      *
@@ -73,13 +76,14 @@ public interface GeoLocationService {
     GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException;
 
     /**
+     * Retrieves the {@link GeoInformation} of the specified geographical point within the specified radius
      * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param accuracyRadius
-     * @return
-     * @throws OXException
+     * @param session The groupware session
+     * @param latitude The latitude
+     * @param longitude The longitude
+     * @param radius The radius
+     * @return The Geographical information of the closest point within the specified radius
+     * @throws OXException if Geographical information cannot be returned or any other error is occurred
      */
     GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException;
 

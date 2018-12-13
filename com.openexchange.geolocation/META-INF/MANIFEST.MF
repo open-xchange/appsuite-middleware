@@ -10,6 +10,8 @@ Import-Package: com.openexchange.database,
  com.openexchange.database.migration.resource.accessor,
  com.openexchange.exception,
  com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
  liquibase.resource,
@@ -17,3 +19,4 @@ Import-Package: com.openexchange.database,
  org.osgi.util.tracker;version="1.5.2",
  org.slf4j;version="1.7.25"
 Export-Package: com.openexchange.geolocation
+Bundle-Activator: com.openexchange.geolocation.osgi.GeoLocationActivator

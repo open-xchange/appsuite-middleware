@@ -47,57 +47,50 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
+package com.openexchange.geolocation.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
-import com.openexchange.geolocation.DefaultGeoInformation;
 import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.geolocation.GeoLocationUtils;
 import com.openexchange.session.Session;
 
 /**
- * {@link MaxMindSQLStorage}
+ * {@link GeoLocationServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage implements GeoLocationStorageService {
+public class GeoLocationServiceImpl implements GeoLocationService {
+
+    private final GeoLocationStorageService storage;
 
     /**
-     * Initialises a new {@link MaxMindSQLStorage}.
+     * Initialises a new {@link GeoLocationServiceImpl}.
      */
-    public MaxMindSQLStorage(ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    public GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
-        return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
-    }
-
-    @Override
-    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
+    public GeoLocationServiceImpl(GeoLocationStorageService storage) {
+        super();
+        this.storage = storage;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#parseResultSet(java.sql.ResultSet)
+     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
      */
     @Override
-    protected GeoInformation parseResultSet(ResultSet resultSet) throws SQLException {
-        //@formatter:off
-        return DefaultGeoInformation.builder()
-            .city(resultSet.getString("city_name"))
-            .continent(resultSet.getString("continent_name"))
-            .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
-            .build();
-        //@formatter:on
+    public GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException {
+        return storage.getGeoInformation(session, GeoLocationUtils.convertIp(ipAddress));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, double, double, int)
+     */
+    @Override
+    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
+        return storage.getGeoInformation(session, latitude, longitude, radius);
     }
 }
