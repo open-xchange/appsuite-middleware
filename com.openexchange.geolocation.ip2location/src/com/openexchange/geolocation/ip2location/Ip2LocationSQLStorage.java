@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
+package com.openexchange.geolocation.ip2location;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,17 +59,17 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link MaxMindSQLStorage}
+ * {@link Ip2LocationSQLStorage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage {
+public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage {
 
     /**
      * Initialises a new {@link MaxMindSQLStorage}.
      */
-    public MaxMindSQLStorage(ServiceLookup services) {
+    public Ip2LocationSQLStorage(ServiceLookup services) {
         super(services);
     }
 
@@ -107,9 +107,8 @@ final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage {
         //@formatter:off
         return DefaultGeoInformation.builder()
             .city(resultSet.getString("city_name"))
-            .continent(resultSet.getString("continent_name"))
             .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
+            .postalCode(resultSet.getInt("zip_code"))
             .build();
         //@formatter:on
     }

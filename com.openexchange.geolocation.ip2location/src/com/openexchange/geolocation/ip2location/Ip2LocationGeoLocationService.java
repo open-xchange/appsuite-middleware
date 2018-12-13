@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,51 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
+package com.openexchange.geolocation.ip2location;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
-import com.openexchange.geolocation.DefaultGeoInformation;
 import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.geolocation.GeoLocationUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link MaxMindSQLStorage}
+ * {@link Ip2LocationGeoLocationService} - The ip[2Location Geo location service.
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.2
+ * @since v7.8.4
  */
-final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage {
+public class Ip2LocationGeoLocationService implements GeoLocationService {
+
+    private final Ip2LocationSQLStorage storage;
 
     /**
-     * Initialises a new {@link MaxMindSQLStorage}.
+     * Initializes a new {@link Ip2LocationGeoLocationService}.
      */
-    public MaxMindSQLStorage(ServiceLookup services) {
-        super(services);
-    }
-
-    /**
-     * 
-     * @param session
-     * @param ipAddress
-     * @return
-     * @throws OXException
-     */
-    GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
-        return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
-    }
-
-    /**
-     * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param radius
-     * @return
-     * @throws OXException
-     */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
+    public Ip2LocationGeoLocationService(ServiceLookup services) {
+        super();
+        this.storage = new Ip2LocationSQLStorage(services);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#parseResultSet(java.sql.ResultSet)
+     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
      */
     @Override
-    protected GeoInformation parseResultSet(ResultSet resultSet) throws SQLException {
-        //@formatter:off
-        return DefaultGeoInformation.builder()
-            .city(resultSet.getString("city_name"))
-            .continent(resultSet.getString("continent_name"))
-            .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
-            .build();
-        //@formatter:on
+    public GeoInformation getGeoInformation(Session session, String ipAddress) throws OXException {
+        return storage.getGeoInformation(session, GeoLocationUtils.convertIp(ipAddress));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, double, double, double)
+     */
+    @Override
+    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
+        return storage.getGeoInformation(session, latitude, longitude, radius);
     }
 }

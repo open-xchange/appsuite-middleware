@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Ip2Location Geo Location Impl
+Bundle-SymbolicName: com.openexchange.geolocation.ip2location
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.geolocation.ip2location
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.config,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.geolocation,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework;version="1.9.0",
+ org.slf4j;version="1.7.25"
+Bundle-Activator: com.openexchange.geolocation.ip2location.osgi.Ip2LocationGeoLocationServiceActivator

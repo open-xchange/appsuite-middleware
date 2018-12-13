@@ -47,70 +47,44 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
+package com.openexchange.geolocation.ip2location.osgi;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
-import com.openexchange.geolocation.DefaultGeoInformation;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.geolocation.ip2location.Ip2LocationGeoLocationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MaxMindSQLStorage}
+ * {@link Ip2LocationGeoLocationServiceActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage {
+public class Ip2LocationGeoLocationServiceActivator extends HousekeepingActivator {
 
     /**
-     * Initialises a new {@link MaxMindSQLStorage}.
+     * Initialises a new {@link Ip2LocationGeoLocationServiceActivator}.
      */
-    public MaxMindSQLStorage(ServiceLookup services) {
-        super(services);
-    }
-
-    /**
-     * 
-     * @param session
-     * @param ipAddress
-     * @return
-     * @throws OXException
-     */
-    GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
-        return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
-    }
-
-    /**
-     * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param radius
-     * @return
-     * @throws OXException
-     */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
+    public Ip2LocationGeoLocationServiceActivator() {
+        super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#parseResultSet(java.sql.ResultSet)
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
-    protected GeoInformation parseResultSet(ResultSet resultSet) throws SQLException {
-        //@formatter:off
-        return DefaultGeoInformation.builder()
-            .city(resultSet.getString("city_name"))
-            .continent(resultSet.getString("continent_name"))
-            .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
-            .build();
-        //@formatter:on
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(GeoLocationService.class, new Ip2LocationGeoLocationService(this));
     }
 }

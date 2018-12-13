@@ -47,70 +47,53 @@
  *
  */
 
-package com.openexchange.geolocation.maxmind;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
-import com.openexchange.geolocation.DefaultGeoInformation;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+package com.openexchange.geolocation.ip2location;
 
 /**
- * {@link MaxMindSQLStorage}
+ * {@link SQLStatements}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage {
+final class SQLStatements {
 
     /**
-     * Initialises a new {@link MaxMindSQLStorage}.
+     * The SQL version of the <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a><br/>
+     * 
+     * Selects a location by a set of GPS coordinates. Values for the parameters:
+     * <li>radius of the earth (either miles or kilometres)</li>
+     * <li>latitude</li>
+     * <li>longitude</li>
+     * <li>latitude</li>
+     * <li>distance filter (either miles or kilometres, the measuring unit have to be consistent with the earth's radius measuring unit)</li>
+     * <li>maximum results</li>
      */
-    public MaxMindSQLStorage(ServiceLookup services) {
-        super(services);
-    }
+    //@formatter:off
+    static String SELECT_BY_GPS_COORDINATES = "SELECT" + 
+        "    country_name, region_name, city_name, zip_code, " + 
+        "    ( ? " + 
+        "      * acos( cos( radians(?) ) " + 
+        "              * cos(  radians( latitude )   ) " + 
+        "              * cos(  radians( longitude ) - radians(?) ) " + 
+        "            + sin( radians(?) ) " + 
+        "              * sin( radians( latitude ) ) " + 
+        "            ) " + 
+        "    ) " + 
+        "    AS distance " + 
+        "FROM ip2location " + 
+        "HAVING distance < ? " + 
+        "ORDER BY distance " + 
+        "LIMIT 0,?;";
+    //@formatter:on
 
     /**
-     * 
-     * @param session
-     * @param ipAddress
-     * @return
-     * @throws OXException
+     * Selects a country by IP
      */
-    GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
-        return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
-    }
-
-    /**
-     * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param radius
-     * @return
-     * @throws OXException
-     */
-    GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#parseResultSet(java.sql.ResultSet)
-     */
-    @Override
-    protected GeoInformation parseResultSet(ResultSet resultSet) throws SQLException {
-        //@formatter:off
-        return DefaultGeoInformation.builder()
-            .city(resultSet.getString("city_name"))
-            .continent(resultSet.getString("continent_name"))
-            .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
-            .build();
-        //@formatter:on
-    }
+    //@formatter:off
+    static String SELECT_BY_IP_ADDRESS = "SELECT country_name, region_name, city_name, zip_code " + 
+        "FROM ip2location " + 
+        "WHERE " + 
+        "? BETWEEN ip_from AND ip_to " + 
+        "LIMIT 1;";
+    //@formatter:on
 }

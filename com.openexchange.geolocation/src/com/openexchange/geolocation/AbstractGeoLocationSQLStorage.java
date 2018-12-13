@@ -49,8 +49,17 @@
 
 package com.openexchange.geolocation;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractGeoLocationSQLStorage}
@@ -61,6 +70,90 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractGeoLocationSQLStorage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGeoLocationSQLStorage.class);
+
     protected static int EARTH_RADIUS_KM = 6371;
     protected static int EARTH_RADIUS_MILES = 3956;
+
+    private ServiceLookup services;
+
+    /**
+     * Initialises a new {@link AbstractGeoLocationSQLStorage}.
+     */
+    public AbstractGeoLocationSQLStorage(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    /**
+     * 
+     * @param session
+     * @param ipAddress
+     * @return
+     * @throws OXException
+     */
+    protected GeoInformation getGeoInformation(Session session, int ipAddress, String query) throws OXException {
+        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
+        Connection connection = databaseService.getReadOnlyForGlobal(session.getContextId());
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement(query);
+            stmt.setInt(1, ipAddress);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return null;
+            }
+            return parseResultSet(rs);
+        } catch (SQLException e) {
+            throw new OXException(31145, "SQL error", e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnlyForGlobal(session.getContextId(), connection);
+        }
+    }
+
+    /**
+     * 
+     * @param session
+     * @param latitude
+     * @param longitude
+     * @param radius
+     * @return
+     * @throws OXException
+     */
+    protected GeoInformation getGeoInformation(Session session, String query, double latitude, double longitude, int radius) throws OXException {
+        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
+        Connection connection = databaseService.getReadOnlyForGlobal(session.getContextId());
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            int parameterIndex = 1;
+            stmt = connection.prepareStatement(query);
+            stmt.setInt(parameterIndex++, EARTH_RADIUS_KM);
+            stmt.setDouble(parameterIndex++, latitude);
+            stmt.setDouble(parameterIndex++, longitude);
+            stmt.setDouble(parameterIndex++, latitude);
+            stmt.setInt(parameterIndex++, radius);
+            stmt.setInt(parameterIndex++, 1); //return the first result
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                LOGGER.debug("No locations could be found from point {},{} within a radius of '{}'.", latitude, longitude, radius);
+                return null;
+            }
+            return parseResultSet(rs);
+        } catch (SQLException e) {
+            throw new OXException(31145, "SQL error", e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnlyForGlobal(session.getContextId(), connection);
+        }
+    }
+
+    /**
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
+    protected abstract GeoInformation parseResultSet(ResultSet resultSet) throws SQLException;
 }
