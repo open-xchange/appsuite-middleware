@@ -1,30 +1,20 @@
 package com.openexchange.principleusecount.impl.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.principalusecount.PrincipalUseCountService;
+import com.openexchange.principleusecount.impl.PrincipalUseCountServiceImpl;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
-	private static BundleContext context;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { DatabaseService.class };
+    }
 
-	static BundleContext getContext() {
-		return context;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext bundleContext) throws Exception {
-		Activator.context = bundleContext;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext bundleContext) throws Exception {
-		Activator.context = null;
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(PrincipalUseCountService.class, new PrincipalUseCountServiceImpl());
+    }
 
 }
