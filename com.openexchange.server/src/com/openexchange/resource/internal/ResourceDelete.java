@@ -66,7 +66,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
-import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -76,7 +75,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResourceDelete {
+public final class ResourceDelete extends AbstractResourcePerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceDelete.class);
 
@@ -85,8 +84,6 @@ public final class ResourceDelete {
     private final Context ctx;
 
     private final Resource resource;
-
-    private final ResourceStorage storage;
 
     private final Date clientLastModified;
 
@@ -98,14 +95,14 @@ public final class ResourceDelete {
      * @param ctx The context
      * @param resource The resource to update
      * @param clientLastModified The client last-modified timestamp; may be <code>null</code> to omit timestamp comparison
+     * @throws OXException
      */
-    ResourceDelete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) {
+    ResourceDelete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         super();
         this.user = user;
         this.ctx = ctx;
         this.resource = resource;
         this.clientLastModified = clientLastModified;
-        storage = ResourceStorage.getInstance();
     }
 
     private Resource getOrig() throws OXException {

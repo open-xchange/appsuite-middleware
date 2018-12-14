@@ -47,59 +47,29 @@
  *
  */
 
-package com.openexchange.resource.json.actions;
+package com.openexchange.resource.storage;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.json.ResourceAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-
 
 /**
- * {@link AllAction}
+ * {@link UsecountAwareResourceStorage}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class AllAction extends AbstractResourceAction {
+public interface UsecountAwareResourceStorage extends ResourceStorage {
 
     /**
-     * Initializes a new {@link AllAction}.
+     * Similar to {@link #searchResources(String, Context)} but sorts the resources by usecount
      *
-     * @param services
+     * @param pattern The pattern to search for
+     * @param context The context
+     * @param userId The user id to sort for
+     * @return The usecount sorted resources
+     * @throws OXException
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    private static final String STR_ALL = "*";
-
-    @Override
-    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-
-        com.openexchange.resource.Resource[] resources = services.getServiceSafe(ResourceService.class).searchResources(STR_ALL, req.getSession().getContext());
-        Date timestamp;
-        List<Resource> list = new LinkedList<Resource>();
-
-        if (resources.length > 0) {
-            long lastModified = Long.MIN_VALUE;
-            for (final com.openexchange.resource.Resource resource : resources) {
-                if (lastModified < resource.getLastModified().getTime()) {
-                    lastModified = resource.getLastModified().getTime();
-                }
-                list.add(resource);
-            }
-            timestamp = new Date(lastModified);
-        } else {
-            timestamp = new Date(0);
-        }
-
-        return new AJAXRequestResult(list, timestamp, "resource");
-    }
+    public abstract Resource[] searchResources(final String pattern, final Context context, int userId) throws OXException;
 
 }

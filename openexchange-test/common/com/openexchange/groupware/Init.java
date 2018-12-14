@@ -285,10 +285,6 @@ public final class Init {
          */
         com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
         /**
-         * Resource storage init
-         */
-        com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
-        /**
          * Notification Configuration
          */
         com.openexchange.groupware.notify.NotificationConfig.getInstance(),
@@ -896,7 +892,7 @@ public final class Init {
 
     private static void startAndInjectResourceService() {
         if (null == TestServiceRegistry.getInstance().getService(ResourceService.class)) {
-            final ResourceService resources = ResourceServiceImpl.getInstance();
+            final ResourceService resources = new ResourceServiceImpl();
             services.put(ResourceService.class, resources);
             TestServiceRegistry.getInstance().addService(ResourceService.class, resources);
         }

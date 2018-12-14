@@ -269,7 +269,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     protected Resource[] resolveResources(final Context ctx, final int... ids) throws OXException {
-        final ResourceStorage resources = ResourceStorage.getInstance();
+        final ResourceStorage resources = ServerServiceRegistry.getServize(ResourceStorage.class, true);
         final Resource[] r = new Resource[ids.length];
         int i = 0;
         for (final int id : ids) {

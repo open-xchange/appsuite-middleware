@@ -52,6 +52,7 @@ package com.openexchange.resource.json.osgi;
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceActionFactory;
 import com.openexchange.resource.json.anonymizer.ResourceAnonymizer;
 import com.openexchange.resource.json.resultconverter.ResourceJsonResultConverter;
@@ -78,6 +79,8 @@ public final class ResourceJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(ResourceService.class);
+        openTrackers();
         registerModule(new ResourceActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "resource");
         registerService(ResultConverter.class, new ResourceJsonResultConverter());
         registerService(AnonymizerService.class, new ResourceAnonymizer());

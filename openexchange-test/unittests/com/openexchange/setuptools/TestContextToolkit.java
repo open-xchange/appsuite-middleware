@@ -63,6 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -94,7 +95,7 @@ public class TestContextToolkit {
     public int resolveResource(final String resource, final Context ctx) {
         ResourceStorage rStorage = null;
         try {
-            rStorage = ResourceStorage.getInstance();
+            rStorage = ServerServiceRegistry.getServize(ResourceStorage.class, true);
             return rStorage.searchResources(resource, ctx)[0].getIdentifier();
         } catch (final OXException e) {
             e.printStackTrace();

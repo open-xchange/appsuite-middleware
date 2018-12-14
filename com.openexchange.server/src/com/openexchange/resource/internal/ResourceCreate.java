@@ -65,7 +65,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
-import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -74,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResourceCreate {
+public final class ResourceCreate extends AbstractResourcePerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCreate.class);
 
@@ -84,20 +83,18 @@ public final class ResourceCreate {
 
     private final Resource resource;
 
-    private final ResourceStorage storage;
-
     /**
      * Initializes a new {@link ResourceCreate}
      *
      * @param ctx The context
      * @param resource The resource to insert
+     * @throws OXException
      */
-    ResourceCreate(final User user, final Context ctx, final Resource resource) {
+    ResourceCreate(final User user, final Context ctx, final Resource resource) throws OXException {
         super();
         this.user = user;
         this.ctx = ctx;
         this.resource = resource;
-        storage = ResourceStorage.getInstance();
     }
 
     /**

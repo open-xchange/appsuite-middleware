@@ -64,7 +64,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
-import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -73,7 +72,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResourceUpdate {
+public final class ResourceUpdate extends AbstractResourcePerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceUpdate.class);
 
@@ -82,8 +81,6 @@ public final class ResourceUpdate {
     private final Context ctx;
 
     private final Resource resource;
-
-    private final ResourceStorage storage;
 
     private final Date clientLastModified;
 
@@ -95,14 +92,14 @@ public final class ResourceUpdate {
      * @param ctx The context
      * @param resource The resource to update
      * @param clientLastModified The client last-modified timestamp; may be <code>null</code> to omit timestamp comparison
+     * @throws OXException
      */
-    ResourceUpdate(final User user, final Context ctx, final Resource resource, final Date clientLastModified) {
+    ResourceUpdate(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         super();
         this.user = user;
         this.ctx = ctx;
         this.resource = resource;
         this.clientLastModified = clientLastModified;
-        storage = ResourceStorage.getInstance();
     }
 
     private Resource getOrig() throws OXException {

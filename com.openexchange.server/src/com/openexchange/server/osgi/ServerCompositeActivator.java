@@ -95,6 +95,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.mail.osgi.UserSettingMailActivator(),
         new com.openexchange.filemanagement.json.osgi.ManagedFileJSONActivator(),
         new com.openexchange.group.json.osgi.GroupJSONActivator(),
+        new com.openexchange.resource.internal.osgi.ResourceActivator(),
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),
         new com.openexchange.quota.json.osgi.QuotaJSONActivator(),
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),

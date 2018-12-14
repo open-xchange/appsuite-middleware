@@ -148,7 +148,7 @@ public final class ResourceDeleteTest {
 
             OXException expected = null;
             try {
-                ResourceStorage.getInstance().getResource(id, ctx);
+                ServerServiceRegistry.getServize(ResourceStorage.class, true).getResource(id, ctx);
             } catch (final OXException e) {
                 expected = e;
             }

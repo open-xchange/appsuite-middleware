@@ -67,13 +67,13 @@ import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.ResourceGroup;
-import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.resource.storage.UsecountAwareResourceStorage;
 import com.openexchange.server.impl.DBPool;
 
 /**
  * This class implements the resource storage using a relational database.
  */
-public class RdbResourceStorage extends ResourceStorage {
+public class RdbResourceStorage implements UsecountAwareResourceStorage {
 
     private static final String RPL_TABLE = "#TABLE#";
 
@@ -86,7 +86,7 @@ public class RdbResourceStorage extends ResourceStorage {
      *
      * @param context Context.
      */
-    RdbResourceStorage() {
+    public RdbResourceStorage() {
         super();
     }
 
@@ -321,6 +321,38 @@ public class RdbResourceStorage extends ResourceStorage {
 
     @Override
     public Resource[] searchResources(final String pattern, final Context context) throws OXException {
+        if (Strings.isEmpty(pattern)) {
+            return new Resource[0];
+        }
+        final Connection con;
+        try {
+            con = DBPool.pickup(context);
+        } catch (final Exception e) {
+            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_RESOURCE2);
+            stmt.setLong(1, context.getContextId());
+            stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
+            stmt.setString(3, LdapUtility.prepareSearchPattern(pattern));
+            result = stmt.executeQuery();
+            final List<Resource> resources = new ArrayList<Resource>();
+            while (result.next()) {
+                resources.add(createResourceFromEntry(result));
+            }
+            return resources.toArray(new Resource[resources.size()]);
+        } catch (final SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    @Override
+    public Resource[] searchResources(final String pattern, final Context context, int userId) throws OXException {
         if (Strings.isEmpty(pattern)) {
             return new Resource[0];
         }

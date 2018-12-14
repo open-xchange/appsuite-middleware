@@ -61,7 +61,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.UseCountAwareResourceService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -82,10 +82,6 @@ public class Services {
 
     public static ContactService getContactService() throws OXException {
         return requireService(ContactService.class);
-    }
-
-    public static ResourceService getResourceService() throws OXException {
-        return requireService(ResourceService.class);
     }
 
     public static FolderService getFolderService() throws OXException {
@@ -126,6 +122,10 @@ public class Services {
 
     public static FileStorageServiceRegistry getFileStorageServiceRegistry() throws OXException {
         return requireService(FileStorageServiceRegistry.class);
+    }
+
+    public static UseCountAwareResourceService getResourceService() throws OXException {
+        return requireService(UseCountAwareResourceService.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {

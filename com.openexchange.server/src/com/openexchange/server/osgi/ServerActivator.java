@@ -244,6 +244,7 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.search.SearchService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
@@ -331,7 +332,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class };
+        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -672,7 +673,6 @@ public final class ServerActivator extends HousekeepingActivator {
         final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(), this);
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
-        registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 

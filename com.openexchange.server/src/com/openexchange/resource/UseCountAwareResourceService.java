@@ -47,50 +47,28 @@
  *
  */
 
-package com.openexchange.resource.internal;
+package com.openexchange.resource;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.storage.ResourceStorage;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link ResourceStorageInit} - The {@link Initialization initialization} for resource storage.
+ * {@link UseCountAwareResourceService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class ResourceStorageInit implements Initialization {
+public interface UseCountAwareResourceService extends ResourceService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceStorageInit.class);
+    /**
+     * Searches all resources which identifier matches the given pattern and sorts the results according to their usecount.
+     *
+     * @param pattern The identifier of all returned resources will match this pattern.
+     * @param context The context.
+     * @param userId
+     * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
+     */
+    public Resource[] searchResources(String pattern, Context context, int userId) throws OXException;
 
-    private static final ResourceStorageInit SINGLETON = new ResourceStorageInit();
-
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
-    public static ResourceStorageInit getInstance() {
-        return SINGLETON;
-    }
-
-    private ResourceStorageInit() {
-        super();
-    }
-
-    @Override
-    public void start() {
-        if (!initialized.compareAndSet(false, true)) {
-            LOG.warn("Duplicate resource storage start-up");
-        }
-        ResourceStorage.setInstance(new RdbResourceStorage());
-        ServerServiceRegistry.getInstance().addService(ResourceService.class, ResourceServiceImpl.getInstance());
-    }
-
-    @Override
-    public void stop() {
-        if (!initialized.compareAndSet(true, false)) {
-            LOG.warn("Duplicate resource storage shut-down");
-        }
-        ServerServiceRegistry.getInstance().removeService(ResourceService.class);
-        ResourceStorage.releaseInstance();
-    }
 }

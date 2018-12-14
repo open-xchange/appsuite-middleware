@@ -47,59 +47,34 @@
  *
  */
 
-package com.openexchange.resource.json.actions;
+package com.openexchange.resource.internal.osgi;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.resource.Resource;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.json.ResourceAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.resource.UseCountAwareResourceService;
+import com.openexchange.resource.internal.RdbResourceStorage;
+import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.resource.storage.ResourceStorage;
 
 /**
- * {@link AllAction}
+ * {@link ResourceActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class AllAction extends AbstractResourceAction {
-
-    /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
-     */
-    public AllAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    private static final String STR_ALL = "*";
+public class ResourceActivator extends HousekeepingActivator {
 
     @Override
-    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
+    protected Class<?>[] getNeededServices() {
+        return new Class[0];
+    }
 
-        com.openexchange.resource.Resource[] resources = services.getServiceSafe(ResourceService.class).searchResources(STR_ALL, req.getSession().getContext());
-        Date timestamp;
-        List<Resource> list = new LinkedList<Resource>();
-
-        if (resources.length > 0) {
-            long lastModified = Long.MIN_VALUE;
-            for (final com.openexchange.resource.Resource resource : resources) {
-                if (lastModified < resource.getLastModified().getTime()) {
-                    lastModified = resource.getLastModified().getTime();
-                }
-                list.add(resource);
-            }
-            timestamp = new Date(lastModified);
-        } else {
-            timestamp = new Date(0);
-        }
-
-        return new AJAXRequestResult(list, timestamp, "resource");
+    @Override
+    protected void startBundle() throws Exception {
+        ResourceServiceImpl service = new ResourceServiceImpl();
+        registerService(UseCountAwareResourceService.class, service);
+        registerService(ResourceService.class, service);
+        registerService(ResourceStorage.class, new RdbResourceStorage());
     }
 
 }

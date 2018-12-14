@@ -56,7 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -86,7 +86,7 @@ public final class GetAction extends AbstractResourceAction {
         final ServerSession session = req.getSession();
         com.openexchange.resource.Resource r = null;
         try {
-            r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
+            r = services.getServiceSafe(ResourceService.class).getResource(id, session.getContext());
         } catch (final OXException exc) {
             LOG.debug("resource not found try to find id in user table", exc);
         }

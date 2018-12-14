@@ -63,7 +63,7 @@ import com.openexchange.resource.ResourceGroup;
  * @author <a href="mailto:marcus@open-xchange.de">Marcus Klein </a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class ResourceStorage {
+public interface ResourceStorage {
 
     public static enum StorageType {
         /**
@@ -80,37 +80,7 @@ public abstract class ResourceStorage {
     /**
      * The search pattern to return all resources: "*"
      */
-    protected static final String SEARCH_PATTERN_ALL = "*";
-
-    private static volatile ResourceStorage instance;
-
-    /**
-     * Default constructor.
-     */
-    protected ResourceStorage() {
-        super();
-    }
-
-    /**
-     * Creates a new instance implementing the resources interface.
-     *
-     * @param context Context.
-     * @return an instance implementing the resources interface.
-     */
-    public static ResourceStorage getInstance() {
-        return instance;
-    }
-
-    public static void setInstance(final ResourceStorage resourceStorage) {
-        instance = resourceStorage;
-    }
-
-    /**
-     * Releases the instance implementing the resources interface
-     */
-    public static void releaseInstance() {
-        instance = null;
-    }
+    static final String SEARCH_PATTERN_ALL = "*";
 
     /**
      * Reads the data of resource group from the underlying persistent data storage.
@@ -151,7 +121,7 @@ public abstract class ResourceStorage {
      * @return All resources located in specified context
      * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public Resource[] getAllResources(final Context context) throws OXException {
+    public default Resource[] getAllResources(final Context context) throws OXException {
         return searchResources(SEARCH_PATTERN_ALL, context);
     }
 
@@ -204,7 +174,7 @@ public abstract class ResourceStorage {
      * @param resource The resource to insert.
      * @throws OXException If resource insertion fails.
      */
-    public final void insertResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
+    public default void insertResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
         insertResource(ctx, con, resource, StorageType.ACTIVE);
     }
 
@@ -238,7 +208,7 @@ public abstract class ResourceStorage {
      * @param resource The resource to delete
      * @throws OXException If resource deletion fails.
      */
-    public void deleteResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
+    public default void deleteResource(final Context ctx, final Connection con, final Resource resource) throws OXException {
         deleteResourceById(ctx, con, resource.getIdentifier());
     }
 

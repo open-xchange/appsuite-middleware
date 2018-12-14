@@ -115,10 +115,6 @@ public class Starter implements Initialization {
          */
         com.openexchange.group.internal.GroupInit.getInstance(),
         /**
-         * Resource storage init
-         */
-        com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
-        /**
          * User configuration init
          */
         com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),

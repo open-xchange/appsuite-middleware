@@ -65,10 +65,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceWriter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -136,7 +136,7 @@ public class ResourceRequest {
         Resource[] updatedResources = null;
         Resource[] deletedResources = null;
         try {
-            final ResourceService resService = ResourceServiceImpl.getInstance();
+            final ResourceService resService = ServerServiceRegistry.getServize(ResourceService.class, true);
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {
@@ -189,7 +189,7 @@ public class ResourceRequest {
                 com.openexchange.resource.Resource r = null;
 
                 try {
-                    r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
+                    r = ServerServiceRegistry.getServize(ResourceService.class, true).getResource(id, session.getContext());
                 } catch (final OXException exc) {
                     LOG.debug("resource not found try to find id in user table", exc);
                 }
@@ -225,7 +225,7 @@ public class ResourceRequest {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         com.openexchange.resource.Resource r = null;
         try {
-            r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
+            r = ServerServiceRegistry.getServize(ResourceService.class, true).getResource(id, session.getContext());
         } catch (final OXException exc) {
             LOG.debug("resource not found try to find id in user table", exc);
         }
@@ -245,7 +245,7 @@ public class ResourceRequest {
 
     private JSONArray actionSearch(final JSONObject jsonObj) throws OXException,
             JSONException {
-        final ResourceService resourceService = ResourceServiceImpl.getInstance();
+        final ResourceService resourceService = ServerServiceRegistry.getServize(ResourceService.class, true);
         if (null == resourceService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
         }
@@ -290,7 +290,7 @@ public class ResourceRequest {
     private JSONArray actionAll() throws OXException {
         final JSONArray jsonResponseArray = new JSONArray();
 
-        final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
+        final com.openexchange.resource.Resource[] resources = ServerServiceRegistry.getServize(ResourceService.class, true).searchResources(
                 STR_ALL, session.getContext());
         if (resources.length > 0) {
             long lastModified = Long.MIN_VALUE;

@@ -60,9 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceAJAXRequest;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -84,10 +82,7 @@ public final class SearchAction extends AbstractResourceAction {
 
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        ResourceService resourceService = ResourceServiceImpl.getInstance();
-        if (null == resourceService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ResourceService.class.getName());
-        }
+        ResourceService resourceService = services.getServiceSafe(ResourceService.class);
 
         if (!req.getSession().getUserPermissionBits().hasGroupware()) {
             return new AJAXRequestResult(new JSONArray(0), "json");
