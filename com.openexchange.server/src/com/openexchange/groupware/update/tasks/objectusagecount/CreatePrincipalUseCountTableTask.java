@@ -73,7 +73,7 @@ public class CreatePrincipalUseCountTableTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             if (!tableExists(writeCon, CreatePrincipalUseCountTableService.TABLE)) {
-                stmt = writeCon.prepareStatement(CreatePrincipalUseCountTableService.getStatament());
+                stmt = writeCon.prepareStatement(CreatePrincipalUseCountTableService.getStatement());
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {

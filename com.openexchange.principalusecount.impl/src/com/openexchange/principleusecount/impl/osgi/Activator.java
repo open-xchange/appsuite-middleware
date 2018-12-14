@@ -14,6 +14,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         registerService(PrincipalUseCountService.class, new PrincipalUseCountServiceImpl());
     }
 

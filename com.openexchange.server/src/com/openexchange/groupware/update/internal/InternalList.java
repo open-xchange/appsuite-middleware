@@ -108,6 +108,7 @@ import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpd
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableTask;
+import com.openexchange.groupware.update.tasks.objectusagecount.CreatePrincipalUseCountTableTask;
 import com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks;
 
 /**
@@ -727,6 +728,8 @@ public final class InternalList {
         // TODO Enable UpdateTask with 7.10.3, see MW-1108
         // list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
         // list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
+        // Add principal table update task
+        list.add(new CreatePrincipalUseCountTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

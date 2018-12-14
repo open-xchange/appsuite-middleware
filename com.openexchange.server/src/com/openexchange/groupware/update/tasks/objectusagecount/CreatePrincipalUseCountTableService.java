@@ -61,14 +61,14 @@ public class CreatePrincipalUseCountTableService extends AbstractCreateTableImpl
 
     final static String TABLE = "principalUseCount";
 
-    static String getStatament() {
+    static String getStatement() {
         // @formatter:off
         return "CREATE TABLE " + TABLE + " (" +
             "cid int(10) unsigned NOT NULL, " +
             "user int(10) unsigned NOT NULL, " +
             "principal int(10) unsigned NOT NULL, " +
             "value int(10) unsigned NOT NULL, " +
-            "PRIMARY KEY (cid, user, principals)" +
+            "PRIMARY KEY (cid, user, principal)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
         // @formatter:on
     }
@@ -85,7 +85,7 @@ public class CreatePrincipalUseCountTableService extends AbstractCreateTableImpl
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getStatament() };
+        return new String[] { getStatement() };
     }
 
 }
