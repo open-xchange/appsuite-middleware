@@ -130,7 +130,7 @@ public class PortableStartPermanentListenerCallable extends AbstractCustomPortab
         }
 
         List<PushUser> startedOnes = PushManagerRegistry.getInstance().applyInitialListeners(pushUsers, nanos);
-        LOG.info("This cluster member \"{}\" now runs permanent listeners for: {}", HOSTNAME, startedOnes.isEmpty() ? "none" : startedOnes.toString());
+        LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", HOSTNAME, startedOnes.isEmpty() ? "none" : startedOnes.size());
 
         return Boolean.TRUE;
     }
