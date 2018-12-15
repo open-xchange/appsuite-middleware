@@ -71,6 +71,7 @@ import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.log.LogProperties;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushExceptionCodes;
@@ -242,7 +243,12 @@ public class PushSubscribeResource extends DAVResource {
                             .transportId(subscription.getTransportId())
                             .userId(result.getTokenUsingUserId());
                         DefaultPushSubscription subscriptionToDrop = builder.build();
-                        subscriptionRegistry.unregisterSubscription(subscriptionToDrop);
+                        LogProperties.put(LogProperties.Name.PNS_NO_RECONNECT, "true");
+                        try {
+                            subscriptionRegistry.unregisterSubscription(subscriptionToDrop);
+                        } finally {
+                            LogProperties.remove(LogProperties.Name.PNS_NO_RECONNECT);
+                        }
                         return true;
                     }
                 case FAIL:
