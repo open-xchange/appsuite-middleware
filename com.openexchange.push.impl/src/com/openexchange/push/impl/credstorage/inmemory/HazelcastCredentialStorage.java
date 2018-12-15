@@ -185,12 +185,12 @@ public class HazelcastCredentialStorage implements CredentialStorage {
             return null;
         }
 
-        DefaultCredentials credentials = new DefaultCredentials();
-        credentials.setContextId(portableCredentials.getContextId());
-        credentials.setUserId(portableCredentials.getUserId());
-        credentials.setPassword(portableCredentials.getPassword());
-        credentials.setLogin(portableCredentials.getLogin());
-        return credentials;
+        DefaultCredentials.Builder credentials = DefaultCredentials.builder();
+        credentials.withContextId(portableCredentials.getContextId());
+        credentials.withUserId(portableCredentials.getUserId());
+        credentials.withPassword(portableCredentials.getPassword());
+        credentials.withLogin(portableCredentials.getLogin());
+        return credentials.build();
     }
 
     private Credentials pollCredentials(PushUser user) {
@@ -213,12 +213,13 @@ public class HazelcastCredentialStorage implements CredentialStorage {
         if (null == portableCredentials) {
             return null;
         }
-        DefaultCredentials credentials = new DefaultCredentials();
-        credentials.setContextId(portableCredentials.getContextId());
-        credentials.setUserId(portableCredentials.getUserId());
-        credentials.setPassword(portableCredentials.getPassword());
-        credentials.setLogin(portableCredentials.getLogin());
-        return credentials;
+
+        DefaultCredentials.Builder credentials = DefaultCredentials.builder();
+        credentials.withContextId(portableCredentials.getContextId());
+        credentials.withUserId(portableCredentials.getUserId());
+        credentials.withPassword(portableCredentials.getPassword());
+        credentials.withLogin(portableCredentials.getLogin());
+        return credentials.build();
     }
 
     // ---------------------------------------------------------------------------------------------------

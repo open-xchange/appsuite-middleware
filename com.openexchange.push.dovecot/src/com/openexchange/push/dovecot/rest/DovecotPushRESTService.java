@@ -271,7 +271,11 @@ public class DovecotPushRESTService {
         try {
             return new int[] { Integer.parseInt(userAndContext.substring(0, pos)), Integer.parseInt(userAndContext.substring(pos + 1)) };
         } catch (NumberFormatException e) {
-            LOGGER.error("Could not parse user and context identifiers from \"{}\"", userAndContext, e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("Could not parse user and context identifiers from \"{}\"", userAndContext, e);
+            } else {
+                LOGGER.error("Could not parse user and context identifiers from \"{}\"", userAndContext);
+            }
             return null;
         }
     }
