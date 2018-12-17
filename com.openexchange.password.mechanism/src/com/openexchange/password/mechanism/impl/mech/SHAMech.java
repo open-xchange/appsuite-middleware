@@ -59,7 +59,7 @@ import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
  * {@link SHAMech}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class SHAMech extends ConfigAwarePasswordMech {
 

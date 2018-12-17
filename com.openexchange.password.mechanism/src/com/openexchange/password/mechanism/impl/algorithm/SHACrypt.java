@@ -58,7 +58,7 @@ import com.openexchange.java.Charsets;
  * {@link SHACrypt}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from global & update to new versions
- * @since v7.10.1
+ * @since v7.10.2
  */
 public enum SHACrypt {
 

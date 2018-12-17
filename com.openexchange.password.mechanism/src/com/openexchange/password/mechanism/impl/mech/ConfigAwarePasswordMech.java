@@ -58,7 +58,7 @@ import com.openexchange.password.mechanism.osgi.Services;
  * {@link ConfigAwarePasswordMech}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public abstract class ConfigAwarePasswordMech extends AbstractPasswordMech {
 

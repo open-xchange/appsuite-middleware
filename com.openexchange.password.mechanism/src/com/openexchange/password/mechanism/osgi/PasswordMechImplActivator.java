@@ -62,7 +62,7 @@ import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
  * {@link PasswordMechImplActivator}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from c.o.global
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class PasswordMechImplActivator extends HousekeepingActivator {
 

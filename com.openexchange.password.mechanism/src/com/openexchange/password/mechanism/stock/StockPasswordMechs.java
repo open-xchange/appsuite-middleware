@@ -59,7 +59,7 @@ import com.openexchange.password.mechanism.impl.mech.SHAMech;
  * {@link StockPasswordMechs}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public enum StockPasswordMechs {
 

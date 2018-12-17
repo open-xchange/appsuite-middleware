@@ -56,7 +56,7 @@ import com.openexchange.password.mechanism.PasswordDetails;
  * {@link BCryptMech}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class BCryptMech extends ConfigAwarePasswordMech {
 

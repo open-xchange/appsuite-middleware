@@ -60,7 +60,7 @@ import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes
  * {@link AbstractPasswordMech}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public abstract class AbstractPasswordMech implements PasswordMech {
 

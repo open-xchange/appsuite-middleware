@@ -59,15 +59,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 
 /**
  * {@link PasswordMechTests}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 @RunWith(Parameterized.class)
 public class PasswordMechTests {
