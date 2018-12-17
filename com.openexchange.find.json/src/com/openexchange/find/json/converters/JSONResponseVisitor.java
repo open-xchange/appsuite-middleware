@@ -69,6 +69,7 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
+import com.openexchange.find.resource.ResourceDocument;
 import com.openexchange.find.tasks.TasksDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
@@ -274,6 +275,21 @@ public class JSONResponseVisitor implements DocumentVisitor {
      */
     public List<OXException> getErrors() {
         return errors;
+    }
+
+    @Override
+    public void visit(ResourceDocument resourceDocument) {
+        try {
+            ResultConverter converter = converterRegistry.getConverter("resource");
+            if (null != converter) {
+                AJAXRequestResult result = new AJAXRequestResult(resourceDocument.getResource());
+                converter.convert(requestData, result, session, null);
+                json.put(result.getResultObject());
+            }
+        } catch (OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
+            errors.add(e);
+        }
     }
 
 }

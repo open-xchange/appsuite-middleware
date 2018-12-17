@@ -47,39 +47,46 @@
  *
  */
 
-package com.openexchange.resource;
+package com.openexchange.find.resource;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.find.Document;
+import com.openexchange.find.DocumentVisitor;
+import com.openexchange.resource.Resource;
 
 /**
- * {@link UseCountAwareResourceService}
+ * {@link ResourceDocument}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public interface UseCountAwareResourceService extends ResourceService {
+public class ResourceDocument implements Document {
+
+    private Resource resource;
 
     /**
-     * Searches all resources which identifier matches the given pattern and sorts the results according to their usecount.
-     *
-     * @param pattern The identifier of all returned resources will match this pattern.
-     * @param context The context.
-     * @param userId The user id of the current user
-     * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
-     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
+     * Initializes a new {@link ResourceDocument}.
+     * 
+     * @param res
      */
-    public Resource[] searchResources(String pattern, Context context, int userId) throws OXException;
+    public ResourceDocument(Resource res) {
+        super();
+        this.resource = res;
+
+    }
 
     /**
-     * Searches all resources which mail address matches the given pattern and sorts the results according to their usecount.
+     * Gets the resource
      *
-     * @param pattern The identifier of all returned resources will match this pattern.
-     * @param context The context.
-     * @param userId The user id of the current user
-     * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
-     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
+     * @return The resource
      */
-    public Resource[] searchResourcesByMail(String pattern, Context context, int userId) throws OXException;
+    public Resource getResource() {
+        return resource;
+    }
+
+    @Override
+    public void accept(DocumentVisitor visitor) {
+        visitor.visit(this);
+
+    }
 
 }

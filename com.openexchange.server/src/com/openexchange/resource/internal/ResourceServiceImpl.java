@@ -116,10 +116,17 @@ public final class ResourceServiceImpl implements UseCountAwareResourceService {
         ResourceStorage servize = ServerServiceRegistry.getServize(ResourceStorage.class, true);
         if (servize instanceof UsecountAwareResourceStorage) {
             return ((UsecountAwareResourceStorage) servize).searchResources(pattern, context, userId);
-        } else {
-            //TODO throw exception
-            return null;
         }
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Resource[] searchResourcesByMail(String pattern, Context context, int userId) throws OXException {
+        ResourceStorage servize = ServerServiceRegistry.getServize(ResourceStorage.class, true);
+        if (servize instanceof UsecountAwareResourceStorage) {
+            return ((UsecountAwareResourceStorage) servize).searchResourcesByMail(pattern, context, userId);
+        }
+        throw new UnsupportedOperationException();
     }
 
 }

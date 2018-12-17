@@ -72,4 +72,15 @@ public interface UsecountAwareResourceStorage extends ResourceStorage {
      */
     public abstract Resource[] searchResources(final String pattern, final Context context, int userId) throws OXException;
 
+    /**
+     * Similar to {@link #searchResourcesByMail(String, Context)} but sorts the resources by usecount
+     *
+     * @param pattern The pattern to search for
+     * @param context The context
+     * @param userId The user id to sort for
+     * @return The usecount sorted resources
+     * @throws OXException
+     */
+    public abstract Resource[] searchResourcesByMail(final String pattern, final Context context, int userId) throws OXException;
+
 }
