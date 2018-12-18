@@ -289,7 +289,7 @@ public class SyncSession {
     public List<ServerFileVersion> getServerFiles(String path, int limit) throws OXException {
         FileStorageFolder folder = getStorage().getFolder(path);
         List<File> files = getStorage().getFilesInFolder(folder.getId());
-        int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory();
+        int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory(getServerSession().getContextId(), getServerSession().getUserId());
         if (-1 != maxFilesPerDirectory && files.size() > maxFilesPerDirectory) {
             throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
         }
@@ -353,7 +353,7 @@ public class SyncSession {
                 trace("Skipping invalid server directory: " + entry.getKey());
             } else if (DriveUtils.isIgnoredPath(this, path)) {
                 trace("Skipping ignored server directory: " + entry.getKey());
-            } else if (false == DriveUtils.isSynchronizable(folderID)) {
+            } else if (false == DriveUtils.isSynchronizable(folderID, session)) {
                 trace("Skipping not synchronizable server directory: " + entry.getKey());
             } else {
                 folderIDs.add(entry.getValue().getId());
@@ -410,10 +410,11 @@ public class SyncSession {
      * @return The optimistic save threshold in bytes
      */
     public long getOptimisticSaveThreshold() {
+        ServerSession serverSession = session.getServerSession();
         if (null != session.getClientType() && session.getClientType().isDesktop()) {
-            return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop();
+            return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop(serverSession.getContextId(), serverSession.getUserId());
         } else {
-            return DriveConfig.getInstance().getOptimisticSaveThresholdMobile();
+            return DriveConfig.getInstance().getOptimisticSaveThresholdMobile(serverSession.getContextId(), serverSession.getUserId());
         }
     }
 

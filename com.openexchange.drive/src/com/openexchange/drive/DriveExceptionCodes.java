@@ -68,6 +68,7 @@ import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATH_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATTERN_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_FILENAME_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_PATH_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_DISABLED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.METDATA_PARSE_ERROR_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NOT_SYNCHRONIZABLE_DIRECTORY_MSG;
@@ -226,6 +227,9 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Unexpected database error, try again: \"%1$s\" */
     DB_ERROR_RETRY("Unexpected database error, try again: \"%1$s\"", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 42),
+
+    /** Push via long polling is disabled for user \"%1$s\" in context \"%2$s\". */
+    LONG_POLLING_DISABLED("Push via long polling is disabled for user \"%1$s\" in context \"%1$s\".", LONG_POLLING_DISABLED_MSG, Category.CATEGORY_CONFIGURATION, 43),
 
     ;
 

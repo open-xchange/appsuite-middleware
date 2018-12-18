@@ -95,6 +95,7 @@ public class TimeSpanParser  implements StringParser {
         if (span == null) {
             return Long.valueOf(-1);
         }
+
         final StringBuilder numberBuilder = new StringBuilder();
         final StringBuilder unitBuilder = new StringBuilder();
         int mode = 0;
@@ -110,7 +111,6 @@ public class TimeSpanParser  implements StringParser {
                     final String unit = 0 == unitBuilder.length() ? "MS" : unitBuilder.toString().toUpperCase();
                     final Long factor = UNITS.get(unit);
                     if (factor == null) {
-
                         throw new IllegalArgumentException("I don't know unit " + unit);
                     }
                     tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();

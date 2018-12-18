@@ -183,7 +183,7 @@ public class DriveTemp {
         /*
          * check configuration first
          */
-        if (false == DriveConfig.getInstance().isUseTempFolder()) {
+        if (false == DriveConfig.getInstance().isUseTempFolder(session.getServerSession().getContextId(), session.getServerSession().getUserId())) {
             session.trace("Temporary folder for upload is disabled by configuration.");
             return null;
         }        

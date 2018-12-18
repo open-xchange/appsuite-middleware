@@ -49,15 +49,20 @@
 
 package com.openexchange.drive.events.gcm.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.google.android.gcm.Constants;
 import com.google.android.gcm.Message;
 import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.google.common.collect.Lists;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.gcm.GCMKeyProvider;
@@ -65,7 +70,7 @@ import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GCMDriveEventPublisher}
@@ -78,11 +83,16 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     private static final String SERIVCE_ID = "gcm";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMDriveEventPublisher.class);
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link GCMDriveEventPublisher}.
+     * 
+     * @param services The service lookup reference
      */
-    public GCMDriveEventPublisher() {
+    public GCMDriveEventPublisher(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -92,56 +102,57 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
 
     @Override
     public void publish(DriveEvent event) {
+        /*
+         * get subscriptions from storage
+         */
+        DriveSubscriptionStore subscriptionStore = null;
         List<Subscription> subscriptions = null;
         try {
-            subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                event.getContextID(), new String[] { SERIVCE_ID }, event.getFolderIDs());
+            subscriptionStore = requireService(DriveSubscriptionStore.class, services);
+            subscriptions = subscriptionStore.getSubscriptions(event.getContextID(), new String[] { SERIVCE_ID }, event.getFolderIDs());
         } catch (OXException e) {
             LOG.error("unable to get subscriptions for service {}", SERIVCE_ID, e);
         }
-        if (null != subscriptions && 0 < subscriptions.size()) {
-            Sender sender = null;
-            try {
-                sender = getSender();
-            } catch (OXException e) {
-                LOG.error("Error getting GCM sender", e);
+        if (null == subscriptions || subscriptions.isEmpty()) {
+            return;
+        }
+        /*
+         * associate subscriptions per API key
+         */
+        String pushTokenReference = event.getPushTokenReference();
+        Map<String, List<String>> registrationsByKey = new HashMap<String, List<String>>();
+        for (Subscription subscription : subscriptions) {
+            if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+                LOG.trace("Skipping push notification for subscription: {}", subscription);
+                continue;
             }
-            if (null == sender) {
-                return;
+            String key = getGCMKey(subscription.getContextID(), subscription.getUserID());
+            if (null == key) {
+                LOG.debug("No API key available for push via FCM for subscription {}, skipping notification.", subscription);
+                continue;
             }
-            String pushTokenReference = event.getPushTokenReference();
-            for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
-                /*
-                 * prepare chunk
-                 */
-                int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
-                List<String> registrationIDs = new ArrayList<String>(length);
-                for (int j = 0; j < length; j++) {
-                    Subscription subscription = subscriptions.get(i + j);
-                    if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
-                        LOG.trace("Skipping push notification for subscription: {}", subscription);
-                        continue;
-                    }
-                    registrationIDs.add(subscription.getToken());
+            com.openexchange.tools.arrays.Collections.put(registrationsByKey, key, subscription.getToken());
+        }
+        /*
+         * send push messages in chunks per API key & process results
+         */
+        Message message = getMessage(event);
+        for (Entry<String, List<String>> entry : registrationsByKey.entrySet()) {
+            Sender sender = new Sender(entry.getKey());
+            for (List<String> registrationIDs : Lists.partition(entry.getValue(), MULTICAST_LIMIT)) {
+                MulticastResult result = null;
+                try {
+                    result = sender.sendNoRetry(message, registrationIDs);
+                } catch (IOException e) {
+                    LOG.warn("error publishing drive event", e);
+                }
+                if (null != result) {
+                    LOG.debug("{}", result);
                 }
                 /*
-                 * send chunk
+                 * process results
                  */
-                if (0 < registrationIDs.size()) {
-                    MulticastResult result = null;
-                    try {
-                        result = sender.sendNoRetry(getMessage(event), registrationIDs);
-                    } catch (IOException e) {
-                        LOG.warn("error publishing drive event", e);
-                    }
-                    if (null != result) {
-                        LOG.debug("{}", result);
-                    }
-                    /*
-                     * process results
-                     */
-                    processResult(event.getContextID(), registrationIDs, result);
-                }
+                processResult(subscriptionStore, event.getContextID(), registrationIDs, result);
             }
         }
     }
@@ -149,7 +160,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     /*
      * http://developer.android.com/google/gcm/http.html#success
      */
-    private void processResult(int contextID, List<String> registrationIDs, MulticastResult multicastResult) {
+    private void processResult(DriveSubscriptionStore subscriptionStore, int contextID, List<String> registrationIDs, MulticastResult multicastResult) {
         if (null == registrationIDs || null == multicastResult) {
             LOG.warn("Unable to process empty results");;
             return;
@@ -184,7 +195,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                          * Note that the original ID is not part of the result, so you need to obtain it from the list of
                          * code>registration_ids passed in the request (using the same index).
                          */
-                        updateRegistrationIDs(contextID, registrationID, result.getCanonicalRegistrationId());
+                        updateRegistrationIDs(subscriptionStore, contextID, registrationID, result.getCanonicalRegistrationId());
                     }
                 } else {
                     /*
@@ -202,7 +213,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                          * was uninstalled from the device or it does not have a broadcast receiver configured to receive
                          * com.google.android.c2dm.intent.RECEIVE intents.
                          */
-                        removeRegistrations(contextID, registrationID);
+                        removeRegistrations(subscriptionStore, contextID, registrationID);
                     } else {
                         /*
                          * Otherwise, there is something wrong in the registration ID passed in the request; it is probably a non-
@@ -210,35 +221,34 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                          * an error response for all possible error values.
                          */
                         LOG.warn("Received error {} when sending push message to {}, removing registration ID.", error, registrationID);
-                        removeRegistrations(contextID, registrationID);
+                        removeRegistrations(subscriptionStore, contextID, registrationID);
                     }
                 }
             }
         }
     }
 
-    private static void updateRegistrationIDs(int contextID, String oldRegistrationID, String newRegistrationID) {
+    private static void updateRegistrationIDs(DriveSubscriptionStore subscriptionStore, int contextID, String oldRegistrationID, String newRegistrationID) {
         try {
-             if (Services.getService(DriveSubscriptionStore.class, true).updateToken(
-                 contextID, SERIVCE_ID, oldRegistrationID, newRegistrationID)) {
+            if (subscriptionStore.updateToken(contextID, SERIVCE_ID, oldRegistrationID, newRegistrationID)) {
                  LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
-             } else {
-                 LOG.warn("Registration ID {} not updated.", oldRegistrationID);
-             }
+            } else {
+                LOG.warn("Registration ID {} not updated.", oldRegistrationID);
+            }
         } catch (OXException e) {
             if ("DRV-0037".equals(e.getErrorCode())) {
                 // Token is already registered, so delete obsolete registration instead
                 LOG.warn("Registration ID {} already exists, removing obsolete registration ID {} instead.", newRegistrationID, oldRegistrationID);
-                removeRegistrations(contextID, oldRegistrationID);
+                removeRegistrations(subscriptionStore, contextID, oldRegistrationID);
             } else {
                 LOG.error("Error updating registration IDs", e);
             }
         }
     }
 
-    private static void removeRegistrations(int contextID, String registrationID) {
+    private static void removeRegistrations(DriveSubscriptionStore subscriptionStore, int contextID, String registrationID) {
         try {
-            if (0 < Services.getService(DriveSubscriptionStore.class, true).removeSubscriptions(contextID, SERIVCE_ID, registrationID)) {
+            if (0 < subscriptionStore.removeSubscriptions(contextID, SERIVCE_ID, registrationID)) {
                 LOG.info("Successfully removed registration ID {}.", registrationID);
             } else {
                 LOG.warn("Registration ID {} not removed.", registrationID);
@@ -255,23 +265,45 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
 //            .addData("folders", event.getFolderIDs().toString())
         .build();
     }
-
+    
     /**
-     * Gets a GCM sender based on the configured API key.
+     * Gets the API key to use for push notifications to GCM.
      *
-     * @return The GCM sender
-     * @throws OXException
+     * @param contextId The context id
+     * @param userId The user Id
+     * @return The suitable GCM API key, or <code>null</code> if not available or configured
      */
-    private static Sender getSender() throws OXException {
-        GCMKeyProvider keyProvider = Services.getOptionalService(GCMKeyProvider.class);
-        if (null == keyProvider) {
-            throw ServiceExceptionCode.absentService(GCMKeyProvider.class);
+    private String getGCMKey(int contextId, int userId) {
+        LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
+        if (null == configService) {
+            LOG.warn("Unable to get configuration service to determine API key for push via FCM for user {} in context {}.", I(userId), I(contextId));
+            return null;
         }
-        String key = keyProvider.getKey();
-        if (Strings.isEmpty(key)) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.drive.events.gcm.key");
+        /*
+         * check if push via GCM is enabled
+         */
+        if (false == configService.getBooleanProperty(userId, contextId, DriveEventsGCMProperty.ENABLED)) {
+            LOG.trace("Push via FCM is disabled for user {} in context {}.", I(userId), I(contextId));
+            return null;
         }
-        return new Sender(keyProvider.getKey());
+        /*
+         * get API key via config cascade if configured
+         */
+        String key = configService.getProperty(userId, contextId, DriveEventsGCMProperty.KEY);
+        if (Strings.isNotEmpty(key)) {
+            LOG.trace("Using configured API key for push via FCM for user {} in context {}.", I(userId), I(contextId));
+            return key;
+        }
+        /*
+         * check for a registered key provider as fallback, otherwise
+         */
+        GCMKeyProvider keyProvider = services.getOptionalService(GCMKeyProvider.class);
+        if (null != keyProvider) {
+            LOG.trace("Using fallback API key for push via FCM for user {} in context {}.", I(userId), I(contextId));
+            return keyProvider.getKey();
+        }
+        LOG.trace("No API key available for push via FCM for user {} in context {}.", I(userId), I(contextId));
+        return null;
     }
-
+    
 }

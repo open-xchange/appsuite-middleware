@@ -50,9 +50,15 @@
 package com.openexchange.drive.json.listener;
 
 import java.util.List;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveProperty;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BlockingListenerFactory}
@@ -61,9 +67,21 @@ import com.openexchange.drive.json.LongPollingListenerFactory;
  */
 public class BlockingListenerFactory implements LongPollingListenerFactory {
 
+    private final ServiceLookup services;
+
+    public BlockingListenerFactory(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
     @Override
-    public LongPollingListener create(DriveSession session, List<String> rootFolderIDs) {
-        return new BlockingListener(session, rootFolderIDs);
+    public LongPollingListener create(DriveSession session, List<String> rootFolderIDs) throws OXException {
+        LeanConfigurationService service = services.getService(LeanConfigurationService.class);
+        ServerSession serverSession = session.getServerSession();
+        if (service.getBooleanProperty(serverSession.getContextId(), serverSession.getUserId(), DriveProperty.EVENTS_BLOCKING_LONG_POLLING_ENABLED)) {
+            return new BlockingListener(session, rootFolderIDs);
+        }
+        throw DriveExceptionCodes.LONG_POLLING_DISABLED.create(serverSession.getUserId(), serverSession.getContextId());
     }
 
     @Override

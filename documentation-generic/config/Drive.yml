@@ -23,7 +23,7 @@ properties:
       defaultValue: OX Drive
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -39,7 +39,7 @@ properties:
       defaultValue: true
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -154,7 +154,7 @@ properties:
       defaultValue: -1
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -166,7 +166,7 @@ properties:
       defaultValue: 65535
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -178,7 +178,7 @@ properties:
       defaultValue: 65535
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -190,7 +190,7 @@ properties:
       defaultValue: com.openexchange.infostore
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -206,7 +206,7 @@ properties:
       defaultValue:
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -229,7 +229,7 @@ properties:
       defaultValue: "[protocol]://[hostname]"
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.UIWebPath","com.openexchange.dispatcher.prefix"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -253,7 +253,7 @@ properties:
       defaultValue: "[protocol]://[hostname]/[uiwebpath]/help-drive/l10n/[locale]/index.html"
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.UIWebPath","com.openexchange.dispatcher.prefix"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -266,8 +266,8 @@ properties:
         or install the restricted components packages for drive.  
       defaultValue: false
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn.ios.keystore", "com.openexchange.drive.events.apn.ios.password"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -281,8 +281,8 @@ properties:
         containing the restricted drive components is not installed.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: com.openexchange.drive.events.apn.ios.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -296,8 +296,8 @@ properties:
         containing the restricted drive components is not installed.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: com.openexchange.drive.events.apn.ios.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -309,8 +309,8 @@ properties:
         <code>false</code> the sandbox service.
       defaultValue: true
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -339,8 +339,8 @@ properties:
         or install the restricted components packages for drive.
       defaultValue: false
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn.macos.keystore","com.openexchange.drive.events.apn.macos.password"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -354,8 +354,8 @@ properties:
         containing the restricted drive components is not installed.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -369,8 +369,8 @@ properties:
         containing the restricted drive components is not installed.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -382,8 +382,8 @@ properties:
         <code>false</code> the sandbox service.
       defaultValue: true
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -411,8 +411,8 @@ properties:
         FCM API key.
       defaultValue: false
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.gcm.key"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -424,8 +424,8 @@ properties:
         containing the restricted drive components is not installed.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: com.openexchange.drive.events.gcm.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -440,7 +440,7 @@ properties:
       defaultValue: false
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related:
       file: drive.properties
       packageName: open-xchange-drive
@@ -464,7 +464,7 @@ properties:
       defaultValue:
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related:
       file: drive.properties
       packageName: open-xchange-drive
@@ -487,7 +487,7 @@ properties:
       defaultValue:
       version:
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related:
       file: drive.properties
       packageName: open-xchange-drive
@@ -501,7 +501,7 @@ properties:
       defaultValue: false
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn2.ios.keystore", "com.openexchange.drive.events.apn2.ios.password"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -515,7 +515,7 @@ properties:
       defaultValue: certificate
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
@@ -525,7 +525,7 @@ properties:
       defaultValue: 
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: com.openexchange.drive.events.apn2.ios.enabled
       file: drive.properties
       packageName: open-xchange-drive
@@ -540,7 +540,7 @@ properties:
       defaultValue:
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -555,7 +555,7 @@ properties:
       defaultValue:
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -568,7 +568,7 @@ properties:
       defaultValue: true
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: 
       file: drive.properties
       packageName: open-xchange-drive
@@ -581,7 +581,7 @@ properties:
       defaultValue: 
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -594,7 +594,7 @@ properties:
       defaultValue: 
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
       file: drive.properties
       packageName: open-xchange-drive
@@ -607,7 +607,7 @@ properties:
       defaultValue: 
       version: 7.10.1
       reloadable: false
-      configcascadeAware: false
+      configcascadeAware: true
       related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
       file: drive.properties
       packageName: open-xchange-drive

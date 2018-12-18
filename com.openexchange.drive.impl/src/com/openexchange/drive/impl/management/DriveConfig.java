@@ -51,26 +51,24 @@ package com.openexchange.drive.impl.management;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
-import com.openexchange.drive.impl.DriveConstants;
+import com.openexchange.drive.DriveProperty;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.drive.impl.management.version.BrandedDriveVersionServiceImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.Initialization;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -79,10 +77,16 @@ import com.openexchange.tools.strings.TimeSpanParser;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveConfig implements Initialization {
+public class DriveConfig {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveConfig.class);
-    private static final DriveConfig instance = new DriveConfig();
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveConfig.class);
+    }
+
+    private static final long MILLIS_PER_HOUR = 1000 * 60 * 60;
+
+    private static final DriveConfig INSTANCE = new DriveConfig();
 
     /**
      * Gets the drive configuration instance.
@@ -90,102 +94,51 @@ public class DriveConfig implements Initialization {
      * @return The drive config instance
      */
     public static DriveConfig getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
-    private final AtomicBoolean started;
-
-    private boolean useTempFolder;
-    private long cleanerInterval;
-    private long cleanerMaxAge;
-    private int maxBandwidth;
-    private int maxBandwidthPerClient;
-    private int maxConcurrentSyncOperations;
-    private String directLinkQuota;
-    private String directLinkHelp;
-    private Pattern excludedFilenamesPattern;
-    private Pattern excludedDirectoriesPattern;
-    private String shortProductName;
-    private int minApiVersion;
-    private int maxDirectoryActions;
-    private int maxFileActions;
-    private String directLinkFragmentsFile;
-    private String directLinkFile;
-    private String jumpLink;
-    private int[] previewImageSize;
-    private int[] thumbnailImageSize;
-    private String imageLinkImageFile;
-    private String imageLinkAudioFile;
-    private String imageLinkDocumentFile;
-    private String directLinkFragmentsDirectory;
-    private String directLinkDirectory;
-    private String uiWebPath;
-    private String dispatcherPrefix;
-    private int maxDirectories;
-    private int maxFilesPerDirectory;
-    private Set<String> enabledServices;
-    private Set<String> excludedFolders;
-    private long checksumCleanerInterval;
-    private long checksumCleanerMaxAge;
-    private long optimisticSaveThresholdMobile;
-    private long optimisticSaveThresholdDesktop;
-
-    private EnumMap<DriveClientType, DriveClientVersion> softMinimumVersions;
-    private EnumMap<DriveClientType, DriveClientVersion> hardMinimumVersions;
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link DriveConfig}.
      */
     private DriveConfig() {
         super();
-        this.started = new AtomicBoolean();
-    }
-
-    @Override
-    public void start() throws OXException {
-        if (false == started.compareAndSet(false, true)) {
-            LOG.warn("Already started - aborting.");
-            return;
-        }
-        /*
-         * register properties
-         */
-        load(DriveServiceLookup.getService(ConfigurationService.class, true));
-    }
-
-    @Override
-    public void stop() throws OXException {
-        if (false == started.compareAndSet(true, false)) {
-            LOG.warn("Not started - aborting.");
-            return;
-        }
     }
 
     /**
      * Gets the useTempFolder
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The useTempFolder
      */
-    public boolean isUseTempFolder() {
-        return useTempFolder;
+    public boolean isUseTempFolder(int contextId, int userId) {
+        return getConfigService().getBooleanProperty(userId, contextId, DriveProperty.USE_TEMP_FOLDER);
     }
 
     /**
      * Gets the cleanerInterval
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The cleanerInterval
      */
-    public long getCleanerInterval() {
-        return cleanerInterval;
+    public long getCleanerInterval(int contextId, int userId) throws OXException {
+        String cleanerIntervalValue = getConfigService().getProperty(userId, contextId, DriveProperty.CLEANER_INTERVAL);
+        return parseTimeSpan(cleanerIntervalValue, 1);
     }
 
     /**
      * Gets the cleanerMaxAge
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The cleanerMaxAge
      */
-    public long getCleanerMaxAge() {
-        return cleanerMaxAge;
+    public long getCleanerMaxAge(int contextId, int userId) throws OXException {
+        String cleanerMaxAgeValue = getConfigService().getProperty(userId, contextId, DriveProperty.CLEANER_MAX_AGE);
+        return parseTimeSpan(cleanerMaxAgeValue, 1);
     }
 
     /**
@@ -194,7 +147,8 @@ public class DriveConfig implements Initialization {
      * @return The maxBandwidth
      */
     public int getMaxBandwidth() {
-        return maxBandwidth;
+        String maxBandwidthValue = getConfigService().getProperty(DriveProperty.MAX_BANDWIDTH);
+        return Strings.isEmpty(maxBandwidthValue) || "-1".equals(maxBandwidthValue) ? -1 : parseBytes(maxBandwidthValue);
     }
 
     /**
@@ -203,173 +157,232 @@ public class DriveConfig implements Initialization {
      * @return The maxBandwidthPerClient
      */
     public int getMaxBandwidthPerClient() {
-        return maxBandwidthPerClient;
+        String maxBandwidthPerClientValue = getConfigService().getProperty(DriveProperty.MAX_BANDWIDTH_PER_CLIENT);
+        return Strings.isEmpty(maxBandwidthPerClientValue) || "-1".equals(maxBandwidthPerClientValue) ? -1 : parseBytes(maxBandwidthPerClientValue);
     }
 
     /**
      * Gets the maxConcurrentSyncOperations
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The maxConcurrentSyncOperations
      */
-    public int getMaxConcurrentSyncOperations() {
-        return maxConcurrentSyncOperations;
+    public int getMaxConcurrentSyncOperations(int contextId, int userId) {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_CONCURRENT_SYNC_OPERATIONS);
     }
 
     /**
      * Gets the directLinkQuota
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The directLinkQuota
      */
-    public String getDirectLinkQuota() {
-        return directLinkQuota;
+    public String getDirectLinkQuota(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_QUOTA);
     }
 
     /**
      * Gets the directLinkHelp
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The directLinkHelp
      */
-    public String getDirectLinkHelp() {
-        return directLinkHelp;
+    public String getDirectLinkHelp(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_HELP);
     }
 
     /**
      * Gets the excludedFilenamesPattern
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The excludedFilenamesPattern
      */
-    public Pattern getExcludedFilenamesPattern() {
-        return excludedFilenamesPattern;
+    public Pattern getExcludedFilenamesPattern(int contextId, int userId) {
+        try {
+            return Pattern.compile(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_FILES_PATTERN), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        } catch (PatternSyntaxException e) {
+            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.EXCLUDED_FILES_PATTERN.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+            return Pattern.compile(DriveProperty.EXCLUDED_FILES_PATTERN.getDefaultValue(String.class), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        }
     }
 
     /**
      * Gets the excludedDirectoriesPattern
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The excludedDirectoriesPattern
      */
-    public Pattern getExcludedDirectoriesPattern() {
-        return excludedDirectoriesPattern;
+    public Pattern getExcludedDirectoriesPattern(int contextId, int userId) {
+        try {
+            return Pattern.compile(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_DIRECTORIES_PATTERN), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        } catch (PatternSyntaxException e) {
+            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+            return Pattern.compile(DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getDefaultValue(String.class), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        }
     }
 
     /**
      * Gets the shortProductName
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The shortProductName
      */
-    public String getShortProductName() {
-        return shortProductName;
+    public String getShortProductName(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.SHORT_PRODUCT_NAME);
     }
 
     /**
      * Gets the minApiVersion
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The minApiVersion
      */
-    public int getMinApiVersion() {
-        return minApiVersion;
+    public int getMinApiVersion(int contextId, int userId) {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MIN_API_VERSION);
     }
 
     /**
      * Gets the maxDirectoryActions
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The maxDirectoryActions
      */
-    public int getMaxDirectoryActions() {
-        return maxDirectoryActions;
+    public int getMaxDirectoryActions(int contextId, int userId) {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_DIRECTORY_ACTIONS);
     }
 
     /**
      * Gets the maxFileActions
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The maxFileActions
      */
-    public int getMaxFileActions() {
-        return maxFileActions;
+    public int getMaxFileActions(int contextId, int userId) {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_FILE_ACTIONS);
     }
 
     /**
      * Gets the directLinkFragmentsFile
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The directLinkFragmentsFile
      */
-    public String getDirectLinkFragmentsFile() {
-        return directLinkFragmentsFile;
+    public String getDirectLinkFragmentsFile(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_FRAGMENTS_FILE);
     }
 
     /**
      * Gets the directLinkFile
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The directLinkFile
      */
-    public String getDirectLinkFile() {
-        return directLinkFile;
+    public String getDirectLinkFile(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_FILE);
     }
 
-    public String getJumpLink() {
-        return jumpLink;
+    public String getJumpLink(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.JUMP_LINK);
     }
 
     /**
      * Gets the thumbnailImageSize
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The thumbnailImageSize
      */
-    public int[] getThumbnailImageSize() {
-        return thumbnailImageSize;
+    public int[] getThumbnailImageSize(int contextId, int userId) {
+        String value = getConfigService().getProperty(userId, contextId, DriveProperty.THUMBNAIL_IMAGE_SIZE);
+        try {
+            return parseDimensions(value);
+        } catch (OXException e) {
+            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.THUMBNAIL_IMAGE_SIZE.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+            return new int[] { 250, 100 };
+        }
     }
 
     /**
      * Gets the previewImageSize
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The previewImageSize
      */
-    public int[] getPreviewImageSize() {
-        return previewImageSize;
+    public int[] getPreviewImageSize(int contextId, int userId) {
+        String value = getConfigService().getProperty(userId, contextId, DriveProperty.PREVIEW_IMAGE_SIZE);
+        try {
+            return parseDimensions(value);
+        } catch (OXException e) {
+            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.PREVIEW_IMAGE_SIZE.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+            return new int[] { 1600, 1600 };
+        }
     }
 
     /**
      * Gets the imageLinkDocumentFile
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The imageLinkDocumentFile
      */
-    public String getImageLinkDocumentFile() {
-        return imageLinkDocumentFile;
+    public String getImageLinkDocumentFile(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_DOCUMENT_FILE);
     }
 
     /**
      * Gets the directLinkDirectory
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The directLinkDirectory
      */
-    public String getDirectLinkDirectory() {
-        return directLinkDirectory;
+    public String getDirectLinkDirectory(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_DIRECTORY);
     }
 
     /**
      * Gets the directLinkFragmentsDirectory
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The directLinkFragmentsDirectory
      */
-    public String getDirectLinkFragmentsDirectory() {
-        return directLinkFragmentsDirectory;
+    public String getDirectLinkFragmentsDirectory(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_FRAGMENTS_DIRECTORY);
     }
 
     /**
      * Gets the imageLinkAudioFile
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The imageLinkAudioFile
      */
-    public String getImageLinkAudioFile() {
-        return imageLinkAudioFile;
+    public String getImageLinkAudioFile(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_AUDIO_FILE);
     }
 
     /**
      * Gets the imageLinkImageFile
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The imageLinkImageFile
      */
-    public String getImageLinkImageFile() {
-        return imageLinkImageFile;
+    public String getImageLinkImageFile(int contextId, int userId) {
+        return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_IMAGE_FILE);
     }
 
     /**
@@ -378,7 +391,7 @@ public class DriveConfig implements Initialization {
      * @return The uiWebPath
      */
     public String getUiWebPath() {
-        return uiWebPath;
+        return ServerConfig.getProperty(Property.UI_WEB_PATH);
     }
 
     /**
@@ -387,54 +400,71 @@ public class DriveConfig implements Initialization {
      * @return The dispatcherPrefix
      */
     public String getDispatcherPrefix() {
-        return dispatcherPrefix;
+        DispatcherPrefixService service = DriveServiceLookup.getService(DispatcherPrefixService.class);
+        if (null != service) {
+            return service.getPrefix();
+        }
+        return DispatcherPrefixService.DEFAULT_PREFIX;
     }
 
     /**
      * Gets the maxDirectories
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The maxDirectories
      */
-    public int getMaxDirectories() {
-        return maxDirectories;
+    public int getMaxDirectories(int contextId, int userId) {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_DIRECTORIES);
     }
 
     /**
      * Gets the maxFilesPerDirectory
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The maxFilesPerDirectory
      */
-    public int getMaxFilesPerDirectory() {
-        return maxFilesPerDirectory;
+    public int getMaxFilesPerDirectory(int contextId, int userId) {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_FILES_PER_DIRECTORY);
     }
 
     /**
      * Gets a value indicating whether synchronization is enabled for a specific file storage service or not.
      *
      * @param serviceID The identifier of the file storage service to check
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return <code>true</code> if synchronization is enabled, <code>false</code>, otherwise
      */
-    public boolean isEnabledService(String serviceID) {
-        return Strings.isNotEmpty(serviceID) && null != enabledServices && enabledServices.contains(serviceID);
+    public boolean isEnabledService(String serviceID, int contextId, int userId) {
+        String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(getConfigService().getProperty(userId, contextId, DriveProperty.ENABLED_SERVICES));
+        Set<String> enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
+        return Strings.isNotEmpty(serviceID) && enabledServices.contains(serviceID);
     }
 
     /**
      * Gets a value indicating whether a specific folder is excluded explicitly from synchronization or not.
      *
      * @param folderID The identifier of the folder to check
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return <code>true</code> if the folder is excluded, <code>false</code>, otherwise
      */
-    public boolean isExcludedFolder(String folderID) {
-        return Strings.isNotEmpty(folderID) && null != excludedFolders && excludedFolders.contains(folderID);
+    public boolean isExcludedFolder(String folderID, int contextId, int userId) {
+        return Strings.isNotEmpty(folderID) && getExcludedFolders(contextId, userId).contains(folderID);
     }
 
     /**
-     * Gets the exclduedFolders
+     * Gets the excluded folders
      *
-     * @return The exclduedFolders
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The excluded folders
      */
-    public Set<String> getExclduedFolders() {
-        return excludedFolders;
+    public Set<String> getExcludedFolders(int contextId, int userId) {
+        String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_FOLDERS));
+        return ((null == exclduedFoldersValue) || (0 == exclduedFoldersValue.length)) ? Collections.emptySet() : new HashSet<String>(Arrays.asList(exclduedFoldersValue));
     }
 
     /**
@@ -443,7 +473,13 @@ public class DriveConfig implements Initialization {
      * @return The checksumCleanerInterval
      */
     public long getChecksumCleanerInterval() {
-        return checksumCleanerInterval;
+        String value = getConfigService().getProperty(DriveProperty.CHECKSUM_CLEANER_INTERVAL);
+        try {
+            return parseTimeSpan(value, 1);
+        } catch (OXException e) {
+            LoggerHolder.LOG.warn("{} configuration error.", DriveProperty.CHECKSUM_CLEANER_INTERVAL.getFQPropertyName(), e);
+            return MILLIS_PER_HOUR * 24;
+        }
     }
 
     /**
@@ -452,199 +488,59 @@ public class DriveConfig implements Initialization {
      * @return The checksumCleanerMaxAge
      */
     public long getChecksumCleanerMaxAge() {
-        return checksumCleanerMaxAge;
+        String value = getConfigService().getProperty(DriveProperty.CHECKSUM_CLEANER_MAXAGE);
+        try {
+            return parseTimeSpan(value, 24);
+        } catch (OXException e) {
+            LoggerHolder.LOG.warn("{} configuration error.", DriveProperty.CHECKSUM_CLEANER_MAXAGE.getFQPropertyName(), e);
+            return MILLIS_PER_HOUR * 24 * 4 * 7;
+        }
     }
 
     /**
      * Gets the optimisticSaveThresholdMobile
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The optimisticSaveThresholdMobile
      */
-    public long getOptimisticSaveThresholdMobile() {
-        return optimisticSaveThresholdMobile;
+    public long getOptimisticSaveThresholdMobile(int contextId, int userId) {
+        return parseBytes(getConfigService().getProperty(userId, contextId, DriveProperty.OPTIMISTIC_SAVE_THRESHOLD_MOBILE));
     }
 
     /**
      * Gets the optimisticSaveThresholdDesktop
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The optimisticSaveThresholdDesktop
      */
-    public long getOptimisticSaveThresholdDesktop() {
-        return optimisticSaveThresholdDesktop;
+    public long getOptimisticSaveThresholdDesktop(int contextId, int userId) {
+        return parseBytes(getConfigService().getProperty(userId, contextId, DriveProperty.OPTIMISTIC_SAVE_THRESHOLD_DESKTOP));
     }
 
     /**
-     * Loads all relevant drive properties from the configuration service.
+     * Parse Drive client version
      *
-     * @param configService The configuration service
+     * @param value The version to parse
+     * @return The parsed {@link DriveClientVersion}
      * @throws OXException
      */
-    private void load(ConfigurationService configService) throws OXException {
-        /*
-         * general
-         */
-        minApiVersion = configService.getIntProperty("com.openexchange.drive.minApiVersion", DriveConstants.DEFAULT_MIN_API_VERSION);
-        shortProductName = configService.getProperty("com.openexchange.drive.shortProductName", "OX Drive");
-        try {
-            excludedFilenamesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedFilesPattern",
-                "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r|\\.msngr_hstr_data_.*\\.log"),
-                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        } catch (PatternSyntaxException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedFilesPattern");
-        }
-        try {
-            excludedDirectoriesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedDirectoriesPattern",
-                "^/\\.drive$|^.*/\\.msngr_hstr_data$|^.*/\\.drive-meta(?:$|/.*)"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        } catch (PatternSyntaxException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedDirectoriesPattern");
-        }
-        /*
-         * temp cleaner
-         */
-        useTempFolder = configService.getBoolProperty("com.openexchange.drive.useTempFolder", true);
-        final long MILLIS_PER_HOUR = 1000 * 60 * 60;
-        String cleanerIntervalValue = configService.getProperty("com.openexchange.drive.cleaner.interval", "1D");
-        try {
-            cleanerInterval = TimeSpanParser.parseTimespan(cleanerIntervalValue);
-        } catch (IllegalArgumentException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, cleanerIntervalValue);
-        }
-        if (MILLIS_PER_HOUR > cleanerInterval) {
-            LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", cleanerIntervalValue);
-            cleanerInterval = MILLIS_PER_HOUR;
-        }
-        String cleanerMaxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
-        try {
-            cleanerMaxAge = TimeSpanParser.parseTimespan(cleanerMaxAgeValue);
-        } catch (IllegalArgumentException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, cleanerMaxAgeValue);
-        }
-        if (MILLIS_PER_HOUR > cleanerMaxAge) {
-            LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", cleanerMaxAgeValue);
-            cleanerMaxAge = MILLIS_PER_HOUR;
-        }
-        /*
-         * checksum cleaner
-         */
-        final long MILLIS_PER_DAY = MILLIS_PER_HOUR * 24;
-        String checksumCleanerIntervalValue = configService.getProperty("com.openexchange.drive.checksum.cleaner.interval", "1D");
-        try {
-            checksumCleanerInterval = TimeSpanParser.parseTimespan(checksumCleanerIntervalValue);
-        } catch (IllegalArgumentException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, checksumCleanerIntervalValue);
-        }
-        if (0 < checksumCleanerInterval) {
-            if (MILLIS_PER_HOUR > checksumCleanerInterval) {
-                LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", checksumCleanerIntervalValue);
-                checksumCleanerInterval = MILLIS_PER_HOUR;
-            }
-            String checksumCleanerMaxAgeValue = configService.getProperty("com.openexchange.drive.checksum.cleaner.maxAge", "4W");
-            try {
-                checksumCleanerMaxAge = TimeSpanParser.parseTimespan(checksumCleanerMaxAgeValue);
-            } catch (IllegalArgumentException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, checksumCleanerMaxAgeValue);
-            }
-            if (MILLIS_PER_DAY > checksumCleanerMaxAge) {
-                LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one day. Falling back to ''1D'' instead.", checksumCleanerMaxAgeValue);
-                checksumCleanerMaxAge = MILLIS_PER_DAY;
-            }
-        }
-        /*
-         * throttling
-         */
-        String maxBandwidthValue = configService.getProperty("com.openexchange.drive.maxBandwidth");
-        maxBandwidth = Strings.isEmpty(maxBandwidthValue) || "-1".equals(maxBandwidthValue) ? -1 : parseBytes(maxBandwidthValue);
-        String maxBandwidthPerClientValue = configService.getProperty("com.openexchange.drive.maxBandwidthPerClient");
-        maxBandwidthPerClient = Strings.isEmpty(maxBandwidthPerClientValue) || "-1".equals(maxBandwidthPerClientValue) ?
-            -1 : parseBytes(maxBandwidthPerClientValue);
-        maxConcurrentSyncOperations = configService.getIntProperty("com.openexchange.drive.maxConcurrentSyncOperations", -1);
-        maxDirectoryActions = configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", 1000);
-        maxFileActions = configService.getIntProperty("com.openexchange.drive.maxFileActions", 500);
-        /*
-         * restrictions
-         */
-        maxDirectories = configService.getIntProperty("com.openexchange.drive.maxDirectories", 65535);
-        maxFilesPerDirectory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDirectory", 65535);
-        String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.enabledServices", "com.openexchange.infostore"));
-        enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
-        String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.excludedFolders"));
-        if (null == exclduedFoldersValue || 0 == exclduedFoldersValue.length) {
-            excludedFolders = Collections.emptySet();
-        } else {
-            excludedFolders = new HashSet<String>(Arrays.asList(exclduedFoldersValue));
-        }
-        /*
-         * direct link templates
-         */
-        directLinkQuota = configService.getProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]");
-        directLinkHelp = configService.getProperty("com.openexchange.drive.directLinkHelp",
-            "[protocol]://[hostname]/[uiwebpath]/help/[locale]/index.html");
-        directLinkFragmentsFile = configService.getProperty("com.openexchange.drive.directLinkFragmentsFile",
-            "m=infostore&f=[folder]&i=[object]");
-        directLinkFile = configService.getProperty("com.openexchange.drive.directLinkFile",
-            "[protocol]://[hostname]/[uiwebpath]#[filefragments]");
-        jumpLink = configService.getProperty("com.openexchange.drive.jumpLink",
-            "[protocol]://[hostname]/[uiwebpath]#[app]&[folder]&[id]");
-        previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "1600x1600"));
-        thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "200x150"));
-        imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&" +
-            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
-            "delivery=download&scaleType=contain&width=[width]&height=[height]&shrinkOnly=true&rotate=true");
-        imageLinkAudioFile = configService.getProperty("com.openexchange.drive.imageLinkAudioFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/image/file/mp3Cover?" +
-            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
-            "delivery=download&scaleType=contain&width=[width]&height=[height]");
-        imageLinkDocumentFile = configService.getProperty("com.openexchange.drive.imageLinkDocumentFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&format=preview_image&" +
-            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
-            "delivery=download&scaleType=contain&width=[width]&height=[height]");
-        directLinkFragmentsDirectory = configService.getProperty("com.openexchange.drive.directLinkFragmentsDirectory",
-            "m=infostore&f=[folder]");
-        directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
-            "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]");
-        uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
-        dispatcherPrefix = configService.getProperty("com.openexchange.dispatcher.prefix", "ajax");
-        /*
-         * version restrictions
-         */
-        softMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
-        hardMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
-        softMinimumVersions.put(DriveClientType.WINDOWS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.softMinimum", "0")));
-        hardMinimumVersions.put(DriveClientType.WINDOWS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.hardMinimum", "0")));
-        softMinimumVersions.put(DriveClientType.MAC_OS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.macos.softMinimum", "0")));
-        hardMinimumVersions.put(DriveClientType.MAC_OS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.macos.hardMinimum", "0")));
-        softMinimumVersions.put(DriveClientType.ANDROID,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.android.softMinimum", "0")));
-        softMinimumVersions.put(DriveClientType.IOS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.ios.softMinimum", "0")));
-        hardMinimumVersions.put(DriveClientType.ANDROID,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.android.hardMinimum", "0")));
-        hardMinimumVersions.put(DriveClientType.IOS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.ios.hardMinimum", "0")));
-        /*
-         * optimistic save thresholds
-         */
-        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "64kB");
-        optimisticSaveThresholdDesktop = Strings.isEmpty(optimisticSaveThresholdDesktopValue) || "-1".equals(optimisticSaveThresholdDesktopValue) ? -1 :
-            parseBytes(optimisticSaveThresholdDesktopValue);
-        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "64kB");
-        optimisticSaveThresholdMobile = Strings.isEmpty(optimisticSaveThresholdMobileValue) || "-1".equals(optimisticSaveThresholdMobileValue) ? -1 :
-            parseBytes(optimisticSaveThresholdMobileValue);
-    }
-
     private static DriveClientVersion parseClientVersion(String value) throws OXException {
         try {
             return Strings.isEmpty(value) ? DriveClientVersion.VERSION_0 : new DriveClientVersion(value);
         } catch (IllegalArgumentException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, value);
         }
     }
 
+    /**
+     * Parse image dimensions into int[]
+     *
+     * @param value The string to parse
+     * @return The parsed dimensions as int[]
+     * @throws OXException
+     */
     private static int[] parseDimensions(String value) throws OXException {
         int idx = value.indexOf('x');
         if (1 > idx) {
@@ -653,7 +549,7 @@ public class DriveConfig implements Initialization {
         try {
             return new int[] { Integer.parseInt(value.substring(0, idx)), Integer.parseInt(value.substring(idx + 1)) };
         } catch (NumberFormatException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(1, value);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, value);
         }
     }
 
@@ -699,29 +595,40 @@ public class DriveConfig implements Initialization {
      * @return The configured limit, or {@link DriveClientVersion#VERSION_0} if not defined
      */
     public DriveClientVersion getSoftMinimumVersion(DriveClientType clientType, Session session) {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
         try {
-            if (clientType == DriveClientType.WINDOWS) {
-                BrandedDriveVersionService versionService = BrandedDriveVersionServiceImpl.getInstance();
-
-                ConfigViewFactory configService = DriveServiceLookup.getService(ConfigViewFactory.class);
-                if (configService != null) {
-                    ConfigView view = configService.getView(session.getUserId(), session.getContextId());
-                    String branding = view.get("com.openexchange.drive.update.branding", String.class);
-                    if (branding != null && !branding.isEmpty()) {
-                        String version = versionService.getSoftMinimumVersion(branding);
-                        if (version != null && !version.isEmpty()) {
-                            return parseClientVersion(version);
+            String value;
+            switch (clientType) {
+                case WINDOWS:
+                    {
+                        LeanConfigurationService configService = getConfigService();
+                        BrandedDriveVersionService versionService = BrandedDriveVersionServiceImpl.getInstance();
+                        String branding = configService.getProperty(userId, contextId, DriveProperty.UPDATE_BRANDING);
+                        if (branding != null && !branding.isEmpty()) {
+                            value = versionService.getHardMinimumVersion(branding);
+                        } else {
+                            value = configService.getProperty(userId, contextId, DriveProperty.VERSION_WINDOWS_SOFT_MINIMUM);
                         }
                     }
-                }
+                    break;
+                case MAC_OS:
+                    value = getConfigService().getProperty(userId, contextId, DriveProperty.VERSION_MACOS_SOFT_MINIMUM);
+                    break;
+                case ANDROID:
+                    value = getConfigService().getProperty(userId, contextId, DriveProperty.VERSION_ANDROID_SOFT_MINIMUM);
+                    break;
+                case IOS:
+                    value = getConfigService().getProperty(userId, contextId, DriveProperty.VERSION_IOS_SOFT_MINIMUM);
+                    break;
+                default:
+                    return DriveClientVersion.VERSION_0;
             }
+            return parseClientVersion(value);
         } catch (OXException e) {
-            LOG.error(e.getMessage());
-            //Fallback to old handling
+            LoggerHolder.LOG.warn(e.getMessage(), e);
+            return DriveClientVersion.VERSION_0;
         }
-
-        DriveClientVersion version = softMinimumVersions.get(clientType);
-        return null != version ? version : DriveClientVersion.VERSION_0;
     }
 
     /**
@@ -732,29 +639,70 @@ public class DriveConfig implements Initialization {
      * @return The configured limit, or {@link DriveClientVersion#VERSION_0} if not defined
      */
     public DriveClientVersion getHardMinimumVersion(DriveClientType clientType, Session session) {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
         try {
-            if (clientType == DriveClientType.WINDOWS) {
-                BrandedDriveVersionService versionService = BrandedDriveVersionServiceImpl.getInstance();
-
-                ConfigViewFactory configService = DriveServiceLookup.getService(ConfigViewFactory.class);
-                if (configService != null) {
-                    ConfigView view = configService.getView(session.getUserId(), session.getContextId());
-                    String branding = view.get("com.openexchange.drive.update.branding", String.class);
-                    if (branding != null && !branding.isEmpty()) {
-                        String version = versionService.getHardMinimumVersion(branding);
-                        if (version != null && !version.isEmpty()) {
-                            return parseClientVersion(version);
+            String value;
+            switch (clientType) {
+                case WINDOWS:
+                    {
+                        LeanConfigurationService configService = getConfigService();
+                        BrandedDriveVersionService versionService = BrandedDriveVersionServiceImpl.getInstance();
+                        String branding = configService.getProperty(userId, contextId, DriveProperty.UPDATE_BRANDING);
+                        if (branding != null && !branding.isEmpty()) {
+                            value = versionService.getHardMinimumVersion(branding);
+                        } else {
+                            value = configService.getProperty(userId, contextId, DriveProperty.VERSION_WINDOWS_HARD_MINIMUM);
                         }
                     }
-                }
+                    break;
+                case MAC_OS:
+                    value = getConfigService().getProperty(userId, contextId, DriveProperty.VERSION_MACOS_HARD_MINIMUM);
+                    break;
+                case ANDROID:
+                    value = getConfigService().getProperty(userId, contextId, DriveProperty.VERSION_ANDROID_HARD_MINIMUM);
+                    break;
+                case IOS:
+                    value = getConfigService().getProperty(userId, contextId, DriveProperty.VERSION_IOS_HARD_MINIMUM);
+                    break;
+                default:
+                    return DriveClientVersion.VERSION_0;
             }
+            return parseClientVersion(value);
         } catch (OXException e) {
-            LOG.error(e.getMessage());
-            //Fallback to old handling
+            LoggerHolder.LOG.warn(e.getMessage(), e);
+            return DriveClientVersion.VERSION_0;
         }
+    }
 
-        DriveClientVersion version = hardMinimumVersions.get(clientType);
-        return null != version ? version : DriveClientVersion.VERSION_0;
+    /**
+     * Parse a timespan including an optional unit
+     *
+     * @param interval The interval to parse
+     * @param minimum The minimal value
+     * @return The parsed timespan in milliseconds
+     * @throws OXException
+     */
+    private long parseTimeSpan(String interval, int minimum) throws OXException {
+        long cleanerInterval = -1L;
+        try {
+            cleanerInterval = TimeSpanParser.parseTimespan(interval).longValue();
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, interval);
+        }
+        if ((MILLIS_PER_HOUR * minimum) > cleanerInterval) {
+            LoggerHolder.LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of {}h. Falling back to ''{}h'' instead.", interval, Integer.valueOf(minimum), Integer.valueOf(minimum));
+            cleanerInterval = MILLIS_PER_HOUR;
+        }
+        return cleanerInterval;
+    }
+
+    private LeanConfigurationService getConfigService() {
+        LeanConfigurationService service = DriveServiceLookup.getService(LeanConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("LeanConfigurationService not available");
+        }
+        return service;
     }
 
 }

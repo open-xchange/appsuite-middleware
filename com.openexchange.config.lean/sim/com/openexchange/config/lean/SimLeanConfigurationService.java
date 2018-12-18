@@ -71,7 +71,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(com.openexchange.config.lean.Property)
      */
     @Override
@@ -81,7 +81,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(com.openexchange.config.lean.Property)
      */
     @Override
@@ -91,7 +91,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(com.openexchange.config.lean.Property)
      */
     @Override
@@ -101,7 +101,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(com.openexchange.config.lean.Property)
      */
     @Override
@@ -111,7 +111,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(com.openexchange.config.lean.Property)
      */
     @Override
@@ -121,7 +121,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
@@ -131,7 +131,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
@@ -141,7 +141,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
@@ -151,7 +151,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
@@ -161,7 +161,7 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
@@ -217,6 +217,11 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
     @Override
     public long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
         return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
+    public boolean isDefinedAndNotEmpty(int userId, int contextId, Property property) {
+        return false;
     }
 
 }

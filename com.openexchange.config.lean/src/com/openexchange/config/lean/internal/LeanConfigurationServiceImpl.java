@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -67,6 +68,8 @@ import com.openexchange.config.lean.internal.parser.FloatPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.IntegerPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.LongPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.StringPropertyValueParser;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link LeanConfigurationServiceImpl}
@@ -197,6 +200,18 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     @Override
     public long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
         return getProperty(property, userId, contextId, Long.class, optionals).longValue();
+    }
+
+    @Override
+    public boolean isDefinedAndNotEmpty(int userId, int contextId, Property property) {
+        try {
+            ConfigViewFactory factory = this.viewFactory;
+            ConfigView view = factory.getView(userId, contextId);
+            ConfigProperty<String> prop = view.property(property.getFQPropertyName(), String.class);
+            return !prop.isDefined() ? false : Strings.isNotEmpty(prop.get());
+        } catch (OXException e) {
+            return false;
+        }
     }
 
     ////////////////////////////////////////HELPERS ///////////////////////////////////////

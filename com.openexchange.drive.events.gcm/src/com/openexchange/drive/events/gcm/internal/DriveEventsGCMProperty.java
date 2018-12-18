@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,30 +47,52 @@
  *
  */
 
-package com.openexchange.drive.events.apn2;
+package com.openexchange.drive.events.gcm.internal;
+
+import com.openexchange.config.lean.Property;
 
 
 /**
- * {@link DefaultIOSApnsHttp2OptionsProvider} - The default iOS options provider accepting an instance of <code>ApnsHttp2Options</code>.
+ * {@link DriveEventsGCMProperty}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.1
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.2
  */
-public class DefaultIOSApnsHttp2OptionsProvider implements IOSApnsHttp2OptionsProvider {
-
-    private final ApnsHttp2Options options;
+public enum DriveEventsGCMProperty implements Property {
 
     /**
-     * Initializes a new {@link DefaultIOSApnsHttp2OptionsProvider}.
+     * Enables or disables push event notifications to clients using the Google
+     * Cloud Messaging (GCM) service. This requires a valid configuration for the
+     * GCM API key.
+     * Default: false
      */
-    public DefaultIOSApnsHttp2OptionsProvider(ApnsHttp2Options options) {
-        super();
-        this.options = options;
+    ENABLED("enabled", false),
+
+    /**
+     * Specifies the API key of the server application.
+     * Default: no default
+     */
+    KEY("key", null)
+    ;
+
+    private static final String PREFIX = "com.openexchange.drive.events.gcm.";
+
+    private final Object defaultValue;
+    private final String name;
+
+    private DriveEventsGCMProperty(String name, Object defaultValue) {
+        this.name = name;
+        this.defaultValue = defaultValue;
     }
 
     @Override
-    public ApnsHttp2Options getOptions() {
-        return options;
+    public String getFQPropertyName() {
+        return PREFIX + name;
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

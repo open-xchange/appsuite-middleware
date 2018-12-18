@@ -55,6 +55,7 @@ import com.openexchange.clientinfo.ClientInfoType;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 
 /**
  * {@link DriveClientInfo}
@@ -68,6 +69,18 @@ public class DriveClientInfo implements ClientInfo {
     private final String platformVersion;
     private final String appVersion;
     private final String osFamily;
+    private final int    contextId;
+    private final int    userId;
+
+    public DriveClientInfo(String platform, String platformVersion, String appVersion, String osFamily, Session session) {
+        super();
+        this.platform = platform;
+        this.platformVersion = platformVersion;
+        this.appVersion = appVersion;
+        this.osFamily = osFamily;
+        this.contextId = session.getContextId();
+        this.userId = session.getUserId();
+    }
 
     public DriveClientInfo(String platform, String platformVersion, String appVersion, String osFamily) {
         super();
@@ -75,6 +88,8 @@ public class DriveClientInfo implements ClientInfo {
         this.platformVersion = platformVersion;
         this.appVersion = appVersion;
         this.osFamily = osFamily;
+        this.contextId = -1;
+        this.userId = -1;
     }
 
     @Override
@@ -84,7 +99,7 @@ public class DriveClientInfo implements ClientInfo {
 
     @Override
     public String getDisplayName(Locale locale) {
-        String app = DriveConfig.getInstance().getShortProductName();
+        String app = DriveConfig.getInstance().getShortProductName(contextId, userId);
         StringHelper helper = StringHelper.valueOf(locale);
         if (Strings.isNotEmpty(appVersion) && Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
             return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_PLATFORM_VERSION), app, appVersion, platform, platformVersion);
@@ -116,7 +131,7 @@ public class DriveClientInfo implements ClientInfo {
 
     @Override
     public String getClientName() {
-        return DriveConfig.getInstance().getShortProductName().toLowerCase();
+        return DriveConfig.getInstance().getShortProductName(contextId, userId).toLowerCase();
     }
 
     @Override

@@ -83,13 +83,13 @@ public interface DriveUtility {
     boolean isInvalidFileName(String fileName);
 
     /**
-     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition. Only
-     * static / global exclusions are considered in this check.
+     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
      *
      * @param fileName The filename to check
+     * @param session The session
      * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
      */
-    boolean isIgnoredFileName(String fileName);
+    boolean isIgnoredFileName(String fileName, Session session) throws OXException;
 
     /**
      * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition. Static /

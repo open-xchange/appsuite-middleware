@@ -77,6 +77,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -139,7 +140,8 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
 
     @Override
     protected int getMaxActions() {
-        return DriveConfig.getInstance().getMaxDirectoryActions();
+        ServerSession serverSession = session.getServerSession();
+        return DriveConfig.getInstance().getMaxDirectoryActions(serverSession.getContextId(), serverSession.getUserId());
     }
 
     @Override

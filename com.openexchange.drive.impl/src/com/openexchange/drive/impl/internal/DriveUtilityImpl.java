@@ -160,8 +160,8 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
-    public boolean isIgnoredFileName(String fileName) {
-        return DriveUtils.isIgnoredFileName(fileName);
+    public boolean isIgnoredFileName(String fileName, Session session) throws OXException {
+        return DriveUtils.isIgnoredFileName(fileName, session);
     }
 
     @Override

@@ -8,8 +8,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.drive.events.gcm.osgi.GCMActivator
 Bundle-ClassPath: .
 Import-Package: com.google.android.gcm,
+ com.google.common.collect,
  com.openexchange.ajax,
- com.openexchange.config,
+ com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.drive.events,
  com.openexchange.drive.events.subscribe,
@@ -19,6 +20,7 @@ Import-Package: com.google.android.gcm,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.tools.arrays,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

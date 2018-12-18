@@ -68,6 +68,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ThrottlingDriveService}
@@ -94,7 +95,7 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException {
         try {
-            enterSyncOperation();
+            enterSyncOperation(session);
             return delegate.syncFolders(session, originalVersions, clientVersions, includeQuota);
         } finally {
             leaveSyncOperation();
@@ -104,7 +105,7 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException {
         try {
-            enterSyncOperation();
+            enterSyncOperation(session);
             return delegate.syncFiles(session, path, originalVersions, clientVersions, includeQuota);
         } finally {
             leaveSyncOperation();
@@ -126,7 +127,7 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public DriveQuota getQuota(DriveSession session) throws OXException {
         try {
-            enterSyncOperation();
+            enterSyncOperation(session);
             return delegate.getQuota(session);
         } finally {
             leaveSyncOperation();
@@ -141,7 +142,7 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public List<DriveFileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions, List<DriveFileField> fields) throws OXException {
         try {
-            enterSyncOperation();
+            enterSyncOperation(session);
             return delegate.getFileMetadata(session, path, fileVersions, fields);
         } finally {
             leaveSyncOperation();
@@ -151,7 +152,7 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public DirectoryMetadata getDirectoryMetadata(DriveSession session, String path) throws OXException {
         try {
-            enterSyncOperation();
+            enterSyncOperation(session);
             return delegate.getDirectoryMetadata(session, path);
         } finally {
             leaveSyncOperation();
@@ -168,8 +169,9 @@ public class ThrottlingDriveService implements DriveService {
         return delegate.getUtility();
     }
 
-    private void enterSyncOperation() throws OXException {
-        int maxConcurrentSyncOperations = DriveConfig.getInstance().getMaxConcurrentSyncOperations();
+    private void enterSyncOperation(DriveSession session) throws OXException {
+        ServerSession serverSession = session.getServerSession();
+        int maxConcurrentSyncOperations = DriveConfig.getInstance().getMaxConcurrentSyncOperations(serverSession.getContextId(), serverSession.getUserId());
         if (0 < maxConcurrentSyncOperations && maxConcurrentSyncOperations < currentSyncOperations.incrementAndGet()) {
             throw DriveExceptionCodes.SERVER_BUSY.create();
         }

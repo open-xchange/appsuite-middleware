@@ -49,21 +49,11 @@
 
 package com.openexchange.drive.events.apn2.osgi;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.apn2.ApnsHttp2Options;
-import com.openexchange.drive.events.apn2.ApnsHttp2Options.AuthType;
-import com.openexchange.drive.events.apn2.DefaultIOSApnsHttp2OptionsProvider;
-import com.openexchange.drive.events.apn2.IOSApnsHttp2OptionsProvider;
-import com.openexchange.drive.events.apn2.internal.ApnsHttp2DriveEventPublisher;
+import com.openexchange.drive.events.apn2.ApnsHttp2OptionsProvider;
 import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -87,115 +77,22 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class,
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class,
             ThreadPoolService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { ApnsHttp2OptionsProvider.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn2");
-
-        ConfigurationService configService = getService(ConfigurationService.class);
-        DriveEventService eventService = getService(DriveEventService.class);
-
         /*
-         * iOS
+         * register publisher
          */
-        if (configService.getBoolProperty("com.openexchange.drive.events.apn2.ios.enabled", false)) {
-            /*
-             * register APN certificate provider for iOS if specified via config file (with a low ranking)
-             */
-            ApnsHttp2Options options = getOptions(configService, "com.openexchange.drive.events.apn2.ios.");
-            if (null != options) {
-                registerService(IOSApnsHttp2OptionsProvider.class, new DefaultIOSApnsHttp2OptionsProvider(options), 1);
-                LOG.info("Successfully registered APNS HTTP/2 options provider for iOS.");
-            } else {
-                LOG.info("No default APNS HTTP/2 options configured for iOS in \"Push\" section in file 'drive.properties', skipping registration for default iOS options provider.");
-            }
-            /*
-             * register publisher
-             */
-            ApnsHttp2DriveEventPublisher publisher = new IOSApnsHttp2DriveEventPublisher(this);
-            eventService.registerPublisher(publisher);
-        } else {
-            LOG.info("Drive events for iOS clients via APNS HTTP/2 are disabled, skipping publisher registration.");
-        }
-    }
-
-    private ApnsHttp2Options getOptions(ConfigurationService configService, String prefix) throws Exception {
-        // Auth type
-        AuthType authType = AuthType.authTypeFor(configService.getProperty(prefix + "authtype"));
-        if (null == authType) {
-            LOG.info("Missing or invalid authentication type in APNS HTTP/2 options for drive events. Assuming {} instead.", AuthType.CERTIFICATE.name());
-            authType = AuthType.CERTIFICATE;
-        }
-
-        ApnsHttp2Options apnsHttp2Options;
-        if (authType == AuthType.CERTIFICATE) {
-            // Keystore name
-            String keystoreName = configService.getProperty(prefix + "keystore");
-            if (Strings.isEmpty(keystoreName)) {
-                LOG.info("Missing \"keystore\" APNS HTTP/2 option for drive events. Ignoring APNS HTTP/2 configuration for drive events.");
-                return null;
-            }
-
-            // Topic
-            String topic = configService.getProperty(prefix + "topic");
-            if (null == topic) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "topic");
-            }
-
-            // Proceed if enabled for associated client
-            String password = configService.getProperty(prefix + "password");
-            if (null == password) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "password");
-            }
-
-            boolean production = configService.getBoolProperty(prefix + "production", true);
-            apnsHttp2Options = createOptions(keystoreName, password, production, topic);
-        } else if (authType == AuthType.JWT) {
-            String privateKeyFile = configService.getProperty(prefix + "privatekey");
-            if (null == privateKeyFile) {
-                LOG.info("Missing \"privatekey\" APNS HTTP/2 option for drive events. Ignoring APNS HTTP/2 configuration for drive events.");
-                return null;
-            }
-
-            String keyId = configService.getProperty(prefix + "keyid");
-            if (null == keyId) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "keyid");
-            }
-
-            String teamId = configService.getProperty(prefix + "teamid");
-            if (null == teamId) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "teamid");
-            }
-
-            // Topic
-            String topic = configService.getProperty(prefix + "topic");
-            if (null == topic) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "topic");
-            }
-
-            boolean production = configService.getBoolProperty(prefix + "production", true);
-            apnsHttp2Options = createOptions(privateKeyFile, keyId, teamId, production, topic);
-        } else {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "authtype");
-        }
-
-        LOG.info("Parsed APNS HTTP/2 options for drive events.");
-        return apnsHttp2Options;
-    }
-
-    private ApnsHttp2Options createOptions(String resourceName, String password, boolean production, String topic) {
-        return new ApnsHttp2Options(new File(resourceName), password, production, topic);
-    }
-
-    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) throws OXException {
-        try {
-            return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
-        } catch (IOException e) {
-            throw ConfigurationExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+        getServiceSafe(DriveEventService.class).registerPublisher(new IOSApnsHttp2DriveEventPublisher(this));
     }
 
 }

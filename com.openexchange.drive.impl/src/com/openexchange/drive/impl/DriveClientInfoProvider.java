@@ -73,7 +73,31 @@ public class DriveClientInfoProvider implements ClientInfoProvider {
 
     @Override
     public ClientInfo getClientInfo(Session session) {
-        return null == session ? null : getClientInfo(session.getClient());
+        if (null == session) {
+            return null;
+        }
+        String clientId = session.getClient();
+        if (Strings.isNotEmpty(clientId)) {
+            DriveClientType type = DriveClientType.parse(clientId);
+            switch (type) {
+                case ANDROID:
+                    return new DriveClientInfo("Android", null, null, "android", session);
+                case IOS:
+                    return new DriveClientInfo("iOS", null, null, "ios", session);
+                case IOS_DRIVE3:
+                    return new DriveClientInfo("iOS", null, "Files", "ios", session);
+                case MAC_OS:
+                    return new DriveClientInfo("Mac OS", null, null, "macos", session);
+                case WINDOWS:
+                    return new DriveClientInfo("Windows", null, null, "windows", session);
+                default:
+                    if ("OXDrive".equals(clientId)) {
+                        return new DriveClientInfo(null, null, null, null, session);
+                    }
+                    return null;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -79,7 +79,7 @@ public class DirectLinkGenerator {
      * @return The quota link
      */
     public String getQuotaLink() {
-        return DriveConfig.getInstance().getDirectLinkQuota()
+        return DriveConfig.getInstance().getDirectLinkQuota(session.getServerSession().getContextId(), session.getServerSession().getUserId())
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
@@ -96,7 +96,7 @@ public class DirectLinkGenerator {
      * @return The help link
      */
     public String getHelpLink() {
-        return DriveConfig.getInstance().getDirectLinkHelp()
+        return DriveConfig.getInstance().getDirectLinkHelp(session.getServerSession().getContextId(), session.getServerSession().getUserId())
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
@@ -126,7 +126,7 @@ public class DirectLinkGenerator {
      * @return The direct link fragments
      */
     public String getFileLinkFragments(String folderID, String objectID) {
-        return DriveConfig.getInstance().getDirectLinkFragmentsFile()
+        return DriveConfig.getInstance().getDirectLinkFragmentsFile(session.getServerSession().getContextId(), session.getServerSession().getUserId())
             .replaceAll("\\[folder\\]", folderID)
             .replaceAll("\\[object\\]", objectID)
         ;
@@ -150,7 +150,7 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getFileLink(String folderID, String objectID) {
-        return DriveConfig.getInstance().getDirectLinkFile()
+        return DriveConfig.getInstance().getDirectLinkFile(session.getServerSession().getContextId(), session.getServerSession().getUserId())
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
@@ -165,7 +165,7 @@ public class DirectLinkGenerator {
      * @return The direct link, or <code>null</code> if not available
      */
     public String getFilePreviewLink(File file) {
-        int[] dimensions = DriveConfig.getInstance().getPreviewImageSize();
+        int[] dimensions = DriveConfig.getInstance().getPreviewImageSize(session.getServerSession().getContextId(), session.getServerSession().getUserId());
         return getFileImageLink(file, dimensions[0], dimensions[1]);
     }
 
@@ -176,7 +176,7 @@ public class DirectLinkGenerator {
      * @return The direct link, or <code>null</code> if not available
      */
     public String getFileThumbnailLink(File file) {
-        int[] dimensions = DriveConfig.getInstance().getThumbnailImageSize();
+        int[] dimensions = DriveConfig.getInstance().getThumbnailImageSize(session.getServerSession().getContextId(), session.getServerSession().getUserId());
         return getFileImageLink(file, dimensions[0], dimensions[1]);
     }
 
@@ -185,7 +185,7 @@ public class DirectLinkGenerator {
         if (Strings.isNotEmpty(mimeType) && 0 < file.getFileSize()) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff|heif|heic))$")) {
-                return DriveConfig.getInstance().getImageLinkImageFile()
+                return DriveConfig.getInstance().getImageLinkImageFile(session.getServerSession().getContextId(), session.getServerSession().getUserId())
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -199,7 +199,7 @@ public class DirectLinkGenerator {
                 ;
             }
             if (mimeType.matches("(?i)^audio\\/(mpeg|m4a|m4b|mp3|ogg|oga|opus|x-m4a)$")) {
-                return DriveConfig.getInstance().getImageLinkAudioFile()
+                return DriveConfig.getInstance().getImageLinkAudioFile(session.getServerSession().getContextId(), session.getServerSession().getUserId())
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -215,7 +215,7 @@ public class DirectLinkGenerator {
             if ((mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
                 || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && session.hasCapability("document_preview")) {
-                return DriveConfig.getInstance().getImageLinkDocumentFile()
+                return DriveConfig.getInstance().getImageLinkDocumentFile(session.getServerSession().getContextId(), session.getServerSession().getUserId())
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -239,7 +239,7 @@ public class DirectLinkGenerator {
      * @return The direct link fragments
      */
     public String getDirectoryLinkFragments(String folderID) {
-        return DriveConfig.getInstance().getDirectLinkFragmentsDirectory()
+        return DriveConfig.getInstance().getDirectLinkFragmentsDirectory(session.getServerSession().getContextId(), session.getServerSession().getUserId())
             .replaceAll("\\[folder\\]", folderID)
         ;
     }
@@ -251,7 +251,7 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getDirectoryLink(String folderID) {
-        return DriveConfig.getInstance().getDirectLinkDirectory()
+        return DriveConfig.getInstance().getDirectLinkDirectory(session.getServerSession().getContextId(), session.getServerSession().getUserId())
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
