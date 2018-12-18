@@ -163,7 +163,7 @@ public abstract class AbstractAgent {
              */
             final String username = creds[0];
             final String password = creds[1];
-            String hashAlgorithm = creds.length > 2 ? creds[2] : "SHA";
+            String hashAlgorithm = creds.length > 2 && creds[2] != null ? creds[2] : "SHA";
 
             PasswordMechRegistry passwordMechRegistry = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
             PasswordMech passwordMech = passwordMechRegistry.get(hashAlgorithm);
