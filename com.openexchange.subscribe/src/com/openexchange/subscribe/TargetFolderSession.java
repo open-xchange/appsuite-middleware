@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -242,6 +243,11 @@ public class TargetFolderSession implements Session {
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return null == session ? null : session.getOrigin();
     }
 
     @Override

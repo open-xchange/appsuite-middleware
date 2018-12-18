@@ -52,6 +52,7 @@ package com.openexchange.publish.tools;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.publish.Publication;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 
 /**
@@ -182,6 +183,11 @@ public class PublicationSession implements Session {
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return Origin.SYNTHETIC;
     }
 
     @Override

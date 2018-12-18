@@ -52,7 +52,9 @@ package com.openexchange.login.internal;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
+import com.openexchange.session.Origin;
 import com.openexchange.sessiond.AddSessionParameter;
 
 /**
@@ -80,6 +82,11 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
         this.request = request;
         this.user = user;
         this.ctx = ctx;
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return Interface.originFor(request.getInterface());
     }
 
     @Override

@@ -63,6 +63,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Origin;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -475,6 +476,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     @Override
     public boolean isTransient() {
         return session().isTransient();
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return session().getOrigin();
     }
 
     @Override

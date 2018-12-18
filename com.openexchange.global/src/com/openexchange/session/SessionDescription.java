@@ -74,6 +74,7 @@ public class SessionDescription implements PutIfAbsent {
     private String hash;
     private String client;
     private boolean tranzient;
+    private Origin origin;
     private final Map<String, Object> parameters;
     private String alternativeId;
 
@@ -87,8 +88,9 @@ public class SessionDescription implements PutIfAbsent {
      * @param sessionId The session identifier
      * @param secret The session's secret string
      * @param alternativeId The alternative session identifier
+     * @param origin The session's origin
      */
-    public SessionDescription(int userId, int contextId, String login, String password, String sessionId, String secret, String alternativeId) {
+    public SessionDescription(int userId, int contextId, String login, String password, String sessionId, String secret, String alternativeId, Origin origin) {
         super();
         this.password = password;
         this.contextId = contextId;
@@ -97,6 +99,7 @@ public class SessionDescription implements PutIfAbsent {
         this.secret = secret;
         this.login = login;
         this.alternativeId = alternativeId;
+        this.origin = origin;
         parameters = new HashMap<String, Object>(8);
     }
 
@@ -173,6 +176,11 @@ public class SessionDescription implements PutIfAbsent {
     @Override
     public Object setParameterIfAbsent(String name, Object value) {
         return parameters.putIfAbsent(name, value);
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
     }
 
     /**
@@ -350,6 +358,15 @@ public class SessionDescription implements PutIfAbsent {
      */
     public void setContextId(int contextId) {
         this.contextId = contextId;
+    }
+
+    /**
+     * Sets the origin
+     *
+     * @param origin The origin to set
+     */
+    public void setOrigin(Origin origin) {
+        this.origin = origin;
     }
 
 }

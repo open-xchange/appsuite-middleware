@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.session.Origin;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
@@ -83,6 +84,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     protected String hash;
     protected String client;
     protected String userLogin;
+    protected Origin origin;
     protected final ConcurrentMap<String, Object> parameters;
 
     /**
@@ -97,7 +99,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
      * Initializes a new {@link StoredSession}.
      */
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login,
-        String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
+        String randomToken, String localIP, String authId, String hash, String client, Origin origin, Map<String, Object> parameters) {
         this();
         this.sessionId = sessionId;
         this.loginName = loginName;
@@ -112,6 +114,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.hash = hash;
         this.client = client;
         this.userLogin = "";
+        this.origin = origin;
         // Take over parameters (if not null)
         if (parameters != null) {
             this.parameters.putAll(parameters);
@@ -143,6 +146,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.sessionId = session.getSessionID();
         this.userId = session.getUserId();
         this.userLogin = session.getUserlogin();
+        this.origin = session.getOrigin();
     }
 
     @Override
@@ -388,4 +392,10 @@ public class StoredSession implements PutIfAbsent, Serializable {
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
+
 }

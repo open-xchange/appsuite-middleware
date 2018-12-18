@@ -3,14 +3,15 @@ package com.openexchange.oidc.tools;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 
 
 public class MockedSession implements Session {
-    
+
     Map<String, Object> parameterMap;
-    
-    
+
+
     public MockedSession() {
         super();
         this.parameterMap = new HashMap<>();
@@ -137,6 +138,11 @@ public class MockedSession implements Session {
     @Override
     public Set<String> getParameterNames() {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Origin getOrigin() {
         return null;
     }
 

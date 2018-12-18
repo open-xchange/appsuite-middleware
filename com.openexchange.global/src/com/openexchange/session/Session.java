@@ -431,4 +431,12 @@ public interface Session {
      * @return the names of all parameters in this session.
      */
     Set<String> getParameterNames();
+
+    /**
+     * Gets this session's origin.
+     *
+     * @return The origin or <code>null</code>
+     */
+    Origin getOrigin();
+
 }

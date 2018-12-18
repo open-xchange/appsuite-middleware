@@ -51,6 +51,7 @@ package com.openexchange.sessiond;
 
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 
 /**
@@ -148,5 +149,12 @@ public interface AddSessionParameter {
      * @return The user-agent
      */
     String getUserAgent();
+
+    /**
+     * Gets the session's origin.
+     *
+     * @return The origin or <code>null</code>
+     */
+    Origin getOrigin();
 
 }

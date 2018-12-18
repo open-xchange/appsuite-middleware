@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.session.Origin;
 import com.openexchange.session.PutIfAbsent;
 
 /**
@@ -68,41 +69,24 @@ import com.openexchange.session.PutIfAbsent;
 public class SessionObject implements PutIfAbsent {
 
     private final String sessionid;
-
     private String username;
-
     private String userlogin;
-
     private String loginName;
-
     private String password;
-
     private String language;
-
     private String localip;
-
     private String host;
-
     private long lifetime;
-
     private Date timestamp;
-
     private Date creationtime;
-
     private String secret;
-
     private String randomToken;
-
     private int contextId;
-
     private String login;
-
     private String authId;
-
     private String hash;
-
     private String client;
-
+    private Origin origin;
     private final ConcurrentMap<String, Object> parameters;
 
     /**
@@ -327,4 +311,10 @@ public class SessionObject implements PutIfAbsent {
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
+
 }
