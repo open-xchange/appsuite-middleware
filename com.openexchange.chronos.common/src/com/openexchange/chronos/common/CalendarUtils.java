@@ -2256,4 +2256,25 @@ public class CalendarUtils {
         return flags;
     }
 
+    /**
+     * Initializes a new attendee based on the supplied internal attendee and copies over all properties, excluding the internal entity identifier field.
+     *
+     * @param internalAttendee The internal attendee to get an external representation for
+     * @param mappedFields Fields to map
+     * @return The external attendee, or <code>null</code> if no external representation is possible due to missing mandatory data
+     */
+    public static Attendee asExternal(Attendee internalAttendee, AttendeeField[] mappedFields) throws OXException {
+        if (null == internalAttendee) {
+            return null;
+        }
+        String email = CalendarUtils.extractEMailAddress(internalAttendee.getUri());
+        if (Strings.isEmpty(email)) {
+            return null;
+        }
+        Attendee attendee = AttendeeMapper.getInstance().copy(internalAttendee, new Attendee(), mappedFields);
+        attendee.removeEntity();
+        attendee.setUri(CalendarUtils.getURI(email));
+        return attendee;
+    }
+
 }

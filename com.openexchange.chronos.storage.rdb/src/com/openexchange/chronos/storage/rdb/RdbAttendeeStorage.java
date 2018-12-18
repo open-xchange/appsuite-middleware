@@ -66,6 +66,7 @@ import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
@@ -550,7 +551,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         return attendeeByEventId;
     }
-    
+
     private Attendee readAttendee(String eventId, ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {
         Attendee attendee = MAPPER.fromResultSet(resultSet, fields);
         try {
@@ -562,14 +563,35 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                  */
                 Attendee fallback = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
                 fallback.removeUri();
-                fallback = entityProcessor.adjustAfterLoad(fallback);
-                String message = "Invalid stored calendar user address \"" + attendee.getUri() + "\" for entity " + 
-                    attendee.getEntity() + ", falling back to default address \"" + fallback.getUri() + "\"";
+                try {
+                    fallback = entityProcessor.adjustAfterLoad(fallback);
+                } catch (OXException e2) {
+                    fallback = fallBackNotFound(e2, eventId, attendee);
+                    if (fallback == null) {
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + attendee, e);
+                    }
+                }
+                String message = "Invalid stored calendar user address \"" + attendee.getUri() + "\" for entity " + attendee.getEntity() + ", falling back to default address \"" + fallback.getUri() + "\"";
                 addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, message, e);
                 return fallback;
-            } 
+            }
             throw e;
         }
+    }
+
+    private Attendee fallBackNotFound(OXException e, String eventId, Attendee attendee) throws OXException {
+        if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+            /*
+             * invalid calendar user; possibly a no longer existing user - add as external attendee as fallback if possible
+             */
+            Attendee externalAttendee = CalendarUtils.asExternal(attendee, AttendeeMapper.getInstance().getMappedFields());
+            if (externalAttendee != null) {
+                String message = "Falling back to external attendee representation for non-existent user " + attendee;
+                addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
+                return (entityProcessor.getEntityResolver().applyEntityData(externalAttendee));
+            }
+        }
+        return null;
     }
 
 }
