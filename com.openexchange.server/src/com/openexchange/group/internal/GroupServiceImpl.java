@@ -52,16 +52,18 @@ package com.openexchange.group.internal;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.group.UseCountAwareGroupService;
+import com.openexchange.group.UseCountAwareGroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GroupServiceImpl implements GroupService {
+public final class GroupServiceImpl implements UseCountAwareGroupService {
 
     public GroupServiceImpl() {
         super();
@@ -80,38 +82,52 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Group getGroup(Context context, int groupId) throws OXException {
-        return GroupStorage.getInstance().getGroup(groupId, context);
+    public Group getGroup(Context ctx, int groupId) throws OXException {
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroup(groupId, ctx);
     }
 
     @Override
-    public Group[] getGroup(Context context, int[] groupIds) throws OXException {
-        return GroupStorage.getInstance().getGroup(groupIds, context);
+    public Group[] search(Context ctx, String pattern, boolean loadMembers) throws OXException {
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).searchGroups(pattern, loadMembers, ctx);
     }
 
     @Override
-    public Group[] search(Context context, String pattern, boolean loadMembers) throws OXException {
-        return GroupStorage.getInstance().searchGroups(pattern, loadMembers, context);
-    }
-
-    @Override
-    public Group[] listAllGroups(Context context, boolean loadMembers) throws OXException {
-        return GroupStorage.getInstance().getGroups(loadMembers, context);
+    public Group[] getGroups(Context ctx, boolean loadMembers) throws OXException {
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroups(loadMembers, ctx);
     }
 
     @Override
     public Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException {
-        return GroupStorage.getInstance().listModifiedGroups(modifiedSince, context);
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).listModifiedGroups(modifiedSince, context);
     }
 
     @Override
-    public Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException {
-        return GroupStorage.getInstance().listDeletedGroups(modifiedSince, context);
+    public Group[] listDeletedGroups(Context context, Date deletedSince) throws OXException {
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).listDeletedGroups(deletedSince, context);
+    }
+
+    @Override
+    public Group[] searchGroups(Context context, String pattern, boolean loadMembers, int userId) throws OXException {
+        GroupStorage groupStorage = ServerServiceRegistry.getServize(GroupStorage.class, true);
+        if(groupStorage instanceof UseCountAwareGroupStorage) {
+            return ((UseCountAwareGroupStorage)groupStorage).searchGroups(pattern, loadMembers, context, userId);
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException {
         Update update = new Update(context, user, group, lastRead, checkI18nNames);
         update.perform();
+    }
+
+    @Override
+    public Group[] listAllGroups(Context context, boolean loadMembers) throws OXException {
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroups(loadMembers, context);
+    }
+
+    @Override
+    public Group[] listGroups(Context ctx, int[] ids) throws OXException {
+        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroup(ids, ctx);
     }
 }

@@ -100,7 +100,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -3238,8 +3238,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Resolve group to users
              */
-            GroupStorage gs = GroupStorage.getInstance();
-            Group group = gs.getGroup(groupId, ctx);
+            final GroupService gs = ServerServiceRegistry.getServize(GroupService.class, true);
+            Group group = gs.getGroup(ctx, groupId);
             int[] members = group.getMember();
             /*
              * Get user storage/contact interface to load user and its contact

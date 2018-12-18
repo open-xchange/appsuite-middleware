@@ -145,6 +145,7 @@ import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.group.internal.FilteringGroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -332,7 +333,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class };
+        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class, GroupService.class, GroupStorage.class };
 
     private static volatile BundleContext CONTEXT;
 

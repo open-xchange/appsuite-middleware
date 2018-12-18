@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.principals.PrincipalFactory;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
@@ -61,6 +62,7 @@ import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -107,7 +109,7 @@ public class GroupPrincipalCollection extends DAVCollection {
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         try {
-            Group[] groups = GroupStorage.getInstance().getGroups(false, factory.getContext());
+            Group[] groups = Services.getService(GroupService.class).getGroups(factory.getContext(), false);
             List<WebdavResource> children = new ArrayList<WebdavResource>(groups.length);
             for (Group group : groups) {
                 children.add(createGroupResource(group));
@@ -119,17 +121,17 @@ public class GroupPrincipalCollection extends DAVCollection {
     }
 
     @Override
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() {
         return new Date(0L);
     }
 
     @Override
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() {
         return new Date(0L);
     }
 
     @Override
-    public String getDisplayName() throws WebdavProtocolException {
+    public String getDisplayName() {
         return "Groups";
     }
 
@@ -140,7 +142,7 @@ public class GroupPrincipalCollection extends DAVCollection {
         }
         try {
             int id = Integer.parseInt(name);
-            return createGroupResource(GroupStorage.getInstance().getGroup(id, factory.getContext()));
+            return createGroupResource(Services.getService(GroupService.class).getGroup(factory.getContext(), id));
         } catch (OXException | NumberFormatException e) {
             throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }

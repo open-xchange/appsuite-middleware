@@ -78,7 +78,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -1261,7 +1261,7 @@ public final class OXFolderAdminHelper {
      */
     public static boolean propagateGroupModification(final int group, final Connection readCon, final Connection writeCon, final int cid) throws SQLException {
         try {
-            final int[] members = GroupStorage.getInstance().getGroup(group, ContextStorage.getStorageContext(cid)).getMember();
+            final int[] members = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ContextStorage.getStorageContext(cid), group).getMember();
             for (final int member : members) {
                 CacheFolderStorage.getInstance().clearCache(member, cid);
             }

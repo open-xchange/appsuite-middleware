@@ -124,7 +124,6 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
-import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
@@ -303,8 +302,6 @@ public final class Init {
         TransportPropertiesInit.getInstance(),
 
         SessiondInit.getInstance(),
-
-        new GroupInit(),
 
     };
 

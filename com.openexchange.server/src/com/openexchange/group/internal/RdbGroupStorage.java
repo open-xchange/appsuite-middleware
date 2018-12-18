@@ -63,7 +63,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.UseCountAwareGroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
@@ -78,7 +78,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 /**
  * This class implements the group storage using a relational database.
  */
-public class RdbGroupStorage extends GroupStorage {
+public class RdbGroupStorage implements UseCountAwareGroupStorage {
 
     private static final String SELECT_GROUPS = "SELECT id,identifier,displayName,lastModified FROM groups WHERE cid=?";
     private static final String SELECT_DELETED_GROUPS = "SELECT id,identifier,displayName,lastModified FROM del_groups WHERE cid=?";
@@ -337,6 +337,60 @@ public class RdbGroupStorage extends GroupStorage {
             final String sqlPattern = LdapUtility.prepareSearchPattern(pattern);
             stmt.setString(2, sqlPattern);
             stmt.setString(3, sqlPattern);
+            result = stmt.executeQuery();
+            List<Group> groups = new ArrayList<Group>();
+            while (result.next()) {
+                final Group group = new Group();
+                int pos = 1;
+                group.setIdentifier(result.getInt(pos++));
+                group.setSimpleName(result.getString(pos++));
+                group.setDisplayName(result.getString(pos++));
+                group.setLastModified(new Date(result.getLong(pos++)));
+                if (loadMembers) {
+                    group.setMember(selectMember(con, context, group.getIdentifier()));
+                }
+                groups.add(group);
+            }
+            return groups.toArray(new Group[groups.size()]);
+        } catch (final SQLException e) {
+            throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+    
+    private static final String SELECT_GROUPS_WITH_USECOUNT;
+    
+    static {
+        StringBuilder b = new StringBuilder();
+        b.append("SELECT id,identifier,displayName,lastModified FROM groups AS g ")
+         .append("LEFT JOIN principalUseCount AS uc ON g.cid=uc.cid AND g.id=uc.principal AND uc.user=? ")
+         .append("WHERE cid=? AND (displayName LIKE ? OR identifier LIKE ?)");
+        SELECT_GROUPS_WITH_USECOUNT = b.toString();
+    }
+
+    @Override
+    public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context context, int userId) throws OXException {
+        if (Strings.isEmpty(pattern)) {
+            return new Group[0];
+        }
+        final Connection con;
+        try {
+            con = DBPool.pickup(context);
+        } catch (final Exception e) {
+            throw GroupExceptionCodes.NO_CONNECTION.create(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT_GROUPS_WITH_USECOUNT);
+            int index = 1;
+            stmt.setInt(index++, userId);
+            stmt.setLong(index++, context.getContextId());
+            final String sqlPattern = LdapUtility.prepareSearchPattern(pattern);
+            stmt.setString(index++, sqlPattern);
+            stmt.setString(index++, sqlPattern);
             result = stmt.executeQuery();
             List<Group> groups = new ArrayList<Group>();
             while (result.next()) {

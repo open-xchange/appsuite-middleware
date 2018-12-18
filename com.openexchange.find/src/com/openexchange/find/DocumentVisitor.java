@@ -52,6 +52,7 @@ package com.openexchange.find;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.group.GroupDocument;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.resource.ResourceDocument;
 import com.openexchange.find.tasks.TasksDocument;
@@ -105,5 +106,12 @@ public interface DocumentVisitor {
      * @param resourceDocument The resource document
      */
     void visit(ResourceDocument resourceDocument);
+
+    /**
+     * Handles given group document.
+     * 
+     * @param groupDocument The group document
+     */
+    void visit(GroupDocument groupDocument);
 
 }

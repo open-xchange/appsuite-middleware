@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fields.SearchFields;
@@ -64,6 +63,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -85,7 +85,7 @@ public final class SearchAction extends AbstractGroupAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException {
         if (!req.getSession().getUserPermissionBits().hasGroupware()) {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
@@ -100,11 +100,10 @@ public final class SearchAction extends AbstractGroupAction {
 
             String searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
             ServerSession session = req.getSession();
-            GroupService groupService = this.services.getService(GroupService.class);
             if ("*".equals(searchpattern)) {
-                groups = groupService.listAllGroups(session.getContext(), true);
+                groups = ServerServiceRegistry.getServize(GroupService.class, true).listAllGroups(session.getContext(), true);
             } else {
-                groups = groupService.search(req.getSession().getContext(), searchpattern, true);
+                groups = ServerServiceRegistry.getServize(GroupService.class, true).search(session.getContext(), searchpattern, true);
             }
         }
 

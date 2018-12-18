@@ -68,7 +68,7 @@ import javax.mail.Multipart;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.CalendarObject;
@@ -259,11 +259,11 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     protected Group[] resolveGroups(final Context ctx, final int... ids) throws OXException {
-        final GroupStorage groups = GroupStorage.getInstance();
+        GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         final Group[] r = new Group[ids.length];
         int i = 0;
         for (final int id : ids) {
-            r[i++] = groups.getGroup(id, ctx);
+            r[i++] = groupService.getGroup(ctx, id);
         }
         return r;
     }

@@ -117,6 +117,7 @@ public class DAVActivator extends HousekeepingActivator {
          */
         registerService(ClientInfoProvider.class, new DAVClientInfoProvider(getService(UserAgentParser.class)), 0);
         openTrackers();
+        Services.setServiceLookup(this);
     }
 
     @Override

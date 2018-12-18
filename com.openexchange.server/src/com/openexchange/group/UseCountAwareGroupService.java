@@ -47,63 +47,29 @@
  *
  */
 
-package com.openexchange.group.internal;
+package com.openexchange.group;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupStorage;
-import com.openexchange.server.Initialization;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * This is something like a bundle activator.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link UseCountAwareGroupService}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class GroupInit implements Initialization {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupInit.class);
+public interface UseCountAwareGroupService extends GroupService {
 
     /**
-     * Singleton instance.
+     * Similar to {@link #search(Context, String, boolean)} but sorts the results according to the use count.
+     * 
+     * @param context The context.
+     * @param pattern this pattern will be searched in the displayName of the group.
+     * @param loadMembers - switch whether members should be loaded too (decreases performance, don't use if not needed)
+     * @param userId The user id
+     * @return an array of groups that match the search pattern sorted by use count.
+     * @throws OXException if searching has some storage related problem.
      */
-    private static final GroupInit SINGLETON = new GroupInit();
+    public abstract Group[] searchGroups(Context context, String pattern, boolean loadMembers, int userId) throws OXException;
 
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
-    /**
-     * Prevent instantiation.
-     */
-    public GroupInit() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void start() throws OXException {
-        if (initialized.get()) {
-            LOG.debug("GroupStorage duplicate initialization.");
-        }
-        GroupStorage.setInstance(new VirtualGroupStorage(new RdbGroupStorage()));
-        initialized.set(true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stop() throws OXException {
-        if (!initialized.get()) {
-            LOG.debug("GroupStorage duplicate shutdown.");
-        }
-        GroupStorage.setInstance(null);
-        initialized.set(false);
-    }
-
-    /**
-     * @return the singleton instance.
-     */
-    public static GroupInit getInstance() {
-        return SINGLETON;
-    }
 }

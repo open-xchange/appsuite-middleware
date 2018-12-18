@@ -308,7 +308,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param service The service reference
      * @param properties The service's properties
      */
-    protected <S> void registerService (final String className, final Object service, final Dictionary<String, ?> properties) {
+    protected void registerService(final String className, final Object service, final Dictionary<String, ?> properties) {
         serviceRegistrations.put(service, context.registerService(className, service, properties));
     }
 
@@ -317,7 +317,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param className The service's class name
      * @param service The service reference
      */
-    protected <S> void registerService (final String className, final Object service) {
+    protected void registerService(final String className, final Object service) {
         registerService(className, service, null);
     }
 

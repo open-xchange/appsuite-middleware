@@ -60,7 +60,7 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class GroupStorage {
+public interface GroupStorage {
 
     /**
      * Identifies the virtual 0-group containing all users but no guests.
@@ -74,15 +74,6 @@ public abstract class GroupStorage {
 
     public static final String GROUP_STANDARD_SIMPLE_NAME = "users";
 
-    private static volatile GroupStorage instance;
-
-    /**
-     * Private constructor to prevent instantiation.
-     */
-    protected GroupStorage() {
-        super();
-    }
-
     /**
      * This method inserts a group without its members into the storage.
      *
@@ -91,7 +82,7 @@ public abstract class GroupStorage {
      * @param group group to insert.
      * @throws OXException if some problem occurs.
      */
-    public final void insertGroup(final Context ctx, final Connection con, final Group group) throws OXException {
+    public default void insertGroup(final Context ctx, final Connection con, final Group group) throws OXException {
         insertGroup(ctx, con, group, StorageType.ACTIVE);
     }
 
@@ -104,7 +95,7 @@ public abstract class GroupStorage {
      * @param type defines if group is inserted ACTIVE or DELETED.
      * @throws OXException if some problem occurs.
      */
-    public abstract void insertGroup(Context ctx, Connection con, Group group, StorageType type) throws OXException;
+    public void insertGroup(Context ctx, Connection con, Group group, StorageType type) throws OXException;
 
     /**
      * This method updates group field in the storage.
@@ -115,11 +106,29 @@ public abstract class GroupStorage {
      * @param lastRead timestamp when the group has been read last.
      * @throws OXException if updating does not finish successfully.
      */
-    public abstract void updateGroup(Context ctx, Connection con, Group group, Date lastRead) throws OXException;
+    public void updateGroup(Context ctx, Connection con, Group group, Date lastRead) throws OXException;
 
-    public abstract void insertMember(Context ctx, Connection con, Group group, int[] members) throws OXException;
+    /**
+     * Insert a member into a group
+     * 
+     * @param ctx The context
+     * @param con The connection to use
+     * @param group The group to change
+     * @param members The members to add
+     * @throws OXException
+     */
+    public void insertMember(Context ctx, Connection con, Group group, int[] members) throws OXException;
 
-    public abstract void deleteMember(Context ctx, Connection con, Group group, int[] members) throws OXException;
+    /**
+     * Removes a member from a group.
+     * 
+     * @param ctx The context
+     * @param con The connection to use
+     * @param group The group to change
+     * @param members The members to remove
+     * @throws OXException
+     */
+    public void deleteMember(Context ctx, Connection con, Group group, int[] members) throws OXException;
 
     /**
      * This method deletes a group from the database. Before all its members must be removed.
@@ -130,7 +139,7 @@ public abstract class GroupStorage {
      * @param lastRead timestamp when the group has been read last.
      * @throws OXException if deleting fails.
      */
-    public abstract void deleteGroup(Context ctx, Connection con, int groupId, Date lastRead) throws OXException;
+    public void deleteGroup(Context ctx, Connection con, int groupId, Date lastRead) throws OXException;
 
     /**
      * Reads a group from the persistent storage.
@@ -140,7 +149,7 @@ public abstract class GroupStorage {
      * @return The group data object.
      * @throws OXException If an error occurs
      */
-    public abstract Group getGroup(int gid, Context context) throws OXException;
+    public Group getGroup(int gid, Context context) throws OXException;
 
     /**
      * Reads group ids from the persistent storage.
@@ -164,7 +173,7 @@ public abstract class GroupStorage {
      * @return an array of groups that match the search pattern.
      * @throws OXException if searching has some storage related problem.
      */
-    public abstract Group[] searchGroups(String pattern, boolean loadMembers, Context context) throws OXException;
+    public Group[] searchGroups(String pattern, boolean loadMembers, Context context) throws OXException;
 
     /**
      * This method returns groups that have been modified since the given timestamp.
@@ -174,7 +183,7 @@ public abstract class GroupStorage {
      * @return an array of groups.
      * @throws OXException if an error occurs.
      */
-    public abstract Group[] listModifiedGroups(Date modifiedSince, Context context) throws OXException;
+    public Group[] listModifiedGroups(Date modifiedSince, Context context) throws OXException;
 
     /**
      * This metods returns groups that have been deleted since the given timestamp
@@ -184,7 +193,7 @@ public abstract class GroupStorage {
      * @return an array of groups.
      * @throws OXException if an error occurs.
      */
-    public abstract Group[] listDeletedGroups(Date modifiedSince, Context context) throws OXException;
+    public Group[] listDeletedGroups(Date modifiedSince, Context context) throws OXException;
 
     /**
      * Returns the data objects of all groups.
@@ -194,20 +203,7 @@ public abstract class GroupStorage {
      * @return all groups.
      * @throws OXException if an error occurs.
      */
-    public abstract Group[] getGroups(boolean loadMembers, Context context) throws OXException;
-
-    /**
-     * Creates a new instance implementing the group storage interface.
-     *
-     * @return an instance implementing the group storage interface.
-     */
-    public static GroupStorage getInstance() {
-        return instance;
-    }
-
-    public static void setInstance(final GroupStorage instance) {
-        GroupStorage.instance = instance;
-    }
+    public Group[] getGroups(boolean loadMembers, Context context) throws OXException;
 
     public static enum StorageType {
         /**

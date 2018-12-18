@@ -67,9 +67,10 @@ import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.Group.Field;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -131,11 +132,11 @@ public class GroupRequest {
 
     public JSONValue actionUpdates(final JSONObject jsonObject) throws JSONException, OXException {
         timestamp = new Date(0);
-        final GroupStorage groupStorage = GroupStorage.getInstance();
+        final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         final Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
 
-        final Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, session.getContext());
-        final Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, session.getContext());
+        final Group[] modifiedGroups = groupService.listModifiedGroups(session.getContext(), modifiedSince);
+        final Group[] deletedGroups = groupService.listDeletedGroups(session.getContext(), modifiedSince);
         final GroupWriter groupWriter = new GroupWriter();
         final JSONArray modified = new JSONArray();
         final JSONArray deleted= new JSONArray();
@@ -168,11 +169,11 @@ public class GroupRequest {
         timestamp = new Date(0);
         Date lastModified = null;
         final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance();
+        final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < jsonArray.length(); a++) {
             final JSONObject jData = jsonArray.getJSONObject(a);
-            final Group group = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID), session.getContext());
+            final Group group = groupService.getGroup(session.getContext(), DataParser.checkInt(jData, DataFields.ID));
             final JSONObject jsonGroupObj = new JSONObject();
             groupWriter.writeGroup(group, jsonGroupObj);
             jsonResponseArray.put(jsonGroupObj);
@@ -187,8 +188,8 @@ public class GroupRequest {
     public JSONObject actionGet(final JSONObject json) throws JSONException, OXException, OXException, OXException {
         final int groupId = DataParser.checkInt(json, PARAMETER_ID);
         timestamp = new Date(0);
-        final GroupStorage groupStorage = GroupStorage.getInstance();
-        final Group group = groupStorage.getGroup(groupId, session.getContext());
+        final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
+        final Group group = groupService.getGroup(session.getContext(), groupId);
         final GroupWriter groupWriter = new GroupWriter();
         final JSONObject retval = new JSONObject();
         groupWriter.writeGroup(group, retval);
@@ -206,12 +207,12 @@ public class GroupRequest {
 
         timestamp = new Date(0);
         final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance();
+        final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         Group[] groups = null;
         if ("*".equals(searchpattern)) {
-            groups = groupStorage.getGroups(true, session.getContext());
+            groups = groupService.getGroups(session.getContext(), true);
         } else {
-            groups = groupStorage.searchGroups(searchpattern, true, session.getContext());
+            groups = groupService.search(session.getContext(), searchpattern, true);
         }
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
@@ -225,7 +226,7 @@ public class GroupRequest {
         return jsonResponseArray;
     }
 
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws OXException {
         timestamp = new Date(0);
 
         final String[] sColumns = Strings.splitByComma(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
@@ -242,9 +243,9 @@ public class GroupRequest {
 
 
         final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance();
+        final GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         Group[] groups = null;
-        groups = groupStorage.getGroups(loadMembers, session.getContext());
+        groups = groupService.getGroups(session.getContext(), loadMembers);
         final GroupWriter groupWriter = new GroupWriter();
         for (int a = 0; a < groups.length; a++) {
             final JSONArray row = new JSONArray();

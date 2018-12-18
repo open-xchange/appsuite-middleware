@@ -47,69 +47,36 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.group.internal.osgi;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.group.UseCountAwareGroupService;
+import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.group.internal.RdbGroupStorage;
+import com.openexchange.group.internal.VirtualGroupStorage;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ListAction}
+ * {@link GroupActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class ListAction extends AbstractGroupAction {
+public class GroupActivator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link ListAction}.
-     * 
-     * @param services
-     */
-    public ListAction(final ServiceLookup services) {
-        super(services);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        JSONArray jBody = req.getData();
-        if (null == jBody) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
+    protected void startBundle() throws Exception {
+        GroupServiceImpl service = new GroupServiceImpl();
+        registerService(UseCountAwareGroupService.class, service);
+        registerService(GroupService.class, service);
+        registerService(GroupStorage.class, new VirtualGroupStorage(new RdbGroupStorage()));
 
-        List<Integer> groupIds = new LinkedList<Integer>();
-
-        int length = jBody.length();
-        for (int a = 0; a < length; a++) {
-            JSONObject jData = jBody.getJSONObject(a);
-            groupIds.add(DataParser.checkInt(jData, DataFields.ID));
-        }
-
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groupsResult = groupService.listGroups(req.getSession().getContext(), groupIds.stream().mapToInt(i -> i).toArray());
-
-        List<Group> groupList = new LinkedList<Group>();
-        Date timestamp = new Date(0);
-        for (int a = 0; a < groupsResult.length; a++) {
-            Group group = groupsResult[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = group.getLastModified();
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
     }
+
 }

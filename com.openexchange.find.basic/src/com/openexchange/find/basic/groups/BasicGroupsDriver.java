@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.find.basic.resource;
+package com.openexchange.find.basic.groups;
 
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
-import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,31 +65,31 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.FolderType;
-import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetTypeLookUp;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.resource.ResourceDocument;
+import com.openexchange.find.facet.SimpleDisplayItem;
+import com.openexchange.find.group.GroupDocument;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
+import com.openexchange.group.Group;
+import com.openexchange.group.UseCountAwareGroupService;
 import com.openexchange.java.Strings;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.UseCountAwareResourceService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link BasicResourceDriver}
+ * {@link BasicGroupsDriver}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class BasicResourceDriver extends AbstractModuleSearchDriver implements FacetTypeLookUp {
+public class BasicGroupsDriver extends AbstractModuleSearchDriver implements FacetTypeLookUp {
 
     @Override
     public Module getModule() {
-        return Module.RESOURCE;
+        return Module.GROUPS;
     }
 
     @Override
@@ -104,22 +103,20 @@ public class BasicResourceDriver extends AbstractModuleSearchDriver implements F
         String prefix = autocompleteRequest.getPrefix();
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
-            UseCountAwareResourceService service = Services.getResourceService();
+            UseCountAwareGroupService service = Services.getGroupService();
             // Search by name
-            Resource[] searchResources = service.searchResources(prefix, session.getContext(), session.getUserId());
-            List<Resource> resources = Arrays.asList(searchResources);
-            if (null != resources && !resources.isEmpty()) {
-                DefaultFacetBuilder builder = newDefaultBuilder(ResourceType.RESOURCE);
-                for (Resource res: resources) {
-                    String id = ResourceType.RESOURCE.getId();
-                    Filter filter = Filter.of(id, String.valueOf(res.getIdentifier()));
-                    String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(res.getIdentifier()));
-                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(new ComplexDisplayItem(res.getDisplayName(), res.getMail())).withFilter(filter).build());
+            Group[] searchedGroups = service.searchGroups(session.getContext(), prefix, true, session.getUserId());
+            List<Group> groups = Arrays.asList(searchedGroups);
+            if (null != groups && !groups.isEmpty()) {
+                DefaultFacetBuilder builder = newDefaultBuilder(GroupType.GROUP);
+                for (Group group : groups) {
+                    String id = GroupType.GROUP.getId();
+                    Filter filter = Filter.of(id, String.valueOf(group.getIdentifier()));
+                    String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(group.getIdentifier()));
+                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(new SimpleDisplayItem(group.getDisplayName())).withFilter(filter).build());
                 }
                 facets.add(builder.build());
             }
-            // Add mail facet
-            facets.add(newSimpleBuilder(ResourceType.RESOURCE_MAIL).withSimpleDisplayItem(prefix).withFilter(Filter.of(ResourceType.RESOURCE_MAIL.getId(), prefix)).build());
         }
 
         return new AutocompleteResult(facets);
@@ -133,23 +130,20 @@ public class BasicResourceDriver extends AbstractModuleSearchDriver implements F
         }
 
         Filter filter = filters.get(0);
-        UseCountAwareResourceService service = Services.getResourceService();
-        Resource[] searchResources;
+        UseCountAwareGroupService service = Services.getGroupService();
+
         if (filter.getFields() == null || filter.getFields().size() != 1) {
             return SearchResult.EMPTY;
         }
-        if (filter.getFields().get(0).equals(ResourceType.RESOURCE.getId())) {
-            searchResources = service.searchResources(filter.getQueries().get(0), session.getContext(), session.getUserId());
-        } else {
-            searchResources = service.searchResourcesByMail(filter.getQueries().get(0), session.getContext(), session.getUserId());
+        if (filter.getFields().get(0).equals(GroupType.GROUP.getId())) {
+            Group[] searchGroups = service.searchGroups(session.getContext(), filter.getQueries().get(0), true, session.getUserId());
+            List<Document> result = new ArrayList<>();
+            for (Group group : searchGroups) {
+                result.add(new GroupDocument(group));
+            }
+            return new SearchResult(result.size(), 0, result, searchRequest.getActiveFacets());
         }
-
-        List<Document> result = new ArrayList<>();
-        for (Resource res : searchResources) {
-            result.add(new ResourceDocument(res));
-        }
-
-        return new SearchResult(searchResources.length, 0, result, searchRequest.getActiveFacets());
+        return SearchResult.EMPTY;
     }
 
     @Override
@@ -159,22 +153,18 @@ public class BasicResourceDriver extends AbstractModuleSearchDriver implements F
 
     @Override
     public FacetType facetTypeFor(String id) {
-        return ResourceType.getById(id);
+        return GroupType.getById(id);
     }
 
-    private enum ResourceType implements FacetType {
-        RESOURCE("Resource", "RESOURCE_MAIL"),
-        RESOURCE_MAIL("email", RESOURCE.name());
-
+    private enum GroupType implements FacetType {
+        GROUP("Group");
         private String name;
-        private String conflicting;        
         
         /**
          * Initializes a new {@link BasicGroupsDriver.ResourceTypes}.
          */
-        private ResourceType(String name, String conflicting) {
+        private GroupType(String name) {
             this.name = name;
-            this.conflicting = conflicting;
         }
         
         @Override
@@ -187,8 +177,8 @@ public class BasicResourceDriver extends AbstractModuleSearchDriver implements F
             return name;
         }
 
-        static ResourceType getById(String id) {
-            for (ResourceType type : ResourceType.values()) {
+        static GroupType getById(String id) {
+            for (GroupType type : GroupType.values()) {
                 if (type.getId().equals(id)) {
                     return type;
                 }
@@ -198,7 +188,7 @@ public class BasicResourceDriver extends AbstractModuleSearchDriver implements F
 
         @Override
         public List<FacetType> getConflictingFacets() {
-            return Collections.singletonList(ResourceType.valueOf(conflicting));
+            return Collections.emptyList();
         }
     }
 }

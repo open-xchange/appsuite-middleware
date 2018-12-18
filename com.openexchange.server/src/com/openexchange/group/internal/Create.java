@@ -82,11 +82,6 @@ public final class Create {
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Create.class);
 
-    /**
-     * Storage API for groups.
-     */
-    private static final GroupStorage STORAGE = GroupStorage.getInstance();
-
     private final Context ctx;
     private final User user;
     private final Group group;
@@ -138,7 +133,7 @@ public final class Create {
         Logic.checkMandatoryForCreate(group);
         Logic.validateSimpleName(group);
         Logic.checkData(group);
-        Logic.checkForDuplicate(STORAGE, ctx, group, checkI18nNames);
+        Logic.checkForDuplicate(ServerServiceRegistry.getServize(GroupStorage.class, true), ctx, group, checkI18nNames);
         Logic.doMembersExist(ctx, group);
     }
 
@@ -178,8 +173,9 @@ public final class Create {
             final int identifier = IDGenerator.getId(ctx.getContextId(),
                 Types.PRINCIPAL, con);
             group.setIdentifier(identifier);
-            STORAGE.insertGroup(ctx, con, group);
-            STORAGE.insertMember(ctx, con, group, group.getMember());
+            GroupStorage storage = ServerServiceRegistry.getServize(GroupStorage.class, true);
+            storage.insertGroup(ctx, con, group);
+            storage.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }

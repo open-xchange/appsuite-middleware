@@ -96,14 +96,24 @@ public interface GroupService {
     Group getGroup(Context context, int groupId) throws OXException;
 
     /**
-     * Returns the denoted groups.
+     * Returns the all groups of a given context.
      *
-     * @param context The context
-     * @param groupIds An array of group identifiers
-     * @return The groups
-     * @throws OXException If one group cannot be returned
+     * @param ctx The context
+     * @param loadMembers Whether to load members or not.
+     * @return An array of groups
+     * @throws OXException If group cannot be returned
      */
-    Group[] getGroup(Context context, int[] groupIds) throws OXException;
+    Group[] getGroups(Context ctx, boolean loadMembers) throws OXException;
+    
+    /**
+     * Returns the groups with the given ids
+     *
+     * @param ctx The context
+     * @param ids An array of group ids to get
+     * @return An array of groups
+     * @throws OXException If group cannot be returned
+     */
+    Group[] listGroups(Context ctx, int[] ids) throws OXException;
 
     /**
      * Searches for groups by their display name.
@@ -133,4 +143,5 @@ public interface GroupService {
      * @throws OXException if some problem occurs.
      */
     void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
+    
 }

@@ -47,69 +47,28 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.group;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link ListAction}
+ * {@link UseCountAwareGroupStorage}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class ListAction extends AbstractGroupAction {
+public interface UseCountAwareGroupStorage extends GroupStorage {
 
     /**
-     * Initializes a new {@link ListAction}.
+     * Similar to {@link #searchGroups(String, boolean, Context)} but sorts the results according to the use count.
      * 
-     * @param services
+     * @param pattern this pattern will be searched in the displayName of the group.
+     * @param loadMembers - switch whether members should be loaded too (decreases performance, don't use if not needed)
+     * @param context The context.
+     * @return an array of groups that match the search pattern sorted by usecount.
+     * @throws OXException if searching has some storage related problem.
      */
-    public ListAction(final ServiceLookup services) {
-        super(services);
-    }
+    public Group[] searchGroups(String pattern, boolean loadMembers, Context context, int userId) throws OXException;
 
-    @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        JSONArray jBody = req.getData();
-        if (null == jBody) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-
-        List<Integer> groupIds = new LinkedList<Integer>();
-
-        int length = jBody.length();
-        for (int a = 0; a < length; a++) {
-            JSONObject jData = jBody.getJSONObject(a);
-            groupIds.add(DataParser.checkInt(jData, DataFields.ID));
-        }
-
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groupsResult = groupService.listGroups(req.getSession().getContext(), groupIds.stream().mapToInt(i -> i).toArray());
-
-        List<Group> groupList = new LinkedList<Group>();
-        Date timestamp = new Date(0);
-        for (int a = 0; a < groupsResult.length; a++) {
-            Group group = groupsResult[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = group.getLastModified();
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
-    }
 }

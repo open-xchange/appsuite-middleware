@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -341,7 +342,7 @@ public final class OXFolderUtility {
                      * Check against group members
                      */
                     try {
-                        final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
+                        final int[] members = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, permission.getEntity()).getMember();
                         for (final int cur : members) {
                             if (diff.contains(cur) && f.getFolderName().equals(folderName)) {
                                 affectedUsers.add(cur);
@@ -1109,7 +1110,7 @@ public final class OXFolderUtility {
              * Resolve group
              */
             try {
-                for (int member : GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember()) {
+                for (int member : ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, permission.getEntity()).getMember()) {
                     retval.add(member);
                 }
             } catch (final OXException e) {
@@ -1227,7 +1228,7 @@ public final class OXFolderUtility {
     public static String getGroupName(final int groupId, final Context ctx) {
         final Group g;
         try {
-            g = GroupStorage.getInstance().getGroup(groupId, ctx);
+            g = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, groupId);
         } catch (final OXException e) {
             return String.valueOf(groupId);
         }

@@ -47,69 +47,72 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.dav.osgi;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ListAction}
+ * {@link Services}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class ListAction extends AbstractGroupAction {
+public final class Services {
 
     /**
-     * Initializes a new {@link ListAction}.
-     * 
-     * @param services
+     * Initializes a new {@link Services}.
      */
-    public ListAction(final ServiceLookup services) {
-        super(services);
+    private Services() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        JSONArray jBody = req.getData();
-        if (null == jBody) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
-        List<Integer> groupIds = new LinkedList<Integer>();
-
-        int length = jBody.length();
-        for (int a = 0; a < length; a++) {
-            JSONObject jData = jBody.getJSONObject(a);
-            groupIds.add(DataParser.checkInt(jData, DataFields.ID));
-        }
-
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groupsResult = groupService.listGroups(req.getSession().getContext(), groupIds.stream().mapToInt(i -> i).toArray());
-
-        List<Group> groupList = new LinkedList<Group>();
-        Date timestamp = new Date(0);
-        for (int a = 0; a < groupsResult.length; a++) {
-            Group group = groupsResult[a];
-            groupList.add(group);
-
-            Date lastModified = group.getLastModified();
-            if (null != lastModified && lastModified.after(timestamp)) {
-                timestamp = group.getLastModified();
-            }
-        }
-        return new AJAXRequestResult(groupList, timestamp, "group");
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.dav\" not started?");
+        }
+        return serviceLookup.getServiceSafe(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
+
 }

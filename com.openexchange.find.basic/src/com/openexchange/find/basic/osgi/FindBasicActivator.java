@@ -68,11 +68,13 @@ import com.openexchange.find.basic.contacts.AutocompleteFields;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.contacts.ShowDepartmentJSlobEntry;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
+import com.openexchange.find.basic.groups.BasicGroupsDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
 import com.openexchange.find.basic.resource.BasicResourceDriver;
 import com.openexchange.find.basic.tasks.BasicTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.UseCountAwareGroupService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.JSlobEntry;
@@ -98,7 +100,7 @@ public class FindBasicActivator extends HousekeepingActivator {
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             ThreadPoolService.class, IDBasedFolderAccessFactory.class, UseCountAwareResourceService.class, ConfigurationService.class,
             InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class,
-            IDBasedCalendarAccessFactory.class, RecurrenceService.class, LeanConfigurationService.class, ConversionService.class
+            IDBasedCalendarAccessFactory.class, RecurrenceService.class, LeanConfigurationService.class, ConversionService.class, UseCountAwareGroupService.class
         };
     }
     //@formatter:on
@@ -114,6 +116,7 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicResourceDriver(), defaultProperties());
+        registerService(ModuleSearchDriver.class, new BasicGroupsDriver(), defaultProperties());
         registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
 
         // Register the 'showDepartment' jslob
