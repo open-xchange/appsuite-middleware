@@ -504,17 +504,16 @@ public final class PushManagerRegistry implements PushListenerService {
 
         PermanentListenerRescheduler useThisInstanceToReschedule = null;
 
-        boolean inserted;
-        synchronized (this) {
-            int contextId = session.getContextId();
-            int userId = session.getUserId();
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
 
-            inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
+        boolean inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
 
-            if (inserted) {
-                // Not registered
-                CredentialStorage credentialStorage = optCredentialStorage();
-                if (null != credentialStorage) {
+        // Store/update credentials
+        {
+            CredentialStorage credentialStorage = optCredentialStorage();
+            if (null != credentialStorage) {
+                if (inserted || (null == credentialStorage.getCredentials(userId, contextId))) {
                     try {
                         credentialStorage.storeCredentials(new DefaultCredentials(session));
                         LOG.info("Successfully stored/updated credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
@@ -522,7 +521,11 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.error("Failed to store credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                     }
                 }
+            }
+        }
 
+        if (inserted) {
+            synchronized (this) {
                 // Start for push user
                 PermanentListenerRescheduler rescheduler = reschedulerRef.get();
                 boolean allowPermanentPush = isPermanentPushAllowed();
@@ -541,21 +544,8 @@ public final class PushManagerRegistry implements PushListenerService {
 
                     }
                 }
-            } else {
-                // Already registered a permanent listener for the client
-                CredentialStorage credentialStorage = optCredentialStorage();
-                if (null != credentialStorage) {
-                    try {
-                        if (null == credentialStorage.getCredentials(userId, contextId)) {
-                            // No credentials stored, yet
-                            credentialStorage.storeCredentials(new DefaultCredentials(session));
-                        }
-                    } catch (OXException e) {
-                        LOG.error("Failed to check credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
-                    }
-                }
-            }
-        } // End of synchronized block
+            } // End of synchronized block
+        }
 
         if (null != useThisInstanceToReschedule) {
             try {
@@ -583,19 +573,22 @@ public final class PushManagerRegistry implements PushListenerService {
             return false;
         }
 
-        synchronized (this) {
-            DeleteResult deleteResult = PushDbUtils.deletePushRegistration(userId, contextId, clientId);
-            if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
-                CredentialStorage credentialStorage = optCredentialStorage();
-                if (null != credentialStorage) {
-                    try {
-                        credentialStorage.deleteCredentials(userId, contextId);
-                        LOG.info("Successfully deleted credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
-                    } catch (Exception e) {
-                        LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
-                    }
-                }
+        DeleteResult deleteResult = PushDbUtils.deletePushRegistration(userId, contextId, clientId);
 
+        if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
+            CredentialStorage credentialStorage = optCredentialStorage();
+            if (null != credentialStorage) {
+                try {
+                    credentialStorage.deleteCredentials(userId, contextId);
+                    LOG.info("Successfully deleted credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
+                } catch (Exception e) {
+                    LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                }
+            }
+        }
+
+        synchronized (this) {
+            if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
                 PushUser pushUser = new PushUser(userId, contextId);
                 for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                     PushManagerService pushManager = pushManagersIterator.next();
@@ -627,21 +620,21 @@ public final class PushManagerRegistry implements PushListenerService {
      * @throws OXException If unregistration fails
      */
     public boolean unregisterAllPermanentListenersFor(int userId, int contextId) throws OXException {
-        synchronized (this) {
-            DeleteResult deleteResult = PushDbUtils.deleteAllPushRegistrations(userId, contextId);
-            if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
-                CredentialStorage credentialStorage = optCredentialStorage();
-                if (null != credentialStorage) {
-                    try {
-                        credentialStorage.deleteCredentials(userId, contextId);
-                        LOG.info("Successfully deleted credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
-                    } catch (Exception e) {
-                        LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
-                    }
+        DeleteResult deleteResult = PushDbUtils.deleteAllPushRegistrations(userId, contextId);
+        if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
+            CredentialStorage credentialStorage = optCredentialStorage();
+            if (null != credentialStorage) {
+                try {
+                    credentialStorage.deleteCredentials(userId, contextId);
+                    LOG.info("Successfully deleted credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
+                } catch (Exception e) {
+                    LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                 }
-
             }
 
+        }
+
+        synchronized (this) {
             PushUser pushUser = new PushUser(userId, contextId);
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 PushManagerService pushManager = pushManagersIterator.next();

@@ -59,16 +59,125 @@ import com.openexchange.session.Session;
  */
 public class DefaultCredentials implements Credentials {
 
-    private int contextId;
-    private int userId;
-    private String password;
-    private String login;
+    /**
+     * Creates a new builder.
+     *
+     * @return The new builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The builder for an instance of <code>DefaultCredentials</code> */
+    public static class Builder {
+
+        private int contextId;
+        private int userId;
+        private String password;
+        private String login;
+
+        Builder() {
+            super();
+        }
+
+        /**
+         * Copies arguments from given credentials
+         *
+         * @param credentials The credentials
+         * @return This builder
+         */
+        public Builder copyFromCredentials(Credentials credentials) {
+            contextId = credentials.getContextId();
+            userId = credentials.getUserId();
+            password = credentials.getPassword();
+            login = credentials.getLogin();
+            return this;
+        }
+
+        /**
+         * Copies arguments from given session
+         *
+         * @param session The session
+         * @return This builder
+         */
+        public Builder copyFromSession(Session session) {
+            contextId = session.getContextId();
+            userId = session.getUserId();
+            password = session.getPassword();
+            login = session.getLoginName();
+            return this;
+        }
+
+        /**
+         * Sets the context identifier
+         *
+         * @param contextId The context identifier to set
+         * @return This builder
+         */
+        public Builder withContextId(int contextId) {
+            this.contextId = contextId;
+            return this;
+        }
+
+        /**
+         * Sets the user identifier
+         *
+         * @param userId The user identifier to set
+         * @return This builder
+         */
+        public Builder withUserId(int userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        /**
+         * Sets the password
+         *
+         * @param password The password to set
+         * @return This builder
+         */
+        public Builder withPassword(String password) {
+            this.password = password;
+            return this;
+        }
+
+        /**
+         * Sets the login
+         *
+         * @param login The login to set
+         * @return This builder
+         */
+        public Builder withLogin(String login) {
+            this.login = login;
+            return this;
+        }
+
+        /**
+         * Builds the instance of <code>DefaultCredentials</code> from this builde's arguments.
+         *
+         * @return The <code>DefaultCredentials</code> instance
+         */
+        public DefaultCredentials build() {
+            return new DefaultCredentials(contextId, userId, password, login);
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
+    private final int contextId;
+    private final int userId;
+    private final String password;
+    private final String login;
 
     /**
      * Initializes a new {@link DefaultCredentials}.
      */
-    public DefaultCredentials() {
+    DefaultCredentials(int contextId, int userId, String password, String login) {
         super();
+        this.contextId = contextId;
+        this.userId = userId;
+        this.password = password;
+        this.login = login;
     }
 
     /**
@@ -115,42 +224,6 @@ public class DefaultCredentials implements Credentials {
     @Override
     public String getLogin() {
         return login;
-    }
-
-    /**
-     * Sets the context identifier
-     *
-     * @param contextId The context identifier to set
-     */
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    /**
-     * Sets the user identifier
-     *
-     * @param userId The user identifier to set
-     */
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Sets the password
-     *
-     * @param password The password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Sets the login
-     *
-     * @param login The login to set
-     */
-    public void setLogin(String login) {
-        this.login = login;
     }
 
     @Override
