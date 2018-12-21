@@ -51,6 +51,7 @@ package com.openexchange.ajax.login.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -61,10 +62,12 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.RateLimiterByLogin;
+import com.openexchange.ajax.login.AllowedRedirectUris;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.format.CompositeLoginFormatter;
@@ -187,6 +190,32 @@ public class LoginActivator extends HousekeepingActivator {
                 LoggerHolder.LOG.warn("Value configured for \"{}\" and/or \"{}\" property must be positive. Rate limiting by login name is effectively disabled!", propPermits, propTimeFrame);
             }
         }
+
+        // Allowed paths for redirects
+        String allowedRedirectUris = configurationService.getProperty("com.openexchange.ajax.login.allowedRedirectURIsOnLoginError");
+        if (Strings.isNotEmpty(allowedRedirectUris)) {
+            String[] wildcardPatterns = Strings.splitByComma(allowedRedirectUris);
+            AllowedRedirectUris whitelist = AllowedRedirectUris.getInstance();
+            for (String wildcardPattern : wildcardPatterns) {
+                if (Strings.isNotEmpty(wildcardPattern)) {
+                    String wcp = Strings.unquote(wildcardPattern.trim());
+                    int starPos = wcp.indexOf('*');
+                    int qmarPos = wcp.indexOf('?');
+                    if (starPos < 0 && qmarPos < 0) {
+                        whitelist.add(new AllowedRedirectUris.IgnoreCaseExactUriMatcher(wcp));
+                    } else {
+                        int mlen = wcp.length() - 1;
+                        if (mlen > 0 && ((starPos >= mlen && qmarPos >= mlen) || (starPos == mlen && qmarPos < 0) || (qmarPos == mlen && starPos < 0))) {
+                            whitelist.add(new AllowedRedirectUris.IgnoreCasePrefixUriMatcher(wcp.substring(0, mlen)));
+                        } else {
+                            Pattern pattern = Pattern.compile(Strings.wildcardToRegex(wcp), Pattern.CASE_INSENSITIVE);
+                            whitelist.add(new AllowedRedirectUris.PatternUriMatcher(pattern));
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
 }

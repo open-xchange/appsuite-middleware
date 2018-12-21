@@ -49,8 +49,6 @@
 
 package com.openexchange.saml.impl;
 
-import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
-import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -130,9 +128,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         try {
             doSsoLogin(req, resp, loginConfiguration);
         } catch (OXException e) {
-            String errorPage = loginConfiguration.getErrorPageTemplate().replace("ERROR_MESSAGE", filter(e.getMessage()));
-            resp.setContentType(CONTENTTYPE_HTML);
-            resp.getWriter().write(errorPage);
+            LoginTools.useErrorPageTemplateOrSendException(e, loginConfiguration.getErrorPageTemplate(), req, resp);
         }
     }
 

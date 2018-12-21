@@ -166,7 +166,31 @@ public class LoginServlet extends AJAXServlet {
     /**
      * The default error page template
      */
-    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    private static final String ERROR_PAGE_TEMPLATE =
+        // @formatter:off
+            "<html>\n" +
+            "<script type=\"text/javascript\">\n" +
+            "// Display normal HTML for 5 seconds, then redirect via referrer.\n" +
+            "setTimeout(redirect,5000);\n" +
+            "function redirect(){\n" +
+            " var referrer=document.referrer;\n" +
+            " var redirect_url;\n" +
+            " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
+            " if(referrer.indexOf(\"login=failed\")>=0){\n" +
+            "  redirect_url=referrer;\n" + " }else{\n" +
+            "  // Check if referrer contains multiple parameter\n" +
+            "  if(referrer.indexOf(\"?\")<0){\n" +
+            "   redirect_url=referrer+\"?login=failed\";\n" +
+            "  }else{\n" +
+            "   redirect_url=referrer+\"&login=failed\";\n" +
+            "  }\n" + " }\n" + " // Redirect to referrer\n" +
+            " window.location.href=redirect_url;\n" +
+            "}\n" + "</script>\n" +
+            "<body>\n" +
+            "<h1>ERROR_MESSAGE</h1>\n" +
+            "</body>\n" +
+            "</html>\n";
+        // @formatter:on
 
     /**
      * <code>"open-xchange-session-"</code>
