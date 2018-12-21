@@ -13,7 +13,7 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 
 /**
- * 
+ *
  * {@link IncrementOrSetPrincipalUseCountTask} increments or sets the principal use count for a given user
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -23,12 +23,11 @@ class IncrementOrSetPrincipalUseCountTask extends AbstractTask<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IncrementOrSetPrincipalUseCountTask.class);
     private static final String SQL_INCREMENT = "INSERT INTO principalUseCount (cid, user, principal, value) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=value+1";
-    private static final String SQL_SET       = "UPDATE principalUseCount SET value = ? WHERE cid = ? AND user = ? AND principal ?";
+    private static final String SQL_SET = "UPDATE principalUseCount SET value = ? WHERE cid = ? AND user = ? AND principal = ?";
 
     private final Session session;
-    private int           principal;
-    private Integer       value;
-
+    private final int principal;
+    private final Integer value;
 
     /**
      * Initializes a new {@link IncrementOrSetPrincipalUseCountTask}.

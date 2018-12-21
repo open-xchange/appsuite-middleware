@@ -78,14 +78,18 @@ public class PrincipalUseCountDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        int type = event.getType();
-        if (type == DeleteEvent.TYPE_CONTEXT) {
-            handleContextDeletion(writeCon, event.getContext());
+        switch (event.getType()) {
+            case DeleteEvent.TYPE_CONTEXT:
+                handleContextDeletion(writeCon, event.getContext());
+                break;
+            case DeleteEvent.TYPE_GROUP:
+            case DeleteEvent.TYPE_RESOURCE:
+                handlePrincipalDeletion(writeCon, event.getContext(), event.getId());
+                break;
+            case DeleteEvent.TYPE_USER:
+                handleUserDeletion(writeCon, event.getContext(), event.getId());
+                break;
         }
-        if (type == DeleteEvent.TYPE_GROUP || type == DeleteEvent.TYPE_RESOURCE) {
-            handlePrincipalDeletion(writeCon, event.getContext(), event.getId());
-        }
-
     }
 
     private void handleContextDeletion(Connection writeCon, Context ctx) throws OXException {
@@ -105,6 +109,18 @@ public class PrincipalUseCountDeleteListener implements DeleteListener {
         try {
             stmt = writeCon.createStatement();
             stmt.executeUpdate("DELETE FROM principalUseCount WHERE cid=" + ctx.getContextId() + " AND principal=" + id);
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private void handleUserDeletion(Connection writeCon, Context ctx, int userId) throws OXException {
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+            stmt.executeUpdate("DELETE FROM principalUseCount WHERE cid=" + ctx.getContextId() + " AND user=" + userId);
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
