@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * This object must be send with every method call in ox rmi interface!
@@ -184,8 +185,7 @@ public class Credentials implements Serializable {
 
         final StringBuilder retValue = new StringBuilder();
 
-        retValue.append("Credentials ( ").append(super.toString()).append(TAB).append("login = ").append(this.login).append(TAB).append(
-            "passwordMech = ").append(this.passwordMech).append(TAB).append("salt = ").append(this.salt).append(" )");
+        retValue.append("Credentials ( ").append(super.toString()).append(TAB).append("login = ").append(this.login).append(TAB).append("passwordMech = ").append(this.passwordMech).append(TAB).append(" )");
 
         return retValue.toString();
     }
@@ -197,7 +197,7 @@ public class Credentials implements Serializable {
         result = prime * result + ((login == null) ? 0 : login.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
-        result = prime * result + ((salt == null) ? 0 : salt.hashCode());
+        result = prime * result + ((salt == null) ? 0 : Arrays.hashCode(salt));
         return result;
     }
 
@@ -238,7 +238,7 @@ public class Credentials implements Serializable {
             if (other.salt != null) {
                 return false;
             }
-        } else if (!salt.equals(other.salt)) {
+        } else if (!Arrays.equals(salt, other.salt)) {
             return false;
         }
         return true;

@@ -114,13 +114,11 @@ public enum SHACrypt {
 
     public String makeSHAPasswd(String raw, byte[] salt) throws NoSuchAlgorithmException {
         final MessageDigest sha = MessageDigest.getInstance(makeDigestReady(getIdentifier()));
-        sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
         if (null != salt) {
             sha.update(salt);
         }
-
+        sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
         final byte[] hash = sha.digest();
-
         return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(hash));
     }
 

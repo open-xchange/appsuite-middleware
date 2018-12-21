@@ -251,7 +251,11 @@ public class RdbUserStorage extends UserStorage {
                 setStringOrNull(i++, stmt, null); // filestore_password
                 stmt.setLong(i++, 0); // quota_max
             }
-            stmt.setBytes(i++, user.getSalt());
+            if (user.getSalt() == null) {
+                stmt.setNull(i++, java.sql.Types.VARBINARY);
+            } else {
+                stmt.setBytes(i++, user.getSalt());
+            }
 
             stmt.executeUpdate();
 

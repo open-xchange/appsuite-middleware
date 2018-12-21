@@ -54,6 +54,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -5027,7 +5028,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
-        result = prime * result + ((salt == null) ? 0 : salt.hashCode());
+        result = prime * result + ((salt == null) ? 0 : Arrays.hashCode(salt));
         result = prime * result + (saltSet ? 1231 : 1237);
         result = prime * result + ((password_expired == null) ? 0 : password_expired.hashCode());
         result = prime * result + (password_expiredset ? 1231 : 1237);
@@ -5756,7 +5757,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             if (other.salt != null) {
                 return false;
             }
-        } else if (!salt.equals(other.salt)) {
+        } else if (!Arrays.equals(salt, other.salt)) {
             return false;
         }
         if (saltSet != other.saltSet) {

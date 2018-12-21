@@ -402,7 +402,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
         result = prime * result + (passwordset ? 1231 : 1237);
-        result = prime * result + ((salt == null) ? 0 : salt.hashCode());
+        result = prime * result + ((salt == null) ? 0 : Arrays.hashCode(salt));
         result = prime * result + (saltSet ? 1231 : 1237);
         result = prime * result + ((restrictions == null) ? 0 : Arrays.hashCode(restrictions));
         result = prime * result + (restrictionsset ? 1231 : 1237);
@@ -490,7 +490,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
             if (other.salt != null) {
                 return false;
             }
-        } else if (!salt.equals(other.salt)) {
+        } else if (!Arrays.equals(salt, other.salt)) {
             return false;
         }
         if (saltSet != other.saltSet) {

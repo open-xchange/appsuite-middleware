@@ -77,7 +77,7 @@ public class CryptMech extends ConfigAwarePasswordMech {
             if (doSalt()) {
                 byte[] salt = getSalt();
                 String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
-                return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), saltString.getBytes());
+                return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), null);
             }
             return new PasswordDetails(str, UnixCrypt.crypt(str), getIdentifier(), null);
         } catch (UnsupportedEncodingException e) {
