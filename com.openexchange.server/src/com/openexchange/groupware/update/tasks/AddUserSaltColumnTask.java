@@ -78,7 +78,7 @@ public class AddUserSaltColumnTask extends UpdateTaskAdapter {
             con.setAutoCommit(false);
             rollback = true;
 
-            Column saltColumn = new Column("salt", "binary(128) DEFAULT NULL");
+            Column saltColumn = new Column("salt", "VARBINARY(128) DEFAULT NULL");
             Tools.checkAndAddColumns(con, USER_TABLE_NAME, saltColumn);
             Tools.checkAndAddColumns(con, DEL_USER_TABLE_NAME, saltColumn);
 

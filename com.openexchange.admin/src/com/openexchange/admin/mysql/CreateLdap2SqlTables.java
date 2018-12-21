@@ -116,7 +116,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "filestore_login VARCHAR(32) DEFAULT NULL,"
        + "filestore_passwd VARCHAR(32) DEFAULT NULL,"
        + "quota_max BIGINT(20) NOT NULL DEFAULT -1,"
-       + "salt binary(128) DEFAULT NULL,"
+       + "salt VARBINARY(128) DEFAULT NULL,"
        + "PRIMARY KEY (cid, id),"
        + "INDEX `mailIndex` (cid, mail(191)),"
        + "INDEX `guestCreatedByIndex` (cid, guestCreatedBy)"
@@ -148,7 +148,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "filestore_login VARCHAR(32) DEFAULT NULL,"
        + "filestore_passwd VARCHAR(32) DEFAULT NULL,"
        + "quota_max BIGINT(20) NOT NULL DEFAULT -1,"
-       + "salt binary(128) DEFAULT NULL,"
+        + "salt VARBINARY(128) DEFAULT NULL,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
