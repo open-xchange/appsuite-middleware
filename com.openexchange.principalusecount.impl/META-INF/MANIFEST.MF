@@ -9,6 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.openexchange.principleusecount.impl
 Import-Package: com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
  com.openexchange.osgi,
  com.openexchange.principalusecount,
  com.openexchange.server,

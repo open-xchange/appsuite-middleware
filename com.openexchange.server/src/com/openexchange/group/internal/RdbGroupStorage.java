@@ -359,14 +359,15 @@ public class RdbGroupStorage implements UseCountAwareGroupStorage {
             DBPool.closeReaderSilent(context, con);
         }
     }
-    
+
     private static final String SELECT_GROUPS_WITH_USECOUNT;
-    
+
     static {
         StringBuilder b = new StringBuilder();
         b.append("SELECT id,identifier,displayName,lastModified FROM groups AS g ")
          .append("LEFT JOIN principalUseCount AS uc ON g.cid=uc.cid AND g.id=uc.principal AND uc.user=? ")
-         .append("WHERE cid=? AND (displayName LIKE ? OR identifier LIKE ?)");
+         .append("WHERE g.cid=? AND (g.displayName LIKE ? OR g.identifier LIKE ?) ")
+         .append("ORDER BY uc.value DESC;");
         SELECT_GROUPS_WITH_USECOUNT = b.toString();
     }
 
