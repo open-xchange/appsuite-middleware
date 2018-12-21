@@ -58,21 +58,67 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.1
  */
 public enum S3Properties implements Property {
+
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].endpoint"
+     */
     ENDPOINT("endpoint", "s3.amazonaws.com"),
-    BUCKET_NAME("bucketName", null),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].bucketName"
+     */
+    BUCKET_NAME("bucketName"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].region"
+     */
     REGION("region", "us-west-2"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].pathStyleAccess"
+     */
     PATH_STYLE_ACCESS("pathStyleAccess", Boolean.TRUE),
-    ACCESS_KEY("accessKey", null),
-    SECRET_KEY("secretKey", null),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].accessKey"
+     */
+    ACCESS_KEY("accessKey"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].secretKey"
+     */
+    SECRET_KEY("secretKey"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].encryption"
+     */
     ENCRYPTION("encryption", EncryptionType.NONE.getName()),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].signerOverride"
+     */
     SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].chunkSize"
+     */
     CHUNK_SIZE("chunkSize", "5 MB"),
-    RSA_KEYSTORE("encryption.rsa.keyStore", null),
-    RSA_PASSWORD("encryption.rsa.password", null),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].encryption.rsa.keyStore"
+     */
+    RSA_KEYSTORE("encryption.rsa.keyStore"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].encryption.rsa.password"
+     */
+    RSA_PASSWORD("encryption.rsa.password"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].connectTimeout"
+     */
     CONNECT_TIMEOUT("connectTimeout", "10000"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].readTimeout"
+     */
     READ_TIMEOUT("readTimeout", "50000"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].maxConnectionPoolSize"
+     */
     MAX_CONNECTION_POOL_SIZE("maxConnectionPoolSize", "50"),
 
+    /**
+     * "com.openexchange.filestore.s3.metricCollection"
+     */
     METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", Boolean.FALSE)
     ;
 
@@ -81,6 +127,13 @@ public enum S3Properties implements Property {
 
     private final Object defaultValue;
     private final String fqn;
+
+    /**
+     * Initializes a new {@link S3Properties}.
+     */
+    private S3Properties(String propName) {
+        this(propName, null);
+    }
 
     /**
      * Initializes a new {@link S3Properties}.
