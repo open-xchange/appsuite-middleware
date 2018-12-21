@@ -60,50 +60,54 @@ import java.util.Map;
 public interface Property {
 
     /**
-     * Returns the fully qualified name of the {@link Property}
+     * Gets the fully qualified name of the {@link Property}
      *
      * @return the fully qualified name of the {@link Property}
      */
     String getFQPropertyName();
 
     /**
-     * Returns the fully qualified name of the {@link Property}
-     * 
+     * Gets the fully qualified name of the {@link Property}
+     *
      * @param optionals A {@link Map} containing values for optional parts in the fully
      *            qualified name. E.g. <code>com.openexchange.test.[replaceMe]</code>
      *            is returned as <code>com.openexchange.test.success</code> if the Map
      *            contains a key called <code>replaceMe</code> with the value
      *            <code>success</code>. If the Map does not contain the key
      *            <code>com.openexchange.test.[replaceMe]</code> is returned.
-     * 
+     *
      * @return the fully qualified name of the {@link Property}
      */
     default String getFQPropertyName(Map<String, String> optionals) {
         String fqn = getFQPropertyName();
-
-        if (null == optionals || optionals.isEmpty() || !fqn.contains("[")) {
+        if (null == optionals || (fqn.indexOf('[') < 0) || optionals.isEmpty()) {
             // No need to change anything
             return fqn;
         }
 
         // Contains optional parameters
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < fqn.length(); i++) {
+        int length = fqn.length();
+        StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
             char c = fqn.charAt(i);
             switch (c) {
                 case '[':
                     // Build key word
-                    StringBuilder keyWord = new StringBuilder();
-                    while ((c = fqn.charAt(++i)) != ']' && i < fqn.length()) {
-                        keyWord.append(c);
-                    }
-                    // Search if it is within map
-                    if (optionals.containsKey(keyWord.toString())) {
-                        String value = optionals.get(keyWord.toString());
-                        builder.append(value);
+                    int pos = fqn.indexOf(']', i);
+                    if (pos > 0) {
+                        String keyWord = fqn.substring(i + 1, pos);
+                        // Search if it is within map
+                        String optValue = optionals.get(keyWord);
+                        if (null != optValue) {
+                            builder.append(optValue);
+                            i += keyWord.length() + 1;
+                        } else {
+                            // Add as default
+                            builder.append(c);
+                        }
                     } else {
-                        // Add key back as default
-                        builder.append('[').append(keyWord).append(']');
+                        // Add as default
+                        builder.append(c);
                     }
                     break;
                 default:
@@ -112,12 +116,11 @@ public interface Property {
             }
         }
         return builder.toString();
-
     }
 
     /**
      * Returns the default value of the {@link Property}
-     * 
+     *
      * @return The default value of the {@link Property}
      */
     Object getDefaultValue();

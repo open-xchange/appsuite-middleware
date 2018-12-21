@@ -63,8 +63,8 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -269,7 +269,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return new AmazonS3ClientInfo((AmazonS3Client) clientBuilder.build(), encrypted, chunkSize);
     }
 
-    private String getPropertySafe(S3Properties prop, LeanConfigurationService configurationService, Map<String, String> optionals) throws OXException {
+    private static String getPropertySafe(S3Properties prop, LeanConfigurationService configurationService, Map<String, String> optionals) throws OXException {
         String property = configurationService.getProperty(prop, optionals);
         if (Strings.isEmpty(property)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prop.getFQPropertyName(optionals));
@@ -277,18 +277,54 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return property;
     }
 
-    private Map<String, String> getOptional(String filestoreId) {
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put(S3Properties.OPTIONAL_NAME, filestoreId);
-        return hashMap;
+    private static Map<String, String> getOptional(String filestoreId) {
+        return Collections.singletonMap(S3Properties.OPTIONAL_NAME, filestoreId);
     }
 
     private ClientConfiguration getClientConfiguration(String filestoreID, LeanConfigurationService configService) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
-        String signerOverride = configService.getProperty(S3Properties.SIGNER_OVERRIDE, getOptional(filestoreID));
 
-        if (Strings.isNotEmpty(signerOverride)) {
-            clientConfiguration.setSignerOverride(signerOverride);
+        {
+            String signerOverride = configService.getProperty(S3Properties.SIGNER_OVERRIDE, getOptional(filestoreID));
+            if (Strings.isNotEmpty(signerOverride)) {
+                clientConfiguration.setSignerOverride(signerOverride);
+            }
+        }
+
+        {
+            String connectTimeout = configService.getProperty(S3Properties.CONNECT_TIMEOUT, getOptional(filestoreID));
+            if (Strings.isNotEmpty(connectTimeout)) {
+                try {
+                    clientConfiguration.setConnectionTimeout(Integer.parseInt(connectTimeout.trim()));
+                } catch (NumberFormatException e) {
+                    // Invalid connect timeout.
+                    LOG.warn("Invalid integer value specified for {}", S3Properties.CONNECT_TIMEOUT.getFQPropertyName(), e);
+                }
+            }
+        }
+
+        {
+            String readTimeout = configService.getProperty(S3Properties.READ_TIMEOUT, getOptional(filestoreID));
+            if (Strings.isNotEmpty(readTimeout)) {
+                try {
+                    clientConfiguration.setSocketTimeout(Integer.parseInt(readTimeout.trim()));
+                } catch (NumberFormatException e) {
+                    // Invalid connect timeout.
+                    LOG.warn("Invalid integer value specified for {}", S3Properties.READ_TIMEOUT.getFQPropertyName(), e);
+                }
+            }
+        }
+
+        {
+            String maxConnectionPoolSize = configService.getProperty(S3Properties.MAX_CONNECTION_POOL_SIZE, getOptional(filestoreID));
+            if (Strings.isNotEmpty(maxConnectionPoolSize)) {
+                try {
+                    clientConfiguration.setMaxConnections(Integer.parseInt(maxConnectionPoolSize.trim()));
+                } catch (NumberFormatException e) {
+                    // Invalid connect timeout.
+                    LOG.warn("Invalid integer value specified for {}", S3Properties.MAX_CONNECTION_POOL_SIZE.getFQPropertyName(), e);
+                }
+            }
         }
 
         String proxyHost = System.getProperty("http.proxyHost");

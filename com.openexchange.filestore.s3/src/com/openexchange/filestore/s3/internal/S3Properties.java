@@ -61,7 +61,7 @@ public enum S3Properties implements Property {
     ENDPOINT("endpoint", "s3.amazonaws.com"),
     BUCKET_NAME("bucketName", null),
     REGION("region", "us-west-2"),
-    PATH_STYLE_ACCESS("pathStyleAccess", true),
+    PATH_STYLE_ACCESS("pathStyleAccess", Boolean.TRUE),
     ACCESS_KEY("accessKey", null),
     SECRET_KEY("secretKey", null),
     ENCRYPTION("encryption", EncryptionType.NONE.getName()),
@@ -69,38 +69,37 @@ public enum S3Properties implements Property {
     CHUNK_SIZE("chunkSize", "5 MB"),
     RSA_KEYSTORE("encryption.rsa.keyStore", null),
     RSA_PASSWORD("encryption.rsa.password", null),
+    CONNECT_TIMEOUT("connectTimeout", "10000"),
+    READ_TIMEOUT("readTimeout", "50000"),
+    MAX_CONNECTION_POOL_SIZE("maxConnectionPoolSize", "50"),
 
-    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", false)
+    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", Boolean.FALSE)
     ;
 
     public static final String OPTIONAL_NAME = "filestoreID";
     private static final String PREFIX = "com.openexchange.filestore.s3.[" + OPTIONAL_NAME + "].";
 
     private final Object defaultValue;
-    private final String propName;
-    private final String prefix;
-
-    /**
-     * Initializes a new {@link S3Properties}.
-     */
-    private S3Properties(String prefix, String propName, Object defaultValue) {
-        this.propName = propName;
-        this.defaultValue = defaultValue;
-        this.prefix = prefix;
-    }
+    private final String fqn;
 
     /**
      * Initializes a new {@link S3Properties}.
      */
     private S3Properties(String propName, Object defaultValue) {
-        this.propName = propName;
+        this(PREFIX, propName, defaultValue);
+    }
+
+    /**
+     * Initializes a new {@link S3Properties}.
+     */
+    private S3Properties(String prefix, String propName, Object defaultValue) {
+        this.fqn = prefix + propName;
         this.defaultValue = defaultValue;
-        this.prefix = PREFIX;
     }
 
     @Override
     public String getFQPropertyName() {
-        return prefix + propName;
+        return fqn;
     }
 
     @Override
