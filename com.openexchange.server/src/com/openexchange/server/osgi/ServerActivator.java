@@ -672,9 +672,9 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
-        
+
         registerService(Remote.class, new GABRestorerRMIServiceImpl());
-        
+
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
@@ -745,7 +745,7 @@ public final class ServerActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
-            registerService(DataSource.class, new ICalMailPartDataSource(), props);
+            registerService(DataSource.class, new ICalMailPartDataSource().setServiceLookup(this), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
