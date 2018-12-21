@@ -284,15 +284,16 @@ public class S3FileStorageFactory implements FileStorageProvider {
     private ClientConfiguration getClientConfiguration(String filestoreID, LeanConfigurationService configService) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
 
+        Map<String, String> optional = getOptional(filestoreID);
         {
-            String signerOverride = configService.getProperty(S3Properties.SIGNER_OVERRIDE, getOptional(filestoreID));
+            String signerOverride = configService.getProperty(S3Properties.SIGNER_OVERRIDE, optional);
             if (Strings.isNotEmpty(signerOverride)) {
                 clientConfiguration.setSignerOverride(signerOverride);
             }
         }
 
         {
-            String connectTimeout = configService.getProperty(S3Properties.CONNECT_TIMEOUT, getOptional(filestoreID));
+            String connectTimeout = configService.getProperty(S3Properties.CONNECT_TIMEOUT, optional);
             if (Strings.isNotEmpty(connectTimeout)) {
                 try {
                     clientConfiguration.setConnectionTimeout(Integer.parseInt(connectTimeout.trim()));
@@ -304,7 +305,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         {
-            String readTimeout = configService.getProperty(S3Properties.READ_TIMEOUT, getOptional(filestoreID));
+            String readTimeout = configService.getProperty(S3Properties.READ_TIMEOUT, optional);
             if (Strings.isNotEmpty(readTimeout)) {
                 try {
                     clientConfiguration.setSocketTimeout(Integer.parseInt(readTimeout.trim()));
@@ -316,7 +317,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         {
-            String maxConnectionPoolSize = configService.getProperty(S3Properties.MAX_CONNECTION_POOL_SIZE, getOptional(filestoreID));
+            String maxConnectionPoolSize = configService.getProperty(S3Properties.MAX_CONNECTION_POOL_SIZE, optional);
             if (Strings.isNotEmpty(maxConnectionPoolSize)) {
                 try {
                     clientConfiguration.setMaxConnections(Integer.parseInt(maxConnectionPoolSize.trim()));
@@ -441,7 +442,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         if (false == bucketExists) {
-            String region = configService.getProperty(S3Properties.REGION, getOptional(filestoreID));
+            String region = configService.getProperty(S3Properties.REGION, optional);
 
             try {
                 s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));

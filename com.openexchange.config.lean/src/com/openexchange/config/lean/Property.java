@@ -87,35 +87,45 @@ public interface Property {
 
         // Contains optional parameters
         int length = fqn.length();
-        StringBuilder builder = new StringBuilder(length);
+        StringBuilder builder = null;
         for (int i = 0; i < length; i++) {
             char c = fqn.charAt(i);
-            switch (c) {
-                case '[':
-                    // Build key word
-                    int pos = fqn.indexOf(']', i);
-                    if (pos > 0) {
-                        String keyWord = fqn.substring(i + 1, pos);
-                        // Search if it is within map
-                        String optValue = optionals.get(keyWord);
-                        if (null != optValue) {
-                            builder.append(optValue);
-                            i += keyWord.length() + 1;
-                        } else {
-                            // Add as default
+            if (c == '[') {
+                // Find associated closing bracket
+                int pos = fqn.indexOf(']', i);
+                if (pos > 0) {
+                    String toReplace = fqn.substring(i + 1, pos);
+                    String optValue = optionals.get(toReplace);
+                    if (null != optValue) {
+                        // Replacement available
+                        if (null == builder) {
+                            builder = new StringBuilder(length);
+                            if (i > 0) {
+                                builder.append(fqn, 0, i);
+                            }
+                        }
+                        builder.append(optValue);
+                        i += toReplace.length() + 1;
+                    } else {
+                        // Add '[' character
+                        if (null != builder) {
                             builder.append(c);
                         }
-                    } else {
-                        // Add as default
+                    }
+                } else {
+                    // Add '[' character
+                    if (null != builder) {
                         builder.append(c);
                     }
-                    break;
-                default:
+                }
+            } else {
+                // Not a '[' character
+                if (null != builder) {
                     builder.append(c);
-                    break;
+                }
             }
         }
-        return builder.toString();
+        return null == builder ? fqn : builder.toString();
     }
 
     /**

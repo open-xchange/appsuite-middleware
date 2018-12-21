@@ -262,27 +262,26 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @SuppressWarnings("unchecked")
     private <T> T getProperty(Property property, Class<T> coerceTo, Map<String, String> optionals) {
-        T defaultValue = null;
         String value = null;
         try {
-            ConfigurationService configService = getService(ConfigurationService.class);
+            ConfigurationService configService = requireService(ConfigurationService.class);
             value = configService.getProperty(property.getFQPropertyName(optionals));
             if (value == null) {
-                defaultValue = property.getDefaultValue(coerceTo);
+                T defaultValue = property.getDefaultValue(coerceTo);
                 LOGGER.debug("The value of property '{}' was 'null'. Returning default value '{}' instead.", property.getFQPropertyName(optionals), defaultValue);
                 return defaultValue;
             }
 
             PropertyValueParser<?> propertyValueParser = valueParsers.get(coerceTo);
             if (propertyValueParser == null) {
-                defaultValue = property.getDefaultValue(coerceTo);
+                T defaultValue = property.getDefaultValue(coerceTo);
                 LOGGER.debug("Cannot find an appropriate value parser for '{}'. Returning default value '{}' instead.", coerceTo, defaultValue);
                 return defaultValue;
             }
 
             return (T) propertyValueParser.parse(value);
         } catch (Exception e) {
-            defaultValue = property.getDefaultValue(coerceTo);
+            T defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(optionals), coerceTo.getSimpleName(), defaultValue, e);
             return defaultValue;
         }
@@ -298,15 +297,14 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @return The value T of the property from the config cascade or the default value
      */
     private <T> T getProperty(Property property, int userId, int contextId, Class<T> coerceTo, Map<String, String> optionals) {
-        T defaultValue = null;
         try {
-            ConfigViewFactory factory = getService(ConfigViewFactory.class);
+            ConfigViewFactory factory = requireService(ConfigViewFactory.class);
             ConfigView view = factory.getView(userId, contextId);
 
             ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(optionals), coerceTo);
             return p.isDefined() ? p.get() : property.getDefaultValue(coerceTo);
         } catch (Exception e) {
-            defaultValue = property.getDefaultValue(coerceTo);
+            T defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, I(userId), I(contextId), defaultValue, e);
             return defaultValue;
         }
@@ -319,7 +317,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @return The requested service
      * @throws OXException If the service is not available
      */
-    private <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+    private <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
         final S service = services.getService(clazz);
         if (service == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
