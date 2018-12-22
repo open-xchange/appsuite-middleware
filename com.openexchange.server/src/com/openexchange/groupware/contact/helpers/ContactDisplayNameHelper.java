@@ -121,7 +121,8 @@ public class ContactDisplayNameHelper {
             }
             return String.format(locale, template, firstName, lastName, department);
         }
-        return String.format(locale, template, contact.getDisplayName(), "", department);
+        String displayName = Strings.isEmpty(contact.getDisplayName()) ? "-" : contact.getDisplayName();
+        return String.format(locale, template, displayName, "", department);
     }
 
     /**
