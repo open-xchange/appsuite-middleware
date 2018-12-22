@@ -59,6 +59,7 @@ import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.impl.PushManagerRegistry;
+import com.openexchange.push.impl.jobqueue.PermanentListenerJob;
 
 
 /**
@@ -129,7 +130,7 @@ public class PortableStartPermanentListenerCallable extends AbstractCustomPortab
             pushUsers.add(new PushUser(userIds[i], contextIds[i]));
         }
 
-        List<PushUser> startedOnes = PushManagerRegistry.getInstance().applyInitialListeners(pushUsers, nanos);
+        List<PermanentListenerJob> startedOnes = PushManagerRegistry.getInstance().applyInitialListeners(pushUsers, nanos);
         LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", HOSTNAME, startedOnes.isEmpty() ? "none" : startedOnes.size());
 
         return Boolean.TRUE;
