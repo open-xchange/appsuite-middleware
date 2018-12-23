@@ -67,7 +67,7 @@ public class SHAMech extends ConfigAwarePasswordMech {
 
     /**
      * Initializes a new {@link SHAMech}.
-     * 
+     *
      * @param crypt The {@link SHACrypt} to use
      */
     public SHAMech(SHACrypt crypt) {
@@ -103,11 +103,13 @@ public class SHAMech extends ConfigAwarePasswordMech {
     }
 
     private static int getHashLength(SHACrypt crypt) {
-        if (crypt == SHACrypt.SHA1) {
-            return 32;
-        } else if (crypt == SHACrypt.SHA256) {
-            return 64;
+        switch (crypt) {
+            case SHA1:
+                return 32;
+            case SHA256:
+                return 64;
+            default:
+                return 128;
         }
-        return 128;
     }
 }

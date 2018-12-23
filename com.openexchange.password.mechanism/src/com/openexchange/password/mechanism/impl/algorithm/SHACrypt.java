@@ -54,7 +54,6 @@ import java.security.NoSuchAlgorithmException;
 import com.openexchange.java.Charsets;
 
 /**
- * 
  * {@link SHACrypt}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from global & update to new versions
@@ -66,46 +65,31 @@ public enum SHACrypt {
 
     /**
      * SHA-1 algorithm.
-     * 
+     *
      * @deprecated Use SHA256 to generate new password instead
      */
     @Deprecated
-    SHA1("{SHA}"),
-
+    SHA1("{SHA}", "SHA"),
     /**
      * SHA-256 algorithm
      */
-    SHA256("{SHA-256}"),
-
+    SHA256("{SHA-256}", "SHA-256"),
     /**
      * SHA-512 algorithm.
      * Note: Might not run will all JVMs.
-     * 
+     *
      * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
-     * 
+     *
      */
-    SHA512("{SHA-512}");
+    SHA512("{SHA-512}", "SHA-512"),
     ;
 
     private final String identifier;
+    private final String algorithm;
 
-    // -------------------------------------------------------------------
-
-    private SHACrypt(String lIdentifier) {
+    private SHACrypt(String lIdentifier, String algorithm) {
         this.identifier = lIdentifier;
-    }
-
-    // -------------------------------------------------------------------
-
-    private static String makeDigestReady(String lIdentifier) {
-        String identifier = new String(lIdentifier);
-        if (identifier.startsWith("{")) {
-            identifier = identifier.substring(1);
-        }
-        if (identifier.endsWith("}")) {
-            identifier = identifier.substring(0, identifier.length() - 1);
-        }
-        return identifier;
+        this.algorithm = algorithm;
     }
 
     public String makeSHAPasswd(String raw) throws NoSuchAlgorithmException {
@@ -113,7 +97,7 @@ public enum SHACrypt {
     }
 
     public String makeSHAPasswd(String raw, byte[] salt) throws NoSuchAlgorithmException {
-        final MessageDigest sha = MessageDigest.getInstance(makeDigestReady(getIdentifier()));
+        final MessageDigest sha = MessageDigest.getInstance(algorithm);
         if (null != salt) {
             sha.update(salt);
         }
@@ -130,4 +114,5 @@ public enum SHACrypt {
     public String getIdentifier() {
         return identifier;
     }
+
 }
