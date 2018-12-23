@@ -107,13 +107,13 @@ public interface Property {
                         builder.append(optValue);
                         i += toReplace.length() + 1;
                     } else {
-                        // Add '[' character
+                        // Add '[' character as no replacement available in map
                         if (null != builder) {
                             builder.append(c);
                         }
                     }
                 } else {
-                    // Add '[' character
+                    // Add '[' character as no closing ']' present
                     if (null != builder) {
                         builder.append(c);
                     }
