@@ -575,8 +575,13 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         }
         
         int alarmHash = 1;
-        for (Alarm a : getAlarmHelper().getDefaultAlarms()) {
-            alarmHash = 31 * alarmHash + a.hashCode();
+        List<Alarm> defaultAlarms = getAlarmHelper().getDefaultAlarms();
+        if (defaultAlarms != null) {
+            for (Alarm a : defaultAlarms) {
+                if (a != null) {
+                    alarmHash = 31 * alarmHash + a.hashCode();
+                }
+            }
         }
         
         return lastModified.getTime() + "-" + foldersHash + "-" + alarmHash;
