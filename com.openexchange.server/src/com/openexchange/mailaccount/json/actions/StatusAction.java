@@ -199,6 +199,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
         accountDescription.setMailProtocol(account.getMailProtocol());
         accountDescription.setMailStartTls(account.isMailStartTls());
         accountDescription.setLogin(account.getLogin());
+        accountDescription.setPrimaryAddress(account.getPrimaryAddress());
         {
             AuthInfo authInfo = determinePasswordAndAuthType(account.getLogin(), session, account, true);
             accountDescription.setPassword(authInfo.getPassword());
