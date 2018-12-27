@@ -98,7 +98,9 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link ChronosJsonActivator}
@@ -115,6 +117,11 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
             ContactService.class, ResourceService.class, GroupService.class, MimeTypeMap.class
         };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { ThreadPoolService.class, PrincipalUseCountService.class };
     }
 
     @Override

@@ -87,6 +87,7 @@ import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -120,7 +121,7 @@ public class ChronosActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class };
+        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class, PrincipalUseCountService.class };
     }
 
     @Override

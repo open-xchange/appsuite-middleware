@@ -57,6 +57,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.converters.TaskIcalResultConverter;
 import com.openexchange.tasks.json.converters.TaskResultConverter;
@@ -96,6 +97,7 @@ public class TaskJSONActivator extends AJAXModuleActivator {
         });
 
         trackService(ObjectUseCountService.class);
+        trackService(PrincipalUseCountService.class);
         openTrackers();
     }
 

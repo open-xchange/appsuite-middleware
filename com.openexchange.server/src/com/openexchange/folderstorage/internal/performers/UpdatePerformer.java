@@ -85,6 +85,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -99,6 +100,8 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
+    private boolean increaseObjectUseCount;
+
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
      *
@@ -107,6 +110,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
+        increaseObjectUseCount = true;
     }
 
     /**
@@ -117,6 +121,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     public UpdatePerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context, decorator);
+        increaseObjectUseCount = true;
     }
 
     /**
@@ -128,6 +133,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
+        increaseObjectUseCount = true;
     }
 
     /**
@@ -139,6 +145,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     public UpdatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
+        increaseObjectUseCount = true;
+    }
+
+    /**
+     * Sets the increaseObjectUseCount flag
+     *
+     * @param increaseObjectUseCount The increaseObjectUseCount to set
+     */
+    public void setIncreaseObjectUseCount(boolean increaseObjectUseCount) {
+        this.increaseObjectUseCount = increaseObjectUseCount;
     }
 
     /**
@@ -423,12 +439,22 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     private void doPermissionChange(String treeId, String folderId, Folder folder, ComparedFolderPermissions comparedPermissions, String oldParentId, Folder storageFolder, FolderStorage storage, Boolean isRecursion, boolean cascadePermissions, FolderServiceDecorator decorator,TransactionManager transactionManager, Collection<FolderStorage> openedStorages) throws OXException {
-        ObjectUseCountService useCountService = FolderStorageServices.getService(ObjectUseCountService.class);
-        List<Integer> addedUsers = comparedPermissions.getAddedUsers();
-        if (null != useCountService && null != addedUsers && !addedUsers.isEmpty()) {
-            for (Integer i : addedUsers) {
-                IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
-                useCountService.incrementObjectUseCount(session, arguments);
+        if (this.increaseObjectUseCount) {
+            ObjectUseCountService useCountService = FolderStorageServices.getService(ObjectUseCountService.class);
+            List<Integer> addedUsers = comparedPermissions.getAddedUsers();
+            if (null != useCountService && null != addedUsers && !addedUsers.isEmpty()) {
+                for (Integer i : addedUsers) {
+                    IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
+                    useCountService.incrementObjectUseCount(session, arguments);
+                }
+            }
+
+            PrincipalUseCountService principalUseCountService = FolderStorageServices.getService(PrincipalUseCountService.class);
+            List<Permission> groupPermissions = comparedPermissions.getAddedGroupPermissions();
+            if (null != principalUseCountService && groupPermissions != null && !groupPermissions.isEmpty()) {
+                for (Permission perm : groupPermissions) {
+                    principalUseCountService.increment(session, perm.getEntity());
+                }
             }
         }
 

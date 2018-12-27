@@ -132,6 +132,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -1250,13 +1251,25 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
-                if (null != comparedPermissions && comparedPermissions.hasAddedUsers()) {
-                    ObjectUseCountService useCountService = Services.optService(ObjectUseCountService.class);
-                    if (null != useCountService) {
-                        List<Integer> addedUsers = comparedPermissions.getAddedUsers();
-                        for (Integer i : addedUsers) {
-                            IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
-                            useCountService.incrementObjectUseCount(session, arguments);
+                if (null != comparedPermissions) {
+                    if (comparedPermissions.hasAddedUsers()) {
+                        ObjectUseCountService useCountService = Services.optService(ObjectUseCountService.class);
+                        if (null != useCountService) {
+                            List<Integer> addedUsers = comparedPermissions.getAddedUsers();
+                            for (Integer i : addedUsers) {
+                                IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
+                                useCountService.incrementObjectUseCount(session, arguments);
+                            }
+                        }
+                    }
+
+                    if (comparedPermissions.hasAddedGroups()) {
+                        PrincipalUseCountService useCountService = Services.optService(PrincipalUseCountService.class);
+                        if (null != useCountService) {
+                            List<FileStorageObjectPermission> perms = comparedPermissions.getAddedGroupPermissions();
+                            for (FileStorageObjectPermission perm : perms) {
+                                useCountService.increment(session, perm.getEntity());
+                            }
                         }
                     }
                 }

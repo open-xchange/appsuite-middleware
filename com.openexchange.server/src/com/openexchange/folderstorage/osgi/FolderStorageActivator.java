@@ -89,6 +89,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.Tools;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -229,7 +230,8 @@ public final class FolderStorageActivator implements BundleActivator {
         DatabaseService.class,
         UserPermissionService.class,
         ObjectUseCountService.class,
-        HideAdminService.class
+        HideAdminService.class,
+        PrincipalUseCountService.class
     };
 
     @Override

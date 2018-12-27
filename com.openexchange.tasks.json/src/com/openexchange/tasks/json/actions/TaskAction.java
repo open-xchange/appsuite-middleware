@@ -68,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tasks.json.TaskRequest;
@@ -221,8 +222,9 @@ public abstract class TaskAction implements AJAXActionService {
             return;
         }
         ObjectUseCountService service = services.getService(ObjectUseCountService.class);
-        if (null == service) {
-            LOGGER.debug("The 'ObjectUseCountService' is unavailable at the moment");
+        PrincipalUseCountService principalUseCountService = services.getService(PrincipalUseCountService.class);
+        if (null == service && principalUseCountService == null) {
+            LOGGER.debug("The 'ObjectUseCountService' and the 'PrincipalUseCountService' are both unavailable at the moment");
             return;
         }
         if (!task.containsParticipants()) {
@@ -231,16 +233,29 @@ public abstract class TaskAction implements AJAXActionService {
         for (Participant p : task.getParticipants()) {
             switch (p.getType()) {
                 case Participant.USER:
+                    if (null == service) {
+                        continue;
+                    }
                     if (p.getIdentifier() != session.getUserId()) {
                         IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier()).build();
                         service.incrementObjectUseCount(session, arguments);
                     }
                     break;
                 case Participant.EXTERNAL_USER: {
+                    if (null == service) {
+                        continue;
+                    }
                     IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
                     service.incrementObjectUseCount(session, arguments);
                 }
                     break;
+                case Participant.GROUP:
+                case Participant.RESOURCE: {
+                    if (null == principalUseCountService) {
+                        continue;
+                    }
+                    principalUseCountService.increment(session, p.getIdentifier());
+                }
                 default:
                     LOGGER.debug("Skipping participant type '{}'", p.getType());
                     break;

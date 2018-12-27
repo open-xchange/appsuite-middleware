@@ -1730,6 +1730,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         {
             UpdatePerformer updatePerformer = newUpdatePerformer(storageParameters);
             updatePerformer.setCheck4Duplicates(false);
+            updatePerformer.setIncreaseObjectUseCount(false);
             updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 
             Set<OXException> warnings = updatePerformer.getWarnings();
@@ -2210,5 +2211,5 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
         return false;
     }
-    
+
 }

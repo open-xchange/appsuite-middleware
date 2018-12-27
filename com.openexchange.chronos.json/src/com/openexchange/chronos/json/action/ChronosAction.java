@@ -89,7 +89,10 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -107,6 +110,10 @@ public abstract class ChronosAction extends AbstractChronosAction {
     protected static final String EVENT = "event";
 
     protected static final String EVENTS = "events";
+
+    protected static final String BODY_PARAM_COMMENT = "comment";
+
+    protected static final String PARAM_USED_GROUP = "usedGroups";
 
     /**
      * Initializes a new {@link ChronosAction}.
@@ -127,6 +134,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             result = perform(calendarAccess, requestData);
             calendarAccess.commit();
             committed = true;
+            incrementGroupUseCount(requestData);
         } finally {
             if (false == committed) {
                 calendarAccess.rollback();
@@ -459,5 +467,44 @@ public abstract class ChronosAction extends AbstractChronosAction {
         // Use also the occurrence id to distinguish any exceptions in the series
         // and in case that exception may have different attachments that the master series?
         return IDMangler.mangle(Integer.toString(contextId), eventId.getFolderID(), eventId.getObjectID(), /* eventId.getRecurrenceID().toString(), */ managedId);
+    }
+
+    protected void incrementGroupUseCount(AJAXRequestData requestData) throws OXException {
+
+        String groupsString = requestData.getParameter(PARAM_USED_GROUP);
+        if(Strings.isEmpty(groupsString)) {
+            // Nothing to do here
+            return;
+        }
+        String[] groups = Strings.splitByCommaNotInQuotes(groupsString);
+        PrincipalUseCountService principalUseCountService = services.getOptionalService(PrincipalUseCountService.class);
+        if(principalUseCountService == null) {
+            LOG.debug("Missing " + PrincipalUseCountService.class.getName() + " service.");
+            return;
+        }
+
+        ThreadPoolService threadPoolService = services.getOptionalService(ThreadPoolService.class);
+        if(threadPoolService != null) {
+            threadPoolService.getExecutor().execute(() -> {
+                incrementGroupUseCount(requestData.getSession(), principalUseCountService, groups);
+            });
+        } else {
+            incrementGroupUseCount(requestData.getSession(), principalUseCountService, groups);
+        }
+
+    }
+
+    private void incrementGroupUseCount(Session session, PrincipalUseCountService principalUseCountService, String[] groups) {
+        for (String group : groups) {
+            try {
+                principalUseCountService.increment(session, Integer.valueOf(group));
+            } catch (NumberFormatException e) {
+                LOG.warn("Unable to parse group id: " + e.getMessage());
+                continue;
+            } catch (OXException e) {
+                // Nothing to do here
+                LOG.debug(e.getMessage(), e);
+            }
+        }
     }
 }
