@@ -566,6 +566,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (!alarmUpdates.getAddedItems().isEmpty()) {
                 for (Alarm alarm : alarmUpdates.getAddedItems()) {
                     alarm.setId(alarmStorage.nextId());
+                    alarm.setLastModified(System.currentTimeMillis());
                 }
                 alarmStorage.insertAlarms(event, userId, alarmUpdates.getAddedItems());
             }
@@ -583,6 +584,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                     Alarm update = itemUpdate.getUpdate();
                     update.setId(itemUpdate.getOriginal().getId());
                     update.setUid(itemUpdate.getOriginal().getUid());
+                    update.setLastModified(System.currentTimeMillis());
                     alarms.add(update);
                 }
                 alarmStorage.updateAlarms(event, userId, alarms);
@@ -838,6 +840,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if (null != importedEvent.getAlarms() && !importedEvent.getAlarms().isEmpty()) {
             for (Alarm alarm : importedEvent.getAlarms()) {
                 alarm.setId(calendarStorage.getAlarmStorage().nextId());
+                alarm.setLastModified(System.currentTimeMillis());
             }
             calendarStorage.getAlarmStorage().insertAlarms(importedEvent, session.getUserId(), importedEvent.getAlarms());
         }
@@ -854,6 +857,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
                 for (Alarm alarm : importedChangeException.getAlarms()) {
                     alarm.setId(calendarStorage.getAlarmStorage().nextId());
+                    alarm.setLastModified(System.currentTimeMillis());
                 }
                 calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, session.getUserId(), importedChangeException.getAlarms());
             }

@@ -99,16 +99,18 @@ public class EventConverter {
     private final ServiceLookup services;
     private final String folderId;
     private final int calendarUserId;
+    private AlarmHelper alarmHelper;
 
-    public EventConverter(ServiceLookup services, Locale locale, int calendarUserId) {
+    public EventConverter(ServiceLookup services, AlarmHelper alarmHelper, Locale locale, int calendarUserId) {
         super();
         this.locale = locale;
         this.services = services;
+        this.alarmHelper = alarmHelper;
         this.calendarUserId = calendarUserId;
         this.folderId = BirthdaysCalendarAccess.FOLDER_ID;
     }
 
-    public Event getSeriesMaster(Contact contact) {
+    public Event getSeriesMaster(Contact contact) throws OXException {
         Event event = new Event();
         event.setFolderId(folderId);
         event.setId(getEventId(contact));
@@ -125,9 +127,7 @@ public class EventConverter {
         calendar.add(Calendar.DATE, 1);
         //        event.setEndDate(new DateTime(null, calendar.getTimeInMillis()).toAllDay());
         event.setEndDate(new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)));
-        if (null != contact.getLastModified()) {
-            event.setTimestamp(contact.getLastModified().getTime());
-        }
+        determineLastModified(contact, event);
         event.setUid(contact.getUid());
         event.setSummary(getSummary(contact));
         event.setDescription(getDescription(contact));
@@ -142,7 +142,17 @@ public class EventConverter {
         return event;
     }
 
-    public List<Event> getSeriesMasters(List<Contact> contacts, Date from, Date until, TimeZone timeZone) {
+    private void determineLastModified(Contact contact, Event event) throws OXException {
+        if (null != contact.getLastModified()) {
+            event.setTimestamp(contact.getLastModified().getTime());
+        }
+        long latestLastModified = alarmHelper.getLatestLastModified(event.getId(), calendarUserId);
+        if (latestLastModified != 0 && latestLastModified > event.getTimestamp()) {
+            event.setTimestamp(latestLastModified);
+        }
+    }
+
+    public List<Event> getSeriesMasters(List<Contact> contacts, Date from, Date until, TimeZone timeZone) throws OXException {
         if (null == contacts || 0 == contacts.size()) {
             return Collections.emptyList();
         }

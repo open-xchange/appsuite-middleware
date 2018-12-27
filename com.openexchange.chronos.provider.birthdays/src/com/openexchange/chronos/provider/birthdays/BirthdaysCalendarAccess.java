@@ -167,7 +167,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         this.services = services;
         this.session = session;
         this.parameters = parameters;
-        this.eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
+        this.eventConverter = new EventConverter(services, getAlarmHelper(), session.getUser().getLocale(), account.getUserId());
     }
 
     /**
@@ -574,17 +574,10 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         
-        int alarmHash = 1;
-        List<Alarm> defaultAlarms = getAlarmHelper().getDefaultAlarms();
-        if (defaultAlarms != null) {
-            for (Alarm a : defaultAlarms) {
-                if (a != null) {
-                    alarmHash = 31 * alarmHash + a.hashCode();
-                }
-            }
-        }
-        
-        return lastModified.getTime() + "-" + foldersHash + "-" + alarmHash;
+        Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestLastModified(null, session.getUserId()));
+        lastModified = lastModified.after(latestAlarmLastModified) ? lastModified : latestAlarmLastModified;
+
+        return lastModified.getTime() + "-" + foldersHash;
     }
 
     protected Date getFrom() {

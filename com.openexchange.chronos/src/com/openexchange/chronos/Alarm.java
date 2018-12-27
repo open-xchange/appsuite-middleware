@@ -74,6 +74,7 @@ public class Alarm {
     private String description;
     private String summary;
     private List<Attendee> attendees;
+    private long lastModified;
 
     private final EnumSet<AlarmField> setFields;
 
@@ -539,6 +540,42 @@ public class Alarm {
         return setFields.contains(AlarmField.ATTENDEES);
     }
 
+    /**
+     * Gets the last modified of the alarm.
+     * 
+     * @return The last modified
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Sets the last modified of the alarm.
+     * 
+     * @param The last modified
+     */
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+        setFields.add(AlarmField.LAST_MODIFIED);
+    }
+
+    /**
+     * Gets a value indicating whether the last modified of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the last modified is set, <code>false</code>, otherwise
+     */
+    public boolean containsLastModified() {
+        return setFields.contains(AlarmField.LAST_MODIFIED);
+    }
+
+    /**
+     * Removes the last modified of the alarm.
+     */
+    public void removeLastModified() {
+        this.lastModified = 0;
+        setFields.remove(AlarmField.LAST_MODIFIED);
+    }
+
     @Override
     public String toString() {
         return "Alarm [action=" + action + ", trigger=" + trigger + "]";
@@ -555,6 +592,7 @@ public class Alarm {
         result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((extendedProperties == null) ? 0 : extendedProperties.hashCode());
         result = prime * result + id;
+        result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
         result = prime * result + ((relatedTo == null) ? 0 : relatedTo.hashCode());
         result = prime * result + ((repeat == null) ? 0 : repeat.hashCode());
         result = prime * result + ((setFields == null) ? 0 : setFields.hashCode());

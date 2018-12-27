@@ -74,6 +74,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.conversion.ConversionService;
@@ -291,6 +292,26 @@ public class AlarmHelper {
         }.executeUpdate();
     }
 
+    /**
+     * Returns the latest last modified of alarms for this user.
+     * can be limited to an event.
+     *
+     * @param eventId The optional event identifier, can be null
+     * @param userId The user identifier
+     * @return
+     * @throws OXException
+     */
+    public long getLatestLastModified(final String eventId, final int userId) throws OXException {
+        return new OSGiCalendarStorageOperation<Long>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected Long call(CalendarStorage storage) throws OXException {
+                AlarmStorage alarmStorage = storage.getAlarmStorage();
+                return eventId == null ? alarmStorage.getLatestLastModified(userId) : alarmStorage.getLatestLastModified(eventId, userId);
+            }
+        }.executeQuery();
+    }
+
     boolean updateAlarms(CalendarStorage storage, Event event, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
@@ -314,6 +335,7 @@ public class AlarmHelper {
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
+                alarm.setLastModified(System.currentTimeMillis());
                 alarms.add(alarm);
                 //                alarms.add(Check.alarmIsValid(alarm));//TODO
             }
@@ -328,6 +350,7 @@ public class AlarmHelper {
             for (Alarm alarm : addedItems) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
+                newAlarm.setLastModified(System.currentTimeMillis());
                 if (false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
@@ -357,6 +380,7 @@ public class AlarmHelper {
             Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
             newAlarm.setId(storage.getAlarmStorage().nextId());
             newAlarm.setUid(UUID.randomUUID().toString());
+            newAlarm.setLastModified(System.currentTimeMillis());
             AlarmUtils.addExtendedProperty(newAlarm, new ExtendedProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"), true);
             newAlarms.add(newAlarm);
         }

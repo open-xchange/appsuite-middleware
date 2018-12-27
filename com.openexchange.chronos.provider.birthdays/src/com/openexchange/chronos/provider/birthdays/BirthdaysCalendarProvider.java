@@ -344,7 +344,8 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     @Override
     public Event getEventByAlarm(Context context, CalendarAccount account, String eventId, RecurrenceId recurrenceId) throws OXException {
         ServerSession session = ServerSessionAdapter.valueOf(account.getUserId(), context.getContextId());
-        EventConverter eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
+        AlarmHelper alarmHelper = new AlarmHelper(services, context, account);
+        EventConverter eventConverter = new EventConverter(services, alarmHelper, session.getUser().getLocale(), account.getUserId());
         int[] decodeEventId = eventConverter.decodeEventId(eventId);
         ContactService contactService = Tools.requireService(ContactService.class, services);
         Contact contact = contactService.getContact(session, String.valueOf(decodeEventId[0]), String.valueOf(decodeEventId[1]));
@@ -355,7 +356,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
             event = eventConverter.getSeriesMaster(contact);
         }
 
-        return new AlarmHelper(services, context, account).applyAlarms(event);
+        return alarmHelper.applyAlarms(event);
     }
 
     @Override

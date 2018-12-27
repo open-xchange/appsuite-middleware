@@ -853,4 +853,14 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     public Alarm loadAlarm(int alarmId) throws OXException {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public long getLatestLastModified(int userId) {
+        return 0;
+    }
+
+    @Override
+    public long getLatestLastModified(String eventId, int userId) {
+        return 0;
+    }
 }

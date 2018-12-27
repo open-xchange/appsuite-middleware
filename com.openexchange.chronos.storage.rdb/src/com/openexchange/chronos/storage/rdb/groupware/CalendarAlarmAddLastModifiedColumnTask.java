@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,53 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.storage.rdb.groupware;
+
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AlarmField}
+ * {@link CalendarAlarmAddLastModifiedColumnTask}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.2
  */
-public enum AlarmField {
+public class CalendarAlarmAddLastModifiedColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * The internal identifier of the alarm.
-     */
-    ID,
-    /**
-     * The universal identifier of the alarm.
-     */
-    UID,
-    /**
-     * The relationship between this and other alarms.
-     */
-    RELATED_TO,
-    /**
-     * The time when the alarm was last sent or acknowledged.
-     */
-    ACKNOWLEDGED,
-    /**
-     * The type of action invoked when the alarm is triggered.
-     */
-    ACTION,
-    /**
-     * The additional repetitions of the alarm's trigger.
-     */
-    REPEAT,
-    /**
-     * The moment the alarm will trigger.
-     */
-    TRIGGER,
-    /**
-     * Extended properties of the alarm.
-     */
-    EXTENDED_PROPERTIES,
-    /**
-     * A list of attachments. Can be used as the sound source for the audio action or as attachments for the mail action.
-     */
-    ATTACHMENTS,
-    /**
-     * A summary which can be used as the mail subject for the mail action.
-     */
-    SUMMARY,
-    /**
-     * A description which can either be used to be display for the display action or used as a text for the mail action.
-     */
-    DESCRIPTION,
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask" };
+    }
 
-    /**
-     * A list of mail addresses for the mail action.
-     */
-    ATTENDEES,
-
-    /**
-     * The last modified timestamp of this alarm.
-     */
-    LAST_MODIFIED
-
-    ;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        int rollback = 0;
+        try {
+            connection.setAutoCommit(false);
+            rollback = 1;
+            Tools.checkAndAddColumns(connection, "calendar_alarm", new Column("lastModified", "bigint(20) NOT NULL DEFAULT 0"));
+            connection.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
+            }
+        }
+    }
 }

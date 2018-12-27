@@ -175,4 +175,14 @@ public class RdbAlarmStorage implements AlarmStorage {
         return delegate.loadAlarm(alarmId);
     }
 
+    @Override
+    public long getLatestLastModified(int userId) throws OXException {
+        return delegate.getLatestLastModified(userId);
+    }
+
+    @Override
+    public long getLatestLastModified(String eventId, int userId) throws OXException {
+        return delegate.getLatestLastModified(eventId, userId);
+    }
+
 }

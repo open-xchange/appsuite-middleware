@@ -380,6 +380,7 @@ class SingleMessageDeliveryTask implements Runnable {
         for (Alarm tmpAlarm : alarms) {
             if (tmpAlarm.getId() == alarm.getId()) {
                 tmpAlarm.setAcknowledged(new Date());
+                tmpAlarm.setLastModified(System.currentTimeMillis());
                 break;
             }
         }

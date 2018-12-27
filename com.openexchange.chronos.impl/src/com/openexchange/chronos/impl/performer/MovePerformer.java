@@ -335,6 +335,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                     return true;
                 }
             };
+            originalAlarms.stream().forEach(a -> a.setLastModified(System.currentTimeMillis()));
             storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
         }
     }

@@ -193,7 +193,7 @@ public class ContactEventHandler implements EventHandler {
     }
 
     private com.openexchange.chronos.Event loadEvent(Contact contact, Context context, CalendarAccount account) throws OXException {
-        com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
+        com.openexchange.chronos.Event event = getEventConverter(context, account).getSeriesMaster(contact);
         return getAlarmHelper(context, account).applyAlarms(event);
     }
 
@@ -221,7 +221,7 @@ public class ContactEventHandler implements EventHandler {
     }
 
     private void deleteAlarms(Context context, CalendarAccount account, Contact contact) throws OXException {
-        String eventId = getEventConverter(account).getEventId(contact);
+        String eventId = getEventConverter(context, account).getEventId(contact);
         getAlarmHelper(context, account).deleteAlarms(eventId);
     }
 
@@ -264,7 +264,7 @@ public class ContactEventHandler implements EventHandler {
     private void insertDefaultAlarms(Context context, CalendarAccount account, Contact contact) throws OXException {
         AlarmHelper alarmHelper = getAlarmHelper(context, account);
         if (alarmHelper.hasDefaultAlarms()) {
-            alarmHelper.insertDefaultAlarms(getEventConverter(account).getSeriesMaster(contact));
+            alarmHelper.insertDefaultAlarms(getEventConverter(context, account).getSeriesMaster(contact));
         }
     }
 
@@ -272,8 +272,8 @@ public class ContactEventHandler implements EventHandler {
         return new AlarmHelper(services, context, account);
     }
 
-    private EventConverter getEventConverter(CalendarAccount account) {
-        return new EventConverter(services, Locale.US, account.getUserId());
+    private EventConverter getEventConverter(Context context, CalendarAccount account) {
+        return new EventConverter(services, getAlarmHelper(context, account), Locale.US, account.getUserId());
     }
 
     private List<CalendarAccount> getBirthdaysCalendarAccounts(Context context, Collection<Integer> affectedUserIds) throws OXException {

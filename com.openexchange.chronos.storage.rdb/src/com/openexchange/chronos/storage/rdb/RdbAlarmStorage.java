@@ -364,6 +364,53 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return 0 < updated;
     }
 
+    @Override
+    public long getLatestLastModified(int userId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(lastModified) FROM calendar_alarm WHERE cid = ? AND user = ?")) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public long getLatestLastModified(String eventId, int userId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(lastModified) FROM calendar_alarm WHERE cid = ? AND event = ? AND user = ?")) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setString(parameterIndex++, eventId);
+                stmt.setInt(parameterIndex++, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
