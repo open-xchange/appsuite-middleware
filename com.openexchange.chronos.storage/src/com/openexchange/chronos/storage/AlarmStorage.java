@@ -226,4 +226,14 @@ public interface AlarmStorage {
      * @throws OXException 
      */
     long getLatestTimestamp(String eventId, int userId) throws OXException;
+
+    /**
+     * Returns the latest timestamps of any alarm for the given user for the given events.
+     *
+     * @param eventId The event identifier
+     * @param userId The user identifier
+     * @return The latest timestamps of the events
+     * @throws OXException 
+     */
+    Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException;
 }

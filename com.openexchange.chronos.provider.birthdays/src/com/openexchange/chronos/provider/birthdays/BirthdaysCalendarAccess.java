@@ -64,14 +64,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
@@ -167,7 +170,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         this.services = services;
         this.session = session;
         this.parameters = parameters;
-        this.eventConverter = new EventConverter(services, getAlarmHelper(), session.getUser().getLocale(), account.getUserId());
+        this.eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
     }
 
     /**
@@ -327,7 +330,17 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     private List<Event> postProcess(List<Event> events, boolean master) throws OXException {
         if (contains(getFields(), EventField.ALARMS)) {
             events = getAlarmHelper().applyAlarms(events);
+            for (Event event : events) {
+                for (Alarm alarm : event.getAlarms()) {
+                    if (alarm.getTimestamp() > event.getTimestamp()) {
+                        event.setTimestamp(alarm.getTimestamp());
+                    }
+                }
+            }
+        } else {
+            applyTimestampFromAlarms(events);
         }
+
         TimeZone timeZone = getTimeZone();
         Date from = getFrom();
         Date until = getUntil();
@@ -340,6 +353,28 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         }
         CalendarUtils.sortEvents(events, new SearchOptions(parameters).getSortOrders(), timeZone);
         return events;
+    }
+
+    private void applyTimestampFromAlarms(List<Event> events) throws OXException {
+        List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
+        Map<String, Long> timestamps = getAlarmHelper().getLatestTimestamps(eventIds, session.getUserId());
+        ListIterator<Event> iterator = events.listIterator();
+        while (iterator.hasNext()) {
+            Event event = iterator.next();
+            Long timestamp = timestamps.get(event.getId());
+            if (timestamp > event.getTimestamp()) {
+                iterator.set(new DelegatingEvent(event) {
+                    @Override
+                    public long getTimestamp() {
+                        return timestamp;
+                    }
+                    @Override
+                    public boolean containsTimestamp() {
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
     private Event postProcess(Event event) throws OXException {
@@ -574,7 +609,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         
-        Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestTimestamp(null, session.getUserId()));
+        Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestTimestamp(session.getUserId()));
         lastModified = lastModified.after(latestAlarmLastModified) ? lastModified : latestAlarmLastModified;
 
         return lastModified.getTime() + "-" + foldersHash;

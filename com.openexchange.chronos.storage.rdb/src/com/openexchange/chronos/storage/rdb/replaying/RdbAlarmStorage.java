@@ -185,4 +185,9 @@ public class RdbAlarmStorage implements AlarmStorage {
         return delegate.getLatestTimestamp(eventId, userId);
     }
 
+    @Override
+    public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
+        return delegate.getLatestTimestamp(eventIds, userId);
+    }
+
 }

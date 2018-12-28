@@ -369,10 +369,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(lastModified) FROM calendar_alarm WHERE cid = ? AND user = ?")) {
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND user = ? AND account = ?")) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, userId);
+                stmt.setInt(parameterIndex++, accountId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getLong(1);
@@ -392,11 +393,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(lastModified) FROM calendar_alarm WHERE cid = ? AND event = ? AND user = ?")) {
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND event = ? AND user = ? AND account = ?")) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setString(parameterIndex++, eventId);
                 stmt.setInt(parameterIndex++, userId);
+                stmt.setInt(parameterIndex++, accountId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getLong(1);
@@ -404,6 +406,36 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 }
             }
             return 0;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            StringBuilder sql = new StringBuilder("SELECT event, MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND user = ? AND account = ? AND event");
+            sql.append(getPlaceholders(eventIds.size())).append(" GROUP BY event;");
+            try (PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, userId);
+                stmt.setInt(parameterIndex++, accountId);
+                for (String eventId : eventIds) {
+                    stmt.setString(parameterIndex++, eventId);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    Map<String, Long> retval = new HashMap<>();
+                    while (rs.next()) {
+                        retval.put(rs.getString("event"), rs.getLong("MAX(timestamp)"));
+                    }
+                    return retval;
+                }
+            }
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {

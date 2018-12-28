@@ -296,18 +296,36 @@ public class AlarmHelper {
      * Returns the latest timestamp of alarms for this user.
      * Can be limited to an event.
      *
-     * @param eventId The optional event identifier, can be null
+     * @param eventIds The optional event identifiers, can be null
      * @param userId The user identifier
      * @return The latest timestamp
      * @throws OXException
      */
-    public long getLatestTimestamp(final String eventId, final int userId) throws OXException {
+    public Map<String, Long> getLatestTimestamps(final List<String> eventIds, final int userId) throws OXException {
+        return new OSGiCalendarStorageOperation<Map<String, Long>>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected Map<String, Long> call(CalendarStorage storage) throws OXException {
+                AlarmStorage alarmStorage = storage.getAlarmStorage();
+                return eventIds == null || eventIds.isEmpty() ? Collections.emptyMap() : alarmStorage.getLatestTimestamp(eventIds, userId);
+            }
+        }.executeQuery();
+    }
+
+    /**
+     * Returns the latest timestamp of alarms for this user.
+     *
+     * @param userId The user identifier
+     * @return The latest timestamp
+     * @throws OXException
+     */
+    public long getLatestTimestamp(final int userId) throws OXException {
         return new OSGiCalendarStorageOperation<Long>(services, context.getContextId(), account.getAccountId()) {
 
             @Override
             protected Long call(CalendarStorage storage) throws OXException {
                 AlarmStorage alarmStorage = storage.getAlarmStorage();
-                return eventId == null ? alarmStorage.getLatestTimestamp(userId) : alarmStorage.getLatestTimestamp(eventId, userId);
+                return alarmStorage.getLatestTimestamp(userId);
             }
         }.executeQuery();
     }

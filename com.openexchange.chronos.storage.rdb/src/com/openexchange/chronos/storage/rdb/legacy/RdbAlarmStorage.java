@@ -863,4 +863,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     public long getLatestTimestamp(String eventId, int userId) {
         return 0;
     }
+
+    @Override
+    public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
+        return Collections.emptyMap();
+    }
 }
