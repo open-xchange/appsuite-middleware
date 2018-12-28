@@ -49,11 +49,23 @@
 
 package com.openexchange.principleusecount.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.principalusecount.PrincipalUseCountService;
+import com.openexchange.principleusecount.impl.osgi.Services;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link PrincipalUseCountServiceImpl}
@@ -99,6 +111,49 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
             throw PrincipalUseCountExceptionCode.UNKNOWN.create(e, e.getMessage());
         }
 
+    }
+
+
+    private static final String SELECT_USECOUNT = "SELECT principal, value FROM principalUseCount WHERE cid=? AND user=? AND principal IN (";
+
+    @Override
+    public Map<Integer, Integer> get(Session session, Integer... principals) throws OXException {
+        if (principals == null || principals.length == 0) {
+            return Collections.emptyMap();
+        }
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        if (null == dbService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
+        }
+        String sql = DBUtils.getIN(SELECT_USECOUNT, principals.length);
+
+        Connection con = dbService.getReadOnly(session.getContextId());
+        ResultSet rs = null;
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            int index = 1;
+            stmt.setInt(index++, session.getContextId());
+            stmt.setInt(index++, session.getUserId());
+            for (Integer id : principals) {
+                stmt.setInt(index++, id);
+            }
+            rs = stmt.executeQuery();
+            Map<Integer, Integer> result = new HashMap<>();
+            // Initialize result map with 0 values
+            for (Integer id : principals) {
+                result.put(id, 0);
+            }
+            while (rs.next()) {
+                result.put(rs.getInt("principal"), rs.getInt("value"));
+            }
+            return result;
+        } catch (SQLException e) {
+            throw PrincipalUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs);
+            if (con != null) {
+                dbService.backReadOnly(session.getContextId(), con);
+            }
+        }
     }
 
 }

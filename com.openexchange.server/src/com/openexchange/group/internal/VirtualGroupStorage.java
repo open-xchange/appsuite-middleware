@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.group.UseCountAwareGroupStorage;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -68,12 +67,12 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class VirtualGroupStorage implements UseCountAwareGroupStorage {
+public final class VirtualGroupStorage implements GroupStorage {
 
     /**
      * Underlying group storage handling groups except group with identifier 0.
      */
-    private final UseCountAwareGroupStorage delegate;
+    private final GroupStorage delegate;
 
     /**
      * Default constructor.
@@ -81,7 +80,7 @@ public final class VirtualGroupStorage implements UseCountAwareGroupStorage {
      * @param ctx Context.
      * @param delegate underlying group storage.
      */
-    public VirtualGroupStorage(final UseCountAwareGroupStorage delegate) {
+    public VirtualGroupStorage(final GroupStorage delegate) {
         super();
         this.delegate = delegate;
     }
@@ -239,23 +238,4 @@ public final class VirtualGroupStorage implements UseCountAwareGroupStorage {
         s.append('$');
         return (s.toString());
     }
-
-    @Override
-    public Group[] searchGroups(String pattern, boolean loadMembers, Context ctx, int userId) throws OXException {
-        final Pattern pat = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
-        final Group zero = GroupTools.getGroupZero(ctx);
-        final Matcher zeroMatch = pat.matcher(zero.getDisplayName());
-        final Group guests = GroupTools.getGuestGroup(ctx);
-        final Matcher guestsMatch = pat.matcher(guests.getDisplayName());
-        final List<Group> groups = new ArrayList<Group>();
-        groups.addAll(Arrays.asList(delegate.searchGroups(pattern, loadMembers, ctx, userId)));
-        if (zeroMatch.find()) {
-            groups.add(zero);
-        }
-        if (guestsMatch.find()) {
-            groups.add(guests);
-        }
-        return groups.toArray(new Group[groups.size()]);
-    }
-
 }

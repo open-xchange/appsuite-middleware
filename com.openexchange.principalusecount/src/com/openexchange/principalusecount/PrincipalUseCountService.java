@@ -49,6 +49,7 @@
 
 package com.openexchange.principalusecount;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -87,5 +88,15 @@ public interface PrincipalUseCountService {
      * @throws OXException
      */
     public void set(Session session, int principal, int value) throws OXException;
+
+    /**
+     * Returns a map of principal ids mapped to their use counts.
+     *
+     * @param session The user session
+     * @param principals The principal ids
+     * @return A map of principal ids mapped to their use counts
+     * @throws OXException
+     */
+    public Map<Integer, Integer> get(Session session, Integer... principals) throws OXException;
 
 }

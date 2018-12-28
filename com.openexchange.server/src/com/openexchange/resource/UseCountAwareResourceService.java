@@ -50,7 +50,7 @@
 package com.openexchange.resource;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 
 /**
  * {@link UseCountAwareResourceService}
@@ -61,25 +61,23 @@ import com.openexchange.groupware.contexts.Context;
 public interface UseCountAwareResourceService extends ResourceService {
 
     /**
-     * Searches all resources which identifier matches the given pattern and sorts the results according to their usecount.
+     * Searches all resources which identifier matches the given pattern and sorts the results according to their use count.
      *
+     * @param session The user session
      * @param pattern The identifier of all returned resources will match this pattern.
-     * @param context The context.
-     * @param userId The user id of the current user
-     * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
+     * @return An array of found resources
      * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public Resource[] searchResources(String pattern, Context context, int userId) throws OXException;
+    public Resource[] searchResources(Session session, String pattern) throws OXException;
 
     /**
-     * Searches all resources which mail address matches the given pattern and sorts the results according to their usecount.
+     * Searches all resources which mail address matches the given pattern and sorts the results according to their use count.
      *
+     * @param session The user session
      * @param pattern The identifier of all returned resources will match this pattern.
-     * @param context The context.
-     * @param userId The user id of the current user
-     * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
+     * @return An array of found resources
      * @throws OXException If an exception occurs while reading from the underlying persistent storage.
      */
-    public Resource[] searchResourcesByMail(String pattern, Context context, int userId) throws OXException;
+    public Resource[] searchResourcesByMail(Session session, String pattern) throws OXException;
 
 }

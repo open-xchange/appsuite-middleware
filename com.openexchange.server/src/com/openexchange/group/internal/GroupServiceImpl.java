@@ -49,15 +49,21 @@
 
 package com.openexchange.group.internal;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.UseCountAwareGroupService;
-import com.openexchange.group.UseCountAwareGroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  *
@@ -107,12 +113,76 @@ public final class GroupServiceImpl implements UseCountAwareGroupService {
     }
 
     @Override
-    public Group[] searchGroups(Context context, String pattern, boolean loadMembers, int userId) throws OXException {
-        GroupStorage groupStorage = ServerServiceRegistry.getServize(GroupStorage.class, true);
-        if(groupStorage instanceof UseCountAwareGroupStorage) {
-            return ((UseCountAwareGroupStorage)groupStorage).searchGroups(pattern, loadMembers, context, userId);
+    public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException {
+        Group[] groups = ServerServiceRegistry.getServize(GroupStorage.class, true).searchGroups(pattern, loadMembers, ServerSessionAdapter.valueOf(session).getContext());
+        return sortGroupsByUseCount(session, groups);
+    }
+
+    @Override
+    public Group[] getGroups(Session session, boolean loadMembers) throws OXException {
+        Group[] groups = ServerServiceRegistry.getServize(GroupStorage.class, true).getGroups(loadMembers, ServerSessionAdapter.valueOf(session).getContext());
+        return sortGroupsByUseCount(session, groups);
+    }
+
+    private Group[] sortGroupsByUseCount(Session session, Group[] groups) throws OXException {
+        Integer[] principalIds = new Integer[groups.length];
+        int x = 0;
+        for (Group group : groups) {
+            principalIds[x++] = group.getIdentifier();
         }
-        throw new UnsupportedOperationException();
+
+        Map<Integer, Integer> useCounts = ServerServiceRegistry.getServize(PrincipalUseCountService.class, true).get(session, principalIds);
+        List<GroupAndUseCount> listToSort = new ArrayList<>(useCounts.size());
+        x = 0;
+        for (Group group : groups) {
+            listToSort.add(new GroupAndUseCount(group, useCounts.get(group.getIdentifier())));
+        }
+        Collections.sort(listToSort);
+
+        Group[] result = new Group[listToSort.size()];
+        x = 0;
+        for (GroupAndUseCount tmp : listToSort) {
+            result[x++] = tmp.getGroup();
+        }
+        return result;
+    }
+
+    private class GroupAndUseCount implements Comparable<GroupAndUseCount> {
+
+        private final Group group;
+        private final Integer usecount;
+
+        /**
+         * Initializes a new {@link GroupServiceImpl.GroupAndUseCount}.
+         */
+        public GroupAndUseCount(Group group, Integer usecount) {
+            this.group = group;
+            this.usecount = usecount;
+        }
+
+        /**
+         * Gets the group
+         *
+         * @return The group
+         */
+        public Group getGroup() {
+            return group;
+        }
+
+        /**
+         * Gets the usecount
+         *
+         * @return The usecount
+         */
+        public Integer getUsecount() {
+            return usecount;
+        }
+
+        @Override
+        public int compareTo(GroupAndUseCount o) {
+            return -this.usecount.compareTo(o.getUsecount());
+        }
+
     }
 
     @Override

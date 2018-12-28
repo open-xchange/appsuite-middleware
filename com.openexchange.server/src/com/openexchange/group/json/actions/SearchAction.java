@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.UseCountAwareGroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -100,10 +101,19 @@ public final class SearchAction extends AbstractGroupAction {
 
             String searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
             ServerSession session = req.getSession();
-            if ("*".equals(searchpattern)) {
-                groups = ServerServiceRegistry.getServize(GroupService.class, true).listAllGroups(session.getContext(), true);
+            GroupService servize = ServerServiceRegistry.getServize(GroupService.class, true);
+            if (servize instanceof UseCountAwareGroupService) {
+                if ("*".equals(searchpattern)) {
+                    groups = ((UseCountAwareGroupService) servize).getGroups(session, true);
+                } else {
+                    groups = ((UseCountAwareGroupService) servize).searchGroups(session, searchpattern, true);
+                }
             } else {
-                groups = ServerServiceRegistry.getServize(GroupService.class, true).search(session.getContext(), searchpattern, true);
+                if ("*".equals(searchpattern)) {
+                    groups = servize.getGroups(session.getContext(), true);
+                } else {
+                    groups = servize.search(session.getContext(), searchpattern, true);
+                }
             }
         }
 

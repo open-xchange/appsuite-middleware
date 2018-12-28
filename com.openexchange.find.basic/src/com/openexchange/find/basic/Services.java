@@ -58,11 +58,9 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.UseCountAwareGroupService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.resource.UseCountAwareResourceService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -123,14 +121,6 @@ public class Services {
 
     public static FileStorageServiceRegistry getFileStorageServiceRegistry() throws OXException {
         return requireService(FileStorageServiceRegistry.class);
-    }
-
-    public static UseCountAwareResourceService getResourceService() throws OXException {
-        return requireService(UseCountAwareResourceService.class);
-    }
-    
-    public static UseCountAwareGroupService getGroupService() throws OXException {
-        return requireService(UseCountAwareGroupService.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {

@@ -58,6 +58,8 @@ import com.openexchange.resource.UseCountAwareResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.UsecountAwareResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ResourceServiceImpl}
@@ -112,19 +114,19 @@ public final class ResourceServiceImpl implements UseCountAwareResourceService {
     }
 
     @Override
-    public Resource[] searchResources(String pattern, Context context, int userId) throws OXException {
+    public Resource[] searchResources(Session session, String pattern) throws OXException {
         ResourceStorage servize = ServerServiceRegistry.getServize(ResourceStorage.class, true);
         if (servize instanceof UsecountAwareResourceStorage) {
-            return ((UsecountAwareResourceStorage) servize).searchResources(pattern, context, userId);
+            return ((UsecountAwareResourceStorage) servize).searchResources(pattern, ServerSessionAdapter.valueOf(session).getContext(), session.getUserId());
         }
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Resource[] searchResourcesByMail(String pattern, Context context, int userId) throws OXException {
+    public Resource[] searchResourcesByMail(Session session, String pattern) throws OXException {
         ResourceStorage servize = ServerServiceRegistry.getServize(ResourceStorage.class, true);
         if (servize instanceof UsecountAwareResourceStorage) {
-            return ((UsecountAwareResourceStorage) servize).searchResourcesByMail(pattern, context, userId);
+            return ((UsecountAwareResourceStorage) servize).searchResourcesByMail(pattern, ServerSessionAdapter.valueOf(session).getContext(), session.getUserId());
         }
         throw new UnsupportedOperationException();
     }

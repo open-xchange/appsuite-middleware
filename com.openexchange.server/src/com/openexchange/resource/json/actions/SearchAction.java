@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.UseCountAwareResourceService;
 import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -98,7 +99,12 @@ public final class SearchAction extends AbstractResourceAction {
         }
 
         String searchpattern = jData.getString(SearchFields.PATTERN);
-        com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, req.getSession().getContext());
+        Resource[] resources = null;
+        if(resourceService instanceof UseCountAwareResourceService) {
+            resources = ((UseCountAwareResourceService) resourceService).searchResources(req.getSession(), searchpattern);
+        } else {
+            resources = resourceService.searchResources(searchpattern, req.getSession().getContext());
+        }
         Date timestamp;
         List<Resource> list = new LinkedList<Resource>();
 

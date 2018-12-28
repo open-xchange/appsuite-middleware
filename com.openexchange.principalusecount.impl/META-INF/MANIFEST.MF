@@ -16,5 +16,6 @@ Import-Package: com.openexchange.database,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.threadpool,
+ com.openexchange.tools.sql,
  org.osgi.framework,
  org.slf4j;version="1.7.25"
