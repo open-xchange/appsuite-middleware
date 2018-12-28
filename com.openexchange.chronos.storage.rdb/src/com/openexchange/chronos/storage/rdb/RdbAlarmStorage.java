@@ -365,7 +365,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public long getLatestLastModified(int userId) throws OXException {
+    public long getLatestTimestamp(int userId) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
@@ -388,7 +388,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public long getLatestLastModified(String eventId, int userId) throws OXException {
+    public long getLatestTimestamp(String eventId, int userId) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);

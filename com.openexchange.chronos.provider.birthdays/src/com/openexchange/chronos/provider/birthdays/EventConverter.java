@@ -146,7 +146,7 @@ public class EventConverter {
         if (null != contact.getLastModified()) {
             event.setTimestamp(contact.getLastModified().getTime());
         }
-        long latestLastModified = alarmHelper.getLatestLastModified(event.getId(), calendarUserId);
+        long latestLastModified = alarmHelper.getLatestTimestamp(event.getId(), calendarUserId);
         if (latestLastModified != 0 && latestLastModified > event.getTimestamp()) {
             event.setTimestamp(latestLastModified);
         }

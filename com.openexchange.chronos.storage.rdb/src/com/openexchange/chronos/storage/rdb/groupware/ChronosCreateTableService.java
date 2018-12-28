@@ -262,6 +262,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "triggerRelated VARCHAR(32) DEFAULT NULL," +
                 "triggerDuration VARCHAR(32) DEFAULT NULL," +
                 "triggerDate BIGINT(20) DEFAULT NULL," +
+                "timestamp BIGINT(20) NOT NULL DEFAULT 0," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY event_user (cid,account,event,user)" +

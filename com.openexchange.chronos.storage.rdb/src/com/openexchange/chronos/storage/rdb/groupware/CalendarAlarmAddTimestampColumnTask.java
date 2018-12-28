@@ -61,12 +61,12 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link CalendarAlarmAddLastModifiedColumnTask}
+ * {@link CalendarAlarmAddTimestampColumnTask}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.2
  */
-public class CalendarAlarmAddLastModifiedColumnTask extends UpdateTaskAdapter {
+public class CalendarAlarmAddTimestampColumnTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
@@ -80,7 +80,7 @@ public class CalendarAlarmAddLastModifiedColumnTask extends UpdateTaskAdapter {
         try {
             connection.setAutoCommit(false);
             rollback = 1;
-            Tools.checkAndAddColumns(connection, "calendar_alarm", new Column("lastModified", "bigint(20) NOT NULL DEFAULT 0"));
+            Tools.checkAndAddColumns(connection, "calendar_alarm", new Column("timestamp", "bigint(20) NOT NULL DEFAULT 0"));
             connection.commit();
             rollback = 2;
         } catch (SQLException e) {

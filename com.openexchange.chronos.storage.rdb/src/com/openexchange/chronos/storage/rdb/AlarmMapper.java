@@ -139,26 +139,26 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
                 alarm.removeId();
             }
         });
-        mappings.put(AlarmField.LAST_MODIFIED, new BigIntMapping<Alarm>("lastModified", "Last Modified") {
+        mappings.put(AlarmField.TIMESTAMP, new BigIntMapping<Alarm>("timestamp", "Timestamp") {
 
             @Override
             public void set(Alarm alarm, Long value) {
-                alarm.setLastModified(null == value ? 0L : l(value));
+                alarm.setTimestamp(null == value ? 0L : l(value));
             }
 
             @Override
             public boolean isSet(Alarm alarm) {
-                return alarm.containsLastModified();
+                return alarm.containsTimestamp();
             }
 
             @Override
             public Long get(Alarm alarm) {
-                return L(alarm.getLastModified());
+                return L(alarm.getTimestamp());
             }
 
             @Override
             public void remove(Alarm alarm) {
-                alarm.removeLastModified();
+                alarm.removeTimestamp();
             }
         });
         mappings.put(AlarmField.UID, new VarCharMapping<Alarm>("uid", "UID") {

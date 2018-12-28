@@ -855,12 +855,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public long getLatestLastModified(int userId) {
+    public long getLatestTimestamp(int userId) {
         return 0;
     }
 
     @Override
-    public long getLatestLastModified(String eventId, int userId) {
+    public long getLatestTimestamp(String eventId, int userId) {
         return 0;
     }
 }

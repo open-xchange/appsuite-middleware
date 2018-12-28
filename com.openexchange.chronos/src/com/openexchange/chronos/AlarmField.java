@@ -108,9 +108,9 @@ public enum AlarmField {
     ATTENDEES,
 
     /**
-     * The last modified timestamp of this alarm.
+     * The timestamp of this alarm.
      */
-    LAST_MODIFIED
+    TIMESTAMP
 
     ;
 }

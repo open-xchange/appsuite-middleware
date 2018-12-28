@@ -450,7 +450,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             for (Alarm alarm : entry.getValue()) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
-                newAlarm.setLastModified(System.currentTimeMillis());
+                newAlarm.setTimestamp(System.currentTimeMillis());
                 if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
@@ -519,7 +519,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
-                alarm.setLastModified(System.currentTimeMillis());
+                alarm.setTimestamp(System.currentTimeMillis());
                 alarms.add(Check.alarmIsValid(alarm, itemUpdate.getUpdatedFields().toArray(new AlarmField[itemUpdate.getUpdatedFields().size()])));
                 toDelete.add(alarm.getId());
                 toAdd.add(alarm.getId());

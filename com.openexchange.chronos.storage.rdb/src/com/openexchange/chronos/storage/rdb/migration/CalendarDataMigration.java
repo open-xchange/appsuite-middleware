@@ -480,7 +480,7 @@ public class CalendarDataMigration {
             for (Entry<Integer, List<Alarm>> alarmsPerUser : entry.getValue().entrySet()) {
                 for (Alarm alarm : alarmsPerUser.getValue()) {
                     alarm.setId(destinationStorage.nextId());
-                    alarm.setLastModified(System.currentTimeMillis());
+                    alarm.setTimestamp(System.currentTimeMillis());
                     if (false == alarm.containsUid() || null == alarm.getUid()) {
                         alarm.setUid(UUID.randomUUID().toString());
                     }

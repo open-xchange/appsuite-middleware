@@ -209,21 +209,21 @@ public interface AlarmStorage {
     Alarm loadAlarm(int alarmId) throws OXException;
 
     /**
-     * Returns the latest last modified of any alarm for the given user.
+     * Returns the latest timestamp of any alarm for the given user.
      *
      * @param userId The user identifier
-     * @return The latest last modified
+     * @return The latest timestamp
      * @throws OXException 
      */
-    long getLatestLastModified(int userId) throws OXException;
+    long getLatestTimestamp(int userId) throws OXException;
 
     /**
-     * Returns the latest last modified of any alarm for the given user for the given event.
+     * Returns the latest timestamp of any alarm for the given user for the given event.
      *
      * @param eventId The event identifier
      * @param userId The user identifier
-     * @return The latest last modified
+     * @return The latest timestamp
      * @throws OXException 
      */
-    long getLatestLastModified(String eventId, int userId) throws OXException;
+    long getLatestTimestamp(String eventId, int userId) throws OXException;
 }

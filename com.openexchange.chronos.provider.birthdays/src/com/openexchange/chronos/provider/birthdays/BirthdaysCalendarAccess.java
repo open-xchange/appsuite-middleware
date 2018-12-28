@@ -574,7 +574,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         
-        Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestLastModified(null, session.getUserId()));
+        Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestTimestamp(null, session.getUserId()));
         lastModified = lastModified.after(latestAlarmLastModified) ? lastModified : latestAlarmLastModified;
 
         return lastModified.getTime() + "-" + foldersHash;

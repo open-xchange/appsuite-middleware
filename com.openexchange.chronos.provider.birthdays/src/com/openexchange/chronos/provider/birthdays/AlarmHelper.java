@@ -293,21 +293,21 @@ public class AlarmHelper {
     }
 
     /**
-     * Returns the latest last modified of alarms for this user.
-     * can be limited to an event.
+     * Returns the latest timestamp of alarms for this user.
+     * Can be limited to an event.
      *
      * @param eventId The optional event identifier, can be null
      * @param userId The user identifier
-     * @return
+     * @return The latest timestamp
      * @throws OXException
      */
-    public long getLatestLastModified(final String eventId, final int userId) throws OXException {
+    public long getLatestTimestamp(final String eventId, final int userId) throws OXException {
         return new OSGiCalendarStorageOperation<Long>(services, context.getContextId(), account.getAccountId()) {
 
             @Override
             protected Long call(CalendarStorage storage) throws OXException {
                 AlarmStorage alarmStorage = storage.getAlarmStorage();
-                return eventId == null ? alarmStorage.getLatestLastModified(userId) : alarmStorage.getLatestLastModified(eventId, userId);
+                return eventId == null ? alarmStorage.getLatestTimestamp(userId) : alarmStorage.getLatestTimestamp(eventId, userId);
             }
         }.executeQuery();
     }
@@ -335,7 +335,7 @@ public class AlarmHelper {
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
-                alarm.setLastModified(System.currentTimeMillis());
+                alarm.setTimestamp(System.currentTimeMillis());
                 alarms.add(alarm);
                 //                alarms.add(Check.alarmIsValid(alarm));//TODO
             }
@@ -350,7 +350,7 @@ public class AlarmHelper {
             for (Alarm alarm : addedItems) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
-                newAlarm.setLastModified(System.currentTimeMillis());
+                newAlarm.setTimestamp(System.currentTimeMillis());
                 if (false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
@@ -380,7 +380,7 @@ public class AlarmHelper {
             Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
             newAlarm.setId(storage.getAlarmStorage().nextId());
             newAlarm.setUid(UUID.randomUUID().toString());
-            newAlarm.setLastModified(System.currentTimeMillis());
+            newAlarm.setTimestamp(System.currentTimeMillis());
             AlarmUtils.addExtendedProperty(newAlarm, new ExtendedProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"), true);
             newAlarms.add(newAlarm);
         }
