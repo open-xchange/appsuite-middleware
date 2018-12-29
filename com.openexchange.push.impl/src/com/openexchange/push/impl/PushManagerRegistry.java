@@ -587,9 +587,7 @@ public final class PushManagerRegistry implements PushListenerService {
                     LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                 }
             }
-        }
 
-        if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
             PushUser pushUser = new PushUser(userId, contextId);
             for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
                 try {
