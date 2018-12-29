@@ -109,21 +109,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public CalendarSettings getSettings() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-        ExtendedProperties extendedProperties = getExtendedProperties();
-        if (CachingCalendarUtils.canBeUsedForSync(BasicSchedJoulesCalendarProvider.PROVIDER_ID, session)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
-        } else {
-            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        }
-
-        CalendarSettings settings = getCalendarSettings(extendedProperties);
-        settings.setSubscribed(true);
-        return settings;
-    }
-
-    @Override
     protected long getRefreshInterval() throws OXException {
         return account.getUserConfiguration().optLong(SchedJoulesFields.REFRESH_INTERVAL, 0);
     }

@@ -232,6 +232,58 @@ public enum CalendarFolderProperty {
         return new ExtendedProperty(LAST_UPDATE_LITERAL, value, Collections.singletonList(PROTECTED_PARAMETER));
     }
 
+    /**
+     * Initializes a new calendar folder property for the <code>source</code> property.
+     * <p/>
+     * The source represents a subscription's source URI, e.g. an iCalendar feed URL.
+     *
+     * @param value The value to take over
+     * @return The extended property
+     */
+    public static ExtendedProperty SOURCE(String value) {
+        return createProperty(SOURCE_LITERAL, value, false);
+    }
+
+    /**
+     * Initializes a new calendar folder property for the <code>source</code> property.
+     * <p/>
+     * The source represents a subscription's source URI, e.g. an iCalendar feed URL.
+     *
+     * @param value The value to take over
+     * @param protekted <code>true</code> if the property should be protected, <code>false</code>, otherwise
+     * @return The extended property
+     */
+    public static ExtendedProperty SOURCE(String value, boolean protekted) {
+        return createProperty(SOURCE_LITERAL, value, protekted);
+    }
+
+    /**
+     * Initializes a new calendar folder property for the <code>refreshRate</code> property.
+     * <p/>
+     * This configures the interval the cached data for an external calendar subscription is refreshed.
+     *
+     * @param value The value to take over, as specified in <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
+     * @return The extended property
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
+     */
+    public static ExtendedProperty REFRESH_RATE(String value) {
+        return createProperty(REFRESH_RATE_LITERAL, value, false);
+    }
+
+    /**
+     * Initializes a new calendar folder property for the <code>refreshRate</code> property.
+     * <p/>
+     * This configures the interval the cached data for an external calendar subscription is refreshed.
+     *
+     * @param value The value to take over, as specified in <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
+     * @param protekted <code>true</code> if the property should be protected, <code>false</code>, otherwise
+     * @return The extended property
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
+     */
+    public static ExtendedProperty REFRESH_RATE(String value, boolean protekted) {
+        return createProperty(REFRESH_RATE_LITERAL, value, protekted);
+    }
+
     /** The literal used for the {@link CalendarFolderProperty#COLOR} property. */
     public static final String COLOR_LITERAL = "color";
 
@@ -246,6 +298,12 @@ public enum CalendarFolderProperty {
 
     /** The literal used for the {@link CalendarFolderProperty#LAST_UPDATE} property. */
     public static final String LAST_UPDATE_LITERAL = "lastUpdate";
+
+    /** The literal used for the {@link CalendarFolderProperty#SOURCE} property. */
+    public static final String SOURCE_LITERAL = "source";
+
+    /** The literal used for the {@link CalendarFolderProperty#REFRESH_RATE} property. */
+    public static final String REFRESH_RATE_LITERAL = "refreshRate";
 
     /**
      * Gets a value indicating whether a specific property is marked as <i>protected</i> or not.
