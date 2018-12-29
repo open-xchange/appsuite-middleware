@@ -401,13 +401,16 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     private List<PushManagerExtendedService> getExtendedPushManagers() {
-        List<PushManagerExtendedService> managers = new LinkedList<PushManagerExtendedService>();
+        List<PushManagerExtendedService> managers = null;
         for (PushManagerService pushManager : map.values()) {
             if (pushManager instanceof PushManagerExtendedService) {
+                if (null == managers) {
+                    managers = new ArrayList<>(2);
+                }
                 managers.add((PushManagerExtendedService) pushManager);
             }
         }
-        return managers;
+        return null == managers ? Collections.emptyList() : managers;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
