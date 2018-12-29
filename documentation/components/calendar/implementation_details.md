@@ -449,11 +449,30 @@ When being converted back to a plain e-mail address string (as used for external
 
 Besides the default, internal calendar, there may be further calendar sources that should be integrated into a user's calendar module. For example, calendar feeds from external sources, or a virtual calendar containing the upcoming birthdays found in the user's address book. Therefore, a new layer is introduced that provides access to all available calendar *accounts* from different *providers* of a user using the same API.
 
+
 ## Calendar Providers and Accounts
 
 A calendar provider implements the functionality to access the calendar data of a specific calendar source. Calendar access is always bound to a specific account of a user within the calendar provider, i.e. each calendar provider provides a number of accounts for different users. A user may have a fixed number of accounts (e.g. exactly one) within a concrete provider, or there can be multiple accounts for the user. 
 
 Have a look at the chapter 'Default implementations' to get an overview over providers shipped by Open-Xchange.
+
+## Discovery and Addressing
+
+Due to the newly introduced calendar access layer, the discovery and addressing of calendar folders and their contents was extended accordingly. 
+
+### HTTP API 
+
+For the ``folders`` module, a new content type has been introduced in order to provide backwards-compatibility on the one hand, and support for the newly introduced provider/account architecture on the other hand. Doing so, any existing requests to the API will return the same responses as before (i.e. list the same folders with the same identifiers). All "new" folders will be returned when requesting folders of the content type ``event``, which includes both the previously used calendar *groupware* folders, as well as calendar folders representing external accounts. Differentiation is performed based on *composite* identifiers, which carry the information about the underlying calendar account.
+
+Those calendar folders are now driven by a dedicated folder storage, and there's no folder hierarchy anymore, i.e. there are no subfolders. The calendar folder storage makes use of the the newly introduced calendar access layer, where the requests are routed to the actual calendar accounts. The account information is encoded within the composite folder identifiers, which are of the format ``cal://<account_id>/<relative_folder_id>?``. The default groupware calendar provider has the reserved identifier ``0``, all further calendar accounts are generated with an unique identifier. 
+
+### CalDAV
+
+For calendar clients accessing the CalDAV interface, the composite folder identifiers will appear in the respective collection URIs in a base 64 representation. The formerly exposed numerical collection names are no longer advertised. Upon the first synchronization after the server has been upgraded, a typical CalDAV client will remove all previously synchronized collections, and add the new ones automatically. This usually works seamlessly, since clients typically start each synchronization cycle by querying all available calendars in the user's calendar home (by issuing a ``PROPFIND`` request with depth 1). The response includes all calendars visible for the user and their paths (and implicitly those that are no longer available), i.e. the client basically replaces the local list of collections with the ones of the response, then continues to synchronize the contents of each collection. 
+
+**Attention:** Depending on the usage and the configured interval for CalDAV synchronization, this may cause some additional load after an upgrade since existing clients will effectively re-synchronize the contents of those newly advertised calendar collections.
+
+As one exception, the calendar client from Thunderbird/Lightning does not synchronize all calendars in the user's calendar home. Instead, it directly accesses a single calendar using the fixed path to that collection. As there is no automatic bootstrapping process for this client that directly synchronizes a single collection, there's a fallback handling in place so that the client can still access previously configured collections under the "old" path, i.e. using the non-qualified identifiers.
 
 ## External Calendar Account Caching
 
