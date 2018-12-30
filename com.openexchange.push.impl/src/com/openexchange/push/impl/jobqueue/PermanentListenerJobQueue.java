@@ -59,10 +59,12 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerExtendedService;
@@ -93,34 +95,49 @@ public class PermanentListenerJobQueue {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    private final ReentrantReadWriteLock stoplock;
+    private final Lock stoplockReadLock;
     final Map<PushUser, FutureTask<PushListener>> user2jobs;
     final BlockingQueue<FutureTask<PushListener>> jobs;
     final AtomicReference<Thread> workerReference;
-    private final AtomicBoolean stopped;
+    private boolean stopped;
 
     /**
      * Initializes a new {@link PermanentListenerJobQueue}.
      */
     private PermanentListenerJobQueue() {
         super();
+        stoplock = new ReentrantReadWriteLock();
+        stoplockReadLock = stoplock.readLock();
         user2jobs = new HashMap<>(256);
         jobs = new LinkedBlockingQueue<>();
         workerReference = new AtomicReference<Thread>(null);
-        stopped = new AtomicBoolean(false);
+        stopped = false;
     }
 
     /**
      * Stops this job queue.
      */
     public void stop() {
-        stopped.set(true);
-        jobs.clear();
-        Thread worker = workerReference.getAndSet(null);
-        if (null != worker) {
-            worker.interrupt();
-        }
-        synchronized (user2jobs) {
-            user2jobs.clear();
+        Lock lock = this.stoplock.writeLock();
+        lock.lock();
+        try {
+            if (stopped) {
+                // Already stopped
+                return;
+            }
+
+            stopped = true;
+            jobs.clear();
+            Thread worker = workerReference.getAndSet(null);
+            if (null != worker) {
+                worker.interrupt();
+            }
+            synchronized (user2jobs) {
+                user2jobs.clear();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -130,29 +147,32 @@ public class PermanentListenerJobQueue {
      * @param pushUser The push user
      * @param extendedService The service to run the listener
      * @return The scheduled job; otherwise <code>null</code> if there is already such a job or job could not be added
+     * @throws ShutDownRuntimeException If server is about to shut-down
      */
     public PermanentListenerJob scheduleJob(PushUser pushUser, PushManagerExtendedService extendedService) {
-        if (stopped.get()) {
-            return null;
-        }
-
-        FutureTask<PushListener> newJob;
-        synchronized (user2jobs) {
-            if (user2jobs.containsKey(pushUser)) {
-                // There is already such a job
-                return null;
+        Lock lock = this.stoplockReadLock;
+        lock.lock();
+        try {
+            if (stopped) {
+                throw new ShutDownRuntimeException();
             }
 
-            // None present, yet. Create a new job.
-            newJob = new FutureTask<>(new PermanentListenerCallable(pushUser, extendedService, this));
-            user2jobs.put(pushUser, newJob);
-        }
+            FutureTask<PushListener> newJob;
+            synchronized (user2jobs) {
+                if (user2jobs.containsKey(pushUser)) {
+                    // There is already such a job
+                    return null;
+                }
 
-        // Add to queue in case job was newly created
-        jobs.offer(newJob);
+                // None present, yet. Create a new job.
+                newJob = new FutureTask<>(new PermanentListenerCallable(pushUser, extendedService, this));
+                user2jobs.put(pushUser, newJob);
+            }
 
-        // Ensure worker is active
-        {
+            // Add to queue in case job was newly created
+            jobs.offer(newJob);
+
+            // Ensure worker is active
             if (null == workerReference.get()) {
                 synchronized (this) {
                     if (null == workerReference.get()) {
@@ -162,10 +182,12 @@ public class PermanentListenerJobQueue {
                     }
                 }
             }
-        }
 
-        // Job newly added
-        return new PermanentListenerJobImpl(pushUser, newJob);
+            // Job newly added
+            return new PermanentListenerJobImpl(pushUser, newJob);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -200,7 +222,7 @@ public class PermanentListenerJobQueue {
     }
 
     /**
-     * Removes the job for push user from mapping.
+     * Removes the job for push user from '<code>user2jobs</code>' mapping.
      *
      * @param pushUser The push user
      */
@@ -335,6 +357,51 @@ public class PermanentListenerJobQueue {
         @Override
         public int compareTo(PermanentListenerJob o) {
             return pushUser.compareTo(o.getPushUser());
+        }
+    }
+
+    private static class ScheduleKey {
+
+        final PushUser pushUser;
+        final PushManagerExtendedService extendedService;
+        private final int hash;
+
+        ScheduleKey(PushUser pushUser, PushManagerExtendedService extendedService) {
+            super();
+            if (pushUser == null || extendedService == null) {
+                throw new IllegalArgumentException("Neither of the arguments may be null");
+            }
+            this.pushUser = pushUser;
+            this.extendedService = extendedService;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + (pushUser.hashCode());
+            result = prime * result + (extendedService.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof ScheduleKey)) {
+                return false;
+            }
+            ScheduleKey other = (ScheduleKey) obj;
+            if (!pushUser.equals(other.pushUser)) {
+                return false;
+            }
+            if (!extendedService.equals(other.extendedService)) {
+                return false;
+            }
+            return true;
         }
     }
 

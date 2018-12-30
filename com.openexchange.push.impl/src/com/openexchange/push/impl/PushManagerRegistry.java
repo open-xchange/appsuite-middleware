@@ -71,6 +71,7 @@ import com.openexchange.groupware.update.Updater;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccounts;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -281,7 +282,7 @@ public final class PushManagerRegistry implements PushListenerService {
         PermanentListenerJobQueue jobQueue = PermanentListenerJobQueue.getInstance();
         TIntSet blockedContexts = new TIntHashSet(pushUsers.size());
         List<PermanentListenerJob> startedOnes = new ArrayList<PermanentListenerJob>(pushUsers.size());
-        for (PushUser pushUser : pushUsers) {
+        NextPushUser: for (PushUser pushUser : pushUsers) {
             // Schedule to start permanent listener for current push user
             int contextId = pushUser.getContextId();
             int userId = pushUser.getUserId();
@@ -310,6 +311,9 @@ public final class PushManagerRegistry implements PushListenerService {
                 }
             } catch (OXException e) {
                 LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
+            } catch (ShutDownRuntimeException shutDown) {
+                LOG.error("Server shut-down while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, shutDown);
+                break NextPushUser;
             } catch (RuntimeException e) {
                 LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
             }
