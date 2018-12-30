@@ -540,10 +540,13 @@ public final class PushManagerRegistry implements PushListenerService {
             PermanentListenerRescheduler rescheduler = reschedulerRef.get();
             boolean allowPermanentPush = isPermanentPushAllowed();
             Collection<PushUser> toStart = Collections.singletonList(new PushUser(userId, contextId));
-            for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
-                if (null == rescheduler) {
+            if (null == rescheduler) {
+                for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
                     startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
-                } else {
+                }
+            } else {
+                for (Iterator<PushManagerExtendedService> it = getExtendedPushManagers().iterator(); useThisInstanceToReschedule == null && it.hasNext();) {
+                    PushManagerExtendedService extendedService = it.next();
                     if (extendedService.supportsPermanentListeners()) {
                         useThisInstanceToReschedule = rescheduler;
                     }
