@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,7 +64,12 @@ import com.openexchange.testing.httpclient.models.GroupListElement;
 import com.openexchange.testing.httpclient.models.GroupSearchBody;
 import com.openexchange.testing.httpclient.models.GroupUpdateResponse;
 import com.openexchange.testing.httpclient.models.GroupsResponse;
+import com.openexchange.testing.httpclient.models.TaskData;
+import com.openexchange.testing.httpclient.models.TaskListElement;
+import com.openexchange.testing.httpclient.models.TaskParticipant;
+import com.openexchange.testing.httpclient.models.TaskUpdateResponse;
 import com.openexchange.testing.httpclient.modules.GroupsApi;
+import com.openexchange.testing.httpclient.modules.TasksApi;
 
 /**
  * {@link GroupUseCountTest}
@@ -76,6 +82,10 @@ public class GroupUseCountTest extends AbstractChronosTest {
     private GroupsApi groupsApi;
     private Integer[] groupIds;
     private Long timestamp;
+    private TasksApi taskApi;
+    private Long taskTimestamp;
+    private List<TaskListElement> tasksToDelete;
+
     /**
      * Initializes a new {@link GroupUseCountTest}.
      */
@@ -97,12 +107,26 @@ public class GroupUseCountTest extends AbstractChronosTest {
         groupData = new GroupData();
         groupData.setDisplayName("Test2");
         groupData.setName("Test2");
+        List<Integer> members = new ArrayList<>(2);
+        members.add(3);
+        members.add(4);
+        groupData.setMembers(members);
         response = groupsApi.createGroup(getSessionId(), groupData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         groupIds[1] = response.getData().getId();
         timestamp = response.getTimestamp();
+
+        tasksToDelete = new ArrayList<TaskListElement>();
+        taskApi = new TasksApi(getApiClient());
     }
 
+    private synchronized void rememberTask(String folderId, String id, Long timestamp) {
+        TaskListElement element = new TaskListElement();
+        element.setId(id);
+        element.setFolder(folderId);
+        this.tasksToDelete.add(element);
+        this.taskTimestamp = timestamp;
+    }
 
     @Override
     public void tearDown() throws Exception {
@@ -112,6 +136,9 @@ public class GroupUseCountTest extends AbstractChronosTest {
                 body.setId(id);
                 groupsApi.deleteGroup(getSessionId(), timestamp, body);
             }
+        }
+        if(tasksToDelete != null && !tasksToDelete.isEmpty()) {
+            taskApi.deleteTasks(getSessionId(), taskTimestamp, tasksToDelete);
         }
         super.tearDown();
     }
@@ -150,7 +177,63 @@ public class GroupUseCountTest extends AbstractChronosTest {
         for (GroupData group : groups) {
             Assert.assertEquals(groupIds[x--], group.getId());
         }
+    }
 
+    @Test
+    public void testUseCountWithTask() throws Exception {
+        GroupSearchBody body = new GroupSearchBody();
+        body.setPattern("Test");
+        GroupsResponse response = groupsApi.searchGroups(getSessionId(), body);
+        Assert.assertNull(response.getError(), response.getErrorDesc());
+        List<GroupData> groups = response.getData();
+        Assert.assertEquals(2, groups.size());
+        int x = 0;
+        // Check that groups are returned in the same order
+        for (GroupData group : groups) {
+            Assert.assertEquals(groupIds[x++], group.getId());
+        }
+
+        // use group 2
+        TaskData task = new TaskData();
+        task.setTitle("testUseCountWithTask");
+        task.setFolderId(getTaskFolderId());
+        TaskParticipant participant = new TaskParticipant();
+        participant.setId(groupIds[1]);
+        participant.setType(2); // 2 == user group
+        task.addParticipantsItem(participant);
+        TaskUpdateResponse createTask = taskApi.createTask(getSessionId(), task);
+        Assert.assertNull(createTask.getError(), createTask.getErrorDesc());
+        rememberTask(task.getFolderId(), createTask.getData().getId(), createTask.getTimestamp());
+
+        // Check order again
+        body = new GroupSearchBody();
+        body.setPattern("Test");
+        response = groupsApi.searchGroups(getSessionId(), body);
+        Assert.assertNull(response.getError(), response.getErrorDesc());
+        groups = response.getData();
+        Assert.assertEquals(2, groups.size());
+        x = 1;
+        // Check that groups are returned in the inverse order now
+        for (GroupData group : groups) {
+            Assert.assertEquals(groupIds[x--], group.getId());
+        }
+    }
+
+    /**
+     * @return
+     * @throws Exception
+     */
+    private String getTaskFolderId() throws Exception {
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, getSessionId(), "tasks", "1,308", "0");
+        if (privateList.size() == 1) {
+            return (String) privateList.get(0).get(0);
+        }
+        for (ArrayList<?> folder : privateList) {
+            if ((Boolean) folder.get(1)) {
+                return (String) folder.get(0);
+            }
+        }
+        throw new Exception("Unable to find default tasks folder!");
     }
 
 }
