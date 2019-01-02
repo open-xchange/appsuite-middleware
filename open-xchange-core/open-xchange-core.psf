@@ -175,6 +175,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.objectusecount"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.objectusecount.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.principalusecount"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.principalusecount.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oxscripts.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.password.mechanism"/>
