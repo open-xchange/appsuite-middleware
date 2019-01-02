@@ -419,7 +419,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getReadConnection(context);
             StringBuilder sql = new StringBuilder("SELECT event, MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND user = ? AND account = ? AND event");
-            sql.append(getPlaceholders(eventIds.size())).append(" GROUP BY event;");
+            sql.append(Databases.getPlaceholders(eventIds.size())).append(" GROUP BY event;");
             try (PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
