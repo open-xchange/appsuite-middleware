@@ -87,7 +87,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Initialises a new {@link SessiondRESTService}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public SessiondRESTService(ServiceLookup services) {
@@ -96,7 +96,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Closes the sessions specified by the ids in the JSON payload
-     * 
+     *
      * @param global whether to perform a cluster-wide or local clean-up. Defaults to <code>true</code>
      * @param payload the payload containing the session identifiers
      * @return
@@ -118,7 +118,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Closes the sessions that belong to the specified contexts specified by the identifiers in the JSON payload
-     * 
+     *
      * @param global whether to perform a cluster-wide or local clean-up. Defaults to <code>true</code>
      * @param payload the payload containing the context identifiers
      * @return
@@ -140,7 +140,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Closes the sessions that belong to the specified users specified by the contextId/userId tuple in the JSON payload
-     * 
+     *
      * @param global whether to perform a cluster-wide or local clean-up. Defaults to <code>true</code>
      * @param payload the payload containing the context identifiers
      * @return
@@ -164,7 +164,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Performs the action
-     * 
+     *
      * @param supplier The {@link Supplier} to perform the action
      * @return
      *         <ul>
@@ -189,7 +189,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Retrieves from the specified payload the requested values array.
-     * 
+     *
      * @param payload The payload
      * @param restField The field to request
      * @return The {@link JSONArray} with the values
@@ -207,7 +207,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Checks whether the payload is <code>null</code> or empty.
-     * 
+     *
      * @param payload The payload to check
      * @throws IllegalArgumentException if the payload is either <code>null</code> or empty.
      */
@@ -219,7 +219,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Creates a {@link SessionFilter} of the specified {@link SessionFilterType}
-     * 
+     *
      * @param array The array containing the values for the {@link SessionFilter}
      * @param sessionFilterType The {@link SessionFilterType}
      * @return The new {@link SessionFilter}
@@ -227,17 +227,22 @@ public class SessiondRESTService extends JAXRSService {
      */
     private SessionFilter createFilter(JSONArray array, SessionFilterType sessionFilterType) {
         StringBuilder filter = new StringBuilder(64);
-        filter.append("(|");
+        if (array.length() > 1) {
+            filter.append("(");
+            filter.append("|");
+        }
         for (int index = 0; index < array.length(); index++) {
             sessionFilterType.apply(filter, array.opt(index));
         }
-        filter.append(")");
+        if (array.length() > 1) {
+            filter.append(")");
+        }
         return SessionFilter.create(filter.toString());
     }
 
     /**
      * Closes the sessions (either globally or locally) that meet the criteria of the specified filter.
-     * 
+     *
      * @param global Whether to close sessions on the entire cluster or on the local node.
      * @param sessionFilter The {@link SessionFilter}
      * @return The {@link Response} with the outcome, 200 if the operation succeeded, 500 if it failed.
@@ -259,7 +264,7 @@ public class SessiondRESTService extends JAXRSService {
 
     /**
      * Decides whether to log the filter used to clear the sessions as well as the cleared sessions
-     * 
+     *
      * @param sessions The cleared sessions
      * @param filter The filter use to clear the sessions
      * @param global whether a global clear was invoked
@@ -283,22 +288,22 @@ public class SessiondRESTService extends JAXRSService {
     /**
      * Parses the specified {@link Exception} to a {@link JSONObject} that conforms with the
      * <code>RFC-7807</code>.
-     * 
+     *
      * @param e The {@link Exception} to parse
      * @return The {@link JSONObject} with the exception
      * @see <a href="https://tools.ietf.org/html/rfc7807">RFC-7807</a>
      */
     private JSONObject parse(Exception e, int statusCode) {
         try {
-            // At the moment we lack proper documentation and/or code logic 
+            // At the moment we lack proper documentation and/or code logic
             // to either include the 'type', 'instance' or the 'detail' fields.
-            // - For the 'type' and 'instance' fields the documentation framework 
-            // needs to be adjusted in order to consider and include generic models 
+            // - For the 'type' and 'instance' fields the documentation framework
+            // needs to be adjusted in order to consider and include generic models
             // for the problem types and publish them at doc.ox.com.
             // - For the 'detail' field maybe the display message of the OXException ought
-            // to do it, though for other non-OXExceptions there isn't much that 
+            // to do it, though for other non-OXExceptions there isn't much that
             // can be done other than explicitly analysing them or assigning them specific extra
-            // details regarding their error type: e.g. 
+            // details regarding their error type: e.g.
             //   * for IOExceptions:   'An I/O error was occurred. That's all we know'
             //   * for JSONExceptions: 'A JSON error was occurred due to xyz'
             //   * etc.
@@ -370,7 +375,7 @@ public class SessiondRESTService extends JAXRSService {
 
         /**
          * Applies the value of the specified object to the specified filter builder
-         * 
+         *
          * @param filterBuilder The filter builder
          * @param object The object
          */
