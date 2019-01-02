@@ -69,6 +69,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ResourceUpdateAJAXTest.class,
     ResourceUpdatesAJAXTest.class,
     ResourceTest.class,
+    ResourceUseCountTest.class
 
 })
 public class ResourceSuite  {
