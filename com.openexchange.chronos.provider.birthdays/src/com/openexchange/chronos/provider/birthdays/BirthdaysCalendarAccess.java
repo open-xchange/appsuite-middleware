@@ -362,7 +362,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         while (iterator.hasNext()) {
             Event event = iterator.next();
             Long timestamp = timestamps.get(event.getId());
-            if (timestamp > event.getTimestamp()) {
+            if (timestamp != null && timestamp.longValue() > event.getTimestamp()) {
                 iterator.set(new DelegatingEvent(event) {
                     @Override
                     public long getTimestamp() {
