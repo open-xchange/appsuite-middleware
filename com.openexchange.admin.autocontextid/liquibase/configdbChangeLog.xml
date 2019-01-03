@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ************************************************************************************* 
+	Hints: - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG 
+	table - use failOnError param to define if a successful execution of the 
+	ChangeSet is required - DDLs for the configdb have additionally be considered 
+	within the configdb.sql file (for new installations) ************************************************************************************* -->
+
+<databaseChangeLog xmlns="urn:liquibase"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
+	logicalFilePath="configdbChangeLog">
+
+	<changeSet id="7.10.2:autocontextIdInit" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sequence_context" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'sequence_context' table</comment>
+		<sql>
+			CREATE TABLE sequence_context (
+			cid INT4 UNSIGNED NOT NULL,
+			id INT4 UNSIGNED NOT NULL,
+			PRIMARY KEY (id)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+			INSERT INTO sequence_context VALUES (0,0);
+		</sql>
+		<rollback>
+			<dropTable tableName="sequence_context" />
+		</rollback>
+	</changeSet>
+</databaseChangeLog>

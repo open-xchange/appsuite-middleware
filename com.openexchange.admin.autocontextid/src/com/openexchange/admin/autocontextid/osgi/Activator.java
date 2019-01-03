@@ -52,6 +52,7 @@ package com.openexchange.admin.autocontextid.osgi;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.autocontextid.liquibase.AutocontextIDDBMigration;
 import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.daemons.AdminDaemonService;
@@ -60,6 +61,7 @@ import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
@@ -81,6 +83,7 @@ public class Activator extends HousekeepingActivator {
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
 
+            AutocontextIDDBMigration.scheduleMigrations(getServiceSafe(DBMigrationExecutorService.class), context.getBundle(), getServiceSafe(DatabaseService.class));
         } catch (final SQLException e) {
             LOG.error("", e);
             throw e;
@@ -101,6 +104,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class };
     }
 }
