@@ -78,20 +78,19 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
     @Override
     public void increment(Session session, int principal) throws OXException {
         try {
-            Task<Void> task = new IncrementOrSetPrincipalUseCountTask(session, principal);
+            Task<Void> task = new PrincipalUseCountTask(session, principal, PrincipalUseCountTask.TaskType.INCREMENT);
             ThreadPools.submitElseExecute(task);
         } catch (RuntimeException e) {
             throw PrincipalUseCountExceptionCode.UNKNOWN.create(e, e.getMessage());
         } catch (Exception e) {
             throw PrincipalUseCountExceptionCode.UNKNOWN.create(e, e.getMessage());
         }
-
     }
 
     @Override
     public void reset(Session session, int principal) throws OXException {
         try {
-            Task<Void> task = new IncrementOrSetPrincipalUseCountTask(session, principal, 0);
+            Task<Void> task = new PrincipalUseCountTask(session, principal, PrincipalUseCountTask.TaskType.DELETE);
             ThreadPools.submitElseExecute(task);
         } catch (RuntimeException e) {
             throw PrincipalUseCountExceptionCode.UNKNOWN.create(e, e.getMessage());
@@ -103,7 +102,7 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
     @Override
     public void set(Session session, int principal, int value) throws OXException {
         try {
-            Task<Void> task = new IncrementOrSetPrincipalUseCountTask(session, principal, value);
+            Task<Void> task = new PrincipalUseCountTask(session, principal, value);
             ThreadPools.submitElseExecute(task);
         } catch (RuntimeException e) {
             throw PrincipalUseCountExceptionCode.UNKNOWN.create(e, e.getMessage());
@@ -112,7 +111,6 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
         }
 
     }
-
 
     private static final String SELECT_USECOUNT = "SELECT principal, value FROM principalUseCount WHERE cid=? AND user=? AND principal IN (";
 
