@@ -302,7 +302,8 @@ public final class HttpClients {
             clientBuilder.setDefaultCookieSpecRegistry(builder.build());
         }
 
-        if (config.contentCompressionDisabled) {
+        if (false == config.contentCompressionDisabled) {
+            // Support content compression
             clientBuilder.addInterceptorLast(new HttpResponseInterceptor() {
 
                 @Override
