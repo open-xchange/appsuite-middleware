@@ -137,27 +137,25 @@ public class SyncHandler extends AbstractExtensionHandler {
     }
 
     /**
-     * Gets the sequence number, which is the highest last-modification timestamp of the account itself and its contents.
+     * Gets the sequence number, which is the highest highest timestamp of all contained items.
      *
      * @return The sequence number
-     * @throws OXException
      */
     public long getSequenceNumber() throws OXException {
         return new OSGiCalendarStorageOperation<Long>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
             protected Long call(CalendarStorage storage) throws OXException {
-                long timestamp = getAccount().getLastModified().getTime();
-
-                SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
+                long timestamp = 0L;
+                SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
                 EventField[] fields = { EventField.TIMESTAMP };
-                List<Event> events = storage.getEventStorage().searchEvents(createSearchTerm(System.currentTimeMillis()), searchOptions, fields);
-                if (false == events.isEmpty() && timestamp < events.get(0).getTimestamp()) {
+                List<Event> events = storage.getEventStorage().searchEvents(null, sortOptions, fields);
+                if (0 < events.size() && timestamp < events.get(0).getTimestamp()) {
                     timestamp = events.get(0).getTimestamp();
                 }
-                List<Event> tombstoneEvents = storage.getEventStorage().searchEventTombstones(createSearchTerm(0), searchOptions, fields);
-                if (false == tombstoneEvents.isEmpty() && timestamp < tombstoneEvents.get(0).getTimestamp()) {
-                    timestamp = tombstoneEvents.get(0).getTimestamp();
+                List<Event> deletedEvents = storage.getEventStorage().searchEventTombstones(null, sortOptions, fields);
+                if (0 < deletedEvents.size() && timestamp < deletedEvents.get(0).getTimestamp()) {
+                    timestamp = deletedEvents.get(0).getTimestamp();
                 }
                 return timestamp;
             }
