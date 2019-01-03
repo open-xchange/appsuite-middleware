@@ -3,8 +3,8 @@
 <!-- ************************************************************************************* 
 	Hints: - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG 
 	table - use failOnError param to define if a successful execution of the 
-	ChangeSet is required - DDLs for the configdb have additionally be considered 
-	within the configdb.sql file (for new installations) ************************************************************************************* -->
+	ChangeSet is required
+	 ************************************************************************************* -->
 
 <databaseChangeLog xmlns="urn:liquibase"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
