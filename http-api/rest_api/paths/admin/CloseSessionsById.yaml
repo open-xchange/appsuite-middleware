@@ -6,34 +6,33 @@
       summary: Close a session by its ID
       parameters:
         - $ref: "#/parameters/globalQuery"
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              type: object
-              properties:
-                sessionIds:
-                  type: array
-                  description: "Array of session IDs"
-                  items:
-                    type: string
-                    examples:
-                      ex:
-                      value: ["767b23f32135447fa8a5ec9f740eb848", "c959400b85ce485f8040ec8a148db343"]
+        - in: body
+          name: body
+          description: A JSON object containing an array of session ids.
+          required: true
+          schema:
+            type: object
+            title: CloseSessionsByIdBody
+            properties:
+              sessionIds:
+                type: array
+                description: "Array of session IDs"
+                items:
+                  type: string
       produces:
         - application/json
       responses:
-        '200':
+        200:
           description: OK
-        '400':
+        400:
           description: 'Bad request, response contains error message.'
-        '401':
+        401:
           description: Not authorized
-        '403':
+        403:
           description: Forbidden
-        '404':
+        404:
           description: Not found. If path is wrong. Response contains error message.
-        '500':
+        500:
           description: 'Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.'
       security: 
         - masterAdminAuth: []
