@@ -66,6 +66,9 @@ import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRe
  */
 public class ReloadBrandings extends AbstractRmiCLI<Void> {
 
+    private static final String BRANDINGS_AVAILABLE_MSG = "The following brandingss are now available:";
+    private static final String BRANDINGS_RELOADED_MSG = "Brandings successful reloaded!";
+
     private static final String PATH_LONG = "path";
 
     public static void main(String[] args) {
@@ -92,8 +95,8 @@ public class ReloadBrandings extends AbstractRmiCLI<Void> {
         } else {
             brands = remote.reload(path);
         }
-        System.out.println("Brandings successful reloaded!");
-        System.out.println("The following brands are now available:");
+        System.out.println(BRANDINGS_RELOADED_MSG);
+        System.out.println(BRANDINGS_AVAILABLE_MSG);
         for (String brand : brands) {
             System.out.println("\t -" + brand);
         }
