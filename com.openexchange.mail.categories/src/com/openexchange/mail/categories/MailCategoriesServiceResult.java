@@ -59,8 +59,8 @@ import com.openexchange.exception.OXException;
  */
 public class MailCategoriesServiceResult {
 
-    String category;
-    OXException error;
+    private final String category;
+    private OXException error;
 
     /**
      * Initializes a new {@link MailCategoriesServiceResult.ResultObject}.
