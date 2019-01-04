@@ -152,24 +152,24 @@ public class S3FileStorageFactory implements FileStorageProvider {
     @Override
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         try {
-                LOG.debug("Initializing S3 client for {}", uri);
-                /*
-                 * extract filestore ID from authority part of URI
-                 */
-                String filestoreID = extractFilestoreID(uri);
-                LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
-                /*
-                 * create client
-                 */
-                LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
-                Map<String, String> optional = getOptional(filestoreID);
-                String encryption = getPropertySafe(S3Properties.ENCRYPTION, configService, optional);
-                S3EncryptionConfig s3EncryptionConfig = new S3EncryptionConfig(encryption);
-                AmazonS3ClientInfo clientInfo = initClient(filestoreID, configService, s3EncryptionConfig);
-                AmazonS3Client client = clientInfo.client;
-                String bucketName = initBucket(client, filestoreID, configService, s3EncryptionConfig);
-                LOG.debug("Using \"{}\" as bucket name.", bucketName);
-                return new S3FileStorage(client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
+            LOG.debug("Initializing S3 client for {}", uri);
+            /*
+             * extract filestore ID from authority part of URI
+             */
+            String filestoreID = extractFilestoreID(uri);
+            LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
+            /*
+             * create client
+             */
+            LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
+            Map<String, String> optional = getOptional(filestoreID);
+            String encryption = getPropertySafe(S3Properties.ENCRYPTION, configService, optional);
+            S3EncryptionConfig s3EncryptionConfig = new S3EncryptionConfig(encryption);
+            AmazonS3ClientInfo clientInfo = initClient(filestoreID, configService, s3EncryptionConfig);
+            AmazonS3Client client = clientInfo.client;
+            String bucketName = initBucket(client, filestoreID, configService, s3EncryptionConfig);
+            LOG.debug("Using \"{}\" as bucket name.", bucketName);
+            return new S3FileStorage(client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
         } catch (OXException ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof AmazonS3Exception) {
@@ -205,7 +205,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @param filestoreID The filestore ID
      * @param configService The {@link LeanConfigurationService}
      * @param encryptionConfig The {@link S3EncryptionConfig} of the given filestore
-     * @return The client
+     * @return The {@link AmazonS3ClientInfo} containing the configured {@link AmazonS3Client}
      * @throws OXException
      */
     private AmazonS3ClientInfo initClient(String filestoreID, LeanConfigurationService configService, S3EncryptionConfig encryptionConfig) throws OXException {
@@ -269,6 +269,15 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return new AmazonS3ClientInfo((AmazonS3Client) clientBuilder.build(), encrypted, chunkSize);
     }
 
+    /**
+     * Gets the property safe
+     *
+     * @param prop The property to retrieve
+     * @param configurationService The {@link LeanConfigurationService} to use
+     * @param optionals The optionals to use
+     * @return The property
+     * @throws OXException
+     */
     private static String getPropertySafe(S3Properties prop, LeanConfigurationService configurationService, Map<String, String> optionals) throws OXException {
         String property = configurationService.getProperty(prop, optionals);
         if (Strings.isEmpty(property)) {
@@ -277,10 +286,23 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return property;
     }
 
+    /**
+     * Creates and optional map containing only the given filestore id
+     *
+     * @param filestoreId The filestore id
+     * @return The optional map
+     */
     private static Map<String, String> getOptional(String filestoreId) {
         return Collections.singletonMap(S3Properties.OPTIONAL_NAME, filestoreId);
     }
 
+    /**
+     * Gets the client configuration for the given filestore id
+     *
+     * @param filestoreID The filestore id
+     * @param configService The {@link LeanConfigurationService} to use
+     * @return The {@link ClientConfiguration} for the filestore id
+     */
     private ClientConfiguration getClientConfiguration(String filestoreID, LeanConfigurationService configService) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
 
@@ -352,9 +374,18 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return clientConfiguration;
     }
 
-    private EncryptionMaterials getEncryptionMaterials(String filestoreID, EncryptionType clientType, LeanConfigurationService configurationService) throws OXException {
-        if (!EncryptionType.RSA.equals(clientType)) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unsupported encryption type: " + clientType.getName());
+    /**
+     * Creates a new {@link EncryptionMaterials} for the given filestore id and also checks if the client encryption type is applicable.
+     *
+     * @param filestoreID The filestore id
+     * @param clientEncryptionType The {@link EncryptionType} of the client
+     * @param configurationService The {@link LeanConfigurationService} to use
+     * @return The {@link EncryptionMaterials}
+     * @throws OXException in case of errors or if the client encryption type is not applicable
+     */
+    private EncryptionMaterials getEncryptionMaterials(String filestoreID, EncryptionType clientEncryptionType, LeanConfigurationService configurationService) throws OXException {
+        if (!EncryptionType.RSA.equals(clientEncryptionType)) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unsupported encryption type: " + clientEncryptionType.getName());
         }
         Map<String, String> optional = getOptional(filestoreID);
         String keyStore = getPropertySafe(S3Properties.RSA_KEYSTORE, configurationService, optional);
@@ -567,6 +598,12 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return null == sb ? path : sb.toString();
     }
 
+    /**
+     * Checks if the character is an allowed special character
+     *
+     * @param ch The character to check
+     * @return true if it is an allowed special character, false otherwise
+     */
     private static boolean isAllowedSpecial(char ch) {
         switch (ch) {
             case '!':
@@ -604,6 +641,12 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return authority;
     }
 
+    /**
+     *
+     * {@link AmazonS3ClientInfo}
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
     private static class AmazonS3ClientInfo {
 
         /** The Amazon S3 client reference */
