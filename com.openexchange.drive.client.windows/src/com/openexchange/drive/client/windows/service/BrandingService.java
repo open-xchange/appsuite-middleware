@@ -87,7 +87,6 @@ public class BrandingService {
         ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
         ConfigView configView = configFactory.getView(userId, contextId);
         return configView.get(Constants.BRANDING_CONF, String.class);
-
     }
 
 }
