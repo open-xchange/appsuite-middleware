@@ -81,6 +81,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.DateUtils;
+import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
@@ -244,7 +245,8 @@ public final class HttpClients {
         ccm.setDefaultMaxPerRoute(config.maxConnectionsPerRoute);
         ccm.setMaxTotal(config.maxTotalConnections);
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
-        ccm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(config.socketReadTimeout).setRcvBufSize(config.socketBufferSize).setSndBufSize(config.socketBufferSize).build());
+        ccm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(config.socketReadTimeout).build());
+        ccm.setDefaultConnectionConfig(ConnectionConfig.custom().setBufferSize(config.socketBufferSize).build());
         return ccm;
     }
 
@@ -506,8 +508,10 @@ public final class HttpClients {
         }
 
         /**
-         * Instead of a duration a own KeepAliveStrategy can be set.
-         * Default: null
+         * Instead of a {@link #setKeepAliveDuration(int) keep-alive duration} a custom <code>ConnectionKeepAliveStrategy</code> can be set.<br>
+         * Default: <code>null</code>
+         * <p>
+         * <b>Note</b>: If a keep-alive strategy is set, the keep-alive duration is ignored!
          *
          * @param strategy The {@link KeepAliveStrategy}
          */
