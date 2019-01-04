@@ -51,6 +51,7 @@ package com.openexchange.caldav.resources;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_PROVIDER_FIELD;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -58,9 +59,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.CalendarOrder;
-import com.openexchange.caldav.mixins.CalendarTimezone;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
@@ -80,6 +82,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -123,6 +126,22 @@ public class CalDAVPlaceholderCollection<T> extends CalDAVFolderCollection<T> {
     }
 
     @Override
+    protected boolean handleSpecialPut(WebdavProperty prop) throws WebdavProtocolException {
+        if (Protocol.RESOURCETYPE_LITERAL.getNamespace().equals(prop.getNamespace()) && Protocol.RESOURCETYPE_LITERAL.getName().equals(prop.getName())) {
+            /*
+             * apply ical calendar provider in case the new collection should be a "subscribed" one
+             */
+            for (Element element : prop.getChildren()) {
+                if (CaldavProtocol.CALENDARSERVER_NS.equals(element.getNamespace()) && "subscribed".equals(element.getName())) {
+                    folderToCreate.setProperty(CALENDAR_PROVIDER_FIELD, CalendarProviders.ID_ICAL);
+                }
+            }
+            return true;
+        }
+        return super.handleSpecialPut(prop);
+    }
+
+    @Override
     protected void internalPutProperty(WebdavProperty property) throws WebdavProtocolException {
         Element element = DAVProperty.class.isInstance(property) ? ((DAVProperty) property).getElement() : null;
         if (DAVProtocol.CAL_NS.getURI().equals(property.getNamespace()) && "supported-calendar-component-set".equals(property.getName())) {
@@ -155,12 +174,12 @@ public class CalDAVPlaceholderCollection<T> extends CalDAVFolderCollection<T> {
         } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "resourcetype".equals(property.getName()) && null != element) {
             if (null != element.getChild("calendar", DAVProtocol.CAL_NS)) {
                 folderToCreate.setContentType(CalendarContentType.getInstance());
+                if (null != element.getChild("subscribed", DAVProtocol.CALENDARSERVER_NS)) {
+                    folderToCreate.setProperty(CalendarFolderConverter.CALENDAR_PROVIDER_FIELD, CalendarProviders.ID_ICAL);
+                }
             } else {
                 throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-resourcetype", getUrl(), HttpServletResponse.SC_CONFLICT);
             }
-        } else if (matches(property, CalendarTimezone.NAMESPACE, CalendarTimezone.NAME)) {
-            // ignore
-            LOG.debug("Ignoring attempt to set {} for new collection {}", property, getUrl());
         } else {
             super.internalPutProperty(property);
         }

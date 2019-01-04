@@ -50,6 +50,7 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.mixins.AllowedSharingModes;
@@ -65,11 +67,17 @@ import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
 import com.openexchange.caldav.mixins.Invite;
+import com.openexchange.caldav.mixins.RefreshRate;
+import com.openexchange.caldav.mixins.Source;
+import com.openexchange.caldav.mixins.SubscribedStripAlarms;
+import com.openexchange.caldav.mixins.SubscribedStripAttachments;
+import com.openexchange.caldav.mixins.SubscribedStripTodos;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventsResult;
@@ -131,6 +139,15 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
             new DefaultAlarmVeventDate(),
             new DefaultAlarmVeventDatetime()
         );
+        if (isSubscription(folder)) {
+            includeProperties(
+                new RefreshRate(this), 
+                new Source(this), 
+                new SubscribedStripAlarms(this), 
+                new SubscribedStripAttachments(this), 
+                new SubscribedStripTodos(this)
+            );
+        }
         if (supportsPermissions(folder)) {
             includeProperties(new Invite(factory, this));
         }
@@ -167,11 +184,19 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         return syncToken;
     }
 
+    private static boolean isSubscription(UserizedFolder folder) {
+        return CalendarProviders.ID_ICAL.equals(optCalendarProvider(folder));
+    }
+
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        StringBuilder stringBuilder = new StringBuilder(super.getResourceType());
+        StringBuilder stringBuilder = new StringBuilder(DAVProtocol.COLLECTION);
         if (null != folder) {
-            stringBuilder.append('<').append(DAVProtocol.CAL_NS.getPrefix()).append(":calendar/>");
+            if (isSubscription(folder)) {
+                stringBuilder.append('<').append(DAVProtocol.CALENDARSERVER_NS.getPrefix()).append(":subscribed/>");
+            } else {
+                stringBuilder.append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>");
+            }
             if (supportsPermissions(folder)) {
                 if (SharedType.getInstance().equals(folder.getType())) {
                     // used to indicate that the calendar is owned by another user and is being shared to the current user.

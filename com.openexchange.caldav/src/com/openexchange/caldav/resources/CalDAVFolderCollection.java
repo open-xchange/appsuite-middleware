@@ -50,15 +50,22 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.caldav.mixins.CalendarOrder.NO_ORDER;
+import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.REFRESH_INTERVAL;
+import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.URI;
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_CONFIG_FIELD;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
+import org.dmfs.rfc5545.Duration;
+import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.json.JSONObject;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
@@ -71,8 +78,10 @@ import com.openexchange.caldav.mixins.ManagedAttachmentsServerURL;
 import com.openexchange.caldav.mixins.MaxDateTime;
 import com.openexchange.caldav.mixins.MinDateTime;
 import com.openexchange.caldav.mixins.Organizer;
+import com.openexchange.caldav.mixins.RefreshRate;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
+import com.openexchange.caldav.mixins.Source;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
@@ -262,6 +271,43 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
              */
             String value = null != property.getElement() ? property.getElement().getText() : null;
             CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.DESCRIPTION(value));
+        } else if (matches(property, Source.NAMESPACE, Source.NAME)) {
+            /*
+             * apply subscription source uri folder property
+             */
+            JSONObject calendarConfig = CalendarFolderConverter.optCalendarConfig(folderToUpdate);
+            if (null == calendarConfig) {
+                calendarConfig = new JSONObject();
+                folderToUpdate.setProperty(CALENDAR_CONFIG_FIELD, calendarConfig);
+            }
+            for (Element element : property.getChildren()) {
+                if (DAVProtocol.DAV_NS.equals(element.getNamespace()) && "href".equals(element.getName())) {
+                    calendarConfig.putSafe(URI, element.getValue());
+                }
+            }
+        } else if (matches(property, RefreshRate.NAMESPACE, RefreshRate.NAME)) {
+            /*
+             * apply refresh rate folder property
+             */
+            Duration duration = null;
+            String value = null != property.getElement() ? property.getElement().getText() : null;
+            if (Strings.isNotEmpty(value)) {
+                try {
+                    duration = Duration.parse(value);
+                } catch (IllegalArgumentException e) {
+                    LOG.info("Ignoring invalid duration {} in refreshrate property", value, e);
+                }
+            }
+            JSONObject calendarConfig = CalendarFolderConverter.optCalendarConfig(folderToUpdate);
+            if (null == calendarConfig) {
+                calendarConfig = new JSONObject();
+                folderToUpdate.setProperty(CALENDAR_CONFIG_FIELD, calendarConfig);
+            }
+            if (null == duration) {
+                calendarConfig.remove(REFRESH_INTERVAL);
+            } else {
+                calendarConfig.putSafe(REFRESH_INTERVAL, Long.valueOf(TimeUnit.MILLISECONDS.toMinutes(duration.toMillis())));
+            }
         } else if (ScheduleCalendarTransp.NAMESPACE.getURI().equals(property.getNamespace()) && ScheduleCalendarTransp.NAME.equals(property.getName())) {
             /*
              * apply schedule transparency folder property

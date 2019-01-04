@@ -47,26 +47,51 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.caldav.mixins;
 
-import com.openexchange.java.Strings;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.REFRESH_INTERVAL;
+import java.util.concurrent.TimeUnit;
+import org.jdom2.Namespace;
+import org.json.JSONObject;
+import com.openexchange.caldav.resources.EventCollection;
+import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.folderstorage.CalendarFolderConverter;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-public class WebdavOptionsAction extends AbstractAction {
+/**
+ * {@link RefreshRate}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.2
+ */
+public class RefreshRate extends SingleXMLPropertyMixin {
 
-    static final String DAV_OPTIONS =
-        "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule, " +
-        "calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, calendarserver-subscribed, " +
-        "resource-sharing, calendar-managed-attachments, calendarserver-private-events, calendarserver-recurrence-split"
-    ;
+    public static final String NAME = "refreshrate";
+    public static final Namespace NAMESPACE = DAVProtocol.APPLE_NS;
 
-	@Override
-    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-		response.setHeader("Content-Length", "0");
-		response.setHeader("Allow", Strings.join(request.getResource().getOptions(), ","));
-        response.setHeader("DAV", DAV_OPTIONS);
-		response.setHeader("Accept-Ranges", "bytes");
-		response.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
-	}
+    private final EventCollection collection;
+
+    /**
+     * Initializes a new {@link RefreshRate}.
+     *
+     * @param collection The event collection to initialize with
+     */
+    public RefreshRate(EventCollection collection) {
+        super(NAMESPACE.getURI(), NAME);
+        this.collection = collection;
+    }
+
+    @Override
+    protected String getValue() {
+        JSONObject calendarConfig = CalendarFolderConverter.optCalendarConfig(collection.getFolder());
+        if (null != calendarConfig) {
+            long value = calendarConfig.optLong(REFRESH_INTERVAL, 0L);
+            if (0L != value) {
+                return AlarmUtils.getDuration(value, TimeUnit.MINUTES);
+            }
+        }
+        return null;
+    }
 
 }

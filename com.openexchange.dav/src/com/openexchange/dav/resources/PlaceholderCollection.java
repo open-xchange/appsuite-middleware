@@ -59,6 +59,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
@@ -70,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.ParameterizedFolder;
@@ -165,6 +167,9 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
                 contentType = ContactContentType.getInstance();
             } else if (null != element.getChild("calendar", DAVProtocol.CAL_NS)) {
                 contentType = CalendarContentType.getInstance();
+                if (null != element.getChild("subscribed", DAVProtocol.CALENDARSERVER_NS)) {
+                    getFolderToUpdate().setProperty(CalendarFolderConverter.CALENDAR_PROVIDER_FIELD, CalendarProviders.ID_ICAL);
+                }
             } else {
                 throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-resourcetype", getUrl(), HttpServletResponse.SC_CONFLICT);
             }
