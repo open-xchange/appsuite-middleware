@@ -59,6 +59,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class MailCategoriesOrganizeExceptionStrings implements LocalizableStrings {
 
+    /**
+     * Prevents instantiations
+     */
+    private MailCategoriesOrganizeExceptionStrings() {}
+
     // Reorganizing of mails failed. Please try again later.
     public static final String UNABLE_TO_ORGANIZE = "Reorganizing of mails failed. Please try again later.";
 

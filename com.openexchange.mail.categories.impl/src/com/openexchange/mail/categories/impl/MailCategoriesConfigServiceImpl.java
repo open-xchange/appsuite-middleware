@@ -242,6 +242,15 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return result;
     }
 
+    /**
+     * Gets the user configuration for the given category
+     *
+     * @param session The users {@link Session}
+     * @param locale The locale to use
+     * @param category The name of the category
+     * @return The {@link MailCategoryConfig}
+     * @throws OXException
+     */
     private MailCategoryConfig getUserConfigByCategory(Session session, Locale locale, String category) throws OXException {
         Builder builder = new Builder();
         builder.category(category);
@@ -262,6 +271,15 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
     }
 
+    /**
+     * Gets the localized name for the given category
+     *
+     * @param session The users session
+     * @param locale The {@link Locale} to use
+     * @param category The category name
+     * @return The localized name. If the {@link Locale} is not available the fallback name is returned instead
+     * @throws OXException
+     */
     private String getLocalizedName(Session session, Locale locale, String category) throws OXException {
 
         String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME_LANGUAGE_PREFIX + locale.toString(), null, session);
@@ -271,6 +289,15 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
     }
 
+    /**
+     * Gets the localized description for the given category
+     *
+     * @param session The users session
+     * @param locale The {@link Locale} to use
+     * @param category The category name
+     * @return The localized description. If the {@link Locale} is not available the fallback description is returned instead
+     * @throws OXException
+     */
     private String getLocalizedDescription(Session session, Locale locale, String category) throws OXException {
 
         String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION_LANGUAGE_PREFIX + locale.toString(), null, session);
@@ -280,6 +307,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION, null, session);
     }
 
+    /**
+     * Gets the names of the system categories
+     *
+     * @param session The current users {@link Session}
+     * @return An array of the system categories for the users
+     * @throws OXException
+     */
     String[] getSystemCategoryNames(Session session) throws OXException {
         String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
@@ -290,6 +324,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return result == null ? new String[0] : result;
     }
 
+    /**
+     * Gets the names of the users categories
+     *
+     * @param session The users {@link Session}
+     * @return An array of user category names
+     * @throws OXException
+     */
     private String[] getUserCategoryNames(Session session) throws OXException {
         String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
@@ -341,12 +382,26 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
     }
 
+    /**
+     * Generates the flag name for the given category
+     *
+     * @param category The category
+     * @return The flag term
+     */
     String generateFlag(String category) {
         StringBuilder builder = new StringBuilder(FLAG_PREFIX);
         builder.append(category.hashCode());
         return builder.toString();
     }
 
+    /**
+     * Sets the given rule
+     *
+     * @param session The users {@link Session}
+     * @param category The category this rule applies to to perform some checks.
+     * @param rule The rule to set
+     * @throws OXException
+     */
     private void setRule(Session session, String category, MailCategoryRule rule) throws OXException {
         String flag = null;
         if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
@@ -361,6 +416,14 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         ruleEngine.setRule(session, rule, RuleType.CATEGORY);
     }
 
+    /**
+     * Gets the rule for the given category
+     *
+     * @param session The users {@link Session}
+     * @param category The category name
+     * @return The {@link MailCategoryRule}
+     * @throws OXException
+     */
     private MailCategoryRule getRule(Session session, String category) throws OXException {
         String flag = null;
         if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
@@ -373,10 +436,23 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return ruleEngine.getRule(session, flag);
     }
 
+    /**
+     * Removes the mail address from all rules
+     *
+     * @param session The users session
+     * @param mailAddress The mail address to remove
+     * @throws OXException
+     */
     private void removeMailFromRules(Session session, String mailAddress) throws OXException {
         ruleEngine.removeValueFromHeader(session, mailAddress, "from");
     }
 
+    /**
+     * Creates the search term for the given rule
+     *
+     * @param rule The {@link MailCategoryRule}
+     * @return The {@link SearchTerm}
+     */
     SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
         if (!rule.hasSubRules()) {
             if (rule.getHeaders().size() == 1 && rule.getValues().size() == 1) {
@@ -570,6 +646,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return MailCategoriesConfigUtil.getValueFromProperty(INIT_TASK_STATUS_PROPERTY, STATUS_NOT_YET_STARTED, session);
     }
 
+    /**
+     * Initializes mail categories
+     *
+     * @param session The users {@link Session}
+     * @throws OXException
+     */
     void initMailCategories(Session session) throws OXException {
         CapabilityService capService = Services.getService(CapabilityService.class);
         if (!capService.getCapabilities(session).contains(new Capability("mail_categories"))) {
@@ -601,6 +683,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     }
 
+    /**
+     *
+     * {@link InitTask} initializes mail category rules based on the configuration
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.2
+     */
     private static final class InitTask extends AbstractTask<Boolean> {
 
         private final MailCategoriesConfigServiceImpl mailCategoriesService;
