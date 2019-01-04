@@ -56,6 +56,7 @@ import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2467,9 +2468,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     check_default_sender_address = s == null ? s : IDNA.toIDN(s);
                 }
 
-                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-                final boolean found_email1 = useraliases.contains(check_email1);
-                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+                List<String> realMailAddresses = extractRealMailAddresses(useraliases);
+                final boolean found_primary_mail = realMailAddresses.contains(check_primary_mail);
+                final boolean found_email1 = realMailAddresses.contains(check_email1);
+                final boolean found_default_sender_address = realMailAddresses.contains(check_default_sender_address);
 
                 if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
                     throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
@@ -2484,6 +2486,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         // TODO mail checks
+    }
+
+    private List<String> extractRealMailAddresses(Collection<String> aliases) {
+        List<String> result = new ArrayList<>(aliases.size());
+        for (String mail : aliases) {
+            int indexOf = mail.indexOf("<");
+            if (indexOf >= 0) {
+                result.add(mail.substring(indexOf + 1, mail.indexOf(">")));
+            } else {
+                result.add(mail);
+            }
+        }
+        return result;
     }
 
     private static void checkContext(final Context ctx) throws InvalidDataException {
