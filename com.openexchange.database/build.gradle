@@ -1,0 +1,9 @@
+sourceSets {
+    main {
+        java {
+            srcDirs 'src'
+            srcDirs 'src7'
+        }
+
+    }
+}

@@ -1,0 +1,3 @@
+pdeJava {
+    installBundleAsDirectory.set(true)
+}
