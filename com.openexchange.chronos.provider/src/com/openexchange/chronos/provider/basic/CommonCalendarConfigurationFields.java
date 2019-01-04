@@ -47,7 +47,9 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.basic;
+package com.openexchange.chronos.provider.basic;
+
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 
 /**
  * {@link CommonCalendarConfigurationFields} - Specifies the common fields of calendar configurations
@@ -60,17 +62,17 @@ public class CommonCalendarConfigurationFields {
     /**
      * The folder's description
      */
-    public static final String DESCRIPTION = "description";
+    public static final String DESCRIPTION = CalendarFolderProperty.DESCRIPTION_LITERAL;
 
     /**
      * Flag indicating whether the folder is used for sync
      */
-    public static final String USED_FOR_SYNC = "usedForSync";
+    public static final String USED_FOR_SYNC = CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 
     /**
      * The folder's color
      */
-    public static final String COLOR = "color";
+    public static final String COLOR = CalendarFolderProperty.COLOR_LITERAL;
 
     /**
      * The user configuration's key for the folder's name
@@ -78,7 +80,13 @@ public class CommonCalendarConfigurationFields {
     public static final String NAME = "name";
 
     /**
-     * Flag indicating whether the calendar is subscribed.
+     * The URI of an external calendar subscription source.
      */
-    public static final String SUBSCRIBED = "subscribed";
+    public static final String URI = "uri";
+
+    /**
+     * The interval at which the data for an external subscription is refreshed (in minutes).
+     */
+    public static final String REFRESH_INTERVAL = "refreshInterval";
+
 }

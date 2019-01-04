@@ -56,9 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirs
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.REFRESH_RATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.SOURCE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
@@ -91,7 +89,6 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DataHandlers;
@@ -101,11 +98,11 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -268,8 +265,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
         extendedProperties.add(COLOR(internalConfig.optString(CommonCalendarConfigurationFields.COLOR, null), false));
         extendedProperties.add(LAST_UPDATE(optLastUpdate()));
-        extendedProperties.add(REFRESH_RATE(optRefreshRate()));
-        extendedProperties.add(SOURCE(optSource(), true));
         /*
          * build calendar settings
          */
@@ -910,41 +905,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             }
         }
         return null;
-    }
-
-    /**
-     * Optionally gets the configured interval when the cached data for an external calendar subscription is refreshed.
-     * 
-     * @return The refresh interval, or <code>null</code> if unknown
-     */
-    protected String optRefreshRate() {
-        String refreshRate = account.getInternalConfiguration().optString(CalendarFolderProperty.REFRESH_RATE_LITERAL, null);
-        if (Strings.isEmpty(refreshRate)) {
-            /*
-             * also try previously used 'refreshInterval' in minutes from user config
-             */
-            long refreshInterval = account.getUserConfiguration().optLong("refreshInterval", 0L);
-            if (0L < refreshInterval) {
-                refreshRate = AlarmUtils.getDuration(refreshInterval, TimeUnit.MINUTES);
-            }
-        }
-        return refreshRate;
-    }
-
-    /**
-     * Optionally gets the subscription's source URI, e.g. an iCalendar feed URL.
-     * 
-     * @return The subscription's source, or <code>null</code> if unknown
-     */
-    protected String optSource() {
-        String source = account.getInternalConfiguration().optString(CalendarFolderProperty.SOURCE_LITERAL, null);
-        if (Strings.isEmpty(source)) {
-            /*
-             * also try previously used 'uri' from user config
-             */
-            source = account.getUserConfiguration().optString("uri", null);
-        }
-        return source;
     }
 
     /**

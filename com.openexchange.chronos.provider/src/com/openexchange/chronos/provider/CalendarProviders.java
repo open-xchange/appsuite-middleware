@@ -57,6 +57,18 @@ package com.openexchange.chronos.provider;
  */
 public class CalendarProviders {
 
+    /** The identifier for the iCal calendar provider */
+    public static final String ID_ICAL = "ical";
+
+    /** The identifier for the schedjoules calendar provider */
+    public static final String ID_SCHEDJOULES = "schedjoules";
+
+    /** The identifier for the birthdays calendar provider */
+    public static final String ID_BIRTHDAYS = "birthdays";
+
+    /** The identifier for the internal chronos calendar provider */
+    public static final String ID_CHRONOS = "chronos";
+
     /**
      * Gets the name of the declared capability for a specific calendar provider.
      *

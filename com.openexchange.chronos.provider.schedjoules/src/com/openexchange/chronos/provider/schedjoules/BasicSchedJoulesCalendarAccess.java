@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -58,13 +56,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;

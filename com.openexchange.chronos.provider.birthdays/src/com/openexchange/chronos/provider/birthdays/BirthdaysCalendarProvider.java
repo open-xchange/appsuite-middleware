@@ -75,6 +75,7 @@ import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -103,7 +104,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoProvisioningCalendarProvider, AdministrativeCalendarProvider {
 
     /** The identifier of the calendar provider */
-    public static final String PROVIDER_ID = "birthdays";
+    public static final String PROVIDER_ID = CalendarProviders.ID_BIRTHDAYS;
 
     private final ServiceLookup services;
 
