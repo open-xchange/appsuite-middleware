@@ -3,6 +3,8 @@
 *.pmd
 .DS_Store
 .lint4jprefs
+/.gradle/
+/.idea/
 bin
 bin/
 .git-rewrite/
