@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.birthdays;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getURI;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.java.Autoboxing.I;
 import java.text.DateFormat;
@@ -154,12 +155,15 @@ public class EventConverter {
         return events;
     }
 
-    public List<Event> getOccurrences(Contact contact, Date from, Date until) throws OXException {
-        List<Event> occurrences = new ArrayList<>();
+    public List<Event> getOccurrences(Contact contact, Date from, Date until, TimeZone timeZone) throws OXException {
+        List<Event> occurrences = new ArrayList<Event>();
         Event seriesEvent = getSeriesMaster(contact);
         RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(seriesEvent, from, until);
         while (iterator.hasNext()) {
-            occurrences.add(nextOccurrence(iterator, contact));
+            Event occurrence = nextOccurrence(iterator, contact);
+            if (isInRange(occurrence, from, until, timeZone)) {
+                occurrences.add(occurrence);
+            }
         }
         return occurrences;
     }
@@ -170,7 +174,7 @@ public class EventConverter {
         }
         List<Event> occurrences = new ArrayList<>();
         for (Contact contact : contacts) {
-            occurrences.addAll(getOccurrences(contact, from, until));
+            occurrences.addAll(getOccurrences(contact, from, until, timeZone));
         }
         return occurrences;
     }

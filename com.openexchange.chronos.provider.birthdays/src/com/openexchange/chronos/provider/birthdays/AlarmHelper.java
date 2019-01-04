@@ -55,6 +55,7 @@ import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
@@ -113,7 +116,10 @@ public class AlarmHelper {
 
     /**
      * Loads and applies all alarm data of the account user associated with the supplied event.
-     *
+     * <p/>
+     * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
+     * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
+     * 
      * @param event The event to load and apply the alarm data for
      * @return The event, enhanced with the loaded alarm data
      */
@@ -123,6 +129,9 @@ public class AlarmHelper {
 
     /**
      * Loads and applies all alarm data of the account user associated with the supplied events.
+     * <p/>
+     * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
+     * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
      *
      * @param events The events to load and apply the alarm data for
      * @return The events, enhanced with the loaded alarm data
@@ -407,6 +416,9 @@ public class AlarmHelper {
 
     /**
      * Applies a specific list of alarms for an event.
+     * <p/>
+     * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
+     * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
      *
      * @param event The event to apply the alarms for
      * @param alarms The alarms to apply
@@ -427,6 +439,28 @@ public class AlarmHelper {
             public boolean containsAlarms() {
                 return true;
             }
+
+            @Override
+            public long getTimestamp() {
+                long timestamp = super.getTimestamp();
+                if (null != alarms && 0 < alarms.size()) {
+                    for (Alarm alarm : alarms) {
+                        timestamp = Math.max(timestamp, alarm.getTimestamp());
+                    }
+                }
+                return timestamp;
+            }
+
+            @Override
+            public EnumSet<EventFlag> getFlags() {
+                EnumSet<EventFlag> flags = super.getFlags();
+                if (null != alarms && 0 < alarms.size()) {
+                    flags = EnumSet.copyOf(flags);
+                    flags.add(EventFlag.ALARMS);
+                }
+                return flags;
+            }
+
         };
     }
 
