@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 22
+%define        ox_release 23
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -52,6 +52,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Jan 07 2019 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2019-01-14 (5039)
 * Mon Dec 10 2018 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2018-12-17 (5018)
 * Mon Nov 26 2018 Marc Arens <marc.arens@open-xchange.com>
