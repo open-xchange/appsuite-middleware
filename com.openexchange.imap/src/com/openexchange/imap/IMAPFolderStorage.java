@@ -2211,7 +2211,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     separator = deleteMeEntry.getSeparator();
                 } else {
                     ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, deleteMe);
-                    if (null == listInfo && false == canBeOpened(deleteMe)) {
+                    if (null == listInfo) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                     }
                     separator = listInfo.separator;
