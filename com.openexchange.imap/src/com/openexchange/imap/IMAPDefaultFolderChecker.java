@@ -479,7 +479,9 @@ public class IMAPDefaultFolderChecker {
             if (size > 0) {
                 // Determine the SPECIAL-USE entry to use
                 ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(MailAccount.DEFAULT_ID == accountId, index, names, fullNames, entries);
-
+                if (entry == null) {
+                    return null;
+                }
                 // Check entry
                 ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session, ignoreSubscription);
                 if (!cached.exists()) {
