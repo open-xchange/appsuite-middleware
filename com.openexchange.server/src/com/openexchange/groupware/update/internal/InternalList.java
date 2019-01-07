@@ -54,8 +54,6 @@ import java.util.List;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
-import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
-import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask;
@@ -70,8 +68,6 @@ import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAtt
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
 import com.openexchange.groupware.update.tasks.CorrectFileAsInContacts;
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
-import com.openexchange.groupware.update.tasks.CreateIcalIdsPrimaryKeyTask;
-import com.openexchange.groupware.update.tasks.CreateIcalPrincipalPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.DateExternalCreateForeignKeyUpdateTask;
@@ -99,7 +95,6 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReserv
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
-import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
@@ -361,18 +356,6 @@ public final class InternalList {
         //Add Uuid column to dlist tables
         list.add(new AddUUIDForDListTables());
 
-        //Add primary key to ical_ids table
-        list.add(new CreateIcalIdsPrimaryKeyTask());
-
-        //Add primary key to ical_principal table
-        list.add(new CreateIcalPrincipalPrimaryKeyTask());
-
-        //Add primary key to vcard_ids table
-        list.add(new AddPrimaryKeyVcardIdsTask());
-
-        //Add primary key to vcard_principal table
-        list.add(new AddPrimaryKeyVcardPrincipalTask());
-
         // Add UUID column to user_attribute table
         list.add(new AddUUIDForUserAttributeTable());
 
@@ -436,9 +419,6 @@ public final class InternalList {
 
             //Add primary key to prg_links table
             list.add(new PrgLinksAddPrimaryKeyUpdateTask());
-
-            //Add primary key to prg_contacts_linkage table
-            list.add(new PrgContactsLinkageAddPrimaryKeyUpdateTask());
 
             //Add primary key to dlist tables
             list.add(new MakeUUIDPrimaryForDListTables());
@@ -719,9 +699,6 @@ public final class InternalList {
         // Converts OAuth accessor tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4());
         list.add(new com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4());
-
-        // Convert iCal/vCard tables to utf8mb4
-        list.add(new com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4());
 
         // Convert legacy calendar tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.LegacyCalendarTablesUtf8Mb4UpdateTask());
