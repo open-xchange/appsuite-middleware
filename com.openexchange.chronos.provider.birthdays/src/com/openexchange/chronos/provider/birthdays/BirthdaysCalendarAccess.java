@@ -336,6 +336,9 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     private Event postProcess(Event event) throws OXException {
+        if (event == null) {
+            return null;
+        }
         if (contains(getFields(), EventField.ALARMS) || contains(getFields(), EventField.FLAGS)) {
             event = getAlarmHelper().applyAlarms(event);
         } else if (event.containsTimestamp()) {
