@@ -1540,7 +1540,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             ListLsubEntry renameEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null == renameEntry || !renameEntry.exists()) {
                 ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, renameMe);
-                if (null == listInfo && false == canBeOpened(renameMe)) {
+                if (null == listInfo) {
                     renameMe = checkForNamespaceFolder(fullName);
                     if (null == renameMe) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
