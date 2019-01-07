@@ -100,8 +100,10 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -169,18 +171,21 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final HttpStatus shutDownStatus;
     private final ErrorPageGenerator errorPageGenerator;
     private final boolean supportHierachicalLookupOnNotFound;
+    private final int sessionTimeoutInSeconds;
 
     /**
      * Constructor.
      *
      * @param initialFilters The initial Servlet filter to apply
      * @param supportHierachicalLookupOnNotFound <code>true</code> to support hierarchical look-up of "parent" servlets; otherwise <code>false</code>
+     * @param sessionTimeoutInSeconds The session timeout in seconds
      * @param bundle Bundle that we create if for, for local data reference.
      */
-    public OSGiMainHandler(List<FilterAndPath> initialFilters, boolean supportHierachicalLookupOnNotFound, Bundle bundle) {
+    public OSGiMainHandler(List<FilterAndPath> initialFilters, boolean supportHierachicalLookupOnNotFound, int sessionTimeoutInSeconds, Bundle bundle) {
         super();
         this.initialFilters = initialFilters;
         this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
+        this.sessionTimeoutInSeconds = sessionTimeoutInSeconds;
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
         this.shutDownStatus = HttpStatus.newHttpStatus(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "Server shutting down...");
@@ -714,24 +719,28 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             HashMap<String, String> params;
             if (initparams != null) {
                 params = new HashMap<String, String>(initparams.size());
-                Enumeration names = initparams.keys();
-                while (names.hasMoreElements()) {
-                    String name = (String) names.nextElement();
-                    params.put(name, (String) initparams.get(name));
+                if (initparams instanceof Hashtable) {
+                    @SuppressWarnings("unchecked")
+                    Hashtable<String, String> ht = (Hashtable<String, String>) initparams;
+                    for (Map.Entry<String, String> entry : ht.entrySet()) {
+                        params.put(entry.getKey(), entry.getValue());
+                    }
+                } else {
+                    for (Enumeration<?> names = initparams.keys(); names.hasMoreElements();) {
+                        String name = (String) names.nextElement();
+                        params.put(name, (String) initparams.get(name));
+                    }
                 }
             } else {
                 params = new HashMap<String, String>(0);
             }
 
             servletHandlers = new ArrayList<OSGiServletHandler>(1);
-            mapper.addContext(httpContext,
-                    mapper.getServletContext(httpContext),
-                    servletHandlers);
-
-            final OSGiServletContext servletContext =
-                    mapper.getServletContext(httpContext);
-
-            assert servletContext != null;
+            OSGiServletContext servletContext = mapper.getServletContext(httpContext);
+            if (servletContext == null) {
+                servletContext = new OSGiServletContext(httpContext, sessionTimeoutInSeconds);
+            }
+            mapper.addContext(httpContext, servletContext, servletHandlers);
 
             osgiServletHandler =
                     new OSGiServletHandler(servlet,
