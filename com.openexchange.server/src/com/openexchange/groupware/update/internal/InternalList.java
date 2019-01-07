@@ -95,7 +95,6 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReserv
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
-import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
@@ -349,9 +348,6 @@ public final class InternalList {
 
         //Add Uuid column to prg_links table
         list.add(new PrgLinksAddUuidUpdateTask());
-
-        //Add Uuid column to prg_contacts_linkage table
-        list.add(new PrgContactsLinkageAddUuidUpdateTask());
 
         //Add Uuid column to dlist tables
         list.add(new AddUUIDForDListTables());
