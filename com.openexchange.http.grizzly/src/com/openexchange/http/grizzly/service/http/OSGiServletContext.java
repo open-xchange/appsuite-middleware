@@ -96,6 +96,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EventListener;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.http.util.MimeType;
 import org.glassfish.grizzly.servlet.FilterChainFactory;
@@ -126,10 +127,13 @@ public class OSGiServletContext extends WebappContext {
      * Default constructor.
      *
      * @param httpContext {@link org.osgi.service.http.HttpContext} to provide integration with OSGi.
+     * @param sessionTimeoutInSeconds The session timeout in seconds
      * @param logger      Logger util.
      */
-    public OSGiServletContext(HttpContext httpContext) {
+    public OSGiServletContext(HttpContext httpContext, int sessionTimeoutInSeconds) {
         this.httpContext = httpContext;
+        int minutes = (int) TimeUnit.MINUTES.convert(sessionTimeoutInSeconds, TimeUnit.SECONDS);
+        setSessionTimeout(minutes);
         installAuthFilter(httpContext);
     }
 
