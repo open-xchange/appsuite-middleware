@@ -57,7 +57,6 @@ import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.reseller.liquibase.ResellerDBMigration;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
@@ -106,9 +105,8 @@ public class Activator extends HousekeepingActivator {
             registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
 
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            track(DBMigrationExecutorService.class, new ResellerDBMigrationServiceTracker(this, context));
             openTrackers();
-
-            ResellerDBMigration.scheduleMigrations(getServiceSafe(DBMigrationExecutorService.class), context.getBundle(), getServiceSafe(DatabaseService.class));
         } catch (final StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);
             throw e;

@@ -65,8 +65,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
-%dir /opt/open-xchange/etc/mysql
-%config(noreplace) /opt/open-xchange/etc/mysql/*
 %doc com.openexchange.admin.reseller.rmi/javadoc
 %doc ./com.openexchange.admin.reseller/ChangeLog
 

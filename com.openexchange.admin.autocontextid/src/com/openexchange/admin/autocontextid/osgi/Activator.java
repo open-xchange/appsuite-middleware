@@ -52,7 +52,6 @@ package com.openexchange.admin.autocontextid.osgi;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.autocontextid.liquibase.AutocontextIDDBMigration;
 import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.daemons.AdminDaemonService;
@@ -76,14 +75,13 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSetConfigurationService(null, service);
             initCache(service);
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            track(DBMigrationExecutorService.class, new AutoCIDDBMigrationServiceTracker(this, context));
             openTrackers();
 
             final Hashtable<String, String> props = new Hashtable<String, String>(2);
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-
-            AutocontextIDDBMigration.scheduleMigrations(getServiceSafe(DBMigrationExecutorService.class), context.getBundle(), getServiceSafe(DatabaseService.class));
         } catch (final SQLException e) {
             LOG.error("", e);
             throw e;

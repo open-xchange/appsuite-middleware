@@ -8,10 +8,9 @@
 <databaseChangeLog xmlns="urn:liquibase"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
-	logicalFilePath="configdbChangeLog">
+	logicalFilePath="resellerConfigdbChangeLog">
 
-	<changeSet id="7.10.2:resellerCreateSubadmin"
-		author="kevin.ruthmann@open-xchange.com">
+	<changeSet id="7.10.2:subadmin:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="subadmin" />
@@ -36,8 +35,7 @@
 		</rollback>
 	</changeSet>
 	
-	<changeSet id="7.10.2:resellerCreateRestrictions"
-		author="kevin.ruthmann@open-xchange.com">
+	<changeSet id="7.10.2:restrictions:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="restrictions" />
@@ -58,8 +56,7 @@
 		</rollback>
 	</changeSet>
 	
-	<changeSet id="7.10.2:resellerCreateSubadminRestrictions"
-		author="kevin.ruthmann@open-xchange.com">
+	<changeSet id="7.10.2:subadmin_restrictions:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="subadmin_restrictions" />
@@ -82,8 +79,7 @@
 		</rollback>
 	</changeSet>
 	
-	<changeSet id="7.10.2:resellerCreateContextRestrictions"
-		author="kevin.ruthmann@open-xchange.com">
+	<changeSet id="7.10.2:context_restrictions:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="context_restrictions" />
@@ -107,8 +103,7 @@
 		</rollback>
 	</changeSet>
 	
-	<changeSet id="7.10.2:resellerCreateContext2subadmin"
-		author="kevin.ruthmann@open-xchange.com">
+	<changeSet id="7.10.2:context2subadmin:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="context2subadmin" />
@@ -132,8 +127,7 @@
 		</rollback>
 	</changeSet>
 	
-	<changeSet id="7.10.2:resellerCreateContextCustomfields"
-		author="kevin.ruthmann@open-xchange.com">
+	<changeSet id="7.10.2:context_customfields:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="context_customfields" />
