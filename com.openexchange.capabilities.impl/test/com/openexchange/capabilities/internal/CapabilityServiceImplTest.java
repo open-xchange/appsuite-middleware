@@ -79,7 +79,7 @@ public class CapabilityServiceImplTest {
         this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, null);
         this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
-        Assert.assertEquals(7, this.capabilities.size());
+        Assert.assertEquals(6, this.capabilities.size());
     }
 
      @Test
@@ -110,7 +110,7 @@ public class CapabilityServiceImplTest {
 
         this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
-        Assert.assertEquals(7, this.capabilities.size());
+        Assert.assertEquals(6, this.capabilities.size());
     }
 
      @Test
