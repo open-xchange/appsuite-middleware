@@ -80,6 +80,11 @@ public enum SchedJoulesProperty implements Property {
      */
     scheme("https"),
     /**
+     * Defines the connection timeout (in msec) of a connection to the SchedJoules servers.
+     * Defaults to 30000
+     */
+    connectionTimeout(30000),
+    /**
      * Defines a comma separated blacklist for itemIds of SchedJoules calendars and pages that should be hidden from
      * the end user.
      * Default: empty
