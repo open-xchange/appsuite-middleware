@@ -176,7 +176,7 @@
     <changeSet id="7.8.4:feedback_star_rating_v1:create" author="kevin.ruthmann@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="star_rating_v1" />
+                <tableExists tableName="feedback_star_rating_v1" />
             </not>
         </preConditions>
         <comment>
