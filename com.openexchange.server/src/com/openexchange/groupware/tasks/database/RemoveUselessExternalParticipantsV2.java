@@ -82,7 +82,7 @@ public final class RemoveUselessExternalParticipantsV2 extends UpdateTaskAdapter
 
     @Override
     public String[] getDependencies() {
-        return new String[] { RemoveUselessExternalParticipants.class.getName() };
+        return new String[] {};
     }
 
     @Override
