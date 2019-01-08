@@ -94,8 +94,8 @@ public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
      */
     public ListUpdateTasksCLT() {
         //@formatter:off
-        super("listUpdateTasks [[-a | -g | -e | -x | -xf | -xn] -A <adminUser> -P <adminPassword> [-p <port> -s <server> --responsetime <responseTime>]] | -h", 
-           "Lists executed, pending and excluded update tasks of a schema. The switches '-a', '-e', '-g', '-x', '-xf' and '-xn' are mutually exclusive AND mandatory."
+        super("listUpdateTasks [[-a | -g | -e | -x | -xf | -xn] -n <schemaName> -A <masterAdminUser> -P <masterAdminPassword> [-p <port> -s <server> --responsetime <responseTime>]] | -h", 
+           "Lists executed, pending and excluded update tasks of a schema specified by the '-n' switch (mandatory). The switches '-a', '-e', '-g', '-x', '-xf' and '-xn' are mutually exclusive AND mandatory."
             + "\n\n An overall database status of all schemata can be retrieved via the 'checkdatabase' command line tool.\n\n"
             + "An update task may be in 'pending' state for three reasons:"
             + "\n  a) It was never executed before and is due for execution"
@@ -111,7 +111,7 @@ public final class ListUpdateTasksCLT extends AbstractUpdateTasksCLT<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        Option schemaOption = new Option("n", "name", true, "A valid schema name.");
+        Option schemaOption = createArgumentOption("n", "name", "schemaName", "A valid schema name.", true);
         schemaOption.setType(String.class);
         options.addOption(schemaOption);
 

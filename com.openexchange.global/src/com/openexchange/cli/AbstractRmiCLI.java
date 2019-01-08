@@ -56,6 +56,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -147,23 +148,23 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             // Check if administrative permission is required
             boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
-                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
+                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Master admin username", true));
+                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Master admin password", true));
             }
 
             // Add other options
             addOptions(options);
 
-            // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
-            CommandLine cmd = parser.parse(options, args);
-
             // Check if help output is requested
-            if (cmd.hasOption('h')) {
+            if (Arrays.binarySearch(args, "-h") >= 0 || Arrays.binarySearch(args, "--help") >= 0) {
                 printHelp(options);
                 System.exit(0);
                 return null;
             }
+
+            // Initialize command-line parser & parse arguments
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check for port/server
             if (cmd.hasOption('p')) {

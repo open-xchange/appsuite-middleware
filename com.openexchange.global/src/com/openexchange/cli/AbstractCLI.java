@@ -49,6 +49,7 @@
 
 package com.openexchange.cli;
 
+import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -92,17 +93,17 @@ public abstract class AbstractCLI<R, C> {
 
             // Add other options
             addOptions(options);
-
-            // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
-            CommandLine cmd = parser.parse(options, args);
-
+            
             // Check if help output is requested
-            if (cmd.hasOption('h')) {
+            if (Arrays.binarySearch(args, "-h") >= 0 || Arrays.binarySearch(args, "--help") >= 0) {
                 printHelp(options, 120, true);
                 System.exit(0);
                 return null;
             }
+
+            // Initialize command-line parser & parse arguments
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check other mandatory options
             checkOptions(cmd, options);
