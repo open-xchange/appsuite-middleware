@@ -95,6 +95,7 @@ public abstract class AbstractCLI<R, C> {
             addOptions(options);
             
             // Check if help output is requested
+            Arrays.sort(args);
             if (Arrays.binarySearch(args, "-h") >= 0 || Arrays.binarySearch(args, "--help") >= 0) {
                 printHelp(options, 120, true);
                 System.exit(0);
