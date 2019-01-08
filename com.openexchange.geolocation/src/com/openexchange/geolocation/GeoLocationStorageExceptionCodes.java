@@ -49,38 +49,79 @@
 
 package com.openexchange.geolocation;
 
-import com.openexchange.annotation.Nullable;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link GeoLocationStorageService}
+ * {@link GeoLocationStorageExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public interface GeoLocationStorageService {
+public enum GeoLocationStorageExceptionCodes implements DisplayableOXExceptionCode {
+    /**
+     * <li>An SQL error occurred: %1$s</li>
+     */
+    SQL_ERROR("An SQL error occurred: %1$s", CATEGORY_ERROR, 1),
+    ;
+
+    private final int number;
+    private final Category category;
+    public static final String PREFIX = "GLS-STORAGE";
+    private final String message;
+    private final String displayMessage;
 
     /**
-     * Retrieves the {@link GeoInformation} of the specified IP address from the storage
-     * 
-     * @param session The groupware session
-     * @param ipAddress The IP address as string
-     * @return The Geographical information for the specified IP address or <code>null</code> if no location could be determined
-     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
-     *             or any other error is occurred
+     * Initialises a new {@link GeoLocationExceptionCodes}.
      */
-    @Nullable GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException;
+    private GeoLocationStorageExceptionCodes(final String message, final Category category, final int number) {
+        this.message = message;
+        this.displayMessage = message;
+        this.category = category;
+        this.number = number;
+    }
+
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     /**
-     * Retrieves the {@link GeoInformation} of the specified geographical point within the specified radius
-     * 
-     * @param session The groupware session
-     * @param latitude The latitude
-     * @param longitude The longitude
-     * @param radius The radius
-     * @return The Geographical information of the closest point within the specified radius or <code>null</code> if no location could be found
-     * @throws OXException if Geographical information cannot be returned or any other error is occurred
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    @Nullable GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException;
+    public OXException create(Throwable cause, Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
 }

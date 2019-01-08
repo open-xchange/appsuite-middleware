@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -62,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link AbstractGeoLocationSQLStorage}
+ * {@link AbstractGeoLocationSQLStorage} - Provides abstract and common logic for SQL storage
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
@@ -78,6 +79,8 @@ public abstract class AbstractGeoLocationSQLStorage {
 
     /**
      * Initialises a new {@link AbstractGeoLocationSQLStorage}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
     public AbstractGeoLocationSQLStorage(ServiceLookup services) {
         super();
@@ -85,13 +88,15 @@ public abstract class AbstractGeoLocationSQLStorage {
     }
 
     /**
+     * Retrieves the {@link GeoInformation} for the specified ipAddress
      * 
-     * @param session
-     * @param ipAddress
-     * @return
-     * @throws OXException
+     * @param session The groupware session
+     * @param ipAddress The ipAddress
+     * @param query the SQL query to use for querying the database
+     * @return The found {@link GeoInformation} or <code>null</code> if no location could be determined.
+     * @throws OXException if an error is occurred
      */
-    protected GeoInformation getGeoInformation(Session session, int ipAddress, String query) throws OXException {
+    protected @Nullable GeoInformation getGeoInformation(Session session, int ipAddress, String query) throws OXException {
         DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
         Connection connection = databaseService.getReadOnlyForGlobal(session.getContextId());
         PreparedStatement stmt = null;
@@ -105,7 +110,7 @@ public abstract class AbstractGeoLocationSQLStorage {
             }
             return parseResultSet(rs);
         } catch (SQLException e) {
-            throw new OXException(31145, "SQL error", e);
+            throw GeoLocationStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnlyForGlobal(session.getContextId(), connection);
@@ -113,15 +118,17 @@ public abstract class AbstractGeoLocationSQLStorage {
     }
 
     /**
+     * Retrieves the {@link GeoInformation} of the location which is closest to the point of origin (latitude/longitude) and within
+     * the specified radius
      * 
-     * @param session
-     * @param latitude
-     * @param longitude
-     * @param radius
-     * @return
-     * @throws OXException
+     * @param session The groupware session
+     * @param latitude The latitude
+     * @param longitude The longitude
+     * @param radius The radius to search
+     * @return The found {@link GeoInformation} or <code>null</code> if no location could be found within the specified radius.
+     * @throws OXException if an error is occurred
      */
-    protected GeoInformation getGeoInformation(Session session, String query, double latitude, double longitude, int radius) throws OXException {
+    protected @Nullable GeoInformation getGeoInformation(Session session, String query, double latitude, double longitude, int radius) throws OXException {
         DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
         Connection connection = databaseService.getReadOnlyForGlobal(session.getContextId());
         PreparedStatement stmt = null;
@@ -142,7 +149,7 @@ public abstract class AbstractGeoLocationSQLStorage {
             }
             return parseResultSet(rs);
         } catch (SQLException e) {
-            throw new OXException(31145, "SQL error", e);
+            throw GeoLocationStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnlyForGlobal(session.getContextId(), connection);
@@ -150,10 +157,11 @@ public abstract class AbstractGeoLocationSQLStorage {
     }
 
     /**
+     * Parses the specified {@link ResultSet} to a {@link GeoInformation}
      * 
-     * @param resultSet
-     * @return
-     * @throws SQLException
+     * @param resultSet The {@link ResultSet} to parse
+     * @return The parsed {@link GeoInformation}
+     * @throws SQLException if an SQL error is occurred
      */
     protected abstract GeoInformation parseResultSet(ResultSet resultSet) throws SQLException;
 }
