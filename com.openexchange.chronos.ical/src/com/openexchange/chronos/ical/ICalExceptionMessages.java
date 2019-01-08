@@ -70,6 +70,8 @@ public class ICalExceptionMessages implements LocalizableStrings {
     public static final String TRUNCATED_RESULTS_MSG = "Not all of the objects could be imported due to a configured limitation.";
     
     public static final String INVALID_CALENDAR_CONTENT_MSG = "The given iCalendar source does not contain valid content and cannot be processed.";
+    
+    public static final String TOO_MANY_IMPORTS_MSG = "The given iCal file contains too many entities.";
 
     /**
      * Initializes a new {@link ICalExceptionMessages}.

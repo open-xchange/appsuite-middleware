@@ -53,6 +53,7 @@ import static com.openexchange.chronos.ical.ICalExceptionMessages.CONVERSION_FAI
 import static com.openexchange.chronos.ical.ICalExceptionMessages.INVALID_CALENDAR_CONTENT_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.NO_CALENDAR_FOUND_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.PARSER_ERROR_MSG;
+import static com.openexchange.chronos.ical.ICalExceptionMessages.TOO_MANY_IMPORTS_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.TRUNCATED_RESULTS_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.VALIDATION_FAILED_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
@@ -102,7 +103,12 @@ public enum ICalExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The given iCalendar source does not contain valid content and cannot be processed.</li>
      * <li>The calendar source does not contain valid content</li>
      */
-    INVALID_CALENDAR_CONTENT("The calendar source does not contain valid content", INVALID_CALENDAR_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 7),
+    INVALID_CALENDAR_CONTENT("The calendar source does not contain valid content", INVALID_CALENDAR_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 7), 
+    
+    /**
+     * The given iCal file contains too many entities.
+     */
+    TOO_MANY_IMPORTS(TOO_MANY_IMPORTS_MSG, TOO_MANY_IMPORTS_MSG, Category.CATEGORY_USER_INPUT, 8),
 
     ;
 
