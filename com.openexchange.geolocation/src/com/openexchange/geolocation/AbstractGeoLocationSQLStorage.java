@@ -106,6 +106,7 @@ public abstract class AbstractGeoLocationSQLStorage {
             stmt.setInt(1, ipAddress);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
+                LOGGER.debug("No locations could be found for '{}'.", GeoLocationUtils.convertIp(ipAddress));
                 return null;
             }
             return parseResultSet(rs);

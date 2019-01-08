@@ -119,7 +119,15 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         try {
             GeoLocationService service = services.getServiceSafe(GeoLocationService.class);
             GeoInformation geoInformationCurrent = service.getGeoInformation(session, current);
+            if (geoInformationCurrent == null) {
+                LOGGER.warn("No geo information could be retrieved for the current IP '{}'.", current);
+                return;
+            }
             GeoInformation geoInformationPrevious = service.getGeoInformation(session, previous);
+            if (geoInformationPrevious == null) {
+                LOGGER.warn("No geo information could be retrieved for the previous IP '{}'.", previous);
+                return;
+            }
 
             boolean countryChanged = true;
             if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
@@ -158,7 +166,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     }
 
     ///////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
-
+    
     /**
      * Accepts the IP change and applies it to the specified {@link Session}
      *
