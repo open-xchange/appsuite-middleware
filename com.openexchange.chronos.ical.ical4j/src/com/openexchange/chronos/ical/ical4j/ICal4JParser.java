@@ -49,26 +49,31 @@
 
 package com.openexchange.chronos.ical.ical4j;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.tools.TimeZoneUtils;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 
@@ -81,82 +86,74 @@ import net.fortuna.ical4j.data.ParserException;
  */
 public class ICal4JParser {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ICal4JParser.class);
 
-    public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, InputStream iCalFile) throws IOException, ParserException {
+    private static final String TZ_REGEX = ";TZID=([^:]+):\\\\s*([0-9]{8}T[0-9]{6})";
+
+    private static final Pattern WORKAROUND_30027 = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*");
+
+    private static final Pattern TRIGGER = Pattern.compile("TRIGGER" + TZ_REGEX);
+
+    private static final Pattern CREATED = Pattern.compile("CREATED" + TZ_REGEX);
+
+    private static final Pattern LAST_MODIFIED = Pattern.compile("LAST-MODIFIED" + TZ_REGEX);
+
+    private static final Pattern COMPLETED = Pattern.compile("COMPLETED" + TZ_REGEX);
+
+    private static final Pattern DTSTAMP = Pattern.compile("DTSTAMP" + TZ_REGEX);
+
+    /**
+     * Parses the given iCAL file to an {@link net.fortuna.ical4j.model.Calendar}
+     * 
+     * @param builder The {@link CalendarBuilder}
+     * @param iCalFile The iCAL file as {@link InputStream}
+     * @param importLimit The limit of events to import. See {@link ICalParameters#IMPORT_LIMIT}
+     * @return {@link net.fortuna.ical4j.model.Calendar} of the given iCAL
+     * @throws IOException If reading fails
+     * @throws ParserException If iCAL contains errors
+     * @throws OXException If limit is exceeded
+     */
+    public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, InputStream iCalFile, int importLimit) throws IOException, ParserException, OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(iCalFile, Charsets.UTF_8));
-            return parse(builder, reader);
+            return parse(builder, reader, importLimit);
         } finally {
             Streams.close(reader);
         }
     }
 
-    public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, final BufferedReader reader) throws IOException, ParserException {
-        final StringBuilder chunk = new StringBuilder();
-        boolean read = false;
-        boolean timezoneStarted = false; //hack to fix bug 11958
-        boolean timezoneEnded = false; //hack to fix bug 11958
-        boolean timezoneRead = false; //hack to fix bug 11958
-        final StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
-        // Copy until we find an END:VCALENDAR
-        boolean beginFound = false;
+    public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, final BufferedReader reader, int importLimit) throws IOException, ParserException, OXException {
+        StringBuilder ical = new StringBuilder();
+        StringBuilder chunk = new StringBuilder();
+        int lines = 0;
+        int eventCount = 0;
         for (String line; (line = reader.readLine()) != null;) {
-            if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
-                line = removeByteOrderMarks(line);
+            if (importLimit > -1 && line.startsWith("BEGIN:VEVENT")) {
+                // Track numbers of events
+                eventCount++;
+                if (eventCount > importLimit) {
+                    LOGGER.info("The defined maximum value of {} events for the property {} was exceeded. Aborting the import.", I(importLimit), ICalParameters.IMPORT_LIMIT);
+                    throw ICalExceptionCodes.TOO_MANY_IMPORTS.create();
+                }
             }
-            if(line.startsWith("BEGIN:VCALENDAR")) {
-                beginFound = true;
-            } else if ( !beginFound && !"".equals(line)) {
-                continue; // ignore bad lines between "VCALENDAR" Tags.
-            }
-            if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
-                if(line.matches("^\\s*BEGIN:VTIMEZONE")){
-                    timezoneStarted = true;
-                }
-                if(!line.matches("\\s*")) {
-                    read = true;
-                    if(timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
-                        timezoneInfo.append(line).append('\n');
-                    } else {
-                        chunk.append(line).append('\n');
-                    }
-                }
-                if(line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958
-                    timezoneEnded = true;
-                    timezoneRead = true && timezoneStarted;
-                }
-            } else {
-                break;
+            chunk.append(line).append('\n');
+            if (++lines > 1000) {
+                // Apply workarounds in smaller chunks to keep the used heap space as small as feasible
+                ical.append(applyWorkarounds(chunk));
+                lines = 0;
+                chunk = new StringBuilder();
             }
         }
-        if(!read) {  return null; }
-        chunk.append("END:VCALENDAR\n");
-        if(timezoneRead){
-            int locationForInsertion = chunk.indexOf("BEGIN:");
-            if(locationForInsertion > -1){
-                locationForInsertion = chunk.indexOf("BEGIN:", locationForInsertion + 1);
-                if(locationForInsertion > -1){
-                    chunk.insert(locationForInsertion, timezoneInfo);
-                }
-            }
+        if (lines > 0) {
+            ical.append(applyWorkarounds(chunk));
         }
-        final UnsynchronizedStringReader chunkedReader = new UnsynchronizedStringReader(
-            workaroundFor19463(
-            workaroundFor16895(
-            workaroundFor16613(
-            workaroundFor16367(
-            workaroundFor17492(
-            workaroundFor17963(
-            workaroundFor20453(
-            workaroundFor27706And28942(
-            workaroundFor29282(
-            workaroundFor30027(
-            removeAnnoyingWhitespaces(chunk.toString()
-            )))))))))))
-        ); // FIXME: Encoding?
-        return builder.build(chunkedReader);
+
+        return builder.build(new UnsynchronizedStringReader(ical.toString()));// FIXME: Encoding?
+    }
+
+    private String applyWorkarounds(StringBuilder sb) {
+        return workaroundFor19463(workaroundFor16895(workaroundFor16613(workaroundFor16367(workaroundFor17492(workaroundFor17963(workaroundFor20453(workaroundFor27706And28942(workaroundFor29282(workaroundFor30027(removeAnnoyingWhitespaces(sb.toString())))))))))));
     }
 
     private String workaroundFor17963(final String input) {
@@ -168,16 +165,11 @@ public class ICal4JParser {
     }
 
     private String workaroundFor19463(final String input) {
-        return input
-            .replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
-            .replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
-            ;
+        return input.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1").replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)", "TZOFFSETTO:+$1");
     }
 
     private String workaroundFor20453(final String input) {
-        return input
-            .replaceAll("DTEND;\\s*\n", "")
-            ;
+        return input.replaceAll("DTEND;\\s*\n", "");
     }
 
     private String workaroundFor29282(final String input) {
@@ -185,69 +177,89 @@ public class ICal4JParser {
     }
 
     private String workaroundFor27706And28942(final String input) {
-        Matcher m = Pattern.compile("DTSTAMP;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(input);
+        Map<TimeZone, SimpleDateFormat> zones = new HashMap<>();
+        Matcher m = DTSTAMP.matcher(input);
         final StringBuffer sb = new StringBuffer(input.length());
         while (m.find()) {
-            final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("DTSTAMP:" + getUtcPropertyFrom(m.group(2), tz)));
+            final TimeZone tz = getTimeZone(zones, m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("DTSTAMP:" + getUtcPropertyFrom(m.group(2), zones, tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = Pattern.compile("COMPLETED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
-        sb.setLength(0);
+        m = COMPLETED.matcher(sb.toString());
+        sb.delete(0, sb.length());
         while (m.find()) {
-            final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), tz)));
+            final TimeZone tz = getTimeZone(zones, m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), zones, tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = Pattern.compile("LAST-MODIFIED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
-        sb.setLength(0);
+        m = LAST_MODIFIED.matcher(sb.toString());
+        sb.delete(0, sb.length());
         while (m.find()) {
-            final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("LAST-MODIFIED:" + getUtcPropertyFrom(m.group(2), tz)));
+            final TimeZone tz = getTimeZone(zones, m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("LAST-MODIFIED:" + getUtcPropertyFrom(m.group(2), zones, tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = Pattern.compile("CREATED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
-        sb.setLength(0);
+        m = CREATED.matcher(sb.toString());
+        sb.delete(0, sb.length());
         while (m.find()) {
-            final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
+            final TimeZone tz = getTimeZone(zones, m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), zones, tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = Pattern.compile("TRIGGER;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
-        sb.setLength(0);
+        m = TRIGGER.matcher(sb.toString());
+        sb.delete(0, sb.length());
         while (m.find()) {
-            final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("TRIGGER:" + getUtcPropertyFrom(m.group(2), tz)));
+            final TimeZone tz = getTimeZone(zones, m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("TRIGGER:" + getUtcPropertyFrom(m.group(2), zones, tz)));
         }
         m.appendTail(sb);
 
         return sb.toString();
     }
 
+    private TimeZone getTimeZone(Map<TimeZone, SimpleDateFormat> zones, String ID) {
+        if (Strings.isEmpty(ID)) {
+            return TimeZone.getDefault();
+        }
+        for (Iterator<Entry<TimeZone, SimpleDateFormat>> iterator = zones.entrySet().iterator(); iterator.hasNext();) {
+            Entry<TimeZone, SimpleDateFormat> entry = iterator.next();
+            if (entry.getKey().getID().equals(ID)) {
+                // Found
+                return entry.getKey();
+            }
+        }
+
+        // Insert new time zone
+        TimeZone zone = TimeZoneUtils.getTimeZone(ID);
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        format.setTimeZone(zone);
+        zones.put(zone, format);
+        return zone;
+    }
+
     private static final SimpleDateFormat UTC_PROPERTY;
 
     static {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        sdf.setTimeZone(getTimeZone("UTC"));
+        sdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
         UTC_PROPERTY = sdf;
     }
 
-    private String getUtcPropertyFrom(final String s, final TimeZone tz) {
+    private String getUtcPropertyFrom(final String s, Map<TimeZone, SimpleDateFormat> zones, final TimeZone tz) {
         try {
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-            sdf.setTimeZone(tz);
+            SimpleDateFormat sdf = zones.get(tz);
             final Date d = sdf.parse(s);
             synchronized (UTC_PROPERTY) {
                 return UTC_PROPERTY.format(d);
@@ -258,7 +270,7 @@ public class ICal4JParser {
     }
 
     private String workaroundFor30027(final String input) {
-        final Matcher m = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*").matcher(input);
+        final Matcher m = WORKAROUND_30027.matcher(input);
         final StringBuffer sb = new StringBuffer(input.length());
         while (m.find()) {
             m.appendReplacement(sb, ": $1");
@@ -292,14 +304,16 @@ public class ICal4JParser {
     }
 
     private String workaroundFor16895(final String input) {
-        /* Bug in Zimbra: They like to use an EMAIL element for the
+        /*
+         * Bug in Zimbra: They like to use an EMAIL element for the
          * ATTENDEE property, though there is none.
          */
         return input.replaceAll("ATTENDEE([^\n]*?);EMAIL=", "ATTENDEE$1;X-ZIMBRA-EMAIL=");
     }
 
     private String workaroundFor16367(final String input) {
-        /* Bug in MS Exchange: If you use a CN element, it must have a value.
+        /*
+         * Bug in MS Exchange: If you use a CN element, it must have a value.
          * MS Exchange has an empty value, which we now replace properly.
          */
         return input.replaceAll("CN=:", "CN=\"\":");
@@ -311,70 +325,6 @@ public class ICal4JParser {
          * ones are allowed, but they would start with X-GW for Groupwise.
          * We ignore those.
          */
-        return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])" , "\nATTACH$1$3");
+        return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])", "\nATTACH$1$3");
     }
-
-    private String removeByteOrderMarks(String line){
-        char[] buf = line.toCharArray();
-        int length = buf.length;
-
-        final char first = buf[0];
-        if(length > 3) {
-            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
-                if(Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
-                    return new String(Arrays.copyOfRange(buf, 3, length));
-                }
-                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
-                    return new String(Arrays.copyOfRange(buf, 3, length));
-                }
-            }
-        }
-        if(length > 1) {
-            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
-                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
-                    return new String(Arrays.copyOfRange(buf, 2, length));
-                }
-            }
-        }
-        if(length > 0) {
-            if(Character.getNumericValue(first) < 0) {
-                if(Character.getType(first) == 16) {
-                    return new String(Arrays.copyOfRange(buf, 1, length));
-                }
-            }
-        }
-        return line;
-    }
-
-    private String composeErrorMessage(Exception e, String ical) {
-        final StringBuilder sb = new StringBuilder(ical.length() + 256);
-        sb.append("Parsing of iCal content failed: ");
-        sb.append(e.getMessage());
-        if (LOG.isDebugEnabled()) {
-            sb.append(". Affected iCal content:").append('\n');
-            dumpIcal(ical, sb);
-        }
-        return sb.toString();
-    }
-
-    private void dumpIcal(String ical, StringBuilder sb) {
-        String[] lines = Strings.splitByCRLF(ical);
-        DecimalFormat df = new DecimalFormat("0000");
-        int count = 1;
-        for (final String line : lines) {
-            sb.append(df.format(count++)).append(' ').append(line).append('\n');
-        }
-        OutputStreamWriter writer = null;
-        try {
-            File file = File.createTempFile("parsefailed", ".ics", new File(System.getProperty("java.io.tmpdir")));
-            writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
-            writer.write(ical);
-            writer.flush();
-        } catch (IOException e) {
-            LOG.error("Problem writing not parsable iCal to tmp directory.", e);
-        } finally {
-            Streams.close(writer);
-        }
-    }
-
 }
