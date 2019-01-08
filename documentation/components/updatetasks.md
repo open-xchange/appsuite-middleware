@@ -160,69 +160,27 @@ As mentioned above the ``forceupdatetask`` command-line interface is supposed to
 ./forceupdatetask -l admin -s secret -n openxchangedb -t com.openexchange.tasks.FailedTask01
 ```
 
-## List executed update tasks for a schema
+## List executed, pending and/or excluded update tasks for a schema
 
-The ``listExecutedTasks`` is supposed to be used in order to list all update tasks that have been executed on a specified database schema.
-
-### Parameters
-
-- ``-H,--host <arg>``  
-The optional JMX host (default:localhost)
-- ``-h,--help``  
-Prints a help text.
-- ``-l,--login <arg>``  
-The optional JMX login (if JMX has authentication enabled)
-- ``-n,--name <arg>``  
-A valid schema name.
-- ``-p,--port <arg>``  
-The optional JMX port (default:9999)
-- ``--responsetimeout <arg>``  
-The optional response timeout in seconds when reading data from server (default: 0s; infinite)
-- ``-s,--password <arg>``  
-The optional JMX password (if JMX has authentication enabled)
-
-### Examples
-
-```
-./listExecutedUpdateTasks -l admin -s secret -n openxchangedb
-taskName                                                                               successful lastModified
-com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTask                     true       2009-12-23 10:43:51 CET
-com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask                     true       2009-12-23 10:43:51 CET
-com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch            true       2009-12-23 10:43:51 CET
-com.openexchange.groupware.update.tasks.DelFolderTreeTableUpdateTask                   true       2009-12-23 10:43:51 CET
-com.openexchange.groupware.update.tasks.MALPollCreateTableTask                         true       2009-12-23 10:43:51 CET
- ...
-com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUsedColumnTask                true       2016-03-16 16:33:10 CET
-com.openexchange.drive.checksum.rdb.DirectoryChecksumsReIndexTaskV2                    true       2016-03-16 16:33:10 CET
-com.openexchange.usm.database.ox.update.USMDeleteStoredProceduresUpdateTaskV2          true       2016-04-11 14:37:30 CEST
-com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask      true       2016-04-11 14:37:30 CEST
-com.openexchange.groupware.update.tasks.UserSettingMediumTextTask                      true       2016-04-29 07:57:44 CEST
-com.openexchange.groupware.update.tasks.Release781UpdateTask                           true       2016-05-01 09:12:07 CEST
-com.openexchange.share.limit.rdb.FileAccessCreateTableTask                             true       2016-05-12 10:04:18 CEST
-com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask   true       2016-05-30 11:31:40 CEST
-com.openexchange.download.limit.rdb.FileAccessCreateTableTask                          true       2016-06-08 16:51:59 CEST
-com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask true       2016-06-23 11:57:13 CEST
-```
-
-## List pending and excluded update tasks for a schema
-
-The ``listPendingUpdateTasks`` command line tool can be used to list all pending and excluded update tasks, i.e. the tasks that were either not executed yet, or were excluded via the ``excludedupdatetasks.properties`` file or via a namespace.
+The ``listExecutedUpdateTasks`` can to be used to list all update tasks that have been executed on a specified database schema as well as all pending and excluded ones, i.e. the tasks that were either not executed yet, or were excluded via the ``excludedupdatetasks.properties`` file or via a namespace..
 
 ### Parameters
 
- - ``-A,--adminuser <arg>``
+ - ``-A,--adminuser <masterAdmin>``
  The master admin username
  - ``-a,--all``
  Lists all pending and excluded update tasks (both via excludedupdate.properties' file and namespace)
- - ``-e,--pending``
- Lists only the pending update tasks
+ - ``-e,--executed``
+ Lists all executed (ran at least once) update tasks of a schema
+ - ``-g,--pending``
+ Lists only the pending update tasks, i.e. those that were never executed but are due for execution.
  - ``-h,--help``
  Prints a help text
- - ``-n,--name <arg>``
+ - ``-n,--name <schemaName>``
  A valid schema name.
- - ``-p,--port <arg>``
+ - ``-p,--port <rmiPort>``
  The optional RMI port (default:1099)
- -  ``-P,--adminpass <arg>``
+ -  ``-P,--adminpass <masterPassword>``
  The master admin password
  - ``--responsetimeout <arg>``
  The optional response timeout in seconds when reading data from server (default: 0s; infinite)
@@ -235,12 +193,24 @@ The ``listPendingUpdateTasks`` command line tool can be used to list all pending
  - ``-xn,--excluded-via-namespace``
  Lists only the update tasks excluded via namespace
  
- The switches ``-a``, ``-e``, ``-x``, ``-xf`` and ``-xn`` are mutually exclusive AND mandatory.
+ Lists executed, pending and excluded update tasks of a schema specified by
+the '``-n``' switch (mandatory). The switches '``-a``', '``-e``', '``-g``', '``-x``', '``-xf``'
+and '``-xn``' are mutually exclusive AND mandatory.
+
+ An overall database status of all schemata can be retrieved via the
+'``checkdatabase``' command line tool.
+
+An update task may be in 'pending' state for three reasons:
+  a) It was never executed before and is due for execution
+  b) It is excluded via a namespace
+  c) It is excluded via an entry in the 'excludeupdatetasks.properties'
 
 ### Examples
 
+List all pending and excluded update tasks
+
 ```
-./listPendingUpdateTasks -A oxadminmaster -P secret -a -n oxdatabase_1337
+./listExecutedUpdateTasks -A oxadminmaster -P secret -a -n oxdatabase_1337
 taskName                                                                                                state                                            
 com.openexchange.oauth.impl.internal.groupware.RemoveLinkedInScopeUpdateTask                            pending                                          
 com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectRangesTask                           pending                                          
@@ -289,6 +259,30 @@ com.openexchange.file.storage.rdb.groupware.FileStorageConvertUtf8ToUtf8mb4Task 
 com.openexchange.net.ssl.management.storage.SSLCertificateManagementTableUtf8Mb4UpdateTask              excluded via namespace 'groupware.utf8mb4'       
 com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task                        excluded via namespace 'groupware.utf8mb4'   
 ```
+
+List all executed update tasks
+
+```
+./listExecutedUpdateTasks -l oxadminmaster -s secret -n openxchangedb -e
+taskName                                                                               successful lastModified
+com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTask                     true       2009-12-23 10:43:51 CET
+com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask                     true       2009-12-23 10:43:51 CET
+com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch            true       2009-12-23 10:43:51 CET
+com.openexchange.groupware.update.tasks.DelFolderTreeTableUpdateTask                   true       2009-12-23 10:43:51 CET
+com.openexchange.groupware.update.tasks.MALPollCreateTableTask                         true       2009-12-23 10:43:51 CET
+ ...
+com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUsedColumnTask                true       2016-03-16 16:33:10 CET
+com.openexchange.drive.checksum.rdb.DirectoryChecksumsReIndexTaskV2                    true       2016-03-16 16:33:10 CET
+com.openexchange.usm.database.ox.update.USMDeleteStoredProceduresUpdateTaskV2          true       2016-04-11 14:37:30 CEST
+com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask      true       2016-04-11 14:37:30 CEST
+com.openexchange.groupware.update.tasks.UserSettingMediumTextTask                      true       2016-04-29 07:57:44 CEST
+com.openexchange.groupware.update.tasks.Release781UpdateTask                           true       2016-05-01 09:12:07 CEST
+com.openexchange.share.limit.rdb.FileAccessCreateTableTask                             true       2016-05-12 10:04:18 CEST
+com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask   true       2016-05-30 11:31:40 CEST
+com.openexchange.download.limit.rdb.FileAccessCreateTableTask                          true       2016-06-08 16:51:59 CEST
+com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask true       2016-06-23 11:57:13 CEST
+```
+
 
 ## Trigger all pending update tasks for a specific schema
 
