@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,6 +66,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Tue Jan 08 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2019-01-14 (5023)
 * Fri Nov 23 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 RC 1 for 7.10.1 release
 * Fri Nov 02 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
