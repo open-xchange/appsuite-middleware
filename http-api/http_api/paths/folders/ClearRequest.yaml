@@ -10,6 +10,11 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamFolderTree"
       - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push token to restrict the generated drive event
+        required: false
       - in: body
         name: body
         description: A JSON array with object IDs of the folders.

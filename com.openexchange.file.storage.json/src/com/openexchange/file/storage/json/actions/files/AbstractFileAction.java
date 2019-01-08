@@ -81,6 +81,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -217,6 +219,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         AJAXInfostoreRequest req = new AJAXInfostoreRequest(requestData, session);
         try {
             before(req);
+            parsePushTokenParameter(req);
             AJAXRequestResult result = handle(req);
             success(req, result);
             return result;
@@ -394,7 +397,19 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         }
         scan(isClosure, metadata.getFilename(), metadata.getFileId(), metadata.getFilesize());
     }
-
+    
+    /**
+     * Retrieves the optional pushToken parameter from the request and adds it to the session
+     *
+     * @param request The request of the action call
+     */
+    private void parsePushTokenParameter(AJAXInfostoreRequest request) {
+        String pushToken = request.getParameter("pushToken");
+        if (Strings.isNotEmpty(pushToken)) {
+            request.getSession().setParameter(Session.PARAM_PUSH_TOKEN, pushToken);
+        }
+    }
+    
     /**
      * Scans the items that are denoted with the specified {@link IdVersionPair}s (if a scan is requested by the specified
      * {@link InfostoreRequest}, i.e. via the <code>scan</code> URL parameter). If the <code>recursive</code> flag

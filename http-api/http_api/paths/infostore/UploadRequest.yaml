@@ -107,6 +107,11 @@
          Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability. 
          If set the id parameter must also be set to the id previously recieved from the first/starting request.
         required: false
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push token to restrict the generated drive event
+        required: false
       - in: body
         description: The binary file
         name: binary

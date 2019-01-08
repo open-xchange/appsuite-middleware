@@ -144,7 +144,7 @@ public class SaveAsAction extends AbstractWriteAction {
             /*
              * save attachment in storage, ignoring potential warnings
              */
-            List<Field> modifiedColumns = null != sentColumns ? new ArrayList<Field>(sentColumns) : new ArrayList<Field>();
+            List<Field> modifiedColumns = null != sentColumns ? new ArrayList<>(sentColumns) : new ArrayList<>();
             modifiedColumns.add(Field.FILENAME);
             modifiedColumns.add(Field.FILE_SIZE);
             modifiedColumns.add(Field.FILE_MIMETYPE);

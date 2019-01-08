@@ -126,8 +126,8 @@ public class CopyAction extends AbstractWriteAction {
         IDBasedFolderAccess folderAccess = request.getFolderAccess();
         String destFolder = request.getFolderId();
 
-        List<String> newFiles = new LinkedList<String>();
-        List<String> newFolders = new LinkedList<String>();
+        List<String> newFiles = new LinkedList<>();
+        List<String> newFolders = new LinkedList<>();
 
         boolean error = true;
         try {
