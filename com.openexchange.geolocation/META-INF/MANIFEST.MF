@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.geolocation
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.database,
+Import-Package: com.openexchange.annotation,
+ com.openexchange.database,
  com.openexchange.database.migration,
  com.openexchange.database.migration.resource.accessor,
  com.openexchange.exception,
