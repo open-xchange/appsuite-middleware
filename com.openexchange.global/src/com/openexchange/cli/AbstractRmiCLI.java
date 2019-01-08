@@ -156,12 +156,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             addOptions(options);
 
             // Check if help output is requested
-            Arrays.sort(args);
-            if (Arrays.binarySearch(args, "-h") >= 0 || Arrays.binarySearch(args, "--help") >= 0) {
-                printHelp(options);
-                System.exit(0);
-                return null;
-            }
+            helpRequested(args);
 
             // Initialize command-line parser & parse arguments
             CommandLineParser parser = new PosixParser();
