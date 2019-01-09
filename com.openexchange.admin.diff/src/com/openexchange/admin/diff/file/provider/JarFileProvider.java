@@ -109,13 +109,8 @@ public class JarFileProvider implements IConfigurationFileProvider {
         }
 
         for (File currentFile : filesToAdd) {
-
-            JarFile jarFile;
-            try {
-                jarFile = new JarFile(currentFile);
-                final Enumeration<JarEntry> entries = jarFile.entries();
-
-                while (entries.hasMoreElements()) {
+            try (JarFile jarFile = new JarFile(currentFile);) {
+                for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
                     final JarEntry entry = entries.nextElement();
                     final String entryName = entry.getName();
 
@@ -123,20 +118,19 @@ public class JarFileProvider implements IConfigurationFileProvider {
                     final int slashIdx = entryName.lastIndexOf('/');
                     if (slashIdx > 0) {
                         final String entryExt = entryName.substring(slashIdx + 1);
-
                         if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE) && entryName.contains("conf/")) {
-                            InputStream inputStream = jarFile.getInputStream(entry);
+                            InputStream inputStream = null;
                             try {
+                                inputStream = jarFile.getInputStream(entry);
                                 String fileContent = IOUtils.toString(inputStream);
                                 IOUtils.closeQuietly(inputStream);
                                 inputStream = null;
+
                                 String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory.getAbsolutePath());
                                 ConfigurationFile configurationFile = new ConfigurationFile(entryExt, rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
                                 ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                             } finally {
-                                if (null != inputStream) {
-                                    IOUtils.closeQuietly(inputStream);
-                                }
+                                IOUtils.closeQuietly(inputStream);
                             }
                         }
                     }
