@@ -72,6 +72,7 @@ import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -97,45 +98,35 @@ public class Participants implements ChangeDescriptionGenerator {
         ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE, NEEDS_ACTION
     }
 
-    private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>() {
+    private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>(6, 0.9f);
 
-        {
-            put(ChangeType.ADD, Messages.HAS_ADDED_PARTICIPANT);
+    static {
+        PARTICIPANT_MESSAGE_MAP.put(ChangeType.ADD, Messages.HAS_ADDED_PARTICIPANT);
 
-            put(ChangeType.REMOVE, Messages.HAS_REMOVED_PARTICIPANT);
+        PARTICIPANT_MESSAGE_MAP.put(ChangeType.REMOVE, Messages.HAS_REMOVED_PARTICIPANT);
 
-            put(ChangeType.ACCEPT, Messages.HAS_CHANGED_STATE);
-            put(ChangeType.DECLINE, Messages.HAS_CHANGED_STATE);
-            put(ChangeType.TENTATIVE, Messages.HAS_CHANGED_STATE);
+        PARTICIPANT_MESSAGE_MAP.put(ChangeType.ACCEPT, Messages.HAS_CHANGED_STATE);
+        PARTICIPANT_MESSAGE_MAP.put(ChangeType.DECLINE, Messages.HAS_CHANGED_STATE);
+        PARTICIPANT_MESSAGE_MAP.put(ChangeType.TENTATIVE, Messages.HAS_CHANGED_STATE);
 
-        }
-    };
+    }
 
-    private static final Map<ChangeType, String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>() {
+    private static final Map<ChangeType, String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>(3, 0.9f);
 
-        {
-            put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
-            put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
-        }
-    };
+    static {
+        GROUP_MESSAGE_MAP.put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
+        GROUP_MESSAGE_MAP.put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
+    }
 
-    private static final Map<ChangeType, String> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, String>() {
+    private static final Map<ChangeType, String> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, String>(3, 0.9f);
 
-        {
-            put(ChangeType.ADD, Messages.HAS_ADDED_RESOURCE);
-            put(ChangeType.REMOVE, Messages.HAS_REMOVED_RESOURCE);
-        }
-    };
+    static {
+        RESOURCE_MESSAGE_MAP.put(ChangeType.ADD, Messages.HAS_ADDED_RESOURCE);
+        RESOURCE_MESSAGE_MAP.put(ChangeType.REMOVE, Messages.HAS_REMOVED_RESOURCE);
+    }
 
-    private final UserService     users;
-    private final GroupService    groups;
-    private final ResourceService resources;
-
-    public Participants(UserService users, GroupService groups, ResourceService resources) {
+    public Participants() {
         super();
-        this.users = users;
-        this.groups = groups;
-        this.resources = resources;
     }
 
     @Override
@@ -158,8 +149,9 @@ public class Participants implements ChangeDescriptionGenerator {
 
         List<Sentence> changes = new ArrayList<Sentence>();
 
+        UserService userService = Services.getService(UserService.class, true);
         for (Integer attendeeId : attendeeIds) {
-            User u = users.getUser(i(attendeeId), ctx);
+            User u = userService.getUser(i(attendeeId), ctx);
             ChangeType changeType = attendeeChange.get(attendeeId);
             writeChange(changes, u.getDisplayName(), changeType);
         }
@@ -171,8 +163,9 @@ public class Participants implements ChangeDescriptionGenerator {
             writeChange(changes, mail, changeType);
         }
 
+        GroupService groupService = Services.getService(GroupService.class, true);
         for (Entry<Integer, ChangeType> change : groupChange.entrySet()) {
-            Group group = groups.getGroup(ctx, i(change.getKey()));
+            Group group = groupService.getGroup(ctx, i(change.getKey()));
             ChangeType changeType = change.getValue();
             if (changeType == null) {
                 continue;
@@ -186,6 +179,7 @@ public class Participants implements ChangeDescriptionGenerator {
             }
         }
 
+        ResourceService resources = Services.getService(ResourceService.class, true);
         for (Entry<Integer, ChangeType> entry : resourceChange.entrySet()) {
             Resource resource = resources.getResource(i(entry.getKey()), ctx);
             ChangeType changeType = entry.getValue();

@@ -54,17 +54,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriber;
-import com.openexchange.chronos.itip.generators.changes.generators.Details;
-import com.openexchange.chronos.itip.generators.changes.generators.Participants;
-import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
 
 /**
  * {@link ChangeHelper}
@@ -86,7 +78,7 @@ public class ChangeHelper {
 
     private final TimeZone timezone;
 
-    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, final ServiceLookup services) {
+    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper) {
         super();
         this.original = original;
         this.update = update;
@@ -95,12 +87,8 @@ public class ChangeHelper {
         this.timezone = tz;
         this.wrapper = wrapper;
         this.ctx = ctx;
-        final Rescheduling rescheduling = new Rescheduling();
-        final Participants participants = new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class));
-        final Details details = new Details();
-        Transparency shownAs = new Transparency();
-
-        describer = new ChangeDescriber(rescheduling, details, participants, shownAs);
+        
+        describer = new ChangeDescriber();
 
     }
 

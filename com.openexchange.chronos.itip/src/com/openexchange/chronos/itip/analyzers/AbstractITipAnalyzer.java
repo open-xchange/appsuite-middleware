@@ -81,10 +81,6 @@ import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriber;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
-import com.openexchange.chronos.itip.generators.changes.generators.Details;
-import com.openexchange.chronos.itip.generators.changes.generators.Participants;
-import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
@@ -93,10 +89,8 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
 
 /**
@@ -152,8 +146,6 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
         final ContextService contexts = Services.getService(ContextService.class);
         final UserService users = Services.getService(UserService.class);
-        final GroupService groups = Services.getService(GroupService.class);
-        final ResourceService resources = Services.getService(ResourceService.class);
 
         final Context ctx = contexts.getContext(session.getContextId());
         final User user = users.getUser(session.getUserId(), ctx);
@@ -179,7 +171,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             return;
         }
 
-        final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(), new Details(), new Participants(users, groups, resources), new Transparency());
+        final ChangeDescriber cd = new ChangeDescriber();
 
         final List<String> descriptions = cd.getChanges(ctx, currentEvent, newEvent, change.getDiff(), wrapper, user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()));
         change.setDiffDescription(descriptions);
