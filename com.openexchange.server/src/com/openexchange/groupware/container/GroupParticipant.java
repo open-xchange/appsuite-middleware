@@ -128,9 +128,9 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
     public int compareTo(Participant part) {
         final int retval;
         if (GROUP == part.getType()) {
-            retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
+            retval = Integer.compare(id, part.getIdentifier());
         } else {
-            retval = Integer.valueOf(GROUP).compareTo(Integer.valueOf(part.getType()));
+            retval = Integer.compare(GROUP, part.getType());
         }
         return retval;
     }
