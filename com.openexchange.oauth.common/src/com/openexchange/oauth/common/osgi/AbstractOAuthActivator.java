@@ -79,7 +79,7 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthActivator.class);
 
     //@formatter:off
-    protected static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, ConfigViewFactory.class, DeferringURLService.class, 
+    protected static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, ConfigViewFactory.class, DeferringURLService.class,
         CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class, SSLConfigurationService.class };
     //@formatter:on
 
@@ -92,21 +92,21 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
 
     /**
      * Creates a new {@link OAuthServiceMetaData} instance for the current service provider
-     * 
+     *
      * @return The new {@link OAuthServiceMetaData}
      */
     protected abstract OAuthServiceMetaData getOAuthServiceMetaData();
 
     /**
      * Returns an array with all valid scopes for this provider
-     * 
+     *
      * @return an array with all valid scopes for this provider
      */
     protected abstract OAuthScope[] getScopes();
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
@@ -116,7 +116,7 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
     @Override
@@ -163,7 +163,7 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
     @Override
@@ -178,5 +178,6 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
         if (capabilityService != null) {
             capabilityService.undeclareCapability(metaData.getAPI().getCapability());
         }
+        super.stopBundle();
     }
 }
