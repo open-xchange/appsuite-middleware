@@ -355,7 +355,7 @@ public class DropPublicationTablesTask implements UpdateTaskV2 {
         void accept(T t) throws SQLException;
     }
 
-    private class PublicationUser {
+    private static class PublicationUser {
 
         String name;
 
