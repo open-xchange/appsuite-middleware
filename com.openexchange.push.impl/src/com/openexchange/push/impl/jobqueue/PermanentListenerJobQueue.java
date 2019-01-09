@@ -70,6 +70,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.impl.PushManagerRegistry;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link PermanentListenerJobQueue}
@@ -170,7 +171,17 @@ public class PermanentListenerJobQueue {
             }
 
             // Add to queue in case job was newly created
-            jobs.offer(newJob);
+            boolean offered = jobs.offer(newJob);
+            if (false == offered) {
+                // Could not be offered to job queue. Run with this thread...
+                try {
+                    newJob.run();
+                    PushListener pushListener = ThreadPools.getFrom(newJob);
+                    return new AlreadyExecutedPermanentListenerJob(pushUser, pushListener);
+                } catch (Exception e) {
+                    return new AlreadyExecutedPermanentListenerJob(pushUser, e);
+                }
+            }
 
             // Ensure worker is active
             if (null == workerReference.get()) {
@@ -352,6 +363,55 @@ public class PermanentListenerJobQueue {
         @Override
         public PushListener get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return future.get(timeout, unit);
+        }
+
+        @Override
+        public int compareTo(PermanentListenerJob o) {
+            return pushUser.compareTo(o.getPushUser());
+        }
+    }
+
+    private static class AlreadyExecutedPermanentListenerJob implements PermanentListenerJob {
+
+        private final PushUser pushUser;
+        private final PushListener pushListener;
+        private final Exception executionException;
+
+        AlreadyExecutedPermanentListenerJob(PushUser pushUser, PushListener pushListener) {
+            super();
+            this.pushUser = pushUser;
+            this.pushListener = pushListener;
+            this.executionException = null;
+        }
+
+        AlreadyExecutedPermanentListenerJob(PushUser pushUser, Exception executionException) {
+            super();
+            this.pushUser = pushUser;
+            this.executionException = executionException;
+            this.pushListener = null;
+        }
+
+        @Override
+        public PushUser getPushUser() {
+            return pushUser;
+        }
+
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        public PushListener get() throws InterruptedException, ExecutionException {
+            if (null != executionException) {
+                throw new ExecutionException(executionException);
+            }
+            return pushListener;
+        }
+
+        @Override
+        public PushListener get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return get();
         }
 
         @Override
