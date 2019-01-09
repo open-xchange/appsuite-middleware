@@ -82,7 +82,7 @@ public class Organizer implements ChangeDescriptionGenerator {
     public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException {
         List<Sentence> changes = new ArrayList<Sentence>();
         if (diff.containsAnyChangeOf(FIELDS)) {
-            changes.add(new Sentence(Messages.ORGANIZER_CHANGE).add(updated.getOrganizer().getEMail(), ArgumentType.UPDATED));
+            changes.add(new Sentence(Messages.ORGANIZER_CHANGE).add(updated.getOrganizer().getEMail(), ArgumentType.EMPHASIZED));
         }
         return changes;
     }
