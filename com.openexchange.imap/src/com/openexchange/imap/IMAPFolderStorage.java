@@ -1724,14 +1724,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             ListLsubEntry moveMeEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null == moveMeEntry || !moveMeEntry.exists()) {
                 ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, moveMe);
-                if (null == listInfo && false == canBeOpened(moveMe)) {
-                    moveMe = checkForNamespaceFolder(fullName);
-                    if (null == moveMe) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                if (null == listInfo) {
+                    if (false == canBeOpened(moveMe)) {
+                        moveMe = checkForNamespaceFolder(fullName);
+                        if (null == moveMe) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                        throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
                     }
-                    throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
+                    separator = getSeparator();
+                } else {
+                    separator = listInfo.separator;
                 }
-                separator = listInfo.separator;
             } else {
                 separator = moveMeEntry.getSeparator();
             }
