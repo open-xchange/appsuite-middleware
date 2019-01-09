@@ -47,53 +47,57 @@
  *
  */
 
-package com.openexchange.geolocation.osgi;
+package com.openexchange.geolocation.impl;
 
-import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoLocationRMIService;
-import com.openexchange.geolocation.GeoLocationStorageService;
-import com.openexchange.geolocation.impl.GeoLocationRMIServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link GeoLocationActivator}
+ * {@link GeoLocationRMIServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class GeoLocationActivator extends HousekeepingActivator {
+public class GeoLocationRMIServiceImpl implements GeoLocationRMIService {
+
+    private final ServiceLookup services;
 
     /**
-     * Initialises a new {@link GeoLocationActivator}.
+     * Initialises a new {@link GeoLocationRMIServiceImpl}.
+     * 
+     * @param services the {@link ServiceLookup} instance
      */
-    public GeoLocationActivator() {
+    public GeoLocationRMIServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.geolocation.GeoLocationRMIService#getGlobalDatabaseName(java.lang.String)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put("RMIName", GeoLocationRMIService.RMI_NAME);
-        registerService(Remote.class, new GeoLocationRMIServiceImpl(this), props);
-        track(GeoLocationStorageService.class, new GeoLocationServiceRegistrationTracker(context));
-        openTrackers();
+    public String getGlobalDatabaseName(String group) throws RemoteException {
+        DatabaseService service = null;
+        Connection connection = null;
+        try {
+            service = services.getServiceSafe(DatabaseService.class);
+            connection = service.getReadOnlyForGlobal(group);
+            return connection.getCatalog();
+        } catch (OXException e) {
+            throw new RemoteException(e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new RemoteException(e.getMessage(), e);
+        } finally {
+            if (service != null) {
+                service.backReadOnlyForGlobal(group, connection);
+            }
+        }
     }
 }

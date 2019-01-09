@@ -47,53 +47,27 @@
  *
  */
 
-package com.openexchange.geolocation.osgi;
+package com.openexchange.geolocation;
 
 import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.geolocation.GeoLocationRMIService;
-import com.openexchange.geolocation.GeoLocationStorageService;
-import com.openexchange.geolocation.impl.GeoLocationRMIServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.rmi.RemoteException;
 
 /**
- * {@link GeoLocationActivator}
+ * {@link GeoLocationRMIService} - Provides RMI utilities for the {@link GeoLocationService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class GeoLocationActivator extends HousekeepingActivator {
+public interface GeoLocationRMIService extends Remote {
+    
+    public static final String RMI_NAME = GeoLocationRMIService.class.getSimpleName();
 
     /**
-     * Initialises a new {@link GeoLocationActivator}.
-     */
-    public GeoLocationActivator() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Retrieves the global database name for the specified group
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @param group The group for which to retrieve the name of the global database
+     * @return the global database name for the specified group
+     * @throws RemoteException if an error is occurred
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put("RMIName", GeoLocationRMIService.RMI_NAME);
-        registerService(Remote.class, new GeoLocationRMIServiceImpl(this), props);
-        track(GeoLocationStorageService.class, new GeoLocationServiceRegistrationTracker(context));
-        openTrackers();
-    }
+    String getGlobalDatabaseName(String group) throws RemoteException;
 }
