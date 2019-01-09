@@ -49,34 +49,64 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.test.concurrent.ParallelSuite;
+import java.util.Calendar;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.junit.Test;
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.reports.SyncCollectionReportInfo;
 
 /**
- * {@link CalDAVTestSuite} - Testsuite for the CalDAV interface.
+ * {@link SyncTokenTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.2
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ // @formatter:off
-    NewTest.class,
-    FreeBusyTest.class,
-    MkCalendarTest.class,
-    CookieTest.class,
-    ConfirmationTest.class,
-    AlarmTestEMClient.class,
-    AlarmTestMacCalendar.class,
-    AlarmTestLightning.class,
-    AlarmTestIOSCalendar.class,
-    ExDateTest.class,
-    SplitSeriesTest.class,
-    MailtoEncodingTest.class,
-    GeoTest.class,
-    AvailabilityTest.class, 
-    MoveTest.class,
-    SyncTokenTest.class
-}) // @formatter:on
-public final class CalDAVTestSuite {
+public class SyncTokenTest extends CalDAVTest {
+
+    @Test
+    public void testEmptySyncToken() throws Exception {
+        syncCollection("", StatusCodes.SC_MULTISTATUS);
+    }
+
+    @Test
+    public void testNoSyncToken() throws Exception {
+        syncCollection(null, StatusCodes.SC_MULTISTATUS);
+    }
+
+    @Test
+    public void testRegularSyncToken() throws Exception {
+        syncCollection(String.valueOf(System.currentTimeMillis()), StatusCodes.SC_MULTISTATUS);
+    }
+
+    @Test
+    public void testOutdatedSyncToken() throws Exception {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, -2);
+        syncCollection(String.valueOf(calendar.getTimeInMillis()), StatusCodes.SC_FORBIDDEN);
+    }
+
+    @Test
+    public void testMalformedSyncToken() throws Exception {
+        syncCollection("wurstpeter", StatusCodes.SC_FORBIDDEN);
+    }
+
+    protected MultiStatusResponse[] syncCollection(String syncToken, int expectedResponse) throws Exception {
+        String uri = getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID());
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.GETETAG);
+        ReportInfo reportInfo = new SyncCollectionReportInfo(syncToken, props);
+        ReportMethod report = null;
+        try {
+            report = new ReportMethod(uri, reportInfo);
+            return getWebDAVClient().doReport(report, expectedResponse);
+        } finally {
+            release(report);
+        }
+    }
 
 }

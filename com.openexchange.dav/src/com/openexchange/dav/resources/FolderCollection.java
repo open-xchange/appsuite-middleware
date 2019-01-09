@@ -255,8 +255,8 @@ public abstract class FolderCollection<T> extends DAVCollection {
                 OXException cause = OXException.general("Invalid sync token \"" + token + "\"");
                 throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
+            checkDataAvailability(since, token);
         }
-        checkDataAvailability(since, token);
         try {
             /*
              * get sync-status
