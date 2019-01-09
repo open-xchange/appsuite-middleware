@@ -143,6 +143,10 @@ public class SessionObject implements PutIfAbsent {
         this.contextId = contextId;
     }
 
+    public void setOrigin(Origin origin) {
+        this.origin = origin;
+    }
+
     @Override
     public String getSessionID() {
         return sessionid;
