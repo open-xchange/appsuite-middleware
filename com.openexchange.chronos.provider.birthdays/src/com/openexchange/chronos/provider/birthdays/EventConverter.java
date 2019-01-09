@@ -161,7 +161,7 @@ public class EventConverter {
         RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(seriesEvent, from, until);
         while (iterator.hasNext()) {
             Event occurrence = nextOccurrence(iterator, contact);
-            if (isInRange(occurrence, from, until, timeZone)) {
+            if (null != occurrence && isInRange(occurrence, from, until, timeZone)) {
                 occurrences.add(occurrence);
             }
         }
