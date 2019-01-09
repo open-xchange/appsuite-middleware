@@ -93,7 +93,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
@@ -103,6 +103,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
             getContext().ungetService(reference);
             return null;
         }
+
         synchronized (this) {
             AbstractOAuthFileStorageService service = this.service;
             if (null == service) {
@@ -137,20 +138,20 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
 
     /**
      * Initialises and returns the cloud file storage service
-     * 
+     *
      * @return the cloud file storage service
      */
     protected abstract AbstractOAuthFileStorageService getCloudFileStorageService();
 
     /**
-     * 
+     *
      * @param compositeProvider
      * @return
      */
     protected abstract AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider);
 
     /**
-     * 
+     *
      * @param storageService
      * @return
      */
@@ -158,14 +159,14 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
 
     /**
      * Returns the provider's identifier
-     * 
+     *
      * @return the provider's identifier1
      */
     protected abstract String getProviderId();
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
@@ -175,15 +176,16 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
     public void removedService(ServiceReference<FileStorageAccountManagerProvider> reference, FileStorageAccountManagerProvider service) {
-        if (null == provider) {
-            return;
-        }
         synchronized (this) {
+            if (null == provider) {
+                return;
+            }
+
             CompositeFileStorageAccountManagerProvider compositeProvider = this.service.getCompositeAccountManager();
             if (null == compositeProvider) {
                 unregisterService(reference);
@@ -198,7 +200,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
 
     /**
      * Unregisters the services
-     * 
+     *
      * @param reference The {@link ServiceReference} for the provider
      */
     private void unregisterService(ServiceReference<FileStorageAccountManagerProvider> reference) {
