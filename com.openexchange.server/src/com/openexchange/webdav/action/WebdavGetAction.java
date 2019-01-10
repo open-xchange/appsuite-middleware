@@ -218,7 +218,7 @@ public class WebdavGetAction extends WebdavHeadAction {
         @Override
 		public int compareTo(final ByteRange arg0) {
             final ByteRange other = arg0;
-            return (Long.valueOf(startOffset)).compareTo(Long.valueOf(other.startOffset));
+            return Long.compare(startOffset, other.startOffset);
         }
 
         @Override
