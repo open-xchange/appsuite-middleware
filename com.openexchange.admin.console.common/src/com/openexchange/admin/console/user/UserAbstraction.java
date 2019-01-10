@@ -386,7 +386,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         private final String string;
         private final int index;
-        private boolean required;
+        private final boolean required;
 
         private Constants(String string, boolean required) {
             this.index = INITIAL_CONSTANTS_VALUE + ordinal();
@@ -411,7 +411,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         @Override
         public void setRequired(final boolean required) {
-            this.required = required;
+            throw new UnsupportedOperationException("setRequired() is not supported for Constants." + this.name() + " enum constant");
         }
 
     }
