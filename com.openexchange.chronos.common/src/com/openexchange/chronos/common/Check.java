@@ -336,8 +336,8 @@ public class Check {
      */
     public static Available[] availabilityIsValid(RecurrenceService recurrenceService, Available[] availability) throws OXException {
         if (null != availability) {
-            for (Available available : availability) {
-                Check.availableIsValid(recurrenceService, available);
+            for (int j = availability.length; j-- > 0;) {
+                availability[j] = Check.availableIsValid(recurrenceService, availability[j]);
             }
         }
         return availability;
