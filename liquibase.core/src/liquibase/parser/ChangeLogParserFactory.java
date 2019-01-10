@@ -34,7 +34,7 @@ public class ChangeLogParserFactory {
         changelogParserComparator = new Comparator<ChangeLogParser>() {
             @Override
             public int compare(ChangeLogParser o1, ChangeLogParser o2) {
-                return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
+                return Integer.compare(o2.getPriority(), o1.getPriority());
             }
         };
 
@@ -43,7 +43,7 @@ public class ChangeLogParserFactory {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 
             for (Class<? extends ChangeLogParser> clazz : classes) {
-                    register((ChangeLogParser) clazz.getConstructor().newInstance());
+                    register(clazz.getConstructor().newInstance());
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
