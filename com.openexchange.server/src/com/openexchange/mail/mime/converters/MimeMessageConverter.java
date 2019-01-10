@@ -2089,12 +2089,12 @@ public final class MimeMessageConverter {
                 if (!f.isOpen()) {
                     f.open(Folder.READ_ONLY);
                     try {
-                        extracted(msg, f, ret);
+                        setId(msg, f, ret);
                     } finally {
                         f.close(false);
                     }
                 } else {
-                    extracted(msg, f, ret);
+                    setId(msg, f, ret);
                 }
                 return ret;
             }
@@ -2105,7 +2105,7 @@ public final class MimeMessageConverter {
         return null;
     }
 
-    private static void extracted(final MimeMessage msg, final Folder f, String[] ret) throws MessagingException {
+    private static void setId(final MimeMessage msg, final Folder f, String[] ret) throws MessagingException {
         if (f instanceof UIDFolder) {
             ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
         } else if (f instanceof POP3Folder) {
