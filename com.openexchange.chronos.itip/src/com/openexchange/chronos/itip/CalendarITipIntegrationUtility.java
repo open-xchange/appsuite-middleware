@@ -120,7 +120,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     private Event load(final CalendarSession session, String id) throws OXException {
         CalendarStorage storage = getStorage(session);
         Event event = storage.getEventStorage().loadEvent(id, null);
-        applyEventData(session, storage, event);
+        if (event != null) {
+            applyEventData(session, storage, event);
+        }
         return event;
     }
 
