@@ -57,66 +57,57 @@ import com.openexchange.ajax.AJAXServlet;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Group implements Cloneable {
-	public enum Field{
-		ID(1,AJAXServlet.PARAMETER_ID, "id"),
-		LAST_MODIFIED(5,"last_modified", "lastModified"),
-		SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
-		FULL_NAME(701, "display_name", "displayName"),
-		MEMBERS(702, "members", null);
 
-		private int colNumber;
-		private String ajaxName;
-		private String dbName;
+    public enum Field {
+        ID(1, AJAXServlet.PARAMETER_ID, "id"),
+        LAST_MODIFIED(5, "last_modified", "lastModified"),
+        SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
+        FULL_NAME(701, "display_name", "displayName"),
+        MEMBERS(702, "members", null);
 
-		private Field(int colNumber, String ajaxName, String dbName){
-			this.setColNumber(colNumber);
-			this.setAjaxName(ajaxName);
-			this.setDbName(dbName);
-		}
+        private final int colNumber;
+        private final String ajaxName;
+        private final String dbName;
 
-		public void setColNumber(int colNumber) {
-			this.colNumber = colNumber;
-		}
+        private Field(int colNumber, String ajaxName, String dbName) {
+            this.colNumber = colNumber;
+            this.ajaxName = ajaxName;
+            this.dbName = dbName;
+        }
 
-		public int getColNumber() {
-			return colNumber;
-		}
+        public int getColNumber() {
+            return colNumber;
+        }
 
-		public void setAjaxName(String ajaxName) {
-			this.ajaxName = ajaxName;
-		}
+        public String getAjaxName() {
+            return ajaxName;
+        }
 
-		public String getAjaxName() {
-			return ajaxName;
-		}
+        public String getDbName() {
+            return dbName;
+        }
 
-		public void setDbName(String dbName) {
-			this.dbName = dbName;
-		}
-
-		public String getDbName() {
-			return dbName;
-		}
-
-		public static Field getByColumnNumber(int num){
-			for(Field val: values()){
-				if(val.getColNumber() == num) {
-                    return val;
+        public static Field getByColumnNumber(int num) {
+            if (num > 0) {
+                for (Field val : values()) {
+                    if (val.getColNumber() == num) {
+                        return val;
+                    }
                 }
-			}
-			return null;
-		}
+            }
+            return null;
+        }
 
-		public static int[] intValues(){
-			Field[] vals = values();
-			int[] retVal = new int[vals.length];
-			for(int i = 0; i< vals.length; i++) {
+        public static int[] intValues() {
+            Field[] vals = values();
+            int[] retVal = new int[vals.length];
+            for (int i = 0; i < vals.length; i++) {
                 retVal[i] = vals[i].getColNumber();
             }
-			return retVal;
-		}
+            return retVal;
+        }
 
-	}
+    }
 
 	public static int[] ALL_COLUMNS = new int[]{
 		Field.FULL_NAME.getColNumber(),
@@ -124,6 +115,7 @@ public class Group implements Cloneable {
 		Field.LAST_MODIFIED.getColNumber(),
 		Field.SIMPLE_NAME.getColNumber(),
 		Field.MEMBERS.getColNumber()};
+
 	public static int[] ALL_COLUMNS_EXCEPT_MEMBERS = new int[]{
 		Field.FULL_NAME.getColNumber(),
 		Field.ID.getColNumber(),
