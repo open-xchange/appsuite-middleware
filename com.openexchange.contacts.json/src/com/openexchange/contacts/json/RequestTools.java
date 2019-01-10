@@ -322,17 +322,17 @@ public class RequestTools {
                     int dayOfMonthReference = calendar.get(Calendar.DAY_OF_MONTH);
                     if (month1 == month2 && dayOfMonth1 == dayOfMonth2) {
                         // same month/date, compare years
-                        return Integer.valueOf(year1).compareTo(Integer.valueOf(year2));
+                        return Integer.compare(year1, year2);
                     } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
                         (month2 >= monthReference || month2 == monthReference && dayOfMonth2 >= dayOfMonthReference)) {
                         // both after reference date, use default comparison
-                        int monthResult = Integer.valueOf(month1).compareTo(Integer.valueOf(month2));
-                        return 0 != monthResult ? monthResult : Integer.valueOf(dayOfMonth1).compareTo(Integer.valueOf(dayOfMonth2));
+                        int monthResult = Integer.compare(month1, month2);
+                        return 0 != monthResult ? monthResult : Integer.compare(dayOfMonth1, dayOfMonth2);
                     } else if ((month1 < monthReference || month1 == monthReference && dayOfMonth1 < dayOfMonthReference) &&
                         (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // both before reference date, use default comparison
-                        int monthResult = Integer.valueOf(month1).compareTo(Integer.valueOf(month2));
-                        return 0 != monthResult ? monthResult : Integer.valueOf(dayOfMonth1).compareTo(Integer.valueOf(dayOfMonth2));
+                        int monthResult = Integer.compare(month1, month2);
+                        return 0 != monthResult ? monthResult : Integer.compare(dayOfMonth1, dayOfMonth2);
                     } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
                         (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // first is next
