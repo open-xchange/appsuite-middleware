@@ -185,8 +185,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Updates data of an existing event recurrence and tracks the update in the underlying calendar result.
      *
      * @param originalSeriesMaster The original series master event
-     * @param The recurrence identifier targeting the event occurrence to update
-     * @param eventData The updated event data
+     * @param recurrenceId The recurrence identifier targeting the event occurrence to update
+     * @param updatedEventData The updated event data
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
      */
     protected void updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
