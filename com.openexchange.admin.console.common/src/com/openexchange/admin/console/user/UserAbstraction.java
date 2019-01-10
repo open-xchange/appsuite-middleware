@@ -227,12 +227,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessGlobalAddressBookDisabled(25, OPT_DISABLE_GAB, false);
 
         private final String string;
-
         private final int index;
+        private final boolean required;
 
-        private boolean required;
-
-        private AccessCombinations(final int index, final String string, final boolean required) {
+        private AccessCombinations(int index, String string, boolean required) {
             this.index = index;
             this.string = string;
             this.required = required;
@@ -255,7 +253,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         @Override
         public void setRequired(final boolean required) {
-            this.required = required;
+            throw new UnsupportedOperationException("setRequired() is not supported for AccessCombinations." + this.name() + " enum constant");
         }
     }
 
