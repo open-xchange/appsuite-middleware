@@ -185,9 +185,9 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     public int compareTo(final Participant part) {
         final int retval;
         if (RESOURCE == part.getType()) {
-            retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
+            retval = Integer.compare(id, part.getIdentifier());
         } else {
-            retval = Integer.valueOf(RESOURCE).compareTo(Integer.valueOf(part.getType()));
+            retval = Integer.compare(RESOURCE, part.getType());
         }
         return retval;
     }

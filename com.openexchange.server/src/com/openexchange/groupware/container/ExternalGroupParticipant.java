@@ -181,7 +181,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
                 retval = 0;
             }
         } else {
-            retval = Integer.valueOf(EXTERNAL_GROUP).compareTo(Integer.valueOf(part.getType()));
+            retval = Integer.compare(EXTERNAL_GROUP, part.getType());
         }
         return retval;
     }
