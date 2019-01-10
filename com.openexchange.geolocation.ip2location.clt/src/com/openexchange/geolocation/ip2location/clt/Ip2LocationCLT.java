@@ -79,7 +79,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
     private static final String USAGE = "ip2location";
     private static final String FOOTER = "";
-    
+
     /**
      * The identifier of the LITE version
      */
@@ -165,7 +165,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("u", "database-user", "database-user", "The database user for importing the data.", true));
         options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
         options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
-        options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested", false));
+        options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested. If absent, then the full version of the database will be requested.", false));
     }
 
     /*
@@ -389,7 +389,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private void importDatabase() {
         //@formatter:off
-        String[] importData = { "/usr/local/mysql/bin/mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
+        String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
                 + "START TRANSACTION;"
                 + "TRUNCATE `" + TABLE_NAME + "`;"
                 + "LOAD DATA LOCAL INFILE '" + databaseFilename + "' " + "INTO TABLE `" + TABLE_NAME + "` " + "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\r\\n' IGNORE 0 LINES;"

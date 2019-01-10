@@ -105,7 +105,7 @@ public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage impleme
         return DefaultGeoInformation.builder()
             .city(resultSet.getString("city_name"))
             .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("zip_code"))
+            .postalCode(resultSet.getString("zip_code"))
             .build();
         //@formatter:on
     }

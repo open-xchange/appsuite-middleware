@@ -49,6 +49,8 @@
 
 package com.openexchange.geolocation;
 
+import com.openexchange.java.Strings;
+
 /**
  * {@link DefaultGeoInformation} - The default (immutable) implementation for {@link GeoInformation}.
  *
@@ -72,7 +74,7 @@ public class DefaultGeoInformation implements GeoInformation {
         private String continent = "N/A";
         private String country = "N/A";
         private String city = "N/A";
-        private int postalCode;
+        private String postalCode = "N/A";
 
         /**
          * 0: postal // 00001 1
@@ -137,9 +139,9 @@ public class DefaultGeoInformation implements GeoInformation {
          * @param postalCode The postalCode to set
          * @return This builder
          */
-        public Builder postalCode(int postalCode) {
+        public Builder postalCode(String postalCode) {
             this.postalCode = postalCode;
-            if (postalCode > 0) {
+            if (Strings.isNotEmpty(postalCode)) {
                 bitmask = (short) (bitmask | 1);
             }
             return this;
@@ -160,10 +162,10 @@ public class DefaultGeoInformation implements GeoInformation {
     private final String continent;
     private final String country;
     private final String city;
-    private final int postalCode;
+    private final String postalCode;
     private final short bitmask;
 
-    DefaultGeoInformation(String continent, String country, String city, int postalCode, short bitmask) {
+    DefaultGeoInformation(String continent, String country, String city, String postalCode, short bitmask) {
         super();
         this.continent = continent;
         this.country = country;
@@ -188,7 +190,7 @@ public class DefaultGeoInformation implements GeoInformation {
     }
 
     @Override
-    public int getPostalCode() {
+    public String getPostalCode() {
         return postalCode;
     }
 

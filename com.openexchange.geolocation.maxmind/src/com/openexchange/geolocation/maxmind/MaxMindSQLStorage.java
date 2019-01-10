@@ -96,7 +96,7 @@ public final class MaxMindSQLStorage extends AbstractGeoLocationSQLStorage imple
             .city(resultSet.getString("city_name"))
             .continent(resultSet.getString("continent_name"))
             .country(resultSet.getString("country_name"))
-            .postalCode(resultSet.getInt("postal_code"))
+            .postalCode(resultSet.getString("postal_code"))
             .build();
         //@formatter:on
     }

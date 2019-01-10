@@ -83,7 +83,7 @@ public interface GeoInformation {
      *
      * @return The postalCode
      */
-    int getPostalCode();
+    String getPostalCode();
 
     /**
      * Gets the hasContinent
