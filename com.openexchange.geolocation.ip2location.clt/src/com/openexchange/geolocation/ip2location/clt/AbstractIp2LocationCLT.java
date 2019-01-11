@@ -49,12 +49,20 @@
 
 package com.openexchange.geolocation.ip2location.clt;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URLConnection;
+import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
@@ -73,6 +81,10 @@ abstract class AbstractIp2LocationCLT extends AbstractRmiCLI<Void> {
      * Table name of the ip2location database
      */
     protected static final String TABLE_NAME = "ip2location";
+    /**
+     * The extraction working directory
+     */
+    protected static final String EXTRACT_DIRECTORY = File.separator + "tmp";
 
     private final String usage;
     private final String footer;
@@ -93,6 +105,19 @@ abstract class AbstractIp2LocationCLT extends AbstractRmiCLI<Void> {
      * The global database name retrieved via RMI
      */
     private String dbName;
+    /**
+     * Influenced by '-k'
+     */
+    protected boolean keep = false;
+
+    /**
+     * The absolute path of the downloaded file
+     */
+    protected String downloadFilePath;
+    /**
+     * The absolute path of the database file contained within the downloaded zip file
+     */
+    protected String databaseFilePath;
 
     /**
      * Initialises a new {@link AbstractIp2LocationCLT}.
@@ -113,6 +138,7 @@ abstract class AbstractIp2LocationCLT extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("u", "database-user", "database-user", "The database user for importing the data.", true));
         options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
         options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
+        options.addOption(createSwitch("k", "keep", "Keeps the temporary files produced from this command line tool (zip archives, downloaded and extracted files).", false));
     }
 
     /*
@@ -122,6 +148,7 @@ abstract class AbstractIp2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
+
         if (cmd.hasOption('u')) {
             dbUser = cmd.getOptionValue('u');
         }
@@ -190,5 +217,126 @@ abstract class AbstractIp2LocationCLT extends AbstractRmiCLI<Void> {
             dbName = rmiService.getGlobalDatabaseName(dbGroup);
         }
         return dbName;
+    }
+
+    /**
+     * Extracts the database file to '/tmp' and sets the 'databaseFilename' path for future use.
+     * 
+     * @throws IOException if an I/O error is occurred
+     */
+    protected void extractDatase() throws IOException {
+        System.out.println("Extracting the archive '" + downloadFilePath + "' in '" + EXTRACT_DIRECTORY + "'...");
+        FileInputStream fis = new FileInputStream(new File(downloadFilePath));
+        ZipInputStream zis = new ZipInputStream(fis);
+        ZipEntry ze = zis.getNextEntry();
+        byte[] buffer = new byte[1024];
+        while (ze != null) {
+            String fileName = ze.getName();
+            File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
+            if (false == keep) {
+                newFile.deleteOnExit();
+            }
+            if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
+                databaseFilePath = newFile.getAbsolutePath();
+            }
+            System.out.println("Extracting to " + newFile.getAbsolutePath());
+
+            new File(newFile.getParent()).mkdirs();
+            FileOutputStream fos = new FileOutputStream(newFile);
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+
+            fos.close();
+
+            zis.closeEntry();
+            ze = zis.getNextEntry();
+        }
+        //close last ZipEntry
+        zis.closeEntry();
+        zis.close();
+        fis.close();
+
+        if (databaseFilePath == null || databaseFilePath.isEmpty()) {
+            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + EXTRACT_DIRECTORY + "'");
+            System.exit(-1);
+            return;
+        }
+        System.out.println("OK");
+    }
+
+    /**
+     * Imports the data into the specified database
+     */
+    protected void importDatabase(String optRmiHostName) throws Exception {
+        String dbName = getGlobalDatabaseName(optRmiHostName);
+        //@formatter:off
+        String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
+                + "START TRANSACTION;"
+                + "TRUNCATE `" + TABLE_NAME + "`;"
+                + "LOAD DATA LOCAL INFILE '" + databaseFilePath + "' " + "INTO TABLE `" + TABLE_NAME + "` " + "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\r\\n' IGNORE 0 LINES;"
+                + "COMMIT;"
+                + "SET autocommit=1;"};
+        //@formatter:on
+        Process runtimeProcess;
+        try {
+            System.out.println("Using database file '" + databaseFilePath + "'.");
+            System.out.print("Importing data to schema '" + dbName + "' in table '" + TABLE_NAME + "'...");
+
+            ProcessBuilder processBuilder = new ProcessBuilder(importData);
+            runtimeProcess = processBuilder.start();
+            int processComplete = runtimeProcess.waitFor();
+            if (processComplete == 0) {
+                System.out.println("OK.");
+                return;
+            }
+            System.out.println("Could not import the data.");
+            printErrors(runtimeProcess.getInputStream());
+            printErrors(runtimeProcess.getErrorStream());
+        } catch (IOException e) {
+            if (e.getMessage().contains("No such file or directory")) {
+                System.out.println("\nERROR: Couldn't find the 'mysql' executable. Ensure that 'mysql' is installed and in your $PATH");
+                System.exit(1);
+                return;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Prints any errors that were encountered during processing
+     * 
+     * @param inputStream the {@link InputStream} that holds the errors
+     * @throws IOException if an I/O error is occurred
+     */
+    private void printErrors(InputStream inputStream) throws IOException {
+        BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = r.readLine()) != null) {
+            System.out.println(line);
+        }
+        r.close();
+    }
+
+    /**
+     * Reads the text response from the specified {@link URLConnection}
+     * 
+     * @param connection The {@link URLConnection} from which to read the text response
+     * @return The text response
+     * @throws IOException if an I/O error is occurred
+     */
+    protected String readTextResponse(URLConnection connection) throws IOException {
+        try (InputStream inputStream = connection.getInputStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder builder = new StringBuilder(128);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+
+            return builder.toString();
+        }
     }
 }

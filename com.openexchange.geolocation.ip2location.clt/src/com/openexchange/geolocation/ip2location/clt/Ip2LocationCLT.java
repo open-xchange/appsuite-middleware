@@ -49,18 +49,13 @@
 
 package com.openexchange.geolocation.ip2location.clt;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
@@ -94,11 +89,6 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
      */
     private static final String DOWNLOAD = "https://www.ip2location.com/download?token=#TOKEN#&file=#PACKAGE#";
     /**
-     * The extraction working directory
-     */
-    private static final String EXTRACT_DIRECTORY = File.separator + "tmp";
-
-    /**
      * Value of '-t'
      */
     private String token;
@@ -106,18 +96,6 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
      * The requested Ip2Location database version. Influenced by '-l'
      */
     private String dbVersion = DB_VERSION;
-    /**
-     * The downloaded filename
-     */
-    private String downloadFilename = "IP2LOCATION-LITE-DB9.CSV.ZIP";
-    /**
-     * The database filename contained within the downloaded zip file
-     */
-    private String databaseFilename;
-    /**
-     * Influenced by '-k'
-     */
-    private boolean keep = false;
 
     /**
      * Entry point
@@ -143,7 +121,6 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
     @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
-        options.addOption(createSwitch("k", "keep", "Keeps the downloaded files.", false));
         options.addOption(createArgumentOption("t", "token", "token", "Download Token", true));
         options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested. If absent, then the full version of the database will be requested.", false));
     }
@@ -220,7 +197,7 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
 
         checkContentType(connection);
 
-        downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
+        String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
 
         InputStream inputStream = connection.getInputStream();
         try {
@@ -228,6 +205,7 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
             if (false == keep) {
                 dbfile.deleteOnExit();
             }
+            this.downloadFilePath = dbfile.getAbsolutePath();
             FileOutputStream output = FileUtils.openOutputStream(dbfile);
             try {
                 IOUtils.copy(inputStream, output);
@@ -239,53 +217,6 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
             IOUtils.closeQuietly(inputStream);
         }
         System.err.println("OK");
-    }
-
-    /**
-     * Extracts the database file to '/tmp'
-     * 
-     * @throws IOException if an I/O error is occurred
-     */
-    private void extractDatase() throws IOException {
-        System.out.println("Extracting the archive...");
-        FileInputStream fis = new FileInputStream(Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile());
-        ZipInputStream zis = new ZipInputStream(fis);
-        ZipEntry ze = zis.getNextEntry();
-        byte[] buffer = new byte[1024];
-        while (ze != null) {
-            String fileName = ze.getName();
-            File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
-            if (false == keep) {
-                newFile.deleteOnExit();
-            }
-            if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-                databaseFilename = newFile.getAbsolutePath();
-            }
-            System.out.println("Extracting to " + newFile.getAbsolutePath());
-
-            new File(newFile.getParent()).mkdirs();
-            FileOutputStream fos = new FileOutputStream(newFile);
-            int len;
-            while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-            }
-
-            fos.close();
-
-            zis.closeEntry();
-            ze = zis.getNextEntry();
-        }
-        //close last ZipEntry
-        zis.closeEntry();
-        zis.close();
-        fis.close();
-
-        if (databaseFilename == null || databaseFilename.isEmpty()) {
-            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + EXTRACT_DIRECTORY + "'");
-            System.exit(-1);
-            return;
-        }
-        System.out.println("OK");
     }
 
     /**
@@ -322,79 +253,5 @@ public class Ip2LocationCLT extends AbstractIp2LocationCLT {
             return dbVersion;
         }
         return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
-    }
-
-    /**
-     * Imports the data into the specified database
-     */
-    private void importDatabase(String optRmiHostName) throws Exception {
-        String dbName = getGlobalDatabaseName(optRmiHostName);
-        //@formatter:off
-        String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
-                + "START TRANSACTION;"
-                + "TRUNCATE `" + TABLE_NAME + "`;"
-                + "LOAD DATA LOCAL INFILE '" + databaseFilename + "' " + "INTO TABLE `" + TABLE_NAME + "` " + "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\r\\n' IGNORE 0 LINES;"
-                + "COMMIT;"
-                + "SET autocommit=1;"};
-        //@formatter:on
-        Process runtimeProcess;
-        try {
-            System.out.println("Using database file '" + databaseFilename + "'.");
-            System.out.print("Importing data to schema '" + dbName + "' in table '" + TABLE_NAME + "'...");
-
-            ProcessBuilder processBuilder = new ProcessBuilder(importData);
-            runtimeProcess = processBuilder.start();
-            int processComplete = runtimeProcess.waitFor();
-            if (processComplete == 0) {
-                System.out.println("OK.");
-                return;
-            }
-            System.out.println("Could not import the data.");
-            printErrors(runtimeProcess.getInputStream());
-            printErrors(runtimeProcess.getErrorStream());
-        } catch (IOException e) {
-            if (e.getMessage().contains("No such file or directory")) {
-                System.out.println("\nERROR: Couldn't find the 'mysql' executable. Ensure that 'mysql' is installed and in your $PATH");
-                System.exit(1);
-                return;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * Prints any errors that were encountered during processing
-     * 
-     * @param inputStream the {@link InputStream} that holds the errors
-     * @throws IOException if an I/O error is occurred
-     */
-    private void printErrors(InputStream inputStream) throws IOException {
-        BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        while ((line = r.readLine()) != null) {
-            System.out.println(line);
-        }
-        r.close();
-    }
-
-    /**
-     * Reads the text response from the specified {@link URLConnection}
-     * 
-     * @param connection The {@link URLConnection} from which to read the text response
-     * @return The text response
-     * @throws IOException if an I/O error is occurred
-     */
-    private String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder builder = new StringBuilder(128);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-
-            return builder.toString();
-        }
     }
 }
