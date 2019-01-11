@@ -1107,6 +1107,8 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             }
             event.setAttendees(purged);
         }
+        
+        private final EventField[] ORGANIZER_CHANGE = new EventField[] { EventField.ORGANIZER };
 
         @Override
         public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
@@ -1124,6 +1126,8 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                     return update(counter(participant));
                 } else if (ignorableChangedOnly()) {
                     return null;
+                } else if (diff.containsAnyChangeOf(ORGANIZER_CHANGE)) {
+                    return ORGANIZER.generateUpdateMailFor(participant);
                 } else {
                     return update(noITIP(participant, Type.MODIFIED));
                 }
