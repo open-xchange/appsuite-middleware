@@ -542,7 +542,7 @@ public class NotificationMail {
     }
 
     private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES,
-        EventField.CHANGE_EXCEPTION_DATES };
+        EventField.CHANGE_EXCEPTION_DATES, EventField.ORGANIZER };
 
     private boolean anInterestingFieldChanged() throws OXException {
         if (getDiff() == null) {
