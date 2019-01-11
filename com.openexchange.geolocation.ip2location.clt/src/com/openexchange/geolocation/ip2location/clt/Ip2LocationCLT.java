@@ -58,24 +58,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.rmi.RemoteException;
+import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.geolocation.GeoLocationRMIService;
 
 /**
- * {@link Ip2LocationCLT}
+ * {@link Ip2LocationCLT} - Command line tool to initialise and update the 'ip2location' database
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
+public class Ip2LocationCLT extends AbstractIp2LocationCLT {
 
     private static final String USAGE = "ip2location";
     private static final String FOOTER = "";
@@ -97,10 +94,6 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private static final String DOWNLOAD = "https://www.ip2location.com/download?token=#TOKEN#&file=#PACKAGE#";
     /**
-     * Table name of the ip2location database
-     */
-    private static final String TABLE_NAME = "ip2location";
-    /**
      * The extraction working directory
      */
     private static final String EXTRACT_DIRECTORY = File.separator + "tmp";
@@ -109,22 +102,6 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * Value of '-t'
      */
     private String token;
-    /**
-     * Value of '-g'
-     */
-    private String dbGroup = "default";
-    /**
-     * Value of '-u'
-     */
-    private String dbUser;
-    /**
-     * Value of '-a'
-     */
-    private String dbPassword;
-    /**
-     * The global database name retrieved via RMI
-     */
-    private String dbName;
     /**
      * The requested Ip2Location database version. Influenced by '-l'
      */
@@ -137,6 +114,10 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * The database filename contained within the downloaded zip file
      */
     private String databaseFilename;
+    /**
+     * Influenced by '-k'
+     */
+    private boolean keep = false;
 
     /**
      * Entry point
@@ -151,7 +132,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * Initialises a new {@link Ip2LocationCLT}.
      */
     public Ip2LocationCLT() {
-        super();
+        super(USAGE, FOOTER);
     }
 
     /*
@@ -161,10 +142,9 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
+        super.addOptions(options);
+        options.addOption(createSwitch("k", "keep", "Keeps the downloaded files.", false));
         options.addOption(createArgumentOption("t", "token", "token", "Download Token", true));
-        options.addOption(createArgumentOption("u", "database-user", "database-user", "The database user for importing the data.", true));
-        options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
-        options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
         options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested. If absent, then the full version of the database will be requested.", false));
     }
 
@@ -175,49 +155,12 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
+        super.checkOptions(cmd);
+        keep = cmd.hasOption('k');
         token = cmd.getOptionValue('t');
-        if (cmd.hasOption('u')) {
-            dbUser = cmd.getOptionValue('u');
-        }
-        if (cmd.hasOption('a')) {
-            dbPassword = cmd.getOptionValue('a');
-        }
-        if (cmd.hasOption('g')) {
-            dbGroup = cmd.getOptionValue('g');
-        }
         if (cmd.hasOption('l')) {
             dbVersion = LITE_DB_VERSION;
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
-    @Override
-    protected String getFooter() {
-        return FOOTER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
-    @Override
-    protected String getName() {
-        return USAGE;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        authenticator.doAuthentication(login, password);
     }
 
     /*
@@ -227,24 +170,14 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        //checkLicense();
-        //downloadDatabase();
-        GeoLocationRMIService rmiService = getRmiStub(optRmiHostName, GeoLocationRMIService.RMI_NAME);
-        dbName = rmiService.getGlobalDatabaseName(dbGroup);
+        if (keep) {
+            System.out.println("Temporary files will be KEPT in " + EXTRACT_DIRECTORY + ".");
+        }
+        checkLicense();
+        downloadDatabase();
         extractDatase();
-        importDatabase();
+        importDatabase(optRmiHostName);
         return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        //TODO: switch to 'true'
-        return false;
     }
 
     ///////////////////////////////////////////// HELPERS /////////////////////////////////////////////
@@ -291,7 +224,11 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
         InputStream inputStream = connection.getInputStream();
         try {
-            FileOutputStream output = FileUtils.openOutputStream(new File(EXTRACT_DIRECTORY + File.separator + downloadFilename));
+            File dbfile = Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile();
+            if (false == keep) {
+                dbfile.deleteOnExit();
+            }
+            FileOutputStream output = FileUtils.openOutputStream(dbfile);
             try {
                 IOUtils.copy(inputStream, output);
                 output.close();
@@ -310,18 +247,21 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private void extractDatase() throws IOException {
-        System.out.println("Extracting...");
-        FileInputStream fis = new FileInputStream(EXTRACT_DIRECTORY + File.separator + downloadFilename);
+        System.out.println("Extracting the archive...");
+        FileInputStream fis = new FileInputStream(Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile());
         ZipInputStream zis = new ZipInputStream(fis);
         ZipEntry ze = zis.getNextEntry();
         byte[] buffer = new byte[1024];
         while (ze != null) {
             String fileName = ze.getName();
-            File newFile = new File(EXTRACT_DIRECTORY + File.separator + fileName);
+            File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
+            if (false == keep) {
+                newFile.deleteOnExit();
+            }
             if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
                 databaseFilename = newFile.getAbsolutePath();
             }
-            System.out.println("Unzipping to " + newFile.getAbsolutePath());
+            System.out.println("Extracting to " + newFile.getAbsolutePath());
 
             new File(newFile.getParent()).mkdirs();
             FileOutputStream fos = new FileOutputStream(newFile);
@@ -387,7 +327,8 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
     /**
      * Imports the data into the specified database
      */
-    private void importDatabase() {
+    private void importDatabase(String optRmiHostName) throws Exception {
+        String dbName = getGlobalDatabaseName(optRmiHostName);
         //@formatter:off
         String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
                 + "START TRANSACTION;"
@@ -400,9 +341,10 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         try {
             System.out.println("Using database file '" + databaseFilename + "'.");
             System.out.print("Importing data to schema '" + dbName + "' in table '" + TABLE_NAME + "'...");
-            runtimeProcess = Runtime.getRuntime().exec(importData);
-            int processComplete = runtimeProcess.waitFor();
 
+            ProcessBuilder processBuilder = new ProcessBuilder(importData);
+            runtimeProcess = processBuilder.start();
+            int processComplete = runtimeProcess.waitFor();
             if (processComplete == 0) {
                 System.out.println("OK.");
                 return;
@@ -410,6 +352,12 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             System.out.println("Could not import the data.");
             printErrors(runtimeProcess.getInputStream());
             printErrors(runtimeProcess.getErrorStream());
+        } catch (IOException e) {
+            if (e.getMessage().contains("No such file or directory")) {
+                System.out.println("\nERROR: Couldn't find the 'mysql' executable. Ensure that 'mysql' is installed and in your $PATH");
+                System.exit(1);
+                return;
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
