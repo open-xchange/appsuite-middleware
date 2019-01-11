@@ -187,6 +187,11 @@ public class LoginServlet extends AJAXServlet {
      * <code>"open-xchange-public-session-"</code>
      */
     public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
+    
+    /**
+     * <code>"open-xchange-shard"</code>
+     */
+    public static final String SHARD = "open-xchange-shard".intern();
 
     public static final String ACTION_FORMLOGIN = "formlogin";
 
@@ -944,6 +949,19 @@ public class LoginServlet extends AJAXServlet {
     public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) throws OXException {
         resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session)));
     }
+    
+    /**
+     * Writes the (groupware's) shard cookie to specified HTTP servlet response whose name is 
+     * <code>"open-xchange-shard"</code>.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
+        resp.addCookie(configureCookie(new Cookie(SHARD, ServerConfig.getProperty(ServerConfig.Property.SHARD_NAME)), secure, serverName, getLoginConfiguration(session)));
+    }
 
     /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
@@ -960,6 +978,7 @@ public class LoginServlet extends AJAXServlet {
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
         resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
+        writeShardCookie(resp, session, secure, serverName);
         session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
     }
 
@@ -1080,5 +1099,4 @@ public class LoginServlet extends AJAXServlet {
         boolean shareTransientSessions = Boolean.valueOf(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
         return new ShareLoginConfiguration(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
-
 }
