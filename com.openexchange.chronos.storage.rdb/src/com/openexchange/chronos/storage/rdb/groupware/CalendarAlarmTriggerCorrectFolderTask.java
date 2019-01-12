@@ -93,7 +93,7 @@ public class CalendarAlarmTriggerCorrectFolderTask extends UpdateTaskAdapter {
              */
             Map<Integer, List<Entry<Integer, String>>> folderReferencesPerContext = new HashMap<Integer, List<Entry<Integer, String>>>();  
             String sql = "SELECT t.cid,t.alarm,a.folder FROM calendar_alarm_trigger as t LEFT JOIN calendar_attendee AS a " + 
-                "ON t.cid=a.cid AND t.account=a.account AND t.user=a.entity AND t.eventId=a.event WHERE t.account=0 AND t.folder<>a.folder;"; 
+                "ON t.cid=a.cid AND t.account=a.account AND t.user=a.entity AND t.eventId=a.event WHERE t.account=0 AND a.folder>0 AND t.folder<>a.folder;";
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 try (ResultSet resultSet = stmt.executeQuery()) {
                     while (resultSet.next()) {
