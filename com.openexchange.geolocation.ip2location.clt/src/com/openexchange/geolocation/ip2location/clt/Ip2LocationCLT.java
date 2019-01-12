@@ -52,6 +52,7 @@ package com.openexchange.geolocation.ip2location.clt;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +62,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.CommandLine;
@@ -80,8 +82,52 @@ import com.openexchange.geolocation.GeoLocationRMIService;
  */
 public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
+    /**
+     * {@link DatabaseVersion} - Defines the amount of fields for every supported Ip2Location database
+     */
+    private enum DatabaseVersion {
+        DB5(8),
+        DB9(9),
+        DB11(10);
+
+        private final int numberOfFields;
+
+        /**
+         * Initialises a new {@link Ip2LocationCLT.DatabaseVersion}.
+         */
+        private DatabaseVersion(int numberOfFields) {
+            this.numberOfFields = numberOfFields;
+        }
+
+        /**
+         * Gets the numberOfFields
+         *
+         * @return The numberOfFields
+         */
+        public int getNumberOfFields() {
+            return numberOfFields;
+        }
+
+        public String getLiteName() {
+            return name() + "LITECSV";
+        }
+
+        public String getName() {
+            return name() + "CSV";
+        }
+    }
+
+    private static final String supportedDBVersions() {
+        StringBuilder b = new StringBuilder(32);
+        for (DatabaseVersion dbv : DatabaseVersion.values()) {
+            b.append(dbv.name()).append(",");
+        }
+        b.setLength(b.length() - 1);
+        return b.toString();
+    }
+
     private static final String USAGE = "[ip2location -u <database-user> [-a <database-password>] [-g <group>] [[-i <database-file>] | [-t <token>]] [-k] [-l] -A <masterAdmin> -P <masterPassword> [-p <rmiPort>] [--responsetimeout <timeout>] [-s <rmiHost>]] | [-h]";
-    private static final String FOOTER = "Note that the options '-i' and '-t' are mutually exclusive.";
+    private static final String FOOTER = "Note that the options '-i' and '-t' are mutually exclusive.\n\nSupported ip2location database versions: " + supportedDBVersions();
 
     /**
      * Table name of the ip2location database
@@ -91,14 +137,6 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * The extraction working directory
      */
     private static final String EXTRACT_DIRECTORY = File.separator + "tmp";
-    /**
-     * The identifier of the LITE version
-     */
-    private static final String LITE_DB_VERSION = "DB9LITECSV";
-    /**
-     * The identifier of the PAID version
-     */
-    private static final String DB_VERSION = "DB9CSV";
     /**
      * URL to check whether the token is valid for the specified database version
      */
@@ -112,9 +150,13 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private String token;
     /**
+     * Value of '-d'
+     */
+    private DatabaseVersion databaseVersion = DatabaseVersion.DB9;
+    /**
      * The requested Ip2Location database version. Influenced by '-l'
      */
-    private String dbVersion = DB_VERSION;
+    private String dbVersionName = databaseVersion.getName();
     /**
      * Value of '-g'
      */
@@ -170,7 +212,8 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
         options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
         options.addOption(createSwitch("k", "keep", "Keeps the temporary files produced from this command line tool (zip archives, downloaded and extracted files).", false));
-        options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested. If absent, then the full version of the database will be requested. Has no effet when in import mode (-i option)", false));
+        options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested. If absent, then the full version of the database will be requested. Has no effect when in import mode (-i option)", false));
+        options.addOption(createArgumentOption("d", "database-version", "database-version", "The database version identifier to download and import. If absent falls back to 'DB9'. The import mode is affected by this switch. Be sure to supply the correct version for the CSV you are importing.", false));
 
         OptionGroup og = new OptionGroup();
         og.addOption(createArgumentOption("t", "token", "token", "Download Token. Mutually exclusive with -i option.", true));
@@ -200,6 +243,16 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('g')) {
             dbGroup = cmd.getOptionValue('g');
         }
+        if (cmd.hasOption('d')) {
+            String d = cmd.getOptionValue('d');
+            try {
+                databaseVersion = DatabaseVersion.valueOf(d);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid database version identifier supplied: '" + d + "'. Supported database identifiers are: " + supportedDBVersions());
+                System.exit(1);
+                return;
+            }
+        }
         keep = cmd.hasOption('k');
         downloadFilePath = cmd.getOptionValue('i');
         if (downloadFilePath != null && false == downloadFilePath.isEmpty()) {
@@ -208,7 +261,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         }
         token = cmd.getOptionValue('t');
         if (cmd.hasOption('l')) {
-            dbVersion = LITE_DB_VERSION;
+            dbVersionName = databaseVersion.getLiteName();
         }
     }
 
@@ -227,7 +280,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             if (isArchive(f)) {
                 extractDatase();
             } else {
-                // Seems that the provided file is not archive, 
+                // Seems that the provided file is not an archive, 
                 // so use that as the source for the CSV database.
                 databaseFilePath = downloadFilePath;
             }
@@ -239,6 +292,30 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         extractDatase();
         importDatabase(optRmiHostName);
         return null;
+    }
+
+    /**
+     * Checks whether the specified databaseFilePath denotes a valid ip2location CSV file
+     * corresponding to the specified {@link DatabaseVersion}
+     * 
+     * @throws FileNotFoundException if the file does not exist
+     */
+    private void checkCSVFormat() throws FileNotFoundException {
+        try (Scanner input = new Scanner(new File(databaseFilePath))) {
+            int counter = 0;
+            int maxLines = 5;
+            while (input.hasNextLine() && counter < maxLines) {
+                String line = input.nextLine();
+                String[] split = line.split(",");
+                if (split != null && split.length == databaseVersion.getNumberOfFields()) {
+                    return;
+                }
+                counter++;
+            }
+        }
+        System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
+        System.exit(1);
+
     }
 
     /*
@@ -258,8 +335,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected boolean requiresAdministrativePermission() {
-        //TODO: switch to 'true'
-        return false;
+        return true;
     }
 
     /*
@@ -290,7 +366,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private void checkLicense() throws IOException {
-        String checkLicense = CHECK_LICENSE.replaceFirst("#TOKEN#", token).replaceFirst("#PACKAGE#", dbVersion);
+        String checkLicense = CHECK_LICENSE.replaceFirst("#TOKEN#", token).replaceFirst("#PACKAGE#", dbVersionName);
         URLConnection connection = new URL(checkLicense).openConnection();
         String contentType = connection.getContentType();
         if (false == contentType.startsWith("text")) {
@@ -313,8 +389,8 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private void downloadDatabase() throws IOException {
-        String download = DOWNLOAD.replaceFirst("#TOKEN#", token).replaceFirst("#PACKAGE#", dbVersion);
-        System.out.print("Downloading " + dbVersion + "...");
+        String download = DOWNLOAD.replaceFirst("#TOKEN#", token).replaceFirst("#PACKAGE#", dbVersionName);
+        System.out.print("Downloading " + dbVersionName + "...");
 
         URLConnection connection = new URL(download).openConnection();
         connection.setConnectTimeout(15000);
@@ -349,8 +425,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
     private void extractDatase() throws IOException {
         System.out.println("Extracting the archive '" + downloadFilePath + "' in '" + EXTRACT_DIRECTORY + "'...");
         byte[] buffer = new byte[4096];
-        try (FileInputStream fis = new FileInputStream(new File(downloadFilePath)); 
-            ZipInputStream zipInputStream = new ZipInputStream(fis)) {
+        try (FileInputStream fis = new FileInputStream(new File(downloadFilePath)); ZipInputStream zipInputStream = new ZipInputStream(fis)) {
             while (true) {
                 ZipEntry zipEntry = null;
                 try {
@@ -409,6 +484,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * Imports the data into the specified database
      */
     private void importDatabase(String optRmiHostName) throws Exception {
+        checkCSVFormat();
         GeoLocationRMIService rmiService = getRmiStub(optRmiHostName, GeoLocationRMIService.RMI_NAME);
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
         //@formatter:off
@@ -462,7 +538,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         if (false == content.equals("NO PERMISSION")) {
             return;
         }
-        System.out.println("You have no permission to access '" + dbVersion + "'.");
+        System.out.println("You have no permission to access '" + dbVersionName + "'.");
         System.exit(-1);
     }
 
@@ -474,11 +550,11 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private String extractFilename(String contentDisposition) {
         if (contentDisposition == null || contentDisposition.isEmpty()) {
-            return dbVersion;
+            return dbVersionName;
         }
         int index = contentDisposition.indexOf("filename=");
         if (index < 0) {
-            return dbVersion;
+            return dbVersionName;
         }
         return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
     }
@@ -506,8 +582,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             StringBuilder builder = new StringBuilder(128);
             String line;
             while ((line = reader.readLine()) != null) {
