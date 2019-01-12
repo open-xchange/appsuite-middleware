@@ -69,7 +69,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.geolocation.GeoLocationRMIService;
@@ -86,6 +85,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * {@link DatabaseVersion} - Defines the amount of fields for every supported Ip2Location database
      */
     private enum DatabaseVersion {
+        DB1(4),
         DB5(8),
         DB9(9),
         DB11(10);
@@ -117,6 +117,11 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         }
     }
 
+    /**
+     * Returns a comma separated string with the supported ip2location DB versions
+     * 
+     * @return a comma separated string with the supported ip2location DB versions
+     */
     private static final String supportedDBVersions() {
         StringBuilder b = new StringBuilder(32);
         for (DatabaseVersion dbv : DatabaseVersion.values()) {
@@ -128,6 +133,8 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
     private static final String USAGE = "[ip2location -u <database-user> [-a <database-password>] [-g <group>] [[-i <database-file>] | [-t <token>]] [-k] [-l] -A <masterAdmin> -P <masterPassword> [-p <rmiPort>] [--responsetimeout <timeout>] [-s <rmiHost>]] | [-h]";
     private static final String FOOTER = "Note that the options '-i' and '-t' are mutually exclusive.\n\nSupported ip2location database versions: " + supportedDBVersions();
+
+    private static final int BUFFER_SIZE = 4096;
 
     /**
      * Table name of the ip2location database
@@ -390,7 +397,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private void downloadDatabase() throws IOException {
         String download = DOWNLOAD.replaceFirst("#TOKEN#", token).replaceFirst("#PACKAGE#", dbVersionName);
-        System.out.print("Downloading " + dbVersionName + "...");
+        System.out.println("Downloading " + dbVersionName + "...");
 
         URLConnection connection = new URL(download).openConnection();
         connection.setConnectTimeout(15000);
@@ -399,22 +406,46 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         checkContentType(connection);
 
         String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
-
+        long contentLength = connection.getContentLength();
+        System.out.println("Database size: " + contentLength + " bytes.\n");
         try (InputStream inputStream = connection.getInputStream()) {
             File dbfile = Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile();
             if (false == keep) {
                 dbfile.deleteOnExit();
             }
             this.downloadFilePath = dbfile.getAbsolutePath();
-            FileOutputStream output = FileUtils.openOutputStream(dbfile);
-            try {
-                IOUtils.copy(inputStream, output);
-                output.close();
-            } finally {
-                IOUtils.closeQuietly(output);
+            try (FileOutputStream output = FileUtils.openOutputStream(dbfile)) {
+                float sum = 0;
+                int count = 0;
+                byte[] data = new byte[BUFFER_SIZE];
+                while ((count = inputStream.read(data, 0, BUFFER_SIZE)) != -1) {
+                    output.write(data, 0, count);
+                    sum += count;
+                    if (contentLength > 0) {
+                        updateProgress(sum / contentLength);
+                    }
+                }
             }
         }
-        System.err.println("OK");
+    }
+
+    /**
+     * Updates the download progress bar
+     * 
+     * @param progressPercentage The progress percentage
+     */
+    private void updateProgress(double progressPercentage) {
+        int width = 50;
+
+        System.out.print("\r " + downloadFilePath + " " + String.format("%.2f", progressPercentage * 100) + "% [");
+        int i = 0;
+        for (; i <= (int) (progressPercentage * width); i++) {
+            System.out.print("#");
+        }
+        for (; i < width; i++) {
+            System.out.print("-");
+        }
+        System.out.print("]");
     }
 
     /**
@@ -424,7 +455,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private void extractDatase() throws IOException {
         System.out.println("Extracting the archive '" + downloadFilePath + "' in '" + EXTRACT_DIRECTORY + "'...");
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[BUFFER_SIZE];
         try (FileInputStream fis = new FileInputStream(new File(downloadFilePath)); ZipInputStream zipInputStream = new ZipInputStream(fis)) {
             while (true) {
                 ZipEntry zipEntry = null;
@@ -531,6 +562,9 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private void checkContentType(URLConnection connection) throws IOException {
         String contentType = connection.getContentType();
+        if (contentType == null || contentType.isEmpty()) {
+            return;
+        }
         if (false == contentType.startsWith("text") && contentType.toLowerCase().contains("zip")) {
             return;
         }
