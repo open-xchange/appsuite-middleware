@@ -259,7 +259,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
     @Override
     protected boolean requiresAdministrativePermission() {
         //TODO: switch to 'true'
-        return true;
+        return false;
     }
 
     /*
@@ -324,8 +324,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
         String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
 
-        InputStream inputStream = connection.getInputStream();
-        try {
+        try (InputStream inputStream = connection.getInputStream()) {
             File dbfile = Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile();
             if (false == keep) {
                 dbfile.deleteOnExit();
@@ -338,8 +337,6 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             } finally {
                 IOUtils.closeQuietly(output);
             }
-        } finally {
-            IOUtils.closeQuietly(inputStream);
         }
         System.err.println("OK");
     }
@@ -351,42 +348,59 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private void extractDatase() throws IOException {
         System.out.println("Extracting the archive '" + downloadFilePath + "' in '" + EXTRACT_DIRECTORY + "'...");
-        FileInputStream fis = new FileInputStream(new File(downloadFilePath));
-        ZipInputStream zis = new ZipInputStream(fis);
-        ZipEntry ze = zis.getNextEntry();
-        byte[] buffer = new byte[1024];
-        while (ze != null) {
-            String fileName = ze.getName();
-            File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
-            if (false == keep) {
-                newFile.deleteOnExit();
+        byte[] buffer = new byte[4096];
+        try (FileInputStream fis = new FileInputStream(new File(downloadFilePath)); 
+            ZipInputStream zipInputStream = new ZipInputStream(fis)) {
+            while (true) {
+                ZipEntry zipEntry = null;
+                try {
+                    zipEntry = zipInputStream.getNextEntry();
+                    if (zipEntry == null) {
+                        break;
+                    }
+                    extractZipEntry(zipInputStream, zipEntry, buffer);
+                } finally {
+                    if (zipEntry != null) {
+                        zipInputStream.closeEntry();
+                    }
+                }
             }
-            if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-                databaseFilePath = newFile.getAbsolutePath();
-            }
-            System.out.println("Extracting to " + newFile.getAbsolutePath());
-
-            new File(newFile.getParent()).mkdirs();
-            FileOutputStream fos = new FileOutputStream(newFile);
-            int len;
-            while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-            }
-
-            fos.close();
-
-            zis.closeEntry();
-            ze = zis.getNextEntry();
         }
-        //close last ZipEntry
-        zis.closeEntry();
-        zis.close();
-        fis.close();
-
         if (databaseFilePath == null || databaseFilePath.isEmpty()) {
             System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + EXTRACT_DIRECTORY + "'");
             System.exit(-1);
             return;
+        }
+    }
+
+    /**
+     * Extracts the zip entries from the specified {@link ZipInputStream}
+     * 
+     * @param zipInputStream The {@link ZipInputStream} containing the entries
+     * @param zipEntry The ZipEntry to extract
+     * @param buffer the buffer to use when writing the extracted entry
+     * @throws IOException if an I/O error is occurred
+     */
+    private void extractZipEntry(ZipInputStream zipInputStream, ZipEntry zipEntry, byte[] buffer) throws IOException {
+        String fileName = zipEntry.getName();
+        File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
+        if (false == keep) {
+            newFile.deleteOnExit();
+        }
+        if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
+            databaseFilePath = newFile.getAbsolutePath();
+        }
+        System.out.print("Extracting to '" + newFile.getAbsolutePath() + "'...");
+
+        new File(newFile.getParent()).mkdirs();
+        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+            int len;
+            while ((len = zipInputStream.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            System.out.println("failed.");
+            throw e;
         }
         System.out.println("OK");
     }
@@ -398,7 +412,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         GeoLocationRMIService rmiService = getRmiStub(optRmiHostName, GeoLocationRMIService.RMI_NAME);
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
         //@formatter:off
-        String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
+        String[] importData = { "/usr/local/mysql/bin/mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
                 + "START TRANSACTION;"
                 + "TRUNCATE `" + TABLE_NAME + "`;"
                 + "LOAD DATA LOCAL INFILE '" + databaseFilePath + "' " + "INTO TABLE `" + TABLE_NAME + "` " + "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\r\\n' IGNORE 0 LINES;"
@@ -476,12 +490,12 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private void printErrors(InputStream inputStream) throws IOException {
-        BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        while ((line = r.readLine()) != null) {
-            System.out.println(line);
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                System.out.println(line);
+            }
         }
-        r.close();
     }
 
     /**
@@ -492,14 +506,13 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        try (InputStream inputStream = connection.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             StringBuilder builder = new StringBuilder(128);
             String line;
             while ((line = reader.readLine()) != null) {
                 builder.append(line);
             }
-
             return builder.toString();
         }
     }
