@@ -1648,7 +1648,6 @@ public class Strings {
             sb.delete(0, st);
         }
 
-
         return sb;
     }
 
