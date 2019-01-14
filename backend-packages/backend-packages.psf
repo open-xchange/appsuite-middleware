@@ -52,6 +52,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-onedrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip-ip2location"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hazelcast-community"/>
