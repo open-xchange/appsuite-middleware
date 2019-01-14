@@ -1,0 +1,5 @@
+open-xchange-geoip-ip2location (7.10.2-0) unstable; urgency=medium
+
+  * Initial release
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Mon, 14 Jan 2019 13:37:00 +0200
