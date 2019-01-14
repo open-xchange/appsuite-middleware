@@ -503,7 +503,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         GeoLocationRMIService rmiService = getRmiStub(optRmiHostName, GeoLocationRMIService.RMI_NAME);
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
         //@formatter:off
-        String[] importData = { "/usr/local/mysql/bin/mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
+        String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
                 + "START TRANSACTION;"
                 + "TRUNCATE `" + TABLE_NAME + "`;"
                 + "LOAD DATA LOCAL INFILE '" + databaseFilePath + "' " + "INTO TABLE `" + TABLE_NAME + "` " + "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\r\\n' IGNORE 0 LINES;"
