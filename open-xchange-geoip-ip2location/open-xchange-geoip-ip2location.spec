@@ -46,12 +46,22 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+
+# prevent bash from expanding, see bug 13316
+GLOBIGNORE='*'
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 
 %changelog
 * Mon Jan 14 2019 Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
