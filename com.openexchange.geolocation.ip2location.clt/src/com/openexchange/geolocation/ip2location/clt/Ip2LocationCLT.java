@@ -71,7 +71,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.cli.ProgressMonitor;
 import com.openexchange.geolocation.GeoLocationRMIService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Ip2LocationCLT} - Command line tool to initialise and update the 'ip2location' database
@@ -283,8 +285,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             System.out.println("Temporary files will be KEPT in " + EXTRACT_DIRECTORY + ".");
         }
         if (importMode) {
-            File f = new File(downloadFilePath);
-            if (isArchive(f)) {
+            if (isArchive()) {
                 extractDatase();
             } else {
                 // Seems that the provided file is not an archive, 
@@ -407,7 +408,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
         String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
         long contentLength = connection.getContentLength();
-        System.out.println("Database size: " + contentLength + " bytes.\n");
+        System.out.println("Database size: " + Strings.humanReadableByteCount(contentLength, true) + " bytes.\n");
         try (InputStream inputStream = connection.getInputStream()) {
             File dbfile = Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile();
             if (false == keep) {
@@ -415,37 +416,20 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             }
             this.downloadFilePath = dbfile.getAbsolutePath();
             try (FileOutputStream output = FileUtils.openOutputStream(dbfile)) {
-                float sum = 0;
+                long sum = 0;
                 int count = 0;
                 byte[] data = new byte[BUFFER_SIZE];
+                ProgressMonitor progressMonitor = new ProgressMonitor(50, downloadFilePath);
                 while ((count = inputStream.read(data, 0, BUFFER_SIZE)) != -1) {
                     output.write(data, 0, count);
                     sum += count;
                     if (contentLength > 0) {
-                        updateProgress(sum / contentLength);
+                        progressMonitor.update(Strings.humanReadableByteCount(sum, true), ((double) sum / contentLength));
                     }
                 }
             }
         }
-    }
-
-    /**
-     * Updates the download progress bar
-     * 
-     * @param progressPercentage The progress percentage
-     */
-    private void updateProgress(double progressPercentage) {
-        int width = 50;
-
-        System.out.print("\r " + downloadFilePath + " " + String.format("%.2f", progressPercentage * 100) + "% [");
-        int i = 0;
-        for (; i <= (int) (progressPercentage * width); i++) {
-            System.out.print("#");
-        }
-        for (; i < width; i++) {
-            System.out.print("-");
-        }
-        System.out.print("]");
+        System.out.println();
     }
 
     /**
@@ -627,15 +611,15 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
     }
 
     /**
-     * Checks the first four bytes of the specified file ot determine whether
+     * Checks the first four bytes of the specified file to determine whether
      * it is a ZIP archive. The signatures of a ZIP archive are listed
      * <a href="https://en.wikipedia.org/wiki/List_of_file_signatures">here</a>.
      * 
-     * @param f The file to check
-     * @return <code>true</code> if the file is an archive; <code>false</code> otherwise.
+     * @return <code>true</code> if the downloaded file is an archive; <code>false</code> otherwise.
      * @throws IOException if an I/O error is occurred
      */
-    private boolean isArchive(File f) throws IOException {
+    private boolean isArchive() throws IOException {
+        File f = new File(downloadFilePath);
         int fileSignature = 0;
         try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
             fileSignature = raf.readInt();
