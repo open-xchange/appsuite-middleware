@@ -11,4 +11,4 @@ Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Description: The Open-Xchange GeoIP service
- This package provides connectivity to a GeoIP service
+ This package provides connectivity to a GeoIP service based on the MaxMind's GeoDatabase
