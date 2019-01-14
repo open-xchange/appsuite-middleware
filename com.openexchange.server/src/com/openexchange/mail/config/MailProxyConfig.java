@@ -90,14 +90,15 @@ public class MailProxyConfig {
     }
 
     public HostList getImapNonProxyHostList() {
-        return getHostListFrom(imapHostList, true);
+        return getHostListFrom(true);
     }
 
     public HostList getSmtpNonProxyHostList() {
-        return getHostListFrom(smtpHostList, false);
+        return getHostListFrom(false);
     }
 
-    private HostList getHostListFrom(AtomicReference<HostList> hostListReference, boolean imap) {
+    private HostList getHostListFrom(boolean imap) {
+        AtomicReference<HostList> hostListReference = imap ? imapHostList : smtpHostList;
         HostList hostList = hostListReference.get();
         if (hostList == null) {
             synchronized (hostListReference) {
