@@ -147,6 +147,12 @@ The properties are stored as-is in the database, and are accessible in the same 
 
 In the Chronos stack, there's no dedicated "principal". Instead, it is ensured that the organizer is always the actual calendar owner for newly created events (An exception to this rule are imported scheduling object resources from external organizers, as described at RFC 6638, section 3.2.2.2). In case the event is created on behalf of the folder owner by another calendar user (e.g. the secretary), this is expressed via the ``SENT-BY`` attribute within the organizer.       
 
+## Changing the organizer
+
+Since v.7.10.2 the organizer of an event can hand the event over to another *internal* CU. Doing so, the other CU becomes the new organizer of the event thus is able to change the event.
+In case external attendees are part of the changed event an iTIP message is triggered. The feature is part of iTIP standard but isn't well supported by other platforms. Therefore the feature is deactivated by default and can be activated by setting the property ``com.openexchange.calendar.restrictAllowedOrganizerChange`` to ``true``.
+When changing the organizer the server will generate a notification to all attendees, optional giving the old organizer the possibility to announce why he transmitted the event to another CU.
+
 ## Conversion 
 
 In order to convert between the legacy properties for organizer/principal and the organizer as it is used within the Chronos stack, the following conversions are performed:
