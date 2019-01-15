@@ -55,9 +55,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
@@ -65,7 +62,6 @@ import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.geolocation.GeoLocationRMIService;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractGeoLocationCLT}
@@ -78,8 +74,12 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     /**
      * The extraction working directory
      */
-    protected static final String EXTRACT_DIRECTORY = File.separator + "tmp";
+    private static final String DEFAULT_EXTRACT_DIRECTORY = File.separator + "tmp";
 
+    /**
+     * Value of '-o'
+     */
+    private String extractDirectory = DEFAULT_EXTRACT_DIRECTORY;
     /**
      * Value of '-g'
      */
@@ -116,15 +116,19 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     private boolean importMode = false;
 
     private final String tables;
+    private String usage;
+    private String footer;
 
     /**
      * Initialises a new {@link AbstractGeoLocationCLT}.
      * 
      * @param a comma separated list with the database tables
      */
-    public AbstractGeoLocationCLT(String tables) {
+    public AbstractGeoLocationCLT(String tables, String usage, String footer) {
         super();
         this.tables = tables;
+        this.usage = usage;
+        this.footer = footer;
     }
 
     /**
@@ -139,7 +143,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * Checks whether the provided license is valid for the specified database version
      */
     protected abstract void checkLicense();
-    
+
     /**
      * 
      * @return
@@ -153,6 +157,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
+        options.addOption(createArgumentOption("o", "output-directory", "output-directory", "The output directory, i.e. where the downloaded and extracted files will be placed. If absent it will fall-back to '/tmp'", false));
         options.addOption(createArgumentOption("u", "database-user", "database-user", "The database user for importing the data.", true));
         options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
         options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
@@ -167,6 +172,20 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
+        if (cmd.hasOption('o')) {
+            extractDirectory = cmd.getOptionValue('o');
+            File f = new File(extractDirectory);
+            if (false == f.exists()) {
+                System.out.println("The specified output directory '" + extractDirectory + "' does not exist. We will try to create it");
+                try {
+                    f.mkdirs();
+                } catch (Exception e) {
+                    System.out.println("Unable to create output directory '" + extractDirectory + "': " + e.getMessage());
+                    System.exit(1);
+                    return;
+                }
+            }
+        }
         if (cmd.hasOption('u')) {
             dbUser = cmd.getOptionValue('u');
         }
@@ -203,6 +222,26 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     @Override
     protected boolean requiresAdministrativePermission() {
         return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
+    @Override
+    protected String getName() {
+        return usage;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
+    @Override
+    protected String getFooter() {
+        return footer;
     }
 
     /////////////////////////////////////// GETTERS //////////////////////////////
@@ -255,32 +294,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     //////////////////////////////////////// HELPERS ///////////////////////////////
 
     /**
-     * Downloads the requested database version from the Ip2Location servers
-     * 
-     * @throws IOException if an I/O error is occurred
-     */
-    protected void downloadDatabase(String downloadUrl) throws IOException {
-        URLConnection connection = new URL(downloadUrl).openConnection();
-        connection.setConnectTimeout(15000);
-        connection.setReadTimeout(30000);
-
-        checkContentType(connection);
-
-        String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
-        long contentLength = connection.getContentLength();
-        System.out.println("Database size: " + Strings.humanReadableByteCount(contentLength, true) + ".\n");
-        try (InputStream inputStream = connection.getInputStream()) {
-            File dbfile = Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile();
-            if (false == isKeep()) {
-                dbfile.deleteOnExit();
-            }
-            this.downloadFilePath = dbfile.getAbsolutePath();
-            FileUtils.writeFile(inputStream, dbfile, contentLength);
-        }
-        System.out.println();
-    }
-
-    /**
      * Imports the data into the 'global' database
      * 
      * @param the RMI hostname of the node on which to query the name of the global database
@@ -290,34 +303,13 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         checkCSVFormat();
         GeoLocationRMIService rmiService = getRmiStub(rmiHostName, GeoLocationRMIService.RMI_NAME);
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
-        Process runtimeProcess;
-        try {
-            System.out.println("Using database file '" + databaseFilePath + "'.");
-            System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...");
 
-            ProcessBuilder processBuilder = new ProcessBuilder(environment);
-            runtimeProcess = processBuilder.start();
-            int processComplete = runtimeProcess.waitFor();
-            if (processComplete == 0) {
-                System.out.println("OK.");
-                return;
-            }
-            System.out.println("Could not import the data.");
-            printErrors(runtimeProcess.getInputStream());
-            printErrors(runtimeProcess.getErrorStream());
-        } catch (IOException e) {
-            if (e.getMessage().contains("No such file or directory")) {
-                System.out.println("\nERROR: Couldn't find the 'mysql' executable. Ensure that 'mysql' is installed and in your $PATH");
-                System.exit(1);
-                return;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.exit(1);
-            return;
-        }
+        System.out.println("Using database file '" + databaseFilePath + "'.");
+        System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...");
+        runProcess(environment);
+        System.out.println("OK.");
     }
-    
+
     /**
      * Runs the process with the specified execution environment
      * 
@@ -352,45 +344,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     }
 
     /**
-     * Checks whether the appropriate content type is returned before unzipping
-     * 
-     * @param connection The {@link URLConnection}
-     * @throws IOException if an I/O error is occurred
-     */
-    private void checkContentType(URLConnection connection) throws IOException {
-        String contentType = connection.getContentType();
-        if (contentType == null || contentType.isEmpty()) {
-            return;
-        }
-        if (false == contentType.startsWith("text") && contentType.toLowerCase().contains("zip")) {
-            return;
-        }
-        String content = readTextResponse(connection);
-        if (false == content.equals("NO PERMISSION")) {
-            return;
-        }
-        System.out.println("You have no permission to access '" + dbVersionName + "'.");
-        System.exit(-1);
-    }
-
-    /**
-     * Extracts the 'filename' from the specified content disposition header
-     * 
-     * @param contentDisposition The content disposition header
-     * @return The filename value
-     */
-    private String extractFilename(String contentDisposition) {
-        if (contentDisposition == null || contentDisposition.isEmpty()) {
-            return dbVersionName;
-        }
-        int index = contentDisposition.indexOf("filename=");
-        if (index < 0) {
-            return dbVersionName;
-        }
-        return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
-    }
-
-    /**
      * Prints any errors that were encountered during processing
      * 
      * @param inputStream the {@link InputStream} that holds the errors
@@ -402,24 +355,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
             while ((line = r.readLine()) != null) {
                 System.out.println(line);
             }
-        }
-    }
-
-    /**
-     * Reads the text response from the specified {@link URLConnection}
-     * 
-     * @param connection The {@link URLConnection} from which to read the text response
-     * @return The text response
-     * @throws IOException if an I/O error is occurred
-     */
-    private String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            StringBuilder builder = new StringBuilder(128);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-            return builder.toString();
         }
     }
 
@@ -442,7 +377,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 counter++;
             }
         }
-        System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
+        System.out.println("The file you provided does not seem to be a valid CSV file.");
         System.exit(1);
     }
 }
