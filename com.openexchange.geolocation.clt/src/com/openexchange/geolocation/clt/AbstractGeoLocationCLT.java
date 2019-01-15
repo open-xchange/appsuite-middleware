@@ -58,11 +58,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Paths;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
@@ -129,16 +127,13 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
 
     private boolean importMode = false;
 
-    private final String tables;
-
     /**
      * Initialises a new {@link AbstractGeoLocationCLT}.
      * 
      * @param a comma separated list with the database tables
      */
-    public AbstractGeoLocationCLT(String tables) {
+    public AbstractGeoLocationCLT() {
         super();
-        this.tables = tables;
     }
 
     /**
@@ -147,12 +142,18 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @return returns the {@link DatabaseVersion}
      * @throws IllegalArgumentException if no valid database version can be parsed
      */
-    protected abstract DatabaseVersion parseDatabaseVersion();
+    protected abstract DatabaseVersion parseDatabaseVersion(CommandLine cmd);
 
     /**
      * Checks whether the provided license is valid for the specified database version
      */
     protected abstract void checkLicense();
+
+    protected abstract String getImportStatement();
+
+    protected abstract String getAffectedTables();
+
+    protected abstract String getDownloadUrl();
 
     /*
      * (non-Javadoc)
@@ -184,7 +185,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('g')) {
             dbGroup = cmd.getOptionValue('g');
         }
-        databaseVersion = parseDatabaseVersion();
+        databaseVersion = parseDatabaseVersion(cmd);
         dbVersionName = cmd.hasOption('l') ? databaseVersion.getLiteName() : databaseVersion.getName();
         keep = cmd.hasOption('k');
         downloadFilePath = cmd.getOptionValue('i');
@@ -192,13 +193,32 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
             importMode = true;
         }
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        // TODO Auto-generated method stub
+        if (keep) {
+            System.out.println("Temporary files will be KEPT in " + EXTRACT_DIRECTORY + ".");
+        }
+        if (importMode) {
+            if (isArchive()) {
+                extractDatase();
+            } else {
+                // Seems that the provided file is not an archive, 
+                // so use that as the source for the CSV database.
+                databaseFilePath = downloadFilePath;
+            }
+            importDatabase(optRmiHostName);
+            return null;
+        }
+        //checkLicense();
+        downloadDatabase();
+        extractDatase();
+        importDatabase(optRmiHostName);
         return null;
     }
 
@@ -269,6 +289,33 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         return importMode;
     }
 
+    /**
+     * Gets the databaseFilePath
+     *
+     * @return The databaseFilePath
+     */
+    public String getDatabaseFilePath() {
+        return databaseFilePath;
+    }
+
+    /**
+     * Gets the dbVersionName
+     *
+     * @return The dbVersionName
+     */
+    public String getDbVersionName() {
+        return dbVersionName;
+    }
+
+    /**
+     * Gets the databaseVersion
+     *
+     * @return The databaseVersion
+     */
+    public DatabaseVersion getDatabaseVersion() {
+        return databaseVersion;
+    }
+
     //////////////////////////////////////// HELPERS ///////////////////////////////
 
     /**
@@ -300,12 +347,13 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     }
 
     /**
-     * Downloads the requested database version from the Ip2Location servers
+     * Downloads the requested database version
      * 
      * @throws IOException if an I/O error is occurred
      */
-    protected void downloadDatabase(String downloadUrl) throws IOException {
-        URLConnection connection = new URL(downloadUrl).openConnection();
+    protected void downloadDatabase() throws IOException {
+        System.out.println("Downloading " + dbVersionName + "...");
+        URLConnection connection = new URL(getDownloadUrl()).openConnection();
         connection.setConnectTimeout(15000);
         connection.setReadTimeout(30000);
 
@@ -361,7 +409,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 }
             }
         }
-        if (databaseFilePath == null || databaseFilePath.isEmpty()) {
+        if (getDatabaseFilePath() == null || getDatabaseFilePath().isEmpty()) {
             System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + EXTRACT_DIRECTORY + "'");
             System.exit(-1);
             return;
@@ -404,18 +452,18 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * Imports the data into the 'global' database
      * 
      * @param the RMI hostname of the node on which to query the name of the global database
-     * @param environment The execution environment
      */
-    protected void importDatabase(String rmiHostName, String[] environment) throws Exception {
+    protected void importDatabase(String rmiHostName) throws Exception {
         checkCSVFormat();
         GeoLocationRMIService rmiService = getRmiStub(rmiHostName, GeoLocationRMIService.RMI_NAME);
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
         Process runtimeProcess;
         try {
-            System.out.println("Using database file '" + databaseFilePath + "'.");
-            System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...");
+            String[] executionEnvironment = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", getImportStatement()};
+            System.out.println("Using database file '" + getDatabaseFilePath() + "'.");
+            System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + getAffectedTables() + "'...");
 
-            ProcessBuilder processBuilder = new ProcessBuilder(environment);
+            ProcessBuilder processBuilder = new ProcessBuilder(executionEnvironment);
             runtimeProcess = processBuilder.start();
             int processComplete = runtimeProcess.waitFor();
             if (processComplete == 0) {
@@ -442,9 +490,8 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * Checks whether the appropriate content type is returned before unzipping
      * 
      * @param connection The {@link URLConnection}
-     * @throws IOException if an I/O error is occurred
      */
-    private void checkContentType(URLConnection connection) throws IOException {
+    private void checkContentType(URLConnection connection) {
         String contentType = connection.getContentType();
         if (contentType == null || contentType.isEmpty()) {
             return;
@@ -483,12 +530,15 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @param inputStream the {@link InputStream} that holds the errors
      * @throws IOException if an I/O error is occurred
      */
-    private void printErrors(InputStream inputStream) throws IOException {
+    private void printErrors(InputStream inputStream) {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = r.readLine()) != null) {
                 System.out.println(line);
             }
+        } catch (IOException e) {
+            System.out.println("An I/O error occurred: " + e.getMessage());
+            System.exit(1);
         }
     }
 
@@ -497,9 +547,8 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * 
      * @param connection The {@link URLConnection} from which to read the text response
      * @return The text response
-     * @throws IOException if an I/O error is occurred
      */
-    private String readTextResponse(URLConnection connection) throws IOException {
+    protected String readTextResponse(URLConnection connection) {
         try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             StringBuilder builder = new StringBuilder(128);
             String line;
@@ -507,6 +556,10 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 builder.append(line);
             }
             return builder.toString();
+        } catch (IOException e) {
+            System.out.println("An I/O error occurred: " + e.getMessage());
+            System.exit(1);
+            return null;
         }
     }
 
@@ -517,7 +570,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @throws FileNotFoundException if the file does not exist
      */
     private void checkCSVFormat() throws FileNotFoundException {
-        try (Scanner input = new Scanner(new File(databaseFilePath))) {
+        try (Scanner input = new Scanner(new File(getDatabaseFilePath()))) {
             int counter = 0;
             int maxLines = 5;
             while (input.hasNextLine() && counter < maxLines) {
@@ -533,4 +586,5 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         System.exit(1);
 
     }
+
 }
