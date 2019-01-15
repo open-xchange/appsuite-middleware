@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.html.internal.jsoup;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Tools;
-
+import static com.openexchange.java.Strings.toLowerCase;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * {@link CreateIcalPrincipalPrimaryKeyTask}
+ * {@link JsoupHandlers} - Utility class for {@link JsoupHandler Jsoup handlers}.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-public class CreateIcalPrincipalPrimaryKeyTask extends UpdateTaskAdapter {
+public class JsoupHandlers {
 
     /**
-     * Initializes a new {@link CreateIcalPrincipalPrimaryKeyTask}.
+     * Initializes a new {@link JsoupHandlers}.
      */
-    public CreateIcalPrincipalPrimaryKeyTask() {
+    private JsoupHandlers() {
         super();
     }
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        try {
-            if (!Tools.hasPrimaryKey(con, "ical_principal")) {
-                Tools.createPrimaryKey(con, "ical_principal", new String[] { "cid", "object_id" });
-            }
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        }
+    // -------------------------------------- Image check --------------------------------------------- //
+
+    private static final String CID = "cid:";
+    private static final String DATA = "data:";
+    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
+
+    /**
+     * Checks if specified value from &lt;img&gt; tag's <code>"src"</code> attribute appears to be an inline/embedded image.
+     *
+     * @param src The value of the <code>"src"</code> attribute to examine
+     * @param extactCheckForEmbeddedImage Whether an exact check for an embedded image should be performed
+     * @return <code>true</code> for an inline/embedded image; otherwisae <code>false</code>
+     */
+    public static boolean isInlineImage(String src, boolean extactCheckForEmbeddedImage) {
+        String tmp = toLowerCase(src);
+        return tmp.startsWith(CID) || (tmp.startsWith(DATA) && (extactCheckForEmbeddedImage ? isEmbeddedImage(tmp) : true)) || PATTERN_FILENAME.matcher(tmp).matches();
     }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[0];
+    /** Simple class to delay initialization until needed */
+    private static class DataBase64PatternHolder {
+        static final Pattern PATTERN_DATA_BASE64 = Pattern.compile("data:([\\p{L}_0-9-]+(?:/([\\p{L}_0-9-]+))?)?;base64,"); // data:image/jpeg;base64
     }
+
+    private static boolean isEmbeddedImage(String val) {
+        Matcher m = DataBase64PatternHolder.PATTERN_DATA_BASE64.matcher(val);
+        return m.find() && (m.start() == 0);
+    }
+
+    // ----------------------------------------------------------------------------------------------- //
 
 }

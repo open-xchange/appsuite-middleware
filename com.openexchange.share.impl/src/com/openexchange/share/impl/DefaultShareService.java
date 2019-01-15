@@ -306,6 +306,7 @@ public class DefaultShareService implements ShareService {
                  * prepare shares for this recipient
                  */
                 ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
+
                 sharesInfos.add(shareInfo);
                 sharesByRecipient.put(recipient, shareInfo);
             }
@@ -966,6 +967,7 @@ public class DefaultShareService implements ShareService {
          */
         int permissionBits = utils.getRequiredPermissionBits(recipient, target);
         User targetUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
+
         ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
         if (false == targetUser.isGuest()) {
             return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, true);
@@ -1011,10 +1013,6 @@ public class DefaultShareService implements ShareService {
             /*
              * check quota restrictions & capability for anonymous links
              */
-            CapabilitySet capabilities = requireService(CapabilityService.class).getCapabilities(session);
-            if (null == capabilities || false == capabilities.contains("share_links")) {
-                throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
-            }
             AccountQuota quota = requireService(QuotaService.class).getProvider("share_links").getFor(session, "0");
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
@@ -1027,10 +1025,6 @@ public class DefaultShareService implements ShareService {
             /*
              * check quota restrictions & capability for inviting guests
              */
-            CapabilitySet capabilities = requireService(CapabilityService.class).getCapabilities(session);
-            if (null == capabilities || false == capabilities.contains("invite_guests")) {
-                throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
-            }
             AccountQuota quota = requireService(QuotaService.class).getProvider("invite_guests").getFor(session, "0");
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
@@ -1213,6 +1207,9 @@ public class DefaultShareService implements ShareService {
              */
             AnonymousRecipient recipient = new AnonymousRecipient(LINK_PERMISSION_BITS, null, null);
             LOG.info("Adding new share link to {} for {} in context {}...", target, recipient, I(session.getContextId()));
+
+            checkRecipients(Collections.singletonList(recipient), session);
+
             ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
             checkQuota(session, connectionHelper, Collections.singletonList(shareInfo));
             /*

@@ -142,6 +142,11 @@ public abstract class AbstractReminderAction implements AJAXActionService {
                     result.add(module);
                 }
             } catch (NumberFormatException e) {
+                int module = AJAXServlet.getModuleInteger(str);
+                if (module >= 0) {
+                    result.add(module);
+                    continue;
+                }
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MODULES_PARAMETER, parameter);
             }
         }
