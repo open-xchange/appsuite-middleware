@@ -117,7 +117,7 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return null;
+        return "Clear all sessions belonging to a given context and/or user.";
     }
 
     @Override
