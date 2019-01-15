@@ -49,13 +49,18 @@
 
 package com.openexchange.geolocation.clt;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +75,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class FileUtils {
+public final class FileUtils {
 
     /**
      * The default buffer size
@@ -102,6 +107,36 @@ public class FileUtils {
                 System.exit(1);
             default:
                 return false;
+        }
+    }
+
+    /**
+     * Downloads the file denoted by the specified downloadUrl to the specified downloadPath and uses the optional name
+     * as the file name (if no filename is provided by the 'Content-Disposition' header.
+     * 
+     * @param downloadUrl the download URL
+     * @param downloadPath The download path
+     * @param optionalName The optional file name
+     * @return the downloaded {@link File}
+     * @throws IOException
+     * @throws MalformedURLException if a malformed URL is specified
+     * @throws InvalidContentType
+     */
+    public static File downloadFile(String downloadUrl, String downloadPath, String optionalName, String allowedContentTypes) throws MalformedURLException, IOException {
+        URLConnection connection = new URL(downloadUrl).openConnection();
+        connection.setConnectTimeout(15000);
+        connection.setReadTimeout(30000);
+
+        checkContentType(connection, allowedContentTypes);
+
+        String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"), optionalName);
+        long contentLength = connection.getContentLength();
+        System.out.println("Database size: " + Strings.humanReadableByteCount(contentLength, true) + ".\n");
+        try (InputStream inputStream = connection.getInputStream()) {
+            File dbfile = Paths.get(downloadPath, downloadFilename).toFile();
+            FileUtils.writeFile(inputStream, dbfile, contentLength);
+            System.out.println();
+            return dbfile;
         }
     }
 
@@ -190,5 +225,60 @@ public class FileUtils {
             throw e;
         }
         System.out.println("OK");
+    }
+
+    /**
+     * Extracts the 'filename' from the specified content disposition header
+     * 
+     * @param contentDisposition The content disposition header
+     * @return The filename value
+     */
+    private static String extractFilename(String contentDisposition, String defaultName) {
+        if (contentDisposition == null || contentDisposition.isEmpty()) {
+            return defaultName;
+        }
+        int index = contentDisposition.indexOf("filename=");
+        if (index < 0) {
+            return defaultName;
+        }
+        return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
+    }
+
+    /**
+     * Checks whether the appropriate content type is returned from the specified connection
+     * 
+     * @param connection The {@link URLConnection}
+     * @throws IOException if an I/O error is occurred or if an invalid content type is returned by the server
+     */
+    private static void checkContentType(URLConnection connection, String expectedContentType) throws IOException {
+        String contentType = connection.getContentType();
+        if (contentType == null || contentType.isEmpty()) {
+            return;
+        }
+        if (contentType.toLowerCase().contains(expectedContentType)) {
+            return;
+        }
+        if (contentType.startsWith("text")) {
+            throw new IOException(readTextResponse(connection));
+        }
+        throw new IOException("Invalid content type returned by the server. Expected: '" + expectedContentType + ", but it was: '" + contentType + "'.");
+    }
+
+    /**
+     * Reads the text response from the specified {@link URLConnection}
+     * 
+     * @param connection The {@link URLConnection} from which to read the text response
+     * @return The text response
+     * @throws IOException if an I/O error is occurred
+     */
+    private static String readTextResponse(URLConnection connection) throws IOException {
+        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            StringBuilder builder = new StringBuilder(128);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+            return builder.toString();
+        }
     }
 }

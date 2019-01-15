@@ -51,28 +51,19 @@ package com.openexchange.geolocation.clt;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Paths;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Scanner;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.cli.ProgressMonitor;
 import com.openexchange.geolocation.GeoLocationRMIService;
 import com.openexchange.java.Strings;
 
@@ -88,11 +79,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * The extraction working directory
      */
     protected static final String EXTRACT_DIRECTORY = File.separator + "tmp";
-
-    /**
-     * Default buffer size
-     */
-    private static final int BUFFER_SIZE = 4096;
 
     /**
      * Value of '-g'
@@ -153,6 +139,12 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * Checks whether the provided license is valid for the specified database version
      */
     protected abstract void checkLicense();
+    
+    /**
+     * 
+     * @return
+     */
+    protected abstract String getDownloadUrl();
 
     /*
      * (non-Javadoc)
@@ -191,15 +183,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         if (downloadFilePath != null && false == downloadFilePath.isEmpty()) {
             importMode = true;
         }
-    }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
-    @Override
-    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     /*
@@ -272,34 +255,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     //////////////////////////////////////// HELPERS ///////////////////////////////
 
     /**
-     * Checks the first four bytes of the specified file to determine whether
-     * it is a ZIP archive. The signatures of a ZIP archive are listed
-     * <a href="https://en.wikipedia.org/wiki/List_of_file_signatures">here</a>.
-     * 
-     * @return <code>true</code> if the downloaded file is an archive; <code>false</code> otherwise.
-     * @throws IOException if an I/O error is occurred
-     */
-    protected boolean isArchive() throws IOException {
-        File f = new File(downloadFilePath);
-        int fileSignature = 0;
-        try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
-            fileSignature = raf.readInt();
-        }
-        switch (fileSignature) {
-            case 0x504B0304:
-                return true;
-            case 0x504B0506:
-                System.out.println("ERROR: It seems that the archive you provided is empty.");
-                System.exit(1);
-            case 0x504B0708:
-                System.out.println("ERROR: It seems that the archive you provided is spanned over multiple files.");
-                System.exit(1);
-            default:
-                return false;
-        }
-    }
-
-    /**
      * Downloads the requested database version from the Ip2Location servers
      * 
      * @throws IOException if an I/O error is occurred
@@ -320,84 +275,9 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 dbfile.deleteOnExit();
             }
             this.downloadFilePath = dbfile.getAbsolutePath();
-            try (FileOutputStream output = FileUtils.openOutputStream(dbfile)) {
-                long sum = 0;
-                int count = 0;
-                byte[] data = new byte[BUFFER_SIZE];
-                ProgressMonitor progressMonitor = new ProgressMonitor(50, downloadFilePath);
-                while ((count = inputStream.read(data, 0, BUFFER_SIZE)) != -1) {
-                    output.write(data, 0, count);
-                    sum += count;
-                    if (contentLength > 0) {
-                        progressMonitor.update(Strings.humanReadableByteCount(sum, true), ((double) sum / contentLength));
-                    }
-                }
-            }
+            FileUtils.writeFile(inputStream, dbfile, contentLength);
         }
         System.out.println();
-    }
-
-    /**
-     * Extracts the database file to '/tmp' and sets the 'databaseFilename' path for future use.
-     * 
-     * @throws IOException if an I/O error is occurred
-     */
-    protected void extractDatase() throws IOException {
-        System.out.println("Extracting the archive '" + downloadFilePath + "' in '" + EXTRACT_DIRECTORY + "'...");
-        byte[] buffer = new byte[BUFFER_SIZE];
-        try (FileInputStream fis = new FileInputStream(new File(downloadFilePath)); ZipInputStream zipInputStream = new ZipInputStream(fis)) {
-            while (true) {
-                ZipEntry zipEntry = null;
-                try {
-                    zipEntry = zipInputStream.getNextEntry();
-                    if (zipEntry == null) {
-                        break;
-                    }
-                    extractZipEntry(zipInputStream, zipEntry, buffer);
-                } finally {
-                    if (zipEntry != null) {
-                        zipInputStream.closeEntry();
-                    }
-                }
-            }
-        }
-        if (databaseFilePath == null || databaseFilePath.isEmpty()) {
-            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + EXTRACT_DIRECTORY + "'");
-            System.exit(-1);
-            return;
-        }
-    }
-
-    /**
-     * Extracts the zip entries from the specified {@link ZipInputStream}
-     * 
-     * @param zipInputStream The {@link ZipInputStream} containing the entries
-     * @param zipEntry The ZipEntry to extract
-     * @param buffer the buffer to use when writing the extracted entry
-     * @throws IOException if an I/O error is occurred
-     */
-    private void extractZipEntry(ZipInputStream zipInputStream, ZipEntry zipEntry, byte[] buffer) throws IOException {
-        String fileName = zipEntry.getName();
-        File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
-        if (false == keep) {
-            newFile.deleteOnExit();
-        }
-        if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-            databaseFilePath = newFile.getAbsolutePath();
-        }
-        System.out.print("Extracting to '" + newFile.getAbsolutePath() + "'...");
-
-        new File(newFile.getParent()).mkdirs();
-        try (FileOutputStream fos = new FileOutputStream(newFile)) {
-            int len;
-            while ((len = zipInputStream.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            System.out.println("failed.");
-            throw e;
-        }
-        System.out.println("OK");
     }
 
     /**
@@ -428,6 +308,39 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         } catch (IOException e) {
             if (e.getMessage().contains("No such file or directory")) {
                 System.out.println("\nERROR: Couldn't find the 'mysql' executable. Ensure that 'mysql' is installed and in your $PATH");
+                System.exit(1);
+                return;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+            return;
+        }
+    }
+    
+    /**
+     * Runs the process with the specified execution environment
+     * 
+     * @param executionEnvironment The execution environment, i.e. the executable with all its arguments
+     */
+    protected void runProcess(String[] executionEnvironment) {
+        if (executionEnvironment == null || executionEnvironment.length == 0) {
+            System.out.println("The execution environment is empty.");
+            System.exit(1);
+            return;
+        }
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(executionEnvironment);
+            Process runtimeProcess = processBuilder.start();
+            int processComplete = runtimeProcess.waitFor();
+            if (processComplete == 0) {
+                return;
+            }
+            printErrors(runtimeProcess.getInputStream());
+            printErrors(runtimeProcess.getErrorStream());
+        } catch (IOException e) {
+            if (e.getMessage().contains("No such file or directory")) {
+                System.out.println("\nERROR: Couldn't find the '" + executionEnvironment[0] + "' executable. Ensure that '" + executionEnvironment[0] + "' is installed and in your $PATH");
                 System.exit(1);
                 return;
             }
@@ -531,6 +444,5 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         }
         System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
         System.exit(1);
-
     }
 }
