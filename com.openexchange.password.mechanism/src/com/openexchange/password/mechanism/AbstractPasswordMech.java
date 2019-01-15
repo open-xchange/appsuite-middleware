@@ -66,7 +66,13 @@ public abstract class AbstractPasswordMech implements PasswordMech {
 
     protected final static Logger LOG = LoggerFactory.getLogger(AbstractPasswordMech.class);
 
-    private final static SecureRandom SECURE_RANDOM = initSecureRandom();
+    /*
+     * The random number generator used by this class to create random
+     * based salts. In a holder class to defer initialization until needed.
+     */
+    private static class Holder {
+        static final SecureRandom saltGenerator = new SecureRandom();
+    }
 
     private final String mechIdentifier;
 
@@ -151,8 +157,9 @@ public abstract class AbstractPasswordMech implements PasswordMech {
     }
 
     protected byte[] getSalt() {
+        SecureRandom ng = Holder.saltGenerator;
         byte[] salt = new byte[this.hashSize];
-        SECURE_RANDOM.nextBytes(salt);
+        ng.nextBytes(salt);
         return salt;
     }
 }
