@@ -174,12 +174,20 @@ public class PermanentListenerJobQueue {
             boolean offered = jobs.offer(newJob);
             if (false == offered) {
                 // Could not be offered to job queue. Run with this thread...
+                boolean remove = true;
                 try {
                     newJob.run();
+                    removeJobFor(pushUser);
+                    remove = false;
+
                     PushListener pushListener = ThreadPools.getFrom(newJob);
                     return new AlreadyExecutedPermanentListenerJob(pushUser, pushListener);
                 } catch (Exception e) {
                     return new AlreadyExecutedPermanentListenerJob(pushUser, e);
+                } finally {
+                    if (remove) {
+                        removeJobFor(pushUser);
+                    }
                 }
             }
 
