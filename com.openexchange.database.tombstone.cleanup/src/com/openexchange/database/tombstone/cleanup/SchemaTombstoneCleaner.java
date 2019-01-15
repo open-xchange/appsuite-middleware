@@ -154,7 +154,7 @@ public class SchemaTombstoneCleaner {
     public Map<String, Integer> cleanup(Connection writeConnection, long timestamp) throws SQLException {
         Map<String, Integer> tableCleanupResults = new HashMap<>();
 
-        for (TombstoneTableCleaner cleaner : tombstoneCleaner) {
+        for (TombstoneTableCleaner cleaner : getTombstoneCleaner()) {
             long before = System.currentTimeMillis();
             LOG.debug("Starting TombstoneCleaner '{}'", cleaner.toString());
             Map<String, Integer> cleanedTables = cleaner.cleanup(writeConnection, timestamp);
@@ -163,6 +163,10 @@ public class SchemaTombstoneCleaner {
             LOG.debug("Successfully finished TombstoneCleaner '{}' on schema '{}'. Processing took {}ms.", cleaner.toString(), writeConnection.getCatalog(), after - before);
         }
         return tableCleanupResults;
+    }
+
+    protected Set<TombstoneTableCleaner> getTombstoneCleaner() {
+        return tombstoneCleaner;
     }
 
     /**

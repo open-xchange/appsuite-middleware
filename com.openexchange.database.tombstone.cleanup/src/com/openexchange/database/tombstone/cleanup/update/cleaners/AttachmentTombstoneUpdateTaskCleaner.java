@@ -47,45 +47,33 @@
  *
  */
 
-package com.openexchange.database.tombstone.cleanup.update;
+package com.openexchange.database.tombstone.cleanup.update.cleaners;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
 import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.database.tombstone.cleanup.cleaners.AttachmentTombstoneCleaner;
 
 /**
- * {@link InitialTombstoneCleanupUpdateTask}
+ * {@link AttachmentTombstoneUpdateTaskCleaner}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.2
  */
-public class InitialTombstoneCleanupUpdateTask extends UpdateTaskAdapter {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InitialTombstoneCleanupUpdateTask.class);
-
-    private long timespan;
-
-    public InitialTombstoneCleanupUpdateTask(long timespan) {
-        this.timespan = timespan;
-    }
+public class AttachmentTombstoneUpdateTaskCleaner extends AttachmentTombstoneCleaner {
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        long timestamp = System.currentTimeMillis() - timespan;
-
-        try {
-            SchemaTombstoneCleanerForUpdateTask schemaCleaner = new SchemaTombstoneCleanerForUpdateTask();
-            Map<String, Integer> cleanedTables = schemaCleaner.cleanup(params.getConnection(), timestamp);
-            schemaCleaner.logResults(params.getSchema().getSchema(), cleanedTables);
-        } catch (final SQLException e) {
-            LOG.error("Unable to clean up schema.", e);
+    public Map<String, Integer> cleanupSafe(Connection connection, long timestamp) throws SQLException {
+        try (Statement createStatement = connection.createStatement()) {
+            createStatement.addBatch("CREATE TABLE del_attachment_new LIKE del_attachment;");
+            createStatement.addBatch("ALTER TABLE del_attachment_new ENGINE = InnoDB;");
+            createStatement.addBatch("INSERT INTO del_attachment_new SELECT * FROM del_attachment WHERE del_date >= " + timestamp + ";");
+            createStatement.addBatch("RENAME TABLE del_attachment TO del_attachment_old, del_attachment_new TO del_attachment;");
+            createStatement.addBatch("DROP TABLE del_attachment_old");
+            createStatement.executeBatch();
         }
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[0];
+        return Collections.emptyMap();
     }
 }

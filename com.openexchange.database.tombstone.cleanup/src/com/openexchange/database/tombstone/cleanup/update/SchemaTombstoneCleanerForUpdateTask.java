@@ -49,43 +49,40 @@
 
 package com.openexchange.database.tombstone.cleanup.update;
 
-import java.sql.SQLException;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import java.sql.Connection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import com.openexchange.database.tombstone.cleanup.SchemaTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.CalendarTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.FolderTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.GroupTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.ObjectPermissionTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.ResourceTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.TaskTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.TombstoneTableCleaner;
+import com.openexchange.database.tombstone.cleanup.update.cleaners.AttachmentTombstoneUpdateTaskCleaner;
+import com.openexchange.database.tombstone.cleanup.update.cleaners.ContactTombstoneUpdateTaskCleaner;
+import com.openexchange.database.tombstone.cleanup.update.cleaners.InfostoreTombstoneUpdateTaskCleaner;
 
 /**
- * {@link InitialTombstoneCleanupUpdateTask}
+ * {@link SchemaTombstoneCleanerForUpdateTask}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.2
  */
-public class InitialTombstoneCleanupUpdateTask extends UpdateTaskAdapter {
+public class SchemaTombstoneCleanerForUpdateTask extends SchemaTombstoneCleaner {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InitialTombstoneCleanupUpdateTask.class);
-
-    private long timespan;
-
-    public InitialTombstoneCleanupUpdateTask(long timespan) {
-        this.timespan = timespan;
+    /**
+     * Default constructor that should be used if you do not yet have a {@link Connection} to the target schema
+     */
+    public SchemaTombstoneCleanerForUpdateTask() {
+        super();
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        long timestamp = System.currentTimeMillis() - timespan;
-
-        try {
-            SchemaTombstoneCleanerForUpdateTask schemaCleaner = new SchemaTombstoneCleanerForUpdateTask();
-            Map<String, Integer> cleanedTables = schemaCleaner.cleanup(params.getConnection(), timestamp);
-            schemaCleaner.logResults(params.getSchema().getSchema(), cleanedTables);
-        } catch (final SQLException e) {
-            LOG.error("Unable to clean up schema.", e);
-        }
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[0];
+    protected Set<TombstoneTableCleaner> getTombstoneCleaner() {
+        return Stream.of(new AttachmentTombstoneUpdateTaskCleaner(), new CalendarTombstoneCleaner(), new ContactTombstoneUpdateTaskCleaner(), new FolderTombstoneCleaner(), new GroupTombstoneCleaner(), new InfostoreTombstoneUpdateTaskCleaner(), new ObjectPermissionTombstoneCleaner(), new ResourceTombstoneCleaner(), new TaskTombstoneCleaner()).collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
     }
 }

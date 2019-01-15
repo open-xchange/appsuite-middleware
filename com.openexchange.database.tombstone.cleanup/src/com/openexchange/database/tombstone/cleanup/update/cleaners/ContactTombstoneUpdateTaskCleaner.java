@@ -47,45 +47,38 @@
  *
  */
 
-package com.openexchange.database.tombstone.cleanup.update;
+package com.openexchange.database.tombstone.cleanup.update.cleaners;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
 import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.database.tombstone.cleanup.cleaners.ContactTombstoneCleaner;
 
 /**
- * {@link InitialTombstoneCleanupUpdateTask}
+ * {@link ContactTombstoneUpdateTaskCleaner}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.2
  */
-public class InitialTombstoneCleanupUpdateTask extends UpdateTaskAdapter {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InitialTombstoneCleanupUpdateTask.class);
-
-    private long timespan;
-
-    public InitialTombstoneCleanupUpdateTask(long timespan) {
-        this.timespan = timespan;
-    }
+public class ContactTombstoneUpdateTaskCleaner extends ContactTombstoneCleaner {
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        long timestamp = System.currentTimeMillis() - timespan;
+    public Map<String, Integer> cleanupSafe(Connection connection, long timestamp) throws SQLException {
+        // Removes entries from both tables where the relation matches
+        String deleteEntriesWithConstraints = "DELETE FROM del_contacts, del_contacts_image USING del_contacts INNER JOIN del_contacts_image ON del_contacts.cid = del_contacts_image.cid AND del_contacts.intfield01 = del_contacts_image.intfield01 WHERE del_contacts.changing_date < ?";
+        delete(connection, timestamp, deleteEntriesWithConstraints);
 
-        try {
-            SchemaTombstoneCleanerForUpdateTask schemaCleaner = new SchemaTombstoneCleanerForUpdateTask();
-            Map<String, Integer> cleanedTables = schemaCleaner.cleanup(params.getConnection(), timestamp);
-            schemaCleaner.logResults(params.getSchema().getSchema(), cleanedTables);
-        } catch (final SQLException e) {
-            LOG.error("Unable to clean up schema.", e);
+        try (Statement createStatement = connection.createStatement()) {
+            createStatement.addBatch("CREATE TABLE del_contacts_new LIKE del_contacts;");
+            createStatement.addBatch("ALTER TABLE del_contacts_new ENGINE = InnoDB;");
+            createStatement.addBatch("INSERT INTO del_contacts_new SELECT * FROM del_contacts WHERE changing_date >= " + timestamp + ";");
+            createStatement.addBatch("RENAME TABLE del_contacts TO del_contacts_old, del_contacts_new TO del_contacts;");
+            createStatement.addBatch("DROP TABLE del_contacts_old");
+            createStatement.executeBatch();
         }
-    }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[0];
+        return Collections.emptyMap();
     }
 }
