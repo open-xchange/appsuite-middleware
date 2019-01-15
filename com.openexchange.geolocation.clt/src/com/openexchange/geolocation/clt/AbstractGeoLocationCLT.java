@@ -51,12 +51,10 @@ package com.openexchange.geolocation.clt;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
-import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
@@ -137,18 +135,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @return returns the {@link DatabaseVersion}
      * @throws IllegalArgumentException if no valid database version can be parsed
      */
-    protected abstract DatabaseVersion parseDatabaseVersion();
-
-    /**
-     * Checks whether the provided license is valid for the specified database version
-     */
-    protected abstract void checkLicense();
-
-    /**
-     * 
-     * @return
-     */
-    protected abstract String getDownloadUrl();
+    protected abstract DatabaseVersion parseDatabaseVersion(CommandLine cmd);
 
     /*
      * (non-Javadoc)
@@ -195,7 +182,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('g')) {
             dbGroup = cmd.getOptionValue('g');
         }
-        databaseVersion = parseDatabaseVersion();
+        databaseVersion = parseDatabaseVersion(cmd);
         dbVersionName = cmd.hasOption('l') ? databaseVersion.getLiteName() : databaseVersion.getName();
         keep = cmd.hasOption('k');
         downloadFilePath = cmd.getOptionValue('i');
@@ -299,14 +286,14 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @param the RMI hostname of the node on which to query the name of the global database
      * @param environment The execution environment
      */
-    protected void importDatabase(String rmiHostName, String[] environment) throws Exception {
-        checkCSVFormat();
+    protected void importDatabase(String rmiHostName, String importStatements) throws Exception {
         GeoLocationRMIService rmiService = getRmiStub(rmiHostName, GeoLocationRMIService.RMI_NAME);
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
 
+        String[] executionEnvironment = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", importStatements };
         System.out.println("Using database file '" + databaseFilePath + "'.");
         System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...");
-        runProcess(environment);
+        runProcess(executionEnvironment);
         System.out.println("OK.");
     }
 
@@ -356,28 +343,5 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 System.out.println(line);
             }
         }
-    }
-
-    /**
-     * Checks whether the specified databaseFilePath denotes a valid ip2location CSV file
-     * corresponding to the specified {@link DatabaseVersion}
-     * 
-     * @throws FileNotFoundException if the file does not exist
-     */
-    private void checkCSVFormat() throws FileNotFoundException {
-        try (Scanner input = new Scanner(new File(databaseFilePath))) {
-            int counter = 0;
-            int maxLines = 5;
-            while (input.hasNextLine() && counter < maxLines) {
-                String line = input.nextLine();
-                String[] split = line.split(",");
-                if (split != null && split.length == databaseVersion.getNumberOfFields()) {
-                    return;
-                }
-                counter++;
-            }
-        }
-        System.out.println("The file you provided does not seem to be a valid CSV file.");
-        System.exit(1);
     }
 }
