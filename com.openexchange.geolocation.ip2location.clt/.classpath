@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="/com.openexchange.geolocation"/>
 	<classpathentry kind="src" path="/com.openexchange.server"/>
 	<classpathentry kind="src" path="/com.openexchange.java"/>
+	<classpathentry kind="src" path="/com.openexchange.geolocation.clt"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

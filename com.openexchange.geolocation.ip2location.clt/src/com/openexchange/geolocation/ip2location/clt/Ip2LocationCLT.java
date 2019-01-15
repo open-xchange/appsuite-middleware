@@ -73,6 +73,7 @@ import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.cli.ProgressMonitor;
 import com.openexchange.geolocation.GeoLocationRMIService;
+import com.openexchange.geolocation.clt.DatabaseVersion;
 import com.openexchange.java.Strings;
 
 /**
@@ -84,49 +85,13 @@ import com.openexchange.java.Strings;
 public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
     /**
-     * {@link DatabaseVersion} - Defines the amount of fields for every supported Ip2Location database
-     */
-    private enum DatabaseVersion {
-        DB1(4),
-        DB5(8),
-        DB9(9),
-        DB11(10);
-
-        private final int numberOfFields;
-
-        /**
-         * Initialises a new {@link Ip2LocationCLT.DatabaseVersion}.
-         */
-        private DatabaseVersion(int numberOfFields) {
-            this.numberOfFields = numberOfFields;
-        }
-
-        /**
-         * Gets the numberOfFields
-         *
-         * @return The numberOfFields
-         */
-        public int getNumberOfFields() {
-            return numberOfFields;
-        }
-
-        public String getLiteName() {
-            return name() + "LITECSV";
-        }
-
-        public String getName() {
-            return name() + "CSV";
-        }
-    }
-
-    /**
      * Returns a comma separated string with the supported ip2location DB versions
      * 
      * @return a comma separated string with the supported ip2location DB versions
      */
     private static final String supportedDBVersions() {
         StringBuilder b = new StringBuilder(32);
-        for (DatabaseVersion dbv : DatabaseVersion.values()) {
+        for (Ip2LocationDatabaseVersion dbv : Ip2LocationDatabaseVersion.values()) {
             b.append(dbv.name()).append(",");
         }
         b.setLength(b.length() - 1);
@@ -161,7 +126,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
     /**
      * Value of '-d'
      */
-    private DatabaseVersion databaseVersion = DatabaseVersion.DB9;
+    private DatabaseVersion databaseVersion = Ip2LocationDatabaseVersion.DB9;
     /**
      * The requested Ip2Location database version. Influenced by '-l'
      */
@@ -255,7 +220,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('d')) {
             String d = cmd.getOptionValue('d');
             try {
-                databaseVersion = DatabaseVersion.valueOf(d);
+                databaseVersion = Ip2LocationDatabaseVersion.valueOf(d);
             } catch (IllegalArgumentException e) {
                 System.out.println("Invalid database version identifier supplied: '" + d + "'. Supported database identifiers are: " + supportedDBVersions());
                 System.exit(1);
