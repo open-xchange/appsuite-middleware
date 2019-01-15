@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,86 +47,55 @@
  *
  */
 
-package com.openexchange.share.servlet.auth;
+package com.openexchange.html.internal.jsoup;
 
-import com.openexchange.authentication.GuestAuthenticated;
-import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
-import com.openexchange.share.AuthenticationMode;
+import static com.openexchange.java.Strings.toLowerCase;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * {@link AuthenticationMode}
+ * {@link JsoupHandlers} - Utility class for {@link JsoupHandler Jsoup handlers}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-public class ShareAuthenticated implements GuestAuthenticated, SessionEnhancement {
-
-    private final User user;
-    private final Context context;
-    private final SessionEnhancement enhancement;;
+public class JsoupHandlers {
 
     /**
-     * Initializes a new {@link ShareAuthenticated}.
-     *
-     * @param user The user
-     * @param context The context
-     * @param enhancement The session enhancement delegate, or <code>null</code> if not applicable
+     * Initializes a new {@link JsoupHandlers}.
      */
-    public ShareAuthenticated(User user, Context context, SessionEnhancement enhancement) {
+    private JsoupHandlers() {
         super();
-        this.user = user;
-        this.context = context;
-        this.enhancement = enhancement;
     }
+
+    // -------------------------------------- Image check --------------------------------------------- //
+
+    private static final String CID = "cid:";
+    private static final String DATA = "data:";
+    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
 
     /**
-     * Gets the user
+     * Checks if specified value from &lt;img&gt; tag's <code>"src"</code> attribute appears to be an inline/embedded image.
      *
-     * @return The user
+     * @param src The value of the <code>"src"</code> attribute to examine
+     * @param extactCheckForEmbeddedImage Whether an exact check for an embedded image should be performed
+     * @return <code>true</code> for an inline/embedded image; otherwisae <code>false</code>
      */
-    public User getUser() {
-        return user;
+    public static boolean isInlineImage(String src, boolean extactCheckForEmbeddedImage) {
+        String tmp = toLowerCase(src);
+        return tmp.startsWith(CID) || (tmp.startsWith(DATA) && (extactCheckForEmbeddedImage ? isEmbeddedImage(tmp) : true)) || PATTERN_FILENAME.matcher(tmp).matches();
     }
 
-    /**
-     * Gets the context
-     *
-     * @return The context
-     */
-    public Context getContext() {
-        return context;
+    /** Simple class to delay initialization until needed */
+    private static class DataBase64PatternHolder {
+        static final Pattern PATTERN_DATA_BASE64 = Pattern.compile("data:([\\p{L}_0-9-]+(?:/([\\p{L}_0-9-]+))?)?;base64,"); // data:image/jpeg;base64
     }
 
-    @Override
-    public String getContextInfo() {
-        String[] loginInfo = context.getLoginInfo();
-        return null != loginInfo && 0 < loginInfo.length ? loginInfo[0] : context.getName();
+    private static boolean isEmbeddedImage(String val) {
+        Matcher m = DataBase64PatternHolder.PATTERN_DATA_BASE64.matcher(val);
+        return m.find() && (m.start() == 0);
     }
 
-    @Override
-    public String getUserInfo() {
-        return user.getMail();
-    }
-
-    @Override
-    public int getContextID() {
-        return context.getContextId();
-    }
-
-    @Override
-    public int getUserID() {
-        return user.getId();
-    }
-
-    @Override
-    public void enhanceSession(Session session) {
-        if (null != enhancement) {
-            enhancement.enhanceSession(session);
-        }
-        session.setParameter(Session.PARAM_GUEST, true);  // Guest authenticated.  Set Guest parameter True
-    }
+    // ----------------------------------------------------------------------------------------------- //
 
 }

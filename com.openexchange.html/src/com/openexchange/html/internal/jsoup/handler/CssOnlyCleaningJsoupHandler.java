@@ -52,7 +52,7 @@ package com.openexchange.html.internal.jsoup.handler;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
-import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.html.internal.jsoup.JsoupHandlers.isInlineImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -441,7 +441,7 @@ public final class CssOnlyCleaningJsoupHandler implements JsoupHandler {
                         attribute.setValue("");
                         imageURLFound = true;
                     } else if ("src".equals(attr) && ("img".equals(tagName) || "input".equals(tagName))) {
-                        if (isInlineImage(val)) {
+                        if (isInlineImage(val, true)) {
                             // Allow inline images
                         } else {
                             attribute.setValue("");
@@ -472,17 +472,6 @@ public final class CssOnlyCleaningJsoupHandler implements JsoupHandler {
             copy.add(attribute);
         }
         return copy;
-    }
-
-    // --------------------------------- Image check --------------------------------------- //
-
-    private static final String CID = "cid:";
-    private static final String DATA_BASE64 = "data:;base64,";
-    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
-
-    private boolean isInlineImage(final String val) {
-        final String tmp = toLowerCase(val);
-        return tmp.startsWith(CID) || tmp.startsWith(DATA_BASE64) || PATTERN_FILENAME.matcher(tmp).matches();
     }
 
     // ----------------------------------------------------------------------------------- //

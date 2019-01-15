@@ -81,7 +81,7 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task.class.getName() };
+        return new String[] { com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask.class.getName() };
     }
 
     @Override
