@@ -200,6 +200,10 @@ This is what the second load balancer is for.
 For example, the main site is available through www.mysite.com and the secondary (the x.y.z cluster) through www.XYZ.mysite.com. If any user with a context that is still in 7.10.0 tries to log in to the www.XYZ.mysite.com, 
 then login will fail with a 'CTX-0012' exception which indicates that the context the user is trying to login is located in another server. No redirect will happen in this case, since it may result in an endless loop.
 
+**Q**: From an administrator point of view, is it somehow possible to determine whether a context exists on a given server instance?
+
+**A**: Yes. The `OXContextService` SOAP end-point and the RMI interface `com.openexchange.admin.rmi.OXContextInterface` have been enhanced by the method `existsInServer` to retrieve exactly the information if a context lives within the queried server.
+
 **Q**: Can I upgrade from 7.8.x versions directly to 7.10.0 and later using this guide?
 
 **A**: No. It is only possible to upgrade from 7.10.0 to any successor version.
