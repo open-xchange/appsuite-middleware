@@ -81,7 +81,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        Email businessEmail = getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0);
+        Email businessEmail = getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0, false);
         if (has(contact, Contact.EMAIL1)) {
             if (null == businessEmail) {
                 vCard.addEmail(contact.getEmail1(), EmailType.WORK, EmailType.PREF);
@@ -95,7 +95,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email2 - type "HOME"
          */
-        Email homeEmail = getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1);
+        Email homeEmail = getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1, false);
         if (has(contact, Contact.EMAIL2)) {
             if (null == homeEmail) {
                 vCard.addEmail(contact.getEmail2(), EmailType.HOME);
@@ -109,7 +109,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        Email otherEmail = getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2);
+        Email otherEmail = getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2, true);
         if (has(contact, Contact.EMAIL3)) {
             if (null == otherEmail) {
                 otherEmail = new Email(contact.getEmail3());
@@ -149,15 +149,15 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        contact.setEmail1(parseEMail(getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0), parameters, warnings));
+        contact.setEmail1(parseEMail(getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0, false), parameters, warnings));
         /*
          * email2 - type "HOME"
          */
-        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1), parameters, warnings));
+        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1, false), parameters, warnings));
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2), parameters, warnings));
+        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2, true), parameters, warnings));
         /*
          * telex - type "TLX"
          */
@@ -185,16 +185,18 @@ public class EMailMapping extends AbstractMapping {
 
     /**
      * Chooses a specific e-mail address from a list of candidates matching either a distinguishing type, or, if the candidates are not
-     * using any distinguishing e-mail types at all, the n-th e-mail property as fallback.
+     * using any distinguishing e-mail types at all, the n-th e-mail property as fallback, or, if there are candidates with unknown
+     * or no distinguishing types, the first of those e-mail properties as fallback.
      *
      * @param vCard The vCard
      * @param emails The possible e-mail properties to choose from
      * @param distinguishingType The distinguishing type
      * @param abLabel The distinguishing <code>X-ABLabel</code> property, or <code>null</code> if not used
      * @param fallbackIndex The index in the candidate list to use when selecting the fallback property, or <code>-1</code> to use no fallback
+     * @param fallbackToUnknownType <code>true</code> to use the first e-mail with unknown distinguishing type as fallback, <code>false</code>, otherwise
      * @return The matching e-mail property, or <code>null</code> if none was found
      */
-    private Email getEmail(VCard vCard, List<Email> emails, String distinguishingType, String abLabel, int fallbackIndex) {
+    private Email getEmail(VCard vCard, List<Email> emails, String distinguishingType, String abLabel, int fallbackIndex, boolean fallbackToUnknownType) {
         if (null == emails || 0 == emails.size()) {
             return null;
         }
@@ -218,6 +220,17 @@ public class EMailMapping extends AbstractMapping {
                 sort(simpleEmails);
                 email = simpleEmails.get(fallbackIndex);
             }
+        }
+        if (null == email && fallbackToUnknownType) {
+            /*
+             * if no distinguishing e-mail type found, use first non-distinguishing address as fallback
+             */
+            List<Email> simpleEmails = getPropertiesWithoutTypes(emails,
+                EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
+            if (0 < simpleEmails.size()) {
+                sort(simpleEmails);
+                email = simpleEmails.get(0);
+            }            
         }
         return email;
     }
