@@ -808,7 +808,7 @@ properties:
     file: Server.properties
     packageName: open-xchange-core
     tags: ["Server"]
-    - key: com.openexchange.server.shardName
+  - key: com.openexchange.server.shardName
     description: |
       Configures the name of this servers shard. This value is stored in a seperate open-xchange-shard cookie which is set alongside
       all other session related cookies.
