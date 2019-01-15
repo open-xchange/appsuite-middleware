@@ -50,12 +50,14 @@
 package com.openexchange.geolocation.maxmind.clt;
 
 import java.io.File;
-import java.rmi.RemoteException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.geolocation.clt.AbstractGeoLocationCLT;
+import com.openexchange.geolocation.clt.DatabaseVersion;
+import com.openexchange.geolocation.clt.FileUtils;
 
 /**
  * {@link MaxMindCLT}
@@ -63,63 +65,47 @@ import com.openexchange.cli.AbstractRmiCLI;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class MaxMindCLT extends AbstractRmiCLI<Void> {
+public class MaxMindCLT extends AbstractGeoLocationCLT {
+
+    /**
+     * Returns a comma separated string with the supported MaxMind DB versions
+     * 
+     * @return a comma separated string with the supported MaxMind DB versions
+     */
+    private static final String supportedDBVersions() {
+        StringBuilder b = new StringBuilder(32);
+        for (MaxMindDatabaseVersion dbv : MaxMindDatabaseVersion.values()) {
+            b.append(dbv.name()).append(",");
+        }
+        b.setLength(b.length() - 1);
+        return b.toString();
+    }
 
     private static final String USAGE = "";
     private static final String FOOTER = "";
-    
-    /**
-     * Table name of the ip2location database
-     */
-    private static final String TABLE_NAME = "ip2location";
-    /**
-     * The extraction working directory
-     */
-    private static final String EXTRACT_DIRECTORY = File.separator + "tmp";
-    
-    /**
-     * Value of '-g'
-     */
-    private String dbGroup = "default";
-    /**
-     * Value of '-u'
-     */
-    private String dbUser;
-    /**
-     * Value of '-a'
-     */
-    private String dbPassword;
-    /**
-     * Influenced by '-k'
-     */
-    private boolean keep = false;
-    
-    /**
-     * The absolute path of the downloaded file
-     */
+
+    private static final String DOWNLOAD = "https://geolite.maxmind.com/download/geoip/database/#VERSION#.zip";
+
+    private String ipBlocksFilePath;
+    private String ipLocationsFilePath;
     private String downloadFilePath;
-    /**
-     * The absolute path of the database file contained within the downloaded zip file
-     */
-    private String databaseFilePath;
 
     private boolean importMode = false;
+
+    /**
+     * Entry point
+     * 
+     * @param args The command line arguments
+     */
+    public static void main(String[] args) {
+        new MaxMindCLT().execute(args);
+    }
 
     /**
      * Initialises a new {@link MaxMindCLT}.
      */
     public MaxMindCLT() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        authenticator.doAuthentication(login, password);
+        super("ip_blocks, ip_locations", USAGE, FOOTER);
     }
 
     /*
@@ -129,15 +115,10 @@ public class MaxMindCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createArgumentOption("u", "database-user", "database-user", "The database user for importing the data.", true));
-        options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
-        options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
-        options.addOption(createSwitch("k", "keep", "Keeps the temporary files produced from this command line tool (zip archives, downloaded and extracted files).", false));
-
-        OptionGroup og = new OptionGroup();
-        og.addOption(createSwitch("d", "download", "Downloads the latest MaxMind Lite geo databaase. Mutually exclusive with -i option.", true));
-        og.addOption(createArgumentOption("i", "import", "database-file", "Imports the ip2location csv file to the database. Mutually exclusive with -d option.", true));
-        options.addOptionGroup(og);
+        super.addOptions(options);
+        options.addOption(createArgumentOption("z", "zip-archive", "zip-archive", "Imports the contents of the ZIP archive to the database. The ZIP archive will be extracted to the extraction directory specified by the '-o' options (defaults to '/tmp' if absent). The ZIP archive is expected to contain the two CSV files supplied by MaxMind, i.e. the ip_blocks and ip_locations. Mutually exclusive with '-b' and '-l' options", false));
+        options.addOption(createArgumentOption("b", "ip-blocks", "ip-blocks-file", "Imports the ip_blocks csv file to the database. Must be used in conjunction with '-l' option. Mutually exclusive with the '-z' option.", false));
+        options.addOption(createArgumentOption("l", "ip-locations", "ip-locations-file", "Imports the ip_locations csv file to the database. Must be used in conjunction with '-b' option. Mutually exclusive with the '-z' option.", false));
     }
 
     /*
@@ -147,22 +128,20 @@ public class MaxMindCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        if (keep) {
-            System.out.println("Temporary files will be KEPT in " + EXTRACT_DIRECTORY + ".");
+        if (isKeep()) {
+            System.out.println("Temporary files will be KEPT in " + getExtractDirectory() + ".");
         }
-        
+        if (importMode) {
+            if (FileUtils.isArchive(downloadFilePath)) {
+                extractDatase();
+            }
+            importDatabase(optRmiHostName);
+            return null;
+        }
+        downloadDatabase();
+        extractDatase();
+        importDatabase(optRmiHostName);
         return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        // TODO switch to 'true'
-        return false;
     }
 
     /*
@@ -172,47 +151,130 @@ public class MaxMindCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        if (cmd.hasOption('i') && cmd.hasOption('d')) {
-            System.out.println("The options '-i' and '-d' are mutually exclusive.");
-            printHelp(options, 120);
-            System.exit(1);
-            return;
-        }
-        if (cmd.hasOption('u')) {
-            dbUser = cmd.getOptionValue('u');
-        }
-        if (cmd.hasOption('a')) {
-            dbPassword = cmd.getOptionValue('a');
-        }
-        if (cmd.hasOption('g')) {
-            dbGroup = cmd.getOptionValue('g');
-        }
-        keep = cmd.hasOption('k');
-        downloadFilePath = cmd.getOptionValue('i');
-        if (downloadFilePath != null && false == downloadFilePath.isEmpty()) {
+        super.checkOptions(cmd);
+        downloadFilePath = cmd.getOptionValue('z');
+        ipBlocksFilePath = cmd.getOptionValue('b');
+        ipLocationsFilePath = cmd.getOptionValue('l');
+        if (ipBlocksFilePath != null && false == ipBlocksFilePath.isEmpty() && ipLocationsFilePath != null && false == ipLocationsFilePath.isEmpty()) {
             importMode = true;
+        }
+    }
+
+    /////////////////////////////////////////////// HELPERS /////////////////////////////////////////
+
+    /**
+     * Downloads the requested database version from the Ip2Location servers
+     */
+    private void downloadDatabase() {
+        String download = DOWNLOAD.replaceFirst("#VERSION#", getDatabaseVersion().getLiteName());
+        System.out.println("Downloading " + getDatabaseVersion().getLiteName() + "...");
+        try {
+            File downloadedFile = FileUtils.downloadFile(download, getExtractDirectory(), getDatabaseVersion().getLiteName(), "application/zip");
+            downloadFilePath = downloadedFile.getAbsolutePath();
+        } catch (MalformedURLException e) {
+            System.err.println("A malformed URL was specified: " + download);
+            System.exit(-1);
+        } catch (IOException e) {
+            String content = e.getMessage();
+            if (content.equals("NO PERMISSION")) {
+                System.out.println("You have no permission to access '" + getDatabaseVersion().getLiteName() + "'.");
+                System.exit(-1);
+                return;
+            }
+            System.err.println("An I/O error occurred: " + content);
+            System.exit(-1);
             return;
         }
-        importMode = !cmd.hasOption('d');
+    }
+
+    /**
+     * Extracts the database file to '/tmp' and sets the 'databaseFilename' path for future use.
+     * 
+     * @throws IOException if an I/O error is occurred
+     */
+    private void extractDatase() throws IOException {
+        List<File> extractedFiles = FileUtils.extractArchive(downloadFilePath, getExtractDirectory(), isKeep());
+        for (File f : extractedFiles) {
+            String path = f.getAbsolutePath().toLowerCase();
+            if (path.contains("locations") && path.endsWith(".csv")) {
+                ipLocationsFilePath = f.getAbsolutePath();
+                continue;
+            }
+            if (path.contains("blocks") && path.endsWith(".csv")) {
+                ipBlocksFilePath = f.getAbsolutePath();
+                continue;
+            }
+        }
+        if ((ipLocationsFilePath == null || ipLocationsFilePath.isEmpty()) && (ipBlocksFilePath == null || ipBlocksFilePath.isEmpty())) {
+            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + getExtractDirectory() + "'");
+            System.exit(-1);
+            return;
+        }
+    }
+
+    /**
+     * Imports the data into the specified database
+     */
+    private void importDatabase(String optRmiHostName) throws Exception {
+        //checkCSVFormat();
+        //@formatter:off
+        String importStatements = "SET autocommit = 0;" +
+            "START TRANSACTION;" +
+            "TRUNCATE `ip_blocks`;" + 
+
+            "LOAD DATA LOCAL INFILE '" + ipBlocksFilePath + "' INTO TABLE ip_blocks COLUMNS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (" + 
+            "@network," + 
+            "geoname_id," + 
+            "registered_country_geoname_id," + 
+            "represented_country_geoname_id," + 
+            "is_anonymous_proxy," + 
+            "is_satellite_provider," + 
+            "postal_code," + 
+            "latitude," + 
+            "longitude," + 
+            "accuracy_radius) SET " + 
+            "ip_from = INET_ATON(SUBSTRING(@network, 1, LOCATE('/', @network) - 1))," + 
+            "ip_to = (INET_ATON(SUBSTRING(@network, 1, LOCATE('/', @network) - 1)) + (pow(2, (32-CONVERT(SUBSTRING(@network, LOCATE('/', @network) + 1), UNSIGNED INTEGER)))-1));" + 
+            
+            "LOAD DATA LOCAL INFILE '" + ipLocationsFilePath + "' INTO TABLE ip_locations CHARACTER SET UTF8 COLUMNS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (" + 
+            "geoname_id," + 
+            "locale_code," + 
+            "continent_code," + 
+            "continent_name," + 
+            "country_iso_code," + 
+            "country_name," + 
+            "subdivision_1_iso_code," + 
+            "subdivision_1_name," + 
+            "subdivision_2_iso_code," + 
+            "subdivision_2_name," + 
+            "city_name," + 
+            "metro_code," + 
+            "time_zone);" +
+            
+            "COMMIT;" + 
+            "SET autocommit=1;";
+        //@formatter:on
+        System.out.println("Using database files '" + ipBlocksFilePath + "' and '" + ipLocationsFilePath + "'.");
+        importDatabase(optRmiHostName, importStatements);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     * @see com.openexchange.geolocation.clt.AbstractGeoLocationCLT#parseDatabaseVersion(org.apache.commons.cli.CommandLine)
      */
     @Override
-    protected String getFooter() {
-        return FOOTER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
-    @Override
-    protected String getName() {
-        return USAGE;
+    protected DatabaseVersion parseDatabaseVersion(CommandLine cmd) {
+        if (false == cmd.hasOption('d')) {
+            return MaxMindDatabaseVersion.CITY;
+        }
+        String d = cmd.getOptionValue('d');
+        try {
+            return MaxMindDatabaseVersion.valueOf(d);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid database version identifier supplied: '" + d + "'. Supported database identifiers are: " + supportedDBVersions());
+            System.exit(1);
+            return null;
+        }
     }
 }

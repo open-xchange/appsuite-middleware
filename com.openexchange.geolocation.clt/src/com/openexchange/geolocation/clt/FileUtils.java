@@ -89,6 +89,9 @@ public final class FileUtils {
      * @throws IOException if an I/O error is occurred
      */
     public static boolean isArchive(String filePath) throws IOException {
+        if (filePath == null || filePath.isEmpty()) {
+            return false;
+        }
         File f = new File(filePath);
         int fileSignature = 0;
         try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
@@ -99,10 +102,10 @@ public final class FileUtils {
                 return true;
             case 0x504B0506:
                 System.out.println("ERROR: It seems that the archive you provided is empty.");
-                System.exit(1);
+                return false;
             case 0x504B0708:
                 System.out.println("ERROR: It seems that the archive you provided is spanned over multiple files.");
-                System.exit(1);
+                return false;
             default:
                 return false;
         }

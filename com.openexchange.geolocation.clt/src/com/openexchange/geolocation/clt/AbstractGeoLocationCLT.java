@@ -278,6 +278,15 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         return importMode;
     }
 
+    /**
+     * Gets the extractDirectory
+     *
+     * @return The extractDirectory
+     */
+    public String getExtractDirectory() {
+        return extractDirectory;
+    }
+
     //////////////////////////////////////// HELPERS ///////////////////////////////
 
     /**
@@ -291,7 +300,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
 
         String[] executionEnvironment = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", importStatements };
-        System.out.println("Using database file '" + databaseFilePath + "'.");
         System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...");
         runProcess(executionEnvironment);
         System.out.println("OK.");
@@ -343,5 +351,14 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 System.out.println(line);
             }
         }
+    }
+
+    /**
+     * Gets the databaseVersion
+     *
+     * @return The databaseVersion
+     */
+    public DatabaseVersion getDatabaseVersion() {
+        return databaseVersion;
     }
 }

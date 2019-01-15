@@ -49,32 +49,23 @@
 
 package com.openexchange.geolocation.ip2location.clt;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Scanner;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.cli.ProgressMonitor;
-import com.openexchange.geolocation.GeoLocationRMIService;
+import com.openexchange.geolocation.clt.AbstractGeoLocationCLT;
+import com.openexchange.geolocation.clt.ConnectionUtils;
 import com.openexchange.geolocation.clt.DatabaseVersion;
-import com.openexchange.java.Strings;
+import com.openexchange.geolocation.clt.FileUtils;
 
 /**
  * {@link Ip2LocationCLT} - Command line tool to initialise and update the 'ip2location' database
@@ -82,7 +73,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
+public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /**
      * Returns a comma separated string with the supported ip2location DB versions
@@ -101,16 +92,10 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
     private static final String USAGE = "[ip2location -u <database-user> [-a <database-password>] [-g <group>] [[-i <database-file>] | [-t <token>]] [-k] [-l] -A <masterAdmin> -P <masterPassword> [-p <rmiPort>] [--responsetimeout <timeout>] [-s <rmiHost>]] | [-h]";
     private static final String FOOTER = "Note that the options '-i' and '-t' are mutually exclusive.\n\nSupported ip2location database versions: " + supportedDBVersions();
 
-    private static final int BUFFER_SIZE = 4096;
-
     /**
      * Table name of the ip2location database
      */
     private static final String TABLE_NAME = "ip2location";
-    /**
-     * The extraction working directory
-     */
-    private static final String EXTRACT_DIRECTORY = File.separator + "tmp";
     /**
      * URL to check whether the token is valid for the specified database version
      */
@@ -124,30 +109,9 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private String token;
     /**
-     * Value of '-d'
-     */
-    private DatabaseVersion databaseVersion = Ip2LocationDatabaseVersion.DB9;
-    /**
      * The requested Ip2Location database version. Influenced by '-l'
      */
-    private String dbVersionName = databaseVersion.getName();
-    /**
-     * Value of '-g'
-     */
-    private String dbGroup = "default";
-    /**
-     * Value of '-u'
-     */
-    private String dbUser;
-    /**
-     * Value of '-a'
-     */
-    private String dbPassword;
-    /**
-     * Influenced by '-k'
-     */
-    private boolean keep = false;
-
+    private String dbVersionName;
     /**
      * The absolute path of the downloaded file
      */
@@ -172,7 +136,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * Initialises a new {@link Ip2LocationCLT}.
      */
     public Ip2LocationCLT() {
-        super();
+        super(TABLE_NAME, USAGE, FOOTER);
     }
 
     /*
@@ -182,16 +146,12 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createArgumentOption("u", "database-user", "database-user", "The database user for importing the data.", true));
-        options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
-        options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
-        options.addOption(createSwitch("k", "keep", "Keeps the temporary files produced from this command line tool (zip archives, downloaded and extracted files).", false));
+        super.addOptions(options);
         options.addOption(createSwitch("l", "lite", "Switch to indicate that the 'lite' version of the database is requested. If absent, then the full version of the database will be requested. Has no effect when in import mode (-i option)", false));
-        options.addOption(createArgumentOption("d", "database-version", "database-version", "The database version identifier to download and import. If absent falls back to 'DB9'. The import mode is affected by this switch. Be sure to supply the correct version for the CSV you are importing.", false));
 
         OptionGroup og = new OptionGroup();
         og.addOption(createArgumentOption("t", "token", "token", "Download Token. Mutually exclusive with -i option.", true));
-        og.addOption(createArgumentOption("i", "import", "database-file", "Imports the ip2location csv file to the database. Mutually exclusive with -t option.", true));
+        og.addOption(createArgumentOption("i", "import", "database-file", "Imports the ip2location csv file to the database. If the supplied file is a ZIP archive, it will be extracted to the extraction directory specified by the '-o' option (defaults to '/tmp' if absent). Mutually exclusive with -t option.", true));
         options.addOptionGroup(og);
     }
 
@@ -202,41 +162,21 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
+        super.checkOptions(cmd);
         if (cmd.hasOption('i') && cmd.hasOption('t')) {
             System.out.println("The options '-i' and '-t' are mutually exclusive.");
             printHelp(options, 120);
             System.exit(1);
             return;
         }
-        if (cmd.hasOption('u')) {
-            dbUser = cmd.getOptionValue('u');
-        }
-        if (cmd.hasOption('a')) {
-            dbPassword = cmd.getOptionValue('a');
-        }
-        if (cmd.hasOption('g')) {
-            dbGroup = cmd.getOptionValue('g');
-        }
-        if (cmd.hasOption('d')) {
-            String d = cmd.getOptionValue('d');
-            try {
-                databaseVersion = Ip2LocationDatabaseVersion.valueOf(d);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid database version identifier supplied: '" + d + "'. Supported database identifiers are: " + supportedDBVersions());
-                System.exit(1);
-                return;
-            }
-        }
-        keep = cmd.hasOption('k');
+
         downloadFilePath = cmd.getOptionValue('i');
         if (downloadFilePath != null && false == downloadFilePath.isEmpty()) {
             importMode = true;
             return;
         }
         token = cmd.getOptionValue('t');
-        if (cmd.hasOption('l')) {
-            dbVersionName = databaseVersion.getLiteName();
-        }
+        dbVersionName = cmd.hasOption('l') ? getDatabaseVersion().getLiteName() : getDatabaseVersion().getName();
     }
 
     /*
@@ -246,11 +186,11 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        if (keep) {
-            System.out.println("Temporary files will be KEPT in " + EXTRACT_DIRECTORY + ".");
+        if (isKeep()) {
+            System.out.println("Temporary files will be KEPT in " + getExtractDirectory() + ".");
         }
         if (importMode) {
-            if (isArchive()) {
+            if (FileUtils.isArchive(downloadFilePath)) {
                 extractDatase();
             } else {
                 // Seems that the provided file is not an archive, 
@@ -280,7 +220,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             while (input.hasNextLine() && counter < maxLines) {
                 String line = input.nextLine();
                 String[] split = line.split(",");
-                if (split != null && split.length == databaseVersion.getNumberOfFields()) {
+                if (split != null && split.length == getDatabaseVersion().getNumberOfFields()) {
                     return;
                 }
                 counter++;
@@ -347,7 +287,7 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
             System.exit(-1);
             return;
         }
-        String content = readTextResponse(connection);
+        String content = ConnectionUtils.readTextResponse(connection);
         if (content.equals("INVALID")) {
             System.out.println("Invalid license key.");
             System.exit(-1);
@@ -358,43 +298,27 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Downloads the requested database version from the Ip2Location servers
-     * 
-     * @throws IOException if an I/O error is occurred
      */
-    private void downloadDatabase() throws IOException {
+    private void downloadDatabase() {
         String download = DOWNLOAD.replaceFirst("#TOKEN#", token).replaceFirst("#PACKAGE#", dbVersionName);
         System.out.println("Downloading " + dbVersionName + "...");
-
-        URLConnection connection = new URL(download).openConnection();
-        connection.setConnectTimeout(15000);
-        connection.setReadTimeout(30000);
-
-        checkContentType(connection);
-
-        String downloadFilename = extractFilename(connection.getHeaderField("Content-Disposition"));
-        long contentLength = connection.getContentLength();
-        System.out.println("Database size: " + Strings.humanReadableByteCount(contentLength, true) + " bytes.\n");
-        try (InputStream inputStream = connection.getInputStream()) {
-            File dbfile = Paths.get(EXTRACT_DIRECTORY, downloadFilename).toFile();
-            if (false == keep) {
-                dbfile.deleteOnExit();
+        try {
+            File downloadedFile = FileUtils.downloadFile(download, getExtractDirectory(), dbVersionName, "application/zip");
+            downloadFilePath = downloadedFile.getAbsolutePath();
+        } catch (MalformedURLException e) {
+            System.err.println("A malformed URL was specified: " + download);
+            System.exit(-1);
+        } catch (IOException e) {
+            String content = e.getMessage();
+            if (content.equals("NO PERMISSION")) {
+                System.out.println("You have no permission to access '" + dbVersionName + "'.");
+                System.exit(-1);
+                return;
             }
-            this.downloadFilePath = dbfile.getAbsolutePath();
-            try (FileOutputStream output = FileUtils.openOutputStream(dbfile)) {
-                long sum = 0;
-                int count = 0;
-                byte[] data = new byte[BUFFER_SIZE];
-                ProgressMonitor progressMonitor = new ProgressMonitor(50, downloadFilePath);
-                while ((count = inputStream.read(data, 0, BUFFER_SIZE)) != -1) {
-                    output.write(data, 0, count);
-                    sum += count;
-                    if (contentLength > 0) {
-                        progressMonitor.update(Strings.humanReadableByteCount(sum, true), ((double) sum / contentLength));
-                    }
-                }
-            }
+            System.err.println("An I/O error occurred: " + content);
+            System.exit(-1);
+            return;
         }
-        System.out.println();
     }
 
     /**
@@ -403,61 +327,18 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private void extractDatase() throws IOException {
-        System.out.println("Extracting the archive '" + downloadFilePath + "' in '" + EXTRACT_DIRECTORY + "'...");
-        byte[] buffer = new byte[BUFFER_SIZE];
-        try (FileInputStream fis = new FileInputStream(new File(downloadFilePath)); ZipInputStream zipInputStream = new ZipInputStream(fis)) {
-            while (true) {
-                ZipEntry zipEntry = null;
-                try {
-                    zipEntry = zipInputStream.getNextEntry();
-                    if (zipEntry == null) {
-                        break;
-                    }
-                    extractZipEntry(zipInputStream, zipEntry, buffer);
-                } finally {
-                    if (zipEntry != null) {
-                        zipInputStream.closeEntry();
-                    }
-                }
+        List<File> extractedFiles = FileUtils.extractArchive(downloadFilePath, getExtractDirectory(), isKeep());
+        for (File f : extractedFiles) {
+            // It is always expected to be one and only one CSV file in the archive.
+            if (f.getAbsolutePath().toLowerCase().endsWith(".csv")) {
+                databaseFilePath = f.getAbsolutePath();
             }
         }
         if (databaseFilePath == null || databaseFilePath.isEmpty()) {
-            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + EXTRACT_DIRECTORY + "'");
+            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + getExtractDirectory() + "'");
             System.exit(-1);
             return;
         }
-    }
-
-    /**
-     * Extracts the zip entries from the specified {@link ZipInputStream}
-     * 
-     * @param zipInputStream The {@link ZipInputStream} containing the entries
-     * @param zipEntry The ZipEntry to extract
-     * @param buffer the buffer to use when writing the extracted entry
-     * @throws IOException if an I/O error is occurred
-     */
-    private void extractZipEntry(ZipInputStream zipInputStream, ZipEntry zipEntry, byte[] buffer) throws IOException {
-        String fileName = zipEntry.getName();
-        File newFile = Paths.get(EXTRACT_DIRECTORY, fileName).toFile();
-        if (false == keep) {
-            newFile.deleteOnExit();
-        }
-        if (newFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-            databaseFilePath = newFile.getAbsolutePath();
-        }
-        System.out.print("Extracting to '" + newFile.getAbsolutePath() + "'...");
-
-        new File(newFile.getParent()).mkdirs();
-        try (FileOutputStream fos = new FileOutputStream(newFile)) {
-            int len;
-            while ((len = zipInputStream.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            System.out.println("failed.");
-            throw e;
-        }
-        System.out.println("OK");
     }
 
     /**
@@ -465,141 +346,35 @@ public class Ip2LocationCLT extends AbstractRmiCLI<Void> {
      */
     private void importDatabase(String optRmiHostName) throws Exception {
         checkCSVFormat();
-        GeoLocationRMIService rmiService = getRmiStub(optRmiHostName, GeoLocationRMIService.RMI_NAME);
-        String dbName = rmiService.getGlobalDatabaseName(dbGroup);
         //@formatter:off
-        String[] importData = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", "SET autocommit = 0;"
+        String importStatements = "SET autocommit = 0;"
                 + "START TRANSACTION;"
                 + "TRUNCATE `" + TABLE_NAME + "`;"
                 + "LOAD DATA LOCAL INFILE '" + databaseFilePath + "' " + "INTO TABLE `" + TABLE_NAME + "` " + "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\r\\n' IGNORE 0 LINES;"
                 + "COMMIT;"
-                + "SET autocommit=1;"};
+                + "SET autocommit=1;";
         //@formatter:on
-        Process runtimeProcess;
+        System.out.println("Using database file '" + databaseFilePath + "'.");
+        importDatabase(optRmiHostName, importStatements);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.geolocation.clt.AbstractGeoLocationCLT#parseDatabaseVersion()
+     */
+    @Override
+    protected DatabaseVersion parseDatabaseVersion(CommandLine cmd) {
+        if (false == cmd.hasOption('d')) {
+            return Ip2LocationDatabaseVersion.DB9;
+        }
+        String d = cmd.getOptionValue('d');
         try {
-            System.out.println("Using database file '" + databaseFilePath + "'.");
-            System.out.print("Importing data to schema '" + dbName + "' in table '" + TABLE_NAME + "'...");
-
-            ProcessBuilder processBuilder = new ProcessBuilder(importData);
-            runtimeProcess = processBuilder.start();
-            int processComplete = runtimeProcess.waitFor();
-            if (processComplete == 0) {
-                System.out.println("OK.");
-                return;
-            }
-            System.out.println("Could not import the data.");
-            printErrors(runtimeProcess.getInputStream());
-            printErrors(runtimeProcess.getErrorStream());
-        } catch (IOException e) {
-            if (e.getMessage().contains("No such file or directory")) {
-                System.out.println("\nERROR: Couldn't find the 'mysql' executable. Ensure that 'mysql' is installed and in your $PATH");
-                System.exit(1);
-                return;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            return Ip2LocationDatabaseVersion.valueOf(d);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid database version identifier supplied: '" + d + "'. Supported database identifiers are: " + supportedDBVersions());
             System.exit(1);
-            return;
-        }
-    }
-
-    /**
-     * Checks whether the appropriate content type is returned before unzipping
-     * 
-     * @param connection The {@link URLConnection}
-     * @throws IOException if an I/O error is occurred
-     */
-    private void checkContentType(URLConnection connection) throws IOException {
-        String contentType = connection.getContentType();
-        if (contentType == null || contentType.isEmpty()) {
-            return;
-        }
-        if (false == contentType.startsWith("text") && contentType.toLowerCase().contains("zip")) {
-            return;
-        }
-        String content = readTextResponse(connection);
-        if (false == content.equals("NO PERMISSION")) {
-            return;
-        }
-        System.out.println("You have no permission to access '" + dbVersionName + "'.");
-        System.exit(-1);
-    }
-
-    /**
-     * Extracts the 'filename' from the specified content disposition header
-     * 
-     * @param contentDisposition The content disposition header
-     * @return The filename value
-     */
-    private String extractFilename(String contentDisposition) {
-        if (contentDisposition == null || contentDisposition.isEmpty()) {
-            return dbVersionName;
-        }
-        int index = contentDisposition.indexOf("filename=");
-        if (index < 0) {
-            return dbVersionName;
-        }
-        return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
-    }
-
-    /**
-     * Prints any errors that were encountered during processing
-     * 
-     * @param inputStream the {@link InputStream} that holds the errors
-     * @throws IOException if an I/O error is occurred
-     */
-    private void printErrors(InputStream inputStream) throws IOException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = r.readLine()) != null) {
-                System.out.println(line);
-            }
-        }
-    }
-
-    /**
-     * Reads the text response from the specified {@link URLConnection}
-     * 
-     * @param connection The {@link URLConnection} from which to read the text response
-     * @return The text response
-     * @throws IOException if an I/O error is occurred
-     */
-    private String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            StringBuilder builder = new StringBuilder(128);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-            return builder.toString();
-        }
-    }
-
-    /**
-     * Checks the first four bytes of the specified file to determine whether
-     * it is a ZIP archive. The signatures of a ZIP archive are listed
-     * <a href="https://en.wikipedia.org/wiki/List_of_file_signatures">here</a>.
-     * 
-     * @return <code>true</code> if the downloaded file is an archive; <code>false</code> otherwise.
-     * @throws IOException if an I/O error is occurred
-     */
-    private boolean isArchive() throws IOException {
-        File f = new File(downloadFilePath);
-        int fileSignature = 0;
-        try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
-            fileSignature = raf.readInt();
-        }
-        switch (fileSignature) {
-            case 0x504B0304:
-                return true;
-            case 0x504B0506:
-                System.out.println("ERROR: It seems that the archive you provided is empty.");
-                System.exit(1);
-            case 0x504B0708:
-                System.out.println("ERROR: It seems that the archive you provided is spanned over multiple files.");
-                System.exit(1);
-            default:
-                return false;
+            return null;
         }
     }
 }
