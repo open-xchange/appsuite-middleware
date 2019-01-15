@@ -65,6 +65,7 @@ import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -92,6 +93,8 @@ public class InternalCalendarResult {
     private List<UpdateResult> userizedUpdates;
     private List<DeleteResult> deletions;
     private List<DeleteResult> userizedDeletions;
+    
+    private List<SchedulingMessage> messages;
 
     /**
      * Initializes a new {@link InternalCalendarResult}.
@@ -106,6 +109,7 @@ public class InternalCalendarResult {
         this.calendarUserId = calendarUserId;
         this.folder = folder;
         this.affectedFolderIds = new HashSet<String>();
+        this.messages = new ArrayList<>();
     }
 
     public CalendarSession getSession() {
@@ -308,6 +312,21 @@ public class InternalCalendarResult {
         userizedUpdates.add(new UpdateResultImpl(originalEvent, updatedEvent));
         return this;
     }
+    
+    public InternalCalendarResult addScheulingMessage(SchedulingMessage message) {
+        this.messages.add(message);
+        return this;
+    }
+
+    /**
+     * Get a {@link List} of {@link SchedulingMessage}
+     *
+     * @return The messages that needs to be scheduled
+     */
+    public List<SchedulingMessage> getSchedulingMessages() {
+        return this.messages;
+    }
+    
 
     /**
      * Gets the calendar event representing the system-wide view on the performed calendar changes.

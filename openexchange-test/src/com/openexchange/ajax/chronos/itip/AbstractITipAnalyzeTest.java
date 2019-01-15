@@ -49,20 +49,23 @@
 
 package com.openexchange.ajax.chronos.itip;
 
+import static com.openexchange.ajax.chronos.itip.ITipUtil.convertToAttendee;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-import com.openexchange.ajax.chronos.factory.ICalFacotry;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.Method;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.ProdID;
-import com.openexchange.ajax.chronos.factory.ITipMailFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Analysis;
 import com.openexchange.testing.httpclient.models.Analysis.ActionsEnum;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 
@@ -76,6 +79,8 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
 
     protected MailDestinationData mailData;
 
+    protected EventData createdEvent;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -84,32 +89,96 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
     @Override
     public void tearDown() throws Exception {
         try {
+            if (null != createdEvent) {
+                deleteEvent(createdEvent);
+            }
             if (null != mailData) {
-                removeMail(mailData);
+                removeMail(apiClient, mailData);
             }
         } finally {
             super.tearDown();
         }
     }
 
-    protected void analyze(ProdID id, Method method, List<EventData> events, Consumer<Analysis> analysisValidator, Map<String, Object> values) throws Exception {
-        ICalFacotry iCalFacotry = new ICalFacotry(events);
-        iCalFacotry.addProdID(id);
-        iCalFacotry.addMethod(method);
-        if (null != values) {
-            iCalFacotry.addValueMap(values);
-        }
-        analyze(iCalFacotry, analysisValidator);
+    protected Attendee prepareCommonAttendees(EventData event) {
+        Attendee replyingAttendee = convertToAttendee(testUserC2, Integer.valueOf(0));
+        replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
+        // organizer gets added automatically
+        event.setAttendees(Collections.singletonList(replyingAttendee));
+        CalendarUser c = new CalendarUser();
+        c.cn(userResponseC1.getData().getDisplayName());
+        c.email(userResponseC1.getData().getEmail1());
+        c.entity(Integer.valueOf(userResponseC1.getData().getId()));
+        event.setOrganizer(c);
+        event.setCalendarUser(c);
+
+        return replyingAttendee;
     }
 
-    protected void analyze(ICalFacotry iCalFacotry, Consumer<Analysis> analysisValidator) throws Exception {
-        String eml = new ITipMailFactory(userResponseC2.getData().getEmail1(), userResponseC1.getData().getEmail1(), iCalFacotry.build()).build();
-        mailData = createMailInInbox(eml);
-        Assert.assertThat("No mail created.", mailData.getId(), notNullValue());
+    protected Attendee prepareAttendees(EventData event) {
+        Attendee replyingAttendee = convertToAttendee(testUserC2, apiClientC2.getUserId());
+        replyingAttendee.setEntity(Integer.valueOf(0));
+        replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
 
-        AnalyzeResponse response = analyze(constructBody(mailData.getId()));
+        Attendee organizer = convertToAttendee(testUser, apiClient.getUserId());
+        organizer.setPartStat(PartStat.ACCEPTED.getStatus());
+
+        List<Attendee> attendees = new ArrayList<Attendee>(2);
+        attendees.add(organizer);
+        attendees.add(replyingAttendee);
+
+        event.setAttendees(attendees);
+        CalendarUser c = new CalendarUser();
+        c.cn(userResponseC1.getData().getDisplayName());
+        c.email(userResponseC1.getData().getEmail1());
+        c.entity(Integer.valueOf(userResponseC1.getData().getId()));
+        event.setOrganizer(c);
+        event.setCalendarUser(c);
+
+        return replyingAttendee;
+    }
+
+    /**
+     * Prepares a new event with necessary attributes set.
+     *
+     * @param eventData The event do base an delta event on
+     * @return An new event
+     */
+    protected EventData prepareDeltaEvent(EventData eventData) {
+        EventData delta = new EventData();
+        delta.setId(eventData.getId());
+        if (Strings.isNotEmpty(eventData.getFolder())) {
+            delta.setFolder(eventData.getFolder());
+        }
+        if (null != eventData.getRecurrenceId()) {
+            delta.setRecurrenceId(eventData.getRecurrenceId());
+        }
+        if (null != eventData.getAttendees()) {
+            delta.setAttendees(eventData.getAttendees());
+        }
+        return delta;
+    }
+
+    protected void analyze(String mailId) throws Exception {
+        analyze(mailId, CustomConsumers.UPDATE.getConsumer());
+    }
+
+    protected void analyze(String mailId, CustomConsumers consumer) throws Exception {
+        analyze(mailId, consumer.getConsumer());
+    }
+
+    protected void analyze(String mailId, Consumer<Analysis> analysisValidator) throws Exception {
+        AnalyzeResponse response = analyze(ITipUtil.constructBody(mailId));
         Assert.assertThat("Should have no error", response.getErrorId(), nullValue());
 
+        analyze(response, analysisValidator);
+    }
+
+    protected void analyze(AnalyzeResponse response, CustomConsumers consumer) {
+        analyze(response, consumer.getConsumer());
+    }
+
+    protected void analyze(AnalyzeResponse response, Consumer<Analysis> analysisValidator) {
         List<Analysis> data = response.getData();
         Assert.assertThat("No Analyze", data, notNullValue());
         Assert.assertThat("Only one event should have been analyzed", Integer.valueOf(data.size()), is(Integer.valueOf(1)));
@@ -122,30 +191,47 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
     }
 
     public enum CustomConsumers {
+        /** Validates that the response does contain all actions */
+        ALL((Analysis t) -> {
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.TENTATIVE));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.DECLINE));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.UPDATE));
+        }),
         /** Validates that the response does contain actions to set the users status */
         ACTIONS((Analysis t) -> {
-            Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT));
-            Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.TENTATIVE));
-            Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.DECLINE));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.TENTATIVE));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.DECLINE));
 
-            Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.UPDATE));
+            assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.UPDATE));
         }),
         /** Validates that the response does contain the UPDATE action */
         UPDATE((Analysis t) -> {
-            Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT));
-            Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.TENTATIVE));
-            Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.DECLINE));
+            assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT));
+            assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.TENTATIVE));
+            assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.DECLINE));
 
-            Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.UPDATE));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.UPDATE));
         }),
         /** Validates that the response doesn't contain any action */
         EMPTY((Analysis t) -> {
-            Assert.assertTrue("There should be no action!", t.getActions().isEmpty());
+            assertTrue("There should be no action!", t.getActions().isEmpty());
         }),
         /** Validates that the response does contain the party crasher action */
         PARTY_CRASHER((Analysis t) -> {
-            Assert.assertTrue("There should be no action!", t.getActions().size() == 1);
-            Assert.assertTrue("There should be no action!", t.getActions().contains(ActionsEnum.ACCEPT_PARTY_CRASHER));
+            assertTrue("There should be onyl one action!", t.getActions().size() == 1);
+            assertTrue("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT_PARTY_CRASHER));
+        }),
+        /** Validates that the response does contain the cancel action */
+        CANCEL((Analysis t) -> {
+            assertTrue("There should be only one action!", t.getActions().size() == 1);
+            assertTrue("Unwanted action!", t.getActions().contains(ActionsEnum.DELETE));
+        }),
+        /** Validates that the response does contain the cancel action */
+        IGNORE((Analysis t) -> {
+            assertTrue("There should be only one action!", t.getActions().size() == 1);
+            assertTrue("Unwanted action!", t.getActions().contains(ActionsEnum.IGNORE));
         }),
         ;
 

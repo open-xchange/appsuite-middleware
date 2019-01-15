@@ -1,0 +1,13 @@
+${labels.updateIntroduction}
+
+<#if (labels.comment??)>
+${labels.comment}
+</#if>
+
+<#list changes as change>
+${change}
+</#list>
+
+
+
+${templating.include( "notify.event.show.txt.tmpl" )}

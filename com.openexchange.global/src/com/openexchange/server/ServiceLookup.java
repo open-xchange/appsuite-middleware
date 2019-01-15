@@ -49,6 +49,7 @@
 
 package com.openexchange.server;
 
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 
 /**
@@ -76,7 +77,7 @@ public interface ServiceLookup {
      * @throws ShutDownRuntimeException If system is currently shutting down
      * @throws OXException In case of missing service
      */
-    default <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
+    default @NonNull <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
         S service = getOptionalService(clazz);
         if (null == service) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());

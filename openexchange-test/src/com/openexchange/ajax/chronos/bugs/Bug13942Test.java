@@ -56,7 +56,6 @@ import com.openexchange.ajax.chronos.AbstractSecondUserChronosTest;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
@@ -82,7 +81,7 @@ public class Bug13942Test extends AbstractSecondUserChronosTest {
         // As user B first accept event and then add an alarm
         eventManager2.getEvent(defaultFolderId2, createEvent.getId());
         AttendeeAndAlarm attendeeAndAlarm = new AttendeeAndAlarm();
-        attendee.setPartStat(PartStat.ACCEPTED.name());
+        attendee.setPartStat("ACCEPTED");
         attendeeAndAlarm.setAttendee(attendee);
         eventManager2.updateAttendee(createEvent.getId(), attendeeAndAlarm, false);
 
@@ -93,7 +92,7 @@ public class Bug13942Test extends AbstractSecondUserChronosTest {
         EventData getEvent = eventManager.getEvent(folderId, createEvent.getId());
 
         for (Attendee att : getEvent.getAttendees()) {
-            assertEquals(PartStat.ACCEPTED.name(), att.getPartStat());
+            assertEquals("ACCEPTED", att.getPartStat());
         }
 
     }

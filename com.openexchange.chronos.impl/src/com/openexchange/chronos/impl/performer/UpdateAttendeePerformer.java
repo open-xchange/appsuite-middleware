@@ -73,6 +73,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -209,6 +210,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         touch(originalEvent.getId());
         Event updatedEvent = loadEventData(originalEvent.getId());
         resultTracker.trackUpdate(originalEvent, updatedEvent);
+        createSchedulingMessage(originalEvent, updatedEvent, false);
         if (isSeriesException(originalEvent)) {
             /*
              * also 'touch' the series master in case of an exception update
@@ -256,6 +258,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 }
                 Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
                 resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
+
+                createSchedulingMessage(originalEvent, updatedExceptionEvent, true);
                 /*
                  * add change exception date to series master & track results
                  */
@@ -351,6 +355,18 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+        }
+    }
+
+    private void createSchedulingMessage(Event originalEvent, Event updatedEvent, boolean isExceptionCreate) throws OXException {
+        if (CalendarUtils.isOrganizer(updatedEvent, calendarUserId)) {
+            if (isExceptionCreate) {
+                resultTracker.trackSchedulingExceptionUpdate(originalEvent, updatedEvent);
+            } else {
+                resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
+            }
+        } else {
+            resultTracker.trackSchedulingAttendeeUpdate(originalEvent, updatedEvent);
         }
     }
 }

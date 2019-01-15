@@ -37,9 +37,18 @@ properties:
           type: array
           description: Annotations to be displayed to the user.
           items:
-            type: string
+            type: object
             title: Annotations
             description: An array of annotations.
+            properties:
+               message:
+                  type: string
+                  description: A string describing the current situation
+               event:
+                  type: array
+                  description: Additional events, set e.g. if an new exception is created but master can't be found.
+                  items:
+                      $ref: ../chronos/EventData.yaml
         changes:
           type: array
           title: Changes

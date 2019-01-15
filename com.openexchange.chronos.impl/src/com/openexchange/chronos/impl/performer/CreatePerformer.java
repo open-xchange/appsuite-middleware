@@ -68,6 +68,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -127,8 +128,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
             Check.internalOrganizerIsAttendee(newEvent);
-            newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? 
-                Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
+            newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
         }
         /*
          * check for conflicts & quota restrictions
@@ -165,6 +165,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             }
         }
         storage.getAlarmTriggerStorage().insertTriggers(createdEvent, alarmsPerUserId);
+        /*
+         * prepare invitation messages
+         */
+        if (CalendarUtils.isOrganizer(createdEvent, calendarUserId) && false == isNullOrEmpty(newEvent.getAttendees())) {
+            resultTracker.trackSchedulingRequests(createdEvent);
+        }
         /*
          * track creation & return result
          */
@@ -233,5 +239,4 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             EventField.RELATED_TO, EventField.STATUS, EventField.EXTENDED_PROPERTIES
         );
     }
-
 }

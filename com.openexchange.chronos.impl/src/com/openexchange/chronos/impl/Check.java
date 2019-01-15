@@ -512,6 +512,23 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that a specific attachment is contained in one of the supplied events, based on the attachment's managed identifier.
+     * 
+     * @param events The events to search
+     * @param managedId The managed identifier to lookup
+     * @return The matching attachment
+     * @throws OXException {@link CalendarExceptionCodes#ATTACHMENT_NOT_FOUND}
+     * @see CalendarUtils#findAttachment(Collection, int)
+     */
+    public static Attachment containsAttachment(Collection<Event> events, int managedId) throws OXException {
+        Attachment attachment = CalendarUtils.findAttachment(events, managedId);
+        if (null == attachment) {
+            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), null, null);
+        }
+        return attachment;
+    }
+
+    /**
      * Checks that a particular attendee exists in an event.
      *
      * @param event The event to check

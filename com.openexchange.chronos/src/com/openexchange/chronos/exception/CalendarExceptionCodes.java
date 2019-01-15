@@ -97,6 +97,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_METHOD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
@@ -434,6 +435,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Authentication failed to access a shared calendar at %1$s</li>
      */
     AUTH_FAILED_FOR_SHARE("Authentication failed to access a shared calendar at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_USER_INPUT, 4011),
+    /**
+     * <li>The method \"%1$s\" is not supported.</li>
+     * <li>The method %1$s is unsupported for the provider %2$s.</li>
+     */
+    UNSUPPORTED_METHOD("The method %1$s is unsupported for the provider %2$s.", UNSUPPORTED_METHOD_MSG, Category.CATEGORY_TRUNCATED, 1992),
     
     ;
 

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            ${templating.include( "notify.event.styles.css.tmpl" )}
+        </style>
+    </head>
+    <body>
+        <div class="content">
+            ${templating.include( "notify.event.intro.html.tmpl" )}
+            <div class="calendar-action">${labels.declineIntroduction}</div>
+            ${templating.include( "notify.event.show.html.tmpl" )}
+        </div>
+    </body>
+</html>

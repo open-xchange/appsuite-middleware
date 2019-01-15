@@ -157,17 +157,19 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
             recurrenceId = updatedEventData.getRecurrenceId();
         }
+
         if (null != recurrenceId) {
             if (isSeriesMaster(originalEvent)) {
                 updateRecurrence(originalEvent, recurrenceId, updatedEventData);
-            } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
-                updateEvent(originalEvent, updatedEventData);
-            } else {
+                return resultTracker.getResult();
+            }
+            if (false == isSeriesException(originalEvent) || false == recurrenceId.equals(originalEvent.getRecurrenceId())) {
                 throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
             }
-        } else {
-            updateEvent(originalEvent, updatedEventData);
+            // Fall through and update exception
         }
+        updateEvent(originalEvent, updatedEventData);
+        resultTracker.trackNecessarySchedulingUpdate(originalEvent, loadEventData(originalEvent.getId()));
         return resultTracker.getResult();
     }
 
@@ -192,13 +194,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * update "this and future" recurrences; first split the series at this recurrence
              */
             Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
-            new SplitPerformer(this).perform(originalSeriesMaster.getSeriesId(), recurrenceId.getValue(), null, originalSeriesMaster.getTimestamp());
+            InternalCalendarResult result = new SplitPerformer(this).perform(originalSeriesMaster.getSeriesId(), recurrenceId.getValue(), null, originalSeriesMaster.getTimestamp(), false);
             /*
              * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
              */
+            // TODO One notification mail for internal
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             updatedEventData = adjustSeriesAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData);
-            updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
+            updatedMasterEvent = updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
+            resultTracker.trackSchedulingUpdateAfterSplit(updatedMasterEvent, result.getCalendarEvent().getUpdates());
         } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
             /*
              * update for existing change exception, perform update, touch master & track results
@@ -206,6 +210,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Check.recurrenceRangeMatches(recurrenceId, null);
             Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
             updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
+            resultTracker.trackNecessarySchedulingUpdate(originalExceptionEvent, loadEventData(originalExceptionEvent.getId()));
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
         } else {
@@ -229,6 +234,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
             Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+            resultTracker.trackSchedulingExceptionUpdate(originalSeriesMaster, updatedExceptionEvent);
             /*
              * add change exception date to series master & track results
              */

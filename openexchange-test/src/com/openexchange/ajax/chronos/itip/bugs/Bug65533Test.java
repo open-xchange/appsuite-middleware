@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.chronos.itip.bugs;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.parseICalAttachment;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -68,8 +73,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import java.util.regex.Pattern;
 import javax.ws.rs.core.GenericType;
 import org.junit.Test;
@@ -78,38 +81,21 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
-import com.openexchange.chronos.ical.impl.ICalUtils;
+import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.ContentType;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.invoker.Pair;
-import com.openexchange.testing.httpclient.models.ActionResponse;
-import com.openexchange.testing.httpclient.models.Analysis;
-import com.openexchange.testing.httpclient.models.AnalysisChange;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
-import com.openexchange.testing.httpclient.models.AnalyzeResponse;
-import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
-import com.openexchange.testing.httpclient.models.ConversionDataSource;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
-import com.openexchange.testing.httpclient.models.MailAttachment;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailDestinationResponse;
-import com.openexchange.testing.httpclient.models.MailResponse;
-import com.openexchange.testing.httpclient.models.MailsResponse;
-import com.openexchange.testing.httpclient.modules.ChronosApi;
-import com.openexchange.testing.httpclient.modules.MailApi;
-import net.fortuna.ical4j.util.CompatibilityHints;
 
 /**
  * {@link Bug65533Test}
@@ -157,7 +143,7 @@ public class Bug65533Test extends AbstractITipTest {
         /*
          * receive & analyze iMIP request as user a
          */
-        MailData iMipRequestData = receiveIMip(apiClient, organizerMail, summary, 0, "REQUEST");
+        MailData iMipRequestData = receiveIMip(apiClient, organizerMail, summary, 0, SchedulingMethod.REQUEST);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClient, iMipRequestData)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(uid, newEvent.getUid());
@@ -171,8 +157,7 @@ public class Bug65533Test extends AbstractITipTest {
         /*
          * check event in calendar
          */
-        EventResponse eventResponse = chronosApi.getEvent(
-            apiClient.getSession(), eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         eventData = eventResponse.getData();
         rememberForCleanup(eventData);
@@ -192,7 +177,7 @@ public class Bug65533Test extends AbstractITipTest {
         /*
          * receive & analyze iMIP reply as user b, too
          */
-        MailData iMipReplyData = receiveIMip(apiClientC2, recipientMail, summary, 0, "REPLY");
+        MailData iMipReplyData = receiveIMip(apiClientC2, recipientMail, summary, 0, SchedulingMethod.REPLY);
         assertNotNull(iMipReplyData);
         ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, iMipReplyData);
         assertEquals("REPLY", iTipReply.getMethod());
@@ -227,164 +212,6 @@ public class Bug65533Test extends AbstractITipTest {
         return dateFormat.format(date);
     }
 
-    protected static AnalysisChange assertSingleChange(AnalyzeResponse analyzeResponse) {
-        assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
-        assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());
-        Analysis analysis = analyzeResponse.getData().get(0);
-        assertEquals("unexpected number of changes in analysis", 1, analysis.getChanges().size());
-        return analysis.getChanges().get(0);
-    }
-
-    private void rememberForCleanup(EventData eventData) {
-        if (null != eventData) {
-            EventId eventId = new EventId();
-            eventId.setId(eventData.getId());
-            eventId.setFolder(eventData.getFolder());
-            rememberEventId(eventId);
-        }
-    }
-
-    private static String extractITipAttachmentId(MailData mailData, String expectedMethod) throws OXException {
-        assertNotNull(mailData.getAttachments());
-        for (MailAttachment attachment : mailData.getAttachments()) {
-            if (ContentType.isMimeType(attachment.getContentType(), "text/calendar")) {
-                if (null != expectedMethod && false == attachment.getContentType().contains(expectedMethod)) {
-                    continue;
-                }
-                return attachment.getId();
-            }
-        }
-        throw new AssertionError("no itip attachment found");
-    }
-
-    private static AnalyzeResponse analyze(ApiClient apiClient, MailData mailData) throws Exception {
-        ConversionDataSource body = new ConversionDataSource();
-        body.setComOpenexchangeMailConversionFullname(mailData.getFolderId());
-        body.setComOpenexchangeMailConversionMailid(mailData.getId());
-        body.setComOpenexchangeMailConversionSequenceid(extractITipAttachmentId(mailData, null));
-        return new ChronosApi(apiClient).analyze(apiClient.getSession(), "com.openexchange.mail.ical", "html", body, null);
-    }
-
-    private static Attendee assertAttendeePartStat(List<Attendee> attendees, String email, String expectedPartStat) {
-        Attendee attendee = extractAttendee(attendees, email);
-        assertNotNull(attendee);
-        assertEquals(expectedPartStat, attendee.getPartStat());
-        return attendee;
-    }
-
-    private static Attendee extractAttendee(List<Attendee> attendees, String email) {
-        if (null != attendees) {
-            for (Attendee attendee : attendees) {
-                String uri = attendee.getUri();
-                if (null != uri && uri.toLowerCase().contains(email.toLowerCase())) {
-                    return attendee;
-                }
-            }
-        }
-        return null;
-    }
-
-    private static com.openexchange.chronos.Attendee assertAttendeePartStat(List<com.openexchange.chronos.Attendee> attendees, String email, com.openexchange.chronos.ParticipationStatus expectedPartStat) {
-        com.openexchange.chronos.Attendee matchingAttendee = null;
-        if (null != attendees) {
-            for (com.openexchange.chronos.Attendee attendee : attendees) {
-                String uri = attendee.getUri();
-                if (null != uri && uri.toLowerCase().contains(email.toLowerCase())) {
-                    matchingAttendee = attendee;
-                    break;
-                }
-            }
-        }
-        assertNotNull(matchingAttendee);
-        assertEquals(expectedPartStat, matchingAttendee.getPartStat());
-        return matchingAttendee;
-    }
-
-    private static EventData assertSingleEvent(ActionResponse actionResponse) {
-        assertNotNull(actionResponse.getData());
-        assertEquals(1, actionResponse.getData().size());
-        return actionResponse.getData().get(0);
-    }
-    
-    private static MailData receiveIMip(ApiClient apiClient, String fromToMatch, String subjectToMatch, int sequenceToMatch, String iTipMethodToMatch) throws Exception {
-        for (int i = 0; i < 10; i++) {
-            MailData mailData = lookupMail(apiClient, "default0%2FINBOX", fromToMatch, subjectToMatch, sequenceToMatch, iTipMethodToMatch);
-            if (null != mailData) {
-                return mailData;
-            }
-            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
-        }
-        throw new AssertionError("No mail with " + subjectToMatch + " from " + fromToMatch + " received");
-    }
-
-    private static MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch, int sequenceToMatch, String iTipMethodToMatch) throws Exception {
-        MailApi mailApi = new MailApi(apiClient);
-        MailsResponse mailsResponse = mailApi.getAllMails(apiClient.getSession(), folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
-        assertNull(mailsResponse.getError(), mailsResponse.getError());
-        assertNotNull(mailsResponse.getData());
-        for (List<String> mail : mailsResponse.getData()) {
-            String subject = mail.get(2);
-            if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
-                continue;
-            }
-            MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, null, null, null, null, null, null, null, null, null, null);
-            assertNull(mailResponse.getError(), mailsResponse.getError());
-            assertNotNull(mailResponse.getData());
-            MailData mailData = mailResponse.getData();
-            if (null == extractMatchingAddress(mailData.getFrom(), fromToMatch)) {
-                continue;
-            }
-            ImportedCalendar calendar = parseICalAttachment(apiClient, mailData, iTipMethodToMatch);
-            if (null == calendar) {
-                continue;
-            }
-            Event matchingEvent = extractMatchingEvent(calendar.getEvents(), sequenceToMatch);
-            if (null == matchingEvent) {
-                continue;
-            }
-            return mailData;
-        }
-        return null;
-    }
-
-    private static Event extractMatchingEvent(List<Event> events, int sequence) {
-        if (null != events) {
-            for (Event event : events) {
-                if (event.getSequence() == sequence) {
-                    return event;
-                }
-            }
-        }
-        return null;
-    }
-
-    private static List<String> extractMatchingAddress(List<List<String>> addresses, String email) {
-        if (null != addresses) {
-            for (List<String> address : addresses) {
-                assertEquals(2, address.size());
-                if (null != address.get(1) && address.get(1).contains(email)) {
-                    return address;
-                }
-            }
-        }
-        return null;
-    }
-
-    private static ImportedCalendar parseICalAttachment(ApiClient apiClient, MailData mailData) throws Exception {
-        return parseICalAttachment(apiClient, mailData.getFolderId(), mailData.getId(), extractITipAttachmentId(mailData, null));
-    }
-
-    private static ImportedCalendar parseICalAttachment(ApiClient apiClient, MailData mailData, String expectedMethod) throws Exception {
-        return parseICalAttachment(apiClient, mailData.getFolderId(), mailData.getId(), extractITipAttachmentId(mailData, expectedMethod));
-    }
-
-    private static ImportedCalendar parseICalAttachment(ApiClient apiClient, String folder, String id, String attachmentId) throws Exception {
-        MailApi mailApi = new MailApi(apiClient);
-        byte[] attachment = mailApi.getMailAttachment(apiClient.getSession(), folder, id, attachmentId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-        CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true);
-        return ICalUtils.importCalendar(Streams.newByteArrayInputStream(attachment), new ICalMapper(), null);
-    }
-
     private static MailDestinationData sendIMip(ApiClient apiClient, Object body) throws ApiException {
         Object localVarPostBody = body;
 
@@ -403,13 +230,11 @@ public class Bug65533Test extends AbstractITipTest {
 
         localVarQueryParams.addAll(apiClient.parameterToPairs("", "session", apiClient.getSession()));
 
-        final String[] localVarAccepts = {
-            "application/json"
+        final String[] localVarAccepts = { "application/json"
         };
         final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
 
-        final String[] localVarContentTypes = {
-            "text/plain"
+        final String[] localVarContentTypes = { "text/plain"
         };
         final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
 

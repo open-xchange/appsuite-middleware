@@ -63,7 +63,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.ICalFacotry;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -165,7 +164,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         assertThat("Attendee should not have been removed", Integer.valueOf(data.getAttendees().size()), is(Integer.valueOf(2)));
         Attendee hiden = data.getAttendees().stream().filter(a -> a.getEntity() == actingAttendee.getEntity()).findFirst().orElse(null);
         assertThat("Attendee is missing!", hiden, notNullValue());
-        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is(ICalFacotry.PartStat.DECLINED.toString()));
+        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is("DECLINED"));
     }
 
     @Test(expected = ChronosApiException.class)
@@ -222,7 +221,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         assertThat("Attendee should not have been removed", Integer.valueOf(data.getAttendees().size()), is(Integer.valueOf(2)));
         Attendee hiden = data.getAttendees().stream().filter(a -> a.getEntity() == actingAttendee.getEntity()).findFirst().orElse(null);
         assertThat("Attendee is missing!", hiden, notNullValue());
-        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is(ICalFacotry.PartStat.DECLINED.toString()));
+        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is("DECLINED"));
     }
 
     @Test

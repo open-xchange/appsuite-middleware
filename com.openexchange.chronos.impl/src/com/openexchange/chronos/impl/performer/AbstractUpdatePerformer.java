@@ -105,10 +105,12 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
@@ -145,7 +147,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.calendarUser = getCalendarUser(session, folder);
         this.calendarUserId = calendarUser.getEntity();
         this.timestamp = new Date();
-        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
+        this.resultTracker = new ResultTracker(storage, session, calendarUser, folder, timestamp.getTime(), getSelfProtection());
         this.roles = roles;
     }
 
@@ -1048,5 +1050,30 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             throw e;
         }
     }
-
+    
+    /**
+     * Mocks an event that takes place at the time of an delete exception.
+     *
+     * @param masterEvent The master {@link Event} of the series
+     * @param recurrenceId The {@link RecurrenceId} of the delete exception
+     * @return An delete exception {@link Event}
+     * @throws OXException If calculating fails
+     */
+    protected Event loadDeleteException(Event masterEvent, RecurrenceId recurrenceId) throws OXException {
+        if (false == CalendarUtils.isSeriesMaster(masterEvent)) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create();
+        }
+        RecurrenceService recurrenceService = Services.getServiceLookup().getServiceSafe(RecurrenceService.class);
+        Iterator<Event> iterator = recurrenceService.calculateInstances(masterEvent, null, null, null);
+        while (iterator.hasNext()) {
+            Event e = iterator.next();
+            if (recurrenceId.compareTo(e.getRecurrenceId()) == 0) {
+                return e;
+            }
+            if (e.getStartDate().after(recurrenceId.getValue())) {
+                break;
+            }
+        }
+        throw CalendarExceptionCodes.EVENT_NOT_FOUND.create();
+    }
 }

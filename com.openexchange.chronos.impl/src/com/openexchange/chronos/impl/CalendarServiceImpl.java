@@ -88,6 +88,7 @@ import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
 import com.openexchange.chronos.impl.session.DefaultCalendarSession;
+import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -102,6 +103,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -113,16 +115,16 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class CalendarServiceImpl implements CalendarService {
 
-    private final CalendarEventNotificationService notificationService;
-    
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link CalendarServiceImpl}.
      *
-     * @param CalendarEventNotificationService The {@link CalendarEventNotificationService}
+     * @param services A service lookup reference
      */
-    public CalendarServiceImpl(CalendarEventNotificationService notificationService) {
+    public CalendarServiceImpl(ServiceLookup services) {
         super();
-        this.notificationService = notificationService;
+        this.services = services;
     }
 
     @Override
@@ -281,9 +283,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult createEvent(CalendarSession session, final String folderId, final Event event) throws OXException {
         /*
-         * insert event, notify handlers, track attendee usage & return userized result
+         * insert event, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -295,9 +297,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult updateEvent(CalendarSession session, final EventID eventID, final Event event, final long clientTimestamp) throws OXException {
         /*
-         * update event, notify handlers, track attendee usage & return userized result
+         * update event, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -310,9 +312,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult updateEventAsOrganizer(CalendarSession session, EventID eventID, Event event, long clientTimestamp) throws OXException {
         /*
-         * update event, notify handlers & return userized result
+         * update event, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -325,9 +327,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult touchEvent(CalendarSession session, final EventID eventID) throws OXException {
         /*
-         * touch event, notify handlers & return userized result
+         * touch event, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -340,9 +342,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final String folderId, final long clientTimestamp) throws OXException {
         /*
-         * move event, notify handlers & return userized result
+         * move event, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -354,14 +356,13 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException {
         /*
-         * update attendee, notify handlers & return userized result
+         * update attendee, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID(), false))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, alarms, L(clientTimestamp));
+                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID(), false)).perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, alarms, L(clientTimestamp));
 
             }
         }.executeUpdate()).getUserizedResult();
@@ -370,14 +371,13 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult updateAlarms(CalendarSession session, EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         /*
-         * update attendee, notify handlers & return userized result
+         * update alarms, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID(), false))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, L(clientTimestamp));
+                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID(), false)).perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, L(clientTimestamp));
 
             }
         }.executeUpdate()).getUserizedResult();
@@ -386,24 +386,24 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult changeOrganizer(CalendarSession session, EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
         /*
-         * update organizer, notify handlers & return userized result
+         * change organizer, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ChangeOrganizerPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), organizer, L(clientTimestamp));
 
             }
-        }.executeUpdate()).getUserizedResult();
+        }.executeUpdate(), true).getUserizedResult();
     }
 
     @Override
     public CalendarResult deleteEvent(CalendarSession session, final EventID eventID, final long clientTimestamp) throws OXException {
         /*
-         * delete event, notify handlers & return userized result
+         * delete event, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -416,13 +416,13 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult splitSeries(CalendarSession session, EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException {
         /*
-         * split event series, notify handlers & return userized result
+         * split event series, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new SplitPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), splitPoint, uid, clientTimestamp);
+                return new SplitPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), splitPoint, uid, clientTimestamp, true);
 
             }
         }.executeUpdate()).getUserizedResult();
@@ -431,9 +431,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public CalendarResult clearEvents(CalendarSession session, final String folderId, final long clientTimestamp) throws OXException {
         /*
-         * clear events, notify handlers & return userized result
+         * clear events, trigger post-processing & return userized result
          */
-        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        return postProcess(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -474,7 +474,7 @@ public class CalendarServiceImpl implements CalendarService {
              */
             List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
             for (InternalImportResult result : results) {
-                importResults.add(notifyHandlers(result).getImportResult());
+                importResults.add(postProcess(result).getImportResult());
             }
             return importResults;
         } finally {
@@ -506,20 +506,31 @@ public class CalendarServiceImpl implements CalendarService {
         }.executeQuery();
     }
 
-    private <T extends InternalCalendarResult> T notifyHandlers(T result) {
-        return notifyHandlers(result, false);
+    private <T extends InternalCalendarResult> T postProcess(T result) {
+        return postProcess(result, false);
     }
 
-    private <T extends InternalCalendarResult> T notifyHandlers(T result, boolean trackAttendeeUsage) {
-        Runnable notifyRunnable = () -> {
+    private <T extends InternalCalendarResult> T postProcess(T result, boolean trackAttendeeUsage) {
+        ThreadPools.submitElseExecute(ThreadPools.task(() -> {
+            /*
+             * track attendee usage as needed & notify registered calendar handlers
+             */
             CalendarEvent calendarEvent = result.getCalendarEvent();
             if (trackAttendeeUsage) {
                 trackAttendeeUsage(result.getSession(), calendarEvent);
             }
-            notificationService.notifyHandlers(calendarEvent, false);
-        };
-
-        ThreadPools.submitElseExecute(ThreadPools.task(notifyRunnable));
+            CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
+            if (null != notificationService) {
+                notificationService.notifyHandlers(calendarEvent, false);
+            }
+            /*
+             * handle pending scheduling messages
+             */
+            SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
+            if (null != schedulingBroker) {
+                schedulingBroker.handle(result.getSession().getSession(), result.getSchedulingMessages());
+            }
+        }));
         return result;
     }
 

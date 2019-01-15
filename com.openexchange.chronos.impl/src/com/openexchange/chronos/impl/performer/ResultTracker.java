@@ -70,26 +70,43 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.impl.scheduling.CancelMessageBuilder;
+import com.openexchange.chronos.impl.scheduling.CreateMessageBuilder;
+import com.openexchange.chronos.impl.scheduling.ReplyMessageBuilder;
+import com.openexchange.chronos.impl.scheduling.UpdateMessageBuilder;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
@@ -104,6 +121,7 @@ public class ResultTracker {
 
     private final CalendarStorage storage;
     private final CalendarSession session;
+    private final CalendarUser calendarUser;
     private final CalendarFolder folder;
     private final long timestamp;
     private final InternalCalendarResult result;
@@ -118,11 +136,13 @@ public class ResultTracker {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      * @param timestamp The timestamp to apply for the result
+     * @param protection The {@link SelfProtection}
      */
-    public ResultTracker(CalendarStorage storage, CalendarSession session, CalendarFolder folder, long timestamp, SelfProtection protection) {
+    public ResultTracker(CalendarStorage storage, CalendarSession session, CalendarUser calendarUser, CalendarFolder folder, long timestamp, SelfProtection protection) {
         super();
         this.storage = storage;
         this.session = session;
+        this.calendarUser = calendarUser;
         this.folder = folder;
         this.timestamp = timestamp;
         this.protection = protection;
@@ -316,6 +336,152 @@ public class ResultTracker {
             }
         } else {
             trackUserizedDeletion(folder, deletedEvent);
+        }
+    }
+
+    /**
+     * Generates and tracks a scheduling request messages
+     *
+     * @param createdEvent The created event
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingRequests(Event createdEvent) throws OXException {
+        trackMessage(new CreateMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(createdEvent, createdEvent.getAttendees()));
+    }
+
+    /**
+     * Generates and tracks a scheduling request messages after an series was splitted
+     *
+     * @param events A {@link List} of created events with the same UID
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingRequestAfterSplit(List<Event> events) throws OXException {
+        trackMessage(new CreateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildForSeries(events));
+    }
+
+    /**
+     * GGenerates and tracks a scheduling messages for a deleted event
+     * <p>
+     * <b>Note:</b> This is not a decline! Use only as organizer or on behalf of the organizer
+     *
+     * @param deleted The deleted event
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingCancelation(Event deleted) throws OXException {
+        trackSchedulingCancelation(deleted, deleted.getAttendees());
+    }
+
+    /**
+     * Generates and tracks a scheduling messages for a deleted event
+     * <p>
+     * <b>Note:</b> This is not a decline! Use only as organizer or on behalf of the organizer
+     *
+     * @param deleted The deleted event
+     * @param attendees The list of attendees to send the cancel to
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingCancelation(Event deleted, List<Attendee> attendees) throws OXException {
+        trackMessage(new CancelMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(deleted, attendees));
+    }
+
+    /**
+     * Generates and tracks a scheduling update messages. 
+     * Does generate invitation or cancel messages for added or removed attendees, too.
+     *
+     * @param original The original event
+     * @param updated The updated event
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingUpdate(Event original, Event updated) throws OXException {
+        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(original, updated));
+    }
+
+    //@formatter:off
+    private static final EventField[] FIELDS_TO_REPORT = new EventField[] 
+    {
+        EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE,
+        EventField.ATTENDEES, EventField.CHANGE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ATTACHMENTS, EventField.TRANSP 
+    };
+    //@formatter:on
+
+    /**
+     * Generates and tracks a scheduling request messages.
+     * <p>
+     * Does only generate messages when an field changed, that needs an update on client side
+     *
+     * @param original The original event
+     * @param updated The updated event
+     * @throws OXException If generation fails
+     */
+    public void trackNecessarySchedulingUpdate(Event original, Event updated) throws OXException {
+        EventUpdate eventUpdate = DefaultEventUpdate.builder().considerUnset(true).originalEvent(original).updatedEvent(updated).build();
+        if (eventUpdate.containsAnyChangeOf(FIELDS_TO_REPORT)) {
+            trackSchedulingUpdate(original, updated);
+        }
+    }
+
+    /**
+     * Generates and tracks a scheduling request messages after an change exception has been created.
+     *
+     * @param original The original event
+     * @param updated The updated event
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingExceptionUpdate(Event original, Event updated) throws OXException {
+        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildForNewException(original, updated));
+    }
+
+    /**
+     * Generates and tracks a scheduling request messages after an series split. This includes update messages to attendees within change exceptions.
+     *
+     * @param masterEvent The updated master event
+     * @param updates A {@link List} of {@link UpdateResult}
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingUpdateAfterSplit(Event masterEvent, List<UpdateResult> updates) throws OXException {
+        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildAfterSplit(masterEvent, updates));
+    }
+
+    /**
+     * Generates and tracks a decline message for the current user
+     *
+     * @param event The event to decline with untouched attendees
+     * @throws OXException In case copying of the attendee or sending fails
+     */
+    public void trackAttendeeDeclineScheduling(Event event) throws OXException {
+        Attendee updatedAttendee = AttendeeMapper.getInstance().copy(CalendarUtils.find(event.getAttendees(), calendarUser), null, (AttendeeField[]) null);
+        updatedAttendee.setHidden(true);
+        updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
+        updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
+
+        List<Attendee> attendees = new LinkedList<>(event.getAttendees());
+        attendees.remove(CalendarUtils.find(attendees, calendarUser));
+        attendees.add(updatedAttendee);
+        Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+        copy.setAttendees(attendees);
+
+        trackSchedulingAttendeeUpdate(event, copy);
+    }
+
+    /**
+     * Generates and tracks a reply message to the organizer
+     *
+     * @param original The original event
+     * @param updated The updated event
+     * @throws OXException If generation fails
+     */
+    public void trackSchedulingAttendeeUpdate(Event original, Event updated) throws OXException {
+        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(original, updated));
+    }
+
+    /**
+     * Tracks a {@link SchedulingMessage}
+     *
+     * @param messages The messages to track
+     */
+    private void trackMessage(List<SchedulingMessage> messages) {
+        for (SchedulingMessage message : messages) {
+            this.result.addScheulingMessage(message);
         }
     }
 

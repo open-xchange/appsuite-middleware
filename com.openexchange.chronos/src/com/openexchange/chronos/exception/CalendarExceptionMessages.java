@@ -163,6 +163,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_MANY_ALARMS_MSG = "The appointment contains too many reminders.";
     
+    public static final String UNSUPPORTED_METHOD_MSG = "The method \"%1$s\" is not supported.";
+    
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

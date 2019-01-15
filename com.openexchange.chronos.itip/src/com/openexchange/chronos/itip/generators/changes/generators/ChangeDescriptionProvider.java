@@ -61,7 +61,7 @@ import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerat
  */
 public class ChangeDescriptionProvider {
 
-    private static final ImmutableList<ChangeDescriptionGenerator> GENERATORS = ImmutableList.of(new Details(), new Organizer(), new Participants(), new Rescheduling(), new Transparency());
+    private static final ImmutableList<ChangeDescriptionGenerator> GENERATORS = ImmutableList.of(new Details(), new Organizer(), new Participants(), new Rescheduling(), new Transparency(), new Attachments());
 
     /**
      * Initializes a new {@link ChangeDescriptionProvider}.

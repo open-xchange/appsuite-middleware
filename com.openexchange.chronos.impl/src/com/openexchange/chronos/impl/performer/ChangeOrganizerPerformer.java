@@ -184,12 +184,17 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
          * update "this and future" recurrences; first split the series at this recurrence
          */
         Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
-        new SplitPerformer(this).perform(originalEvent.getSeriesId(), recurrenceId.getValue(), null, originalEvent.getTimestamp());
+        InternalCalendarResult result = new SplitPerformer(this).perform(originalEvent.getSeriesId(), recurrenceId.getValue(), null, originalEvent.getTimestamp(), false);
 
         /*
          * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
          */
-        updateSeries(loadEventData(originalEvent.getId()), organizer);
+        Event updateSeries = updateSeries(loadEventData(originalEvent.getId()), organizer);
+        
+        /*
+         * Notify (internal) attendees about the change
+         */
+        resultTracker.trackSchedulingUpdateAfterSplit(updateSeries, result.getCalendarEvent().getUpdates());
 
         return resultTracker.getResult();
     }
@@ -234,21 +239,23 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * Applies the new organizer to a series master and all its change exceptions.
      * Results will be tracked.
      *
-     * @param organizer The new organizer
      * @param originalEvent The original event
+     * @param organizer The new organizer
      * @param lastModified The date to set the {@link Event#getLastModified()} to
+     * @return The (master) event
      * @throws OXException If update fails
      */
-    private void updateSeries(Event originalEvent, Organizer organizer) throws OXException {
+    private Event updateSeries(Event originalEvent, Organizer organizer) throws OXException {
         Event updatedEvent = updateEvent(originalEvent, organizer);
-        updateExceptions(originalEvent, updatedEvent, organizer);
+        updateExceptions(updatedEvent, organizer);
+        return updatedEvent;
     }
 
     /**
      * Update the organizer for a single event.
      *
-     * @param organizer The new organizer
      * @param originalEvent The original event
+     * @param organizer The new organizer
      * @return The updated {@link Event}
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
@@ -266,13 +273,12 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * Loads series exceptions and applies the new organizer to them.
      * Results will be tracked.
      *
-     * @param originalEvent The original event
      * @param updatedEvent The updated series master
      * @param organizer The new organizer
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
      */
-    private void updateExceptions(Event originalEvent, Event updatedEvent, Organizer organizer) throws OXException {
+    private void updateExceptions(Event updatedEvent, Organizer organizer) throws OXException {
         for (Event e : loadExceptionData(updatedEvent)) {
             storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
             insertOrganizerAsAttendee(e, organizer);

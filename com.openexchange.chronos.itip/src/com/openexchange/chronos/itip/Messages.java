@@ -65,6 +65,8 @@ public class Messages implements LocalizableStrings {
      * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
      */
     public static final String HAS_ATTACHMENTS = "This appointment has attachments. Click on the following link to view the appointment and to retrieve the attachments: %1$s.";
+    public static final String HAS_ADDED_ATTACHMENT = "The appointment has a new attachment: %1$s.";
+    public static final String HAS_REMOVED_ATTACHMENT = "The attachment %1$s was removed from the appointment.";
 
     public static final String ADD_TO_UNKNOWN = "The organizer would like to create an exception for a  recurring appointment that could not be found. Either ignore this update, or ask the organizer to again send you the recurrence.";
     public static final String ADD_WOULD_OVERWRITE_EXISTING_EXCEPTION = "The organizer would like to change the occurrence of a recurrence on a day that already contains such a change. The server can only store one change for a series per day.";

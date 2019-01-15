@@ -47,41 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.chronos.itip;
+package com.openexchange.chronos.scheduling.annotations;
 
-import java.util.Collections;
-import org.junit.Test;
-import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.EventData;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * {@link ITipReplyTest}
+ * {@link AttendeeMethod} - Marks this method to be used by an attendee.
+ * <p>
+ * {@link #role()} can be defined to
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.0
+ * @since v7.10.3
  */
-public class ITipReplyTest extends AbstractITipReplyTest {
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.FIELD)
+public @interface AttendeeMethod {
 
-    @Test
-    public void testSimple() throws Exception {
-        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, "Simple test");
-        Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
-        createdEvent = createEvent(eventToCreate);
-        updateAttendeeStatus(replyingAttendee, PartStat.ACCEPTED);
-        analyze(createdEvent);
+    public enum ROLE {
+        /**
+         * The attendee has no special role
+         */
+        DEFAULT,
+
+        /**
+         * The attendee is action on behalf of another attendee or event the
+         * organizer
+         */
+        ON_BEHALF_OF;
     }
 
-    @Test
-    public void testPartyCrasher() throws Exception {
-        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, "Simple test");
-        Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
-        eventToCreate.setAttendees(Collections.emptyList());
-        createdEvent = createEvent(eventToCreate);
-        updateAttendeeStatus(replyingAttendee, PartStat.ACCEPTED);
-        createdEvent.setAttendees(Collections.singletonList(replyingAttendee));
-        analyze(createdEvent, CustomConsumers.PARTY_CRASHER.getConsumer(), null);
-    }
+    /**
+     * The role the attendee has.
+     * 
+     * @return {@link ROLE#DEFAULT} per default or {@link ROLE#ON_BEHALF_OF}
+     */
+    public ROLE role() default ROLE.DEFAULT;
 
 }

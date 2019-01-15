@@ -71,6 +71,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
@@ -182,8 +183,17 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         Map<String, List<Attachment>> attachmentsByEventId = new HashMap<String, List<Attachment>>();
         List<Event> eventTombstones = new ArrayList<Event>(eventsToDelete.size());
         Map<String, List<Attendee>> attendeeTombstonesByEventId = new HashMap<String, List<Attendee>>(eventsToDelete.size());
+        Map<String, Event> idsToCancel = new HashMap<>(eventsToDelete.size());
         for (Event originalEvent : eventsToDelete) {
             eventIds.add(originalEvent.getId());
+            if (idsToCancel.containsKey(originalEvent.getSeriesId())) {
+                if (CalendarUtils.isSeriesMaster(originalEvent)) {
+                    // TODO Check for additional attendees in exceptions
+                    idsToCancel.put(originalEvent.getId(), originalEvent);
+                } //Ignore
+            } else {
+                idsToCancel.put(originalEvent.getId(), originalEvent);
+            }
             eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             if (null != originalEvent.getAttendees() && 0 < originalEvent.getAttendees().size()) {
                 attendeeTombstonesByEventId.put(originalEvent.getId(), storage.getUtilities().getTombstones(originalEvent.getAttendees()));
@@ -203,6 +213,16 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         storage.getEventStorage().deleteEvents(eventIds);
         if (0 < attachmentsByEventId.size()) {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getId(), attachmentsByEventId));
+        }
+        /*
+         * Notify about cancellation of event or attendee
+         */
+        for (Event event : idsToCancel.values()) {
+            if (CalendarUtils.isOrganizer(event, calendarUserId)) {
+                resultTracker.trackSchedulingCancelation(event);
+            } else {
+                resultTracker.trackAttendeeDeclineScheduling(event);
+            }
         }
         /*
          * track deletions in result
@@ -242,13 +262,14 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         storage.getEventStorage().insertEventTombstones(eventTombstones);
         storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesByEventId);
         /*
-         * 'touch' modified events & track results
+         * 'touch' modified events, track results and send notifications
          */
         for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
             Event originalEvent = attendeeToDeleteByEvent.getKey();
             touch(originalEvent.getId());
             Event updatedEvent = loadEventData(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, updatedEvent);
+            resultTracker.trackAttendeeDeclineScheduling(originalEvent);
         }
     }
 

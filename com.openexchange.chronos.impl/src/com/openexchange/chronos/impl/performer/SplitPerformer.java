@@ -59,6 +59,7 @@ import static com.openexchange.chronos.impl.Utils.injectRecurrenceData;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -123,9 +124,10 @@ public class SplitPerformer extends AbstractUpdatePerformer {
      * @param splitPoint The (minimum inclusive) date or date-time where the split is to occur
      * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
      * @param clientTimestamp The client timestamp to catch concurrent modifications
+     * @param generateUpdateMessages <code>true</code> to generate update messages for the attendees, <code>false</code> otherwise
      * @return The split result
      */
-    public InternalCalendarResult perform(String objectId, DateTime splitPoint, String uid, long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String objectId, DateTime splitPoint, String uid, long clientTimestamp, boolean generateUpdateMessages) throws OXException {
         /*
          * load original event data & check permissions
          */
@@ -238,7 +240,10 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), detachedSeriesMaster.getId(), originalEvent.getAttachments());
         Map<Integer, List<Alarm>> newAlarmsByUserId = insertAlarms(detachedSeriesMaster, originalAlarmsByUserId, true);
         storage.getAlarmTriggerStorage().insertTriggers(detachedSeriesMaster, newAlarmsByUserId);
-        resultTracker.trackCreation(loadEventData(detachedSeriesMaster.getId()));
+        detachedSeriesMaster = loadEventData(detachedSeriesMaster.getId());
+        resultTracker.trackCreation(detachedSeriesMaster);
+        List<Event> createdSeries = new LinkedList<>();
+        createdSeries.add(detachedSeriesMaster);
         /*
          * assign existing change exceptions to new detached event series, if prior split time
          */
@@ -248,14 +253,18 @@ public class SplitPerformer extends AbstractUpdatePerformer {
                 EventMapper.getInstance().copy(detachedSeriesMaster, exceptionUpdate, EventField.SERIES_ID, EventField.UID, EventField.FILENAME, EventField.RELATED_TO);
                 Consistency.setModified(session, timestamp, exceptionUpdate, session.getUserId());
                 storage.getEventStorage().updateEvent(exceptionUpdate);
+                createdSeries.add(exceptionUpdate);
                 resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));
             }
         }
+        resultTracker.trackSchedulingRequestAfterSplit(createdSeries);
+        
         /*
          * update the original event series; also decorate original change exceptions on or after the split with the related-to marker
          */
         storage.getEventStorage().updateEvent(updatedSeriesMaster);
-        resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
+        Event updatedEventMaster = loadEventData(originalEvent.getId());
+        resultTracker.trackUpdate(originalEvent, updatedEventMaster);
         for (Event originalChangeException : originalChangeExceptions) {
             if (0 <= compare(originalChangeException.getRecurrenceId().getValue(), splitPoint, timeZone)) {
                 Event exceptionUpdate = EventMapper.getInstance().copy(originalChangeException, null, EventField.ID);
@@ -265,10 +274,15 @@ public class SplitPerformer extends AbstractUpdatePerformer {
                 injectRecurrenceData(exceptionUpdate, new DefaultRecurrenceData(updatedSeriesMaster.getRecurrenceRule(), updatedSeriesMaster.getStartDate()));
                 Consistency.setModified(session, timestamp, exceptionUpdate, session.getUserId());
                 storage.getEventStorage().updateEvent(exceptionUpdate);
-                resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));
+                Event updatedChangeException = loadEventData(originalChangeException.getId());
+                resultTracker.trackUpdate(originalChangeException, updatedChangeException);
             }
         }
-        return resultTracker.getResult();
+        InternalCalendarResult result = resultTracker.getResult();
+        if (generateUpdateMessages) {
+            resultTracker.trackSchedulingUpdateAfterSplit(updatedEventMaster, result.getCalendarEvent().getUpdates());
+        }
+        return result;
     }
 
 }

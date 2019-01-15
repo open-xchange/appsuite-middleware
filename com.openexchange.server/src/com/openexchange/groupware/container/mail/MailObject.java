@@ -416,7 +416,7 @@ public class MailObject {
 
     private final static String HEADER_XPRIORITY = "X-Priority";
 
-    private final static String HEADER_DISPNOTTO = "Disposition-Notification-Toy";
+    private final static String HEADER_DISPNOTTO = "Disposition-Notification-To";
 
     private final static String HEADER_XOXREMINDER = "X-OX-Reminder";
 

@@ -47,67 +47,75 @@
  *
  */
 
-package com.openexchange.ajax.chronos.itip;
+package com.openexchange.chronos.scheduling.changes.impl;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.function.Consumer;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.Method;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.ProdID;
-import com.openexchange.testing.httpclient.models.Analysis;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.CalendarUser;
-import com.openexchange.testing.httpclient.models.EventData;
+import java.util.List;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.ShownAsTransparency;
 
 /**
- * {@link AbstractITipReplyTest}
+ * {@link PassthroughWrapper}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.0
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Moved with v7.10.3
  */
-public abstract class AbstractITipReplyTest extends AbstractITipAnalyzeTest {
-
-    protected EventData createdEvent;
+public class PassthroughWrapper implements TypeWrapper {
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != createdEvent) {
-                deleteEvent(createdEvent);
-            }
-        } finally {
-            super.tearDown();
+    public String none(final Object argument) {
+        if (argument != null) {
+            return argument.toString();
         }
+        return "";
     }
 
-
-    protected void analyze(EventData event) throws Exception {
-        analyze(event, CustomConsumers.UPDATE.getConsumer(), null);
+    @Override
+    public String original(final Object argument) {
+        return none(argument);
     }
 
-    protected void analyze(EventData event, Consumer<Analysis> validator, Map<String, Object> values) throws Exception {
-        analyze(ProdID.OX, Method.REPLY, Collections.singletonList(event), validator, values);
+    @Override
+    public String participant(final Object argument) {
+        return none(argument);
     }
 
-    protected void updateAttendeeStatus(Attendee replyingAttendee, PartStat partStat) {
-        replyingAttendee.setPartStat(partStat.name().toUpperCase());
-        createdEvent.setAttendees(Collections.singletonList(replyingAttendee));
+    @Override
+    public String state(final Object argument, final ParticipationStatus status) {
+        return none(argument);
     }
 
-    protected Attendee prepareCommonAttendees(EventData event) {
-        Attendee replyingAttendee = createAttendee(testUserC2, apiClientC2);
-        replyingAttendee.setEntity(Integer.valueOf(0));
-        // organizer gets added automatically
-        event.setAttendees(Collections.singletonList(replyingAttendee));
-        CalendarUser c = new CalendarUser();
-        c.cn(userResponseC1.getData().getDisplayName());
-        c.email(userResponseC1.getData().getEmail1());
-        c.entity(Integer.valueOf(userResponseC1.getData().getId()));
-        event.setOrganizer(c);
-        event.setCalendarUser(c);
+    @Override
+    public String updated(final Object argument) {
+        return none(argument);
+    }
 
-        return replyingAttendee;
+    @Override
+    public String emphasiszed(final Object argument) {
+        return none(argument);
+    }
+
+    @Override
+    public String reference(final Object argument) {
+        return none(argument);
+    }
+
+    @Override
+    public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
+        return none(argument);
+    }
+
+    @Override
+    public String italic(Object argument) {
+        return none(argument);
+    }
+    
+    @Override
+    public String convert(List<String> descriptions) {
+        StringBuilder sb = new StringBuilder();
+        descriptions.forEach(s -> {
+            sb.append(s).append("\n");
+        });
+        return sb.toString();
     }
 
 }

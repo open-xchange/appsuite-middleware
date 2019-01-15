@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -138,11 +139,25 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
+            List<Attendee> attendees = new ArrayList<>(originalEvent.getAttendees());
             requireDeletePermissions(originalEvent);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent);
             } else {
+                gatherAttendees(originalEvent, attendees);
                 delete(originalEvent);
+            }
+
+            if (CalendarUtils.isOrganizer(originalEvent, calendarUserId)) {
+                /*
+                 * Cancel event or series
+                 */
+                resultTracker.trackSchedulingCancelation(originalEvent, attendees);
+            } else {
+                /*
+                 * Send a reply to the organizer, therefore decline for the user
+                 */
+                resultTracker.trackAttendeeDeclineScheduling(originalEvent);
             }
             return;
         }
@@ -157,6 +172,8 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             } else {
                 delete(originalEvent, userAttendee);
             }
+            resultTracker.trackSchedulingAttendeeUpdate(originalEvent, loadEventData(originalEvent.getId()));
+
             return;
         }
         /*
@@ -211,6 +228,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     Event updatedEvent = loadEventData(originalEvent.getId());
                     updateAlarmTrigger(originalEvent, updatedEvent);
                     resultTracker.trackUpdate(originalEvent, updatedEvent);
+                    resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
                 } else if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                     /*
                      * deletion of existing change exception
@@ -224,7 +242,16 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     /*
                      * creation of new delete exception
                      */
+                    Event exception = loadDeleteException(originalEvent, recurrenceId);
                     addDeleteExceptionDate(originalEvent, recurrenceId);
+                    if (CalendarUtils.isOrganizer(originalEvent, calendarUserId)) {
+                        resultTracker.trackSchedulingCancelation(exception);
+                    } else {
+                        /*
+                         * Send a reply to the organizer, therefore decline for the user
+                         */
+                        resultTracker.trackAttendeeDeclineScheduling(exception);
+                    }
                 }
                 return;
             } else if (isSeriesException(originalEvent)) {
@@ -232,6 +259,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                  * deletion of existing change exception
                  */
                 deleteException(originalEvent);
+                resultTracker.trackSchedulingCancelation(originalEvent);
                 return;
             }
             /*
@@ -263,6 +291,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                      * creation of new delete exception
                      */
                     deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
+                    sendDeclineMessage(originalEvent, recurrenceId);
                 }
                 return;
             } else if (isSeriesException(originalEvent)) {
@@ -270,6 +299,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                  * deletion of existing change exception
                  */
                 deleteException(originalEvent, userAttendee);
+                sendDeclineMessage(originalEvent, recurrenceId);
                 return;
             }
             /*
@@ -393,4 +423,38 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         resultTracker.trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
     }
 
+    /**
+     * Declines a specific delete exception
+     *
+     * @param originalEvent The original event
+     * @param recurrenceId The recurrence identifier of the delete exception
+     * @throws OXException See {@link #sendDeclineMessage(Event, Event)}
+     */
+    private void sendDeclineMessage(Event originalEvent, RecurrenceId recurrenceId) throws OXException {
+        resultTracker.trackAttendeeDeclineScheduling(loadDeleteException(originalEvent, recurrenceId));
+    }
+
+    /**
+     * Gathers all attendees that need to be notified of the deletion.
+     * <p>
+     * Adds attendees that might be added in change exceptions of a series.
+     *
+     * @param originalEvent The original event
+     * @param attendees A {@link List} of attendees
+     * @return A {@link List} of {@link Attendee} that need to be notified about the deletion
+     * @throws OXException
+     */
+    private List<Attendee> gatherAttendees(Event originalEvent, List<Attendee> attendees) throws OXException {
+        if (isSeriesMaster(originalEvent)) {
+            for (Event exception : loadExceptionData(originalEvent)) {
+                for (Attendee attendee : exception.getAttendees()) {
+                    if (false == contains(attendees, attendee)) {
+                        attendees.add(attendee);
+                    }
+                }
+
+            }
+        }
+        return attendees;
+    }
 }

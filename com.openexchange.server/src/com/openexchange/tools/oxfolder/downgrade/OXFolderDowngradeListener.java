@@ -59,6 +59,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.contact.ContactService;
@@ -364,6 +365,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
     private static void deleteContainedAppointments(final int folderID, final DowngradeEvent event) throws OXException {
         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(event.getSession());
         calendarSession.set(PARAMETER_CONNECTION(), event.getWriteCon());
+        calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderID), CalendarUtils.DISTANT_FUTURE);
     }
 

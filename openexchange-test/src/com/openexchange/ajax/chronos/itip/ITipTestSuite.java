@@ -53,7 +53,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.chronos.itip.bugs.Bug65533Test;
 import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link ITipTestSuite}
@@ -61,12 +60,16 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@RunWith(ParallelSuite.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
     ITipRequestTests.class,
-    ITipReplyTest.class,
+    ITipAnalyzeReplyTest.class,
     ReplyBugsTest.class,
     Bug65533Test.class,
+    ITipAnalyzeChangesTest.class,
+    ITipSeriesTest.class,
+    ITipSeriesExceptionTest.class,
+    ITipOnBehalfTest.class
 })
 public class ITipTestSuite {
 

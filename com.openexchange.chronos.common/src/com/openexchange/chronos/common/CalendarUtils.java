@@ -400,6 +400,25 @@ public class CalendarUtils {
     }
 
     /**
+     * Looks up a specific (managed) attachment within the attachments of multiple events based on its managed identifier.
+     *
+     * @param events The events to search
+     * @param managedId The managed identifier to lookup
+     * @return The matching attachment, or <code>null</code> if not found
+     */
+    public static Attachment findAttachment(Collection<Event> events, int managedId) {
+        if (null != events) {
+            for (Event event : events) {
+                Attachment attachment = findAttachment(event.getAttachments(), managedId);
+                if (null != attachment) {
+                    return attachment;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets a value indicating whether an attendee represents an <i>internal</i> entity, i.e. an internal user, group or resource, or not.
      *
      * @param attendee The attendee to check
@@ -2022,7 +2041,6 @@ public class CalendarUtils {
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences between updated items
      * @return The collection update
-     * @throws OXException In case mapping fails
      */
     public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) {
         return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
