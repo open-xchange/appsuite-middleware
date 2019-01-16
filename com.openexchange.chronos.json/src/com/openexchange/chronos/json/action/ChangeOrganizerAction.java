@@ -60,17 +60,19 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.property.ChronosLeanConfigurationProperties;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ChangeOrganizerAction}
+ * {@link ChangeOrganizerAction} - "/chronos/updateOrganizer" endpoint for updating an organizer
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
@@ -90,6 +92,11 @@ public class ChangeOrganizerAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        LeanConfigurationService service = services.getServiceSafe(LeanConfigurationService.class);
+        if (false == service.getBooleanProperty(ChronosLeanConfigurationProperties.ALLOWED_ORGANIZER_CHANGE.getProperty())) {
+            throw AjaxExceptionCodes.DISABLED_ACTION.create("updateOrganizer");
+        }
+
         long clientTimestamp = parseClientTimestamp(requestData);
         EventID eventId = parseIdParameter(requestData);
 
