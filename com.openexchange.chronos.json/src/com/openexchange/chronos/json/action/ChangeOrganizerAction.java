@@ -50,69 +50,70 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.COMMENT;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import static com.openexchange.chronos.json.fields.ChronosJsonFields.ORGANIZER;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link UpdateAction}
+ * {@link ChangeOrganizerAction}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.2
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
-public class UpdateAction extends ChronosAction {
+public class ChangeOrganizerAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS, PARAMETER_PUSH_TOKEN);
+    private static final EventField[] ORGANIZER_FIELD = new EventField[] { EventField.ORGANIZER };
 
     /**
-     * Initializes a new {@link UpdateAction}.
-     *
-     * @param services A service lookup reference
+     * Initializes a new {@link ChangeOrganizerAction}.
+     * 
+     * @param services The {@link ServiceLookup}
      */
-    protected UpdateAction(ServiceLookup services) {
+    public ChangeOrganizerAction(ServiceLookup services) {
         super(services);
-    }
-
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
     }
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
+        EventID eventId = parseIdParameter(requestData);
 
-        Map<String, Object> bodyParameters = new HashMap<>();
-        Event event = parseEvent(requestData, bodyParameters);
-        if (bodyParameters.containsKey(COMMENT)) {
-            calendarAccess.set(CalendarParameters.PARAMETER_COMMENT, bodyParameters.get(COMMENT));
+        JSONObject jsonObject = requestData.getData(JSONObject.class);
+        if (null == jsonObject) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
 
-        if (false == calendarAccess.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {
-            calendarAccess.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
-        }
         try {
-            CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event, clientTimestamp);
+            String comment = jsonObject.getString(COMMENT);
+            if (Strings.isNotEmpty(comment)) {
+                calendarAccess.set(CalendarParameters.PARAMETER_COMMENT, comment);
+            }
+        } catch (JSONException e) {
+            LOG.debug("Unable to read comment parameter", e);
+        }
+
+        try {
+            Event deserialize = EventMapper.getInstance().deserialize(jsonObject, ORGANIZER_FIELD);
+            CalendarResult calendarResult = calendarAccess.updateOrganizer(eventId, deserialize.getOrganizer(), clientTimestamp);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
-        } catch (OXException e) {
-            return handleConflictException(e);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create(ORGANIZER);
         }
     }
+
 }

@@ -108,8 +108,6 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     protected static final String EVENTS = "events";
 
-    protected static final String BODY_PARAM_COMMENT = "comment";
-
     /**
      * Initializes a new {@link ChronosAction}.
      *

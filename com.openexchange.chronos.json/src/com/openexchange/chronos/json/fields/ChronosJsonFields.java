@@ -177,6 +177,10 @@ public class ChronosJsonFields {
      */
     public static final String ORGANIZER = "organizer";
     /**
+     * The optional comment a organizer can set.
+     */
+    public static final String COMMENT = "comment";
+    /**
      * The geolocation of the event. See {@link Event#getGeo()}
      */
     public static final String GEO = "geo";
