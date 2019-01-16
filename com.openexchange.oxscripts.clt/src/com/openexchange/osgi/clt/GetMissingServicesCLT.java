@@ -73,7 +73,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
     private static String SYNTAX = "getmissingservices [-n <bundleName>] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static String FOOTER = "";
 
-    private boolean testAll;
+    private boolean testAll = true;
     private String bundleName;
 
     /**
