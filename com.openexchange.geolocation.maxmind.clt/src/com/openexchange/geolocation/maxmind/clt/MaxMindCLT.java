@@ -81,8 +81,8 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         return b.toString();
     }
 
-    private static final String USAGE = "";
-    private static final String FOOTER = "";
+    private static final String USAGE = "maxmind [-u <database-user> [-a <database-password>] [-g <group>] [[-z <zip-archive>] | [-b <ip-blocks-file> -l <ip-locations-file>]] [-k] [-o <output-directory>] -A <masterAdmin> -P <masterPassword> [-p <rmiPort>] [--responsetimeout <timeout>] [-s <rmiHost>]] | [-h]";
+    private static final String FOOTER = "Note that the options '-b' and '-l' must be used in conjunction and that both are mutually exclusive with the option '-z'.\n\nSupported MaxMind database versions: " + supportedDBVersions();
 
     private static final String DOWNLOAD = "https://geolite.maxmind.com/download/geoip/database/#VERSION#.zip";
 
