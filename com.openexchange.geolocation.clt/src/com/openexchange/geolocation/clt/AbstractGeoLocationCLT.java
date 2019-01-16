@@ -68,6 +68,8 @@ import com.openexchange.geolocation.GeoLocationRMIService;
  * @since v7.10.2
  */
 public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
+    
+    protected static final String ABSTRACT_USAGE = "-u <database-user> [-a <database-password>] [-g <group>] [-k] [-o <output-directory>] [--http-proxy-host <http-proxy-host> --http-proxy-port <http-proxy-port> --https-proxy-host <https-proxy-host> --https-proxy-port <https-proxy-port>]" + BASIC_MASTER_ADMIN_USAGE;
 
     /**
      * The extraction working directory

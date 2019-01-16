@@ -89,7 +89,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         return b.toString();
     }
 
-    private static final String USAGE = "ip2location [-u <database-user> [-a <database-password>] [-g <group>] [[-i <database-file>] | [-t <token>]] [-k] [-l] [-o <output-directory>] -A <masterAdmin> -P <masterPassword> [-p <rmiPort>] [--responsetimeout <timeout>] [-s <rmiHost>]] | [-h]";
+    private static final String USAGE = "ip2location [[-i <database-file>] | [-t <token>]] " + ABSTRACT_USAGE;
     private static final String FOOTER = "Note that the options '-i' and '-t' are mutually exclusive.\n\nSupported ip2location database versions: " + supportedDBVersions();
 
     /**
