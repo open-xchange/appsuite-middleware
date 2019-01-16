@@ -55,13 +55,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.geolocation.clt.AbstractGeoLocationCLT;
 import com.openexchange.geolocation.clt.ConnectionUtils;
 import com.openexchange.geolocation.clt.DatabaseVersion;
@@ -229,46 +227,6 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
         System.exit(1);
 
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
-    @Override
-    protected String getFooter() {
-        return FOOTER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
-    @Override
-    protected String getName() {
-        return USAGE;
     }
 
     ///////////////////////////////////////////// HELPERS /////////////////////////////////////////////

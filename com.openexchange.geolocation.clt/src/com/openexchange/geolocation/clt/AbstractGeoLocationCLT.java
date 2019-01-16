@@ -130,7 +130,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @throws IllegalArgumentException if no valid database version can be parsed
      */
     protected abstract DatabaseVersion parseDatabaseVersion(CommandLine cmd);
-
+    
     /*
      * (non-Javadoc)
      * 
