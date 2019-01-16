@@ -159,21 +159,22 @@ public final class LoginCounterTool extends AbstractMBeanCLI<Void> {
         }
 
         // Parse dates
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String source = unquote(cmd.getOptionValue('t'));
         try {
             startDate = sdf.parse(source);
         } catch (ParseException e) {
-            System.out.println("Wrong format for parameter 'start': " + source + ". Expected in format of \"yyyy-MM-dd HH:mm:ss\" (mind the double quotes)");
+            System.out.println("Wrong format for parameter 'start': " + source + ". Expected in format of \"yyyy-MM-ddTHH:mm:ss\" (mind the double quotes)");
             printHelp();
             System.exit(1);
         }
+        //asd
         if (null == endDate) {
             source = unquote(cmd.getOptionValue('e'));
             try {
                 endDate = sdf.parse(source);
             } catch (ParseException e) {
-                System.out.println("Wrong format for parameter 'end': " + source + ". Expected in format of \"yyyy-MM-dd HH:mm:ss\" (mind the double quotes)");
+                System.out.println("Wrong format for parameter 'end': " + source + ". Expected in format of \"yyyy-MM-ddTHH:mm:ss\" (mind the double quotes)");
                 printHelp();
                 System.exit(1);
             }
