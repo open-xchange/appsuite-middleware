@@ -59,25 +59,25 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * 
- * {@link RestrictAllowedOrganizerChanges}
+ * {@link AllowedOrganizerChanges}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
  */
-public class RestrictAllowedOrganizerChanges extends ReadOnlyChronosJSlobEntry {
+public class AllowedOrganizerChanges extends ReadOnlyChronosJSlobEntry {
 
     /**
-     * Initializes a new {@link RestrictAllowedOrganizerChanges}.
+     * Initializes a new {@link AllowedOrganizerChanges}.
      *
      * @param services A service lookup reference
      */
-    public RestrictAllowedOrganizerChanges(ServiceLookup services) {
+    public AllowedOrganizerChanges(ServiceLookup services) {
         super(services);
     }
 
     @Override
     public String getPath() {
-        return "chronos/restrictAllowedOrganizerChange";
+        return "chronos/allowedOrganizerChange";
     }
 
     @Override
