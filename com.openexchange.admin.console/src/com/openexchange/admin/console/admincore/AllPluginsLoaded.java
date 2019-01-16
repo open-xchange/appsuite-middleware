@@ -99,7 +99,7 @@ public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return null;
+        return "Checks whether all bundles are loaded and active.";
     }
 
     @Override

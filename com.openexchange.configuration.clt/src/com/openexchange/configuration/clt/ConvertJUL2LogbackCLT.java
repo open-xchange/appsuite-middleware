@@ -191,7 +191,7 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected String getFooter() {
-        return null;
+        return "";
     }
 
     /*

@@ -70,7 +70,7 @@ import com.openexchange.report.internal.LoginCounterMBean;
 public final class LoginCounterTool extends AbstractMBeanCLI<Void> {
 
     private static final String SYNTAX = "logincounter [-a] -e <endDate> [-h] [-H <jmxHost>] [-l <jmxLogin>] [-p <jmxPort>] [-r <regex>] [--responsetimeout <timeout>] [-s <jmxPassword>] -t <startDate>";
-    private static final String FOOTER = null;
+    private static final String FOOTER = "";
 
     private Date startDate = null;
     private Date endDate = null;

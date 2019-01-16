@@ -180,7 +180,7 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected String getFooter() {
-        return null;
+        return "";
     }
 
     /*
