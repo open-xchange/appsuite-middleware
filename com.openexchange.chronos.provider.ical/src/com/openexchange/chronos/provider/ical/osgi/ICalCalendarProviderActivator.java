@@ -55,7 +55,6 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.ical.BasicICalCalendarProvider;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderReloadable;
-import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -92,7 +91,6 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
                                 ConversionService.class, 
                                 AdministrativeCalendarAccountService.class,
                                 CalendarUtilities.class,
-                                CalendarEventNotificationService.class,
                                 DatabaseService.class};
     }
 

@@ -5,6 +5,8 @@ Bundle-SymbolicName: com.openexchange.chronos.provider.schedjoules
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.chronos.provider.schedjoules.osgi.SchedJoulesProviderActivator
+Automatic-Module-Name: com.openexchange.chronos.provider.schedjoules
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.exception,
@@ -13,6 +15,7 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.provider.basic,
  com.openexchange.chronos.provider.caching,
  com.openexchange.chronos.provider.caching.basic,
+ com.openexchange.chronos.provider.extensions,
  com.openexchange.chronos.provider.folder,
  com.openexchange.chronos.schedjoules,
  com.openexchange.chronos.schedjoules.api,
@@ -35,4 +38,3 @@ Import-Package: com.openexchange.chronos,
  org.json,
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.chronos.provider.schedjoules.osgi.SchedJoulesProviderActivator

@@ -59,7 +59,7 @@ import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -78,7 +78,7 @@ import com.openexchange.java.Strings;
  */
 public class AccountResponseGenerator extends ResponseGenerator {
 
-    public AccountResponseGenerator(AlarmAwareCachingCalendarAccess cachedCalendarAccess) {
+    public AccountResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
     }
 

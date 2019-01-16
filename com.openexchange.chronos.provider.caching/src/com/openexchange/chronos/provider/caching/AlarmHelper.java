@@ -49,22 +49,12 @@
 
 package com.openexchange.chronos.provider.caching;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.osgi.Tools.requireService;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -295,7 +285,7 @@ public class AlarmHelper {
     }
 
     /**
-     * Inserts the configured default alarms and sets up corresponding triggers list of events.
+     * Inserts the configured default alarms and sets up corresponding triggers for the given events.
      *
      * @param storage The {@link CalendarStorage} to use
      * @param events The events to insert the default alarms for
@@ -307,6 +297,18 @@ public class AlarmHelper {
             return;
         }
         insertDefaultAlarms(storage, defaultAlarms, defaultDateAlarms, events);
+    }
+
+    /**
+     * Removes all previous alarms and adds the new default alarms sets up corresponding triggers for the given events.
+     *
+     * @param storage The {@link CalendarStorage} to use
+     * @param events The events to change the default alarms for
+     */
+    public void changeDefaultAlarms(CalendarStorage storage, final List<Event> events) throws OXException {
+        final List<Alarm> defaultAlarms = getDefaultAlarms();
+        final List<Alarm> defaultDateAlarms = getDateDefaultAlarms();
+        changeDefaultAlarms(storage, defaultAlarms, defaultDateAlarms, events);
     }
 
     public List<AlarmTrigger> getAlarmTriggers(Date until, Set<String> actions) throws OXException {
@@ -436,10 +438,20 @@ public class AlarmHelper {
         }.executeQuery();
     }
 
+    /**
+     * Updates (recreates) the alarm triggers for the given event
+     * 
+     * @param storage The {@link CalendarStorage} to use
+     * @param event The event to update the alarms for
+     * @throws OXException
+     */
     public void updateAlarmTriggers(CalendarStorage storage, final Event event) throws OXException {
         List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
-        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
         storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
+        if (newAlarms.isEmpty()) {
+            return;
+        }
+        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
         storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
     }
 
@@ -513,6 +525,34 @@ public class AlarmHelper {
             alarmsByUserByEventId.put(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
             count += newAlarms.size();
         }
+        storage.getAlarmStorage().insertAlarms(alarmsByUserByEventId);
+        storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, events);
+        return count;
+    }
+
+    int changeDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Alarm> defaultDateAlarms, List<Event> events) throws OXException {
+        int count = 0;
+        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<String, Map<Integer, List<Alarm>>>(events.size());
+        List<String> alarmsToDelete = new ArrayList<>(events.size());
+        for (Event event : events) {
+            alarmsToDelete.add(event.getId());
+            List<Alarm> newAlarms;
+            if (CalendarUtils.isAllDay(event)) {
+                if (defaultDateAlarms == null || defaultDateAlarms.isEmpty()) {
+                    continue;
+                }
+                newAlarms = prepareNewAlarms(storage, defaultDateAlarms);
+            } else {
+                if (defaultAlarms == null || defaultAlarms.isEmpty()) {
+                    continue;
+                }
+                newAlarms = prepareNewAlarms(storage, defaultAlarms);
+            }
+            event.setAlarms(newAlarms);
+            alarmsByUserByEventId.put(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+            count += newAlarms.size();
+        }
+        storage.getAlarmStorage().deleteAlarms(alarmsToDelete);
         storage.getAlarmStorage().insertAlarms(alarmsByUserByEventId);
         storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, events);
         return count;

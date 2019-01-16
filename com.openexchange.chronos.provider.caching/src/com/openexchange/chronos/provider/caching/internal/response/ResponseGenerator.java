@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
@@ -70,9 +70,9 @@ public class ResponseGenerator {
 
     private static EventField[] IGNORED_FIELDS = { EventField.ATTACHMENTS };
 
-    protected final AlarmAwareCachingCalendarAccess cachedCalendarAccess;
+    protected final BasicCachingCalendarAccess cachedCalendarAccess;
 
-    public ResponseGenerator(AlarmAwareCachingCalendarAccess cachedCalendarAccess) {
+    public ResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
         this.cachedCalendarAccess = cachedCalendarAccess;
     }
 

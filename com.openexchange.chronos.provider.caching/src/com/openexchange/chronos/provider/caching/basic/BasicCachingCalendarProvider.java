@@ -85,19 +85,27 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
         return result;
     }
 
-    private void checkAlarms(JSONObject result) throws OXException {
-        /*
-         * check default alarm
-         */
+    /**
+     * Checks if the alarms are valid
+     * 
+     * @param json A json object containing the user config
+     * @throws OXException
+     */
+    private void checkAlarms(JSONObject json) throws OXException {
         try {
-            UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, Services.getServiceLookup()), result);
+            UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, Services.getServiceLookup()), json);
             List<Alarm> defaultAlarm = configWrapper.getDefaultAlarmDate();
             if (null != defaultAlarm) {
                 Check.alarmsAreValid(defaultAlarm);
                 Check.haveReleativeTriggers(defaultAlarm);
             }
+            defaultAlarm = configWrapper.getDefaultAlarmDateTime();
+            if (null != defaultAlarm) {
+                Check.alarmsAreValid(defaultAlarm);
+                Check.haveReleativeTriggers(defaultAlarm);
+            }
         } catch (OXException e) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(result));
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(json));
         }
     }
 
@@ -117,7 +125,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     @Override
     public final void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        //Nothing caching specific to do
+        // Nothing caching specific to do
         onAccountCreatedOpt(session, account, parameters);
     }
 
@@ -158,6 +166,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
      * @param newUserConfiguration New user configuration
      * @throws OXException should be thrown when unchangeable fields might be changed
      */
+    @SuppressWarnings("unused")
     public void checkAllowedUpdate(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
         // overwrite if desired
     }
@@ -190,7 +199,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     @Override
     public final void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        //Nothing caching specific to do; a possible cleanup already happened here: CachingCalendarProvider.reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
+        // Nothing caching specific to do; a possible cleanup already happened here: CachingCalendarProvider.reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
         onAccountUpdatedOpt(session, account, parameters);
     }
 

@@ -56,7 +56,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -77,7 +77,7 @@ public class ChangeExceptionsResponseGenerator extends ResponseGenerator {
 
     final String seriesId;
 
-    public ChangeExceptionsResponseGenerator(AlarmAwareCachingCalendarAccess cachedCalendarAccess, String seriesId) {
+    public ChangeExceptionsResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, String seriesId) {
         super(cachedCalendarAccess);
         this.seriesId = seriesId;
     }

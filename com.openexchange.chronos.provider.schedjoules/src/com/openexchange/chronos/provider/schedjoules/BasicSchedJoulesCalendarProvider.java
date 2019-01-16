@@ -77,6 +77,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
@@ -133,22 +134,23 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     }
 
     @Override
-    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
     protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        BasicCachingCalendarAccess connect = (BasicCachingCalendarAccess) connect(session, account, parameters);
+        connect.updateDefaultAlarms();
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
@@ -272,13 +274,8 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return changed ? internalConfig : null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#triggerCacheInvalidation(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
-     */
     @Override
-    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) {
         return false;
     }
 

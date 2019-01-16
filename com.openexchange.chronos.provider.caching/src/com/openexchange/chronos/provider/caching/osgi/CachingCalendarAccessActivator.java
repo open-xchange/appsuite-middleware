@@ -53,6 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -83,7 +84,7 @@ public class CachingCalendarAccessActivator extends HousekeepingActivator {
         //@formatter:off
         return new Class<?>[] { CalendarStorageFactory.class, DatabaseService.class, ContextService.class,
             CalendarUtilities.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class,
-            RecurrenceService.class, LeanConfigurationService.class, ConversionService.class };
+            RecurrenceService.class, LeanConfigurationService.class, ConversionService.class, CalendarEventNotificationService.class };
         //@formatter:on
     }
 

@@ -64,7 +64,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -87,7 +87,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
 
     final List<EventID> eventIDs;
 
-    public DedicatedEventsResponseGenerator(AlarmAwareCachingCalendarAccess cachedCalendarAccess, List<EventID> eventIDs) {
+    public DedicatedEventsResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, List<EventID> eventIDs) {
         super(cachedCalendarAccess);
         this.eventIDs = eventIDs;
     }

@@ -51,31 +51,34 @@ package com.openexchange.chronos.provider.ical;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
 import org.json.JSONObject;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.provider.caching.basic.AlarmAwareCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
-import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  *
@@ -84,7 +87,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class BasicICalCalendarAccess extends AlarmAwareCachingCalendarAccess {
+public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implements PersonalAlarmAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicICalCalendarAccess.class);
 
@@ -103,8 +106,7 @@ public class BasicICalCalendarAccess extends AlarmAwareCachingCalendarAccess {
         super(  session, 
                 account, 
                 parameters, 
-                Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()), 
-                Tools.requireService(CalendarEventNotificationService.class, Services.getServiceLookup()));
+                Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
@@ -237,7 +239,12 @@ public class BasicICalCalendarAccess extends AlarmAwareCachingCalendarAccess {
     }
 
     @Override
-    protected AlarmHelper getAlarmHelper(ServiceLookup services) throws OXException {
-        return new AlarmHelper(services, ServerSessionAdapter.valueOf(session).getContext(), account);
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return updateAlarmsInternal(eventID, alarms, clientTimestamp);
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
+        return getAlarmTriggersInternal(actions);
     }
 }
