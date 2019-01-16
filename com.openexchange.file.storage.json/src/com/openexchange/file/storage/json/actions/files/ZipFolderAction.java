@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -93,9 +94,12 @@ public class ZipFolderAction extends AbstractFileAction {
             folderName = folderAccess.getFolder(folderId).getName();
             folderName = saneForFileName(folderName);
         }
+        
+        List<IdVersionPair> idVersionPairs = Collections.singletonList(new IdVersionPair(null, null, folderId));
+        scan(request, idVersionPairs, fileAccess, folderAccess, recursive);
 
         // Initialize ZIP maker for folder resource
-        ZipMaker zipMaker = new ZipMaker(Collections.singletonList(new IdVersionPair(null, null, folderId)), recursive, fileAccess, folderAccess);
+        ZipMaker zipMaker = new ZipMaker(idVersionPairs, recursive, fileAccess, folderAccess);
 
         // Check against size threshold
         zipMaker.checkThreshold(threshold());
@@ -120,7 +124,7 @@ public class ZipFolderAction extends AbstractFileAction {
 
             // Signal direct response
             AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-            if(bytesWritten != 0) {
+            if (bytesWritten != 0) {
                 result.setResponseProperty("X-Content-Size", bytesWritten);
             }
             return result;

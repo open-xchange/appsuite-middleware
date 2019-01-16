@@ -52,6 +52,8 @@ package com.openexchange.chronos.json.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
@@ -132,6 +134,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryTracker = new RankingAwareNearRegistryServiceTracker<>(context, ITipActionPerformerFactoryService.class, 0);
             rememberTracker(analyzerTracker);
             rememberTracker(factoryTracker);
+            trackService(AntiVirusService.class);
+            trackService(AntiVirusResultEvaluatorService.class);
             openTrackers();
             registerModule(new ITipActionFactory(this, analyzerTracker, factoryTracker), "chronos/itip");
 

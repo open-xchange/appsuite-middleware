@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.io.IOException;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -57,8 +56,8 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetAttachment}
@@ -90,13 +89,19 @@ public class GetAttachment extends ChronosAction {
         int mid = Integer.parseInt(managedId);
 
         // Get the attachment and prepare the response
-        try (IFileHolder fileHolder = calendarAccess.getAttachment(eventId, mid)) {
+        IFileHolder fileHolder = null;
+        try {
+            fileHolder = calendarAccess.getAttachment(eventId, mid);
+            boolean scanned = scan(requestData, fileHolder, getUniqueId(requestData, eventId, managedId));
+            if (scanned && false == fileHolder.repetitive()) {
+                fileHolder = calendarAccess.getAttachment(eventId, mid);
+            }
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             result.setHeader("ETag", calendarAccess.getSession().getContextId() + "-" + managedId);
             return result;
-        } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(fileHolder);
         }
     }
 }

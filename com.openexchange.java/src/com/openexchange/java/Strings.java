@@ -510,7 +510,7 @@ public class Strings {
         return splitBy(s, ',', true);
     }
 
-   // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+    // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
 
     /**
      * Splits given string by colon separator.
@@ -671,7 +671,6 @@ public class Strings {
         }
         return null == sb ? s : sb.toString();
     }
-
 
     /**
      * Replaces all occurrences of the specified sequence in string with given replacement.
@@ -854,6 +853,7 @@ public class Strings {
 
     /* In a holder class to defer initialization until needed. */
     private static class Holder {
+
         static final CharsetDecoder UTF8_CHARSET_DECODER;
         static {
             final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
@@ -953,6 +953,38 @@ public class Strings {
         join(list, connector, builder);
     }
 
+    /**
+     * Joins the specified array of {@link T} objects with the specified <code>connector</code>
+     * starting from <code>beginIndex</code> and going until the <code>endIndex</code> inclusively.
+     * If the <code>endIndex</code> lies outside the <code>array</code> length, then the array's length
+     * will be used as an <code>endIndex</code>.
+     * 
+     * @param array The elements of the array to join
+     * @param connector The connector string
+     * @param beginIndex The begin index
+     * @param endIndex The end index
+     * @return The joined String or <code>null</code> if an empty or <code>null</code> array is provided.
+     * @throws IllegalArgumentException if the begin index lies after the end index.
+     */
+    public static <T> String join(T[] array, String connector, int beginIndex, int endIndex) {
+        if (array == null || array.length == 0) {
+            return null;
+        }
+        if (endIndex - beginIndex < 0) {
+            throw new IllegalArgumentException("The begin index cannot lie after the end index (" + beginIndex + ">" + endIndex + ")");
+        }
+        if (endIndex > array.length) {
+            endIndex = array.length;
+        }
+        StringBuilder builder = new StringBuilder(array.length << 4);
+        int index = beginIndex;
+        builder.append(array[index++]);
+        while (index < endIndex) {
+            builder.append(connector).append(array[index++]);
+        }
+        return builder.toString();
+    }
+
     public static <T> String join(final T[] arr, final String connector) {
         return join(Arrays.asList(arr), connector);
     }
@@ -979,10 +1011,7 @@ public class Strings {
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
-        final byte[][] byteOrderMarks = new byte[][] {
-            new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF },
-            new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF },
-            new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
+        final byte[][] byteOrderMarks = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
 
         final byte[] bytes = str.getBytes();
         for (final byte[] bom : byteOrderMarks) {
@@ -1243,15 +1272,7 @@ public class Strings {
         return null == builder ? chars.toString() : builder.toString();
     }
 
-    private static char[] lowercases = {
-        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
-        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
-        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
-        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
-        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
-        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
+    private static char[] lowercases = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
 
     /**
      * Fast lower-case conversion.
@@ -1793,4 +1814,20 @@ public class Strings {
         return new String(buf);
     }
 
+    /**
+     * Converts the specified byte count to its counterpart human readable format.
+     * 
+     * @param bytes The amount of bytes to convert
+     * @param si Whether the SI notation will be used.
+     * @return The human readable format
+     */
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
 }
