@@ -49,6 +49,7 @@
 
 package com.openexchange.share.handler.download.osgi;
 
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -93,7 +94,7 @@ public class DownloadHandlerActivator extends HousekeepingActivator {
         // only a local limiter for DownloadHandlers FileResponseRenderer 
         final ShareDownloadLimiter shareDownloadLimiter = new ShareDownloadLimiter(getService(ConfigViewFactory.class));
         handler.addRenderListener(shareDownloadLimiter);
-
+        trackService(AntiVirusService.class);
         registerService(ShareHandler.class, handler, handler.getRanking());
     }
 

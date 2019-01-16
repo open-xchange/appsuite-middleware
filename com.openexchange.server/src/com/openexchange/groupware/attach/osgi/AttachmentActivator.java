@@ -51,6 +51,8 @@ package com.openexchange.groupware.attach.osgi;
 
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -110,6 +112,8 @@ public final class AttachmentActivator extends AJAXModuleActivator {
             }
         };
         track(quotaProviderRegisterer.getFilter(), quotaProviderRegisterer);
+        trackService(AntiVirusService.class);
+        trackService(AntiVirusResultEvaluatorService.class);
         openTrackers();
     }
 

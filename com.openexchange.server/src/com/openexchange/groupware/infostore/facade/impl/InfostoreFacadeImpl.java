@@ -978,9 +978,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedCols));
         updatedCols.removeAll(Arrays.asList(Metadata.CREATED_BY_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.ID_LITERAL));
         boolean checkWriteLock = true;
-        if(updatedCols.size()==1 && updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)){
+        if (updatedCols.size() == 1 && updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
             // Skip lock check in case only permissions are changed
-            checkWriteLock=false;
+            checkWriteLock = false;
         }
 
         document.setModifiedBy(session.getUserId());
@@ -2504,7 +2504,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     private Metadata[] addSequenceNumberIfNeeded(final Metadata[] columns) {
         for (final Metadata metadata : columns) {
-            if (metadata == Metadata.SEQUENCE_NUMBER_LITERAL ) {
+            if (metadata == Metadata.SEQUENCE_NUMBER_LITERAL) {
                 return columns;
             }
         }
@@ -2597,7 +2597,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     Task<Void> task = new AbstractTask<Void>() {
 
                         @Override
-                        public Void call()  {
+                        public Void call() {
                             try {
                                 fileStorage.deleteFile(removeInfo.fileId);
                             } catch (Exception e) {

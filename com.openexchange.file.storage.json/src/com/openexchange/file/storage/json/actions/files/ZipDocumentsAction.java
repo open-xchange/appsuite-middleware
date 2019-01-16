@@ -50,11 +50,9 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -62,7 +60,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.ziputil.ZipMaker;
@@ -113,7 +110,8 @@ public class ZipDocumentsAction extends AbstractFileAction {
         // Get file/folder access
         IDBasedFileAccess fileAccess = request.getFileAccess();
         IDBasedFolderAccess folderAccess = request.getFolderAccess();
-
+        // Perform scan
+        scan(request, idVersionPairs, fileAccess, folderAccess, recursive);
         // Initialize ZIP maker for folder resource
         ZipMaker zipMaker = new ZipMaker(idVersionPairs, recursive, fileAccess, folderAccess);
 
@@ -161,30 +159,4 @@ public class ZipDocumentsAction extends AbstractFileAction {
         ajaxRequestData.setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
     }
-
-    private List<IdVersionPair> parsePairs(JSONArray jPairs) throws JSONException, OXException {
-        int len = jPairs.length();
-        List<IdVersionPair> idVersionPairs = new ArrayList<IdVersionPair>(len);
-        for (int i = 0; i < len; i++) {
-            JSONObject tuple = jPairs.getJSONObject(i);
-
-            // Identifier
-            String id = tuple.optString(Param.ID.getName(), null);
-
-            // Folder
-            String folderId = tuple.optString(Param.FOLDER_ID.getName(), null);
-
-            // Version
-            String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
-
-            // Check validity
-            if (null == id && null == folderId) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("body", "Invalid resource identifier: " + tuple);
-            }
-
-            idVersionPairs.add(new IdVersionPair(id, version, folderId));
-        }
-        return idVersionPairs;
-    }
-
 }

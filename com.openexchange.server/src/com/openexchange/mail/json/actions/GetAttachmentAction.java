@@ -444,7 +444,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 Streams.close(sink);
                 sink = null;
             }
-
+            scan(req, fileHolder, Strings.isEmpty(imageContentId) ? getUniqueId(folderPath, uid, mailPart) : imageContentId);
             if (null != markUnseen && markUnseen.booleanValue()) {
                 fileHolder.addPostProcessingTask(new Runnable() {
 

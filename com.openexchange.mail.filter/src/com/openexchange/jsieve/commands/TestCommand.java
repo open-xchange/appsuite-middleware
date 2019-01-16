@@ -516,32 +516,32 @@ public class TestCommand extends Command {
 
         @Override
         public final Map<String, String> getAddress() {
-            return Collections.unmodifiableMap(address);
+            return null == address ? null : Collections.unmodifiableMap(address);
         }
 
         @Override
         public final Map<String, String> getOtherArguments() {
-            return Collections.unmodifiableMap(otherArguments);
+            return null == otherArguments ? null : Collections.unmodifiableMap(otherArguments);
         }
 
         @Override
         public final Map<String, String> getComparator() {
-            return Collections.unmodifiableMap(comparator);
+            return null == comparator ? null : Collections.unmodifiableMap(comparator);
         }
 
         @Override
         public final List<String> getRequired() {
-            return Collections.unmodifiableList(required);
+            return null == required ? null : Collections.unmodifiableList(required);
         }
 
         @Override
         public final Map<String, String> getMatchTypes() {
-            return Collections.unmodifiableMap(matchTypes);
+            return null == matchTypes ? null : Collections.unmodifiableMap(matchTypes);
         }
 
         @Override
         public List<JSONMatchType> getJsonMatchTypes() {
-            return Collections.unmodifiableList(jsonMatchTypes);
+            return null == jsonMatchTypes ? null : Collections.unmodifiableList(jsonMatchTypes);
         }
     }
 

@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
@@ -193,7 +194,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         MailFetchListenerRegistry.initInstance(listing);
         rememberTracker(listing);
         track(CustomPropertyJsonHandler.class);
-
+        trackService(AntiVirusService.class);
         openTrackers();
 
         registerService(CustomPropertyJsonHandler.class, new GenericCustomPropertyJsonHandler());

@@ -58,11 +58,15 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
+import com.openexchange.antivirus.AntiVirusResult;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -71,12 +75,15 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
+import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -149,38 +156,33 @@ public class DownloadHandler extends HttpAuthShareHandler {
         FileHolder fileHolder = null;
         try {
             String eTag;
+            String uniqueId;
             if (null == document) {
                 /*
                  * load metadata, document on demand
                  */
                 final File fileMetadata = fileAccess.getFileMetadata(id, version);
-                IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
-
-                    @Override
-                    public InputStream newStream() throws OXException, IOException {
-                        InputStream inputStream = fileAccess.getDocument(id, version);
-                        if (BufferedInputStream.class.isInstance(inputStream) || ByteArrayInputStream.class.isInstance(inputStream)) {
-                            return inputStream;
-                        }
-                        return new BufferedInputStream(inputStream, 65536);
-                    }
-                };
+                IFileHolder.InputStreamClosure isClosure = streamClosureFor(id, version, fileAccess);
                 fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
                 eTag = FileStorageUtility.getETagFor(fileMetadata);
+                uniqueId = getUniqueId(fileMetadata, session.getContextId());
+                boolean scanned = scan(session, resolvedShare.getResponse(), fileHolder, uniqueId);
+                if (scanned && false == fileHolder.repetitive()) {
+                    fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+                }
             } else {
                 /*
                  * prefer document and metadata if available
                  */
-                fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
-
-                    @Override
-                    public InputStream newStream() throws OXException, IOException {
-                        return document.getData();
-                    }
-
-                }, document.getSize(), document.getMimeType(), document.getName());
+                fileHolder = new FileHolder(() -> document.getData(), document.getSize(), document.getMimeType(), document.getName());
                 eTag = document.getEtag();
+                uniqueId = document.getFile() == null ? eTag : getUniqueId(document.getFile(), session.getContextId());
+                boolean scanned = scan(session, resolvedShare.getResponse(), fileHolder, uniqueId);
+                if (scanned && false == fileHolder.repetitive()) {
+                    fileHolder = new FileHolder(() -> document.getData(), document.getSize(), document.getMimeType(), document.getName());
+                }
             }
+            
             /*
              * prepare renderer-compatible request result
              */
@@ -210,8 +212,73 @@ public class DownloadHandler extends HttpAuthShareHandler {
         }
     }
 
+    /**
+     * Creates an {@link InputStreamClosure} for the file with the specified identifier
+     * 
+     * @param id The file identifier
+     * @param version The file version
+     * @param fileAccess The {@link IDBasedFileAccess}
+     * @return The {@InputStreamClosure}
+     */
+    private IFileHolder.InputStreamClosure streamClosureFor(final String id, final String version, final IDBasedFileAccess fileAccess) {
+        return () -> {
+            InputStream inputStream = fileAccess.getDocument(id, version);
+            if (BufferedInputStream.class.isInstance(inputStream) || ByteArrayInputStream.class.isInstance(inputStream)) {
+                return inputStream;
+            }
+            return new BufferedInputStream(inputStream, 65536);
+        };
+    }
+
     private static boolean indicatesRaw(HttpServletRequest request) {
         return "view".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) || isTrue(AJAXUtility.sanitizeParam(request.getParameter("raw")));
     }
 
+    /**
+     * Scans the specified IFileHolder and sends a 403 error to the client if the enclosed stream is infected.
+     * 
+     * @param session The session
+     * @param response The {@link HttpServletResponse} with which to send a 403 error to the client in case the file is infected
+     * @param fileHolder The {@link IFileHolder}
+     * @param uniqueId the unique identifier
+     * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
+     *             or if the file is infected, or if a timeout or any other error is occurred. If the file
+     *             is infected then a 403 will be send to the client
+     * @throws IOException if an I/O error is occurred when sending a 403 error to the client
+     */
+    private boolean scan(Session session, HttpServletResponse response, IFileHolder fileHolder, String uniqueId) throws OXException, IOException {
+        AntiVirusService service = Services.getOptionalService(AntiVirusService.class);
+        AntiVirusResultEvaluatorService evaluator = Services.getOptionalService(AntiVirusResultEvaluatorService.class);
+        if (null == service || null == evaluator) {
+            return false;
+        }
+        if (false == service.isEnabled(session)) {
+            return false;
+        }
+        try {
+            AntiVirusResult result = service.scan(fileHolder, uniqueId);
+            evaluator.evaluate(result, fileHolder.getName());
+            return result.isStreamScanned();
+        } catch (OXException e) {
+            response.sendError(403);
+            throw e;
+        }
+    }
+
+    /**
+     * Gets the identifier that uniquely identifies the specified {@link File}, being
+     * either the MD5 checksum, or the file identifier (in that order). If none is present
+     * then the fall-back identifier is returned
+     * 
+     * @param file The {@link File}
+     * @param contextId The context identifier
+     * @return The unique identifier, never <code>null</code>
+     */
+    private String getUniqueId(File file, int contextId) {
+        String id = file.getFileMD5Sum();
+        if (Strings.isNotEmpty(id)) {
+            return id;
+        }
+        return IDMangler.mangle(Integer.toString(contextId), file.getId(), file.getVersion(), Long.toString(file.getSequenceNumber()));
+    }
 }

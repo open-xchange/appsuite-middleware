@@ -3,6 +3,11 @@ CommonResponse:
   type: object
   properties:
     $ref: ./common/CommonResponseData.yaml
+# Anti-Virus
+AntiVirusScanResponse:
+  $ref: ./antivirus/AntiVirusScanResponse.yaml
+AntiVirusScanResultData:
+  $ref: ./antivirus/AntiVirusScanResultData.yaml
 # Module: login
 LoginResponse:
   $ref:  ./login/LoginResponse.yaml
@@ -377,6 +382,8 @@ InfoItemSharingNotificationData:
   $ref: ./infostore/InfoItemSharingNotificationData.yaml
 InfoItemsRestoreResponseData:
   $ref: ./infostore/InfoItemsRestoreResponseData.yaml
+InfoItemScanElement:
+  $ref: ./infostore/InfoItemScanElement.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
 # Module: attachments

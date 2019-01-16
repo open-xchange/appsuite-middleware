@@ -26,3 +26,4 @@ requests:
   - ResolveShareReferenceRequest.yaml
   - ExamineRequest.yaml
   - ThreadReferences.yaml
+  - ScanRequest.yaml

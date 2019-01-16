@@ -78,6 +78,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SaveAsAction extends AbstractWriteAction {
 
+    /**
+     * Initialises a new {@link SaveAsAction}.
+     */
+    public SaveAsAction() {
+        super();
+    }
+
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID, Param.ATTACHED_ID, Param.MODULE, Param.ATTACHMENT).requireFileMetadata();
@@ -101,14 +108,7 @@ public class SaveAsAction extends AbstractWriteAction {
         final User user = session.getUser();
         final UserConfiguration userConfiguration = session.getUserConfiguration();
 
-        final AttachmentMetadata att = attachments.getAttachment(
-            session, folderId,
-            attachedId,
-            moduleId,
-            attachment,
-            session.getContext(),
-            user,
-            userConfiguration);
+        final AttachmentMetadata att = attachments.getAttachment(session, folderId, attachedId, moduleId, attachment, session.getContext(), user, userConfiguration);
 
         final FileFieldSet fileSet = new FileFieldSet();
         final GetSwitch attGet = new GetSwitch(att);
@@ -138,6 +138,7 @@ public class SaveAsAction extends AbstractWriteAction {
         });
 
         file.setId(FileStorageFileAccess.NEW);
+        scan(request, () -> attachments.getAttachedFile(session, folderId, attachedId, moduleId, attachment, session.getContext(), user, userConfiguration), att);
         InputStream fileData = attachments.getAttachedFile(session, folderId, attachedId, moduleId, attachment, session.getContext(), user, userConfiguration);
         try {
             /*
@@ -162,14 +163,19 @@ public class SaveAsAction extends AbstractWriteAction {
     }
 
     protected AttachmentField getMatchingAttachmentField(final File.Field fileField) {
-        switch(fileField) {
-        case FILENAME : return AttachmentField.FILENAME_LITERAL;
-        case FILE_SIZE : return AttachmentField.FILE_SIZE_LITERAL;
-        case FILE_MIMETYPE : return AttachmentField.FILE_MIMETYPE_LITERAL;
-        case TITLE : return AttachmentField.FILENAME_LITERAL;
-        case DESCRIPTION : return AttachmentField.COMMENT_LITERAL;
-        default: return null;
+        switch (fileField) {
+            case FILENAME:
+                return AttachmentField.FILENAME_LITERAL;
+            case FILE_SIZE:
+                return AttachmentField.FILE_SIZE_LITERAL;
+            case FILE_MIMETYPE:
+                return AttachmentField.FILE_MIMETYPE_LITERAL;
+            case TITLE:
+                return AttachmentField.FILENAME_LITERAL;
+            case DESCRIPTION:
+                return AttachmentField.COMMENT_LITERAL;
+            default:
+                return null;
         }
     }
-
 }

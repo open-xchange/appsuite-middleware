@@ -16,6 +16,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-usercopy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-advertisement"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-appsuite-backend"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-antivirus"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sessionstorage-hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-audit"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
