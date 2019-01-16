@@ -295,9 +295,19 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     public String getExtractDirectory() {
         return extractDirectory;
     }
+    
+    /**
+     * Gets the databaseVersion
+     *
+     * @return The databaseVersion
+     */
+    public DatabaseVersion getDatabaseVersion() {
+        return databaseVersion;
+    }
+
 
     //////////////////////////////////////// HELPERS ///////////////////////////////
-
+    
     /**
      * Imports the data into the 'global' database
      * 
@@ -360,14 +370,5 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                 System.out.println(line);
             }
         }
-    }
-
-    /**
-     * Gets the databaseVersion
-     *
-     * @return The databaseVersion
-     */
-    public DatabaseVersion getDatabaseVersion() {
-        return databaseVersion;
     }
 }
