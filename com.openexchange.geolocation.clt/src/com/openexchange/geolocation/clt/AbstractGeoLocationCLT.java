@@ -142,6 +142,10 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
         options.addOption(createSwitch("k", "keep", "Keeps the temporary files produced from this command line tool (zip archives, downloaded and extracted files).", false));
         options.addOption(createArgumentOption("d", "database-version", "database-version", "The database version identifier to download and import. If absent falls back to 'DB9'. The import mode is affected by this switch. Be sure to supply the correct version for the CSV you are importing.", false));
+        options.addOption(createArgumentOption(null, "http-proxy-host", "http-proxy-host", "The IP or hostname of the HTTP proxy", false));
+        options.addOption(createArgumentOption(null, "http-proxy-port", "http-proxy-port", "The port of the HTTP proxy", false));
+        options.addOption(createArgumentOption(null, "https-proxy-host", "https-proxy-host", "The IP or hostname of the HTTPs proxy", false));
+        options.addOption(createArgumentOption(null, "https-proxy-port", "https-proxy-port", "The port of the HTTPs proxy", false));
     }
 
     /*
@@ -164,6 +168,18 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
                     return;
                 }
             }
+        }
+        if (cmd.hasOption("http-proxy-host")) {
+            System.setProperty("http.proxyHost", cmd.getOptionValue("http-proxy-host"));
+        }
+        if (cmd.hasOption("http-proxy-port")) {
+            System.setProperty("http.proxyPort", cmd.getOptionValue("http-proxy-port"));
+        }
+        if (cmd.hasOption("https-proxy-host")) {
+            System.setProperty("https.proxyHost", cmd.getOptionValue("https-proxy-host"));
+        }
+        if (cmd.hasOption("https-proxy-port")) {
+            System.setProperty("https.proxyPort", cmd.getOptionValue("https-proxy-port"));
         }
         if (cmd.hasOption('u')) {
             dbUser = cmd.getOptionValue('u');
