@@ -58,8 +58,8 @@ import com.openexchange.geolocation.clt.DatabaseVersion;
  * @since v7.10.2
  */
 public enum MaxMindDatabaseVersion implements DatabaseVersion {
-    CITY(4, "GeoLite2-City-CSV", "GeoCity-CSV"),
-    COUNTRY(8, "GeoLite2-Country-CSV", "GeoCountry-CSV");
+    CITY(4, "GeoLite2-City-CSV", "GeoIP2-City-CSV"),
+    COUNTRY(8, "GeoLite2-Country-CSV", "GeoIP2-Country-CSV");
 
     private final int numberOfFields;
     private final String liteName;
