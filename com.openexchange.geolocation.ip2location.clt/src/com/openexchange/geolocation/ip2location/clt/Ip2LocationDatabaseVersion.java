@@ -86,13 +86,4 @@ public enum Ip2LocationDatabaseVersion implements DatabaseVersion {
     public String getName() {
         return name() + "CSV";
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.geolocation.clt.DatabaseVersion#parseName(java.lang.String)
-     */
-    @Override
-    public DatabaseVersion parseName(String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

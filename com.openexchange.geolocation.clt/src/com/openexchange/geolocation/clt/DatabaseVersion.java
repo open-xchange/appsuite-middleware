@@ -77,13 +77,4 @@ public interface DatabaseVersion {
      * @return the name of the full version
      */
     String getName();
-
-    /**
-     * Parses the specified name to a valid {@link DatabaseVersion}
-     * 
-     * @param name The name to parse
-     * @return The corresponding {@link DatabaseVersion} if the name was valid
-     * @throws IllegalArgumentException if the name couldn't be parsed to a valid {@link DatabaseVersion}
-     */
-    DatabaseVersion parseName(String name);
 }

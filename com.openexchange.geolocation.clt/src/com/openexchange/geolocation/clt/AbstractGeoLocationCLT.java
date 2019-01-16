@@ -95,17 +95,9 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      */
     private DatabaseVersion databaseVersion;
     /**
-     * The requested database version. Influenced by '-l'
-     */
-    private String dbVersionName;
-    /**
      * The absolute path of the downloaded file
      */
     private String downloadFilePath;
-    /**
-     * The absolute path of the database file contained within the downloaded zip file
-     */
-    private String databaseFilePath;
     /**
      * Influenced by '-k'
      */
@@ -183,7 +175,6 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
             dbGroup = cmd.getOptionValue('g');
         }
         databaseVersion = parseDatabaseVersion(cmd);
-        dbVersionName = cmd.hasOption('l') ? databaseVersion.getLiteName() : databaseVersion.getName();
         keep = cmd.hasOption('k');
         downloadFilePath = cmd.getOptionValue('i');
         if (downloadFilePath != null && false == downloadFilePath.isEmpty()) {
