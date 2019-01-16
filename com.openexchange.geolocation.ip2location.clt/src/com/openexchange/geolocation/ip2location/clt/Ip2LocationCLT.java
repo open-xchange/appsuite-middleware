@@ -280,7 +280,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         try {
             FileUtils.checkCSVFormat(databaseFilePath, getDatabaseVersion().getNumberOfFields());
         } catch (IllegalArgumentException e) {
-            System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
+            System.out.println("The file '" + databaseFilePath + "' you provided does not seem to be a valid 'ip2location' CSV file.");
             System.exit(1);
             return;
         }

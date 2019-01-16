@@ -175,6 +175,10 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         } catch (MalformedURLException e) {
             System.err.println("A malformed URL was specified: " + download);
             System.exit(1);
+        } catch (FileNotFoundException e) {
+            System.out.println("Not Found: '" + download + "'.");
+            System.exit(1);
+            return;
         } catch (IOException e) {
             String content = e.getMessage();
             if (content.equals("NO PERMISSION")) {
@@ -197,11 +201,11 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         List<File> extractedFiles = FileUtils.extractArchive(downloadFilePath, getExtractDirectory(), isKeep());
         for (File f : extractedFiles) {
             String path = f.getAbsolutePath().toLowerCase();
-            if (path.contains("locations") && path.endsWith(".csv")) {
+            if (path.contains("locations") && path.endsWith("-en.csv")) {
                 ipLocationsFilePath = f.getAbsolutePath();
                 continue;
             }
-            if (path.contains("blocks") && path.endsWith(".csv")) {
+            if (path.contains("blocks-ipv4") && path.endsWith(".csv")) {
                 ipBlocksFilePath = f.getAbsolutePath();
                 continue;
             }
@@ -285,8 +289,8 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
      * @throws FileNotFoundException if any of the files does not exist
      */
     private void checkCSVFormat() throws FileNotFoundException {
-        checkCSVFormat(ipBlocksFilePath, 12, "ip-blocks");
-        checkCSVFormat(ipLocationsFilePath, 13, "ip-locations");
+        checkCSVFormat(ipBlocksFilePath, 10, "ip-blocks");
+        checkCSVFormat(ipLocationsFilePath, 14, "ip-locations");
     }
 
     /**
