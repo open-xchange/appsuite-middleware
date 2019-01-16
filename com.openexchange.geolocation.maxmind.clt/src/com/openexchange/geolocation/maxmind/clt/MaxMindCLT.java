@@ -50,6 +50,7 @@
 package com.openexchange.geolocation.maxmind.clt;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -216,7 +217,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
      * Imports the data into the specified database
      */
     private void importDatabase(String optRmiHostName) throws Exception {
-        //checkCSVFormat();
+        checkCSVFormat();
         //@formatter:off
         String importStatements = "SET autocommit = 0;" +
             "START TRANSACTION;" +
@@ -275,6 +276,34 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
             System.out.println("Invalid database version identifier supplied: '" + d + "'. Supported database identifiers are: " + supportedDBVersions());
             System.exit(1);
             return null;
+        }
+    }
+
+    /**
+     * Checks the CSV formats of the ip-blocks and ip-locations files
+     * 
+     * @throws FileNotFoundException if any of the files does not exist
+     */
+    private void checkCSVFormat() throws FileNotFoundException {
+        checkCSVFormat(ipBlocksFilePath, 12, "ip-blocks");
+        checkCSVFormat(ipLocationsFilePath, 13, "ip-locations");
+    }
+
+    /**
+     * Checks the CSV formats of the specified file
+     * 
+     * @param path The path of the CSV file
+     * @param fields The amount of fields per row
+     * @param name An abstract name for the file
+     * @throws FileNotFoundException if the file denoted by the <code>path</code> does not exist
+     */
+    private void checkCSVFormat(String path, int fields, String name) throws FileNotFoundException {
+        try {
+            FileUtils.checkCSVFormat(path, fields);
+        } catch (IllegalArgumentException e) {
+            System.out.println("The file '" + path + "' you provided does not seem to be a valid " + name + " CSV file.");
+            System.exit(1);
+            return;
         }
     }
 }

@@ -62,6 +62,7 @@ import java.net.URLConnection;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.openexchange.cli.ProgressMonitor;
@@ -196,6 +197,31 @@ public final class FileUtils {
             }
         }
         return extractedFiles;
+    }
+
+    /**
+     * Checks whether the specified CSV file denotes a valid CSV file with the specified amount of fields
+     * on each row.
+     * 
+     * @param csvFile The path of the CSV file
+     * @param maxFields The max fields of a row
+     * @throws FileNotFoundException if the file do not exist
+     * @throws IllegalArgumentException if the file is invalid
+     */
+    public static final void checkCSVFormat(String csvFile, int maxFields) throws FileNotFoundException {
+        try (Scanner input = new Scanner(new File(csvFile))) {
+            int counter = 0;
+            int maxLines = 5;
+            while (input.hasNextLine() && counter < maxLines) {
+                String line = input.nextLine();
+                String[] split = line.split(",");
+                if (split != null && split.length == maxFields) {
+                    return;
+                }
+                counter++;
+            }
+        }
+        throw new IllegalArgumentException("The csv file you provided does not seem to be a valid one.");
     }
 
     /**

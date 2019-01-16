@@ -50,13 +50,11 @@
 package com.openexchange.geolocation.ip2location.clt;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
-import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
@@ -205,30 +203,6 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         return null;
     }
 
-    /**
-     * Checks whether the specified databaseFilePath denotes a valid ip2location CSV file
-     * corresponding to the specified {@link DatabaseVersion}
-     * 
-     * @throws FileNotFoundException if the file does not exist
-     */
-    private void checkCSVFormat() throws FileNotFoundException {
-        try (Scanner input = new Scanner(new File(databaseFilePath))) {
-            int counter = 0;
-            int maxLines = 5;
-            while (input.hasNextLine() && counter < maxLines) {
-                String line = input.nextLine();
-                String[] split = line.split(",");
-                if (split != null && split.length == getDatabaseVersion().getNumberOfFields()) {
-                    return;
-                }
-                counter++;
-            }
-        }
-        System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
-        System.exit(1);
-
-    }
-
     ///////////////////////////////////////////// HELPERS /////////////////////////////////////////////
 
     /**
@@ -303,7 +277,13 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
      * Imports the data into the specified database
      */
     private void importDatabase(String optRmiHostName) throws Exception {
-        checkCSVFormat();
+        try {
+            FileUtils.checkCSVFormat(databaseFilePath, getDatabaseVersion().getNumberOfFields());
+        } catch (IllegalArgumentException e) {
+            System.out.println("The file you provided does not seem to be a valid ip2location CSV file.");
+            System.exit(1);
+            return;
+        }
         //@formatter:off
         String importStatements = "SET autocommit = 0;"
                 + "START TRANSACTION;"
