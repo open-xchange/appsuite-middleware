@@ -129,7 +129,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         if (isKeep()) {
-            System.out.println("Temporary files will be KEPT in " + getExtractDirectory() + ".");
+            System.out.println("Temporary files will be KEPT in '" + getExtractDirectory() + "'.");
         }
         if (importMode) {
             if (FileUtils.isArchive(downloadFilePath)) {
@@ -173,16 +173,16 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
             downloadFilePath = downloadedFile.getAbsolutePath();
         } catch (MalformedURLException e) {
             System.err.println("A malformed URL was specified: " + download);
-            System.exit(-1);
+            System.exit(1);
         } catch (IOException e) {
             String content = e.getMessage();
             if (content.equals("NO PERMISSION")) {
                 System.out.println("You have no permission to access '" + getDatabaseVersion().getLiteName() + "'.");
-                System.exit(-1);
+                System.exit(1);
                 return;
             }
             System.err.println("An I/O error occurred: " + content);
-            System.exit(-1);
+            System.exit(1);
             return;
         }
     }
@@ -207,7 +207,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         }
         if ((ipLocationsFilePath == null || ipLocationsFilePath.isEmpty()) && (ipBlocksFilePath == null || ipBlocksFilePath.isEmpty())) {
             System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + getExtractDirectory() + "'");
-            System.exit(-1);
+            System.exit(1);
             return;
         }
     }

@@ -165,7 +165,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         super.checkOptions(cmd);
         if (cmd.hasOption('i') && cmd.hasOption('t')) {
             System.out.println("The options '-i' and '-t' are mutually exclusive.");
-            printHelp(options, 120);
+            printHelp(options);
             System.exit(1);
             return;
         }
@@ -284,13 +284,13 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         String contentType = connection.getContentType();
         if (false == contentType.startsWith("text")) {
             System.out.println("Invalid license key.");
-            System.exit(-1);
+            System.exit(1);
             return;
         }
         String content = ConnectionUtils.readTextResponse(connection);
         if (content.equals("INVALID")) {
             System.out.println("Invalid license key.");
-            System.exit(-1);
+            System.exit(1);
             return;
         }
         System.out.println("License key " + content);
@@ -307,16 +307,16 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
             downloadFilePath = downloadedFile.getAbsolutePath();
         } catch (MalformedURLException e) {
             System.err.println("A malformed URL was specified: " + download);
-            System.exit(-1);
+            System.exit(1);
         } catch (IOException e) {
             String content = e.getMessage();
             if (content.equals("NO PERMISSION")) {
                 System.out.println("You have no permission to access '" + dbVersionName + "'.");
-                System.exit(-1);
+                System.exit(1);
                 return;
             }
             System.err.println("An I/O error occurred: " + content);
-            System.exit(-1);
+            System.exit(1);
             return;
         }
     }
@@ -336,7 +336,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         }
         if (databaseFilePath == null || databaseFilePath.isEmpty()) {
             System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + getExtractDirectory() + "'");
-            System.exit(-1);
+            System.exit(1);
             return;
         }
     }

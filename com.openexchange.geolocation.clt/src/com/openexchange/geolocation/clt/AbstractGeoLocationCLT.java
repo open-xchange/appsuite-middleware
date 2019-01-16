@@ -337,7 +337,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         } catch (IOException e) {
             if (e.getMessage().contains("No such file or directory")) {
                 System.out.println("\nERROR: Couldn't find the '" + executionEnvironment[0] + "' executable. Ensure that '" + executionEnvironment[0] + "' is installed and in your $PATH");
-                System.exit(1);
+                System.exit(127);
                 return;
             }
         } catch (Exception ex) {
