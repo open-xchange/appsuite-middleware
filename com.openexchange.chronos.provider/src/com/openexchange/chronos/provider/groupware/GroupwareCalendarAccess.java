@@ -55,6 +55,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
@@ -212,6 +213,28 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * @return The update result
      */
     CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
+    
+    /**
+     * Updates the event's organizer to the new one.
+     * <p>
+     * Current restrictions are:
+     * 
+     * <li>The event has to be a group scheduled event</li>
+     * <li>All attendees of the event have to be internal</li>
+     * <li>The new organizer must be an internal user</li>
+     * <li>The change has to be performed for one of these:
+     * <ul> a single event</ul>
+     * <ul> a series master, efficiently updating for the complete series</ul>
+     * <ul> a specific recurrence of the series, efficiently performing a series split</ul>
+     * </li>
+     * 
+     * @param eventID The {@link EventID} of the event to change. Optional having a recurrence ID set to perform a series split.
+     * @param organizer The new organizer
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The updated event
+     * @throws OXException In case the organizer change is not allowed
+     */
+    CalendarResult updateOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.

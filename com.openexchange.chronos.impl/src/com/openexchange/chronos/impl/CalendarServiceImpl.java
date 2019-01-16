@@ -67,6 +67,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
@@ -83,6 +84,7 @@ import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ImportPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
+import com.openexchange.chronos.impl.performer.UpdateOrganizerPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
 import com.openexchange.chronos.impl.performer.SplitPerformer;
@@ -383,6 +385,21 @@ public class CalendarServiceImpl implements CalendarService {
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, L(clientTimestamp));
+
+            }
+        }.executeUpdate()).getUserizedResult();
+    }
+
+    @Override
+    public CalendarResult updateOrganizer(CalendarSession session, EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
+        /*
+         * update organizer, notify handlers & return userized result
+         */
+        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new UpdateOrganizerPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), organizer, L(clientTimestamp));
 
             }
         }.executeUpdate()).getUserizedResult();

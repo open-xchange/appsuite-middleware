@@ -82,6 +82,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
@@ -567,6 +568,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             return new IDManglingCalendarResult(result, account.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+    
+    @Override
+    public CalendarResult updateOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarResult result = calendarAccess.updateOrganizer(eventID, organizer, clientTimestamp);
+            return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
         }
     }
 

@@ -81,6 +81,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
@@ -348,6 +349,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     @Override
     public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         return getCalendarService().updateAlarms(session, eventID, alarms, clientTimestamp);
+    }
+    
+    @Override
+    public CalendarResult updateOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
+        return getCalendarService().updateOrganizer(session, eventID, organizer, clientTimestamp);
     }
 
     @Override
