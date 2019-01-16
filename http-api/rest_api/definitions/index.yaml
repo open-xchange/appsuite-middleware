@@ -6,3 +6,5 @@ HealthCheckData:
   $ref: ./health/HealthCheckData.yaml
 ServiceData:
   $ref: ./health/ServiceData.yaml
+CloseSessionsData:
+  $ref: ./admin/CloseSessionsData.yaml

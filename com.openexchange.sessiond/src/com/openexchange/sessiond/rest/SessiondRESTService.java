@@ -255,11 +255,31 @@ public class SessiondRESTService extends JAXRSService {
             SessiondService sessionService = SessiondService.SERVICE_REFERENCE.get();
             Collection<String> sessions = global.booleanValue() ? sessionService.removeSessionsGlobally(sessionFilter) : sessionService.removeSessions(sessionFilter);
             log(sessions, sessionFilter, global.booleanValue());
+            return Response.ok(parse(sessions)).build();
         } catch (OXException e) {
             LOGGER.error("{}", e.getMessage(), e);
             return Response.status(500).build();
         }
-        return Response.ok().build();
+    }
+
+    /**
+     * 
+     * @param sessions
+     * @return
+     */
+    private Object parse(Collection<String> sessions) {
+        try {
+            JSONArray array = new JSONArray(sessions.size());
+            for (String s : sessions) {
+                array.put(s);
+            }
+            JSONObject j = new JSONObject();
+            j.put("closed", array);
+            return j;
+        } catch (JSONException e) {
+            LOGGER.error("", e);
+            return new JSONObject();
+        }
     }
 
     /**
