@@ -187,7 +187,16 @@ public class UpdateOrganizerPerformer extends AbstractUpdatePerformer {
     private Event prepareChanges(CalendarUser organizer, String eventId) throws OXException {
         Event updatedEvent = new Event();
         updatedEvent.setId(eventId);
-        updatedEvent.setOrganizer(session.getEntityResolver().prepare(new Organizer(), CalendarUserType.INDIVIDUAL));
+        if (Organizer.class.isAssignableFrom(organizer.getClass())) {
+            updatedEvent.setOrganizer((Organizer) organizer);
+        } else {
+            Organizer prepared = session.getEntityResolver().prepare(new Organizer(), CalendarUserType.INDIVIDUAL);
+            prepared.setCn(organizer.getCn());
+            prepared.setEMail(prepared.getEMail());
+            prepared.setEntity(prepared.getEntity());
+            prepared.setSentBy(organizer.getSentBy());
+            prepared.setUri(organizer.getUri());
+        }
         updatedEvent.setSequence(updatedEvent.getSequence() + 1);
         updatedEvent.setTimestamp(timestamp.getTime());
         updatedEvent.setModifiedBy(calendarUser);

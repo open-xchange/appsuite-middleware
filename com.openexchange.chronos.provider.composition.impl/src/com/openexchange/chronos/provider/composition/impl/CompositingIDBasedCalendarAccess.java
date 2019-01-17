@@ -576,7 +576,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateOrganizer(eventID, organizer, clientTimestamp);
+            CalendarResult result = calendarAccess.updateOrganizer(getRelativeId(eventID), organizer, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
