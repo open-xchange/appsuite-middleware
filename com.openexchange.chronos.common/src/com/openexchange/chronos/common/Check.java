@@ -158,6 +158,9 @@ public class Check {
      */
     public static RecurrenceId recurrenceIdExists(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
         RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
+        if (null == recurrenceID) {
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
+        }
         Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, new Date(recurrenceID.getValue().getTimestamp()), null);
         if (false == iterator.hasNext()) {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
