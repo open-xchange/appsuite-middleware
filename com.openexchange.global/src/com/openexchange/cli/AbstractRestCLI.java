@@ -57,9 +57,9 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
@@ -120,7 +120,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
 
             // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
+            CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
 
             checkArguments(cmd);
@@ -209,8 +209,10 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         }
         return false;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cli.AbstractCLI#getContext()
      */
     @Override

@@ -63,9 +63,9 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.java.Strings;
 
@@ -118,7 +118,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             addOptions(options);
 
             // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
+            CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
 
             // Check if help output is requested
@@ -296,7 +296,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * Note following options are reserved:
      * <ul>
      * <li>-h / --help
-     * <li>-t / --host
+     * <li>-H / --host
      * <li>-p / --port
      * <li>-l / --login
      * <li>-s / --password

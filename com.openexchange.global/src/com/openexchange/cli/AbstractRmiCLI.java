@@ -56,13 +56,12 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.java.Strings;
 
@@ -159,7 +158,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             helpRequested(args);
 
             // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
+            CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
 
             // Check for port/server
@@ -382,5 +381,4 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         Stub stub = (Stub) Naming.lookup(host + name);
         return stub;
     }
-
 }
