@@ -76,12 +76,12 @@ public enum AntiVirusServiceExceptionCodes implements DisplayableOXExceptionCode
      * <li>We were unable to scan your file for viruses.</li>
      * <li>The remote service is unavailable at the moment: %1$s. Please try again later.</li>
      */
-    REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_SERVICE_DOWN, 3),
+    REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_CONNECTIVITY, 3),
     /**
      * <li>We were unable to scan your file for viruses.</li>
      * <li>A remote internal server error occurred: %1$s</li>
      */
-    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_SERVICE_DOWN, 4),
+    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_ERROR, 4),
     /**
      * <li>We were unable to scan your file for viruses.</li>
      * <li>A remote server error occurred: %1$s</li>
@@ -91,22 +91,22 @@ public enum AntiVirusServiceExceptionCodes implements DisplayableOXExceptionCode
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>The configuration is missing from the '%1$s' property. Please configure the AntiVirus service properly.</li>
      */
-    CONFIGURATION_MISSING("The configuration is missing from the '%1$s' property. Please configure the AntiVirus service properly.", CATEGORY_ERROR, 6),
+    CONFIGURATION_MISSING("The configuration is missing from the '%1$s' property. Please configure the AntiVirus service properly.", CATEGORY_CONFIGURATION, 6),
     /**
      * <li>We were unable to scan your file for viruses.</li>
      * <li>Cannot establish connection to the remote Anti-Virus server. Please try again layer.</li>
      */
-    CANNOT_ESTABLISH_CONNECTION("Cannot establish connection to the remote Anti-Virus server. Please try again layer.", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_ERROR, 7),
+    CANNOT_ESTABLISH_CONNECTION("Cannot establish connection to the remote Anti-Virus server. Please try again layer.", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_CONNECTIVITY, 7),
     /**
      * <li>The file '%1$s' you are trying to scan does not exist</li>
      * <li>File '%1$s' does not exist</li>
      */
-    FILE_NOT_EXISTS("File '%1$s' does not exist", AntiVirusServiceExceptionMessages.FILE_NOT_EXISTS, CATEGORY_ERROR, 8),
+    FILE_NOT_EXISTS("File '%1$s' does not exist", AntiVirusServiceExceptionMessages.FILE_NOT_EXISTS, CATEGORY_USER_INPUT, 8),
     /**
      * <li>The file you are trying to scan exceeds the maximum allowed file size of %1$s.</li>
      * <li>File too big to scan</li>
      */
-    FILE_TOO_BIG("File too big to scan", AntiVirusServiceExceptionMessages.FILE_TOO_BIG, CATEGORY_ERROR, 9),
+    FILE_TOO_BIG("File too big to scan", AntiVirusServiceExceptionMessages.FILE_TOO_BIG, CATEGORY_USER_INPUT, 9),
     /**
      * JSON error: %s
      */
@@ -115,22 +115,22 @@ public enum AntiVirusServiceExceptionCodes implements DisplayableOXExceptionCode
      * <li>The file '%1$s' you are trying to download seems to be infected with '%2$s.</li>
      * <li>The file '%1$s' is infected with '%2$s'.</li>
      */
-    FILE_INFECTED("The file '%1$s' is infected with '%2$s'.", AntiVirusServiceExceptionMessages.FILE_INFECTED, CATEGORY_ERROR, 11),
+    FILE_INFECTED("The file '%1$s' is infected with '%2$s'.", AntiVirusServiceExceptionMessages.FILE_INFECTED, CATEGORY_USER_INPUT, 11),
     /**
      * <li>We were unable to scan your file for viruses.</li>
      * <li>The 'antivirus' capability is disabled for user '%1$s' in context '%2$s'</li>
      */
-    CAPABILITY_DISABLED("The 'antivirus' capability is disabled for user '%1$s' in context '%2$s'", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_ERROR, 12),
+    CAPABILITY_DISABLED("The 'antivirus' capability is disabled for user '%1$s' in context '%2$s'", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_PERMISSION_DENIED, 12),
     /**
      * <li>We were unable to scan your file for viruses.</li>
      * <li>The Anti-Virus service is disabled for user '%1$s' in context '%2$s'</li>
      */
-    ANTI_VIRUS_SERVICE_DISABLED("The Anti-Virus service is disabled for user '%1$s' in context '%2$s'", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_ERROR, 13),
+    ANTI_VIRUS_SERVICE_DISABLED("The Anti-Virus service is disabled for user '%1$s' in context '%2$s'", AntiVirusServiceExceptionMessages.UNABLE_TO_SCAN, CATEGORY_PERMISSION_DENIED, 13),
     /**
      * <li>The Anti-Virus service is unavailable at the moment. Please try again later.</li>
      * <li>The Anti-Virus service is absent.</li>
      */
-    ANTI_VIRUS_SERVICE_ABSENT("The Anti-Virus service is absent.", AntiVirusServiceExceptionMessages.ANTI_VIRUS_SERVICE_UNAVAILABLE, CATEGORY_TRY_AGAIN, 14),
+    ANTI_VIRUS_SERVICE_ABSENT("The Anti-Virus service is absent.", AntiVirusServiceExceptionMessages.ANTI_VIRUS_SERVICE_UNAVAILABLE, CATEGORY_SERVICE_DOWN, 14),
     ;
 
     public static final String PREFIX = "ANTI-VIRUS-SERVICE";
