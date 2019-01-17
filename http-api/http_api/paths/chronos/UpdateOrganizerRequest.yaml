@@ -1,0 +1,38 @@
+/chronos?action=updateOrganizer:
+  put:
+    operationId: updateOrganizer
+    tags:
+      - Chronos
+    summary: Updates an organizer of an event.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceRange"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+      - in: body
+        description: A JSON object containing the new organizer and an optional comment.
+        required: true
+        schema:
+          type: object
+          properties:
+            organizer:
+              $ref: "#/definitions/CalendarUser"
+            comment:
+              type: string
+              description: Optional comment for the user to provide information about the update of the event. This will not be peristed and is just used to inform the attendees via notifications and invitation mails
+    responses:
+      200:
+        description: |
+          A JSON object containing containing the result of the update. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosCalendarResultResponse"
