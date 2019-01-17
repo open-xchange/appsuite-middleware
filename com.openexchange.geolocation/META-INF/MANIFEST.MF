@@ -6,6 +6,8 @@ Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.annotation,
+ com.openexchange.auth.rmi,
+ com.openexchange.cli,
  com.openexchange.database,
  com.openexchange.database.migration,
  com.openexchange.database.migration.resource.accessor,
@@ -18,6 +20,7 @@ Import-Package: com.openexchange.annotation,
  liquibase.resource,
  org.osgi.framework,
  org.osgi.util.tracker,
+ org.apache.commons.io,
  org.slf4j
 Export-Package: com.openexchange.geolocation
 Bundle-Activator: com.openexchange.geolocation.osgi.GeoLocationActivator
