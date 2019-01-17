@@ -187,11 +187,11 @@ public class LoginServlet extends AJAXServlet {
      * <code>"open-xchange-public-session-"</code>
      */
     public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
-    
+
     /**
      * <code>"open-xchange-shard"</code>
      */
-    public static final String SHARD = "open-xchange-shard".intern();
+    public static final String SHARD_COOKIE_NAME = "open-xchange-shard".intern();
 
     public static final String ACTION_FORMLOGIN = "formlogin";
 
@@ -949,9 +949,9 @@ public class LoginServlet extends AJAXServlet {
     public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) throws OXException {
         resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session)));
     }
-    
+
     /**
-     * Writes the (groupware's) shard cookie to specified HTTP servlet response whose name is 
+     * Writes the (groupware's) shard cookie to specified HTTP servlet response whose name is
      * <code>"open-xchange-shard"</code>.
      *
      * @param resp The HTTP servlet response
@@ -960,7 +960,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
-        resp.addCookie(configureCookie(new Cookie(SHARD, ServerConfig.getProperty(ServerConfig.Property.SHARD_NAME)), secure, serverName, getLoginConfiguration(session)));
+        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, ServerConfig.getProperty(ServerConfig.Property.SHARD_NAME)), secure, serverName, getLoginConfiguration(session)));
     }
 
     /**

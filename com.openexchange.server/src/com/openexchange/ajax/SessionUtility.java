@@ -50,7 +50,7 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
-import static com.openexchange.ajax.LoginServlet.SHARD;
+import static com.openexchange.ajax.LoginServlet.SHARD_COOKIE_NAME;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
@@ -951,7 +951,7 @@ public final class SessionUtility {
 
         // Drop "open-xchange-shard" cookie
         {
-            Cookie cookie = cookies.get(SHARD);
+            Cookie cookie = cookies.get(SHARD_COOKIE_NAME);
             if (null != cookie) {
                 removeCookie(cookie, "invalid", domain, resp);
             }
@@ -1011,7 +1011,7 @@ public final class SessionUtility {
         }
 
         removeCookie(cookies, response, SESSION_PREFIX + sessionHash, domain);
-        removeCookie(cookies, response, SHARD, domain);
+        removeCookie(cookies, response, SHARD_COOKIE_NAME, domain);
         removeCookie(cookies, response, SECRET_PREFIX + sessionHash, domain);
         removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID), domain);
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
@@ -1261,12 +1261,12 @@ public final class SessionUtility {
     }
 
     private static boolean isOXCookieName(String name) {
-        return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX) || name.equals(SHARD));
+        return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX) || name.equals(SHARD_COOKIE_NAME));
     }
 
     private static boolean needsShardCookieRefresh(HttpServletRequest request) {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-        Cookie shardCookie = cookies.get(LoginServlet.SHARD);
+        Cookie shardCookie = cookies.get(LoginServlet.SHARD_COOKIE_NAME);
     	return isValidShardCookie(shardCookie) == false;
     }
 
