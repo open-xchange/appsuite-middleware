@@ -60,7 +60,6 @@ import com.openexchange.configuration.ServerProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareProperty;
@@ -78,7 +77,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
     /**
      * Initialises a new {@link SegmentedUpdateServiceImpl}.
      */
-    public SegmentedUpdateServiceImpl(ServiceLookup services) {
+    public SegmentedUpdateServiceImpl() {
         super();
     }
 
@@ -101,7 +100,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
     public String getSharingMigrationRedirectURL(String host) throws OXException {
         String url = getProperty(host, ShareProperty.migrationRedirectURL);
         if (Strings.isEmpty(url)) {
-          url = getProperty(host, ServerProperty.migrationRedirectURL);
+            url = getProperty(host, ServerProperty.migrationRedirectURL);
         }
         return url;
     }
@@ -135,16 +134,8 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
      */
     private @Nullable String getFor(@Nullable String host, Property property) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        if (serverConfigService != null && Strings.isNotEmpty(host)) {
-            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
-            for (Map<String, Object> map : customHostConfigurations) {
-                Object object = map.get(ServerProperty.migrationRedirectURL.getFQPropertyName());
-                if (object != null && object instanceof String) {
-                    String migrationRedirectURL = (String) object;
-                    LOG.debug("Found the following migrationRedirectURL config for host {} in as-config.yml: {}", host, migrationRedirectURL);
-                    break;
-                }
-            }
+        if (serverConfigService == null || Strings.isEmpty(host)) {
+            return null;
         }
         List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(host, -1, -1);
         for (Map<String, Object> map : customHostConfigurations) {
@@ -152,6 +143,9 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
             if (object == null || false == (object instanceof String)) {
                 continue;
             }
+            String migrationURL = (String) object;
+            LOG.debug("Found the following migrationRedirectURL config for host {} in as-config.yml: {}", host, migrationURL);
+            return migrationURL;
         }
         return null;
     }
