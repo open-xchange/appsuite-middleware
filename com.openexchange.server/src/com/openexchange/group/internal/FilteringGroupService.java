@@ -60,6 +60,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FilteringGroupService}
@@ -107,8 +109,8 @@ public class FilteringGroupService implements GroupService {
     }
 
     @Override
-    public Group[] getGroup(Context context, int[] groupIds) throws OXException {
-        Group[] groups = delegate.getGroup(context, groupIds);
+    public Group[] listGroups(Context context, int[] groupIds) throws OXException {
+        Group[] groups = delegate.listGroups(context, groupIds);
         HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
         if (hideAdminService == null) {
             return groups;
@@ -158,5 +160,20 @@ public class FilteringGroupService implements GroupService {
         int[] newGroupMember = hideAdminService.addAdminToGroupMemberList(context.getContextId(), origGroup.getMember(), group.getMember());
         group.setMember(newGroupMember);
         delegate.update(context, user, origGroup, lastRead, checkI18nNames);
+    }
+
+    @Override
+    public Group[] getGroups(Context ctx, boolean loadMembers) throws OXException {
+        return removeAdminFromGroups(ctx, delegate.getGroups(ctx, loadMembers));
+    }
+
+    @Override
+    public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException {
+        return removeAdminFromGroups(ServerSessionAdapter.valueOf(session).getContext(), delegate.searchGroups(session, pattern, loadMembers));
+    }
+
+    @Override
+    public Group[] getGroups(Session session, boolean loadMembers) throws OXException {
+        return removeAdminFromGroups(ServerSessionAdapter.valueOf(session).getContext(), delegate.getGroups(session, loadMembers));
     }
 }

@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * This service defines the API to the groups component.
@@ -144,4 +145,25 @@ public interface GroupService {
      */
     void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
     
+    /**
+     * Similar to {@link #search(Context, String, boolean)} but sorts the results according to the use count.
+     *
+     * @param session The user session
+     * @param pattern this pattern will be searched in the displayName of the group.
+     * @param loadMembers - switch whether members should be loaded too (decreases performance, don't use if not needed)
+     * @return an array of groups that match the search pattern sorted by use count.
+     * @throws OXException if searching has some storage related problem.
+     */
+    public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException;
+
+    /**
+     * Similar to {@link #getGroups(Context, boolean)} but sorts the results according to the use count.
+     *
+     * @param session The user session
+     * @param loadMembers Whether to load members or not.
+     * @return An array of groups
+     * @throws OXException If group cannot be returned
+     */
+    public Group[] getGroups(Session session, boolean loadMembers) throws OXException;
+
 }

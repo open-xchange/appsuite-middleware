@@ -241,21 +241,20 @@ public abstract class TaskAction implements AJAXActionService {
                         service.incrementObjectUseCount(session, arguments);
                     }
                     break;
-                case Participant.EXTERNAL_USER: {
+                case Participant.EXTERNAL_USER:
                     if (null == service) {
                         continue;
                     }
                     IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
                     service.incrementObjectUseCount(session, arguments);
-                }
                     break;
                 case Participant.GROUP:
-                case Participant.RESOURCE: {
+                case Participant.RESOURCE:
                     if (null == principalUseCountService) {
                         continue;
                     }
                     principalUseCountService.increment(session, p.getIdentifier());
-                }
+                    break;
                 default:
                     LOGGER.debug("Skipping participant type '{}'", p.getType());
                     break;

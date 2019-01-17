@@ -55,7 +55,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -143,7 +146,8 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
             while (rs.next()) {
                 result.put(rs.getInt("principal"), rs.getInt("value"));
             }
-            return result;
+            Map<Integer, Integer> sorted = result.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2, LinkedHashMap::new));
+            return sorted;
         } catch (SQLException e) {
             throw PrincipalUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {

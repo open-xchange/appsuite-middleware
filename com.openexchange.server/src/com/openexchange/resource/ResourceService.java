@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * {@link ResourceService} - This service defines the API to the resource component.
@@ -145,4 +146,24 @@ public interface ResourceService {
      * @throws OXException If resource deletion fails
      */
     public void delete(User user, Context ctx, Resource resource, Date clientLastModified) throws OXException;
+
+    /**
+     * Searches all resources which identifier matches the given pattern and sorts the results according to their use count.
+     *
+     * @param session The user session
+     * @param pattern The identifier of all returned resources will match this pattern.
+     * @return An array of found resources
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
+     */
+    public Resource[] searchResources(Session session, String pattern) throws OXException;
+
+    /**
+     * Searches all resources which mail address matches the given pattern and sorts the results according to their use count.
+     *
+     * @param session The user session
+     * @param pattern The identifier of all returned resources will match this pattern.
+     * @return An array of found resources
+     * @throws OXException If an exception occurs while reading from the underlying persistent storage.
+     */
+    public Resource[] searchResourcesByMail(Session session, String pattern) throws OXException;
 }
