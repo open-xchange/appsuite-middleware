@@ -51,7 +51,10 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.COMMENT;
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.ORGANIZER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -78,6 +81,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.10.2
  */
 public class ChangeOrganizerAction extends ChronosAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_PUSH_TOKEN);
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
     private static final EventField[] ORGANIZER_FIELD = new EventField[] { EventField.ORGANIZER };
 
