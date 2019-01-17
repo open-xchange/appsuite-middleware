@@ -62,14 +62,14 @@ import com.openexchange.config.lean.Property;
 public enum ChronosLeanConfigurationProperties {
 
     /**
-     * Property <code>com.openexchange.calendar.allowedOrganizerChange</code>
+     * Property <code>com.openexchange.calendar.allowChangeOfOrganizer</code>
      * <p>
      * <li><code>true</code> means a organizer is allowed to hand the event over to another CU, efficiently making the other CU the new organizer.</li>
      * <li><code>false</code> means changes on the {@link EventField#ORGANIZER} are <b>NOT</b> allowed</li>
      * <p>
      * Default is <code>false</code>
      */
-    ALLOWED_ORGANIZER_CHANGE("com.openexchange.calendar.allowedOrganizerChange", Boolean.FALSE);
+    ALLOWED_ORGANIZER_CHANGE("com.openexchange.calendar.allowChangeOfOrganizer", Boolean.FALSE);
 
     private final Property property;
 
