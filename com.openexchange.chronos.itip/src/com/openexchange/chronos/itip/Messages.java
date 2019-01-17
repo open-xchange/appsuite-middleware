@@ -313,5 +313,10 @@ public class Messages implements LocalizableStrings {
 	 * The organizer of the appointment has changed. New organizer is: %1$s
 	 */
 	public static final String ORGANIZER_CHANGE = "The organizer of the appointment has changed. New organizer is: %1$s";
+	
+	/**
+	 * The organizer of the appointment has changed. This operation is not allowed.
+	 */
+	public static final String UNALLOWED_ORGANIZER_CHANGE = "The organizer of the appointment has changed. This operation is not allowed.";
 }
 

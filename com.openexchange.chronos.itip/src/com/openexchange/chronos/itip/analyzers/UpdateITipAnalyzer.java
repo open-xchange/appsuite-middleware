@@ -65,6 +65,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
@@ -148,6 +149,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 change.setCurrentEvent(original);
                 change.setType(ITipChange.Type.UPDATE);
                 analysis.addChange(change);
+                return analysis;
+            }
+            if (isOrganizerChange(analysis, change, original, update, locale)) {
                 return analysis;
             }
             change.setType(ITipChange.Type.UPDATE);
@@ -430,4 +434,26 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         return update;
     }
+
+    /**
+     * Check if the organizer is changed. If so stop processing.
+     * 
+     * @param analysis The {@link ITipAnalysis}
+     * @param change The {@link ITipChange}
+     * @param locale The users {@link Locale}
+     * @return <code>true</code> when the organizer is changed, <code>false</code> otherwise
+     */
+    private boolean isOrganizerChange(ITipAnalysis analysis, ITipChange change, Event originalEvent, Event updatedEvent, Locale locale) {
+        Organizer original = originalEvent.getOrganizer();
+        if (null != original) {
+            CalendarUtils.matches(original, updatedEvent.getOrganizer());
+            analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
+            analysis.recommendAction(ITipAction.IGNORE);
+            change.setType(ITipChange.Type.UPDATE);
+            analysis.addChange(change);
+            return true;
+        }
+        return false;
+    }
+
 }
