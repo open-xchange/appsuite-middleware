@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -71,6 +72,8 @@ import gnu.trove.list.linked.TIntLinkedList;
  * @since v7.10.1
  */
 public class ContextRMIServiceImpl implements ContextRMIService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextRMIServiceImpl.class);
 
     /**
      * Initialises a new {@link ContextRMIServiceImpl}.
@@ -113,26 +116,13 @@ public class ContextRMIServiceImpl implements ContextRMIService {
                 return false;
             }
 
-            // Logger
-            Logger logger = org.slf4j.LoggerFactory.getLogger(ContextRMIServiceImpl.class);
-
             // Iterate context identifiers
             int inserted = 0;
             for (int contextId : contextIds.toArray()) {
-                PreparedStatement stmt = null;
                 try {
-                    stmt = con.prepareStatement("INSERT INTO login2context (cid, login_info) VALUES (?, ?)");
-                    stmt.setInt(1, contextId);
-                    stmt.setString(2, Integer.toString(contextId));
-                    try {
-                        inserted += stmt.executeUpdate();
-                    } catch (Exception e) {
-                        logger.warn("Couldn't add context identifier to login2context mappings for context {}", Integer.valueOf(contextId), e);
-                    }
+                    inserted += tryInsert(contextId, con);
                 } catch (SQLException e) {
                     throw new RemoteException(e.getMessage(), e);
-                } finally {
-                    Databases.closeSQLStuff(stmt);
                 }
             }
 
@@ -160,22 +150,16 @@ public class ContextRMIServiceImpl implements ContextRMIService {
     @Override
     public boolean checkLogin2ContextMapping(int contextId) throws RemoteException {
         DatabaseService databaseService = getDatabaseService();
-
         Connection con = null;
-        PreparedStatement stmt = null;
         boolean invalidate = false;
         try {
             con = databaseService.getWritable();
-            stmt = con.prepareStatement("INSERT INTO login2context (cid, login_info) VALUES (?, ?)");
-            stmt.setInt(1, contextId);
-            stmt.setString(2, Integer.toString(contextId));
-            invalidate = stmt.executeUpdate() == 1;
+            invalidate = tryInsert(contextId, con) == 1;
         } catch (SQLException e) {
             throw new RemoteException(e.getMessage(), e);
         } catch (OXException e) {
             throw new RemoteException(e.getMessage(), e);
         } finally {
-            Databases.closeSQLStuff(stmt);
             databaseService.backWritable(con);
         }
 
@@ -185,6 +169,29 @@ public class ContextRMIServiceImpl implements ContextRMIService {
             invalidateContext(contextId, cs);
         }
         return invalidate;
+    }
+
+    ///////////////////////////////////////// HELPERS /////////////////////////////////
+
+    /**
+     * Try inserting a login mapping to the 'login2context' table.
+     * 
+     * @param contextId The context identifier
+     * @param connection The writeable connection to configdb
+     * @return The amount of affected rows
+     * @throws SQLException if an SQL error is occurred
+     */
+    private int tryInsert(int contextId, Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO login2context (cid, login_info) VALUES (?, ?)")) {
+            stmt.setInt(1, contextId);
+            stmt.setString(2, Integer.toString(contextId));
+            try {
+                return stmt.executeUpdate();
+            } catch (Exception e) {
+                LOGGER.warn("Couldn't add context identifier to login2context mappings for context {}", Integer.valueOf(contextId), e);
+            }
+            return 0;
+        }
     }
 
     /**
