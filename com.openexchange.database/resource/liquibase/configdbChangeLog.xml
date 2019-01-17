@@ -223,11 +223,6 @@
 		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.ConfigDbToUtf8mb4Change" />
 	</changeSet>
 
-	<changeSet id="7.10.0:reseller:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
-		<comment>Converts the table/column definition to support utf8mb4</comment>
-		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.ResellerToUtf8mb4Change" />
-	</changeSet>
-	
 	<changeSet id="7.10.0:advertisement_config:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
 		<preConditions onFail="CONTINUE">
 			<changeSetExecuted id="7.8.3:advertisement_config:createForConfigDB" author="kevin.ruthmann@open-xchange.com" changeLogFile="configdbChangeLog" />
@@ -275,26 +270,6 @@
 		<comment>Converts the table/column definition to support utf8mb4</comment>
 		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.CountTablesToUtf8mb4Change" />
 	</changeSet>
-
-    <changeSet id="7.10.1:subadmin:addSalt" author="martin.schneider@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <and>
-                <tableExists tableName="subadmin" />
-                <not>
-                    <columnExists tableName="subadmin" columnName="salt" />
-                </not>
-            </and>
-        </preConditions>
-        <comment>
-            Add column 'salt' to table subadmin.
-        </comment>
-        <sql>
-            ALTER TABLE subadmin ADD salt VARBINARY(128) DEFAULT NULL;
-        </sql>
-        <rollback>
-            <dropColumn tableName="subadmin" columnName="salt" />
-        </rollback>
-    </changeSet>
 
     <!--changeSet id="7.10.1:db_pool:removeUrlParameters" author="martin.herfurth@open-xchange.com" failOnError="false">
         <preConditions onFail="CONTINUE">

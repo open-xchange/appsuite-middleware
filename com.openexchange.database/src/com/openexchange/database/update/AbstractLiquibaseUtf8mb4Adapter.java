@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database.internal.change.utf8mb4;
+package com.openexchange.database.update;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;

@@ -9,7 +9,7 @@
 <databaseChangeLog xmlns="urn:liquibase"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
-	logicalFilePath="autocidChangeLog">
+	logicalFilePath="autocidConfigdbChangeLog">
 
 	<changeSet id="7.10.2:sequence_context:create" author="kevin.ruthmann@open-xchange.com">
 		<preConditions onFail="MARK_RAN">

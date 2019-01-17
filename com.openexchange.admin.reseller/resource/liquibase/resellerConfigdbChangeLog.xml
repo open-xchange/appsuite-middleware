@@ -150,4 +150,34 @@
 		</rollback>
 	</changeSet>	
 
+	<!-- This changeset is in fact older than above ones because it previously exists within the core configdbChangeLog.xml.
+		It has was moved to the reseller bundle after introducing liquibase for reseller.
+		This means: this changeset has to be executed after the above ones. Leave it at the current position! 
+		In addition we have to add the logicalFilePath for this changeSet to be able to identify its already happened execution -->
+	<changeSet id="7.10.0:reseller:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false" logicalFilePath="configdbChangeLog"> 
+		<validCheckSum>7:829cdcafd6bd14edec97b1fd4b123ebc</validCheckSum> <!-- required because package of customChange changed -->
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.admin.reseller.update.ResellerToUtf8mb4Change" />
+	</changeSet>
+
+    <changeSet id="7.10.2:subadmin:addSalt" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="subadmin" />
+                <not>
+                    <columnExists tableName="subadmin" columnName="salt" />
+                </not>
+            </and>
+        </preConditions>
+        <comment>
+            Add column 'salt' to table subadmin.
+        </comment>
+        <sql>
+            ALTER TABLE subadmin ADD salt VARBINARY(128) DEFAULT NULL;
+        </sql>
+        <rollback>
+            <dropColumn tableName="subadmin" columnName="salt" />
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>
