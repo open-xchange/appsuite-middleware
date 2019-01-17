@@ -556,7 +556,7 @@ public final class SessionUtility {
             if (false == "unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
-            
+
             // Session MISS -- Consult session inspector
             if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
                 return new SessionResult<ServerSession>(Reply.STOP, null);
@@ -945,7 +945,7 @@ public final class SessionUtility {
                 removeCookie(cookie, "invalid", domain, resp);
             }
         }
-        
+
         // Drop "open-xchange-shard" cookie
         {
             Cookie cookie = cookies.get(SHARD);
@@ -1143,7 +1143,7 @@ public final class SessionUtility {
         }
         return null;
     }
-    
+
     public static void checkShardCookie(HttpServletRequest request, HttpServletResponse response, Session session) {
     	if (needsShardCookieRefresh(request)) {
         	LoginServlet.writeShardCookie(response, session, request.isSecure(), request.getServerName());
@@ -1251,24 +1251,12 @@ public final class SessionUtility {
         return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX) || name.equals(SHARD));
     }
 
-    
-    
     private static boolean needsShardCookieRefresh(HttpServletRequest request) {
-    	Cookie[] cookies = request.getCookies();
-    	if (null == cookies || 0 == cookies.length) {
-    		return false;
-    	}
-    	Cookie shardCookie = null;
-    	for (int i = cookies.length; i-- > 0;) {
-    		Cookie cookie = cookies[i];
-          	if (cookie.getName().equals(LoginServlet.SHARD)) {
-              shardCookie = cookie;
-              break;
-          	}
-    	}
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        Cookie shardCookie = cookies.get(LoginServlet.SHARD);
     	return validShardCookie(shardCookie) == false;
     }
-    
+
     public static boolean validShardCookie(Cookie cookie) {
     	return cookie != null && cookie.getValue().equals(ServerConfig.getProperty(ServerConfig.Property.SHARD_NAME));
     }
