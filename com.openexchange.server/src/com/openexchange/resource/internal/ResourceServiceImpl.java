@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.UseCountAwareResourceService;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.UsecountAwareResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResourceServiceImpl implements UseCountAwareResourceService {
+public final class ResourceServiceImpl implements ResourceService {
 
     /**
      * The permission path to access create, update, and delete methods

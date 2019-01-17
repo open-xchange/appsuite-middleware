@@ -51,7 +51,6 @@ package com.openexchange.resource.internal.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.UseCountAwareResourceService;
 import com.openexchange.resource.internal.RdbResourceStorage;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -72,7 +71,6 @@ public class ResourceActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         ResourceServiceImpl service = new ResourceServiceImpl();
-        registerService(UseCountAwareResourceService.class, service);
         registerService(ResourceService.class, service);
         registerService(ResourceStorage.class, new RdbResourceStorage());
     }

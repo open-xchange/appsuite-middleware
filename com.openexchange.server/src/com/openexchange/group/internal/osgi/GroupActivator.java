@@ -51,7 +51,6 @@ package com.openexchange.group.internal.osgi;
 
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.group.UseCountAwareGroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.group.internal.RdbGroupStorage;
 import com.openexchange.group.internal.VirtualGroupStorage;
@@ -73,7 +72,6 @@ public class GroupActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         GroupServiceImpl service = new GroupServiceImpl();
-        registerService(UseCountAwareGroupService.class, service);
         registerService(GroupService.class, service);
         registerService(GroupStorage.class, new VirtualGroupStorage(new RdbGroupStorage()));
 

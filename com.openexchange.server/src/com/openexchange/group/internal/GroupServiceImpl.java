@@ -56,8 +56,8 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.group.UseCountAwareGroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.principalusecount.PrincipalUseCountService;
@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupServiceImpl implements UseCountAwareGroupService {
+public final class GroupServiceImpl implements GroupService {
 
     public GroupServiceImpl() {
         super();
