@@ -1130,7 +1130,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
 
             if (QUERIES.updateDocument(modifiedCols)) {
-                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE, session), true);
+                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, parameters.getSequenceNumber(), session), true);
             }
 
             // Update object permissions as needed
