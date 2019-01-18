@@ -960,7 +960,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
-        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, ServerConfig.getProperty(ServerConfig.Property.SHARD_NAME)), secure, serverName, getLoginConfiguration(session)));
+        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session)));
     }
 
     /**

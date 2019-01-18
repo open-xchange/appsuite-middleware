@@ -55,9 +55,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.util.List;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.cookie.Cookie;
 import org.json.JSONObject;
 import org.junit.Test;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -99,6 +102,25 @@ public class TokenLoginTest extends AbstractAJAXSession {
             // Test if session really works
             int userId = myClient.execute(new GetRequest(Tree.Identifier)).getInteger();
             assertTrue("Users identifier is somehow wrong. Check if session is correctly activated.", userId > 2);
+        } finally {
+            myClient.logout();
+        }
+    }
+
+    @Test
+    public void testTokenLoginSetShardCookie() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            TokenLoginResponse response = myClient.execute(new TokenLoginRequest(testUser.getLogin(), testUser.getPassword()));
+            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken()));
+            List<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies();
+            boolean isShardCookieSet = false;
+            for (Cookie cookie : cookies) {
+				isShardCookieSet = cookie.getName().equals(LoginServlet.SHARD_COOKIE_NAME);
+			}
+            assertTrue("Shard cookie is not set", isShardCookieSet);
         } finally {
             myClient.logout();
         }

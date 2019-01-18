@@ -52,8 +52,12 @@ package com.openexchange.ajax.session;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import java.util.List;
+import org.apache.http.cookie.Cookie;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -93,6 +97,23 @@ public class FormLoginTest extends AbstractAJAXSession {
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             session.setId(response.getSessionId());
+        } finally {
+            myClient.logout();
+        }
+    }
+
+    @Test
+    public void testFormLoginSetShardCookie() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password));
+            List<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies();
+            boolean isShardCookieSet = false;
+            for (Cookie cookie : cookies) {
+				isShardCookieSet = cookie.getName().equals(LoginServlet.SHARD_COOKIE_NAME);
+			}
+            assertTrue("Shard cookie is not set", isShardCookieSet);
         } finally {
             myClient.logout();
         }

@@ -67,6 +67,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
@@ -1158,7 +1159,7 @@ public final class SessionUtility {
      */
     public static void rewriteShardCookie(HttpServletRequest request, HttpServletResponse response, Session session) {
     	if (needsShardCookieRefresh(request)) {
-    		LOG.info("Value of open-xchange-shard cookie invalid or no cookie available, rewrite cookie");
+    		LOG.debug("Value of open-xchange-shard cookie invalid or no cookie available, rewrite cookie");
         	LoginServlet.writeShardCookie(response, session, request.isSecure(), request.getServerName());
 		}
     }
@@ -1278,7 +1279,24 @@ public final class SessionUtility {
      * @return
      */
     public static boolean isValidShardCookie(Cookie cookie) {
-    	return cookie != null && cookie.getValue().equals(ServerConfig.getProperty(ServerConfig.Property.SHARD_NAME));
+    	return cookie != null && cookie.getValue()
+    			.equals(getShardCookieValue());
+    }
+
+    /**
+     * Loads the shard cookie value and replaces the value with the default
+     * value if the loaded one is blank.
+     *
+     * @return The shard cookie value
+     */
+    public static String getShardCookieValue() {
+        final ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final String defaultValue = ServerConfig.Property.SHARD_NAME.getDefaultValue().trim();
+        String cookieValue = configService.getProperty(ServerConfig.Property.SHARD_NAME.getPropertyName(), defaultValue).trim();
+        if (StringUtils.isEmpty(cookieValue)) {
+            cookieValue = defaultValue;
+        }
+        return cookieValue;
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //
