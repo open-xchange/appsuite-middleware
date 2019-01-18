@@ -91,7 +91,7 @@ public class FileStorageLimitChecker extends AbstractCombinedTypeLimitChecker {
     private List<OXException> getExceededLimits(String folderId, List<LimitFile> files, IDBasedFolderAccess folderAccess) throws OXException {
         List<OXException> exceededLimits = new ArrayList<>();
         Quota fileQuota = folderAccess.getFileQuota(folderId);
-        if (fileQuota != null && fileQuota.getLimit() >= 0 && fileQuota.getUsage() + files.size() > fileQuota.getLimit()) {
+        if (fileQuota != null && fileQuota.getLimit() > 0 && fileQuota.getUsage() + files.size() > fileQuota.getLimit()) {
             exceededLimits.add(FileLimitExceptionCodes.TOO_MANY_FILES.create(fileQuota.getLimit()));
         }
 
