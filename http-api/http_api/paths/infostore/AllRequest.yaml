@@ -18,6 +18,21 @@
         type: string
         description: '"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
         required: false
+      - in: query
+        name: left_hand_limit
+        type: integer
+        description: A positive integer number to specify the "left-hand" limit of the range to return.
+        required: false
+      - in: query
+        name: right_hand_limit
+        type: integer
+        description: A positive integer number to specify the "right-hand" limit of the range to return.
+        required: false
+      - in: query
+        name: limit
+        type: integer
+        description: A positive integer number to specify how many items shall be returned according to given sorting; overrides left_hand_limit/right_hand_limit parameters and is equal to left_hand_limit=0 and right_hand_limit=<limit>.
+        required: false
     responses:
       200:
         description: |
