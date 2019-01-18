@@ -585,9 +585,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
-            if (!tool.isContextEnabled(ctx)) {
-                throw new OXContextException(OXContextException.CONTEXT_DISABLED);
-            }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disable(ctx, reason);
             LOGGER.info("Context {} successfully disabled", ctx.getId());
@@ -610,9 +607,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final OXContextException e) {
-            LOGGER.error("", e);
-            throw e;
         }
     }
 
