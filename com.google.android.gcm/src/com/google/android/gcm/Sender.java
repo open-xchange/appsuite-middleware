@@ -69,7 +69,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /**
- * Helper class to send messages to the GCM service using an API Key.
+ * Helper class to send messages to the end-point service (most likely FCM) service using an API Key.
  * <p>
  * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
@@ -116,10 +116,33 @@ public class Sender {
      * @return result of the request (see its javadoc for more details).
      *
      * @throws IllegalArgumentException if to is {@literal null}.
-     * @throws InvalidRequestException if GCM didn't returned a 200 or 5xx status.
+     * @throws InvalidRequestException if FCM didn't returned a 200 or 5xx status.
      * @throws IOException if message could not be sent.
      */
     public Result send(Message message, String to, int retries)
+        throws IOException {
+        return send(message, to, retries, Endpoint.FCM);
+    }
+
+    /**
+     * Sends a message to one device, retrying in case of unavailability.
+     *
+     * <p>
+     * <strong>Note: </strong> this method uses exponential back-off to retry in
+     * case of service unavailability and hence could block the calling thread
+     * for many seconds.
+     *
+     * @param message message to be sent, including the device's registration id.
+     * @param to registration token, notification key, or topic where the message will be sent.
+     * @param retries number of retries in case of service unavailability errors.
+     *
+     * @return result of the request (see its javadoc for more details).
+     *
+     * @throws IllegalArgumentException if to is {@literal null}.
+     * @throws InvalidRequestException if end-point service didn't returned a 200 or 5xx status.
+     * @throws IOException if message could not be sent.
+     */
+    public Result send(Message message, String to, int retries, Endpoint endpoint)
         throws IOException {
         int attempt = 0;
         Result result;
@@ -131,7 +154,7 @@ public class Sender {
                 logger.fine("Attempt #" + attempt + " to send message " +
                     message + " to regIds " + to);
             }
-            result = sendNoRetry(message, to);
+            result = sendNoRetry(message, to, endpoint);
             tryAgain = result == null && attempt <= retries;
             if (tryAgain) {
                 int sleepTime = backoff / 2 + random.nextInt(backoff);
@@ -152,11 +175,11 @@ public class Sender {
      * Sends a message without retrying in case of service unavailability. See
      * {@link #send(Message, String, int)} for more info.
      *
-     * @return result of the post, or {@literal null} if the GCM service was
+     * @return result of the post, or {@literal null} if the FCM service was
      *         unavailable or any network exception caused the request to fail,
      *         or if the response contains more than one result.
      *
-     * @throws InvalidRequestException if GCM didn't returned a 200 status.
+     * @throws InvalidRequestException if FCM didn't returned a 200 status.
      * @throws IllegalArgumentException if to is {@literal null}.
      */
     public Result sendNoRetry(Message message, String to) throws IOException {
@@ -167,11 +190,11 @@ public class Sender {
      * Sends a message without retrying in case of service unavailability. See
      * {@link #send(Message, String, int)} for more info.
      *
-     * @return result of the post, or {@literal null} if the GCM service was
+     * @return result of the post, or {@literal null} if the end-point service was
      *         unavailable or any network exception caused the request to fail,
      *         or if the response contains more than one result.
      *
-     * @throws InvalidRequestException if GCM didn't returned a 200 status.
+     * @throws InvalidRequestException if end-point service didn't returned a 200 status.
      * @throws IllegalArgumentException if to is {@literal null}.
      */
     public Result sendNoRetry(Message message, String to, Endpoint endpoint) throws IOException {
@@ -260,10 +283,35 @@ public class Sender {
      *
      * @throws IllegalArgumentException if registrationIds is {@literal null} or
      *         empty.
-     * @throws InvalidRequestException if GCM didn't returned a 200 or 503 status.
+     * @throws InvalidRequestException if FCM didn't returned a 200 or 503 status.
      * @throws IOException if message could not be sent.
      */
     public MulticastResult send(Message message, List<String> regIds, int retries)
+        throws IOException {
+        return send(message, regIds, retries, Endpoint.FCM);
+    }
+
+    /**
+     * Sends a message to many devices, retrying in case of unavailability.
+     *
+     * <p>
+     * <strong>Note: </strong> this method uses exponential back-off to retry in
+     * case of service unavailability and hence could block the calling thread
+     * for many seconds.
+     *
+     * @param message message to be sent.
+     * @param regIds registration id of the devices that will receive
+     *        the message.
+     * @param retries number of retries in case of service unavailability errors.
+     *
+     * @return combined result of all requests made.
+     *
+     * @throws IllegalArgumentException if registrationIds is {@literal null} or
+     *         empty.
+     * @throws InvalidRequestException if end-point service didn't returned a 200 or 503 status.
+     * @throws IOException if message could not be sent.
+     */
+    public MulticastResult send(Message message, List<String> regIds, int retries, Endpoint endpoint)
         throws IOException {
         int attempt = 0;
         MulticastResult multicastResult;
@@ -282,7 +330,7 @@ public class Sender {
                     message + " to regIds " + unsentRegIds);
             }
             try {
-                multicastResult = sendNoRetry(message, unsentRegIds);
+                multicastResult = sendNoRetry(message, unsentRegIds, endpoint);
             } catch(IOException e) {
                 // no need for WARNING since exception might be already logged
                 logger.log(Level.FINEST, "IOException on attempt " + attempt, e);
@@ -306,8 +354,8 @@ public class Sender {
             }
         } while (tryAgain);
         if (multicastIds.isEmpty()) {
-            // all JSON posts failed due to GCM unavailability
-            throw new IOException("Could not post JSON requests to GCM after "
+            // all JSON posts failed due to endpoint unavailability
+            throw new IOException("Could not post JSON requests to "+endpoint.getName()+" after "
                 + attempt + " attempts");
         }
         // calculate summary
@@ -375,7 +423,7 @@ public class Sender {
      *
      * @throws IllegalArgumentException if registrationIds is {@literal null} or
      *         empty.
-     * @throws InvalidRequestException if GCM didn't returned a 200 status.
+     * @throws InvalidRequestException if FCM didn't returned a 200 status.
      * @throws IOException if there was a JSON parsing error
      */
     public MulticastResult sendNoRetry(Message message,
@@ -392,7 +440,7 @@ public class Sender {
      *
      * @throws IllegalArgumentException if registrationIds is {@literal null} or
      *         empty.
-     * @throws InvalidRequestException if GCM didn't returned a 200 status.
+     * @throws InvalidRequestException if end-point service didn't returned a 200 status.
      * @throws IOException if there was a JSON parsing error
      */
     public MulticastResult sendNoRetry(Message message,
@@ -451,7 +499,7 @@ public class Sender {
             conn = post(endpoint.getEndpoint(), "application/json", requestBody);
             status = conn.getResponseCode();
         } catch (IOException e) {
-            logger.log(Level.FINE, "IOException posting to GCM", e);
+            logger.log(Level.FINE, "IOException posting to " + endpoint.getName(), e);
             return null;
         }
         String responseBody;
@@ -580,13 +628,13 @@ public class Sender {
     }
 
     /**
-     * Makes an HTTP POST request to a given endpoint.
+     * Makes an HTTP POST request to a given end-point.
      *
      * <p>
      * <strong>Note: </strong> the returned connected should not be disconnected,
      * otherwise it would kill persistent connections made using Keep-Alive.
      *
-     * @param url endpoint to post the request.
+     * @param url end-point to post the request.
      * @param contentType type of request.
      * @param body body of the request.
      *
