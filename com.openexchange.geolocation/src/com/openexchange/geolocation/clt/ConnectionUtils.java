@@ -53,7 +53,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ConnectionUtils}
@@ -65,27 +67,25 @@ public final class ConnectionUtils {
 
     /**
      * Checks whether the appropriate content type is returned from the specified connection
-     * 
+     *
      * @param connection The {@link URLConnection}
+     * @param expectedContentType The expected content type
      * @throws IOException if an I/O error is occurred or if an invalid content type is returned by the server
      */
-    public static void checkContentType(URLConnection connection, String expectedContentType) throws IOException {
+    public static void checkContentType(HttpURLConnection connection, String expectedContentType) throws IOException {
         String contentType = connection.getContentType();
-        if (contentType == null || contentType.isEmpty()) {
-            return;
-        }
-        if (contentType.toLowerCase().contains(expectedContentType)) {
+        if (Strings.isEmpty(contentType) || contentType.toLowerCase().contains(expectedContentType)) {
             return;
         }
         if (contentType.startsWith("text")) {
-            throw new IOException(readTextResponse(connection));
+            throw new IOException(connection.getResponseMessage());
         }
         throw new IOException("Invalid content type returned by the server. Expected: '" + expectedContentType + ", but it was: '" + contentType + "'.");
     }
 
     /**
      * Reads the text response from the specified {@link URLConnection}
-     * 
+     *
      * @param connection The {@link URLConnection} from which to read the text response
      * @return The text response
      * @throws IOException if an I/O error is occurred

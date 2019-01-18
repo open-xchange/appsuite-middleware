@@ -51,13 +51,10 @@ package com.openexchange.geolocation.ip2location;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.AbstractGeoLocationSQLStorage;
 import com.openexchange.geolocation.DefaultGeoInformation;
 import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationStorageService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link Ip2LocationSQLStorage}
@@ -65,33 +62,35 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage implements GeoLocationStorageService {
+public class Ip2LocationSQLStorage extends AbstractGeoLocationSQLStorage {
+    
+    private static final String SERVICE_PROVIDER_ID = "ip2location";
 
     /**
      * Initialises a new {@link MaxMindSQLStorage}.
      */
     public Ip2LocationSQLStorage(ServiceLookup services) {
-        super(services);
+        super(services, SERVICE_PROVIDER_ID);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.GeoLocationStorageService#getGeoInformation(com.openexchange.session.Session, int)
+     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#getSelectByIPAddressQuery()
      */
     @Override
-    public GeoInformation getGeoInformation(Session session, int ipAddress) throws OXException {
-        return getGeoInformation(session, ipAddress, SQLStatements.SELECT_BY_IP_ADDRESS);
+    protected String getSelectByIPAddressQuery() {
+        return SQLStatements.SELECT_BY_IP_ADDRESS;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.GeoLocationStorageService#getGeoInformation(com.openexchange.session.Session, double, double, int)
+     * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#getSelectByGPSCoordinatesQuery()
      */
     @Override
-    public GeoInformation getGeoInformation(Session session, double latitude, double longitude, int radius) throws OXException {
-        return getGeoInformation(session, SQLStatements.SELECT_BY_GPS_COORDINATES, latitude, longitude, radius);
+    protected String getSelectByGPSCoordinatesQuery() {
+        return SQLStatements.SELECT_BY_GPS_COORDINATES;
     }
 
     /*

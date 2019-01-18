@@ -56,16 +56,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.openexchange.cli.ProgressMonitor;
+import com.openexchange.java.Numbers;
 import com.openexchange.java.Strings;
 
 /**
@@ -84,12 +85,12 @@ public final class FileUtils {
     /**
      * Checks the first four bytes of the specified file to determine whether
      * it is a ZIP archive. The signatures of a ZIP archive are listed
-     * <a href="https://en.wikipedia.org/wiki/List_of_file_signatures">here</a>.
-     * 
+     * <a href="https://www.iana.org/assignments/media-types/application/zip">here</a>.
+     *
      * @return <code>true</code> if the specified file is an archive; <code>false</code> otherwise.
      * @throws IOException if an I/O error is occurred
      */
-    public static boolean isArchive(String filePath) throws IOException {
+    public static boolean isZipArchive(String filePath) throws IOException {
         if (filePath == null || filePath.isEmpty()) {
             return false;
         }
@@ -115,7 +116,7 @@ public final class FileUtils {
     /**
      * Downloads the file denoted by the specified downloadUrl to the specified downloadPath and uses the optional name
      * as the file name (if no filename is provided by the 'Content-Disposition' header.
-     * 
+     *
      * @param downloadUrl the download URL
      * @param downloadPath The download path
      * @param optionalName The optional file name
@@ -125,7 +126,7 @@ public final class FileUtils {
      * @throws InvalidContentType
      */
     public static File downloadFile(String downloadUrl, String downloadPath, String optionalName, String allowedContentTypes) throws MalformedURLException, IOException {
-        URLConnection connection = new URL(downloadUrl).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(downloadUrl).openConnection();
         connection.setConnectTimeout(15000);
         connection.setReadTimeout(30000);
 
@@ -144,7 +145,7 @@ public final class FileUtils {
 
     /**
      * Writes the specified {@link InputStream} to the specified {@link File}
-     * 
+     *
      * @param inputStream The {@link InputStream} to write
      * @param outputFile The {@link File} to write to
      * @param size The size
@@ -168,7 +169,7 @@ public final class FileUtils {
 
     /**
      * Extracts the contents of the specified archive to the specified extractDirectory.
-     * 
+     *
      * @param filePath The file path that denotes to a ZIP archive
      * @param extractDirectory The extract directory
      * @param keep <code>true</code> if the files should be kept after the JVM exits; <code>false</code> to delete them
@@ -177,7 +178,7 @@ public final class FileUtils {
      * @throws IOException if an I/O error is occurred
      */
     public static final List<File> extractArchive(String filePath, String extractDirectory, boolean keep) throws FileNotFoundException, IOException {
-        System.out.println("Extracting the archive '" + filePath + "' in '" + extractDirectory + "'...");
+        System.out.println("Extracting the archive '" + filePath + "' to '" + extractDirectory + "'...");
         byte[] buffer = new byte[BUFFER_SIZE];
         List<File> extractedFiles = new LinkedList<>();
         try (FileInputStream fis = new FileInputStream(new File(filePath)); ZipInputStream zipInputStream = new ZipInputStream(fis)) {
@@ -200,33 +201,8 @@ public final class FileUtils {
     }
 
     /**
-     * Checks whether the specified CSV file denotes a valid CSV file with the specified amount of fields
-     * on each row.
-     * 
-     * @param csvFile The path of the CSV file
-     * @param maxFields The max fields of a row
-     * @throws FileNotFoundException if the file do not exist
-     * @throws IllegalArgumentException if the file is invalid
-     */
-    public static final void checkCSVFormat(String csvFile, int maxFields) throws FileNotFoundException {
-        try (Scanner input = new Scanner(new File(csvFile))) {
-            int counter = 0;
-            int maxLines = 5;
-            while (input.hasNextLine() && counter < maxLines) {
-                String line = input.nextLine();
-                String[] split = line.split(",");
-                if (split != null && split.length == maxFields) {
-                    return;
-                }
-                counter++;
-            }
-        }
-        throw new IllegalArgumentException("The csv file you provided does not seem to be a valid one.");
-    }
-
-    /**
      * Extracts the ZIP entries from the specified {@link ZipInputStream}
-     * 
+     *
      * @param zipInputStream The {@link ZipInputStream} containing the entries
      * @param zipEntry The ZipEntry to extract
      * @param buffer the buffer to use when writing the extracted entry
@@ -256,7 +232,7 @@ public final class FileUtils {
 
     /**
      * Extracts the 'filename' from the specified content disposition header
-     * 
+     *
      * @param contentDisposition The content disposition header
      * @return The filename value
      */
@@ -269,5 +245,65 @@ public final class FileUtils {
             return defaultName;
         }
         return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
+    }
+
+    /**
+     * Checks whether the specified CSV file denotes a valid CSV file with the specified amount of fields
+     * on each row.
+     *
+     * @param csvFile The path of the CSV file
+     * @param maxFields The max fields of a row
+     * @throws IOException if any I/O error is occurred
+     * @throws IllegalArgumentException if the <code>csvFile</code> provided as an argument is invalid
+     */
+    public static final void checkCSVFormat(String csvFile, int maxFields) throws IOException {
+        File file = new File(csvFile);
+        if (false == file.exists()) {
+            throw new IllegalArgumentException("The CSV file you provided does not exist.");
+        }
+        Random random = new Random();
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
+            int maxLines = 5;
+            for (int i = 0; i < maxLines; i++) {
+                String line = pickRandomLine(randomAccessFile, file.length(), random);
+                String[] split = line.split(",");
+                if (split == null || split.length != maxFields) {
+                    throw new IllegalArgumentException("The CSV file you provided does not seem to be a valid one.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Picks a random line from the specified file and returns it.
+     * 
+     * @param randomAccessFile The {@link RandomAccessFile} instance
+     * @param length The length of the file
+     * @param random The random generator
+     * @return The random line
+     * @throws FileNotFoundException if the file does not exist
+     * @throws IOException if any I/O error is occurred
+     */
+    private static final String pickRandomLine(RandomAccessFile randomAccessFile, long length, Random random) throws FileNotFoundException, IOException {
+        long randomPosition = Numbers.nextLong(random, length - 1);
+        randomAccessFile.seek(randomPosition);
+        randomAccessFile.readLine();
+        String line = randomAccessFile.readLine();
+        if (Strings.isNotEmpty(line)) {
+            return line;
+        }
+        // Seems we got the last line with the previous call.
+        // Seek backwards to the first LF we find.
+        int readByte = -1;
+        long currentPosition = randomPosition;
+        do {
+            randomAccessFile.seek(currentPosition--);
+            readByte = randomAccessFile.read();
+        } while (readByte != 0xA);
+        randomAccessFile.seek(currentPosition + 2);
+
+        byte[] b = new byte[(int) (length - currentPosition)];
+        randomAccessFile.read(b);
+        return new String(b).trim();
     }
 }

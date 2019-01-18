@@ -24,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange GeoIP service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Conflicts:     open-xchange-geoip-ip2location
 
 %description
 This package provides connectivity to a GeoIP service based on the MaxMind's GeoDatabase.

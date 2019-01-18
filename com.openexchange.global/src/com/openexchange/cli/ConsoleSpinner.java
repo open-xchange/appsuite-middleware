@@ -47,75 +47,89 @@
  *
  */
 
-package com.openexchange.geolocation;
+package com.openexchange.cli;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link GeoLocationUtils}
+ * {@link ConsoleSpinner} - A simple console spinner to indicate that work is in progress.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public final class GeoLocationUtils {
+public class ConsoleSpinner {
+
+    private final Thread animationThread;
+    private final String optionalPrefix;
+    private final String optionalSuffix;
 
     /**
-     * The first octet multiplier/divisor for the IP address, i.e. <code>16777216</code>
+     * Initialises a new {@link ConsoleSpinner}.
      */
-    private static final int O1 = (int) Math.pow(2, 24);
-    /**
-     * The second octet multiplier/divisor for the IP address, i.e. <code>65536</code>
-     */
-    private static final int O2 = (int) Math.pow(2, 16);
-    /**
-     * The second octet multiplier/divisor for the IP address, i.e. <code>256</code>
-     */
-    private static final int O3 = (int) Math.pow(2, 8);
-
-    /**
-     * Converts the specified IPv4 address to its integer representation
-     * 
-     * @param ipAddress The IPv4 address to convert
-     * @return The integer representation of the IPv4 address
-     * @throws OXException if the specified IPv4 address is invalid
-     */
-    public static int convertIp(String ipAddress) throws OXException {
-        validate(ipAddress);
-        String[] split = ipAddress.split("\\.");
-        return Integer.parseInt(split[0]) * O1 + Integer.parseInt(split[1]) * O2 + Integer.parseInt(split[2]) * O3 + Integer.parseInt(split[3]);
+    public ConsoleSpinner(String optionalPrefix, String optionalSuffix) {
+        super();
+        this.optionalPrefix = Strings.isEmpty(optionalPrefix) ? "" : optionalPrefix;
+        this.optionalSuffix = Strings.isEmpty(optionalSuffix) ? "" : optionalSuffix;
+        animationThread = new Thread(new SpinnerAnimation(), "spinnerThread");
     }
 
     /**
-     * Converts the specified integer to an IP address
-     * 
-     * @param ipAddress The integer version of the ip address
-     * @return The ip address as a string
-     * @throws OXException if the specified integer did not yield a valid IPv4 address
+     * Starts the spinning
      */
-    public static String convertIp(int ipAddress) throws OXException {
-        int p1 = (ipAddress / O1) % O3;
-        int p2 = (ipAddress / O2) % O3;
-        int p3 = (ipAddress / O3) % O3;
-        int p4 = ipAddress % O3;
-        String ipStr = Strings.concat(".", p1, p2, p3, p4);
-        validate(ipStr);
-        return ipStr;
+    public void start() {
+        animationThread.start();
     }
 
     /**
-     * Determines whether the specified IP address is valid
-     *
-     * @param ipAddress The IP address to validate
-     * @throws OXException If the specified IP address is invalid
+     * Stops the spinning and sets an optional status.
+     * 
      */
-    private static void validate(String ipAddress) throws OXException {
-        try {
-            InetAddress.getByName(ipAddress);
-        } catch (UnknownHostException e) {
-            throw GeoLocationExceptionCodes.UNABLE_TO_RESOLVE_HOST.create(e, ipAddress);
+    public void stop(String status) {
+        System.out.print("\r" + optionalPrefix + "[ " + status + " ]" + optionalSuffix + "\n");
+        animationThread.interrupt();
+    }
+
+    private final class SpinnerAnimation implements Runnable {
+
+        /**
+         * Initialises a new {@link ConsoleSpinner.SpinnerAnimation}.
+         */
+        public SpinnerAnimation() {
+            super();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            try {
+                int c = 1;
+                String s = "";
+                while (true) {
+                    Thread.sleep(200);
+                    System.out.print("\r" + optionalPrefix + s + optionalSuffix);
+                    switch (c) {
+                        case 1:
+                            s = "[ \\ ]";
+                            break;
+                        case 2:
+                            s = "[ | ]";
+                            break;
+                        case 3:
+                            s = "[ / ]";
+                            break;
+                        default:
+                            s = "[ - ]";
+                            c = 0;
+                    }
+                    c++;
+                }
+            } catch (InterruptedException e) {
+                // Ignore
+            }
         }
     }
 }

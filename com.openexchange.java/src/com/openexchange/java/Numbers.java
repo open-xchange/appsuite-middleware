@@ -47,53 +47,36 @@
  *
  */
 
-package com.openexchange.geolocation.osgi;
+package com.openexchange.java;
 
-import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.geolocation.GeoLocationRMIService;
-import com.openexchange.geolocation.GeoLocationStorageService;
-import com.openexchange.geolocation.impl.GeoLocationRMIServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Random;
 
 /**
- * {@link GeoLocationActivator}
+ * {@link Numbers} - A library for performing number operations
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class GeoLocationActivator extends HousekeepingActivator {
+public final class Numbers {
 
     /**
-     * Initialises a new {@link GeoLocationActivator}.
-     */
-    public GeoLocationActivator() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Returns the next pseudorandom, uniformly distributed long value from the specified
+     * {@link Random} number generator's sequence.
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @param random The number generator
+     * @param bound The upper bound
+     * @return The next pseudorandom long
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
+    public static final long nextLong(Random random, long bound) {
+        if (bound <= 0) {
+            throw new IllegalArgumentException("The upper bound must be positive.");
+        }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put("RMIName", GeoLocationRMIService.RMI_NAME);
-        registerService(Remote.class, new GeoLocationRMIServiceImpl(this), props);
-        track(GeoLocationStorageService.class, new GeoLocationServiceRegistrationTracker(context));
-        openTrackers();
+        long bits, val;
+        do {
+            bits = (random.nextLong() << 1) >>> 1;
+            val = bits % bound;
+        } while (bits - val + (bound - 1) < 0L);
+        return val;
     }
 }

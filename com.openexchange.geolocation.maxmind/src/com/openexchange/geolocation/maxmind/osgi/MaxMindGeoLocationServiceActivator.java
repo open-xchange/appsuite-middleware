@@ -50,7 +50,6 @@
 package com.openexchange.geolocation.maxmind.osgi;
 
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.geolocation.GeoLocationStorageService;
 import com.openexchange.geolocation.maxmind.MaxMindSQLStorage;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -77,8 +76,6 @@ public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(DBMigrationExecutorService.class, new MaxMindDBMigrationServiceTracker(this, context));
-        openTrackers();
         registerService(GeoLocationStorageService.class, new MaxMindSQLStorage(this));
     }
 }

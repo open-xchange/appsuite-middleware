@@ -47,57 +47,46 @@
  *
  */
 
-package com.openexchange.geolocation.impl;
+package com.openexchange.geolocation.osgi;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.SQLException;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoLocationRMIService;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GeoLocationRMIServiceImpl}
+ * {@link GeoLocationActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class GeoLocationRMIServiceImpl implements GeoLocationRMIService {
-
-    private final ServiceLookup services;
+public class GeoLocationActivator extends HousekeepingActivator {
 
     /**
-     * Initialises a new {@link GeoLocationRMIServiceImpl}.
-     * 
-     * @param services the {@link ServiceLookup} instance
+     * Initialises a new {@link GeoLocationActivator}.
      */
-    public GeoLocationRMIServiceImpl(ServiceLookup services) {
+    public GeoLocationActivator() {
         super();
-        this.services = services;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.geolocation.GeoLocationRMIService#getGlobalDatabaseName(java.lang.String)
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
-    public String getGlobalDatabaseName(String group) throws RemoteException {
-        DatabaseService service = null;
-        Connection connection = null;
-        try {
-            service = services.getServiceSafe(DatabaseService.class);
-            connection = service.getReadOnlyForGlobal(group);
-            return connection.getCatalog();
-        } catch (OXException e) {
-            throw new RemoteException(e.getMessage(), e);
-        } catch (SQLException e) {
-            throw new RemoteException(e.getMessage(), e);
-        } finally {
-            if (service != null) {
-                service.backReadOnlyForGlobal(group, connection);
-            }
-        }
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class, LeanConfigurationService.class };
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        track(GeoLocationStorageService.class, new GeoLocationStorageServiceRegistrationTracker(context, this));
+        openTrackers();
     }
 }

@@ -59,7 +59,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.cli.ConsoleSpinner;
 import com.openexchange.geolocation.GeoLocationRMIService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractGeoLocationCLT}
@@ -68,7 +70,7 @@ import com.openexchange.geolocation.GeoLocationRMIService;
  * @since v7.10.2
  */
 public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
-    
+
     protected static final String ABSTRACT_USAGE = "-u <database-user> [-a <database-password>] [-g <group>] [-k] [-o <output-directory>] [--http-proxy-host <http-proxy-host> --http-proxy-port <http-proxy-port> --https-proxy-host <https-proxy-host> --https-proxy-port <https-proxy-port>]" + BASIC_MASTER_ADMIN_USAGE;
 
     /**
@@ -130,7 +132,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @throws IllegalArgumentException if no valid database version can be parsed
      */
     protected abstract DatabaseVersion parseDatabaseVersion(CommandLine cmd);
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -143,7 +145,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("a", "database-password", "database-password", "The database password for importing the data.", false));
         options.addOption(createArgumentOption("g", "database-group", "group", "The global database group. If absent it falls-back to 'default'", false));
         options.addOption(createSwitch("k", "keep", "Keeps the temporary files produced from this command line tool (zip archives, downloaded and extracted files).", false));
-        options.addOption(createArgumentOption("d", "database-version", "database-version", "The database version identifier to download and import. If absent falls back to 'DB9'. The import mode is affected by this switch. Be sure to supply the correct version for the CSV you are importing.", false));
+        options.addOption(createArgumentOption("d", "database-version", "database-version", "The database version identifier to download and import. The import mode is affected by this switch. Be sure to supply the correct version for the CSV you are importing.", false));
         options.addOption(createArgumentOption(null, "http-proxy-host", "http-proxy-host", "The IP or hostname of the HTTP proxy", false));
         options.addOption(createArgumentOption(null, "http-proxy-port", "http-proxy-port", "The port of the HTTP proxy", false));
         options.addOption(createArgumentOption(null, "https-proxy-host", "https-proxy-host", "The IP or hostname of the HTTPs proxy", false));
@@ -295,7 +297,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     public String getExtractDirectory() {
         return extractDirectory;
     }
-    
+
     /**
      * Gets the databaseVersion
      *
@@ -305,9 +307,25 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         return databaseVersion;
     }
 
-
     //////////////////////////////////////// HELPERS ///////////////////////////////
-    
+
+    /**
+     * Checks whether the specified array of <code>filePaths</code> is either empty
+     * or <code>null</code> and if one of those is, then terminate the JVM with
+     * error code <code>1</code> to indicate an error.
+     * 
+     * @param filePaths The file paths to check.
+     */
+    protected void checkDatabaseFilePaths(String... filePaths) {
+        for (String f : filePaths) {
+            if (Strings.isEmpty(f)) {
+                System.out.println("No viable database file was found in the extracted files.");
+                System.exit(1);
+                return;
+            }
+        }
+    }
+
     /**
      * Imports the data into the 'global' database
      * 
@@ -319,9 +337,8 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
         String dbName = rmiService.getGlobalDatabaseName(dbGroup);
 
         String[] executionEnvironment = { "mysql", "-u", dbUser, "-p" + dbPassword, dbName, "-e", importStatements };
-        System.out.print("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...");
-        runProcess(executionEnvironment);
-        System.out.println("OK.");
+        ConsoleSpinner cs = new ConsoleSpinner("Importing data to schema '" + dbName + "' in table(s) '" + tables + "'...", null);
+        runProcess(executionEnvironment, cs);
     }
 
     /**
@@ -329,19 +346,24 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * 
      * @param executionEnvironment The execution environment, i.e. the executable with all its arguments
      */
-    protected void runProcess(String[] executionEnvironment) {
+    protected void runProcess(String[] executionEnvironment, ConsoleSpinner consoleSpinner) {
         if (executionEnvironment == null || executionEnvironment.length == 0) {
             System.out.println("The execution environment is empty.");
             System.exit(1);
             return;
         }
         try {
+            consoleSpinner.start();
             ProcessBuilder processBuilder = new ProcessBuilder(executionEnvironment);
             Process runtimeProcess = processBuilder.start();
             int processComplete = runtimeProcess.waitFor();
             if (processComplete == 0) {
+                consoleSpinner.stop("OK");
                 return;
             }
+            // The inputStream of the runtimeProcess might also contain 
+            // hints and/or errors, so we make sure to print those as well.
+            consoleSpinner.stop("FAILED");
             printErrors(runtimeProcess.getInputStream());
             printErrors(runtimeProcess.getErrorStream());
             System.exit(1);

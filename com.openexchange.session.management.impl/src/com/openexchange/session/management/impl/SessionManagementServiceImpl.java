@@ -135,21 +135,20 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         Set<String> blackListedClients = getBlacklistedClients();
         String location = getDefaultLocation(session);
 
-        GeoLocationService geoLocationService = services.getOptionalService(GeoLocationService.class);
         int totalSize = localSessions.size() + remoteSessions.size();
         Map<String, String> ip2locationCache = new HashMap<>(totalSize);
         List<ManagedSession> result = new ArrayList<>(totalSize);
         Set<String> filter = new HashSet<String>(totalSize, 0.9F);
         for (Session s : localSessions) {
             if (filter.add(s.getSessionID()) && false == blackListedClients.contains(s.getClient())) {
-                ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
+                ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache)).build();
                 result.add(managedSession);
             }
         }
 
         for (Session s : remoteSessions) {
             if (filter.add(s.getSessionID()) && false == blackListedClients.contains(s.getClient())) {
-                ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
+                ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache)).build();
                 result.add(managedSession);
             }
         }
@@ -256,7 +255,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         return location;
     }
 
-    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
+    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache) throws OXException {
         String ipAddress = s.getLocalIp();
         try {
             InetAddress address = InetAddress.getByName(ipAddress);
@@ -281,9 +280,10 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             return location;
         }
 
-        if (null != geoLocationService) {
+        GeoLocationService geoLocationService = services.getOptionalService(GeoLocationService.class);
+        if (geoLocationService != null) {
             try {
-                GeoInformation geoInformation = geoLocationService.getGeoInformation(s, ipAddress);
+                GeoInformation geoInformation = geoLocationService.getGeoInformation(s.getContextId(), ipAddress);
                 if (null == geoInformation) {
                     return getDefaultLocation(s);
                 }

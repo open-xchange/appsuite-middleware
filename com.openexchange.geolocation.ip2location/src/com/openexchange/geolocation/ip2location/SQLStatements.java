@@ -59,7 +59,7 @@ final class SQLStatements {
 
     /**
      * The SQL version of the <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a><br/>
-     * 
+     *
      * Selects a location by a set of GPS coordinates. Values for the parameters:
      * <li>radius of the earth (either miles or kilometres)</li>
      * <li>latitude</li>
@@ -69,20 +69,20 @@ final class SQLStatements {
      * <li>maximum results</li>
      */
     //@formatter:off
-    static String SELECT_BY_GPS_COORDINATES = "SELECT" + 
-        "    country_name, region_name, city_name, zip_code, " + 
-        "    ( ? " + 
-        "      * acos( cos( radians(?) ) " + 
-        "              * cos(  radians( latitude )   ) " + 
-        "              * cos(  radians( longitude ) - radians(?) ) " + 
-        "            + sin( radians(?) ) " + 
-        "              * sin( radians( latitude ) ) " + 
-        "            ) " + 
-        "    ) " + 
-        "    AS distance " + 
-        "FROM ip2location " + 
-        "HAVING distance < ? " + 
-        "ORDER BY distance " + 
+    static String SELECT_BY_GPS_COORDINATES = "SELECT" +
+        "    country_name, region_name, city_name, zip_code, " +
+        "    ( ? " +
+        "      * acos( cos( radians(?) ) " +
+        "              * cos(  radians( latitude )   ) " +
+        "              * cos(  radians( longitude ) - radians(?) ) " +
+        "              + sin( radians(?) ) " +
+        "              * sin( radians( latitude ) ) " +
+        "            ) " +
+        "    ) " +
+        "    AS distance " +
+        "FROM ip2location " +
+        "HAVING distance < ? " +
+        "ORDER BY distance " +
         "LIMIT 0,?;";
     //@formatter:on
 
@@ -90,10 +90,10 @@ final class SQLStatements {
      * Selects a country by IP
      */
     //@formatter:off
-    static String SELECT_BY_IP_ADDRESS = "SELECT country_name, region_name, city_name, zip_code " + 
-        "FROM ip2location " + 
-        "WHERE " + 
-        "? BETWEEN ip_from AND ip_to " + 
+    static String SELECT_BY_IP_ADDRESS = "SELECT country_name, region_name, city_name, zip_code " +
+        "FROM ip2location " +
+        "WHERE " +
+        "? BETWEEN ip_from AND ip_to " +
         "LIMIT 1;";
     //@formatter:on
 }

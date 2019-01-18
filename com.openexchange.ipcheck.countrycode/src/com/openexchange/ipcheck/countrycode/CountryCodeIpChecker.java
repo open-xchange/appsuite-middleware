@@ -118,12 +118,12 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         }
         try {
             GeoLocationService service = services.getServiceSafe(GeoLocationService.class);
-            GeoInformation geoInformationCurrent = service.getGeoInformation(session, current);
+            GeoInformation geoInformationCurrent = service.getGeoInformation(session.getContextId(), current);
             if (geoInformationCurrent == null) {
                 LOGGER.warn("No geo information could be retrieved for the current IP '{}'.", current);
                 return;
             }
-            GeoInformation geoInformationPrevious = service.getGeoInformation(session, previous);
+            GeoInformation geoInformationPrevious = service.getGeoInformation(session.getContextId(), previous);
             if (geoInformationPrevious == null) {
                 LOGGER.warn("No geo information could be retrieved for the previous IP '{}'.", previous);
                 return;
@@ -166,7 +166,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     }
 
     ///////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
-    
+
     /**
      * Accepts the IP change and applies it to the specified {@link Session}
      *
@@ -238,7 +238,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             IPCheckers.kick(current, session);
             return;
         }
-        
+
         String sessionId = session.getSessionID();
         synchronized (sessionId) {
             // Only increase metrics when the session was not previously kicked

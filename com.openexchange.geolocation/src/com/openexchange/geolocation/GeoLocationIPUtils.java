@@ -47,34 +47,75 @@
  *
  */
 
-package com.openexchange.geolocation.clt;
+package com.openexchange.geolocation;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
- * {@link DatabaseVersion}
+ * {@link GeoLocationIPUtils}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public interface DatabaseVersion {
+public final class GeoLocationIPUtils {
 
     /**
-     * Gets the numberOfFields
+     * The first octet multiplier/divisor for the IP address, i.e. <code>16777216</code>
+     */
+    private static final long O1 = (long) Math.pow(2, 24);
+    /**
+     * The second octet multiplier/divisor for the IP address, i.e. <code>65536</code>
+     */
+    private static final long O2 = (long) Math.pow(2, 16);
+    /**
+     * The second octet multiplier/divisor for the IP address, i.e. <code>256</code>
+     */
+    private static final long O3 = (long) Math.pow(2, 8);
+
+    /**
+     * Converts the specified IPv4 address to its integer representation
+     * 
+     * @param ipAddress The IPv4 address to convert
+     * @return The number representation of the IPv4 address
+     * @throws OXException if the specified IPv4 address is invalid
+     */
+    public static long convertIp(String ipAddress) throws OXException {
+        validate(ipAddress);
+        String[] split = ipAddress.split("\\.");
+        return Long.parseLong(split[0]) * O1 + Long.parseLong(split[1]) * O2 + Long.parseLong(split[2]) * O3 + Long.parseLong(split[3]);
+    }
+
+    /**
+     * Converts the specified integer to an IP address
+     * 
+     * @param ipAddress The integer version of the IP address
+     * @return The IP address as a string
+     * @throws OXException if the specified integer did not yield a valid IPv4 address
+     */
+    public static String convertIp(long ipAddress) throws OXException {
+        long p1 = (ipAddress / O1) % O3;
+        long p2 = (ipAddress / O2) % O3;
+        long p3 = (ipAddress / O3) % O3;
+        long p4 = ipAddress % O3;
+        String ipStr = Strings.concat(".", p1, p2, p3, p4);
+        validate(ipStr);
+        return ipStr;
+    }
+
+    /**
+     * Determines whether the specified IP address is valid
      *
-     * @return The numberOfFields
+     * @param ipAddress The IP address to validate
+     * @throws OXException If the specified IP address is invalid
      */
-    int getNumberOfFields();
-
-    /**
-     * Returns the name of the lite version
-     * 
-     * @return the name of the lite version
-     */
-    String getLiteName();
-
-    /**
-     * Returns the name of the full version
-     * 
-     * @return the name of the full version
-     */
-    String getName();
+    private static void validate(String ipAddress) throws OXException {
+        try {
+            InetAddress.getByName(ipAddress);
+        } catch (UnknownHostException e) {
+            throw GeoLocationExceptionCodes.UNABLE_TO_RESOLVE_HOST.create(e, ipAddress);
+        }
+    }
 }

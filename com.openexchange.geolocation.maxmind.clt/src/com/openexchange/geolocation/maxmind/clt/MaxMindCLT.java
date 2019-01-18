@@ -70,7 +70,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /**
      * Returns a comma separated string with the supported MaxMind DB versions
-     * 
+     *
      * @return a comma separated string with the supported MaxMind DB versions
      */
     private static final String supportedDBVersions() {
@@ -95,7 +95,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /**
      * Entry point
-     * 
+     *
      * @param args The command line arguments
      */
     public static void main(String[] args) {
@@ -111,7 +111,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
@@ -124,7 +124,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -133,7 +133,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
             System.out.println("Temporary files will be KEPT in '" + getExtractDirectory() + "'.");
         }
         if (importMode) {
-            if (FileUtils.isArchive(downloadFilePath)) {
+            if (FileUtils.isZipArchive(downloadFilePath)) {
                 extractDatase();
             }
             importDatabase(optRmiHostName);
@@ -147,7 +147,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -194,7 +194,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /**
      * Extracts the database file to '/tmp' and sets the 'databaseFilename' path for future use.
-     * 
+     *
      * @throws IOException if an I/O error is occurred
      */
     private void extractDatase() throws IOException {
@@ -210,11 +210,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
                 continue;
             }
         }
-        if ((ipLocationsFilePath == null || ipLocationsFilePath.isEmpty()) && (ipBlocksFilePath == null || ipBlocksFilePath.isEmpty())) {
-            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + getExtractDirectory() + "'");
-            System.exit(1);
-            return;
-        }
+        checkDatabaseFilePaths(ipLocationsFilePath, ipBlocksFilePath);
     }
 
     /**
@@ -225,38 +221,38 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         //@formatter:off
         String importStatements = "SET autocommit = 0;" +
             "START TRANSACTION;" +
-            "TRUNCATE `ip_blocks`;" + 
+            "TRUNCATE `ip_blocks`;" +
 
-            "LOAD DATA LOCAL INFILE '" + ipBlocksFilePath + "' INTO TABLE ip_blocks COLUMNS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (" + 
-            "@network," + 
-            "geoname_id," + 
-            "registered_country_geoname_id," + 
-            "represented_country_geoname_id," + 
-            "is_anonymous_proxy," + 
-            "is_satellite_provider," + 
-            "postal_code," + 
-            "latitude," + 
-            "longitude," + 
-            "accuracy_radius) SET " + 
-            "ip_from = INET_ATON(SUBSTRING(@network, 1, LOCATE('/', @network) - 1))," + 
-            "ip_to = (INET_ATON(SUBSTRING(@network, 1, LOCATE('/', @network) - 1)) + (pow(2, (32-CONVERT(SUBSTRING(@network, LOCATE('/', @network) + 1), UNSIGNED INTEGER)))-1));" + 
-            
-            "LOAD DATA LOCAL INFILE '" + ipLocationsFilePath + "' INTO TABLE ip_locations CHARACTER SET UTF8 COLUMNS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (" + 
-            "geoname_id," + 
-            "locale_code," + 
-            "continent_code," + 
-            "continent_name," + 
-            "country_iso_code," + 
-            "country_name," + 
-            "subdivision_1_iso_code," + 
-            "subdivision_1_name," + 
-            "subdivision_2_iso_code," + 
-            "subdivision_2_name," + 
-            "city_name," + 
-            "metro_code," + 
+            "LOAD DATA LOCAL INFILE '" + ipBlocksFilePath + "' INTO TABLE ip_blocks COLUMNS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (" +
+            "@network," +
+            "geoname_id," +
+            "registered_country_geoname_id," +
+            "represented_country_geoname_id," +
+            "is_anonymous_proxy," +
+            "is_satellite_provider," +
+            "postal_code," +
+            "latitude," +
+            "longitude," +
+            "accuracy_radius) SET " +
+            "ip_from = INET_ATON(SUBSTRING(@network, 1, LOCATE('/', @network) - 1))," +
+            "ip_to = (INET_ATON(SUBSTRING(@network, 1, LOCATE('/', @network) - 1)) + (pow(2, (32-CONVERT(SUBSTRING(@network, LOCATE('/', @network) + 1), UNSIGNED INTEGER)))-1));" +
+
+            "LOAD DATA LOCAL INFILE '" + ipLocationsFilePath + "' INTO TABLE ip_locations CHARACTER SET UTF8 COLUMNS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (" +
+            "geoname_id," +
+            "locale_code," +
+            "continent_code," +
+            "continent_name," +
+            "country_iso_code," +
+            "country_name," +
+            "subdivision_1_iso_code," +
+            "subdivision_1_name," +
+            "subdivision_2_iso_code," +
+            "subdivision_2_name," +
+            "city_name," +
+            "metro_code," +
             "time_zone);" +
-            
-            "COMMIT;" + 
+
+            "COMMIT;" +
             "SET autocommit=1;";
         //@formatter:on
         System.out.println("Using database files '" + ipBlocksFilePath + "' and '" + ipLocationsFilePath + "'.");
@@ -265,7 +261,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.clt.AbstractGeoLocationCLT#parseDatabaseVersion(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -286,22 +282,22 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
     /**
      * Checks the CSV formats of the ip-blocks and ip-locations files
      * 
-     * @throws FileNotFoundException if any of the files does not exist
+     * @throws IOException if any I/O error is occurred
      */
-    private void checkCSVFormat() throws FileNotFoundException {
+    private void checkCSVFormat() throws IOException {
         checkCSVFormat(ipBlocksFilePath, 10, "ip-blocks");
         checkCSVFormat(ipLocationsFilePath, 14, "ip-locations");
     }
 
     /**
      * Checks the CSV formats of the specified file
-     * 
+     *
      * @param path The path of the CSV file
      * @param fields The amount of fields per row
      * @param name An abstract name for the file
-     * @throws FileNotFoundException if the file denoted by the <code>path</code> does not exist
+     * @throws IOException if any I/O error is occurred
      */
-    private void checkCSVFormat(String path, int fields, String name) throws FileNotFoundException {
+    private void checkCSVFormat(String path, int fields, String name) throws IOException {
         try {
             FileUtils.checkCSVFormat(path, fields);
         } catch (IllegalArgumentException e) {

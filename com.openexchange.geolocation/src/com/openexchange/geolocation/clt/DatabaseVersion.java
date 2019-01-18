@@ -50,7 +50,8 @@
 package com.openexchange.geolocation.clt;
 
 /**
- * {@link DatabaseVersion}
+ * {@link DatabaseVersion} - Helper interface to define the different supported
+ * database versions by the different GeoLocation service providers.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
@@ -66,14 +67,14 @@ public interface DatabaseVersion {
 
     /**
      * Returns the name of the lite version
-     * 
+     *
      * @return the name of the lite version
      */
     String getLiteName();
 
     /**
      * Returns the name of the full version
-     * 
+     *
      * @return the name of the full version
      */
     String getName();

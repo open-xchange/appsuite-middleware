@@ -59,15 +59,16 @@ import java.rmi.RemoteException;
  * @since v7.10.2
  */
 public interface GeoLocationRMIService extends Remote {
-    
+
     public static final String RMI_NAME = GeoLocationRMIService.class.getSimpleName();
 
     /**
      * Retrieves the global database name for the specified group
      * 
      * @param group The group for which to retrieve the name of the global database
-     * @return the global database name for the specified group
-     * @throws RemoteException if an error is occurred
+     * @return the global database name for the specified group never <code>null</code>
+     * @throws RemoteException if an error is occurred and/or if the global database's
+     *             name cannot be retrieved.
      */
     String getGlobalDatabaseName(String group) throws RemoteException;
 }

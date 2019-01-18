@@ -62,6 +62,7 @@ import com.openexchange.geolocation.clt.AbstractGeoLocationCLT;
 import com.openexchange.geolocation.clt.ConnectionUtils;
 import com.openexchange.geolocation.clt.DatabaseVersion;
 import com.openexchange.geolocation.clt.FileUtils;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Ip2LocationCLT} - Command line tool to initialise and update the 'ip2location' database
@@ -73,7 +74,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /**
      * Returns a comma separated string with the supported ip2location DB versions
-     * 
+     *
      * @return a comma separated string with the supported ip2location DB versions
      */
     private static final String supportedDBVersions() {
@@ -121,7 +122,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /**
      * Entry point
-     * 
+     *
      * @param args The command line arguments
      */
     public static void main(String[] args) {
@@ -137,7 +138,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#addOptions(com.openexchange.cli.Options)
      */
     @Override
@@ -153,7 +154,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(com.openexchange.cli.CommandLine)
      */
     @Override
@@ -167,7 +168,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         }
 
         downloadFilePath = cmd.getOptionValue('i');
-        if (downloadFilePath != null && false == downloadFilePath.isEmpty()) {
+        if (Strings.isNotEmpty(downloadFilePath)) {
             importMode = true;
             return;
         }
@@ -177,7 +178,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -186,10 +187,10 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
             System.out.println("Temporary files will be KEPT in " + getExtractDirectory() + ".");
         }
         if (importMode) {
-            if (FileUtils.isArchive(downloadFilePath)) {
+            if (FileUtils.isZipArchive(downloadFilePath)) {
                 extractDatase();
             } else {
-                // Seems that the provided file is not an archive, 
+                // Seems that the provided file is not an archive,
                 // so use that as the source for the CSV database.
                 databaseFilePath = downloadFilePath;
             }
@@ -207,7 +208,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /**
      * Checks whether the specified license is valid for the specified IP2Location database version
-     * 
+     *
      * @throws IOException if an I/O error is occurred
      */
     private void checkLicense() throws IOException {
@@ -255,7 +256,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /**
      * Extracts the database file to '/tmp' and sets the 'databaseFilename' path for future use.
-     * 
+     *
      * @throws IOException if an I/O error is occurred
      */
     private void extractDatase() throws IOException {
@@ -266,11 +267,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
                 databaseFilePath = f.getAbsolutePath();
             }
         }
-        if (databaseFilePath == null || databaseFilePath.isEmpty()) {
-            System.out.println("No viable database file was found in the extracted files. Manual intervention is required. Data was downloaded and extracted in '" + getExtractDirectory() + "'");
-            System.exit(1);
-            return;
-        }
+        checkDatabaseFilePaths(databaseFilePath);
     }
 
     /**
@@ -298,7 +295,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.clt.AbstractGeoLocationCLT#parseDatabaseVersion()
      */
     @Override

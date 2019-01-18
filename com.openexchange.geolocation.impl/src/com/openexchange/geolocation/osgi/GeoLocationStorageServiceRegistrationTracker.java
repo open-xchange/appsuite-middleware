@@ -49,36 +49,45 @@
 
 package com.openexchange.geolocation.osgi;
 
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.geolocation.GeoLocationRMIService;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.geolocation.impl.GeoLocationRMIServiceImpl;
 import com.openexchange.geolocation.impl.GeoLocationServiceImpl;
+import com.openexchange.geolocation.impl.GeoLocationStorageServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link GeoLocationServiceRegistrationTracker}
+ * {@link GeoLocationStorageServiceRegistrationTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class GeoLocationServiceRegistrationTracker implements ServiceTrackerCustomizer<GeoLocationStorageService, GeoLocationStorageService> {
+public class GeoLocationStorageServiceRegistrationTracker implements ServiceTrackerCustomizer<GeoLocationStorageService, GeoLocationStorageService> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationServiceRegistrationTracker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationStorageServiceRegistrationTracker.class);
 
     private final BundleContext context;
-    private ServiceRegistration<GeoLocationService> registration;
-    private GeoLocationService service;
+    private final ServiceLookup services;
+    private ServiceRegistration<GeoLocationService> serviceRegistration;
+    private ServiceRegistration<Remote> rmiServiceRegistration;
 
     /**
-     * Initialises a new {@link GeoLocationServiceRegistrationTracker}.
+     * Initialises a new {@link GeoLocationStorageServiceRegistrationTracker}.
      */
-    public GeoLocationServiceRegistrationTracker(BundleContext context) {
+    public GeoLocationStorageServiceRegistrationTracker(BundleContext context, ServiceLookup services) {
         super();
         this.context = context;
+        this.services = services;
     }
 
     /*
@@ -88,14 +97,10 @@ public class GeoLocationServiceRegistrationTracker implements ServiceTrackerCust
      */
     @Override
     public GeoLocationStorageService addingService(ServiceReference<GeoLocationStorageService> reference) {
-        if (service != null) {
-            LOGGER.warn("A GeoLocation service was previously registered! Check your bundles!");
-            return null;
-        }
         GeoLocationStorageService storage = context.getService(reference);
-        service = new GeoLocationServiceImpl(storage);
-        registration = context.registerService(GeoLocationService.class, service, null);
-        LOGGER.info("Registered the GeoLocation service with the '{}' storage", storage.getClass().getName());
+        GeoLocationStorageServiceRegistry.getInstance().registerServiceProvider(storage.getProviderId(), storage);
+        registerServiceIfNeeded();
+        LOGGER.info("Registered the GeoLocationStorageService provider {}.", storage.getProviderId());
         return storage;
     }
 
@@ -116,8 +121,32 @@ public class GeoLocationServiceRegistrationTracker implements ServiceTrackerCust
      */
     @Override
     public void removedService(ServiceReference<GeoLocationStorageService> reference, GeoLocationStorageService service) {
-        registration.unregister();
+        GeoLocationStorageServiceRegistry.getInstance().unregisterServiceProvider(service.getProviderId());
         context.ungetService(reference);
-        this.service = null;
+        LOGGER.info("Unregistered the GeoLocationStorageService provider {}.", service.getProviderId());
+        if (false == GeoLocationStorageServiceRegistry.getInstance().hasStorages() && serviceRegistration != null) {
+            rmiServiceRegistration.unregister();
+            rmiServiceRegistration = null;
+            LOGGER.info("Unregistered the GeoLocationRMIService.");
+
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+            LOGGER.info("Unregistered the GeoLocationService.");
+        }
+    }
+
+    /**
+     * Registers the {@link GeoLocationService} and its RMI counterpart if needed
+     */
+    private void registerServiceIfNeeded() {
+        if (serviceRegistration != null) {
+            return;
+        }
+        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+        props.put("RMIName", GeoLocationRMIService.RMI_NAME);
+        serviceRegistration = context.registerService(GeoLocationService.class, new GeoLocationServiceImpl(services), null);
+        LOGGER.info("Registered the GeoLocationService.");
+        rmiServiceRegistration = context.registerService(Remote.class, new GeoLocationRMIServiceImpl(services), props);
+        LOGGER.info("Registered the GeoLocationRMIService.");
     }
 }

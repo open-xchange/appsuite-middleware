@@ -47,27 +47,63 @@
  *
  */
 
-package com.openexchange.geolocation.ip2location.osgi;
+package com.openexchange.geolocation.impl;
 
-import org.osgi.framework.BundleContext;
-import com.openexchange.geolocation.AbstractDBMigrationServiceTracker;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.geolocation.GeoLocationRMIService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Ip2LocationDBMigrationServiceTracker}
+ * {@link GeoLocationRMIServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class Ip2LocationDBMigrationServiceTracker extends AbstractDBMigrationServiceTracker {
+public class GeoLocationRMIServiceImpl implements GeoLocationRMIService {
+
+    private final ServiceLookup services;
 
     /**
-     * Initialises a new {@link Ip2LocationDBMigrationServiceTracker}.
+     * Initialises a new {@link GeoLocationRMIServiceImpl}.
      * 
-     * @param services
-     * @param context
+     * @param services the {@link ServiceLookup} instance
      */
-    public Ip2LocationDBMigrationServiceTracker(ServiceLookup services, BundleContext context) {
-        super(services, context, "/liquibase/ip2locationGlobalDbChangeLog.xml");
+    public GeoLocationRMIServiceImpl(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.geolocation.GeoLocationRMIService#getGlobalDatabaseName(java.lang.String)
+     */
+    @Override
+    public String getGlobalDatabaseName(String group) throws RemoteException {
+        DatabaseService service = null;
+        Connection connection = null;
+        try {
+            service = services.getServiceSafe(DatabaseService.class);
+            connection = service.getReadOnlyForGlobal(group);
+            String name = connection.getCatalog();
+            if (Strings.isEmpty(name)) {
+                // Should never happen, but just in case...
+                throw new RemoteException("Unable to retrieve the global dabase's name. Returned empty or 'null'.");
+            }
+            return name;
+        } catch (OXException e) {
+            throw new RemoteException(e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new RemoteException(e.getMessage(), e);
+        } finally {
+            if (service != null) {
+                service.backReadOnlyForGlobal(group, connection);
+            }
+        }
     }
 }

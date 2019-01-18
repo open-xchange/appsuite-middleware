@@ -47,57 +47,56 @@
  *
  */
 
-package com.openexchange.geolocation.clt;
+package com.openexchange.geolocation;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URLConnection;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link ConnectionUtils}
+ * {@link GeoLocationProperty}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public final class ConnectionUtils {
+public enum GeoLocationProperty implements Property {
+    /**
+     * Defines the provider to use for the GeoLocationServices.
+     * Default is empty.
+     */
+    PROVIDER("provider", "");
+    ;
+
+    private static final String PREFIX = "com.openexchange.geolocation.";
+
+    private final String fqn;
+    private final Object defaultValue;
 
     /**
-     * Checks whether the appropriate content type is returned from the specified connection
+     * Initialises a new {@link ICAPClientProperty}.
      * 
-     * @param connection The {@link URLConnection}
-     * @throws IOException if an I/O error is occurred or if an invalid content type is returned by the server
+     * @param defaultValue The default value
      */
-    public static void checkContentType(URLConnection connection, String expectedContentType) throws IOException {
-        String contentType = connection.getContentType();
-        if (contentType == null || contentType.isEmpty()) {
-            return;
-        }
-        if (contentType.toLowerCase().contains(expectedContentType)) {
-            return;
-        }
-        if (contentType.startsWith("text")) {
-            throw new IOException(readTextResponse(connection));
-        }
-        throw new IOException("Invalid content type returned by the server. Expected: '" + expectedContentType + ", but it was: '" + contentType + "'.");
+    private GeoLocationProperty(String suffix, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        this.fqn = PREFIX + suffix;
     }
 
-    /**
-     * Reads the text response from the specified {@link URLConnection}
+    /*
+     * (non-Javadoc)
      * 
-     * @param connection The {@link URLConnection} from which to read the text response
-     * @return The text response
-     * @throws IOException if an I/O error is occurred
+     * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
-    public static String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            StringBuilder builder = new StringBuilder(128);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-            return builder.toString();
-        }
+    @Override
+    public String getFQPropertyName() {
+        return fqn;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     */
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }

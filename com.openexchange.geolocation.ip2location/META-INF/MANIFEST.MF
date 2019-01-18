@@ -8,12 +8,10 @@ Automatic-Module-Name: com.openexchange.geolocation.ip2location
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
  com.openexchange.database,
- com.openexchange.database.migration,
  com.openexchange.exception,
  com.openexchange.geolocation,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.session,
  org.osgi.framework,
  org.osgi.framework.wiring,
  org.osgi.util.tracker,

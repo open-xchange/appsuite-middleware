@@ -50,7 +50,6 @@
 package com.openexchange.geolocation.ip2location.osgi;
 
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.geolocation.GeoLocationStorageService;
 import com.openexchange.geolocation.ip2location.Ip2LocationSQLStorage;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -87,8 +86,6 @@ public class Ip2LocationGeoLocationStorageServiceActivator extends HousekeepingA
      */
     @Override
     protected void startBundle() throws Exception {
-        track(DBMigrationExecutorService.class, new Ip2LocationDBMigrationServiceTracker(this, context));
-        openTrackers();
         registerService(GeoLocationStorageService.class, new Ip2LocationSQLStorage(this));
     }
 }
