@@ -55,13 +55,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.util.List;
+import org.apache.http.cookie.Cookie;
 import org.junit.Test;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.TokenLoginParameters;
 import com.openexchange.ajax.session.actions.LoginResponse;
+import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.ajax.session.actions.TokenLoginV2Request;
 import com.openexchange.ajax.session.actions.TokenLoginV2Response;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
@@ -110,6 +114,31 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         int expectedErrorCode = TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber();
         int actualErrorCode = loginResponse.getException().getCode();
         assertEquals("Wrong error. Expected \"" + expectedErrorCode + "\", but was \"" + actualErrorCode + "\".", expectedErrorCode, actualErrorCode);
+    }
+
+    @Test
+    public void testLoginShardCookieSet() throws Exception {
+        AcquireTokenRequest request = new AcquireTokenRequest();
+        AcquireTokenResponse response = getClient().execute(request);
+        String token = response.getToken();
+
+        LoginRequest login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"));
+        AJAXClient client = new AJAXClient(new AJAXSession(), true);
+        LoginResponse loginResponse = client.execute(login);
+        AJAXSession session = client.getSession();
+        session.setId(loginResponse.getSessionId());
+        assertTrue("Shard cookie is not set", isShardCookieSet(session));
+        client.execute(new LogoutRequest(true));
+        assertFalse("Shard cookie is still set", isShardCookieSet(client.getSession()));
+    }
+
+    private boolean isShardCookieSet(final AJAXSession session) {
+        List<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies();
+        boolean isShardCookieSet = false;
+        for (Cookie cookie : cookies) {
+            isShardCookieSet = cookie.getName().equals(LoginServlet.SHARD_COOKIE_NAME);
+        }
+        return isShardCookieSet;
     }
 
     @Test

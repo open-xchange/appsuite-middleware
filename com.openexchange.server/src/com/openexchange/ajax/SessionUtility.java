@@ -1158,10 +1158,10 @@ public final class SessionUtility {
      * @param session The {@link Session}
      */
     public static void rewriteShardCookie(HttpServletRequest request, HttpServletResponse response, Session session) {
-    	if (needsShardCookieRefresh(request)) {
-    		LOG.debug("Value of open-xchange-shard cookie invalid or no cookie available, rewrite cookie");
-        	LoginServlet.writeShardCookie(response, session, request.isSecure(), request.getServerName());
-		}
+        if (needsShardCookieRefresh(request)) {
+            LOG.debug("Value of open-xchange-shard cookie invalid or no cookie available, rewrite cookie");
+            LoginServlet.writeShardCookie(response, session, request.isSecure(), request.getServerName());
+        }
     }
 
     /**
@@ -1268,7 +1268,7 @@ public final class SessionUtility {
     private static boolean needsShardCookieRefresh(HttpServletRequest request) {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie shardCookie = cookies.get(LoginServlet.SHARD_COOKIE_NAME);
-    	return isValidShardCookie(shardCookie) == false;
+        return isValidShardCookie(shardCookie) == false;
     }
 
     /**
@@ -1279,8 +1279,7 @@ public final class SessionUtility {
      * @return
      */
     public static boolean isValidShardCookie(Cookie cookie) {
-    	return cookie != null && cookie.getValue()
-    			.equals(getShardCookieValue());
+        return cookie != null && cookie.getValue().equals(getShardCookieValue());
     }
 
     /**
