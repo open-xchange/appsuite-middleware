@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
+import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.test.pool.TestUser;
 
 /**
@@ -108,15 +110,22 @@ public class FormLoginTest extends AbstractAJAXSession {
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
             FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password));
-            List<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies();
-            boolean isShardCookieSet = false;
-            for (Cookie cookie : cookies) {
-				isShardCookieSet = cookie.getName().equals(LoginServlet.SHARD_COOKIE_NAME);
-			}
-            assertTrue("Shard cookie is not set", isShardCookieSet);
+            assertTrue("Shard cookie is not set", isShardCookieSet(session));
+            session.setId(response.getSessionId());
         } finally {
+            myClient.execute(new LogoutRequest(true));
+            assertFalse("Shard cookie is still set", isShardCookieSet(session));
             myClient.logout();
         }
+    }
+
+    private boolean isShardCookieSet(final AJAXSession session) {
+        List<Cookie> cookies = session.getHttpClient().getCookieStore().getCookies();
+        boolean isShardCookieSet = false;
+        for (Cookie cookie : cookies) {
+            isShardCookieSet = cookie.getName().equals(LoginServlet.SHARD_COOKIE_NAME);
+        }
+        return isShardCookieSet;
     }
 
     /**
