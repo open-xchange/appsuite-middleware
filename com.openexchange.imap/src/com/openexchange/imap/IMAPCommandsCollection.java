@@ -66,7 +66,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -351,7 +350,12 @@ public final class IMAPCommandsCollection {
         return listInfo != null && fullName.equals(listInfo.name);
     }
 
-    private static final Random RANDOM = new SecureRandom();
+    /*
+     * In a holder class to defer initialization until needed.
+     */
+    private static class Holder {
+        static final SecureRandom RANDOM = new SecureRandom();
+    }
 
     /**
      * Gets a random string to use for a mailbox probe.
@@ -359,7 +363,7 @@ public final class IMAPCommandsCollection {
      * @return The random string
      */
     static String getRandomProbe() {
-        return RandomStringUtils.random(32, 97, 122, false, false, null, RANDOM);
+        return RandomStringUtils.random(32, 97, 122, false, false, null, Holder.RANDOM);
     }
 
     /**

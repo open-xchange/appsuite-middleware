@@ -67,8 +67,8 @@ public abstract class AbstractPasswordMech implements PasswordMech {
     protected final static Logger LOG = LoggerFactory.getLogger(AbstractPasswordMech.class);
 
     /*
-     * The random number generator used by this class to create random
-     * based salts. In a holder class to defer initialization until needed.
+     * The salt generator used by this class to create random
+     * salts. In a holder class to defer initialization until needed.
      */
     private static class Holder {
         static final SecureRandom saltGenerator = new SecureRandom();
@@ -80,14 +80,14 @@ public abstract class AbstractPasswordMech implements PasswordMech {
 
     static SecureRandom initSecureRandom() {
         SecureRandom secureRandom = new SecureRandom();
-        byte[] generateSeed = secureRandom.generateSeed(20); // use same number of bytes as guard uses 
+        byte[] generateSeed = secureRandom.generateSeed(20); // use same number of bytes as guard uses
         secureRandom.setSeed(generateSeed);
         return secureRandom;
     }
 
     /**
      * Initializes a new {@link AbstractPasswordMech}.
-     * 
+     *
      * @param mechIdentifier The identifier of the algorithm
      * @hashSize hashSize The size of the resulting hash
      * @throws OXException
@@ -107,9 +107,9 @@ public abstract class AbstractPasswordMech implements PasswordMech {
 
     /**
      * Encodes the given plain password
-     * 
+     *
      * Note: Empty strings will not be validated by the underlying {@link PasswordMech} so these checks have to be done before (see {@link #encode(String)})
-     * 
+     *
      * @param password The password to encode
      * @return {@link PasswordDetails} containing information about the password encoding
      * @throws OXException In case of error
@@ -130,9 +130,9 @@ public abstract class AbstractPasswordMech implements PasswordMech {
 
     /**
      * Checks the password candidate against the encoded password.
-     * 
+     *
      * Note: Empty strings will not be validated by the underlying {@link PasswordMech} so these checks have to be done before (see {@link #check(String, String, byte[])})
-     * 
+     *
      * @param candidate The plain text candidate (non-empty)
      * @param encoded The encoded password (non-empty)
      * @param salt The salt used while password hashing
