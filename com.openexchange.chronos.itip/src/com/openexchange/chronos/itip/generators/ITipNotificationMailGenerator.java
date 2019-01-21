@@ -349,7 +349,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
      */
     private NotificationParticipant determinateSender(boolean external) {
         NotificationParticipant n;
-        if (external) {
+        if (external && organizer.isExternal() == false) {
             n = organizer.clone();
             try {
                 String fromAddr;
