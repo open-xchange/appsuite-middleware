@@ -49,33 +49,50 @@
 
 package com.openexchange.admin.rmi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static org.junit.Assert.assertFalse;
+import java.util.Random;
+import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
- * RMI tests for core admin rmi
+ * 
+ * {@link Bug62360Test}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * @since v7.10.2
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    //@formatter:off
-    AdditionalRMITests.class,
-    Bug16865Test.class,
-    Bug19379Test.class,
-    Bug27065Test.class,
-//    UserTest.class, is invoked by GroupTest
-    ContextTest.class,
-    GroupTest.class,
-    ResourceTest.class,
-//    TaskMgmtTest.class,
-    UtilTest.class,
-    UtilDatabaseTest.class,
-    Bug62360Test.class
-    //@formatter:on
-})
-public class AdminRmiTestSuite {
+public final class Bug62360Test extends AbstractRMITest {
 
+    private int contextId = getRandomNumberInRange(11, 10000);
+    private Context context;
+
+    private static int getRandomNumberInRange(int min, int max) {
+        Random r = new Random();
+        return r.ints(min, (max + 1)).findFirst().getAsInt();
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        context = createContext("bug62360context.com", contextId);
+    }
+
+    @Test
+    public void test() throws Throwable {
+        getContextManager().disable(context);
+        Context data = getContextManager().getData(context);
+        assertFalse(data.isEnabled());
+
+        getContextManager().disable(context);
+        assertFalse(data.isEnabled());
+    }
+
+    private Context createContext(String name, int cid) throws Exception {
+        Context newContext = ContextFactory.createContext(cid, name);
+        User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        return getContextManager().create(newContext, newAdmin);
+    }
 }
