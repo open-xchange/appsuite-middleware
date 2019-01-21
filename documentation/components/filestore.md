@@ -1,5 +1,6 @@
 ---
-title: Filestore 
+title: Filestore
+icon: fa-archive
 ---
 
 # Filestore Documentation

@@ -1,5 +1,6 @@
 ---
 title: Calendar 
+icon: fa-calendar
 ---
 
 Release 7.10.0 brings a major renovation of the Calendar module - the internal calendaring and scheduling logic is rewritten from scratch to be more aligned with the commonly used iCalendar model in the future (and move a bit away from MS Exchange/Outlook, accordingly). 

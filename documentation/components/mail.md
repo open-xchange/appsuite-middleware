@@ -1,6 +1,6 @@
 ---
-title: Database 
-icon: fa-database
+title: Mail 
+icon: fa-envelope 
 ---
 
 

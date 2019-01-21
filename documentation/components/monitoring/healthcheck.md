@@ -1,5 +1,5 @@
 ---
-title: Health-check for middleware
+title: Health Check
 ---
 
 # Introduction

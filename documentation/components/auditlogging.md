@@ -1,5 +1,6 @@
 ---
 title: Audit Logging
+icon: fa-tasks
 ---
 
 # How it works

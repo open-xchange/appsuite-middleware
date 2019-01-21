@@ -1,5 +1,6 @@
 ---
 title: User feedback
+icon: fa-commenting
 ---
 
 # Introduction
