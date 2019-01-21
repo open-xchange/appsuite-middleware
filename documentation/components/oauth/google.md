@@ -1,8 +1,47 @@
 ---
-title: Google App Verification
+title: Google
+classes: toc
+icon: fa-google
 ---
 
-# Problem
+# Register your App
+
+First things first. As with every OAuth provider, you will first need to register your App with Google. You can do this as follows:
+
+* Sign in to [Google Developers Console](https://console.developers.google.com/) using your Google account
+* Please follow [these](https://developers.google.com/identity/sign-in/web/devconsole-project) instructions to create a new project with a client ID, which is needed to call the sign-in API
+* Enable the APIs that are relevant for your project. The middleware currently supports functionality for:
+   * [Google Drive]({{ site.baseurl }}/middleware/components/drive_accounts/google_drive.html) (Read/Write)
+   * Google Contacts (Read Only)
+   * Google Calendars (Read Only)
+* Perform the [Google's site verification](https://support.google.com/webmasters/answer/35179)
+   * you can use any method listed by Google in general
+   * in case our OXaaS offering is used the HTML tag and HTML file methods are not accessible but the DNS based approach is required
+* [Get your app verified by Google](https://documentation.open-xchange.com/7.10.1/middleware/components/oauth/Google%20App%20Verification.html) to avoid awkward warnings.
+
+# Configuration
+
+In addition you have to configure the following properties in file `/opt/open-xchange/etc/googleoauth.properties`:
+
+* Enable the OAuth connector to Google OAuth:
+  `com.openexchange.oauth.google=true`
+* Set the API key and secret, which is Client ID and Client Secret to call the sign-in API (Select your project, select API manager from upper left burger menu, select credentials in left side bar, select Client ID for Web application):
+   `com.openexchange.oauth.google.apiKey=REPLACE_THIS_WITH_YOUR_CLIENT_ID`
+   `com.openexchange.oauth.google.apiSecret=REPLACE_THIS_WITH_YOUR_CLIENT_SECRET`
+* Set the redirect URL. Please ensure the following conditions are met:
+   * The redirect URL specified in the Google App needs to be the same as the one specified by this property.
+   * The redirect URI uses "https://" as protocol
+   * The redirect URI follows the pattern: "https://" + \<host-name\> + "/ajax/defer"
+     `com.openexchange.oauth.google.redirectUrl=`
+      E.g. "https://myappsuite.mydomain.invalid/ajax/defer" 
+* Set the product ID of the registered Google app
+  `com.openexchange.oauth.google.productName=`
+
+You can define them system-wide or via the config cascade mechanism.
+
+# Google App Verification
+
+## Problem
 Google has recently restricted the possibility to allow 3rd party developers to integrate their applications with Google services, see 
 [this article](https://support.google.com/cloud/answer/7454865) for further information. In essence, a verification process was introduced that requires multiple 
 steps to be taken. This change affects all Google integrations for OX App Suite:
@@ -15,9 +54,9 @@ steps to be taken. This change affects all Google integrations for OX App Suite:
 Without verification, users will see a warning message instead of a login form in the authorization popups. While the warning itself can be ignored with some effort, 
 also the number of users that might use a certain 3rd party app with Google gets limited.
 
-![](Google_verification_error.jpg)
+![](google/Google_verification_error.jpg)
 
-# Solution
+## Solution
 The following is necessary to avoid the limitations: (also see [Google's documentation](https://developers.google.com/apps-script/guides/client-verification#requesting_verification))
 
 * In [Google Developer Console](https://console.developers.google.com/), ensure that the OAuth consent screen settings include a valid homepage URL and a 
@@ -66,4 +105,3 @@ Also, you need to provide an explanation why your instance of OX App Suite requi
 It might happen that despite submitting the verification request, you get no positive answer even after weeks. In that case please answer to the submit confirmation mail 
 and ask for guidance on how to proceed to get your app verified. Google seems to react to these eMails. In our case, we were asked to again explain the requested scopes 
 in more detail. After doing that, the app was verified within a day and the warning screen was gone.
-
