@@ -224,7 +224,6 @@ com.openexchange.download.limit.rdb.FileAccessConvertUtf8ToUtf8mb4UpdateTask    
 com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4                                  excluded via namespace 'groupware.utf8mb4'       
 com.openexchange.groupware.update.tasks.AdminTablesUtf8Mb4UpdateTask                                    excluded via namespace 'groupware.utf8mb4'       
 com.openexchange.groupware.update.tasks.SettingsConvertUtf8ToUtf8mb4Task                                excluded via namespace 'groupware.utf8mb4'       
-com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4                                       excluded via namespace 'groupware.utf8mb4'       
 com.openexchange.groupware.update.tasks.IDConvertToUtf8mb4Task                                          excluded via namespace 'groupware.utf8mb4'       
 com.openexchange.groupware.update.tasks.ContactTablesUtf8Mb4UpdateTask                                  excluded via namespace 'groupware.utf8mb4'       
 com.openexchange.oauth.provider.impl.groupware.OAuthGrantConvertUtf8ToUtf8mb4Task                       excluded via namespace 'groupware.utf8mb4'       
