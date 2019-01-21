@@ -83,7 +83,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ChronosBugsTestSuite.class,
     ITipTestSuite.class,
     BirthdayCalendarExportTest.class,
-    BasicCommentTest.class
+    BasicCommentTest.class,
+    ChangeOrganizerTest.class,
     // @formatter:on
 
 })

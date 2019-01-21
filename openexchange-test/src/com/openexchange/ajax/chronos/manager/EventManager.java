@@ -78,6 +78,7 @@ import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
+import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
@@ -97,6 +98,11 @@ import com.openexchange.testing.httpclient.models.UpdatesResult;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class EventManager extends AbstractManager {
+
+    public enum RecurrenceRange {
+        THISANDFUTURE,
+        THISANDPRIOR,
+    }
 
     private final UserApi userApi;
     private final String  defaultFolder;
@@ -600,6 +606,45 @@ public class EventManager extends AbstractManager {
         body.setEvent(eventData);
         ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, null, B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
         return handleUpdate(updateResponse, expectException);
+    }
+
+    /**
+     * Updates the specified recurrence event with specified {@link RecurrenceRange}
+     *
+     * @param eventData The data of the event
+     * @param recurrenceId the recurrence identifier
+     * @param range The {@link RecurrenceRange}
+     * @param expectException Whether an exception is expected or not
+     * @param ignoreConflicts Whether to ignore conflicts or not
+     * @return The updated event
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, RecurrenceRange range, boolean expectException, boolean ignoreConflicts) throws ApiException, ChronosApiException {
+        UpdateBody body = new UpdateBody();
+        body.setEvent(eventData);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, range.name(), B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
+        return handleUpdate(updateResponse, expectException);
+    }
+
+    /**
+     * Updates an organizer on the given event
+     *
+     * @param eventData The data of the event
+     * @param organizer The new organizer to set
+     * @param comment An optional comment to send to the attendees
+     * @param recurrenceId the recurrence identifier
+     * @param range The {@link RecurrenceRange}
+     * @return The updated event
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData updateEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
+        throw new UnsupportedOperationException();
+        // TODO use new action
+        // Body body = new Body(comment, organizer);
+        // ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), recurrenceId, range.name(), body);
+        // return handleUpdate(updateResponse, expectException);
     }
 
     /**
