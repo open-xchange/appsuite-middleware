@@ -31,6 +31,8 @@ Requires:      open-xchange-xerces >= @OXVERSION@
 Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
+Conflicts:     open-xchange-publish < 7.10.2
+Obsoletes:     open-xchange-publish < 7.10.2
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main

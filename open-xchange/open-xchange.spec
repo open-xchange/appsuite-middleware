@@ -45,7 +45,6 @@ Requires(postun): systemd
 # Bug #23216
 Requires:         redhat-lsb
 %endif
-Conflicts:        open-xchange-publish < 7.10.2
 
 %description
 This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
