@@ -13,4 +13,4 @@ requests:
   - NeedsActionRequest.yaml
   - ResolveRequest.yaml
   - ZipAttachmentsRequest.yaml
-  
+  - UpdateOrganizerRequest.yaml
