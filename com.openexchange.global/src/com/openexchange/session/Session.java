@@ -263,7 +263,7 @@ public interface Session {
     /**
      * The session parameter used to hold the client's push token
      */
-    public static final String PARAM_PUSH_TOKEN = "com.openexchange.drive.pushToken".intern();
+    public static final String PARAM_PUSH_TOKEN = "__session.pushtoken".intern();
 
     /**
      * @return the context identifier.
