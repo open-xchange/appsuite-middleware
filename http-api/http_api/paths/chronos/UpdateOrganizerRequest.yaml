@@ -20,12 +20,14 @@
         description: Timestamp of the last update of the event.
         required: true
       - in: body
+        name: updateOrganizerBody
         description: A JSON object containing the new organizer and an optional comment.
         required: true
         schema:
           type: object
           properties:
             organizer:
+              type: object
               $ref: "#/definitions/CalendarUser"
             comment:
               type: string
