@@ -52,6 +52,7 @@ package com.openexchange.contact.internal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.contact.storage.ContactStorage;
@@ -61,10 +62,12 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ResultIterator} - Search iterator for contacts fetched through the
@@ -79,7 +82,7 @@ public class ResultIterator implements SearchIterator<Contact> {
     private static final ContactField[] DLISTMEMBER_FIELDS = {
     	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED,
     	ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME,
-    	ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, };
+        ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME };
 
     private final SearchIterator<Contact> delegate;
     private final boolean needsAttachmentInfo;
@@ -188,27 +191,70 @@ public class ResultIterator implements SearchIterator<Contact> {
 		member.setEmailfield(DistributionListEntryObject.INDEPENDENT);
 	}
 
-	private void updateMemberInfo(DistributionListEntryObject member, Contact referencedContact) {
-	    if (null != referencedContact.getDisplayName()) {
-	        member.setDisplayname(referencedContact.getDisplayName());
+    private void updateMemberInfo(DistributionListEntryObject member, Contact contact) {
+        if (null != contact.getDisplayName()) {
+            member.setDisplayname(contact.getDisplayName());
 	    }
-		member.setFolderID(referencedContact.getParentFolderID());
-		member.setEntryID(referencedContact.getObjectID());
-		member.setFirstname(referencedContact.getGivenName());
-		member.setLastname(referencedContact.getSurName());
+        member.setFolderID(contact.getParentFolderID());
+        member.setEntryID(contact.getObjectID());
+        member.setFirstname(contact.getGivenName());
+        member.setLastname(contact.getSurName());
 		String email = null;
 		if (DistributionListEntryObject.EMAILFIELD1 == member.getEmailfield()) {
-			email = referencedContact.getEmail1();
+            email = contact.getEmail1();
 		} else if (DistributionListEntryObject.EMAILFIELD2 == member.getEmailfield()) {
-			email = referencedContact.getEmail2();
+            email = contact.getEmail2();
 		} else if (DistributionListEntryObject.EMAILFIELD3 == member.getEmailfield()) {
-			email = referencedContact.getEmail3();
+            email = contact.getEmail3();
 		}
 		try {
 			member.setEmailaddress(email);
 		} catch (OXException e) {
 			LOG.warn("Error setting e-mail address for updated distribution list member", e);
 		}
+        member.setSortName(getSortedName(contact.getYomiLastName(), contact.getYomiFirstName(), contact.getSurName(), contact.getGivenName()));
+	}
+	
+	private String getSortedName(String yomiLastName,
+	                             String yomiFirtName,
+	                             String surName,
+	                             String givenName) {
+	    
+	    Locale locale;
+        try {
+            locale = ServerSessionAdapter.valueOf(session).getUser().getLocale();
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            locale = null;
+        }
+	     /*
+         * for contacts, use last- and firstname, preferring the yomi names if suitable
+         */
+        boolean preferYomiFields = null != locale && Locale.JAPANESE.getLanguage().equals(locale.getLanguage());
+        {
+            String[] names;
+            if (preferYomiFields) {
+                names = new String[] { yomiLastName, yomiFirtName, surName, givenName };
+            } else {
+                names = new String[] { surName, givenName, yomiLastName, yomiFirtName };
+            }
+            StringBuilder stringBuilder = new StringBuilder(64);
+            for (String value : names) {
+                if (Strings.isNotEmpty(value)) {
+                    if (0 < stringBuilder.length()) {
+                        stringBuilder.append('_');
+                    }
+                    stringBuilder.append(value);
+                }
+            }
+            if (0 < Strings.trim(stringBuilder).length()) {
+                return stringBuilder.toString();
+            }
+        }
+        /*
+         * fallback to empty sortname
+         */
+        return "";
 	}
 
 	private Contact[] getReferencedContacts(DistributionListEntryObject[] members) {
@@ -234,25 +280,20 @@ public class ResultIterator implements SearchIterator<Contact> {
 			try {
 				ContactStorage storage = Tools.getStorage(session, entry.getKey());
 				searchIterator = storage.list(session, "0".equals(entry.getKey()) ? null : entry.getKey(),
-						entry.getValue().toArray(new String[entry.getValue().size()]), DLISTMEMBER_FIELDS);
-				while (searchIterator.hasNext()) {
-					Contact contact = searchIterator.next();
-					try {
-						if (null != contact && this.accept(contact, null)) {
-							/*
-							 * add contact info for matching member in result
-							 */
-							for (int i = 0; i < members.length; i++) {
-								if (members[i].getEntryID() == contact.getObjectID() && (0 == members[i].getFolderID() ||
-										members[i].getFolderID() == contact.getParentFolderID())) {
-									contacts[i] = contact;
-								}
-							}
-						}
-					} catch (OXException e) {
-						LOG.warn("Error resolving referenced member for distribution list", e);
-					}
-				}
+                    entry.getValue().toArray(new String[entry.getValue().size()]), DLISTMEMBER_FIELDS);
+                while (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    if (null != contact && this.accept(contact, null)) {
+                        /*
+                         * add contact info for matching member in result
+                         */
+                        for (int i = 0; i < members.length; i++) {
+                            if (members[i].getEntryID() == contact.getObjectID() && (0 == members[i].getFolderID() || members[i].getFolderID() == contact.getParentFolderID())) {
+                                contacts[i] = contact;
+                            }
+                        }
+                    }
+                }
 			} catch (OXException e) {
 				LOG.warn("Error resolving referenced members for distribution list", e);
 			} finally {
@@ -270,11 +311,11 @@ public class ResultIterator implements SearchIterator<Contact> {
 	 * @return
 	 * @throws OXException
 	 */
-	private boolean accept(final Contact contact) throws OXException {
+    private boolean accept(final Contact contact) {
 		return this.accept(contact, this.canReadAll);
 	}
 
-	private boolean accept(Contact contact, Boolean canReadAll) throws OXException {
+    private boolean accept(Contact contact, Boolean canReadAll) {
 		if (contact.getCreatedBy() == session.getUserId()) {
 			return true;
 		} else if (contact.containsPrivateFlag()) {
@@ -300,7 +341,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 	}
 
 	@Override
-	public boolean hasNext() throws OXException {
+    public boolean hasNext() {
 		return null != this.next;
 	}
 
