@@ -1140,7 +1140,7 @@ public class Executor {
         }
     }
 
-    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws OXException, SQLException {
+    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws SQLException {
         if (null != objectIDs && objectIDs.length > 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("DELETE FROM object_use_count WHERE cid=?");
@@ -1170,7 +1170,7 @@ public class Executor {
         }
     }
 
-    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws OXException, SQLException {
+    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM object_use_count WHERE cid=?");
         if (Integer.MIN_VALUE != objectID) {

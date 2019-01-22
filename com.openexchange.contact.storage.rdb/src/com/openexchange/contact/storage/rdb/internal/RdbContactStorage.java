@@ -128,7 +128,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     }
 
     @Override
-    public boolean supports(final Session session, final String folderId) throws OXException {
+    public boolean supports(final Session session, final String folderId) {
         return true;
     }
 
@@ -829,7 +829,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
-    private <O> SearchIterator<Contact> getContacts(final Session session, final ContactSearchObject contactSearch, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    private SearchIterator<Contact> getContacts(final Session session, final ContactSearchObject contactSearch, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
@@ -927,7 +927,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         return contacts;
     }
 
-    private List<Contact> mergeAttachmentData(final Connection connection, final int contextID, final List<Contact> contacts) throws SQLException, OXException {
+    private List<Contact> mergeAttachmentData(final Connection connection, final int contextID, final List<Contact> contacts) throws SQLException {
         final int[] objectIDs = getObjectIDsWithAttachments(contacts);
         if (null != objectIDs && 0 < objectIDs.length) {
             final Map<Integer, Date> attachmentData = executor.selectNewestAttachmentDates(connection, contextID, objectIDs);

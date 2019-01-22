@@ -107,7 +107,8 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 	 * Override this <code>serialize</code>-method if needed.
 	 * @throws OXException
 	 */
-	@Override
+    @SuppressWarnings("unused")
+    @Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException, OXException {
 		final T value = this.get(from);
 		return null != value ? value : JSONObject.NULL;

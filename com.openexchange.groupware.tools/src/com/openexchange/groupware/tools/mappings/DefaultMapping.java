@@ -79,6 +79,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
      * Default <code>truncate</code> implementation that never truncates,
      * override if applicable for the mapped property.
      */
+    @SuppressWarnings("unused")
     @Override
     public boolean truncate(O object, int length) throws OXException {
         return false;
@@ -88,6 +89,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
      * Default <code>replaceAll</code> implementation that never replaces,
      * override if applicable for the mapped property.
      */
+    @SuppressWarnings("unused")
     @Override
     public boolean replaceAll(O object, String regex, String replacement) throws OXException {
         return false;
@@ -117,6 +119,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
      * comparison for {@link String}s properties and ignores the timezone.
      * Override if applicable for the mapped property.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public int compare(O o1, O o2, Locale locale, TimeZone timeZone) {
         T value1 = this.get(o1);

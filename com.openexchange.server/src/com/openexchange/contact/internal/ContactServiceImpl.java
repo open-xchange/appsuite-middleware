@@ -613,7 +613,7 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     @Override
-    protected <O> SearchIterator<Contact> doGetContacts(final boolean deleted, final Session session, final String folderID, final String[] ids,
+    protected SearchIterator<Contact> doGetContacts(final boolean deleted, final Session session, final String folderID, final String[] ids,
         final ContactField[] fields, SortOptions sortOptions, final Date since) throws OXException {
         int contextID = session.getContextId();
         /*
