@@ -6,14 +6,20 @@ icon: fa-windows
 
 To setup the Microsoft OneDrive file store you have to install the package `open-xchange-file-storage-onedrive`.
 
-# Registering your app
+# Required Permissions
 
-* Please follow [this guide](https://msdn.microsoft.com/en-us/library/ff751474.aspx) to create/register your app
-* application ID maps to apiKey in OX properties
-* create credentials and copy it to apiSecret
-* choose "Web" as platform
-* enter the redirect URL according to the instruction in msliveconnectoauth.properties
-* enter profile data for your application
+The following Microsoft Graph Permissions are required to enable the OneDrive cloud storage.
+
+ * [Files.Read](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [Files.Read.All](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [Files.Read.Selected](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [Files.ReadWrite](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [Files.ReadWrite.All](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [Files.ReadWrite.AppFolder](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [Files.ReadWrite.Selected](https://docs.microsoft.com/en-us/graph/permissions-reference#delegated-permissions-9)
+ * [offline_access](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
+ * [openid](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
+ * [profile](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
 
 # Configuration
 

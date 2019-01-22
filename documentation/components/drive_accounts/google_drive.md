@@ -12,8 +12,8 @@ Then you will have to enable the Google Drive specific scopes via the [Google De
 * Select your project
 * Navigate to "ENABLE APIS AND SERVICES"
 * Enable the following APIs:
-  * BigQuery API
-  * Drive API
+  * [BigQuery API](https://developers.google.com/identity/protocols/googlescopes#bigqueryv2)
+  * [Drive API](https://developers.google.com/identity/protocols/googlescopes#drivev3)
   * Drive SDK
   * Google Cloud SQL
   * Google Cloud Storage

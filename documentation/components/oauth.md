@@ -2,20 +2,18 @@
 title: OAuth 2.0
 ---
 
-# Installation
-
-To enhance the middleware with OAuth client functionality, you will need to install the package `open-xchange-oauth`. This package provides all necessary authentication mechanisms for the following OAuth providers:
-
-* Box
-* Dropbox
-* Flickr
-* Google
-* Microsoft
-* Twitter
-* Yahoo
-* Xing
-
 # Common Preparations
+
+To enhance the middleware over OAuth client functionality and to be able to use applications (e.g. calendar/contact synchronisation or cloud storage functionality) from third party providers (such as Google or Dropbox) that allow user authentication via OAuth, you need to do some groundwork first and prepare your nodes. The basic template for OAuth is:
+
+ * Configure your nodes to be reachable via HTTPs
+ * Install the `open-xchange-oauth` package
+ * Register an App on the third party provider's website and generate key pairs
+ * Configure your nodes to use those key pairs
+
+For the last two steps there are explicity instructions for each supported OAuth provider depending on what you are trying to accomplish, e.g. configure Dropbox cloud storage, Google Calendars, etc.
+
+## HTTPS
 
 Your setup is required to be reachable via HTTPS, since the OAuth providers expect that a call-back URL to your setup is specified. Such a call-back URL is only accepted if it contains the `https://` scheme., e.g.:
 
@@ -35,3 +33,16 @@ Open-Xchange application uses the deferrer URL as call-back for some of the prov
 If your OX server is reachable only via one host name, you won't have to do anything. If it is reachable by more than one host name, create or open the file `/opt/openexchange/etc/deferrer.properties` and set the properties therein as such:
 
  `com.openexchange.http.deferrer.url=https://mymaindomain.invalid`
+
+# Installation
+
+Install via your OS's package manager the package `open-xchange-oauth`. This package provides all necessary authentication mechanisms for the following OAuth providers:
+
+* Box
+* Dropbox
+* Flickr
+* Google
+* Microsoft
+* Twitter
+* Yahoo
+* Xing

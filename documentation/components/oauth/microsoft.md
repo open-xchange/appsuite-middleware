@@ -15,7 +15,7 @@ First things first. As with every OAuth provider, you will first need to registe
 * A pop-up dialog will display your generated password. Make a note of that as it will be used later in the Configuration section.
 * Under the "*Platforms*" sub-section, click on the "*Add Platform*" button and select "*Web*"
 * Enter the redirect URL as advised [here]({{ site.baseurl }}/middleware/components/oauth.html#common-preparations).
-* Under the "*Microsoft Graph Permissions*" you can enable the scopes that are relevant for your project. The middleware currently supports functionality for:
+* Under the "*Microsoft Graph Permissions*" you can enable the "*Delegated Permissions*" that are relevant for your project. The middleware currently supports functionality for:
    * [Microsoft OneDrive]({{ site.baseurl }}/middleware/components/drive_accounts/microsoft_onedrive.html) (Read/Write)
    * Microsoft Contacts (Read Only)
 
