@@ -93,7 +93,7 @@ public class CassandraActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        final CassandraService cassandraService = new CassandraServiceImpl(this);
+        CassandraService cassandraService = new CassandraServiceImpl(this);
         registerService(CassandraService.class, cassandraService);
         addService(CassandraService.class, cassandraService);
         this.cassandraService = cassandraService;
