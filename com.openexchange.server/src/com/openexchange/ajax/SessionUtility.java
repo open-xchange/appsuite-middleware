@@ -67,7 +67,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
@@ -589,7 +588,7 @@ public final class SessionUtility {
                 LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
-            rewriteShardCookie(req, resp, session);
+            rewriteShardCookieIfNeeded(req, resp, session);
             return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
         } catch (OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
@@ -1157,7 +1156,7 @@ public final class SessionUtility {
      * @param response The {@link HttpServletResponse}
      * @param session The {@link Session}
      */
-    public static void rewriteShardCookie(HttpServletRequest request, HttpServletResponse response, Session session) {
+    public static void rewriteShardCookieIfNeeded(HttpServletRequest request, HttpServletResponse response, Session session) {
         if (needsShardCookieRefresh(request)) {
             LOG.debug("Value of open-xchange-shard cookie invalid or no cookie available, rewrite cookie");
             LoginServlet.writeShardCookie(response, session, request.isSecure(), request.getServerName());
@@ -1283,19 +1282,15 @@ public final class SessionUtility {
     }
 
     /**
-     * Loads the shard cookie value and replaces the value with the default
+     * Gets the shard cookie value and replaces the value with the default
      * value if the loaded one is blank.
      *
      * @return The shard cookie value
      */
     public static String getShardCookieValue() {
-        final ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final String defaultValue = ServerConfig.Property.SHARD_NAME.getDefaultValue().trim();
-        String cookieValue = configService.getProperty(ServerConfig.Property.SHARD_NAME.getPropertyName(), defaultValue).trim();
-        if (StringUtils.isEmpty(cookieValue)) {
-            cookieValue = defaultValue;
-        }
-        return cookieValue;
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        String defaultValue = ServerConfig.Property.SHARD_NAME.getDefaultValue().trim();
+        return configService.getProperty(ServerConfig.Property.SHARD_NAME.getPropertyName(), defaultValue).trim();
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //
