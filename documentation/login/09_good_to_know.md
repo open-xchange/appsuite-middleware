@@ -5,10 +5,12 @@ title: Good to know
 # Introduction
 There are some peculiarities with regards to login and sessions that will be listed on this page.
 
-## Exception code LGI-0016
+## Exception LGI-0016
 There is a contract between server and client (currently web UI and devices) that when the server responds with exception code LGI-0016 the client will (and should) handle it like a HTTP 302. The error parameter will contain the URL the client should redirect to.
 
-A possible response might look like the following JSON snippet:
+The exception will only be handled by the client while login. For instance using the segmented update feature by registering an additional server will redirect the user (that is assigned to a context that was moved to the new server) to the URL of the new server.
+
+A response of this exception will look like the following JSON snippet:
 
 ```json
 {
