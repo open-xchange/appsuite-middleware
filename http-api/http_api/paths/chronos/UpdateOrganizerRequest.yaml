@@ -27,7 +27,6 @@
           type: object
           properties:
             organizer:
-              type: object
               $ref: "#/definitions/CalendarUser"
             comment:
               type: string
