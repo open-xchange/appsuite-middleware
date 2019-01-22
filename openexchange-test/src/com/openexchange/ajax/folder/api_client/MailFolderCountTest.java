@@ -103,7 +103,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null);
+        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null);
         Assert.assertNull(createFolder.getError());
         Assert.assertNotNull(createFolder.getData());
 
@@ -143,7 +143,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
                 body.add(mailListElement);
             }
             api.deleteMails(getApiClient().getSession(), body, timestamp);
-            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, true, false, false);
+            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, true, false, false, null);
         } finally {
             super.tearDown();
         }
@@ -176,7 +176,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
 
     // -------------------------   prepare config --------------------------------------
 
-    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+    private static final Map<String, String> CONFIG = new HashMap<>();
 
     static {
         CONFIG.put("com.openexchange.imap.ignoreDeleted", Boolean.FALSE.toString());

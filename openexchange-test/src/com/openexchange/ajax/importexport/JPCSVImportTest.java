@@ -101,7 +101,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         if (folderToDelete != null) {
-            foldersApi.deleteFolders(getSessionId(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
+            foldersApi.deleteFolders(getSessionId(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         }
         super.tearDown();
     }
@@ -134,7 +134,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null);
+        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
