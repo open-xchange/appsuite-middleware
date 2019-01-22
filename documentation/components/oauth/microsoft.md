@@ -17,7 +17,13 @@ First things first. As with every OAuth provider, you will first need to registe
 * Enter the redirect URL as advised [here]({{ site.baseurl }}/middleware/components/oauth.html#common-preparations).
 * Under the "*Microsoft Graph Permissions*" you can enable the "*Delegated Permissions*" that are relevant for your project. The middleware currently supports functionality for:
    * [Microsoft OneDrive]({{ site.baseurl }}/middleware/components/drive_accounts/microsoft_onedrive.html) (Read/Write)
-   * Microsoft Contacts (Read Only)
+   * [Microsoft Contacts]({{ site.baseurl }}/middleware/components/contacts/microsoft.html) (Read Only)
+* The following permissions are shared among both OneDrive and Contacts and should be enabled right away:
+ * [offline_access](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
+ * [openid](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
+ * [profile](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
+
+   
 
 # Configuration
 

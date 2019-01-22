@@ -12,11 +12,16 @@ First things first. As with every OAuth provider, you will first need to registe
 * Please follow [these](https://developers.google.com/identity/sign-in/web/devconsole-project) instructions to create a new project with a client ID, which is needed to call the sign-in API
 * Enable the APIs that are relevant for your project. The middleware currently supports functionality for:
    * [Google Drive]({{ site.baseurl }}/middleware/components/drive_accounts/google_drive.html) (Read/Write)
-   * Google Contacts (Read Only)
-   * Google Calendars (Read Only)
+   * [Google Contacts]({{ site.baseurl }}/middleware/components/contacts/google_contacts.html) (Read Only)
+   * [Google Calendars]({{ site.baseurl }}/middleware/components/calendar/google_calendar.html) (Read Only)
+* The following permissions are shared among Google Drive, Contacts and Calendars and should be enabled right away:
+  * Google Cloud SQL
+  * Google Cloud Storage
+  * Google Cloud Storage JSON API
+  * [BigQuery API](https://developers.google.com/identity/protocols/googlescopes#bigqueryv2)
 * Perform the [Google's site verification](https://support.google.com/webmasters/answer/35179)
-   * you can use any method listed by Google in general
-   * in case our OXaaS offering is used the HTML tag and HTML file methods are not accessible but the DNS based approach is required
+   * You can use any method listed by Google in general
+   * In case our OXaaS offering is used the HTML tag and HTML file methods are not accessible but the DNS based approach is required
 * [Get your app verified by Google](https://documentation.open-xchange.com/7.10.1/middleware/components/oauth/Google%20App%20Verification.html) to avoid awkward warnings.
 
 # Configuration

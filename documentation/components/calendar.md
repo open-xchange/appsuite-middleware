@@ -12,3 +12,7 @@ While our server does have a CalDAV interface for some time now, there are still
 In order to accomplish our goals of having a more standards compliant calendar and scheduling server, some decent changes on the data model and the calendaring logic are required. However, the existing architecture and grown codebase of the existing calendar implementation did not seem to be a suitable basis for the required amount of necessary refactorings, given the fact that it grew and evolved for so many years now, went through the hands of various developers, is full of workarounds for Outlook/USM quirks and is not really maintainable or extendable anymore. So after all, we decided to take the chance and begun a major rewrite of the calendar module (aka Calendar v2 aka Chronos). 
 
 For further details, please choose a subtopic on the left.
+
+# Calendar Subscriptions
+
+To install calendar synchronisation/subscription with third party providers you have to install the package `open-xchange-subscribe`. Currently, only iCal, [Google Calendars]({{ site.baseurl }}/middleware/components/calendar/google_calendar.html) and [SchedJoules](https://www.schedjoules.com/) are supported.
