@@ -54,15 +54,12 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
@@ -424,42 +421,6 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     @Override
     public abstract void releaseResources() throws OXException;
-
-    /**
-     * A convenience method that saves given draft mail to default drafts folder and supports deletion of old draft's version (draft-edit
-     * operation).
-     *
-     * @param draftFullName name The full name of default drafts folder
-     * @param draftMail The draft mail as a composed mail
-     * @return The stored draft mail
-     * @throws OXException If saving specified draft message fails
-     */
-    @Override
-    public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage draftMail) throws OXException {
-        final String uid;
-        try {
-            final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
-            filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
-            /*
-             * Append message to draft folder
-             */
-            uid = appendMessages(draftFullName, new MailMessage[] { filledMail })[0];
-        } finally {
-            draftMail.cleanUp();
-        }
-        /*
-         * Check for draft-edit operation: Delete old version
-         */
-        final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null && draftFullName.equals(msgref.getFolder())) {
-            deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
-            draftMail.setMsgref(null);
-        }
-        /*
-         * Return draft mail
-         */
-        return getMessage(draftFullName, uid, true);
-    }
 
     /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
