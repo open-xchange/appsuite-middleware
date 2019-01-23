@@ -188,6 +188,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object sequenceNumber(final Object... args) {
+        md(args).setSequenceNumber(longValue(1, args));
         return ret(args);
     }
 
