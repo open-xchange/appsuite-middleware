@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos;
 import static com.openexchange.ajax.chronos.manager.EventManager.RecurrenceRange.THISANDFUTURE;
 import static com.openexchange.ajax.chronos.manager.EventManager.RecurrenceRange.THISANDPRIOR;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,12 +59,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
@@ -118,6 +120,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
     }
 
     @Override
+    @After
     public void tearDown() throws Exception {
         if (null != event) {
             EventId id = new EventId();
@@ -148,7 +151,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
-    @Test
+    @Test(expected = ChronosApiException.class)
     public void testUpdateOnNonGroupScheduled() throws Exception {
         event.setAttendees(null);
 
@@ -156,24 +159,20 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update an non group scheduled
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(not(newOrganizer.getUri())));
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(originalOrganizer.getUri()));
+        eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
     }
 
-    @Test
+    @Test(expected = ChronosApiException.class)
     public void testUpdateToExternal() throws Exception {
         // Create event
         event = eventManager.createEvent(event);
 
         // Update to external
         newOrganizer = AttendeeFactory.createOrganizerFrom(AttendeeFactory.createIndividual("external@example.org"));
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(not(newOrganizer.getUri())));
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(originalOrganizer.getUri()));
+        eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
     }
 
-    @Test
+    @Test(expected = ChronosApiException.class)
     public void testUpdateWithExternalAttendee() throws Exception {
         event.getAttendees().add(AttendeeFactory.createIndividual("external@example.org"));
 
@@ -181,51 +180,50 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update with external attendee
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(not(newOrganizer.getUri())));
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(originalOrganizer.getUri()));
-
+        eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
     }
 
-    @Test
-    public void testUpdateOnSingleOccurence() throws Exception {
-        event.setRrule("FREQ=" + EventFactory.RecurringFrequency.WEEKLY.name() + ";COUNT=" + 10);
+    @Test(expected = ChronosApiException.class)
+    public void testUpdateOnSingleOccurrence() throws Exception {
+        event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
         event = eventManager.createEvent(event);
 
+        EventData occurrence = getOccurrence();
+        EventData exception = new EventData();
+        exception.setSummary("NewSummaryChangeOrganizerTest");
+        exception.setFolder(occurrence.getFolder());
+        exception.setId(occurrence.getId());
+        exception.setRecurrenceId(occurrence.getRecurrenceId());
+        occurrence = eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
+
         // update on occurrence
-        EventId occurence = getOccurence();
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, occurence.getRecurrenceId(), null, true);
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(not(newOrganizer.getUri())));
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(originalOrganizer.getUri()));
+        eventManager.updateEventOrganizer(occurrence, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, true);
     }
 
     @Test
     public void testUpdateThisAndFuture() throws Exception {
-        event.setRrule("FREQ=" + EventFactory.RecurringFrequency.WEEKLY.name() + ";COUNT=" + 10);
+        event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
         event = eventManager.createEvent(event);
 
-        EventId occurence = getOccurence();
+        EventData occurrence = getOccurrence();
         // THISANDFUTURE
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, occurence.getRecurrenceId(), THISANDFUTURE, false);
+        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
-    @Test
+    @Test(expected = ChronosApiException.class)
     public void testUpdateThisAndPrior() throws Exception {
-        event.setRrule("FREQ=" + EventFactory.RecurringFrequency.WEEKLY.name() + ";COUNT=" + 10);
+        event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
         event = eventManager.createEvent(event);
 
-        EventId occurence = getOccurence();
         // THISANDPRIOR
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, occurence.getRecurrenceId(), THISANDPRIOR, true);
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(not(newOrganizer.getUri())));
-        assertThat("Organizer did change", data.getOrganizer().getUri(), is(originalOrganizer.getUri()));
+        eventManager.updateEventOrganizer(event, newOrganizer, null, getOccurrence().getRecurrenceId(), THISANDPRIOR, true);
     }
 
     // ----------------------------- HELPER -----------------------------
@@ -248,23 +246,14 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         return userResponse.getData();
     }
 
-    private EventId getOccurence() throws ApiException {
-        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        instance.setTimeInMillis(System.currentTimeMillis());
-        instance.add(Calendar.DAY_OF_MONTH, -1);
-        Date from = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, 7);
-        Date until = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, -7);
+    private EventData getOccurrence() throws ApiException {
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+        Date from = CalendarUtils.truncateTime(new Date(), timeZone);
+        Date until = CalendarUtils.add(from, Calendar.DATE, 7, timeZone);
+        List<EventData> occurrences = eventManager.getAllEvents(event.getFolder(), from, until, true);
+        occurrences = occurrences.stream().filter(x -> x.getId().equals(event.getId())).collect(Collectors.toList());
 
-        List<EventData> occurences = eventManager.getAllEvents(folderId, from, until, true).stream().filter(x -> x.getId() == event.getId()).collect(Collectors.toList());
-
-        EventId occurence = new EventId();
-        occurence.setId(event.getId());
-        occurence.setFolder(event.getFolder());
-        occurence.setRecurrenceId(occurences.get(2).getRecurrenceId());
-
-        return occurence;
+        return occurrences.get(2);
     }
 
 }

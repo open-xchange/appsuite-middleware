@@ -89,6 +89,7 @@ import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.UpdateBody;
+import com.openexchange.testing.httpclient.models.UpdateOrganizerBody;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
@@ -635,16 +636,18 @@ public class EventManager extends AbstractManager {
      * @param comment An optional comment to send to the attendees
      * @param recurrenceId the recurrence identifier
      * @param range The {@link RecurrenceRange}
+     * @param expectException <code>true</code>
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData updateEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
-        throw new UnsupportedOperationException();
-        // TODO use new action
-        // Body body = new Body(comment, organizer);
-        // ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), recurrenceId, range.name(), body);
-        // return handleUpdate(updateResponse, expectException);
+        ChronosCalendarResultResponse updateResponse 
+        = userApi.getChronosApi().updateOrganizer(
+            userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), 
+            new UpdateOrganizerBody().organizer(organizer).comment(comment), 
+            recurrenceId, null == range ? null : range.name(), null);
+        return handleUpdate(updateResponse, expectException);
     }
 
     /**
