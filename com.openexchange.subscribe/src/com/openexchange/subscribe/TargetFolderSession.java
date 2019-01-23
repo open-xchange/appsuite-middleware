@@ -107,6 +107,7 @@ public class TargetFolderSession implements Session {
         return session.getLocalIp();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setLocalIp(final String ip) {
         if (null == session) {
@@ -218,6 +219,7 @@ public class TargetFolderSession implements Session {
         return session.getHash();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setHash(final String hash) {
         if (null != session) {
@@ -233,6 +235,7 @@ public class TargetFolderSession implements Session {
         return session.getClient();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setClient(final String client) {
         if (null != session) {

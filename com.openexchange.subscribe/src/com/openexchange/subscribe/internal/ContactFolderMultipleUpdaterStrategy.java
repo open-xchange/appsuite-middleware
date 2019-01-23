@@ -173,8 +173,8 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void save(final Contact newElement, final Object session, Collection<OXException> errors) throws OXException {
-        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
-        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+        ContactService contactService = (ContactService) getFromSession(SQL_INTERFACE, session);
+        TargetFolderSession targetFolderSession = (TargetFolderSession) getFromSession(SESSION, session);
         TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
 
@@ -197,6 +197,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Object getFromSession(final int key, final Object session) {
         return ((Map<Integer, Object>) session).get(key);
     }

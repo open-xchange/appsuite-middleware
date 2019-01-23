@@ -161,16 +161,16 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     /**
      * Stores the data
-     * 
+     *
      * @param data contents of this subscription
      * @param subscription The {@link Subscription}
      * @param session The {@link ServerSession}
      * @throws OXException In case data can't be saved
      */
-    protected void storeData(final SearchIterator<?> data, final Subscription subscription, Collection<OXException> optErrors) throws OXException {
-        FolderUpdaterService folderUpdater = getFolderUpdater(subscription);
+    protected <T> void storeData(final SearchIterator<T> data, final Subscription subscription, Collection<OXException> optErrors) throws OXException {
+        @SuppressWarnings("unchecked") FolderUpdaterService<T> folderUpdater = getFolderUpdater(subscription);
         if (folderUpdater instanceof FolderUpdaterServiceV2) {
-            ((FolderUpdaterServiceV2) folderUpdater).save(data, subscription, optErrors);
+            ((FolderUpdaterServiceV2<T>) folderUpdater).save(data, subscription, optErrors);
         } else {
             if (folderUpdater == null) {
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create("Missing FolderUpdateService.");
@@ -179,13 +179,14 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public FolderUpdaterService getFolderUpdater(final TargetFolderDefinition target) throws OXException {
         final FolderObject folder = getFolder(target.getContext().getContextId(), target.getFolderIdAsInt());
 
         //
         final boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
-        for (final FolderUpdaterService<?> updater : folderUpdaters) {
+        for (final FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 // if there are 2 or more subscriptions on the folder: use the multiple-variant of the strategy if it exists
                 if (moreThanOneSubscriptionOnThisFolder && updater.usesMultipleStrategy()) {
@@ -207,6 +208,14 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return null;
     }
 
+    /**
+     * Gets the folder
+     *
+     * @param contextId The context id
+     * @param folderId The folder id
+     * @return The {@link FolderObject}
+     * @throws OXException
+     */
     protected FolderObject getFolder(final int contextId, final int folderId) throws OXException {
         final OXFolderAccess ofa = new OXFolderAccess(contextService.getContext(contextId));
         return ofa.getFolderObject(folderId);
