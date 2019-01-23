@@ -126,14 +126,14 @@ public class UpdateOrganizerPerformer extends AbstractUpdatePerformer {
         /*
          * Check if event is group scheduled
          */
-        if (false == CalendarUtils.isGroupScheduled(originalEvent)) {
+        if (CalendarUtils.isPseudoGroupScheduled(originalEvent) || false == CalendarUtils.isGroupScheduled(originalEvent)) {
             throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, EventField.ORGANIZER);
         }
 
         /*
          * Check if attendees and new organizer are internal users
          */
-        if (containsExternal(originalEvent.getAttendees())) {
+        if (containsExternal(originalEvent.getAttendees()) || false == CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
             throw CalendarExceptionCodes.UNSUPPORTED_FOR_EXTERNAL_ATTENDEES.create();
         }
         if (false == CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL)) {
