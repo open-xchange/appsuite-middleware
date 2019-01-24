@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import static com.openexchange.ajax.chronos.manager.EventManager.RecurrenceRange.THISANDFUTURE;
 import static com.openexchange.ajax.chronos.manager.EventManager.RecurrenceRange.THISANDPRIOR;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.Calendar;
 import java.util.Date;
@@ -191,12 +192,12 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         EventData occurrence = getOccurrence();
-        EventData exception = new EventData();
-        exception.setSummary("NewSummaryChangeOrganizerTest");
-        exception.setFolder(occurrence.getFolder());
-        exception.setId(occurrence.getId());
-        exception.setRecurrenceId(occurrence.getRecurrenceId());
-        occurrence = eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
+
+        EventData exception = prepareException(occurrence);
+        EventData master = eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
+
+        assertThat("Too many change exceptions", Integer.valueOf(master.getChangeExceptionDates().size()), is(Integer.valueOf(1)));
+        assertThat("Unable to find change exception", (occurrence = getOccurrence(master.getChangeExceptionDates().get(0), master.getId())), is(notNullValue()));
 
         // update on occurrence
         eventManager.updateEventOrganizer(occurrence, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, true);
@@ -254,6 +255,24 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         occurrences = occurrences.stream().filter(x -> x.getId().equals(event.getId())).collect(Collectors.toList());
 
         return occurrences.get(2);
+    }
+
+    private EventData getOccurrence(String recurrecneId, String seriesId) throws ApiException {
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+        Date from = CalendarUtils.truncateTime(new Date(), timeZone);
+        Date until = CalendarUtils.add(from, Calendar.DATE, 7, timeZone);
+        List<EventData> occurrences = eventManager.getAllEvents(event.getFolder(), from, until, true);
+        return occurrences.stream().filter(x -> x.getSeriesId().equals(seriesId) && x.getRecurrenceId().equals(recurrecneId)).findFirst().orElse(null);
+    }
+
+    private EventData prepareException(EventData occurrence) {
+        EventData exception = new EventData();
+        exception.setSummary("NewSummaryChangeOrganizerTest");
+        exception.setFolder(occurrence.getFolder());
+        exception.setId(occurrence.getId());
+        exception.setRecurrenceId(occurrence.getRecurrenceId());
+        exception.setAttendees(occurrence.getAttendees());
+        return exception;
     }
 
 }
