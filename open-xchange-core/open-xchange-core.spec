@@ -610,6 +610,21 @@ EOF
       done
       ox_scr_done ${SCR}
     }
+
+    SCR=SCR-322.core
+    ox_scr_todo ${SCR} && {
+      prop_file=/opt/open-xchange/etc/server.properties
+      prop_key=PUBLISH_REVOKE
+      if ox_exists_property ${prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${prop_key} ${prop_file})
+        if [ -z "${prop_val}" ]
+        then
+          ox_remove_property ${prop_key} ${prop_file} 
+        fi
+      fi
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
