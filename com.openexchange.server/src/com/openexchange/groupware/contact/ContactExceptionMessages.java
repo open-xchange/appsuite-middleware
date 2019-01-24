@@ -142,6 +142,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String SET_DISTRIBUTION_LIST_ERROR_DISPLAY = "Invalid number of properties for distribution list.";
 
+    public final static String SUBSCRIPTION_NOT_ALLOWED = "This operation is not allowed in folder %1$s because it has a subscription.";
+
     private ContactExceptionMessages() {
         super();
     }

@@ -256,12 +256,13 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session, Collection<OXException> optErrors) throws OXException {
         int sum = 0;
         for (Subscription subscription : subscriptionsToRefresh) {
-            subscription.setSession(session);
             if (!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription {} because it is disabled", subscription.getDisplayName());
             } else {
                 final int subscriptionId = subscription.getId();
                 if (tryLock(subscriptionId, session)) {
+                    subscription.setSession(session);
+                    session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
                     try {
                         // Get subscription source
                         SubscriptionSource source = subscription.getSource();
@@ -316,10 +317,12 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                         }
                         LOG.warn("Subscription for {} cannot be updated. Move to next one.", subscription.getSource().getId(), oxException);
                     } finally {
+                        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
                         unlock(subscriptionId, session);
                     }
                 }
             }
+
         }
         return sum;
     }

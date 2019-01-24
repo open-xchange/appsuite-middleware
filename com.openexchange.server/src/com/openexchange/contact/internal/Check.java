@@ -73,7 +73,9 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link Check} - Static utility functions for the contact service.
@@ -82,7 +84,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  */
 public final class Check {
 
-	public static void argNotNull(final Object object, final String argumentName) {
+    public static void argNotNull(final Object object, final String argumentName) {
 		if (null == object) {
 			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
 		}
@@ -110,17 +112,19 @@ public final class Check {
 		}
 	}
 
-	public static void canWriteOwn(final EffectivePermission permission, final Session session) throws OXException {
-		if (false == permission.canWriteOwnObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
-		}
-	}
+    public static void canWriteOwn(final EffectivePermission permission, final Session session) throws OXException {
+        if (false == permission.canWriteOwnObjects()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
+        }
+        checkForSubscription(session, String.valueOf(permission.getFuid()), session.getContextId());
+    }
 
-	public static void canWriteAll(final EffectivePermission permission, final Session session) throws OXException {
-		if (false == permission.canWriteAllObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
-		}
-	}
+    public static void canWriteAll(final EffectivePermission permission, final Session session) throws OXException {
+        if (false == permission.canWriteAllObjects()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
+        }
+        checkForSubscription(session, String.valueOf(permission.getFuid()), session.getContextId());
+    }
 
 	public static void canReadAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
 		if (false == permission.canReadAllObjects()) {
@@ -128,23 +132,26 @@ public final class Check {
 		}
 	}
 
-	public static void canCreateObjects(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
-		if (false == permission.canCreateObjects()) {
-			throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
-		}
-	}
+    public static void canCreateObjects(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
+        if (false == permission.canCreateObjects()) {
+            throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+        }
+        checkForSubscription(session, folderID, session.getContextId());
+    }
 
-	public static void canDeleteOwn(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
-		if (false == permission.canDeleteOwnObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
-		}
-	}
+    public static void canDeleteOwn(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
+        if (false == permission.canDeleteOwnObjects()) {
+            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+        }
+        checkForSubscription(session, folderID, session.getContextId());
+    }
 
-	public static void canDeleteAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
-		if (false == permission.canDeleteAllObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
-		}
-	}
+    public static void canDeleteAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
+        if (false == permission.canDeleteAllObjects()) {
+            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+        }
+        checkForSubscription(session, folderID, session.getContextId());
+    }
 
     public static void isContactFolder(final FolderObject folder, final Session session) throws OXException {
 		if (FolderObject.CONTACT != folder.getModule()) {
@@ -176,7 +183,8 @@ public final class Check {
         }
     }
 
-	public static void validateSearch(final ContactSearchObject contactSearch) throws OXException {
+    @SuppressWarnings("deprecation")
+    public static void validateSearch(final ContactSearchObject contactSearch) throws OXException {
 		Search.checkPatternLength(contactSearch);
 		if (0 != contactSearch.getIgnoreOwn() || null != contactSearch.getAnniversaryRange() ||
 				null != contactSearch.getBirthdayRange() || null != contactSearch.getBusinessPostalCodeRange() ||
@@ -356,5 +364,15 @@ public final class Check {
 	private Check() {
 		// prevent instantiation
 	}
+
+    private static void checkForSubscription(Session session, String fid, int cid) throws OXException {
+        Object parameter = session.getParameter(Session.PARAM_SUBSCRIPTION_ADMIN);
+        if (parameter != null && Boolean.parseBoolean(parameter.toString())) {
+            return;
+        }
+        if (new OXFolderAccess(ServerSessionAdapter.valueOf(session).getContext()).isSubscriptionFolder(fid, cid)) {
+            throw ContactExceptionCodes.SUBSCRIPTION_NOT_ALLOWED.create(fid);
+        }
+    }
 
 }

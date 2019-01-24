@@ -752,4 +752,20 @@ public class OXFolderAccess {
         }
     }
 
+    /**
+     * Checks whether the given folder has a subscription.
+     *
+     * @param folderId The folder id
+     * @param contextId The context id
+     * @return <code>true</code> if the folder has a subscription, <code>false</code> otherwise
+     */
+    public boolean isSubscriptionFolder(String folderId, int contextId) throws OXException {
+        Connection con = DBPool.pickup(ctx);
+        try {
+            return OXFolderDependentUtil.hasSubscription(con, contextId, folderId);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
 }

@@ -248,7 +248,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
      */
     public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
         Date since = null;
-        if (Strings.isNotEmpty(token)) {
+        if (Strings.isNotEmpty(token) && !"0".equals(token)) {
             try {
                 since = new Date(Long.parseLong(token));
             } catch (NumberFormatException e) {
@@ -299,6 +299,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         return null != folder ? folder.getCreationDateUTC() : null;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public String getDisplayName() throws WebdavProtocolException {
         Locale locale = factory.getUser().getLocale();

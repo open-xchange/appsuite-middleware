@@ -201,6 +201,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
+    @SuppressWarnings("unused")
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         // Empty body
     }
@@ -240,7 +241,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
-    public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) throws OXException {
+    public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) {
         final SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
         if (encryptionFactoryService == null) {
             return;
@@ -398,6 +399,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     /**
      * Override if possible to allow pipelined processing of the subscription's content.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public SearchIterator<?> loadContent(Subscription subscription) throws OXException {
         Collection<?> collection = getContent(subscription);

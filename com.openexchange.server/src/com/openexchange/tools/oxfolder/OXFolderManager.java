@@ -284,4 +284,5 @@ public abstract class OXFolderManager {
      * @throws OXException
      */
     public abstract void cleanLocksForFolder(FolderObject folder, int userIds[]) throws OXException;
+
 }

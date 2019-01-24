@@ -191,6 +191,13 @@ public interface Session {
     public static final String PARAM_GUEST = "__session.guest".intern();
 
     /**
+     * The parameter to indicate whether the session is allowed to delete/update/create objects in subscribed folders.
+     * 
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_SUBSCRIPTION_ADMIN = "__session.subscription.administrative";
+
+    /**
      * The parameter for the cookie refresh time stamp.
      *
      * @type <code>java.lang.Long</code>

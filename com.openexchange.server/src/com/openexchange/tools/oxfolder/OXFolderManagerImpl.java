@@ -2058,7 +2058,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private void deleteContainedContacts(final int folderID) throws OXException {
-        ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
+        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        try {
+            ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
+        } finally {
+            session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+        }
     }
 
     private void deleteContainedDocuments(final int folderID) throws OXException {
@@ -2399,6 +2404,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     }
 
+    @SuppressWarnings("deprecation")
     private static int getPublishedMailAttachmentsFolder(final Session session) {
         if (null == session) {
             return -1;

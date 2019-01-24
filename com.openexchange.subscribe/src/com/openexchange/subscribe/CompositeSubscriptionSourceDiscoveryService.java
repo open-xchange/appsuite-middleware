@@ -103,9 +103,8 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
             public int compare(final SubscriptionSource o1, final SubscriptionSource o2) {
                 if(o1.getDisplayName() != null && o2.getDisplayName() != null) {
                     return o1.getDisplayName().compareTo(o2.getDisplayName());
-                } else {
-                    return o1.getDisplayName() == null ? -1 : 1;
                 }
+                return o1.getDisplayName() == null ? -1 : 1;
             }
 
         });

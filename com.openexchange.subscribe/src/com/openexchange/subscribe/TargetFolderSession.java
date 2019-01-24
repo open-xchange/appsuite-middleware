@@ -59,7 +59,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-
 /**
  * {@link TargetFolderSession} - A {@link Session} based on a passed {@link TargetFolderDefinition} instance.
  *
@@ -67,8 +66,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class TargetFolderSession implements Session {
 
-    private final int contextId;
-    private final int userId;
+    private final int                 contextId;
+    private final int                 userId;
     private final Map<String, Object> params;
     private final Session             session;
 
@@ -82,10 +81,12 @@ public class TargetFolderSession implements Session {
         Session ses = null;
         if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
             session = ServerSessionAdapter.valueOf(ses, target.getContext());
+            session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
             params = null;
         } else {
             session = null;
             params = new HashMap<String, Object>(8);
+            params.put(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
         }
     }
 

@@ -174,9 +174,8 @@ public abstract class DAVProtocol extends Protocol {
     public static WebdavProtocolException protocolException(WebdavPath url, Exception e) {
         if (OXException.class.isInstance(e)) {
             return protocolException(url, e, getStatusCode(((OXException) e).getCategory()));
-        } else {
-            return protocolException(url, e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+        return protocolException(url, e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     /**
