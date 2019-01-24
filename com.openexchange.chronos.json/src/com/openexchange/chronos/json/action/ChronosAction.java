@@ -134,7 +134,9 @@ public abstract class ChronosAction extends AbstractChronosAction {
             result = perform(calendarAccess, requestData);
             calendarAccess.commit();
             committed = true;
-            incrementGroupUseCount(requestData);
+            if (!EventConflictResultConverter.INPUT_FORMAT.equals(result.getFormat())) {
+                incrementGroupUseCount(requestData);
+            }
         } finally {
             if (false == committed) {
                 calendarAccess.rollback();
@@ -469,7 +471,12 @@ public abstract class ChronosAction extends AbstractChronosAction {
         return IDMangler.mangle(Integer.toString(contextId), eventId.getFolderID(), eventId.getObjectID(), /* eventId.getRecurrenceID().toString(), */ managedId);
     }
 
-    protected void incrementGroupUseCount(AJAXRequestData requestData) throws OXException {
+    /**
+     * Increments the use-count for used groups
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     */
+    private void incrementGroupUseCount(AJAXRequestData requestData) {
 
         String groupsString = requestData.getParameter(PARAM_USED_GROUP);
         if(Strings.isEmpty(groupsString)) {
@@ -494,6 +501,13 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     }
 
+    /**
+     * Increments the use-count for the given groups
+     * 
+     * @param session The user session
+     * @param principalUseCountService The {@link PrincipalUseCountService} to use
+     * @param groups The groups to increase
+     */
     private void incrementGroupUseCount(Session session, PrincipalUseCountService principalUseCountService, String[] groups) {
         for (String group : groups) {
             try {
@@ -503,7 +517,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
                 continue;
             } catch (OXException e) {
                 // Nothing to do here
-                LOG.debug(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
