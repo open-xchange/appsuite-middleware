@@ -558,6 +558,10 @@ public class DefaultEntityResolver implements EntityResolver {
             String email = optEMailAddress(attendee.getUri());
             attendee.setEMail(null != email ? email : getEMail(user));
         }
+        if (user.isGuest()) {
+            attendee.removeEntity();
+            LOG.debug("User {} refers to a guest account, treating {} as external attendee.", I(user.getId()), attendee);
+        }
         return attendee;
     }
 
