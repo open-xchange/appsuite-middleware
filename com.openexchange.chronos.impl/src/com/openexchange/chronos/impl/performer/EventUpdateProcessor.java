@@ -275,6 +275,10 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         changedChangeExceptions = adjustDeletedChangeExceptions(changedEvent, changedChangeExceptions);
         /*
+         * ensure consistency of change exceptions and series master's change exception dates
+         */
+        changedChangeExceptions = ensureChangeExceptionConsistency(changedEvent, changedChangeExceptions);
+        /*
          * take over non-conflicting changes in series master to change exceptions
          */
         changedChangeExceptions = propagateToChangeExceptions(originalEvent, changedEvent, originalChangeExceptions, changedChangeExceptions);
@@ -742,6 +746,52 @@ public class EventUpdateProcessor implements EventUpdate {
                 if (newChangeExceptionDates.removeAll(seriesMaster.getDeleteExceptionDates())) {
                     seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
                 }
+            }
+        }
+        return changeExceptions;
+    }
+    
+    /**
+     * Removes any <i>redundant</i> change exception events in case there are multiple defined for the same recurrence identifier so that
+     * the series' consistency is guaranteed. In such a case, only the 'first' one is preserved in the list of change exception events.
+     * Also, the series master event's list of change exception dates is updated accordingly.
+     * 
+     * @param seriesMaster The series master event
+     * @param changeExceptions The change exception events
+     * @return The resulting list of (possibly adjusted) change exceptions
+     */
+    private List<Event> ensureChangeExceptionConsistency(Event seriesMaster, List<Event> changeExceptions) {
+        if (isNullOrEmpty(changeExceptions)) {
+            /*
+             * ensure series master's change exception dates is empty, too
+             */
+            if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
+                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", 
+                    seriesMaster.getChangeExceptionDates(), Collections.emptyList());
+                seriesMaster.setChangeExceptionDates(null);
+            }
+        } else {
+            /*
+             * check for duplicate recurrence identifiers within change exceptions
+             */
+            List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions.size());
+            Set<RecurrenceId> knownRecurrenceIds = new HashSet<RecurrenceId>(changeExceptions.size());
+            for (Event changeException : changeExceptions) {
+                if (knownRecurrenceIds.add(changeException.getRecurrenceId())) {
+                    newChangeExceptions.add(changeException);
+                } else {
+                    LOG.warn("Duplicate change exception event {}, skipping.", changeException);
+                }
+            }
+            changeExceptions = newChangeExceptions;
+            /*
+             * also check series master's change exception dates against actual list of change exceptions
+             */
+            SortedSet<RecurrenceId> changeExceptionDates = CalendarUtils.getRecurrenceIds(newChangeExceptions);
+            if (changeExceptionDates.equals(seriesMaster.getChangeExceptionDates())) {
+                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", 
+                    seriesMaster.getChangeExceptionDates(), changeExceptionDates);
+                seriesMaster.setChangeExceptionDates(changeExceptionDates);
             }
         }
         return changeExceptions;

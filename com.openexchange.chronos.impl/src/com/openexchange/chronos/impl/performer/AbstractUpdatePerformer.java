@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -128,6 +129,8 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
+
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractUpdatePerformer.class);
 
     protected final CalendarUser calendarUser;
     protected final int calendarUserId;
@@ -215,6 +218,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Loads the recurrence identifiers of all stored change exception events for a specific event series from the storage.
+     * 
+     * @param seriesId The identifier of the series to load the exception dates for
+     * @return The recurrence identifiers of the change exception events, or an empty set if there are none
+     */
+    protected SortedSet<RecurrenceId> loadChangeExceptionDates(String seriesId) throws OXException {
+        return getRecurrenceIds(storage.getEventStorage().loadExceptions(seriesId, new EventField[] { EventField.RECURRENCE_ID }));
+    }
+
+    /**
      * Adds a specific recurrence identifier to the series master's change exception array and updates the series master event in the
      * storage.
      *
@@ -228,7 +241,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
         }
         if (false == changeExceptionDates.add(recurrenceID)) {
-            // TODO throw/log?
+            LOG.warn("Change exception date for {} already present.", recurrenceID);
         }
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
