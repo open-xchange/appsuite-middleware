@@ -1,5 +1,27 @@
 feature_name: Calendar
 properties:
+    - key: com.openexchange.calendar.birthdays.enabled
+      description: |
+        Configures if the <i>birthdays</i> calendar provider is available for a user or not.  
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Contact"]
+    - key: com.openexchange.calendar.birthdays.usedForSync
+      description: |
+        Configures if calendars from the <i>birthdays</i> calendar provider can be synchronized to external clients via CalDAV. If set to <code>false</code>, they are only available in the web client. 
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Contact","CalDAV"]
     - key: com.openexchange.calendar.schedjoules.enabled
       description: |
         Configures if the <i>schedjoules</i> calendar provider is available for a user or not. 
@@ -22,6 +44,17 @@ properties:
       file: subscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.schedjoules.usedForSync
+      description: |
+        Configures if calendars from the <i>schedjoules</i> calendar provider can be synchronized to external clients via CalDAV. If set to <code>false</code>, they are only available in the web client. 
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","CalDAV"]
     - key: com.openexchange.calendar.ical.enabled
       description: |
         Configures if the <i>ical</i> calendar provider is available for a user or not. 
@@ -44,6 +77,17 @@ properties:
       file: subscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.ical.usedForSync
+      description: |
+        Configures if calendars from the <i>ical</i> calendar provider can be synchronized to external clients via CalDAV. If set to <code>false</code>, they are only available in the web client. 
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","CalDAV"]
     - key: com.openexchange.calendar.google.enabled
       description: |
         Configures if the <i>google</i> calendar provider is available for a user or not. 
