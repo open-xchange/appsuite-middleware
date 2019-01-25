@@ -114,6 +114,7 @@ import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
+import com.openexchange.file.storage.UserizedIDTuple;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
@@ -1000,6 +1001,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
             session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
+
+        if (idTuple instanceof UserizedIDTuple) {
+            String originalFolderId = ((UserizedIDTuple) idTuple).getOriginalFolderId();
+            FileID originalFileID = new FileID(serviceID, accountID, originalFolderId, idTuple.getId());
+            FolderID originalFolderID = new FolderID(serviceID, accountID, originalFolderId);
+            postEvent(FileStorageEventHelper.buildUpdateEvent(
+                session, serviceID, accountID, originalFolderID.toUniqueID(), originalFileID.toUniqueID(), document.getFileName()));
+        }
         return newID.toUniqueID();
     }
 
@@ -1256,7 +1265,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 document.setId(result.getId());
                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
                 SaveResult saveResult = new SaveResult();
-                saveResult.setIDTuple(idTuple);
+                if (result instanceof UserizedIDTuple) {
+                    saveResult.setIDTuple(new UserizedIDTuple(idTuple.getFolder(), idTuple.getId(), ((UserizedIDTuple) result).getOriginalFolderId()));
+                } else {
+                    saveResult.setIDTuple(idTuple);
+                }
                 saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
                 return saveResult;
             }
