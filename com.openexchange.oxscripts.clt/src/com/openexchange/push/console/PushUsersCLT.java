@@ -69,7 +69,7 @@ import com.openexchange.push.rmi.PushRMIService;
 public class PushUsersCLT extends AbstractRmiCLI<Void> {
 
     private static final String SYNTAX = "pushusers [-l | [ -r -c <contextId> -u <userId> -i <client>] ] " + BASIC_MASTER_ADMIN_USAGE;
-    private static final String FOOTER = "Command-line tool for unregistering and listing (registered) push users";
+    private static final String FOOTER = "Command-line tool for unregistering and listing push users and client registrations";
 
     private int contextId;
     private int userId;
@@ -77,7 +77,7 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
 
     private enum Mode {
         LIST,
-        LIST_REGISTERED,
+        LIST_REGISTERED_CLIENTS,
         UNREGISTER;
     }
 
@@ -116,7 +116,7 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createSwitch("l", "list-registered", "Flag to only list registered push users", false));
+        options.addOption(createSwitch("l", "list-client-registrations", "Flag to list client registrations", false));
         options.addOption(createSwitch("r", "unregister", "Flag to unregister a push user", false));
         options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier", false));
         options.addOption(createArgumentOption("u", "user", "userId", "A valid user identifier", false));
@@ -134,7 +134,7 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
             case LIST:
                 listPushUsers(optRmiHostName);
                 break;
-            case LIST_REGISTERED:
+            case LIST_REGISTERED_CLIENTS:
                 listRegisteredPushUsers(optRmiHostName);
                 break;
             case UNREGISTER:
@@ -171,7 +171,7 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
             System.exit(1);
         }
         if (cmd.hasOption('l')) {
-            mode = Mode.LIST_REGISTERED;
+            mode = Mode.LIST_REGISTERED_CLIENTS;
             return;
         }
         if (cmd.hasOption('r')) {
@@ -220,7 +220,7 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
      */
     private void listRegisteredPushUsers(String optRmiHostName) throws RemoteException, MalformedURLException, NotBoundException {
         PushRMIService rmiService = getRmiStub(optRmiHostName, PushRMIService.RMI_NAME);
-        List<List<String>> data = rmiService.listRegisteredPushUsers();
+        List<List<String>> data = rmiService.listClientRegistrations();
         if (null == data || data.isEmpty()) {
             System.out.println("No registered push users.");
         } else {

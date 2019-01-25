@@ -73,12 +73,12 @@ public interface PushRMIService extends Remote {
     List<List<String>> listPushUsers() throws RemoteException;
 
     /**
-     * Lists registered push users running on this node
+     * Lists client registrations on this node
      *
-     * @return The registered push users running on this node
+     * @return The registered clients running on this node
      * @throws RemoteException If push users cannot be returned
      */
-    List<List<String>> listRegisteredPushUsers() throws RemoteException;
+    List<List<String>> listClientRegistrations() throws RemoteException;
 
     /**
      * Unregisters the permanent listener for specified push user
