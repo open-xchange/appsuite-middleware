@@ -88,7 +88,15 @@ public class HideAdminServiceImpl implements HideAdminService {
     private final ContextService contextService;
     private final UserService userService;
 
+    /**
+     * Initializes a new {@link HideAdminServiceImpl}.
+     *
+     * @param leanConfigurationService The configuration service to use
+     * @param contextService The context service to use
+     * @param userService The user service to use
+     */
     public HideAdminServiceImpl(LeanConfigurationService leanConfigurationService, ContextService contextService, UserService userService) {
+        super();
         this.leanConfigurationService = leanConfigurationService;
         this.contextService = contextService;
         this.userService = userService;
