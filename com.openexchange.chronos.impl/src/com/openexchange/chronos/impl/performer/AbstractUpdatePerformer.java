@@ -56,7 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -928,7 +928,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <li>the event is located in a <i>public folder</i></li>
      * <li>or the event is not <i>group-scheduled</i></li>
      * <li>or the calendar user is the organizer of the event</li>
-     * <li>or the calendar user is the last internal user attendee in the event</li>
+     * <li>or the calendar user is the last <i>non-hidden</i> internal user attendee in the event</li>
      * </ul>
      *
      * @param originalEvent The original event to check
@@ -938,7 +938,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         return PublicType.getInstance().equals(folder.getType()) ||
             false == isGroupScheduled(originalEvent) ||
             isOrganizer(originalEvent, calendarUserId) ||
-            isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)
+            isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId)
         ;
     }
 

@@ -499,6 +499,22 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific user is the only / the last internal non-<i>hidden</i> user attendee in an attendee list.
+     *
+     * @param attendees The attendees to check
+     * @param userID The identifier of the user to lookup in the attendee list
+     * @return <code>true</code> if there are no other internal non-<i>hidden</i> user attendees despite the specified one, <code>false</code>, otherwise
+     */
+    public static boolean isLastNonHiddenUserAttendee(List<Attendee> attendees, int userID) {
+        for (Attendee userAttendee : filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+            if (false == userAttendee.isHidden() && userAttendee.getEntity() != userID) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Gets a date representing the supplied date-time's value.
      *
      * @param dateTime The date-time to get the corresponding date for
