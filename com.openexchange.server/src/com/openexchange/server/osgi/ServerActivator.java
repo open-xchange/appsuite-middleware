@@ -98,7 +98,6 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
@@ -602,7 +601,6 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track QuotaFileStorageService
          */
         track(QuotaFileStorageService.class, new RegistryCustomizer<QuotaFileStorageService>(context, QuotaFileStorageService.class));
-        track(HideAdminService.class, new RegistryCustomizer<HideAdminService>(context, HideAdminService.class));
         /*
          * Track QuotaAwareSnippetService
          */
@@ -614,14 +612,14 @@ public final class ServerActivator extends HousekeepingActivator {
         UserAliasStorage aliasStorage;
         {
             String regionName = "UserAlias";
-            byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" + 
-                            "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
-                            "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" + 
-                            "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
-                            "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" + 
-                            "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
-                            "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" + 
-                            "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + 
+            byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" +
+                            "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                            "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" +
+                            "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                            "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                            "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                            "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" +
+                            "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
                             "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
 
