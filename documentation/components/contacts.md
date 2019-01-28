@@ -5,7 +5,7 @@ icon: fa-address-book
 
 # Contact Subsriptions
 
-Before proceceeding, please make sure that you have [OAuth 2.0]({{ site.baseurl }}/middleware/components/oauth.html) functionality installed and properly configured on your middleware node.
+Before proceeding, please make sure that you have [OAuth 2.0]({{ site.baseurl }}/middleware/components/oauth.html) functionality installed and properly configured on your middleware node.
 
 # Installation
 
