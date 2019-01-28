@@ -163,9 +163,16 @@ public class RdbContextStorage extends ContextStorage {
         if (Strings.containsSurrogatePairs(loginInfo)) {
             return null;
         }
-        final Connection con;
+
+
+        DatabaseService databaseService = Database.getDatabaseService();
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        Connection con;
         try {
-            con = DBPool.pickup();
+            con = databaseService.getReadOnly();
         } catch (final OXException e) {
             throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
@@ -180,12 +187,16 @@ public class RdbContextStorage extends ContextStorage {
                 return null;
             }
 
-            return loadContextDataFromResultSet(result, -1);
+            ContextImpl context = loadContextDataFromResultSet(result, -1);
+            context.setLoginInfo(getLoginInfos(con, context));
+            // Load context data from UserDB
+            loadContextDataFromUserDb(context, databaseService);
+            return context;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(con);
+            databaseService.backReadOnly(con);
         }
     }
 
@@ -273,6 +284,12 @@ public class RdbContextStorage extends ContextStorage {
         }
 
         // Load context data from UserDB
+        loadContextDataFromUserDb(context, databaseService);
+        return context;
+    }
+
+    private void loadContextDataFromUserDb(ContextImpl context, DatabaseService databaseService) throws OXException {
+        int contextId = context.getContextId();
         try {
             Connection con = databaseService.getReadOnly(contextId);
             try {
@@ -292,8 +309,6 @@ public class RdbContextStorage extends ContextStorage {
                 databaseService.backWritableAfterReading(contextId, con);
             }
         }
-
-        return context;
     }
 
     private ContextImpl loadContext(Connection con, int contextId) throws OXException {
