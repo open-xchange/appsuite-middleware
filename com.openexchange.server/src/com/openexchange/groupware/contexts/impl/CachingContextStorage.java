@@ -78,11 +78,11 @@ public class CachingContextStorage extends ContextStorage {
 
     public static volatile CachingContextStorage parent;
 
-    private final ContextStorage persistantImpl;
+    private final RdbContextStorage persistantImpl;
 
     private boolean started;
 
-    public CachingContextStorage(final ContextStorage persistantImpl) {
+    public CachingContextStorage(final RdbContextStorage persistantImpl) {
         super();
         this.persistantImpl = persistantImpl;
     }
@@ -97,10 +97,14 @@ public class CachingContextStorage extends ContextStorage {
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
             LOG.trace("Cache MISS. Login info: {}", loginInfo);
-            contextId = I(persistantImpl.getContextId(loginInfo));
-            if (NOT_FOUND != contextId.intValue()) {
+            ContextExtended context = persistantImpl.getContext(loginInfo);
+            if (null == context) {
+                contextId = I(NOT_FOUND);
+            } else {
+                contextId = I(context.getContextId());
                 try {
                     cache.put(loginInfo, contextId, false);
+                    cache.put(contextId, context, false);
                 } catch (final OXException e) {
                     LOG.error("", e);
                 }
