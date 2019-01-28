@@ -57,7 +57,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 /**
- * 
+ *
  * {@link PermissionFilterDocumentMetadataImpl} overrides {@link DocumentMetadataImpl} to filter out administrators permission
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -66,11 +66,12 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 public class PermissionFilterDocumentMetadataImpl extends DocumentMetadataImpl implements DocumentMetadata {
 
     private static final long serialVersionUID = -1093207200136520302L;
+
     private final int adminUserId;
 
     /**
      * Initializes a new {@link PermissionFilterDocumentMetadataImpl} from specified folder.
-     * 
+     *
      * @param adminUserId The user id of the context admin
      * @param userizedFolder The requested origin {@link UserizedFolder}
      */
@@ -81,7 +82,7 @@ public class PermissionFilterDocumentMetadataImpl extends DocumentMetadataImpl i
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * The returned {@link ObjectPermission}s will not contain one for the administrator even she actually has got {@link ObjectPermission}s for the related document. So this implementation should be used to view permissions only.
      */
     @Override

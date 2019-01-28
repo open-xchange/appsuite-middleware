@@ -96,10 +96,7 @@ public class HideAdminServiceImpl implements HideAdminService {
 
     @Override
     public boolean showAdmin(int contextId) {
-        if (contextId <= 0) {
-            return true;
-        }
-        return leanConfigurationService.getBooleanProperty(-1, contextId, HideAdminProperty.SHOW_ADMIN_ENABLED);
+        return contextId > 0 ? leanConfigurationService.getBooleanProperty(-1, contextId, HideAdminProperty.SHOW_ADMIN_ENABLED) : true;
     }
 
     private int getAdminUserId(int contextId) throws OXException {
@@ -211,7 +208,6 @@ public class HideAdminServiceImpl implements HideAdminService {
         }
 
         int adminUserId = getAdminUserId(contextId);
-
         return Arrays.stream(userList).filter(x -> x.getId() != adminUserId).toArray(User[]::new);
     }
 
@@ -222,7 +218,6 @@ public class HideAdminServiceImpl implements HideAdminService {
         }
 
         int adminUserId = getAdminUserId(contextId);
-
         return Arrays.stream(userIds).filter(x -> x != adminUserId).toArray();
     }
 
@@ -238,11 +233,11 @@ public class HideAdminServiceImpl implements HideAdminService {
 
     @Override
     public TimedResult<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable final TimedResult<DocumentMetadata> documents) throws OXException {
-        if (documents == null || documents.results() == null || documents.results().size() == 0 || showAdmin(contextId)) {
+        if (documents == null || showAdmin(contextId)) {
             return documents;
         }
-        final int adminUserId = getAdminUserId(contextId);
 
+        final int adminUserId = getAdminUserId(contextId);
         return new CustomizableTimedResult<DocumentMetadata>(documents, new Customizer<DocumentMetadata>() {
 
             @Override
@@ -260,8 +255,8 @@ public class HideAdminServiceImpl implements HideAdminService {
         if (searchIterator == null || searchIterator.size() == 0 || showAdmin(contextId)) {
             return searchIterator;
         }
-        final int adminUserId = getAdminUserId(contextId);
 
+        final int adminUserId = getAdminUserId(contextId);
         return new CustomizableSearchIterator<>(searchIterator, new Customizer<DocumentMetadata>() {
 
             @Override
@@ -276,7 +271,7 @@ public class HideAdminServiceImpl implements HideAdminService {
 
     @Override
     public List<ObjectPermission> addAdminToObjectPermissions(int contextId, @Nullable List<ObjectPermission> originalPermissions, @Nullable List<ObjectPermission> updatedPermissions) throws OXException {
-        if (originalPermissions == null || originalPermissions.size() == 0 || updatedPermissions == null || showAdmin(contextId)) {
+        if (originalPermissions == null || originalPermissions.isEmpty() || updatedPermissions == null || showAdmin(contextId)) {
             return updatedPermissions;
         }
 

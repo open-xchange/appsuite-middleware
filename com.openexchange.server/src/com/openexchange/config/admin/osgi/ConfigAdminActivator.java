@@ -66,9 +66,21 @@ import com.openexchange.user.UserService;
  */
 public final class ConfigAdminActivator extends AJAXModuleActivator {
 
+    /**
+     * Initializes a new {@link ConfigAdminActivator}.
+     */
+    public ConfigAdminActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { LeanConfigurationService.class, ContextService.class, UserService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
@@ -76,6 +88,12 @@ public final class ConfigAdminActivator extends AJAXModuleActivator {
         HideAdminService hideAdminService = new HideAdminServiceImpl(getServiceSafe(LeanConfigurationService.class), getServiceSafe(ContextService.class), getServiceSafe(UserService.class));
         registerService(HideAdminService.class, hideAdminService);
         ServerServiceRegistry.getInstance().addService(HideAdminService.class, hideAdminService);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        ServerServiceRegistry.getInstance().removeService(HideAdminService.class);
+        super.stopBundle();
     }
 
 }
