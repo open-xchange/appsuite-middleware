@@ -770,31 +770,26 @@ public class EventUpdateProcessor implements EventUpdate {
                     seriesMaster.getChangeExceptionDates(), Collections.emptyList());
                 seriesMaster.setChangeExceptionDates(null);
             }
-        } else {
-            /*
-             * check for duplicate recurrence identifiers within change exceptions
-             */
-            List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions.size());
-            Set<RecurrenceId> knownRecurrenceIds = new HashSet<RecurrenceId>(changeExceptions.size());
-            for (Event changeException : changeExceptions) {
-                if (knownRecurrenceIds.add(changeException.getRecurrenceId())) {
-                    newChangeExceptions.add(changeException);
-                } else {
-                    LOG.warn("Duplicate change exception event {}, skipping.", changeException);
-                }
-            }
-            changeExceptions = newChangeExceptions;
-            /*
-             * also check series master's change exception dates against actual list of change exceptions
-             */
-            SortedSet<RecurrenceId> changeExceptionDates = CalendarUtils.getRecurrenceIds(newChangeExceptions);
-            if (changeExceptionDates.equals(seriesMaster.getChangeExceptionDates())) {
-                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", 
-                    seriesMaster.getChangeExceptionDates(), changeExceptionDates);
-                seriesMaster.setChangeExceptionDates(changeExceptionDates);
+            return changeExceptions;
+        }
+        /*
+         * remove any duplicate recurrence identifiers within change exceptions, as well as invalid recurrence identifiers within
+         * series master's list of change exceptions
+         */
+        List<Event> checkedChangeExceptions = new ArrayList<Event>(changeExceptions.size());
+        SortedSet<RecurrenceId> checkedChangeExceptionDates = new TreeSet<RecurrenceId>();
+        for (Event changeException : changeExceptions) {
+            if (checkedChangeExceptionDates.add(changeException.getRecurrenceId())) {
+                checkedChangeExceptions.add(changeException);
+            } else {
+                LOG.warn("Duplicate change exception event {}, skipping.", changeException);
             }
         }
-        return changeExceptions;
+        if (false == checkedChangeExceptionDates.equals(seriesMaster.getChangeExceptionDates())) {
+            LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", seriesMaster.getChangeExceptionDates(), checkedChangeExceptionDates);
+            seriesMaster.setChangeExceptionDates(checkedChangeExceptionDates);
+        }
+        return checkedChangeExceptions;
     }
 
     /**
