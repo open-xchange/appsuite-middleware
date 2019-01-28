@@ -723,8 +723,59 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         }
         classificationAllowsUpdate(folder, originalEvent);
+        /*
+         * require organizer role in case there are further internal attendees
+         */
+        if (false == isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
+            requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
+        }
     }
     
+    /**
+     * Checks that data of a specific attendee of an event can be deleted by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @param deletedAttendee The attendee who is deleted
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent, Attendee deletedAttendee) throws OXException {
+        requireDeletePermissions(originalEvent, deletedAttendee, false);
+    }
+
+    /**
+     * Checks that data of a specific attendee of an event can be deleted by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @param deletedAttendee The attendee who is deleted
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent, Attendee deletedAttendee, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (false == matches(deletedAttendee, calendarUserId)) {
+            /*
+             * always require permissions for whole event in case an attendee different from the calendar user is updated
+             */
+            requireDeletePermissions(originalEvent, assumeExternalOrganizerUpdate);
+        }
+        if (session.getUserId() != calendarUserId) {
+            /*
+             * user acts on behalf of other calendar user, allow attendee deletion based on permissions in underlying folder
+             */
+            if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
+                requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
+            } else {
+                requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+            }
+            classificationAllowsUpdate(folder, originalEvent);
+        }
+    }
+
     /**
      * Checks that a specific event can be updated by the current session's user under the perspective of the current folder, by either
      * requiring write access for <i>own</i> or <i>all</i> objects, based on the user being the creator of the event or not.

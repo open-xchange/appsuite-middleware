@@ -117,7 +117,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          * check current session user's permissions
          */
         Check.eventIsInFolder(originalEvent, folder);
-        requireDeletePermissions(originalEvent);
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
         if (null == recurrenceId) {
             deleteEvent(originalEvent);
@@ -138,6 +137,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
+            requireDeletePermissions(originalEvent);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent);
             } else {
@@ -150,6 +150,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion as one of the attendees
              */
+            requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent, userAttendee);
             } else {
@@ -174,6 +175,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
+            requireDeletePermissions(originalEvent);
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
                 if (null != recurrenceId.getRange()) {
@@ -242,6 +244,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion as attendee
              */
+            requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
                 if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
