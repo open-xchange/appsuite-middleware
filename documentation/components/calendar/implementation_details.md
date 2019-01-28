@@ -396,9 +396,9 @@ Afterwards, typically the new event series is adjusted in a second step, so that
 
 As described above, when dealing with recurring events, it is often necessary to apply a change from one occurrence on into the future (e.g., add a new attendee part way through the series of meetings).
 
-Previously, existing change exceptions are not touched at all when the series master event is modified. In the calendar implementation, we integrated some smart detection if a change to the recurring master event could also be applied to existing change excpetions, e.g. after a new attendee is added, or if the event location changes. As the web client does not have all change exceptions handy, the logic to 'propagate' the changes is implemented in the middleware.
+Previously, existing change exceptions are not touched at all when the series master event is modified. In the calendar implementation, we integrated some smart detection if a change to the recurring master event could also be applied to existing change exceptions, e.g. after a new attendee is added, or if the event location changes. As the web client does not have all change exceptions handy, the logic to 'propagate' the changes is implemented in the middleware.
 
-To avoid possible ambiguities, only certain changes considered, where the change can also be applied in some or all change exceptions intuitively. In particular, the following cases are taken into account:
+To avoid possible ambiguities, only certain changes considered, where the change can also be applied in some or all change exceptions intuitively. Also, for <i>group-scheduled</i> events, change propagation only happens when updating the event as organizer. In particular, the following cases are taken into account:
 
 - For all *simple* changed event fields, it is checked if the modified property is equal in the original series master event and in the change exception. Simple event fields are (preliminary): ``CLASSIFICATION``, ``TRANSP``, ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``CATEGORIES``, ``COLOR``, ``URL``, ``GEO``, ``TRANSP``, ``STATUS``. If not, leave the property in the change exception as-is (i.e. do not propagate this change). If yes, also apply the change in the change exception.
 - Newly added attendees are also added in existing change exception events, unless they're not already attending there.

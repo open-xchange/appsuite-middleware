@@ -233,8 +233,11 @@ public class EventUpdateProcessor implements EventUpdate {
     }
 
     /**
-     * Adjusts any change- and delete exceptions of a recurring event along with the update of the series master. In particular, the
-     * following changes are applied for the changed event and -exceptions:
+     * Adjusts any change- and delete exceptions of a recurring event along with the update of the series master, in case the original
+     * event represents no <i>attendee scheduling resource</i>.
+     * 
+     * <p/>
+     * In particular, the following changes are applied for the changed event and -exceptions:
      * <ul>
      * <li>If an event series is turned into a single event, any series exceptions are removed</li>
      * <li>If the series master event's start-date is changed, the recurrence identifiers of all change- and delete-exceptions are
@@ -250,6 +253,9 @@ public class EventUpdateProcessor implements EventUpdate {
      * @return The resulting list of (possibly adjusted) change exceptions
      */
     private List<Event> adjustExceptions(Event originalEvent, Event changedEvent, List<Event> originalChangeExceptions) throws OXException {
+        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity())) {
+            return originalChangeExceptions;
+        }
         if (false == isSeriesMaster(originalEvent)) {
             return Collections.emptyList();
         }
