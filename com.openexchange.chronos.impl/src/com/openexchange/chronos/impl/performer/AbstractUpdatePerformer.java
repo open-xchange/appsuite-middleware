@@ -698,6 +698,22 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @see Check#classificationAllowsUpdate
      */
     protected void requireDeletePermissions(Event originalEvent) throws OXException {
+        requireDeletePermissions(originalEvent, false);
+    }
+
+    /**
+     * Checks that the current session's user is able to delete a specific event, by either requiring delete access for <i>own</i> or
+     * <i>all</i> objects, based on the user being the creator of the event or not.
+     * <p/>
+     * Additionally, the event's classification is checked.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (roles.contains(Role.ORGANIZER)) {
             return;
         }
@@ -708,7 +724,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         classificationAllowsUpdate(folder, originalEvent);
     }
-
+    
     /**
      * Checks that a specific event can be updated by the current session's user under the perspective of the current folder, by either
      * requiring write access for <i>own</i> or <i>all</i> objects, based on the user being the creator of the event or not.
@@ -746,23 +762,36 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
+        requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
+    }
+
+    /**
+     * Checks that the current session's user is able to act as the organizer in case the event represents a group scheduled event.
+     *
+     * @param originalEvent The event to check the calendar user's role in
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#NOT_ORGANIZER}
+     */
+    private void requireOrganizerSchedulingResource(Event originalEvent, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (PublicType.getInstance().equals(folder.getType())) {
             /*
              * event located in public folder, assume change as or on behalf of organizer
              */
             return;
         }
-        if (isGroupScheduled(originalEvent) && false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
+        if (false == isGroupScheduled(originalEvent)) {
             /*
-             * not allowed attendee change in group scheduled resource, throw error if configured
+             * non group-schedule events, nothing to check
+             */
+            return;
+        }
+        if (false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
+            /*
+             * calendar user is not organizer of group scheduled event, throw error if configured
              */
             OXException e = CalendarExceptionCodes.NOT_ORGANIZER.create(
-                folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
-            if (PublicType.getInstance().equals(folder.getType())) {
-                if (session.getConfig().isRestrictAllowedAttendeeChangesPublic()) {
-                    throw e;
-                }
-            } else if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
+                folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getCn());
+            if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
                 throw e;
             }
             session.addWarning(e);
