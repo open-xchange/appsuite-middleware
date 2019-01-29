@@ -50,6 +50,7 @@
 package com.openexchange.dav;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -69,6 +70,7 @@ import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -100,6 +102,7 @@ import com.openexchange.ajax.oauth.provider.protocol.Protocol;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
@@ -153,15 +156,17 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             DavPropertyNameSet props = new DavPropertyNameSet();
             props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
             propFind = new PropFindMethod(Config.getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
-            if (HttpServletResponse.SC_UNAUTHORIZED == new HttpClient().executeMethod(propFind)) {
-                for (Header header : propFind.getResponseHeaders("WWW-Authenticate")) {
-                    if (header.getValue().startsWith("Bearer")) {
-                        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
-                    } else if (header.getValue().startsWith("Basic")) {
-                        authMethods.add(new Object[] { AUTH_METHOD_BASIC });
-                    }
+            HttpClient httpClient = new HttpClient();
+            httpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, UserAgents.IOS_12_0);
+            assertEquals("Unexpected response status", HttpServletResponse.SC_UNAUTHORIZED, httpClient.executeMethod(propFind));
+            for (Header header : propFind.getResponseHeaders("WWW-Authenticate")) {
+                if (header.getValue().startsWith("Bearer")) {
+                    authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
+                } else if (header.getValue().startsWith("Basic")) {
+                    authMethods.add(new Object[] { AUTH_METHOD_BASIC });
                 }
             }
+            assertFalse("No available authentication mode detected", authMethods.isEmpty());
         } catch (OXException | IOException e) {
             fail(e.getMessage());
         } finally {
