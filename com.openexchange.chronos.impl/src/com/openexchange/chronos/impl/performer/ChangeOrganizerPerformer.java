@@ -79,7 +79,7 @@ import com.openexchange.exception.OXException;
 public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
 
     /**
-     * Initializes a new {@link DeletePerformer}.
+     * Initializes a new {@link ChangeOrganizerPerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
@@ -90,7 +90,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Initializes a new {@link DeletePerformer}.
+     * Initializes a new {@link ChangeOrganizerPerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
