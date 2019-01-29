@@ -65,7 +65,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomChangeException;
-import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 
@@ -85,7 +84,7 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
     }
 
     @Override
-    public void setUp() throws SetupException {
+    public void setUp() {
         // nothing
     }
 
@@ -116,10 +115,10 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
             configDbCon.commit();
             rollback = 2;
         } catch (SQLException e) {
-            LOG.error("Failed to initialize count tables for ConfigDB", e);
+            LOG.error("Failed to removed parameters from all Connection URLs in the db_pool table", e);
             throw new CustomChangeException("SQL error", e);
         } catch (RuntimeException e) {
-            LOG.error("Failed to initialize count tables for ConfigDB", e);
+            LOG.error("Failed to removed parameters from all Connection URLs in the db_pool table", e);
             throw new CustomChangeException("Runtime error", e);
         } finally {
             if (rollback > 0) {
@@ -153,7 +152,7 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
         }
 
         for (Entry<Integer, String> entry : id2Url.entrySet()) {
-            String url = id2Url.get(entry.getKey());
+            String url = entry.getValue();
             int paramStart = url.indexOf('?');
             if (paramStart != -1) {
                 id2NewUrl.put(entry.getKey(), url.substring(0, paramStart));

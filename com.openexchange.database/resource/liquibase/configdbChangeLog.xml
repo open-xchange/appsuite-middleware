@@ -271,17 +271,37 @@
 		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.CountTablesToUtf8mb4Change" />
 	</changeSet>
 
-    <!--changeSet id="7.10.1:db_pool:removeUrlParameters" author="martin.herfurth@open-xchange.com" failOnError="false">
-        <preConditions onFail="CONTINUE">
-            <tableExists tableName="db_pool" />
+    <changeSet id="7.10.1:subadmin:addSalt" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="subadmin" />
+                <not>
+                    <columnExists tableName="subadmin" columnName="salt" />
+                </not>
+            </and>
         </preConditions>
-        <comment>Removes parameters from db_pool connection URLs</comment>
-        <customChange class="com.openexchange.database.internal.change.custom.RemoveParametersFromPoolConnectionUrlCustomTaskChange" />
-    </changeSet-->
+        <comment>
+            Add column 'salt' to table subadmin.
+        </comment>
+        <sql>
+            ALTER TABLE subadmin ADD salt VARBINARY(128) DEFAULT NULL;
+        </sql>
+        <rollback>
+            <dropColumn tableName="subadmin" columnName="salt" />
+        </rollback>
+    </changeSet>
 
 	<changeSet id="7.10.1:filestore2user:changePrimaryKey" author="thorben.betten@open-xchange.com">
 		<comment>This changeset executes a custom task which cares about correcting the PRIMARY KEY of the filestore2user table.</comment>
 		<customChange class="com.openexchange.database.internal.change.custom.ChangeFilestore2UserPrimaryKeyCustomTaskChange" />
+	</changeSet>
+
+	<changeSet id="7.10.2:db_pool:removeUrlParameters" author="martin.herfurth@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<tableExists tableName="db_pool" />
+		</preConditions>
+		<comment>Removes parameters from db_pool connection URLs</comment>
+		<customChange class="com.openexchange.database.internal.change.custom.RemoveParametersFromPoolConnectionUrlCustomTaskChange" />
 	</changeSet>
 
 </databaseChangeLog>
