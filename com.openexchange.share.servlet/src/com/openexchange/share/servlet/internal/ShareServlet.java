@@ -256,9 +256,9 @@ public class ShareServlet extends AbstractShareServlet {
         }
         if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
             LOG.debug("Could not process share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class);
             try {
-                String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
+                SegmentedUpdateService segmentedUpdateService = ShareServiceLookup.getService(SegmentedUpdateService.class, true);
+                String migrationRedirectURL = segmentedUpdateService.getSharingMigrationRedirectURL(request.getServerName());
                 if (Strings.isEmpty(migrationRedirectURL)) {
                     LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
                     LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));

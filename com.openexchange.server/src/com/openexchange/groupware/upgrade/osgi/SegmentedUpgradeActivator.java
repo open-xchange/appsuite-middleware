@@ -85,7 +85,7 @@ public class SegmentedUpgradeActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService(SegmentedUpdateService.class, new SegmentedUpdateServiceImpl(this));
+        registerService(SegmentedUpdateService.class, new SegmentedUpdateServiceImpl());
         track(LeanConfigurationService.class);
         openTrackers();
     }
