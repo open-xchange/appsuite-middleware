@@ -1,3 +1,9 @@
+open-xchange-report-client (7.8.4-49) stable; urgency=medium
+
+  * Build for patch 2019-01-28 (5074)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 22 Jan 2019 16:55:28 +0100
+
 open-xchange-report-client (7.8.4-48) stable; urgency=medium
 
   * Build for patch 2018-12-17 (5017)
