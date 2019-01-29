@@ -283,12 +283,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
         /*
-         * recursively perform pending deletions of change exceptions if required
+         * recursively perform pending deletions of change exceptions if required, checking permissions as needed
          */
-        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
-            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
-                delete(removedException);
-            }
+        for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
+            requireDeletePermissions(removedException);
+            delete(removedException);
         }
         /*
          * update event data in storage, checking permissions as required
@@ -311,10 +310,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * recursively perform pending updates of change exceptions if required
          */
-        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
-            for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
-                updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
-            }
+        for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
+            updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
         }
         /*
          * track update result & update any stored alarm triggers of all users if required
