@@ -151,7 +151,11 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 analysis.addChange(change);
                 return analysis;
             }
-            if (isOrganizerChange(analysis, change, original, update, locale)) {
+            if (isOrganizerChange(change, original, update)) {
+                analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
+                analysis.recommendAction(ITipAction.IGNORE);
+                change.setType(ITipChange.Type.UPDATE);
+                analysis.addChange(change);
                 return analysis;
             }
             change.setType(ITipChange.Type.UPDATE);
@@ -443,15 +447,10 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
      * @param locale The users {@link Locale}
      * @return <code>true</code> when the organizer is changed, <code>false</code> otherwise
      */
-    private boolean isOrganizerChange(ITipAnalysis analysis, ITipChange change, Event originalEvent, Event updatedEvent, Locale locale) {
+    private boolean isOrganizerChange(ITipChange change, Event originalEvent, Event updatedEvent) {
         Organizer original = originalEvent.getOrganizer();
         if (null != original) {
-            CalendarUtils.matches(original, updatedEvent.getOrganizer());
-            analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
-            analysis.recommendAction(ITipAction.IGNORE);
-            change.setType(ITipChange.Type.UPDATE);
-            analysis.addChange(change);
-            return true;
+            return CalendarUtils.matches(original, updatedEvent.getOrganizer());
         }
         return false;
     }
