@@ -1,9 +1,3 @@
-open-xchange-appsuite-backend (7.10.1-6) stable; urgency=medium
-
-  * Build for patch 2019-01-31 (5103)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 29 Jan 2019 10:29:02 +0100
-
 open-xchange-appsuite-backend (7.10.1-5) stable; urgency=medium
 
   * Build for patch 2019-01-28 (5076)
