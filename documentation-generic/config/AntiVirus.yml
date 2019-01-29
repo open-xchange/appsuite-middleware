@@ -1,5 +1,15 @@
 feature_name: Anti-Virus
 properties:
+    - key: com.openexchange.antivirus.enabled
+      description: |
+        Defines whether the Anti-Virus capability is enabled.
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
     - key: com.openexchange.antivirus.server
       description: |
         Defines the address of ICAP server, i.e. where the Anti-Virus service is running.
