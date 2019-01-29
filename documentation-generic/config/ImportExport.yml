@@ -20,7 +20,7 @@ properties:
         Note:  
         That this limit applies for each type, so you can have, for example, 10000 VEVENTS and 10000 VFREEBUSY entries in a single file. 
         <code>-1</code> means unlimited.
-      defaultValue: 10000
+      defaultValue: -1
       version:
       reloadable: false
       configcascadeAware: false

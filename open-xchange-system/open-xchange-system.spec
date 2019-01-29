@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: coreutils
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,9 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}/opt/open-xchange/lib
+# for %ghost file
+mkdir %{buildroot}/opt/open-xchange/etc
+touch %{buildroot}/opt/open-xchange/etc/scr_db
 
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
@@ -60,12 +63,16 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/
+%dir /opt/open-xchange/etc
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%ghost /opt/open-xchange/etc/scr_db
 
 %changelog
+* Mon Jan 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-01-28 (5076)
 * Tue Jan 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-01-14 (5023)
 * Fri Nov 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
