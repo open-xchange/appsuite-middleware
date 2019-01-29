@@ -219,7 +219,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         int maxFileSize = leanConfigurationService.getIntProperty(AntiVirusProperty.maxFileSize);
         long max = (long) (maxFileSize * Math.pow(1024, 2));
         if (contentLength > max) {
-            throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(Strings.humanReadableByteCount(max, true));
+            throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(maxFileSize);
         }
         String server = leanConfigurationService.getProperty(AntiVirusProperty.server);
         int port = leanConfigurationService.getIntProperty(AntiVirusProperty.port);

@@ -68,7 +68,7 @@ final class AntiVirusServiceExceptionMessages {
     // The file '%1$s' you are trying to scan does not exist.
     public static final String FILE_NOT_EXISTS = "The file '%1$s' you are trying to scan does not exist.";
     // The file you are trying to scan exceeds the maximum allowed file size of %1$s.
-    public static final String FILE_TOO_BIG = "The file you are trying to scan exceeds the maximum allowed file size of %1$s.";
+    public static final String FILE_TOO_BIG = "The file you are trying to scan exceeds the maximum allowed file size of %1$s MB.";
     // The file '%1$s' you are trying to download seems to be infected with '%2$s.
     public static final String FILE_INFECTED = "The file '%1$s' you are trying to download seems to be infected with '%2$s'.";
     // We were unable to scan your file for viruses.

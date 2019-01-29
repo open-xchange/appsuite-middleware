@@ -103,7 +103,7 @@ public enum AntiVirusServiceExceptionCodes implements DisplayableOXExceptionCode
      */
     FILE_NOT_EXISTS("File '%1$s' does not exist", AntiVirusServiceExceptionMessages.FILE_NOT_EXISTS, CATEGORY_USER_INPUT, 8),
     /**
-     * <li>The file you are trying to scan exceeds the maximum allowed file size of %1$s.</li>
+     * <li>The file you are trying to scan exceeds the maximum allowed file size of %1$s MB.</li>
      * <li>File too big to scan</li>
      */
     FILE_TOO_BIG("File too big to scan", AntiVirusServiceExceptionMessages.FILE_TOO_BIG, CATEGORY_USER_INPUT, 9),
