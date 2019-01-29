@@ -65,11 +65,11 @@ import com.openexchange.server.ServiceLookup;
 import liquibase.resource.ResourceAccessor;
 
 /**
- * 
+ *
  * {@link ResellerDBMigrationServiceTracker}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @since v7.10.2
  */
 public class ResellerDBMigrationServiceTracker implements ServiceTrackerCustomizer<DBMigrationExecutorService, DBMigrationExecutorService> {
 
