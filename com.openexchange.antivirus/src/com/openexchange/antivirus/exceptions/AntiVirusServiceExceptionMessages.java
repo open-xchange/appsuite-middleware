@@ -70,7 +70,7 @@ final class AntiVirusServiceExceptionMessages {
     // The file you are trying to scan exceeds the maximum allowed file size of %1$s.
     public static final String FILE_TOO_BIG = "The file you are trying to scan exceeds the maximum allowed file size of %1$s.";
     // The file '%1$s' you are trying to download seems to be infected with '%2$s.
-    public static final String FILE_INFECTED = "The file '%1$s' you are trying to download seems to be infected with '%2$s.";
+    public static final String FILE_INFECTED = "The file '%1$s' you are trying to download seems to be infected with '%2$s'.";
     // We were unable to scan your file for viruses.
     public static final String UNABLE_TO_SCAN = "We were unable to scan your file for viruses.";
     // The Anti-Virus service is unavailable at the moment. Please try again later.

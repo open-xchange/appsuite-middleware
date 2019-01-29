@@ -112,7 +112,7 @@ public enum AntiVirusServiceExceptionCodes implements DisplayableOXExceptionCode
      */
     JSON_ERROR("JSON error: %s", MESSAGE, Category.CATEGORY_ERROR, 10),
     /**
-     * <li>The file '%1$s' you are trying to download seems to be infected with '%2$s.</li>
+     * <li>The file '%1$s' you are trying to download seems to be infected with '%2$s'.</li>
      * <li>The file '%1$s' is infected with '%2$s'.</li>
      */
     FILE_INFECTED("The file '%1$s' is infected with '%2$s'.", AntiVirusServiceExceptionMessages.FILE_INFECTED, CATEGORY_USER_INPUT, 11),
