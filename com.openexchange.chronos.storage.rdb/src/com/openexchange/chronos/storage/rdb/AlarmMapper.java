@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,6 +60,8 @@ import java.util.EnumMap;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Repeat;
@@ -134,6 +137,28 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             @Override
             public void remove(Alarm alarm) {
                 alarm.removeId();
+            }
+        });
+        mappings.put(AlarmField.TIMESTAMP, new BigIntMapping<Alarm>("timestamp", "Timestamp") {
+
+            @Override
+            public void set(Alarm alarm, Long value) {
+                alarm.setTimestamp(null == value ? 0L : l(value));
+            }
+
+            @Override
+            public boolean isSet(Alarm alarm) {
+                return alarm.containsTimestamp();
+            }
+
+            @Override
+            public Long get(Alarm alarm) {
+                return L(alarm.getTimestamp());
+            }
+
+            @Override
+            public void remove(Alarm alarm) {
+                alarm.removeTimestamp();
             }
         });
         mappings.put(AlarmField.UID, new VarCharMapping<Alarm>("uid", "UID") {

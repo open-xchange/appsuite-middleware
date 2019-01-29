@@ -52,11 +52,11 @@ package com.openexchange.chronos.provider.composition.impl;
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.chronos.provider.composition.IDMangling.getRelativeFolderId;
+import static com.openexchange.chronos.provider.composition.IDMangling.getRelativeId;
+import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getAccountId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeIdsPerAccountId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withRelativeID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueEventIDs;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
@@ -798,6 +798,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             access = getAccess(account);
         } catch (OXException e) {
             return Collections.singletonList(getBasicCalendarFolder(account, e));
+        } catch (Exception e) {
+            return Collections.singletonList(getBasicCalendarFolder(account, CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage())));
         }
         /*
          * check if provider is enabled by capability, falling back to a placeholder folder if not

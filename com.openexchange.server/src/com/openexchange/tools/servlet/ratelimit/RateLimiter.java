@@ -555,8 +555,9 @@ public final class RateLimiter {
      * Doubles time windows for associated rate limit trace
      *
      * @param key The key associated with the rate limit trace
+     * @param max Maximum value for the window, -1 for no limit
      */
-    public static void doubleRateLimitWindow(Key key) {
+    public static void doubleRateLimitWindow(Key key, long max) {
         if (null == key) {
             return;
         }
@@ -568,7 +569,10 @@ public final class RateLimiter {
 
         Rate rate = bucketMap.getIfPresent(key);
         if (null != rate) {
-            rate.setTimeInMillis(rate.getTimeInMillis() << 1);
+            long doubled = rate.getTimeInMillis() << 1;
+            if ((max == -1 || doubled <= max) && doubled > rate.getTimeInMillis()) { // (No max OR new value < max) && No overflow
+                rate.setTimeInMillis(doubled);
+            }
         }
     }
 

@@ -59,19 +59,28 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class DownloadOnboardingStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link MailOnboardingStrings}.
-     */
     private DownloadOnboardingStrings() {
         super();
     }
 
+    /**
+     * To set up your device, click following link:
+     */
     public static final String MAIL_MESSAGE = "To set up your device, click following link: ";
 
+    /**
+     * To set up your device, click following link:
+     */
     public static final String DEFAULT_MESSAGE = "To set up your device, click following link: ";
 
+    /**
+     * To set up your device, click following link:
+     */
     public static final String DAV_MESSAGE = "To set up your device, click following link: ";
 
+    /**
+     * To set up your device, click following link:
+     */
     public static final String EAS_MESSAGE = "To set up your device, click following link: ";
 
 }

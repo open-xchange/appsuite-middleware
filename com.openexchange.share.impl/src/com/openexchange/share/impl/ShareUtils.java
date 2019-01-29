@@ -70,8 +70,10 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -203,11 +205,16 @@ public class ShareUtils {
         if (recipient.getPreferredLanguage() != null) {  // If recipient language specified, use rather than use sharingUser's language
             guestUser.setPreferredLanguage(recipient.getPreferredLanguage());
         }
-        PasswordMechFactory passwordMechFactory = services.getService(PasswordMechFactory.class);
-        IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
-        guestUser.setPasswordMech(iPasswordMech.getIdentifier());
         if (Strings.isNotEmpty(recipient.getPassword())) {
-            guestUser.setUserPassword(iPasswordMech.encode(recipient.getPassword()));
+            PasswordMechRegistry passwordMechRegistry = services.getService(PasswordMechRegistry.class);
+            PasswordMech passwordMech = passwordMechRegistry.get(guestUser.getPasswordMech());
+            if (passwordMech == null) {
+                passwordMech = StockPasswordMechs.BCRYPT.getPasswordMech();
+            }
+            PasswordDetails passwordDetails = passwordMech.encode(recipient.getPassword());
+            guestUser.setPasswordMech(passwordDetails.getPasswordMech());
+            guestUser.setUserPassword(passwordDetails.getEncodedPassword());
+            guestUser.setSalt(passwordDetails.getSalt());
         }
         return guestUser;
     }
@@ -225,9 +232,10 @@ public class ShareUtils {
         guestUser.setDisplayName("Guest");
         guestUser.setMail("");
         if (null != recipient.getPassword()) {
-            String encodedPassword = services.getService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(recipient.getPassword());
-            guestUser.setUserPassword(encodedPassword);
+            PasswordDetails passwordDetails = services.getService(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).encode(recipient.getPassword());
+            guestUser.setUserPassword(passwordDetails.getEncodedPassword());
             guestUser.setPasswordMech(ShareConstants.PASSWORD_MECH_ID);
+            guestUser.setSalt(passwordDetails.getSalt());
         } else {
             guestUser.setPasswordMech("");
         }

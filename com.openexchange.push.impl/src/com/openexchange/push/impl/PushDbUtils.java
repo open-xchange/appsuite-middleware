@@ -149,27 +149,30 @@ public class PushDbUtils {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param optClient The optional client
      * @return <code>true</code> if a push registration is available; otherwise <code>false</code>
      * @throws OXException If push registrations cannot be returned
      */
-    public static boolean hasPushRegistrationForClient(int userId, int contextId, String client) throws OXException {
+    public static boolean hasPushRegistrationForClient(int userId, int contextId, String optClient) throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getReadOnly(contextId);
         try {
-            return hasPushRegistrationForClient(userId, contextId, client, con);
+            return hasPushRegistrationForClient(userId, contextId, optClient, con);
         } finally {
             service.backReadOnly(contextId, con);
         }
     }
 
-    private static boolean hasPushRegistrationForClient(int userId, int contextId, String client, Connection con) throws OXException {
+    private static boolean hasPushRegistrationForClient(int userId, int contextId, String optClient, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=? AND client=?");
+            stmt = con.prepareStatement(null == optClient ? "SELECT 1 FROM registeredPush WHERE cid=? AND user=?" : "SELECT 1 FROM registeredPush WHERE cid=? AND user=? AND client=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(3, client);
+            if (null != optClient) {
+                stmt.setString(3, optClient);
+            }
             rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
@@ -369,14 +372,21 @@ public class PushDbUtils {
 
     private static boolean insertPushRegistration(int userId, int contextId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO registeredPush (cid,user,client) VALUES (?,?,?)");
+            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? FOR UPDATE");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
+            stmt = con.prepareStatement("INSERT IGNORE INTO registeredPush (cid,user,client) VALUES (?,?,?)");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, clientId);
             try {
-                stmt.executeUpdate();
-                return true;
+                int rows = stmt.executeUpdate();
+                return rows > 0;
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                     return false;
@@ -388,22 +398,22 @@ public class PushDbUtils {
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
-    private static boolean markContextForPush(int contextId, DatabaseService service) throws OXException {
-        int updated = 0;
+    private static void markContextForPush(int contextId, DatabaseService service) throws OXException {
         Connection con = service.getWritable();
         PreparedStatement stmt = null;
+        int updated = 0;
         try {
-            stmt = con.prepareStatement("INSERT INTO context2push_registration (cid) VALUES (?)");
+            stmt = con.prepareStatement("INSERT IGNORE INTO context2push_registration (cid) VALUES (?)");
             stmt.setInt(1, contextId);
             try {
                 updated = stmt.executeUpdate();
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                    return false;
+                    return;
                 }
                 throw e;
             }
@@ -419,13 +429,12 @@ public class PushDbUtils {
                 service.backWritableAfterReading(con);
             }
         }
-        return 0 < updated;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Deletes a push registration associated with the client of specified user
+     * Deletes push registrations associated with all clients of specified user
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -433,78 +442,7 @@ public class PushDbUtils {
      * @throws OXException If operation fails
      */
     public static DeleteResult deleteAllPushRegistrations(int userId, int contextId) throws OXException {
-        DatabaseService service = Services.requireService(DatabaseService.class);
-        Connection con = service.getWritable(contextId);
-        int rollback = 0;
-        try {
-            Databases.startTransaction(con);
-            rollback = 1;
-
-            boolean[] unmark = new boolean[1];
-            unmark[0] = false;
-
-            boolean deleted = deleteAllPushRegistrations(userId, contextId, unmark, con);
-
-            DeleteResult deleteResult;
-            if (unmark[0]) {
-                unmarkContextForPush(contextId, service);
-                deleteResult = DeleteResult.DELETED_COMPLETELY;
-            } else {
-                deleteResult = (deleted ? DeleteResult.DELETED_COMPLETELY : DeleteResult.NOT_DELETED);
-            }
-
-            con.commit();
-            rollback = 2;
-
-            return deleteResult;
-        } catch (SQLException e) {
-            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback > 0) {
-                if (rollback == 1) {
-                    Databases.rollback(con);
-                }
-                Databases.autocommit(con);
-            }
-            service.backWritable(contextId, con);
-        }
-    }
-
-    private static boolean deleteAllPushRegistrations(int userId, int contextId, boolean[] unmark, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? FOR UPDATE");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-
-            stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            boolean deleted = stmt.executeUpdate() > 0;
-            Databases.closeSQLStuff(stmt);
-
-            if (deleted) {
-                stmt = con.prepareStatement("SELECT COUNT(user) FROM registeredPush WHERE cid=?");
-                stmt.setInt(1, contextId);
-                rs = stmt.executeQuery();
-                rs.next();
-                int count = rs.getInt(1);
-                unmark[0] = count <= 0;
-            }
-
-            return deleted;
-        } catch (SQLException e) {
-            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
+        return deletePushRegistration0(userId, contextId, null);
     }
 
     /**
@@ -517,6 +455,14 @@ public class PushDbUtils {
      * @throws OXException If operation fails
      */
     public static DeleteResult deletePushRegistration(int userId, int contextId, String clientId) throws OXException {
+        return deletePushRegistration0(userId, contextId, clientId);
+    }
+
+    private static DeleteResult deletePushRegistration0(int userId, int contextId, String optClientId) throws OXException {
+        if (false == hasPushRegistrationForClient(userId, contextId, optClientId)) {
+            return DeleteResult.NOT_DELETED;
+        }
+
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
         int rollback = 0;
@@ -527,7 +473,7 @@ public class PushDbUtils {
             boolean[] unmark = new boolean[1];
             unmark[0] = false;
 
-            boolean deleted = deletePushRegistration(userId, contextId, clientId, unmark, con);
+            boolean deleted = deletePushRegistration(userId, contextId, optClientId, unmark, con);
 
             DeleteResult deleteResult;
             if (unmark[0]) {
@@ -556,7 +502,7 @@ public class PushDbUtils {
         }
     }
 
-    private static boolean deletePushRegistration(int userId, int contextId, String clientId, boolean[] unmark, Connection con) throws OXException {
+    private static boolean deletePushRegistration(int userId, int contextId, String optClientId, boolean[] unmark, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -566,10 +512,12 @@ public class PushDbUtils {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
 
-            stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=? AND client=?");
+            stmt = con.prepareStatement(null == optClientId ? "DELETE FROM registeredPush WHERE cid=? AND user=?" : "DELETE FROM registeredPush WHERE cid=? AND user=? AND client=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(3, clientId);
+            if (null != optClientId) {
+                stmt.setString(3, optClientId);
+            }
             boolean deleted = stmt.executeUpdate() > 0;
             Databases.closeSQLStuff(stmt);
 

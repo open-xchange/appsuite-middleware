@@ -52,8 +52,8 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.FileInputStream;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.models.ContactData;
 

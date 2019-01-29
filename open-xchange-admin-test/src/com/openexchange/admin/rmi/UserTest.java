@@ -1010,6 +1010,7 @@ public class UserTest extends AbstractRMITest {
         notallowed.add("setPassword");// server password is always different(crypted)
         notallowed.add("setPasswordMech");// server password is always different(crypted)
         notallowed.add("setName");// server does not support username change
+        notallowed.add("setSalt");// salt will be generated server side
 
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestoreOwner");

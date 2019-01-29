@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -155,7 +156,7 @@ public class ICalUtils {
         Calendar calendar;
         try {
             if (Boolean.TRUE.equals(iCalParameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
-                calendar = new ICal4JParser().parse(calendarBuilder, iCalFile);
+                calendar = new ICal4JParser().parse(calendarBuilder, iCalFile, i(parameters.get(ICalParameters.IMPORT_LIMIT, Integer.class, I(-1))));
             } else {
                 calendar = calendarBuilder.build(iCalFile);
             }

@@ -51,10 +51,15 @@ package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
+import java.util.function.Consumer;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
+import com.openexchange.microsoft.graph.onedrive.exception.MicrosoftGraphDriveServiceExceptionCodes;
 
 /**
  * {@link OneDriveFolderParser}
@@ -77,16 +82,19 @@ public class OneDriveFolderParser {
      * Parses the specified {@link JSONObject} entity to an {@link OneDriveFolder}
      * 
      * @param userId The user identifier
+     * @param hasSubFolders Whether the specified entity has any sub-folders
      * @param entity The {@link JSONObject}
      * @return The {@link OneDriveFolder} or <code>null</code> if the entity is not a folder
+     * @throws OXException if the specified entity does not denote a folder
      */
-    public OneDriveFolder parseEntity(int userId, boolean hasSubFolders, JSONObject entity) {
-        if (!entity.hasAndNotNull("folder")) {
-            return null;
-        }
+    public @Nullable OneDriveFolder parseEntity(int userId, boolean hasSubFolders, @Nullable JSONObject entity) throws OXException {
         OneDriveFolder folder = new OneDriveFolder(userId);
         if (entity == null || entity.isEmpty()) {
             return folder;
+        }
+        if (false == entity.hasAndNotNull("folder")) {
+            LOG.debug("The entity is missing the 'folder' field: {}", entity);
+            throw MicrosoftGraphDriveServiceExceptionCodes.NOT_A_FOLDER.create();
         }
         folder.setId(entity.optString("id"));
         folder.setName(entity.optString("name"));
@@ -106,21 +114,24 @@ public class OneDriveFolderParser {
 
         JSONObject fileSystemInfo = entity.optJSONObject("fileSystemInfo");
         if (fileSystemInfo != null && !fileSystemInfo.isEmpty()) {
-            String createdAt = fileSystemInfo.optString("createdDateTime");
-            try {
-                folder.setCreationDate(ISO8601DateParser.parse(createdAt));
-            } catch (ParseException e) {
-                LOG.warn("Could not parse date from: {}", createdAt, e);
-            }
-            String modifiedAt = fileSystemInfo.optString("lastModifiedDateTime");
-            try {
-                folder.setLastModifiedDate(ISO8601DateParser.parse(createdAt));
-            } catch (ParseException e) {
-                LOG.warn("Could not parse date from: {}", modifiedAt, e);
-            }
+            setDate(d -> folder.setCreationDate(d), fileSystemInfo.optString("createdDateTime"));
+            setDate(d -> folder.setLastModifiedDate(d), fileSystemInfo.optString("lastModifiedDateTime"));
             folder.setSubfolders(hasSubFolders);
             folder.setSubscribedSubfolders(hasSubFolders);
         }
         return folder;
+    }
+
+    /**
+     * Parses and sets the date via the specified consumer
+     * 
+     * @param date The date to parse and set
+     */
+    private void setDate(Consumer<Date> consumer, String date) {
+        try {
+            consumer.accept(ISO8601DateParser.parse(date));
+        } catch (ParseException e) {
+            LOG.warn("Could not parse date from: {}", date, e);
+        }
     }
 }

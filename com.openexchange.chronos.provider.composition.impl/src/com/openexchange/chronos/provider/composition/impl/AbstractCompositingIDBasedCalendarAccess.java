@@ -49,10 +49,10 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId;
+import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeEventIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
@@ -84,6 +84,7 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
@@ -615,7 +616,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         try {
             JSONObject internalConfig = account.getInternalConfiguration();
             if (null != internalConfig) {
-                return internalConfig.optString("name", fallbackName);
+                return internalConfig.optString(CommonCalendarConfigurationFields.NAME, fallbackName);
             }
         } catch (Exception e) {
             LOG.debug("Error getting display name for calendar account \"{}\": {}", account.getProviderId(), e.getMessage());

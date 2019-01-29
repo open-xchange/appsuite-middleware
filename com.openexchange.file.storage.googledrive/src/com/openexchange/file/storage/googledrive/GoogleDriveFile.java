@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.googledrive;
 
+import static com.openexchange.file.storage.googledrive.GoogleDriveConstants.ROOT_ID;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -91,7 +92,7 @@ public final class GoogleDriveFile extends DefaultFile {
     }
 
     private static boolean isRootFolder(String id, String rootFolderId) {
-        return "root".equals(id) || rootFolderId.equals(id);
+        return ROOT_ID.equals(id) || rootFolderId.equals(id);
     }
 
     @Override
@@ -122,19 +123,19 @@ public final class GoogleDriveFile extends DefaultFile {
     public GoogleDriveFile parseGoogleDriveFile(File file, List<Field> fields) throws OXException {
         if (null != file) {
             try {
-                final String name = file.getTitle();
+                final String name = file.getName();
                 setTitle(name);
                 setFileName(name);
 
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
                 if (set.contains(Field.CREATED)) {
-                    DateTime createdDate = file.getCreatedDate();
+                    DateTime createdDate = file.getCreatedTime();
                     if (null != createdDate) {
                         setCreated(new Date(createdDate.getValue()));
                     }
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    DateTime modifiedDate = file.getModifiedDate();
+                    DateTime modifiedDate = file.getModifiedTime();
                     if (null != modifiedDate) {
                         setLastModified(new Date(modifiedDate.getValue()));
                     }
@@ -148,7 +149,7 @@ public final class GoogleDriveFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    Long fileSize = file.getFileSize();
+                    Long fileSize = file.getSize();
                     if (null != fileSize) {
                         setFileSize(fileSize.longValue());
                     }
@@ -197,7 +198,7 @@ public final class GoogleDriveFile extends DefaultFile {
 
                 Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    DateTime modifiedDate = revision.getModifiedDate();
+                    DateTime modifiedDate = revision.getModifiedTime();
                     if (null != modifiedDate) {
                         setLastModified(new Date(modifiedDate.getValue()));
                     }
@@ -211,13 +212,16 @@ public final class GoogleDriveFile extends DefaultFile {
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
-                    Long fileSize = revision.getFileSize();
+                    Long fileSize = revision.getSize();
                     if (null != fileSize) {
                         setFileSize(fileSize.longValue());
                     }
                 }
                 if (set.contains(Field.URL)) {
-                    setURL(revision.getDownloadUrl());
+                    Object webContentLink = revision.get("webContentLink");
+                    if (null != webContentLink && String.class.isAssignableFrom(webContentLink.getClass())) {
+                        setURL((String) webContentLink);
+                    }
                 }
                 if (set.contains(Field.FILE_MD5SUM)) {
                     setFileMD5Sum(revision.getMd5Checksum());

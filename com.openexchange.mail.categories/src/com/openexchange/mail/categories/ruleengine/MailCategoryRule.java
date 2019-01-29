@@ -127,9 +127,9 @@ public class MailCategoryRule {
     }
 
     /**
-     * Add a subrule to this rule.
+     * Adds a sub-rule to this rule.
      *
-     * @param subRule The subrule
+     * @param subRule The sub-rule
      */
     public void addSubRule(MailCategoryRule subRule) {
         if (this.subRules == null) {

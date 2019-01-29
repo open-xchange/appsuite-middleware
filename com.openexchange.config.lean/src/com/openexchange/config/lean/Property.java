@@ -60,64 +60,77 @@ import java.util.Map;
 public interface Property {
 
     /**
-     * Returns the fully qualified name of the {@link Property}
+     * Gets the fully qualified name of the {@link Property}
      *
      * @return the fully qualified name of the {@link Property}
      */
     String getFQPropertyName();
 
     /**
-     * Returns the fully qualified name of the {@link Property}
-     * 
+     * Gets the fully qualified name of the {@link Property}
+     *
      * @param optionals A {@link Map} containing values for optional parts in the fully
      *            qualified name. E.g. <code>com.openexchange.test.[replaceMe]</code>
      *            is returned as <code>com.openexchange.test.success</code> if the Map
      *            contains a key called <code>replaceMe</code> with the value
      *            <code>success</code>. If the Map does not contain the key
      *            <code>com.openexchange.test.[replaceMe]</code> is returned.
-     * 
+     *
      * @return the fully qualified name of the {@link Property}
      */
     default String getFQPropertyName(Map<String, String> optionals) {
         String fqn = getFQPropertyName();
-
-        if (null == optionals || optionals.isEmpty() || !fqn.contains("[")) {
+        if (null == optionals || (fqn.indexOf('[') < 0) || optionals.isEmpty()) {
             // No need to change anything
             return fqn;
         }
 
         // Contains optional parameters
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < fqn.length(); i++) {
+        int length = fqn.length();
+        StringBuilder builder = null;
+        for (int i = 0; i < length; i++) {
             char c = fqn.charAt(i);
-            switch (c) {
-                case '[':
-                    // Build key word
-                    StringBuilder keyWord = new StringBuilder();
-                    while ((c = fqn.charAt(++i)) != ']' && i < fqn.length()) {
-                        keyWord.append(c);
-                    }
-                    // Search if it is within map
-                    if (optionals.containsKey(keyWord.toString())) {
-                        String value = optionals.get(keyWord.toString());
-                        builder.append(value);
+            if (c == '[') {
+                // Find associated closing bracket
+                int pos = fqn.indexOf(']', i);
+                if (pos > 0) {
+                    String toReplace = fqn.substring(i + 1, pos);
+                    String optValue = optionals.get(toReplace);
+                    if (null != optValue) {
+                        // Replacement available
+                        if (null == builder) {
+                            builder = new StringBuilder(length);
+                            if (i > 0) {
+                                builder.append(fqn, 0, i);
+                            }
+                        }
+                        builder.append(optValue);
+                        i += toReplace.length() + 1;
                     } else {
-                        // Add key back as default
-                        builder.append('[').append(keyWord).append(']');
+                        // Add '[' character as no replacement available in map
+                        if (null != builder) {
+                            builder.append(c);
+                        }
                     }
-                    break;
-                default:
+                } else {
+                    // Add '[' character as no closing ']' present
+                    if (null != builder) {
+                        builder.append(c);
+                    }
+                }
+            } else {
+                // Not a '[' character
+                if (null != builder) {
                     builder.append(c);
-                    break;
+                }
             }
         }
-        return builder.toString();
-
+        return null == builder ? fqn : builder.toString();
     }
 
     /**
      * Returns the default value of the {@link Property}
-     * 
+     *
      * @return The default value of the {@link Property}
      */
     Object getDefaultValue();

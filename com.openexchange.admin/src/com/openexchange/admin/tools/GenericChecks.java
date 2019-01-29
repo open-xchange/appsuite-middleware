@@ -49,14 +49,16 @@
 
 package com.openexchange.admin.tools;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import javax.mail.internet.AddressException;
-import com.damienmiller.BCrypt;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * @author choeger
@@ -139,35 +141,44 @@ public class GenericChecks {
         if (mech == null) {
             return;
         }
-        if (!mech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH) && !mech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-            throw new InvalidDataException("Invalid PasswordMech: " + mech + ", Valid Mechs: " + PasswordMechObject.CRYPT_MECH + ":" + PasswordMechObject.SHA_MECH);
+
+        try {
+            PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+            List<String> identifiers = mechFactory.getIdentifiers();
+            for (String identifier : identifiers) {
+                if (identifier.equalsIgnoreCase(mech)) {
+                    return;
+                }
+            }
+            throw new InvalidDataException("Invalid PasswordMech: " + mech + ". Use one of the following: " + String.join(",", mechFactory.getIdentifiers()));
+        } catch (OXException e) {
+            throw new InvalidDataException("PasswordMechFactory not available. Did the server start properly?");
         }
     }
 
     /**
-     * Authenticate the cleartext password against the crypted string using the
-     * specified authmech
+     * Authenticate the clear text password against the encrypted string using the
+     * specified {@link PasswordMech}
      *
-     * @param crypted
-     * @param clear
-     * @param mech
-     * @return true if authentication succeeds and false if it fails
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @param crypted The encrypted password
+     * @param clear The password in clear text
+     * @param mech The password mechanism to use
+     * @param salt The salt used for encoding
+     * @return <code>true</code> if authentication succeeds and false if it fails
      */
-    public final static boolean authByMech(String crypted, String clear, String mech) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if (mech == null) {
+    public final static boolean authByMech(String crypted, String clear, String mech, byte[] salt) {
+        if (Strings.isEmpty(mech)) {
             return false;
         }
-        switch (mech) {
-            case "{CRYPT}":
-                return UnixCrypt.matches(crypted, clear);
-            case "{SHA}":
-                return SHACrypt.makeSHAPasswd(clear).equals(crypted);
-            case "{BCRYPT}":
-                return BCrypt.checkpw(clear, crypted);
-            default:
-                return false;
+        try {
+            PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+            PasswordMech passwordMech = mechFactory.get(mech);
+            if (null != passwordMech) {
+                return passwordMech.check(clear, crypted, salt);
+            }
+        } catch (OXException e) {
+            // Ignore
         }
+        return false;
     }
 }

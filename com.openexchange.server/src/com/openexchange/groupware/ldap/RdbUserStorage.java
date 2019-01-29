@@ -87,7 +87,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -118,11 +118,11 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
-    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max, salt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
-    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ? WHERE cid = ? AND id = ?";
+    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ?, salt = ? WHERE cid = ? AND id = ?";
 
     /**
      * Default constructor.
@@ -250,6 +250,11 @@ public class RdbUserStorage extends UserStorage {
                 setStringOrNull(i++, stmt, null); // filestore_login
                 setStringOrNull(i++, stmt, null); // filestore_password
                 stmt.setLong(i++, 0); // quota_max
+            }
+            if (user.getSalt() == null) {
+                stmt.setNull(i++, java.sql.Types.VARBINARY);
+            } else {
+                stmt.setBytes(i++, user.getSalt());
             }
 
             stmt.executeUpdate();
@@ -518,7 +523,7 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain,shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy,filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
+                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain,shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy,filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max,salt FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int userId : currentUserIds) {
@@ -561,6 +566,10 @@ public class RdbUserStorage extends UserStorage {
                                 quotaMax = -1L;
                             }
                             user.setFileStorageQuota(quotaMax);
+                        }
+                        {
+                            byte[] salt = result.getBytes(pos++);
+                            user.setSalt(salt);
                         }
 
                         users.put(user.getId(), user);
@@ -920,20 +929,20 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-            updatePasswordInternal(con, context, userId, mech, password);
+            updatePasswordInternal(con, context, userId, mech, password, salt);
         } finally {
             DBPool.closeWriterSilent(context, con);
         }
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         if (connection == null) {
-            updatePasswordInternal(context, userId, mech, password);
+            updatePasswordInternal(context, userId, mech, password, salt);
             return;
         }
 
@@ -943,6 +952,7 @@ public class RdbUserStorage extends UserStorage {
             int pos = 1;
             stmt.setString(pos++, password);
             stmt.setString(pos++, mech != null ? mech.getIdentifier() : "");
+            stmt.setBytes(pos++, salt);
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
             stmt.execute();
@@ -1363,8 +1373,7 @@ public class RdbUserStorage extends UserStorage {
                 /*
                  * Use utf8*_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insensitive.
                  */
-                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ")
-                    .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
+                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ").append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
                 if (excludeUsers) {
                     /*
                      * exclude all regular users
@@ -1615,6 +1624,7 @@ public class RdbUserStorage extends UserStorage {
     // -----------------------------------------------------------------------------------------
 
     public static final class ValuePair {
+
         public final String newValue;
         public final String oldValue;
 

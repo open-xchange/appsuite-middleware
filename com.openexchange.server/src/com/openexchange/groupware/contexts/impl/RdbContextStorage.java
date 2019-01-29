@@ -99,6 +99,11 @@ public class RdbContextStorage extends ContextStorage {
     private static final String RESOLVE_CONTEXT = "SELECT cid FROM login2context WHERE login_info=?";
 
     /**
+     * SQL select statement for resolving the login info to the context.
+     */
+    private static final String RESOLVE_FULL_CONTEXT = "SELECT context.cid,name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max,server_id FROM context JOIN login2context ON context.cid=login2context.cid JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE login_info=?";
+
+    /**
      * SQL select statement for resolving the identifier of the contexts
      * mailadmin.
      */
@@ -145,6 +150,56 @@ public class RdbContextStorage extends ContextStorage {
         }
         return contextId;
     }
+
+    /**
+     * Instantiates an implementation of the context interface and fill its attributes according to the needs to be able to separate
+     * contexts.
+     *
+     * @param loginContextInfo the login info for the context.
+     * @return the context or <code>null</code> if no matching context exists.
+     * @throws OXException if an error occurs.
+     */
+    public ContextExtended getContext(String loginInfo) throws OXException {
+        if (Strings.containsSurrogatePairs(loginInfo)) {
+            return null;
+        }
+
+
+        DatabaseService databaseService = Database.getDatabaseService();
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        Connection con;
+        try {
+            con = databaseService.getReadOnly();
+        } catch (final OXException e) {
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(RESOLVE_FULL_CONTEXT);
+            stmt.setString(1, loginInfo);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return null;
+            }
+
+            ContextImpl context = loadContextDataFromResultSet(result, -1);
+            context.setLoginInfo(getLoginInfos(con, context));
+            // Load context data from UserDB
+            loadContextDataFromUserDb(context, databaseService);
+            return context;
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            databaseService.backReadOnly(con);
+        }
+    }
+
 
     /**
      * Gets the identifier of the context administrator
@@ -229,6 +284,12 @@ public class RdbContextStorage extends ContextStorage {
         }
 
         // Load context data from UserDB
+        loadContextDataFromUserDb(context, databaseService);
+        return context;
+    }
+
+    private void loadContextDataFromUserDb(ContextImpl context, DatabaseService databaseService) throws OXException {
+        int contextId = context.getContextId();
         try {
             Connection con = databaseService.getReadOnly(contextId);
             try {
@@ -248,8 +309,6 @@ public class RdbContextStorage extends ContextStorage {
                 databaseService.backWritableAfterReading(contextId, con);
             }
         }
-
-        return context;
     }
 
     private ContextImpl loadContext(Connection con, int contextId) throws OXException {
@@ -313,14 +372,27 @@ public class RdbContextStorage extends ContextStorage {
                 throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
             }
 
+            return loadContextDataFromResultSet(result, contextId);
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private ContextImpl loadContextDataFromResultSet(ResultSet result, int optContextId) throws OXException {
+        try {
+            boolean byContextId = optContextId > 0;
+            int contextId = byContextId ? optContextId : result.getInt("cid");
+
             // Check if context-associated server matches this node's one
-            int serverId = result.getInt(8);
+            int serverId = result.getInt("server_id");
             if (serverId != DBPool.getServerId()) {
                 throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
             }
 
             ContextImpl context = new ContextImpl(contextId);
-            int pos = 1;
+            int pos = byContextId ? 1 : 2;;
             context.setName(result.getString(pos++));
             context.setEnabled(result.getBoolean(pos++));
             context.setFilestoreId(result.getInt(pos++));
@@ -333,8 +405,6 @@ public class RdbContextStorage extends ContextStorage {
             return context;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
     }
 

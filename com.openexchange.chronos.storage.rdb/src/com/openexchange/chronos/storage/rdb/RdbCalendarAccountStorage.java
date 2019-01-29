@@ -70,6 +70,7 @@ import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -433,7 +434,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException {
         String sql = new StringBuilder()
             .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
-            .append(getPlaceholders(userIds.length)).append(';')
+            .append(Databases.getPlaceholders(userIds.length)).append(';')
         .toString();
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

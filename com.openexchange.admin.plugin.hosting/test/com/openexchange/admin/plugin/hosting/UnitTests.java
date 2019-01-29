@@ -55,7 +55,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
 
 /**
- * Unit tests for the bundle com.openexchange.admin.plugin.hosting
+ * Unit tests for the bundle com.openexchange.admin.plugin.hosting.plugin.hosting
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2

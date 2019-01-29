@@ -143,6 +143,16 @@ public abstract class GroupStorage {
     public abstract Group getGroup(int gid, Context context) throws OXException;
 
     /**
+     * Reads group ids from the persistent storage.
+     *
+     * @param gid[] Array of unique identifiers of the group.
+     * @param The context.
+     * @return The group data object.
+     * @throws OXException
+     */
+    public abstract Group[] getGroup(int[] gid, Context context) throws OXException;
+
+    /**
      * This method implements a universal search for groups. You have to define additionally to the search pattern the attributes that
      * should be searched in. You can also name the attributes that values should be returned. Please insure that returned attributes are
      * strings and not any other data types. You will get a Set with string arrays. The string arrays contain the values auf the requested

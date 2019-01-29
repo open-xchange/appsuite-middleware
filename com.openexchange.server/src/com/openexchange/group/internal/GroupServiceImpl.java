@@ -61,38 +61,57 @@ import com.openexchange.groupware.ldap.User;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupServiceImpl implements GroupService {
+public class GroupServiceImpl implements GroupService {
 
     public GroupServiceImpl() {
         super();
     }
 
     @Override
-    public void create(Context ctx, User user, Group group, boolean checkI18nNames) throws OXException {
-        Create create = new Create(ctx, user, group, checkI18nNames);
+    public void create(Context context, User user, Group group, boolean checkI18nNames) throws OXException {
+        Create create = new Create(context, user, group, checkI18nNames);
         create.perform();
     }
 
     @Override
-    public void update(Context ctx, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException {
-        Update update = new Update(ctx, user, group, lastRead, checkI18nNames);
-        update.perform();
-    }
-
-    @Override
-    public void delete(Context ctx, User user, int groupId, Date lastRead) throws OXException {
-        Delete delete = new Delete(ctx, user, groupId, lastRead);
+    public void delete(Context context, User user, int groupId, Date lastRead) throws OXException {
+        Delete delete = new Delete(context, user, groupId, lastRead);
         delete.perform();
     }
 
     @Override
-    public Group getGroup(Context ctx, int groupId) throws OXException {
-        return GroupStorage.getInstance().getGroup(groupId, ctx);
+    public Group getGroup(Context context, int groupId) throws OXException {
+        return GroupStorage.getInstance().getGroup(groupId, context);
     }
 
     @Override
-    public Group[] search(Context ctx, String pattern, boolean loadMembers) throws OXException {
-        return GroupStorage.getInstance().searchGroups(pattern, loadMembers, ctx);
+    public Group[] getGroup(Context context, int[] groupIds) throws OXException {
+        return GroupStorage.getInstance().getGroup(groupIds, context);
     }
 
+    @Override
+    public Group[] search(Context context, String pattern, boolean loadMembers) throws OXException {
+        return GroupStorage.getInstance().searchGroups(pattern, loadMembers, context);
+    }
+
+    @Override
+    public Group[] listAllGroups(Context context, boolean loadMembers) throws OXException {
+        return GroupStorage.getInstance().getGroups(loadMembers, context);
+    }
+
+    @Override
+    public Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException {
+        return GroupStorage.getInstance().listModifiedGroups(modifiedSince, context);
+    }
+
+    @Override
+    public Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException {
+        return GroupStorage.getInstance().listDeletedGroups(modifiedSince, context);
+    }
+
+    @Override
+    public void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException {
+        Update update = new Update(context, user, group, lastRead, checkI18nNames);
+        update.perform();
+    }
 }

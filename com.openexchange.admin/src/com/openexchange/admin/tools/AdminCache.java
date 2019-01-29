@@ -64,7 +64,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,12 +72,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
-import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -92,7 +89,11 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.JdbcProperties;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -199,47 +200,10 @@ public class AdminCache {
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 
     /**
-     * The available password encrypters.
-     */
-    private final Map<String, Encrypter> encrypters;
-    /**
-     * The available password mechanisms.
-     */
-    private final Set<String> passwordMechanisms;
-
-    /**
      * Initialises a new {@link AdminCache}.
      */
     public AdminCache() {
         super();
-        encrypters = initialiseEncrypters();
-        passwordMechanisms = initialisePasswordMechanisms();
-    }
-
-    /**
-     * Initialises the available password mechanisms
-     *
-     * @return An unmodifiable {@link Set} with all available password mechanisms
-     */
-    private Set<String> initialisePasswordMechanisms() {
-        Set<String> m = new HashSet<>(4);
-        m.add(PasswordMechObject.BCRYPT_MECH);
-        m.add(PasswordMechObject.CRYPT_MECH);
-        m.add(PasswordMechObject.SHA_MECH);
-        return Collections.unmodifiableSet(m);
-    }
-
-    /**
-     * Initialises the available encrypters
-     *
-     * @return An unmodifiable {@link Map} with all the available encrypters
-     */
-    private Map<String, Encrypter> initialiseEncrypters() {
-        Map<String, Encrypter> e = new HashMap<>(4);
-        e.put(PasswordMechObject.BCRYPT_MECH, (password) -> BCrypt.hashpw(password, BCrypt.gensalt()));
-        e.put(PasswordMechObject.CRYPT_MECH, (password) -> UnixCrypt.crypt(password));
-        e.put(PasswordMechObject.SHA_MECH, (password) -> SHACrypt.makeSHAPasswd(password));
-        return Collections.unmodifiableMap(e);
     }
 
     /**
@@ -669,20 +633,17 @@ public class AdminCache {
      * If <code>passwordMech</code> is <code>null</code>, the default mechanism as configured
      * in <code>User.properties</code> is used and set in the {@link PasswordMechObject} instance.
      *
-     * @param user
+     * @param user The {@link PasswordMechObject}
      * @return the encrypted password
-     * @throws StorageException
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws StorageException If encoding fails
      */
-    public String encryptPassword(PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String passwordMech = getPasswordMechanism(user);
-        Encrypter encrypter = encrypters.get(passwordMech);
-        if (encrypter == null) {
-            log.error("Unsupported password mechanism: {}", passwordMech);
-            throw new StorageException("Unsupported password mechanism: " + passwordMech);
+    public PasswordDetails encryptPassword(PasswordMechObject user) throws StorageException {
+        PasswordMech passwordMech = getPasswordMechanism(user);
+        try {
+            return passwordMech.encode(user.getPassword());
+        } catch (OXException e) {
+            throw new StorageException("Unable to encode password.", e);
         }
-        return encrypter.encrypt(user.getPassword());
     }
 
     /**
@@ -690,21 +651,28 @@ public class AdminCache {
      *
      * @param user The {@link PasswordMechObject}
      * @return The password mechanism. If the {@link PasswordMechObject} contains an unknown password mechanism, then
-     *         the <code>{SHA}</code> mechanism is returned.
+     *         the {@link PasswordMechRegistry#getDefault()} mechanism is returned.
+     * @throws StorageException If password mechanism is unknown
      */
-    private String getPasswordMechanism(PasswordMechObject user) {
-        String passwordMech = user.getPasswordMech();
-        if (com.openexchange.java.Strings.isEmpty(passwordMech) || "null".equals(com.openexchange.java.Strings.toLowerCase(passwordMech))) {
-            String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
-            pwmech = "{" + pwmech.toUpperCase() + "}";
-            if (!passwordMechanisms.contains(pwmech)) {
-                log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
-                pwmech = PasswordMechObject.SHA_MECH;
-            }
-            user.setPasswordMech(pwmech);
-            return pwmech;
+    public PasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
+        String passwordMechIdentifier = user.getPasswordMech();
+        if (Strings.isEmpty(passwordMechIdentifier) || "null".equals(Strings.toLowerCase(passwordMechIdentifier))) {
+            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
         }
-        return passwordMech;
+
+        try {
+            PasswordMechRegistry mechRegistry = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+            PasswordMech passwordMech = mechRegistry.get(passwordMechIdentifier);
+            if (passwordMech == null) {
+                passwordMech = mechRegistry.getDefault();
+                log.warn("Unknown password mechanism defined: '{}'. Will use default: '{}'", passwordMechIdentifier, passwordMech.getIdentifier());
+            }
+            user.setPasswordMech(passwordMech.getIdentifier());
+            return passwordMech;
+        } catch (OXException e) {
+            log.error("Unable to get password mechanism.", e);
+            throw new StorageException("Unable to get password mechanism.", e);
+        }
     }
 
     /**
@@ -761,11 +729,17 @@ public class AdminCache {
                 }
                 // Ok seems to be a line with user:pass entry
                 String[] user_pass_combination = line.split(":");
-                if (user_pass_combination.length != 3) {
+                if (user_pass_combination.length < 3) {
                     throw new OXGenericException("Invalid mpasswd format.");
                 }
                 Credentials masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
                 masterCredentials.setPasswordMech(user_pass_combination[1]);
+                if (user_pass_combination.length == 4) {
+                    String salt = user_pass_combination[3];
+                    if (Strings.isNotEmpty(salt)) {
+                        masterCredentials.setSalt(salt.getBytes());
+                    }
+                }
                 return masterCredentials;
             }
         } catch (IOException e) {

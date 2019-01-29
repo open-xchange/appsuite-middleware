@@ -169,4 +169,19 @@ public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage
         return delegate.loadAlarm(alarmId);
     }
 
+    @Override
+    public long getLatestTimestamp(int userId) throws OXException {
+        return delegate.getLatestTimestamp(userId);
+    }
+
+    @Override
+    public long getLatestTimestamp(String eventId, int userId) throws OXException {
+        return delegate.getLatestTimestamp(eventId, userId);
+    }
+
+    @Override
+    public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
+        return delegate.getLatestTimestamp(eventIds, userId);
+    }
+
 }

@@ -50,11 +50,15 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.TaskPatches;
 import com.openexchange.caldav.Tools;
@@ -64,18 +68,28 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
+import com.openexchange.dav.resources.CommonResource;
+import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link TaskResource}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class TaskResource extends CalDAVResource<Task> {
+public class TaskResource extends CommonResource<Task> {
 
     /**
      * All task fields that may be set in iCal files
@@ -93,12 +107,22 @@ public class TaskResource extends CalDAVResource<Task> {
     };
 
     private TasksSQLInterface taskInterface = null;
-    private final TaskCollection parent;
+    private TaskCollection parent;
     private Task taskToSave = null;
 
-    public TaskResource(final GroupwareCaldavFactory factory, final TaskCollection parent, final Task object, final WebdavPath url) throws OXException {
-        super(factory, parent, object, url);
+    public static final String EXTENSION_ICS = ".ics";
+    private static final String CONTENT_TYPE = "text/calendar; charset=UTF-8";
+    private static final int MAX_RETRIES = 3;
+
+    protected final GroupwareCaldavFactory factory;
+
+    private byte[] iCalFile;
+    private int retryCount;
+
+    public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) throws OXException {
+        super(parent, object, url);
         this.parent = parent;
+        this.factory = factory;
     }
 
     private TasksSQLInterface getTaskInterface() {
@@ -108,7 +132,253 @@ public class TaskResource extends CalDAVResource<Task> {
         return this.taskInterface;
     }
 
+    protected byte[] getICalFile() throws WebdavProtocolException {
+        if (null == iCalFile) {
+            try {
+                iCalFile = generateICal();
+            } catch (OXException e) {
+                throw protocolException(getUrl(), e);
+            }
+        }
+        return iCalFile;
+    }
+
+    protected byte[] serialize(ICalSession session) throws ConversionError {
+        ICalEmitter icalEmitter = factory.getIcalEmitter();
+        ByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = Streams.newByteArrayOutputStream();
+            icalEmitter.writeSession(session, outputStream);
+            return outputStream.toByteArray();
+        } finally {
+            Streams.close(outputStream);
+        }
+    }
+
+    private TimeZone getTimeZone() {
+        String timeZoneID = factory.getUser().getTimeZone();
+        return TimeZone.getTimeZone(null != timeZoneID ? timeZoneID : "UTC");
+    }
+
     @Override
+    protected String getFileExtension() {
+        return EXTENSION_ICS;
+    }
+
+    @Override
+    public Long getLength() throws WebdavProtocolException {
+        byte[] iCalFile = getICalFile();
+        return new Long(null != iCalFile ? iCalFile.length : 0);
+    }
+
+    @Override
+    public String getContentType() throws WebdavProtocolException {
+        return CONTENT_TYPE;
+    }
+
+    @Override
+    public InputStream getBody() throws WebdavProtocolException {
+        byte[] iCalFile = getICalFile();
+        if (null != iCalFile) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("iCal file: {}", new String(iCalFile, Charsets.UTF_8));
+            }
+            return Streams.newByteArrayInputStream(iCalFile);
+        }
+        return null;
+    }
+
+    @Override
+    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+        if (CaldavProtocol.CAL_NS.getURI().equals(namespace) && "calendar-data".equals(name)) {
+            WebdavProperty property = new WebdavProperty(namespace, name);
+            byte[] iCalFile = getICalFile();
+            if (null != iCalFile) {
+                property.setXML(true);
+                property.setValue("<![CDATA[" + new String(iCalFile, Charsets.UTF_8) + "]]>");
+            }
+            return property;
+        }
+        if (CaldavProtocol.CALENDARSERVER_NS.getURI().equals(namespace) && ("created-by".equals(name) || "updated-by".equals(name))) {
+            WebdavProperty property = new WebdavProperty(namespace, name);
+            if (null != object) {
+                int entityID;
+                Date timestamp;
+                if ("created-by".equals(name)) {
+                    entityID = object.getCreatedBy();
+                    timestamp = object.getCreationDate();
+                } else {
+                    entityID = object.getModifiedBy();
+                    timestamp = object.getLastModified();
+                }
+                try {
+                    User user = factory.getService(UserService.class).getUser(entityID, factory.getContext());
+                    property.setXML(true);
+                    property.setValue(new StringBuilder().append("<CS:first-name>").append(user.getGivenName()).append("</CS:first-name>").append("<CS:last-name>").append(user.getSurname()).append("</CS:last-name>").append("<CS:dtstamp>").append(Tools.formatAsUTC(timestamp)).append("</CS:dtstamp>").append("<D:href>mailto:").append(user.getMail()).append("</D:href>").toString());
+                } catch (OXException e) {
+                    LOG.warn("error resolving user '{}'", entityID, e);
+                }
+            }
+            return property;
+        }
+        return null;
+    }
+
+    @Override
+    public TaskResource move(WebdavPath dest, boolean noroot, boolean overwrite) throws WebdavProtocolException {
+        WebdavResource destinationResource = factory.resolveResource(dest);
+        DAVCollection destinationCollection = destinationResource.isCollection() ? (DAVCollection) destinationResource : factory.resolveCollection(dest.parent());
+        if (false == parent.getClass().isInstance(destinationCollection)) {
+            throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        TaskCollection targetCollection = null;
+        try {
+            targetCollection = (TaskCollection) destinationCollection;
+        } catch (ClassCastException e) {
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
+        }
+        try {
+            move(targetCollection);
+        } catch (OXException e) {
+            if (handle(e)) {
+                return move(dest, noroot, overwrite);
+            } else {
+                throw protocolException(getUrl(), e);
+            }
+        }
+        this.parent = targetCollection;
+        return this;
+    }
+
+    /**
+     * Handles given {@link OXException} instance and either throws an appropriate {@link WebdavProtocolException} instance or checks if a
+     * retry attempt is supposed to be performed.
+     *
+     * @param e The exception to handle
+     * @return <code>true</code> to signal that the operation should be retried; otherwise <code>false</code> if no retry should be performed
+     * @throws WebdavProtocolException The appropriate {@link WebdavProtocolException} instance in case no retry is feasible
+     */
+    protected boolean handle(OXException e) throws WebdavProtocolException {
+        boolean retry = false;
+        if (Tools.isDataTruncation(e)) {
+            /*
+             * handle by trimming truncated fields
+             */
+            if (this.trimTruncatedAttributes(e)) {
+                LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
+        } else if (Tools.isIncorrectString(e)) {
+            /*
+             * handle by removing problematic characters
+             */
+            if (replaceIncorrectStrings(e, "")) {
+                LOG.warn("{}: {} - removing problematic characters and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
+        } else if (e.equalsCode(93, "APP")) { // APP-0093
+            /*
+             * 'Moving a recurring appointment to another folder is not supported.'
+             */
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_CONFLICT);
+        } else if (e.equalsCode(100, "APP")) { // APP-0100
+            /*
+             * 'Cannot insert appointment ABC. An appointment with the unique identifier (123) already exists.'
+             */
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_CONFLICT);
+        } else if (e.equalsCode(70, "APP")) { // APP-0070
+            /*
+             * 'You can not use the private flag in a non private folder.'
+             */
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
+        } else if (e.equalsCode(99, "APP")) { // APP-0099
+            /*
+             * Changing an exception into a series is not supported.
+             */
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
+        } else {
+            throw protocolException(getUrl(), e);
+        }
+
+        if (!retry) {
+            return false;
+        }
+
+        return ++retryCount <= MAX_RETRIES;
+    }
+
+    private boolean trimTruncatedAttributes(OXException e) {
+        boolean hasTrimmed = false;
+        if (null != e.getProblematics()) {
+            for (ProblematicAttribute problematic : e.getProblematics()) {
+                if (Truncated.class.isInstance(problematic)) {
+                    hasTrimmed |= this.trimTruncatedAttribute((Truncated) problematic);
+                }
+            }
+        }
+        return hasTrimmed;
+    }
+
+    private boolean replaceIncorrectStrings(OXException e, String replacement) {
+        boolean hasReplaced = false;
+        if (null != e.getProblematics()) {
+            for (ProblematicAttribute problematic : e.getProblematics()) {
+                if (IncorrectString.class.isInstance(problematic)) {
+                    hasReplaced |= this.replaceIncorrectStrings((IncorrectString) problematic, replacement);
+                }
+            }
+        }
+        return hasReplaced;
+    }
+
+    @Override
+    public void create() throws WebdavProtocolException {
+        if (exists()) {
+            throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
+        }
+        try {
+            this.createObject();
+        } catch (OXException e) {
+            if (handle(e)) {
+                create();
+            } else {
+                throw protocolException(getUrl(), e);
+            }
+        }
+    }
+
+    @Override
+    public void delete() throws WebdavProtocolException {
+        if (false == exists()) {
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
+        try {
+            deleteObject();
+        } catch (OXException e) {
+            if (handle(e)) {
+                delete();
+            } else {
+                throw protocolException(getUrl(), e);
+            }
+        }
+    }
+
+    @Override
+    public void save() throws WebdavProtocolException {
+        if (false == exists()) {
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
+        try {
+            saveObject();
+        } catch (OXException e) {
+            if (handle(e)) {
+                save();
+            } else {
+                throw protocolException(getUrl(), e);
+            }
+        }
+    }
+
     protected void saveObject() throws OXException {
         Task originalTask = parent.load(object);
         checkForExplicitRemoves(originalTask, taskToSave);
@@ -118,12 +388,10 @@ public class TaskResource extends CalDAVResource<Task> {
         handleAttachments(originalTask, taskToSave);
     }
 
-    @Override
     protected void deleteObject() throws OXException {
         getTaskInterface().deleteTaskObject(object.getObjectID(), object.getParentFolderID(), object.getLastModified());
     }
 
-    @Override
     protected void createObject() throws OXException {
         taskToSave.removeObjectID(); // in case it's already assigned due to retry operations
         taskToSave.setParentFolderID(null != object ? object.getParentFolderID() : getId(parent));
@@ -131,7 +399,6 @@ public class TaskResource extends CalDAVResource<Task> {
         handleAttachments(null, taskToSave);
     }
 
-    @Override
     protected void move(CalDAVFolderCollection<Task> target) throws OXException {
         final Task task = new Task();
         task.setObjectID(object.getObjectID());
@@ -139,7 +406,6 @@ public class TaskResource extends CalDAVResource<Task> {
         getTaskInterface().updateTaskObject(task, getId(parent), object.getLastModified());
     }
 
-    @Override
     protected byte[] generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
         ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
@@ -151,7 +417,7 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected void deserialize(InputStream body) throws OXException {
-        List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>()).getImportedObjects();
+        List<Task> tasks = factory.getIcalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>()).getImportedObjects();
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } else {
@@ -167,7 +433,6 @@ public class TaskResource extends CalDAVResource<Task> {
         }
     }
 
-    @Override
     protected boolean trimTruncatedAttribute(final Truncated truncated) {
         if (null != this.taskToSave) {
             int field = truncated.getId();
@@ -187,7 +452,6 @@ public class TaskResource extends CalDAVResource<Task> {
         return false;
     }
 
-    @Override
     protected boolean replaceIncorrectStrings(IncorrectString incorrectString, String replacement) {
         if (null != taskToSave) {
             Object value = taskToSave.get(incorrectString.getId());

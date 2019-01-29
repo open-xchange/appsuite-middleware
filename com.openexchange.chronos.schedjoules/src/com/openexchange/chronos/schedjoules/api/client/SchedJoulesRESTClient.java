@@ -99,8 +99,8 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
     /**
      * Initialises a new {@link SchedJoulesRESTClient}.
      */
-    public SchedJoulesRESTClient(String scheme, String host, String apiKey) {
-        super(USER_AGENT, new SchedJoulesRESTResponseParser());
+    public SchedJoulesRESTClient(String scheme, String host, String apiKey, int timeout) {
+        super(USER_AGENT, timeout, new SchedJoulesRESTResponseParser());
 
         this.scheme = scheme;
         this.host = host;

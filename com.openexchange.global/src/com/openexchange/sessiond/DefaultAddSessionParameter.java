@@ -51,6 +51,7 @@ package com.openexchange.sessiond;
 
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Origin;
 
 /**
  * {@link DefaultAddSessionParameter} - The default implementation of {@code AddSessionParameter}.
@@ -72,6 +73,7 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private boolean tranzient;
     private SessionEnhancement enhancement;
     private String userAgent;
+    private Origin origin;
 
     /**
      * Initializes a new {@link DefaultAddSessionParameter}.
@@ -270,7 +272,27 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
         return userAgent;
     }
 
+    /**
+     * Sets the User-Agent string.
+     *
+     * @param userAgent The User-Agent string to set
+     */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
+
+    /**
+     * Sets the origin
+     *
+     * @param origin The origin to set
+     */
+    public void setOrigin(Origin origin) {
+        this.origin = origin;
+    }
+
 }

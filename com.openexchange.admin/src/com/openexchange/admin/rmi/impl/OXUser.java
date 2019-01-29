@@ -51,13 +51,12 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,7 +67,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
-import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
@@ -103,8 +101,6 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.SHACrypt;
-import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
@@ -123,6 +119,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * @author d7
@@ -1281,30 +1280,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             final String mech = cache.getAdminAuthMech(ctx);
-            if ("{CRYPT}".equalsIgnoreCase(mech)) {
-                try {
-                    cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
-                } catch (final UnsupportedEncodingException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
+            try {
+                PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+                PasswordMech passwordMech = mechFactory.get(mech);
+                if (null != passwordMech) {
+                    PasswordDetails passwordDetails = passwordMech.encode(usrdata.getPassword());
+                    cauth.setPassword(passwordDetails.getEncodedPassword());
+                    cauth.setSalt(passwordDetails.getSalt());
+                    cauth.setPasswordMech(passwordDetails.getPasswordMech());
+                } else {
+                    IllegalStateException e = new IllegalStateException("There must be a useable password mechanism.");
+                    LOGGER.error("Error encrypting password for credential cache.", e);
                     throw new StorageException(e);
                 }
-            } else if ("{SHA}".equalsIgnoreCase(mech)) {
-                try {
-                    cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
-                } catch (final NoSuchAlgorithmException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
-                    throw new StorageException(e);
-                } catch (final UnsupportedEncodingException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
-                    throw new StorageException(e);
-                }
-            } else if ("{BCRYPT}".equalsIgnoreCase(mech)) {
-                try {
-                    cauth.setPassword(BCrypt.hashpw(usrdata.getPassword(), BCrypt.gensalt()));
-                } catch (final RuntimeException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
-                    throw new StorageException(e);
-                }
+            } catch (OXException e) {
+                LOGGER.error("Error encrypting password for credential cache.", e);
+                throw new StorageException(e);
             }
             cache.setAdminCredentials(ctx, mech, cauth);
         }
@@ -2477,9 +2468,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     check_default_sender_address = s == null ? s : IDNA.toIDN(s);
                 }
 
-                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-                final boolean found_email1 = useraliases.contains(check_email1);
-                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+                List<String> realMailAddresses = extractRealMailAddresses(useraliases);
+                final boolean found_primary_mail = realMailAddresses.contains(check_primary_mail);
+                final boolean found_email1 = realMailAddresses.contains(check_email1);
+                final boolean found_default_sender_address = realMailAddresses.contains(check_default_sender_address);
 
                 if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
                     throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
@@ -2494,6 +2486,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         // TODO mail checks
+    }
+
+    private List<String> extractRealMailAddresses(Collection<String> aliases) {
+        List<String> result = new ArrayList<>(aliases.size());
+        for (String mail : aliases) {
+            int indexOf = mail.indexOf("<");
+            if (indexOf >= 0) {
+                result.add(mail.substring(indexOf + 1, mail.indexOf(">")));
+            } else {
+                result.add(mail);
+            }
+        }
+        return result;
     }
 
     private static void checkContext(final Context ctx) throws InvalidDataException {
@@ -2713,9 +2718,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         if (namedAccessCombination.isOLOX20()) {
             retval |= UserConfiguration.OLOX20;
-        }
-        if (namedAccessCombination.isPublication()) {
-            retval |= UserConfiguration.PUBLICATION;
         }
         if (namedAccessCombination.getReadCreateSharedFolders()) {
             retval |= UserConfiguration.READ_CREATE_SHARED_FOLDERS;

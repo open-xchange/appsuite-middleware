@@ -76,6 +76,10 @@ import com.openexchange.session.Session;
  */
 public class OnboardingEMClientProvider implements OnboardingProvider {
 
+    private static final String URL_PROPERTY = "com.openexchange.client.onboarding.emclient.url";
+    private static final String EMCLIENT_PREMIUM = "emclient_premium";
+    private static final String EMCLIENT_BASIC = "emclient_basic";
+
     private final String identifier;
     private final Set<Device> supportedDevices;
     private final Set<OnboardingType> supportedTypes;
@@ -143,30 +147,29 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
     }
 
     private String getDownloadLink(Session session) throws OXException {
-        String propertyName = "com.openexchange.client.onboarding.emclient.url";
-        String url = OnboardingUtility.getValueFromProperty(propertyName, null, session);
+        String url = OnboardingUtility.getValueFromProperty(URL_PROPERTY, null, session);
         if (Strings.isEmpty(url)) {
-            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(URL_PROPERTY);
         }
         return url;
     }
 
     @Override
     public AvailabilityResult isAvailable(Session session) throws OXException {
-        boolean available = OnboardingUtility.hasCapability("emclient_basic", session);
+        boolean available = OnboardingUtility.hasCapability(EMCLIENT_BASIC, session);
         if (!available) {
-            available = OnboardingUtility.hasCapability("emclient_premium", session);
+            available = OnboardingUtility.hasCapability(EMCLIENT_PREMIUM, session);
         }
-        return new AvailabilityResult(available, "emclient_basic", "emclient_premium");
+        return new AvailabilityResult(available, EMCLIENT_BASIC, EMCLIENT_PREMIUM);
     }
 
     @Override
     public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
-        boolean available = OnboardingUtility.hasCapability("emclient_basic", userId, contextId);
+        boolean available = OnboardingUtility.hasCapability(EMCLIENT_BASIC, userId, contextId);
         if (!available) {
-            available = OnboardingUtility.hasCapability("emclient_premium", userId, contextId);
+            available = OnboardingUtility.hasCapability(EMCLIENT_PREMIUM, userId, contextId);
         }
-        return new AvailabilityResult(available, "emclient_basic", "emclient_premium");
+        return new AvailabilityResult(available, EMCLIENT_BASIC, EMCLIENT_PREMIUM);
     }
 
 }

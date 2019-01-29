@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.Date;
+import java.util.Map;
 import com.openexchange.chronos.provider.CalendarFolder;
 
 /**
@@ -107,5 +108,12 @@ public interface GroupwareCalendarFolder extends CalendarFolder {
      * @return A {@link GroupwareFolderType}
      */
     GroupwareFolderType getType();
+
+    /**
+     * Gets additional arbitrary metadata associated with the folder.
+     * 
+     * @return The additional metadata, or <code>null</code> if not set
+     */
+    Map<String, Object> getMeta();
 
 }

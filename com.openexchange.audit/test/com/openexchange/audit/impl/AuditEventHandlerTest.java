@@ -682,26 +682,6 @@ public class AuditEventHandlerTest {
     }
 
     @Test
-    public void testHandleInfostoreEvent_TopicRelevantAndPublication_AppendLocalIp() throws Exception {
-        this.auditEventHandler = new AuditEventHandler(userService);
-
-        PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.UPDATE_TOPIC);
-        Session session = PowerMockito.mock(Session.class);
-        PowerMockito.when(session.getParameter(ArgumentMatchers.anyString())).thenReturn(Boolean.TRUE);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).thenReturn(this.userId);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.FOLDER_ID)).thenReturn(this.objectTitle);
-
-        this.auditEventHandler.handleInfostoreEvent(event, stringBuilder);
-
-        Assert.assertFalse(stringBuilder.toString().startsWith("EVENT TYPE: ACCESS; "));
-        Assert.assertTrue(stringBuilder.toString().startsWith("EVENT TYPE: UPDATE; "));
-        Assert.assertTrue(stringBuilder.toString().contains("PUBLISH: " + "unknown"));
-    }
-
-    @Test
     public void testHandleInfostoreEvent_AccessTopic_AppendLocalIp() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 

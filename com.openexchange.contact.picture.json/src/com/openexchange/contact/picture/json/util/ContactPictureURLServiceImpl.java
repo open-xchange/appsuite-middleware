@@ -104,6 +104,18 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
         return getPictureUrl(-1, -1, userId, session, timestamp, preferRelativeUrl);
     }
 
+    /**
+     * Gets the url to the contact picture. Either contact and folder id or the user id must be provided. If both are provided only the contact and user id are used.
+     *
+     * @param contactId The optional contact id
+     * @param folderId The folder id. Must be not null in case the contact id is not null.
+     * @param userId The optional user id
+     * @param session The users session
+     * @param timestamp An optional timestamp value to add to the url
+     * @param preferRelativeUrl Whether relative url is preferred
+     * @return The url to the contact picture
+     * @throws OXException
+     */
     private String getPictureUrl(int contactId, int folderId, int userId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException {
         URIBuilder builder = new URIBuilder();
         if (false == preferRelativeUrl) {

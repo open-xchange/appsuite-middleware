@@ -103,6 +103,8 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected static final char OPT_JMX_AUTH_USER_SHORT = 'J';
     protected static final String OPT_JMX_AUTH_USER_LONG = "jmxauthuser";
 
+    protected static final String OPT_JMX_AUTH_PASSWORD_HASH_MECH_LONG = "jmxauthpasswordhashmech";
+
     protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private CLIOption hostOption = null;
@@ -110,10 +112,12 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     private CLIOption timeoutOption = null;
     protected CLIOption jmxpass = null;
     protected CLIOption jmxuser = null;
+    protected CLIOption jmxpasshash = null;
     protected String hostname = "localhost";
     protected int port = DEFAULT_JMX_SERVER_PORT;
     protected int timeout = 15000;
     private JMXConnector c = null;
+
 
     protected AbstractJMXTools() {
         super();
@@ -256,6 +260,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         this.timeoutOption = setShortLongOpt(parser, OPT_TIMEOUT_SHORT, OPT_TIMEOUT_LONG, "timeout in seconds for the connection creation to the backend (default 15s)", true, NeededQuadState.notneeded);
         this.jmxuser = setShortLongOpt(parser, OPT_JMX_AUTH_USER_SHORT, OPT_JMX_AUTH_USER_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
         this.jmxpass = setShortLongOpt(parser, OPT_JMX_AUTH_PASSWORD_SHORT, OPT_JMX_AUTH_PASSWORD_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
+        this.jmxpasshash = setLongOpt(parser, OPT_JMX_AUTH_PASSWORD_HASH_MECH_LONG, "password hash mechanism used for generating the password (default: SHA)", true, false);
         setFurtherOptions(parser);
     }
 
@@ -299,16 +304,17 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
     }
 
-    protected Map<String, String[]> setCreds(AdminParser parser) throws CLIIllegalOptionValueException {
-        String userValue = (String) parser.getOptionValue(this.jmxuser);
-        String passValue = (String) parser.getOptionValue(this.jmxpass);
+    protected Map<String, String[]> setCreds(final AdminParser parser) throws CLIIllegalOptionValueException {
+        final String userValue = (String) parser.getOptionValue(this.jmxuser);
+        final String passValue = (String) parser.getOptionValue(this.jmxpass);
+        final String passHash = (String) parser.getOptionValue(this.jmxpasshash);
 
         if (userValue != null && userValue.trim().length() > 0) {
             if (passValue == null) {
                 throw new CLIIllegalOptionValueException(this.jmxpass, null);
             }
             Map<String, String[]> env = new HashMap<String, String[]>();
-            String[] creds = new String[] { userValue, passValue };
+            final String[] creds = new String[] { userValue, passValue, passHash };
             env.put(JMXConnector.CREDENTIALS, creds);
             return env;
         }

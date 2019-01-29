@@ -51,12 +51,11 @@ package com.openexchange.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 
 /**
  * {@link AbstractCLI} - The basic super class for command-line tools.
@@ -93,16 +92,12 @@ public abstract class AbstractCLI<R, C> {
             // Add other options
             addOptions(options);
 
-            // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
-            CommandLine cmd = parser.parse(options, args);
-
             // Check if help output is requested
-            if (cmd.hasOption('h')) {
-                printHelp(options, 120, true);
-                System.exit(0);
-                return null;
-            }
+            helpRequested(args);
+
+            // Initialize command-line parser & parse arguments
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check other mandatory options
             checkOptions(cmd, options);
@@ -138,6 +133,25 @@ public abstract class AbstractCLI<R, C> {
             }
         }
         return null;
+    }
+
+    /**
+     * Check if help output is requested
+     * 
+     * @param args The command line arguments
+     */
+    protected void helpRequested(String[] args) {
+        if (args == null || args.length == 0) {
+            return;
+        }
+        for (String s : args) {
+            if (false == s.equals("-h") && false == s.equals("--help")) {
+                continue;
+            }
+            printHelp(options);
+            System.exit(0);
+            return;
+        }
     }
 
     /**
@@ -406,7 +420,7 @@ public abstract class AbstractCLI<R, C> {
     }
 
     /**
-     * Create an {@link Option} with the {@link OptionBuilder}
+     * Create an {@link Option}
      * 
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
@@ -419,7 +433,7 @@ public abstract class AbstractCLI<R, C> {
     }
 
     /**
-     * Create an {@link Option} with the {@link OptionBuilder}
+     * Create an {@link Option}
      * 
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
@@ -429,16 +443,11 @@ public abstract class AbstractCLI<R, C> {
      * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
      */
     protected Option createOption(String shortName, String longName, String argName, boolean hasArgs, String description, boolean mandatory) {
-        OptionBuilder.withLongOpt(longName);
-        OptionBuilder.hasArg(hasArgs);
-        OptionBuilder.withArgName(argName);
-        OptionBuilder.withDescription(description);
-        OptionBuilder.isRequired(mandatory);
-        return OptionBuilder.create(shortName);
+        return Option.builder(shortName).longOpt(longName).hasArg(hasArgs).argName(argName).desc(description).required(mandatory).build();
     }
 
     /**
-     * Create an {@link Option} with the {@link OptionBuilder}
+     * Create an {@link Option}
      * 
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
@@ -449,12 +458,6 @@ public abstract class AbstractCLI<R, C> {
      * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
      */
     protected Option createOption(String shortName, String longName, String argName, boolean hasArgs, Class<?> type, String description, boolean mandatory) {
-        OptionBuilder.withLongOpt(longName);
-        OptionBuilder.hasArg(hasArgs);
-        OptionBuilder.withArgName(argName);
-        OptionBuilder.withDescription(description);
-        OptionBuilder.isRequired(mandatory);
-        OptionBuilder.withType(type);
-        return OptionBuilder.create(shortName);
+        return Option.builder(shortName).longOpt(longName).hasArg(hasArgs).argName(argName).desc(description).type(type).required(mandatory).build();
     }
 }

@@ -487,12 +487,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @see #getNewInstance(Session, int)
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return reconnect(mailAccess, false);
+    }
+
+    /**
+     * Re-connects specified <tt>MailAccess</tt> instance.
+     *
+     * @param mailAccess The <tt>MailAccess</tt> instance to re-connect
+     * @param connectError <code>true</code> if a connect or a connection error occurred (in this case the <tt>MailAccess</tt> instance is closed); otherwise <code>false</code>
+     * @return The re-connected <tt>MailAccess</tt> instance.
+     * @throws OXException If re-connect attempt fails
+     * @see #getNewInstance(Session, int)
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, boolean connectError) throws OXException {
         if (null == mailAccess) {
             return null;
         }
+
         Session session = mailAccess.getSession();
         int accountId = mailAccess.getAccountId();
-        mailAccess.close(true);
+        mailAccess.close(!connectError);
 
         // A new instance, freshly initialized
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);

@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.session.Origin;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
@@ -86,6 +87,7 @@ public final class SessionImpl implements PutIfAbsent {
     private volatile String hash;
     private volatile String client;
     private volatile boolean tranzient;
+    private final Origin origin;
     private final ConcurrentMap<String, Object> parameters;
 
     /**
@@ -107,9 +109,9 @@ public final class SessionImpl implements PutIfAbsent {
      */
     public SessionImpl(int userId, String loginName, String password, int contextId, String sessionId,
         String secret, String randomToken, String localIp, String login, String authId, String hash,
-        String client, boolean tranzient) {
+        String client, boolean tranzient, Origin origin) {
         this(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, authId, hash, client, tranzient,
-            UUIDSessionIdGenerator.randomUUID(), null);
+            UUIDSessionIdGenerator.randomUUID(), origin, null);
     }
 
     /**
@@ -122,7 +124,7 @@ public final class SessionImpl implements PutIfAbsent {
             sessionDescription.getContextId(), sessionDescription.getSessionID(), sessionDescription.getSecret(),
             sessionDescription.getRandomToken(), sessionDescription.getLocalIp(), sessionDescription.getLogin(),
             sessionDescription.getAuthId(), sessionDescription.getHash(), sessionDescription.getClient(), sessionDescription.isTransient(),
-            sessionDescription.getAlternativeId(), sessionDescription.getParameters());
+            sessionDescription.getAlternativeId(), sessionDescription.getOrigin(), sessionDescription.getParameters());
     }
 
     /**
@@ -145,7 +147,7 @@ public final class SessionImpl implements PutIfAbsent {
      */
     public SessionImpl(int userId, String loginName, String password, int contextId, String sessionId,
         String secret, String randomToken, String localIp, String login, String authId, String hash,
-        String client, boolean tranzient, String alternativeId, Map<String, Object> parameters) {
+        String client, boolean tranzient, String alternativeId, Origin origin, Map<String, Object> parameters) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -160,6 +162,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.hash = hash;
         this.client = client;
         this.tranzient = tranzient;
+        this.origin = origin;
         this.parameters = new ConcurrentHashMap<String, Object>(16, 0.9F, 1);
         if (null != parameters) {
             // Copy given parameters
@@ -196,6 +199,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.hash = s.getHash();
         this.client = s.getClient();
         this.tranzient = false;
+        this.origin = s.getOrigin();
         parameters = new ConcurrentHashMap<String, Object>(16, 0.9F, 1);
         for (String name : s.getParameterNames()) {
             parameters.put(name, s.getParameter(name));
@@ -579,6 +583,11 @@ public final class SessionImpl implements PutIfAbsent {
      */
     public void setTransient(boolean tranzient) {
         this.tranzient = tranzient;
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
     }
 
     /**

@@ -53,15 +53,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
+import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavStatusImpl;
 
 /**
  * {@link TaskCollection} - CalDAV collection for tasks.
@@ -70,10 +81,18 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class TaskCollection extends CalDAVFolderCollection<Task> {
 
+    private static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
+
     private static final int[] BASIC_COLUMNS = {
         Task.UID, Task.FILENAME, Task.FOLDER_ID, Task.OBJECT_ID, Task.PARTICIPANTS, Task.LAST_MODIFIED, Task.CREATION_DATE,
         Task.CREATED_BY, Task.MODIFIED_BY
     };
+
+    private final int folderID;
+
+    public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
+        this(factory, url, folder, CalendarOrder.NO_ORDER);
+    }
 
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
@@ -81,20 +100,44 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
             new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VTODO),
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VTODO)
         );
-    }
-
-    public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
-        this(factory, url, folder, NO_ORDER);
+        this.folderID = Tools.parse(folder.getID());
     }
 
     @Override
-    protected Collection<Task> getModifiedObjects(Date since) throws OXException {
-        return filter(factory.getTaskInterface().getModifiedTasksInFolder(folderID, BASIC_COLUMNS, since));
+    protected TaskResource createResource(Task object, WebdavPath url) throws OXException {
+        return new TaskResource(factory, this, object, url);
     }
 
     @Override
-    protected Collection<Task> getDeletedObjects(Date since) throws OXException {
-        return filter(factory.getTaskInterface().getDeletedTasksInFolder(folderID, BASIC_COLUMNS, since));
+    protected Task getObject(String resourceName) throws OXException {
+        Collection<Task> objects = this.getObjects();
+        if (null != objects && 0 < objects.size()) {
+            /*
+             * try filename and uid properties
+             */
+            for (Task t : objects) {
+                if (resourceName.equals(t.getFilename()) || resourceName.equals(t.getUid())) {
+                    return t;
+                }
+            }
+            /*
+             * try object id as fallback to support previous implementation
+             */
+            Matcher matcher = OBJECT_ID_PATTERN.matcher(resourceName);
+            if (matcher.find()) {
+                try {
+                    int objectID = Integer.parseInt(matcher.group(0));
+                    for (Task t : objects) {
+                        if (objectID == t.getObjectID()) {
+                            return t;
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    // not an ID
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -103,28 +146,126 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     }
 
     @Override
-    protected TaskResource createResource(Task object, WebdavPath url) throws OXException {
-        return new TaskResource(factory, this, object, url);
-    }
-
-    protected Task load(Task task) throws OXException {
-        return factory.getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
-    }
-
-    @Override
-    protected boolean isSupported(Task task) throws WebdavProtocolException {
-        return null != task && null == task.getParticipants() && isInInterval(task, getIntervalStart(), getIntervalEnd());
-    }
-
-    @Override
-    protected List<Task> getObjectsInRange(Date from, Date until) throws OXException {
+    protected Collection<Task> getObjects(Date rangeStart, Date rangeEnd) throws OXException {
         List<Task> tasks = new ArrayList<Task>();
         for (Task task : this.getObjects()) {
-            if (isSupported(task) && isInInterval(task, from, until)) {
+            if (isSupported(task) && isInInterval(task, rangeStart, rangeEnd)) {
                 tasks.add(task);
             }
         }
         return tasks;
+    }
+
+    @Override
+    protected WebdavPath constructPathForChildResource(Task object) {
+        String fileName = object.getFilename();
+        if (null == fileName || 0 == fileName.length()) {
+            fileName = object.getUid();
+        }
+        String fileExtension = getFileExtension().toLowerCase();
+        if (false == fileExtension.startsWith(".")) {
+            fileExtension = "." + fileExtension;
+        }
+        return constructPathForChildResource(fileName + fileExtension);
+    }
+
+    @Override
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+        SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
+        //      Date nextSyncToken = new Date(since.getTime());
+        if (null == since) {
+            since = new Date(0L);
+        }
+        boolean initialSync = 0 == since.getTime();
+        Date nextSyncToken = Tools.getLatestModified(since, this.folder);
+        /*
+         * new and modified objects
+         */
+        Collection<Task> modifiedObjects = this.getModifiedObjects(since);
+        for (Task object : modifiedObjects) {
+            // add resource to multistatus
+            WebdavResource resource = createResource(object, constructPathForChildResource(object));
+            int status = null != object.getCreationDate() && object.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
+            multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
+            // remember aggregated last modified for next sync token
+            nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
+        }
+        /*
+         * deleted objects
+         */
+        Collection<Task> deletedObjects = this.getDeletedObjects(since);
+        for (Task object : deletedObjects) {
+            // only include objects that are not also modified (due to move operations)
+            if (null != object.getUid() && false == contains(modifiedObjects, object.getUid())) {
+                if (false == initialSync) {
+                    // add resource to multistatus
+                    WebdavResource resource = createResource(object, constructPathForChildResource(object));
+                    multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), resource));
+                }
+                // remember aggregated last modified for parent folder
+                nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
+            }
+        }
+        /*
+         * Return response with new next sync-token in response
+         */
+        multistatus.setToken(Long.toString(nextSyncToken.getTime()));
+        return multistatus;
+    }
+
+    private Collection<Task> getModifiedObjects(Date since) throws OXException {
+        return filter(factory.getTaskInterface().getModifiedTasksInFolder(folderID, BASIC_COLUMNS, since));
+    }
+
+    private Collection<Task> getDeletedObjects(Date since) throws OXException {
+        return filter(factory.getTaskInterface().getDeletedTasksInFolder(folderID, BASIC_COLUMNS, since));
+    }
+
+    public Task load(Task task) throws OXException {
+        return factory.getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
+    }
+
+    private boolean isSupported(Task task) throws WebdavProtocolException {
+        return null != task && null == task.getParticipants() && isInInterval(task, minDateTime.getMinDateTime(), maxDateTime.getMaxDateTime());
+    }
+
+    private static <T extends CalendarObject> boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
+        if (null == object) {
+            return false;
+        }
+        if (null != intervalStart && null != object.getEndDate() && object.getEndDate().before(intervalStart)) {
+            return false;
+        }
+        if (null != intervalEnd && null != object.getStartDate() && object.getStartDate().after(intervalEnd)) {
+            return false;
+        }
+        return true;
+    }
+
+    private List<Task> filter(SearchIterator<Task> searchIterator) throws OXException {
+        List<Task> list = new ArrayList<Task>();
+        if (null != searchIterator) {
+            try {
+                while (searchIterator.hasNext()) {
+                    Task t = searchIterator.next();
+                    if (isSupported(t)) {
+                        list.add(t);
+                    }
+                }
+            } finally {
+                searchIterator.close();
+            }
+        }
+        return list;
+    }
+
+    private static <T extends CommonObject> boolean contains(Collection<T> objects, String uid) {
+        for (T object : objects) {
+            if (uid.equals(object.getUid())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

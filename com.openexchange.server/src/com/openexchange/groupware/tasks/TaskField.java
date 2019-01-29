@@ -82,9 +82,9 @@ public enum TaskField {
     LABEL(Task.COLOR_LABEL, "Label"),
     UID(Task.UID, "UID");
 
-    private int taskID; // ID used in Task.*
+    private final int taskID; // ID used in Task.*
 
-    private String name; // name used for getters & setters
+    private final String name; // name used for getters & setters
 
     private TaskField(final int taskID, final String name) {
         this.taskID = taskID;
@@ -113,16 +113,8 @@ public enum TaskField {
         return name;
     }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
-
     public int getTaskID() {
         return taskID;
-    }
-
-    public void setTaskID(final int taskID) {
-        this.taskID = taskID;
     }
 
     public String getICalName() {

@@ -403,7 +403,8 @@ public class OSGiCleanMapper {
             OSGiServletContext servletCtx,
             final List<OSGiServletHandler> servletHandlers) {
         if (servletCtx == null) {
-            servletCtx = new OSGiServletContext(httpContext);
+            throw new IllegalArgumentException("Servlet context must not be null");
+            //servletCtx = new OSGiServletContext(httpContext);
         }
 
         contextServletHandlerMap.put(httpContext, servletHandlers);

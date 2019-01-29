@@ -51,7 +51,6 @@ package com.openexchange.crypto;
 
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link DoNothingCryptoService}
  *
@@ -63,7 +62,6 @@ public class DoNothingCryptoService implements CryptoService {
     public String decrypt(String encryptedPayload, String password) throws OXException {
         return encryptedPayload;
     }
-
 
     @Override
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
@@ -79,5 +77,4 @@ public class DoNothingCryptoService implements CryptoService {
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
     }
-
 }

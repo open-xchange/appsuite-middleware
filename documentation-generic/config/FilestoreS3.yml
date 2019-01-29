@@ -206,4 +206,40 @@ properties:
       related:
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Metrics"]  
+      tags: ["Filestore", "Metrics"]
+
+    - key: com.openexchange.filestore.s3.[filestoreID].connectTimeout
+      description: |
+        Defines the connect timeout in milliseconds when connecting to S3 end-point.
+      defaultValue: 10000
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.[filestoreID].readTimeout
+      description: |
+        Defines the socket read timeout in milliseconds when reading responses from to S3 end-point.
+      defaultValue: 50000
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.[filestoreID].maxConnectionPoolSize
+      description: |
+        Defines the maximum number of allowed open HTTP connections.
+      defaultValue: 50
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore"]

@@ -164,9 +164,9 @@ import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationSer
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.ServiceListings;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -194,8 +194,8 @@ import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.CorePoolSize;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.CorePoolSize.Behavior;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.DelegateExecutorService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
@@ -606,13 +606,14 @@ public final class Init {
 
     private static void startAndInjectBasicServices() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
+            com.openexchange.password.mechanism.osgi.Services.setServiceLookup(LOOKUP);
             final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
 
                 @Override
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
                 }
-            }, new PasswordMechFactoryImpl());
+            }, new PasswordMechRegistryImpl(TestServiceRegistry.getInstance().getService(ConfigurationService.class)));
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }

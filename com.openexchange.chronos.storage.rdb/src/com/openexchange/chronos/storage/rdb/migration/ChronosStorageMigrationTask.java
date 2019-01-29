@@ -55,6 +55,8 @@ import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.context.ContextService;
@@ -95,7 +97,8 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
             com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask.class.getName(),
             "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2",
             com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask.class.getName(),
-            com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddSeriesIndexTask.class.getName()
+            com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddSeriesIndexTask.class.getName(),
+            com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmAddTimestampColumnTask.class.getName()
         };
     }
 
@@ -106,6 +109,12 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
+        /*
+         * check if migration is actually needed in schema
+         */
+        if (false == needsMigration(params.getConnection())) {
+            return;
+        }
         ContextService contextService = services.getService(ContextService.class);
         int[] contextIds = params.getContextsInSameSchema();
         MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length);
@@ -174,6 +183,44 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
                 return null;
             }
             throw e;
+        }
+    }
+
+    /**
+     * Gets a value indicating whether a calendar data migration is necessary for the underlying database schema or not, based on
+     * the presence of processable data in the <i>source</i> or <i>destination</i> calendar storage.
+     * 
+     * @param connection The database connection to use
+     * @return <code>true</code> if the database schema needs to be migrated, <code>false</code> if migration can be skipped for the schema
+     */
+    private static boolean needsMigration(Connection connection) throws OXException {
+        try {
+            /*
+             * check for any data in the source storage
+             */
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT 1 FROM prg_dates LIMIT 1;")) {
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        LOG.info("Source calendar storage in schema {} is non-empty, migration is needed.", connection.getCatalog());
+                        return true;
+                    }
+                }
+            }
+            /*
+             * also check for potential stale data in the destination storage
+             */
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT 1 FROM calendar_event WHERE account=0 LIMIT 1;")) {
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        LOG.info("Destination calendar storage in schema {} is non-empty, migration is needed.", connection.getCatalog());
+                        return true;
+                    }
+                }
+            }
+            LOG.info("Calendar storage in schema {} is empty, migration is not needed.", connection.getCatalog());
+            return false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
     }
 

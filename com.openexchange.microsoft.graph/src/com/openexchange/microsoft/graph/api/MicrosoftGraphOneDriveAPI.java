@@ -71,6 +71,7 @@ import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
 import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphDriveClientExceptionCodes;
 import com.openexchange.policy.retry.LinearRetryPolicy;
 import com.openexchange.policy.retry.RetryPolicy;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
@@ -279,7 +280,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_copy">Copy a file or folder</a>
      */
     public String copyItemAsync(String accessToken, String itemId, JSONObject body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itmes/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.sethBodyEntity(new JSONObjectEntity(body));
@@ -287,7 +288,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         if (restResponse.getStatusCode() == 202) {
             return restResponse.getHeader(HttpHeaders.LOCATION);
         }
-        throw new OXException(666, "Copy failed: " + restResponse.getStatusCode());
+        throw MicrosoftGraphDriveClientExceptionCodes.ASYNC_COPY_FAILED.create(itemId, restResponse.getStatusCode());
     }
 
     /**
@@ -469,9 +470,13 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param inputStream A stream with the actual data
      * @return A {@link JSONObject} with the metadata of the newly uploaded file.
      * @throws OXException if an error is occurred
+     * @throws IllegalArgumentException if the content length of the file is less than or equal to zero.
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_createuploadsession">Resumable Upload</a>
      */
     public JSONObject streamingUpload(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
+        if (contentLength <= 0) {
+            throw new IllegalArgumentException("The content length of the file must be greater than zero!");
+        }
         String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/createUploadSession";
         try {
             JSONObject body = new JSONObject();
@@ -480,7 +485,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
             JSONObject sessionBody = postResource(accessToken, path, body);
             String uploadUrl = sessionBody.optString("uploadUrl");
             if (Strings.isEmpty(uploadUrl)) {
-                throw new OXException(666, "Upload failed");
+                throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED_EMPTY_URL.create(filename, folderId);
             }
 
             int read = 0;
@@ -508,7 +513,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 // Upload
                 RESTResponse response = client.execute(put);
                 if (response.getStatusCode() < 200 || response.getStatusCode() > 203) {
-                    throw new OXException(666, "Upload failed: " + response.getStatusCode() + " " + response.getResponseBody());
+                    LOG.debug("Upload failed with status code '{}'. Response body: \n{}", response.getStatusCode(), response.getResponseBody());
+                    throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED_STATUS_CODE.create(filename, folderId, response.getStatusCode());
                 }
                 if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
                     LOG.debug("Upload status for upload with id '{}': Successfully completed.", uploadId);
@@ -516,7 +522,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 }
                 LOG.debug("Upload status for upload with id '{}': Completed: {}% ", uploadId, String.format("%1.2f", (((double) transferredBytes / contentLength * 100))));
             }
-            throw new OXException(666, "Upload failed");
+            throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED.create(filename, folderId);
         } catch (JSONException e) {
             throw RESTExceptionCodes.JSON_ERROR.create(e);
         } catch (IOException e) {

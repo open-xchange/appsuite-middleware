@@ -26,8 +26,7 @@ Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
 
 %description
-Adds the feature to subscribe to third party services or
-publications to the backend installation.
+Adds the feature to subscribe to third party services to the backend installation.
 
 Authors:
 --------
@@ -50,9 +49,6 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-2470
-    ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
-
     # SoftwareChange_Request-2942
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
@@ -67,7 +63,6 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
 %doc docs/

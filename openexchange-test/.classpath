@@ -42,24 +42,18 @@
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.openexchange.server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
-	<classpathentry kind="src" path="/com.openexchange.publish"/>
-	<classpathentry kind="src" path="/com.openexchange.publish.json"/>
 	<classpathentry kind="src" path="/com.openexchange.datatypes.genericonf"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe"/>
 	<classpathentry kind="src" path="/com.openexchange.subscribe.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.threadpool"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.microformats"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.user.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar.printing"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.microformats"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.generic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.datatypes.genericonf.storage"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.basic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sql"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.twitter"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.online.infostore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.rss"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.html"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tx"/>
@@ -173,6 +167,7 @@
 	<classpathentry kind="lib" path="lib/migbase64-2.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.session.management"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.password.mechanism"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rest.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer.impl"/>

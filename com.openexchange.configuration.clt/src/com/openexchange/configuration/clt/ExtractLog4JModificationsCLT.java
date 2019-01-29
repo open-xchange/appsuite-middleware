@@ -196,7 +196,7 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected String getFooter() {
-        return null;
+        return "";
     }
 
     /*

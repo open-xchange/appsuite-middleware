@@ -208,6 +208,11 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
         }
 
         @Override
+        public byte[] getSalt() {
+            return null;
+        }
+
+        @Override
         public boolean isMailEnabled() {
             return false;
         }

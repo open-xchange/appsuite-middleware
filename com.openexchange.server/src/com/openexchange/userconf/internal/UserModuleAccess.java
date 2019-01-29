@@ -110,6 +110,10 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     private boolean Subscription = true;
 
+    /**
+     * @deprecated Publication has been removed with v7.10.2
+     */
+    @Deprecated
     private boolean Publication = true;
 
     private boolean ActiveSync = true;
@@ -283,18 +287,22 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     /**
      * Gets the publication access.
-     *
+     * 
+     * @deprecated Publication has been removed with v7.10.2
      * @return The publication
      */
+    @Deprecated
     public boolean isPublication() {
         return Publication;
     }
 
     /**
      * Sets the publication access.
-     *
+     * 
+     * @deprecated Publication has been removed with v7.10.2
      * @param publication The publication access to set
      */
+    @Deprecated
     public void setPublication(final boolean publication) {
         Publication = publication;
     }

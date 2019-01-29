@@ -103,12 +103,12 @@ public class RdbCredentialStorage implements CredentialStorage {
             if (false == rs.next()) {
                 return null;
             }
-            DefaultCredentials credentials = new DefaultCredentials();
-            credentials.setContextId(contextId);
-            credentials.setUserId(userId);
-            credentials.setPassword(rs.getString(1));
-            credentials.setLogin(rs.getString(2));
-            return credentials;
+            DefaultCredentials.Builder credentials = DefaultCredentials.builder();
+            credentials.withContextId(contextId);
+            credentials.withUserId(userId);
+            credentials.withPassword(rs.getString(1));
+            credentials.withLogin(rs.getString(2));
+            return credentials.build();
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -129,7 +129,7 @@ public class RdbCredentialStorage implements CredentialStorage {
         Connection connection = service.getWritable(contextId);
         boolean modified = false;
         try {
-            modified = storeCredentials(obfuscator.obfuscateCredentials(credentials), connection);
+            modified = storeCredentials(obfuscator.obfuscateCredentials(credentials), true, connection);
         } finally {
             if (modified) {
                 service.backWritable(contextId, connection);
@@ -141,10 +141,6 @@ public class RdbCredentialStorage implements CredentialStorage {
 
     private boolean isValid(Credentials credentials) {
         return (null != credentials.getLogin()) && (null != credentials.getPassword());
-    }
-
-    private boolean storeCredentials(Credentials obfuscatedCredentials, Connection connection) throws OXException {
-        return storeCredentials(obfuscatedCredentials, true, connection);
     }
 
     private boolean storeCredentials(Credentials obfuscatedCredentials, boolean retry, Connection connection) throws OXException {
@@ -160,19 +156,19 @@ public class RdbCredentialStorage implements CredentialStorage {
             rs = stmt.executeQuery();
 
             boolean exists = false;
-            String curLogin = null;
-            String curPassword = null;
+            String currentObfuscatedLogin = null;
+            String currentObfuscatedPassword = null;
             if (rs.next()) {
                 exists = true;
-                curLogin = rs.getString(1);
-                curPassword = rs.getString(2);
+                currentObfuscatedLogin = rs.getString(1);
+                currentObfuscatedPassword = rs.getString(2);
             }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
 
             if (exists) {
                 // Check current credentials
-                if (obfuscatedCredentials.getLogin().equals(curLogin) && obfuscatedCredentials.getPassword().equals(curPassword)) {
+                if (obfuscatedCredentials.getLogin().equals(currentObfuscatedLogin) && obfuscatedCredentials.getPassword().equals(currentObfuscatedPassword)) {
                     // Nothing to do
                     return false;
                 }
@@ -183,8 +179,8 @@ public class RdbCredentialStorage implements CredentialStorage {
                 stmt.setString(2, obfuscatedCredentials.getLogin());
                 stmt.setInt(3, contextId);
                 stmt.setInt(4, userId);
-                stmt.setString(5, curPassword);
-                stmt.setString(6, curLogin);
+                stmt.setString(5, currentObfuscatedPassword);
+                stmt.setString(6, currentObfuscatedLogin);
                 int updatedRows = stmt.executeUpdate();
                 return updatedRows > 0 ? true : storeCredentials(obfuscatedCredentials, false, connection);
             }
@@ -198,8 +194,8 @@ public class RdbCredentialStorage implements CredentialStorage {
             stmt.setString(5, obfuscatedCredentials.getPassword());
             stmt.setString(6, obfuscatedCredentials.getLogin());
             try {
-                stmt.executeUpdate();
-                return true;
+                int insertedRows = stmt.executeUpdate();
+                return insertedRows > 0 ? true : storeCredentials(obfuscatedCredentials, false, connection);
             } catch (SQLException e) {
                 // Duplicate write attempt
                 if (!retry) {

@@ -22,6 +22,11 @@
         format: int64
         description:  Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.
         required: true
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push token to restrict the generated drive event
+        required: false
       - in: body
         name: body
         description: A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.
@@ -56,6 +61,11 @@
         name: try_add_version
         type: boolean
         description: Add new file version if file name exists
+        required: false
+      - in: query
+        name: pushToken
+        type: string
+        description: The push token of the drive client
         required: false
       - in: formData
         name: json

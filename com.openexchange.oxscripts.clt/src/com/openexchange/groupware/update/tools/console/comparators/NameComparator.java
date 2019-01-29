@@ -57,6 +57,7 @@ package com.openexchange.groupware.update.tools.console.comparators;
  */
 public class NameComparator extends AbstractComparator {
 
+    private static final long serialVersionUID = -825548592213602429L;
     private static final int INDEX_POSITION = 1;
 
     /**

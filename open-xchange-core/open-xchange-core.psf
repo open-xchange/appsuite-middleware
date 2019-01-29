@@ -6,6 +6,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.guava"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.antivirus"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.driver.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events"/>
@@ -75,6 +76,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration.clt"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.tombstone.cleanup"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.dataretention"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf.storage"/>
@@ -173,6 +175,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.objectusecount.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oxscripts.clt"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.password.mechanism"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.history"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.history.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.servlet"/>
@@ -186,9 +189,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy.authenticator"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy.servlet"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.basic"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.push.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.push.ms"/>

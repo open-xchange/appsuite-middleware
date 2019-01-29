@@ -325,10 +325,9 @@ public class CSVContactImporter extends AbstractImporter {
                     return new ImportIntention(result, contactObj);
                 }
                 return new ImportIntention(contactObj);
-            } else {
-                result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
-                result.setDate(new Date());
             }
+            result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
+            result.setDate(new Date());
         } catch (final OXException e) {
             if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
                 result.setException(wrapException(e, lineNumber, session));

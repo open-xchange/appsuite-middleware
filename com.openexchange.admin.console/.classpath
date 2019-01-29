@@ -7,6 +7,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.password.mechanism"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.classic.extensions"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.core.extensions"/>

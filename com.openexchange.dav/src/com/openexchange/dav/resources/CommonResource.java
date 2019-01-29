@@ -87,7 +87,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
 
     protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonResource.class);
 
-    protected final CommonFolderCollection<T> parent;
+    protected final FolderCollection<T> parent;
 
     /**
      * Initializes a new {@link CommonResource}.
@@ -96,7 +96,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    protected CommonResource(CommonFolderCollection<T> parent, T object, WebdavPath url) throws OXException {
+    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url) throws OXException {
         super(parent, object, url);
         this.parent = parent;
     }

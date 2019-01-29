@@ -54,82 +54,65 @@ import com.openexchange.ajax.AJAXServlet;
 
 /**
  * This is the data container class for group.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Group implements Cloneable {
-	public enum Field{
-		ID(1,AJAXServlet.PARAMETER_ID, "id"),
-		LAST_MODIFIED(5,"last_modified", "lastModified"),
-		SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
-		FULL_NAME(701, "display_name", "displayName"),
-		MEMBERS(702, "members", null);
 
-		private int colNumber;
-		private String ajaxName;
-		private String dbName;
+    public enum Field {
+        ID(1, AJAXServlet.PARAMETER_ID, "id"),
+        LAST_MODIFIED(5, "last_modified", "lastModified"),
+        SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
+        FULL_NAME(701, "display_name", "displayName"),
+        MEMBERS(702, "members", null);
 
-		private Field(int colNumber, String ajaxName, String dbName){
-			this.setColNumber(colNumber);
-			this.setAjaxName(ajaxName);
-			this.setDbName(dbName);
-		}
+        private final int colNumber;
+        private final String ajaxName;
+        private final String dbName;
 
-		public void setColNumber(int colNumber) {
-			this.colNumber = colNumber;
-		}
+        private Field(int colNumber, String ajaxName, String dbName) {
+            this.colNumber = colNumber;
+            this.ajaxName = ajaxName;
+            this.dbName = dbName;
+        }
 
-		public int getColNumber() {
-			return colNumber;
-		}
+        public int getColNumber() {
+            return colNumber;
+        }
 
-		public void setAjaxName(String ajaxName) {
-			this.ajaxName = ajaxName;
-		}
+        public String getAjaxName() {
+            return ajaxName;
+        }
 
-		public String getAjaxName() {
-			return ajaxName;
-		}
+        public String getDbName() {
+            return dbName;
+        }
 
-		public void setDbName(String dbName) {
-			this.dbName = dbName;
-		}
-
-		public String getDbName() {
-			return dbName;
-		}
-
-		public static Field getByColumnNumber(int num){
-			for(Field val: values()){
-				if(val.getColNumber() == num) {
-                    return val;
+        public static Field getByColumnNumber(int num) {
+            if (num > 0) {
+                for (Field val : values()) {
+                    if (val.getColNumber() == num) {
+                        return val;
+                    }
                 }
-			}
-			return null;
-		}
+            }
+            return null;
+        }
 
-		public static int[] intValues(){
-			Field[] vals = values();
-			int[] retVal = new int[vals.length];
-			for(int i = 0; i< vals.length; i++) {
+        public static int[] intValues() {
+            Field[] vals = values();
+            int[] retVal = new int[vals.length];
+            for (int i = 0; i < vals.length; i++) {
                 retVal[i] = vals[i].getColNumber();
             }
-			return retVal;
-		}
+            return retVal;
+        }
 
-	}
+    }
 
-	public static int[] ALL_COLUMNS = new int[]{
-		Field.FULL_NAME.getColNumber(),
-		Field.ID.getColNumber(),
-		Field.LAST_MODIFIED.getColNumber(),
-		Field.SIMPLE_NAME.getColNumber(),
-		Field.MEMBERS.getColNumber()};
-	public static int[] ALL_COLUMNS_EXCEPT_MEMBERS = new int[]{
-		Field.FULL_NAME.getColNumber(),
-		Field.ID.getColNumber(),
-		Field.LAST_MODIFIED.getColNumber(),
-		Field.SIMPLE_NAME.getColNumber()};
+    public static int[] ALL_COLUMNS = new int[] { Field.FULL_NAME.getColNumber(), Field.ID.getColNumber(), Field.LAST_MODIFIED.getColNumber(), Field.SIMPLE_NAME.getColNumber(), Field.MEMBERS.getColNumber() };
 
+    public static int[] ALL_COLUMNS_EXCEPT_MEMBERS = new int[] { Field.FULL_NAME.getColNumber(), Field.ID.getColNumber(), Field.LAST_MODIFIED.getColNumber(), Field.SIMPLE_NAME.getColNumber() };
 
     /**
      * Unique numeric identifier of this group.
@@ -190,7 +173,29 @@ public class Group implements Cloneable {
     }
 
     /**
+     * Copy constructor.
+     */
+    public Group(Group group) {
+        if (group.isDisplayNameSet()) {
+            this.displayName = group.getDisplayName();
+        }
+        if (group.isIdentifierSet()) {
+            this.identifier = group.getIdentifier();
+        }
+        if (group.isLastModifiedSet()) {
+            this.lastModified = group.getLastModified();
+        }
+        if (group.isMemberSet()) {
+            this.member = group.getMember();
+        }
+        if (group.isSimpleNameSet()) {
+            this.simpleName = group.getSimpleName();
+        }
+    }
+
+    /**
      * Setter for displayName.
+     * 
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -200,6 +205,7 @@ public class Group implements Cloneable {
 
     /**
      * Getter for displayName.
+     * 
      * @return Display name.
      */
     public String getDisplayName() {
@@ -208,6 +214,7 @@ public class Group implements Cloneable {
 
     /**
      * Setter for unique identifier.
+     * 
      * @param identifier unique identifier.
      */
     public void setIdentifier(final int identifier) {
@@ -217,6 +224,7 @@ public class Group implements Cloneable {
 
     /**
      * Getter for unique identifier.
+     * 
      * @return unique identifier.
      */
     public int getIdentifier() {
@@ -225,6 +233,7 @@ public class Group implements Cloneable {
 
     /**
      * Setter for member.
+     * 
      * @param member Member.
      */
     public void setMember(final int[] member) {
@@ -234,8 +243,9 @@ public class Group implements Cloneable {
 
     /**
      * Getter for member.
+     * 
      * @return the members of the group. If the group doesn't have any members
-     * an empty array will be returned.
+     *         an empty array will be returned.
      */
     public int[] getMember() {
         return member;
@@ -322,24 +332,25 @@ public class Group implements Cloneable {
         return lastModifiedSet;
     }
 
-    public Object get(Group.Field field){
-    	if(field == Field.FULL_NAME) {
+    public Object get(Group.Field field) {
+        if (field == Field.FULL_NAME) {
             return getDisplayName();
         }
-    	if(field == Field.SIMPLE_NAME) {
+        if (field == Field.SIMPLE_NAME) {
             return getSimpleName();
         }
-    	if(field == Field.ID) {
+        if (field == Field.ID) {
             return getIdentifier();
         }
-    	if(field == Field.LAST_MODIFIED) {
+        if (field == Field.LAST_MODIFIED) {
             return getLastModified();
         }
-    	if(field == Field.MEMBERS) {
+        if (field == Field.MEMBERS) {
             return getMember();
         }
-    	return null;
+        return null;
     }
+
     /**
      * {@inheritDoc}
      */

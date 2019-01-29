@@ -61,10 +61,10 @@ import com.openexchange.drive.BrandedDriveVersionService;
  */
 public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionService {
 
-    static BrandedDriveVersionServiceImpl instance = null;
-    private HashMap<String, VersionWrapper> driveVersions;
+    private static BrandedDriveVersionServiceImpl instance = null;
+    private HashMap<String, SoftHardVersionTuple> driveVersions;
 
-    static public BrandedDriveVersionServiceImpl getInstance() {
+    public static synchronized BrandedDriveVersionServiceImpl getInstance() {
         if (null == instance) {
             instance = new BrandedDriveVersionServiceImpl();
         }
@@ -76,7 +76,7 @@ public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionServic
         if (driveVersions == null || !driveVersions.containsKey(branding)) {
             return null;
         }
-        return driveVersions.get(branding).getSoft();
+        return driveVersions.get(branding).getSoftVersion();
     }
 
     @Override
@@ -84,18 +84,18 @@ public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionServic
         if (driveVersions == null || !driveVersions.containsKey(branding)) {
             return null;
         }
-        return driveVersions.get(branding).getHard();
+        return driveVersions.get(branding).getHardVersion();
     }
 
     @Override
     public void putBranding(String branding, String minSoftVersion, String minHardVersion) {
         if (null == driveVersions) {
-            driveVersions = new HashMap<String, BrandedDriveVersionServiceImpl.VersionWrapper>();
+            driveVersions = new HashMap<String, BrandedDriveVersionServiceImpl.SoftHardVersionTuple>();
         }
         if (null == branding || null == minSoftVersion || null == minHardVersion || branding.isEmpty() || minSoftVersion.isEmpty() || minHardVersion.isEmpty()) {
             return;
         }
-        driveVersions.put(branding, new VersionWrapper(minSoftVersion, minHardVersion));
+        driveVersions.put(branding, new SoftHardVersionTuple(minSoftVersion, minHardVersion));
     }
 
     @Override
@@ -105,22 +105,29 @@ public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionServic
         }
     }
 
-    private static class VersionWrapper {
+    /**
+     *
+     * {@link SoftHardVersionTuple}
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.8.1
+     */
+    private static class SoftHardVersionTuple {
 
         private final String soft;
         private final String hard;
 
-        public VersionWrapper(String soft, String hard) {
+        public SoftHardVersionTuple(String soft, String hard) {
             super();
             this.soft = soft;
             this.hard = hard;
         }
 
-        String getSoft() {
+        String getSoftVersion() {
             return soft;
         }
 
-        String getHard() {
+        String getHardVersion() {
             return hard;
         }
     }

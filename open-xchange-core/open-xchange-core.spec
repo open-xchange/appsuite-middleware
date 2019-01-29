@@ -31,6 +31,8 @@ Requires:      open-xchange-xerces >= @OXVERSION@
 Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
+Conflicts:     open-xchange-publish < 7.10.2
+Obsoletes:     open-xchange-publish < 7.10.2
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -88,9 +90,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2464
     ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
 
-    # SoftwareChange_Request-2470
-    ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-
     # SoftwareChange_Request-2541
     VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
     if [ "5000" = "$VALUE" ]; then
@@ -146,16 +145,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2772
     ox_add_property com.openexchange.ajax.response.includeArguments false /opt/open-xchange/etc/server.properties
 
-    # SoftwareChange_Request-2811
-    PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-    if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
-        cat >> $PFILE <<EOF
-
-# Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
-!com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
-EOF
-    fi
-
     # SoftwareChange_Request-2815
     ox_add_property html.tag.s '""' /opt/open-xchange/etc/whitelist.properties
 
@@ -174,16 +163,6 @@ EOF
     PFILE=/opt/open-xchange/etc/permissions.properties
     if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
         ox_set_property com.openexchange.capability.archive_emails true $PFILE
-    fi
-
-    # SoftwareChange_Request-2914
-    PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-    if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
-        cat >> $PFILE <<EOF
-
-# Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
-!com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
-EOF
     fi
 
     # SoftwareChange_Request-2990
@@ -629,6 +608,21 @@ EOF
           ox_set_property jcs.region.${region}.elementattributes.MaxLifeSeconds 3600 ${pfile}
         fi
       done
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-322.core
+    ox_scr_todo ${SCR} && {
+      prop_file=/opt/open-xchange/etc/server.properties
+      prop_key=PUBLISH_REVOKE
+      if ox_exists_property ${prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${prop_key} ${prop_file})
+        if [ -z "${prop_val}" ]
+        then
+          ox_remove_property ${prop_key} ${prop_file} 
+        fi
+      fi
       ox_scr_done ${SCR}
     }
 fi

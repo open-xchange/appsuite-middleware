@@ -53,7 +53,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
-import static com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields.NAME;
+import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
@@ -72,11 +72,12 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
-import com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
@@ -97,7 +98,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvider {
 
-    public static final String PROVIDER_ID = "schedjoules";
+    public static final String PROVIDER_ID = CalendarProviders.ID_SCHEDJOULES;
     private static final String DISPLAY_NAME = "SchedJoules";
 
     /**

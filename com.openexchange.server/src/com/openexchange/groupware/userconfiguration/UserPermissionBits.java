@@ -198,7 +198,10 @@ public class UserPermissionBits implements Serializable, Cloneable {
 
     /**
      * The permission bit for publication access.
+     * 
+     * @deprecated Publications were removed with MW-1089 in version 7.10.2
      */
+    @Deprecated
     public static final int PUBLICATION = 1 << 24;
 
     /**
@@ -770,15 +773,6 @@ public class UserPermissionBits implements Serializable, Cloneable {
      */
     public boolean isPublication() {
         return hasPermission(PUBLICATION);
-    }
-
-    /**
-     * Sets if this user configuration indicates to enable publication.
-     *
-     * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
-     */
-    public void setPublication(final boolean publication) {
-        setPermission(publication, PUBLICATION);
     }
 
     /**

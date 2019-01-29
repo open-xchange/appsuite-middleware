@@ -170,14 +170,14 @@ public final class QuartzServiceImpl implements QuartzService {
             } catch (SchedulerException e) {
                 LOG.warn("Could not stop local scheduler.", e);
             }
-            for (String name : namedSchedulers.keySet()) {
-                Scheduler scheduler = namedSchedulers.get(name);
+            for (Map.Entry<String, Scheduler> entry : namedSchedulers.entrySet()) {
+                Scheduler scheduler = entry.getValue();
                 try {
                     if (scheduler.isStarted()) {
                         scheduler.shutdown();
                     }
                 } catch (SchedulerException e) {
-                    LOG.warn("Could not stop clustered scheduler '{}'.", name, e);
+                    LOG.warn("Could not stop clustered scheduler '{}'.", entry.getKey(), e);
                 }
             }
             namedSchedulers.clear();

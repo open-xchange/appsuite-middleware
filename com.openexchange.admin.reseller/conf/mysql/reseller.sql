@@ -5,6 +5,7 @@ CREATE TABLE subadmin ( /* HADM */
     displayName VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     password VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     passwordMech VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+    salt VARBINARY(128) DEFAULT NULL,
     CONSTRAINT name_unique UNIQUE (name),
     PRIMARY KEY (sid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

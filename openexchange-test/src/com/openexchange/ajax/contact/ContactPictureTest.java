@@ -51,10 +51,10 @@ package com.openexchange.ajax.contact;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Collections;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.openexchange.dav.carddav.Photos;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;

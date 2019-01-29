@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -282,7 +283,8 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                 if (!registrationIDs.isEmpty()) {
                     MulticastResult result = null;
                     try {
-                        result = sender.sendNoRetry(getMessage(client, notification), registrationIDs, Endpoint.FCM);
+                        // result = sender.sendNoRetry(getMessage(client, notification), registrationIDs, Endpoint.FCM);
+                        result = sender.send(getMessage(client, notification), registrationIDs, 3, Endpoint.FCM);
 
                         // Log it
                         Object ostr = new Object() {
@@ -290,19 +292,22 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                             @Override
                             public String toString() {
                                 StringBuilder sb = new StringBuilder(registrationIDs.size() * 16);
-                                for (String registrationID : registrationIDs) {
-                                    sb.append(registrationID).append(", ");
+                                Iterator<String> it = registrationIDs.iterator();
+                                sb.append(it.next());
+                                while (it.hasNext()) {
+                                    sb.append(", ").append(it.next());
                                 }
-                                sb.setLength(sb.length() - 2);
                                 return sb.toString();
                             }
                         };
-                        LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
+                        if (null != result) {
+                            LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
+                            LOG.debug("{}", result);
+                        } else {
+                            LOG.info("Failed to send notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
+                        }
                     } catch (IOException e) {
                         LOG.warn("Error publishing push notification", e);
-                    }
-                    if (null != result) {
-                        LOG.debug("{}", result);
                     }
                     /*
                      * process results

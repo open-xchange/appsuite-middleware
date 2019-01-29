@@ -249,9 +249,9 @@ Whenever events are moved between different folders, some special handling appli
 
 The user performing the move must be equipped with appropriate permissions for the source- and target folder. For the source folder, these are at least *Read folder*, *Read own/all objects*, *Write own/all objects* and *Delete own/all objects*. *All* or *own* depends on the event being created by a different user or not. In the target folder, at least the following permissions must be granted: *Create objects in folder*. 
 
-In *group-scheduled* events with multiple attendees, the calendar user's *role* in the event is checked as well, i.e. it's required to be the organizer of the event (see "Permissions" below. Additionally, recurring event series (or change exception events) cannot be moved. And finally, there's a limitation towards moving events with a classification of ``PRIVATE`` or ``CONFIDENTIAL`` (which correlates to the legacy *private* flag). In this case, events must not be moved to a *public* folder, or moved between personal folders of different users (~ *shared* to *private* and vice versa).
+In *group-scheduled* events with multiple attendees, the calendar user's *role* in the event is checked as well when moving between one folder type to another (see also chapter "Permissions" below). In particular, it's required to be or impersonate as the organizer when moving such a *group scheduled* event from a *personal* into a *public* folder and vice-versa. Additionally, recurring event series (or change exception events) cannot be moved. And finally, there's a limitation towards moving events with a classification of ``PRIVATE`` or ``CONFIDENTIAL`` (which correlates to the legacy *private* flag). In this case, events must not be moved to a *public* folder, or moved between personal folders of different users (~ *shared* to *private* and vice versa).
 
-## Move Sceanrios
+## Move Scenarios
 
 After the general restrictions have been checked and are fulfilled, the following happens depending on the source- and target folder type. Implicitly, this also includes triggering of further updates, like updating the folder informations for stored alarm triggers or inserting tombstone objects in the database so that the deletion from the source folder can be successfully tracked by differential synchronization protocols.    
 
@@ -396,9 +396,9 @@ Afterwards, typically the new event series is adjusted in a second step, so that
 
 As described above, when dealing with recurring events, it is often necessary to apply a change from one occurrence on into the future (e.g., add a new attendee part way through the series of meetings).
 
-Previously, existing change exceptions are not touched at all when the series master event is modified. In the calendar implementation, we integrated some smart detection if a change to the recurring master event could also be applied to existing change excpetions, e.g. after a new attendee is added, or if the event location changes. As the web client does not have all change exceptions handy, the logic to 'propagate' the changes is implemented in the middleware.
+Previously, existing change exceptions are not touched at all when the series master event is modified. In the calendar implementation, we integrated some smart detection if a change to the recurring master event could also be applied to existing change exceptions, e.g. after a new attendee is added, or if the event location changes. As the web client does not have all change exceptions handy, the logic to 'propagate' the changes is implemented in the middleware.
 
-To avoid possible ambiguities, only certain changes considered, where the change can also be applied in some or all change exceptions intuitively. In particular, the following cases are taken into account:
+To avoid possible ambiguities, only certain changes considered, where the change can also be applied in some or all change exceptions intuitively. Also, for <i>group-scheduled</i> events, change propagation only happens when updating the event as organizer. In particular, the following cases are taken into account:
 
 - For all *simple* changed event fields, it is checked if the modified property is equal in the original series master event and in the change exception. Simple event fields are (preliminary): ``CLASSIFICATION``, ``TRANSP``, ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``CATEGORIES``, ``COLOR``, ``URL``, ``GEO``, ``TRANSP``, ``STATUS``. If not, leave the property in the change exception as-is (i.e. do not propagate this change). If yes, also apply the change in the change exception.
 - Newly added attendees are also added in existing change exception events, unless they're not already attending there.
@@ -449,11 +449,30 @@ When being converted back to a plain e-mail address string (as used for external
 
 Besides the default, internal calendar, there may be further calendar sources that should be integrated into a user's calendar module. For example, calendar feeds from external sources, or a virtual calendar containing the upcoming birthdays found in the user's address book. Therefore, a new layer is introduced that provides access to all available calendar *accounts* from different *providers* of a user using the same API.
 
+
 ## Calendar Providers and Accounts
 
 A calendar provider implements the functionality to access the calendar data of a specific calendar source. Calendar access is always bound to a specific account of a user within the calendar provider, i.e. each calendar provider provides a number of accounts for different users. A user may have a fixed number of accounts (e.g. exactly one) within a concrete provider, or there can be multiple accounts for the user. 
 
 Have a look at the chapter 'Default implementations' to get an overview over providers shipped by Open-Xchange.
+
+## Discovery and Addressing
+
+Due to the newly introduced calendar access layer, the discovery and addressing of calendar folders and their contents was extended accordingly. 
+
+### HTTP API 
+
+For the ``folders`` module, a new content type has been introduced in order to provide backwards-compatibility on the one hand, and support for the newly introduced provider/account architecture on the other hand. Doing so, any existing requests to the API will return the same responses as before (i.e. list the same folders with the same identifiers). All "new" folders will be returned when requesting folders of the content type ``event``, which includes both the previously used calendar *groupware* folders, as well as calendar folders representing external accounts. Differentiation is performed based on *composite* identifiers, which carry the information about the underlying calendar account.
+
+Those calendar folders are now driven by a dedicated folder storage, and there's no folder hierarchy anymore, i.e. there are no subfolders. The calendar folder storage makes use of the the newly introduced calendar access layer, where the requests are routed to the actual calendar accounts. The account information is encoded within the composite folder identifiers, which are of the format ``cal://<account_id>/<relative_folder_id>?``. The default groupware calendar provider has the reserved identifier ``0``, all further calendar accounts are generated with an unique identifier. 
+
+### CalDAV
+
+For calendar clients accessing the CalDAV interface, the composite folder identifiers will appear in the respective collection URIs in a base 64 representation. The formerly exposed numerical collection names are no longer advertised. Upon the first synchronization after the server has been upgraded, a typical CalDAV client will remove all previously synchronized collections, and add the new ones automatically. This usually works seamlessly, since clients typically start each synchronization cycle by querying all available calendars in the user's calendar home (by issuing a ``PROPFIND`` request with depth 1). The response includes all calendars visible for the user and their paths (and implicitly those that are no longer available), i.e. the client basically replaces the local list of collections with the ones of the response, then continues to synchronize the contents of each collection. 
+
+**Attention:** Depending on the usage and the configured interval for CalDAV synchronization, this may cause some additional load after an upgrade since existing clients will effectively re-synchronize the contents of those newly advertised calendar collections.
+
+As one exception, the calendar client from Thunderbird/Lightning does not synchronize all calendars in the user's calendar home. Instead, it directly accesses a single calendar using the fixed path to that collection. As there is no automatic bootstrapping process for this client that directly synchronizes a single collection, there's a fallback handling in place so that the client can still access previously configured collections under the "old" path, i.e. using the non-qualified identifiers.
 
 ## External Calendar Account Caching
 

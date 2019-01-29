@@ -191,102 +191,6 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
             }
         });
         /*
-         * PRIMARY KEY for "ical_principal"
-         */
-        tasks.add(new Callable<Void>() {
-
-            @Override
-            public Void call() throws SQLException {
-                if (!Tools.existsPrimaryKey(con, "ical_principal", splitter.split("(`cid`,`object_id`)"))) {
-                    Statement stmt = null;
-                    try {
-                        stmt = con.createStatement();
-                        stmt.execute("ALTER TABLE ical_principal ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal`(64))");
-                    } finally {
-                        Databases.closeSQLStuff(stmt);
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "ALTER TABLE ical_principal ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal`(64))";
-            }
-        });
-        /*
-         * PRIMARY KEY for "ical_ids"
-         */
-        tasks.add(new Callable<Void>() {
-
-            @Override
-            public Void call() throws SQLException {
-                if (!Tools.existsPrimaryKey(con, "ical_ids", splitter.split("(`cid`,`object_id`)"))) {
-                    Statement stmt = null;
-                    try {
-                        stmt = con.createStatement();
-                        stmt.execute("ALTER TABLE ical_ids ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal_id`)");
-                    } finally {
-                        Databases.closeSQLStuff(stmt);
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "ALTER TABLE ical_ids ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal_id`)";
-            }
-        });
-        /*
-         * PRIMARY KEY for "vcard_principal"
-         */
-        tasks.add(new Callable<Void>() {
-
-            @Override
-            public Void call() throws SQLException {
-                if (!Tools.existsPrimaryKey(con, "vcard_principal", splitter.split("(`cid`,`object_id`)"))) {
-                    Statement stmt = null;
-                    try {
-                        stmt = con.createStatement();
-                        stmt.execute("ALTER TABLE vcard_principal ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal`(64))");
-                    } finally {
-                        Databases.closeSQLStuff(stmt);
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "ALTER TABLE vcard_principal ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal`(64))";
-            }
-        });
-        /*
-         * PRIMARY KEY for "vcard_ids"
-         */
-        tasks.add(new Callable<Void>() {
-
-            @Override
-            public Void call() throws SQLException {
-                if (!Tools.existsPrimaryKey(con, "vcard_ids", splitter.split("(`cid`,`object_id`)"))) {
-                    Statement stmt = null;
-                    try {
-                        stmt = con.createStatement();
-                        stmt.execute("ALTER TABLE vcard_ids ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal_id`)");
-                    } finally {
-                        Databases.closeSQLStuff(stmt);
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "ALTER TABLE vcard_ids ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal_id`)";
-            }
-        });
-        /*
          * PRIMARY KEY for "infostoreReservedPaths"
          */
         tasks.add(new Callable<Void>() {
@@ -356,30 +260,6 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
             @Override
             public String toString() {
                 return "ALTER TABLE prg_links ADD PRIMARY KEY (`cid`,`firstid`,`firstmodule`,`firstfolder`,`secondid`,`secondmodule`,`secondfolder`)";
-            }
-        });
-        /*
-         * PRIMARY KEY for "prg_contacts_linkage"
-         */
-        tasks.add(new Callable<Void>() {
-
-            @Override
-            public Void call() throws SQLException {
-                if (!Tools.existsPrimaryKey(con, "prg_contacts_linkage", splitter.split("(`cid`,`intfield01`,`intfield02`)"))) {
-                    Statement stmt = null;
-                    try {
-                        stmt = con.createStatement();
-                        stmt.execute("ALTER TABLE prg_contacts_linkage ADD PRIMARY KEY (`cid`,`intfield01`,`intfield02`)");
-                    } finally {
-                        Databases.closeSQLStuff(stmt);
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "ALTER TABLE prg_contacts_linkage ADD PRIMARY KEY (`cid`,`intfield01`,`intfield02`)";
             }
         });
         /*

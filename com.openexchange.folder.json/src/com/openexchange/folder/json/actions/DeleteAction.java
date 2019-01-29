@@ -144,7 +144,7 @@ public final class DeleteAction extends AbstractFolderAction {
         final AJAXRequestResult result;
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
-            Map<String, OXException> foldersWithError = new HashMap<String, OXException>(len);
+            Map<String, OXException> foldersWithError = new HashMap<>(len);
             List<TrashResult> trashResults = new ArrayList<>(len);
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
@@ -199,7 +199,7 @@ public final class DeleteAction extends AbstractFolderAction {
             }
         } else {
             final JSONArray responseArray = new JSONArray();
-            final List<OXException> warnings = new LinkedList<OXException>();
+            final List<OXException> warnings = new LinkedList<>();
             List<TrashResult> trashResults = new ArrayList<>(len);
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);

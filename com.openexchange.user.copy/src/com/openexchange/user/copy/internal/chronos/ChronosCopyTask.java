@@ -339,6 +339,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
                 alarmList = new ArrayList<>(alarmsPerEvent.getValue().size());
                 for (Alarm alarm : alarmsPerEvent.getValue()) {
                     alarm.setId(dstCalendarStorage.getAlarmStorage().nextId());
+                    alarm.setTimestamp(System.currentTimeMillis());
                     //add to list
                     alarmList.add(alarm);
                 }

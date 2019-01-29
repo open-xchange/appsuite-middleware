@@ -82,6 +82,11 @@ public enum MicrosoftGraphDriveServiceExceptionCodes implements DisplayableOXExc
      * <li>The root folder cannot be deleted</li>
      */
     CANNOT_DELETE_ROOT_FOLDER("The root folder cannot be deleted", MicrosoftGraphDriveServiceExceptionMessages.CANNOT_DELETE_ROOT_FOLDER, Category.CATEGORY_ERROR, 4),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The 'folder' field is missing from the entity object. Either the entity is not a folder, or the response is erroneous.</li>
+     */
+    NOT_A_FOLDER("The 'folder' field is missing from the entity object. Either the entity is not a folder, or the response is erroneous.", Category.CATEGORY_ERROR, 5),
 
     ;
 

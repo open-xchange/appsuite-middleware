@@ -84,6 +84,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -631,7 +632,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id")
-            .append(getPlaceholders(eventIds.size())).append(';')
+            .append(Databases.getPlaceholders(eventIds.size())).append(';')
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -674,7 +675,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     private static int deleteReminderMinutes(Connection connection, int contextID, List<String> eventIds) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id")
-            .append(getPlaceholders(eventIds.size())).append(';');
+            .append(Databases.getPlaceholders(eventIds.size())).append(';');
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -851,5 +852,20 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     @Override
     public Alarm loadAlarm(int alarmId) throws OXException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long getLatestTimestamp(int userId) {
+        return 0;
+    }
+
+    @Override
+    public long getLatestTimestamp(String eventId, int userId) {
+        return 0;
+    }
+
+    @Override
+    public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
+        return Collections.emptyMap();
     }
 }

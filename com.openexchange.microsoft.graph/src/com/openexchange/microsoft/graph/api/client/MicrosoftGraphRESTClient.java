@@ -82,14 +82,13 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     private static final String API_VERSION = "v1.0";
     private static final String SCHEME = "https";
     private static final String APPLICATION_JSON = "application/json";
+    private static final int TIMEOUT = 30000;
 
     /**
      * Initialises a new {@link MicrosoftGraphRESTClient}.
-     * 
-     * @param userAgent
      */
     public MicrosoftGraphRESTClient() {
-        super(USER_AGENT, new MicrosoftGraphRESTResponseParser());
+        super(USER_AGENT, TIMEOUT, new MicrosoftGraphRESTResponseParser());
     }
 
     /**

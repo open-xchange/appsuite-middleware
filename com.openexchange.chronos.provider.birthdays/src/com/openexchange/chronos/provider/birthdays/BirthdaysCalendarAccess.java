@@ -60,15 +60,20 @@ import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
@@ -239,12 +244,31 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     @Override
+    public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
+        List<Event> events = new ArrayList<Event>(eventIDs.size());
+        Map<String, Contact> contacts = getBirthdayContacts(eventIDs);
+        for (EventID eventID : eventIDs) {
+            Contact contact = contacts.get(eventID.getObjectID());
+            if (null == contact) {
+                // log not found event, but include null in resulting list to preserve order
+                org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug("Requested event \"{}\" not found, skipping.", eventID);
+                events.add(null);
+            } else if (null != eventID.getRecurrenceID()) {
+                events.add(postProcess(eventConverter.getOccurrence(contact, eventID.getRecurrenceID())));
+            } else {
+                events.add(postProcess(eventConverter.getSeriesMaster(contact)));
+            }
+        }
+        return events;
+    }
+
+    @Override
     public List<Event> getEvents() throws OXException {
         List<Contact> contacts = getBirthdayContacts();
         if (isExpandOccurrences()) {
-            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()), false);
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
         } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()), true);
+            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
         }
     }
 
@@ -291,9 +315,9 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(filters, queries));
         if (isExpandOccurrences()) {
-            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()), false);
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
         } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()), true);
+            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
         }
     }
 
@@ -302,29 +326,56 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         return getLastModifiedChecksum();
     }
 
-    private List<Event> postProcess(List<Event> events, boolean master) throws OXException {
-        if (contains(getFields(), EventField.ALARMS)) {
+    private List<Event> postProcess(List<Event> events) throws OXException {
+        if (contains(getFields(), EventField.ALARMS) || contains(getFields(), EventField.FLAGS)) {
             events = getAlarmHelper().applyAlarms(events);
+        } else if (contains(getFields(), EventField.TIMESTAMP)) {
+            applyTimestampFromAlarms(events);
         }
-        TimeZone timeZone = getTimeZone();
-        Date from = getFrom();
-        Date until = getUntil();
-        if (!master) {
-            for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-                if (!CalendarUtils.isInRange(iterator.next(), from, until, timeZone)) {
-                    iterator.remove();
-                }
-            }
-        }
-        CalendarUtils.sortEvents(events, new SearchOptions(parameters).getSortOrders(), timeZone);
-        return events;
+        return CalendarUtils.sortEvents(events, new SearchOptions(parameters).getSortOrders(), getTimeZone());
     }
 
     private Event postProcess(Event event) throws OXException {
-        if (contains(getFields(), EventField.ALARMS)) {
+        if (event == null) {
+            return null;
+        }
+        if (contains(getFields(), EventField.ALARMS) || contains(getFields(), EventField.FLAGS)) {
             event = getAlarmHelper().applyAlarms(event);
+        } else if (event.containsTimestamp()) {
+            Long timestamp = getAlarmHelper().getLatestTimestamps(Collections.singletonList(event.getId()), account.getUserId()).get(event.getId());
+            if (null != timestamp && timestamp.longValue() > event.getTimestamp()) {
+                return new DelegatingEvent(event) {
+
+                    @Override
+                    public long getTimestamp() {
+                        return timestamp;
+                    }
+                };
+            }
         }
         return event;
+    }
+
+    private void applyTimestampFromAlarms(List<Event> events) throws OXException {
+        List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
+        Map<String, Long> timestamps = getAlarmHelper().getLatestTimestamps(eventIds, session.getUserId());
+        ListIterator<Event> iterator = events.listIterator();
+        while (iterator.hasNext()) {
+            Event event = iterator.next();
+            Long timestamp = timestamps.get(event.getId());
+            if (timestamp != null && timestamp.longValue() > event.getTimestamp()) {
+                iterator.set(new DelegatingEvent(event) {
+                    @Override
+                    public long getTimestamp() {
+                        return timestamp;
+                    }
+                    @Override
+                    public boolean containsTimestamp() {
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
     private List<Contact> getBirthdayContacts() throws OXException {
@@ -342,6 +393,44 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         } catch (IllegalArgumentException | OXException e) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(e, eventId);
         }
+    }
+
+    private Map<String, Contact> getBirthdayContacts(List<EventID> eventIds) throws OXException {
+        /*
+         * separate contact ids by parent contact folder
+         */
+        Map<String, List<String>> idsPerFolderId = new HashMap<String, List<String>>();
+        for (EventID eventId : eventIds) {
+            try {
+                int[] decodedId = eventConverter.decodeEventId(eventId.getObjectID());
+                com.openexchange.tools.arrays.Collections.put(idsPerFolderId, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
+            } catch (IllegalArgumentException e) {
+                org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug("Skipping invalid event id {}", eventId, e);
+            }
+        }
+        /*
+         * get birthday contacts per folder from service
+         */
+        Map<String, Contact> contactsById = new HashMap<String, Contact>(eventIds.size());
+        for (Entry<String, List<String>> entry : idsPerFolderId.entrySet()) {
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = services.getService(ContactService.class).getContacts(
+                    session, entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]), CONTACT_FIELDS);
+                while (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    if (null == contact.getBirthday()) {
+                        org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug(
+                            "Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
+                        continue;
+                    }
+                    contactsById.put(eventConverter.getEventId(contact), contact);
+                }
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
+        }
+        return contactsById;
     }
 
     /**
@@ -513,6 +602,10 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 }
             }
         }
+        
+        Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestTimestamp(session.getUserId()));
+        lastModified = lastModified.after(latestAlarmLastModified) ? lastModified : latestAlarmLastModified;
+
         return lastModified.getTime() + "-" + foldersHash;
     }
 

@@ -59,9 +59,9 @@ import java.rmi.RemoteException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.java.Strings;
 
@@ -147,23 +147,19 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             // Check if administrative permission is required
             boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
-                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
+                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Master admin username", true));
+                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Master admin password", true));
             }
 
             // Add other options
             addOptions(options);
 
-            // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new PosixParser();
-            CommandLine cmd = parser.parse(options, args);
-
             // Check if help output is requested
-            if (cmd.hasOption('h')) {
-                printHelp(options);
-                System.exit(0);
-                return null;
-            }
+            helpRequested(args);
+
+            // Initialize command-line parser & parse arguments
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check for port/server
             if (cmd.hasOption('p')) {
@@ -385,5 +381,4 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         Stub stub = (Stub) Naming.lookup(host + name);
         return stub;
     }
-
 }

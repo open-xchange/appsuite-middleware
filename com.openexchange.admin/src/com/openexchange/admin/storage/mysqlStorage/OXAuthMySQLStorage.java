@@ -51,8 +51,6 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.leaseConnectionForContext;
 import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseWriteContextConnectionAfterReading;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,9 +74,9 @@ import com.openexchange.database.Databases;
  */
 public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
-    private static final String SELECT_USER = "SELECT u.userPassword,u.passwordMech FROM user u JOIN login2user l ON u.id = l.id AND u.cid = l.cid WHERE u.cid = ? AND l.uid = ?";
+    private static final String SELECT_USER = "SELECT u.userPassword,u.passwordMech,u.salt FROM user u JOIN login2user l ON u.id = l.id AND u.cid = l.cid WHERE u.cid = ? AND l.uid = ?";
 
-    private static final String SELECT_CONTEXT_ADMIN = "SELECT u.userPassword,u.passwordMech FROM user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?";
+    private static final String SELECT_CONTEXT_ADMIN = "SELECT u.userPassword,u.passwordMech,u.salt FROM user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?";
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthMySQLStorage.class);
 
@@ -209,8 +207,9 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
             }
             String encryptedPassword = rs.getString("userPassword");
             String passwordMechanism = rs.getString("passwordMech");
+            byte[] salt = rs.getBytes("salt");
             // Check via our crypt mech the password
-            if (!GenericChecks.authByMech(encryptedPassword, credentials.getPassword(), passwordMechanism)) {
+            if (!GenericChecks.authByMech(encryptedPassword, credentials.getPassword(), passwordMechanism, salt)) {
                 log.debug("Password for {} \"{}\" did not match!", isAdmin ? "admin user" : "user", credentials.getLogin());
                 return false;
             }
@@ -221,7 +220,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 cache.setAdminCredentials(context, passwordMechanism, cauth);
             }
             return true;
-        } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e);
         } finally {

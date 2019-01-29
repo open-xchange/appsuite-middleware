@@ -50,9 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -66,6 +64,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -204,8 +203,13 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     return false;
                 }
                 try {
-                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData)), connection);
-                } catch (NoSuchAlgorithmException | UnsupportedEncodingException | StorageException e) {
+                    PasswordDetails passwordDetails = adminCache.encryptPassword(userData);
+                    Map<Attribute, Object> attributes = new HashMap<>();
+                    attributes.put(UserAttribute.USER_PASSWORD, passwordDetails.getEncodedPassword());
+                    attributes.put(UserAttribute.SALT, passwordDetails.getSalt());
+                    attributes.put(UserAttribute.PASSWORD_MECH, passwordDetails.getPasswordMech());
+                    return setAttributes(userId, contextId, TABLE, attributes, connection);
+                } catch (StorageException e) {
                     // TODO: throw storage exception?
                 }
                 return false;

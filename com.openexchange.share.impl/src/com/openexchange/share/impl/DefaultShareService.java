@@ -85,7 +85,8 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -1064,9 +1065,11 @@ public class DefaultShareService implements ShareService {
             if (Strings.isEmpty(password)) {
                 updatedGuest.setPasswordMech("");
                 updatedGuest.setUserPassword(null);
+                updatedGuest.setSalt(null);
             } else {
-                String encodePassword = requireService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(password);
-                updatedGuest.setUserPassword(encodePassword);
+                PasswordDetails passwordDetails = requireService(PasswordMechRegistry.class).get(ShareConstants.PASSWORD_MECH_ID).encode(password);
+                updatedGuest.setUserPassword(passwordDetails.getEncodedPassword());
+                updatedGuest.setSalt(passwordDetails.getSalt());
                 updatedGuest.setPasswordMech(ShareConstants.PASSWORD_MECH_ID);
             }
             requireService(UserService.class).updatePassword(connectionHelper.getConnection(), updatedGuest, context);
@@ -1157,7 +1160,7 @@ public class DefaultShareService implements ShareService {
             }
             String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), context.getContextId()).opt("com.openexchange.context.group", String.class, "default");
 
-            guestService.addGuest(guestUser.getMail(), groupId, context.getContextId(), guestID, guestUser.getUserPassword(), guestUser.getPasswordMech());
+            guestService.addGuest(guestUser.getMail(), groupId, context.getContextId(), guestID, guestUser.getUserPassword(), guestUser.getPasswordMech(), guestUser.getSalt());
 
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }

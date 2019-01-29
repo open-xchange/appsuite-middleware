@@ -90,7 +90,7 @@ public class ReloadConfigurationCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return null;
+        return "Reloads all changed configuration properties that are 'reloadable'.";
     }
 
     @Override

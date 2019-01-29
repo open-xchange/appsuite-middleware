@@ -66,12 +66,10 @@ import static com.openexchange.java.Autoboxing.i;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -168,6 +166,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
@@ -863,64 +862,64 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             rs.close();
 
-            final String passwd = cache.encryptPassword(usrdata);
-
+            PasswordDetails passwordDetails = cache.encryptPassword(usrdata);
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin,filestore_id,filestore_owner,filestore_name,quota_max) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,salt,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin,filestore_id,filestore_owner,filestore_name,quota_max) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setString(3, passwd);
-                stmt.setString(4, usrdata.getPasswordMech());
+                stmt.setString(3, passwordDetails.getEncodedPassword());
+                stmt.setString(4, passwordDetails.getPasswordMech());
+                stmt.setBytes(5, passwordDetails.getSalt());
 
                 if (usrdata.getPassword_expired() == null) {
                     usrdata.setPassword_expired(Boolean.FALSE);
                 }
-                stmt.setInt(5, getintfrombool(usrdata.getPassword_expired().booleanValue()));
+                stmt.setInt(6, getintfrombool(usrdata.getPassword_expired().booleanValue()));
 
-                stmt.setString(6, usrdata.getPrimaryEmail());
+                stmt.setString(7, usrdata.getPrimaryEmail());
 
                 final String timezone = usrdata.getTimezone();
                 if (null != timezone) {
-                    stmt.setString(7, timezone);
+                    stmt.setString(8, timezone);
                 } else {
                     String fallbackTimeZone = cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_TIMEZONE, DEFAULT_TIMEZONE_CREATE);
-                    stmt.setString(7, fallbackTimeZone);
+                    stmt.setString(8, fallbackTimeZone);
                 }
 
                 // language cannot be null, that's checked in checkCreateUserData()
                 final String lang = usrdata.getLanguage();
-                stmt.setString(8, lang);
+                stmt.setString(9, lang);
 
                 // mailenabled
                 if (usrdata.getMailenabled() == null) {
                     usrdata.setMailenabled(Boolean.TRUE);
                 }
-                stmt.setBoolean(9, usrdata.getMailenabled().booleanValue());
+                stmt.setBoolean(10, usrdata.getMailenabled().booleanValue());
 
                 // imap and smtp server
                 String imapServer = usrdata.getImapServerString();
                 if (null == imapServer) {
                     imapServer = DEFAULT_IMAP_SERVER_CREATE;
                 }
-                stmt.setString(10, URIParser.parse(imapServer, URIDefaults.IMAP).toString());
+                stmt.setString(11, URIParser.parse(imapServer, URIDefaults.IMAP).toString());
 
                 String smtpServer = usrdata.getSmtpServerString();
                 if (null == smtpServer) {
                     smtpServer = DEFAULT_SMTP_SERVER_CREATE;
                 }
-                stmt.setString(11, URIParser.parse(smtpServer, URIDefaults.SMTP).toString());
+                stmt.setString(12, URIParser.parse(smtpServer, URIDefaults.SMTP).toString());
 
-                stmt.setInt(12, contactId);
+                stmt.setInt(13, contactId);
 
                 String homedir = "/home"; //prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usrdata.getName();
-                stmt.setString(13, homedir);
+                stmt.setString(14, homedir);
 
                 if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
-                    stmt.setInt(14, uid_number);
+                    stmt.setInt(15, uid_number);
                 } else {
-                    stmt.setInt(14, NOBODY);
+                    stmt.setInt(15, NOBODY);
                 }
 
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -946,48 +945,48 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, con);
                     if (-1 == gid_number) {
                         // Specified group does not exist
-                        stmt.setInt(15, NOGROUP);
+                        stmt.setInt(16, NOGROUP);
                     } else {
-                        stmt.setInt(15, gid_number);
+                        stmt.setInt(16, gid_number);
                     }
                 } else {
-                    stmt.setInt(15, NOGROUP);
+                    stmt.setInt(16, NOGROUP);
                 }
 
-                stmt.setString(16, LOGINSHELL);
+                stmt.setString(17, LOGINSHELL);
 
                 if (usrdata.getImapLogin() != null) {
-                    stmt.setString(17, usrdata.getImapLogin());
+                    stmt.setString(18, usrdata.getImapLogin());
                 } else {
-                    stmt.setNull(17, java.sql.Types.VARCHAR);
+                    stmt.setNull(18, java.sql.Types.VARCHAR);
                 }
 
                 boolean fileStorageSet = false;
                 {
                     Integer fsId = usrdata.getFilestoreId();
                     if (fsId != null && -1 != fsId.intValue()) {
-                        stmt.setInt(18, fsId.intValue());
+                        stmt.setInt(19, fsId.intValue());
 
                         Integer fsOwner = usrdata.getFilestoreOwner();
                         if (fsOwner != null && -1 != fsOwner.intValue()) {
-                            stmt.setInt(19, fsOwner.intValue());
+                            stmt.setInt(20, fsOwner.intValue());
                         } else {
-                            stmt.setInt(19, 0);
+                            stmt.setInt(20, 0);
                         }
 
                         String filestore_name = usrdata.getFilestore_name();
                         if (null != filestore_name) {
-                            stmt.setString(20, filestore_name);
+                            stmt.setString(21, filestore_name);
                         } else {
-                            stmt.setString(20, FileStorages.getNameForUser(userId, contextId));
+                            stmt.setString(21, FileStorages.getNameForUser(userId, contextId));
                         }
 
                         fileStorageSet = true;
                     } else {
                         // No file storage information
-                        stmt.setInt(18, 0);
                         stmt.setInt(19, 0);
-                        stmt.setNull(20, java.sql.Types.VARCHAR);
+                        stmt.setInt(20, 0);
+                        stmt.setNull(21, java.sql.Types.VARCHAR);
                     }
                 }
 
@@ -997,9 +996,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if (quota_max_temp != -1) {
                             quota_max_temp = quota_max_temp << 20;
                         }
-                        stmt.setLong(21, quota_max_temp);
+                        stmt.setLong(22, quota_max_temp);
                     } else {
-                        stmt.setLong(21, -1);
+                        stmt.setLong(22, -1);
                     }
                 }
 
@@ -1311,16 +1310,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
             throw new StorageException(e.toString(), e);
-        } catch (final NoSuchAlgorithmException e) {
-            // Here we throw without rollback, because at the point this
-            // exception is thrown
-            // no database activity has happened
-            throw new StorageException(e);
-        } catch (final UnsupportedEncodingException e) {
-            // Here we throw without rollback, because at the point this
-            // exception is thrown
-            // no database activity has happened
-            throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
             LOG.error("IllegalArgument Error", e);
             throw new StorageException(e);
@@ -2502,7 +2491,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setEditPassword(user.hasPermission(UserConfiguration.EDIT_PASSWORD));
             acc.setCollectEmailAddresses(user.hasPermission(UserConfiguration.COLLECT_EMAIL_ADDRESSES));
             acc.setMultipleMailAccounts(user.hasPermission(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS));
-            acc.setPublication(user.hasPermission(UserConfiguration.PUBLICATION));
             acc.setSubscription(user.hasPermission(UserConfiguration.SUBSCRIPTION));
             acc.setActiveSync(user.hasPermission(UserConfiguration.ACTIVE_SYNC));
             acc.setUSM(user.hasPermission(UserConfiguration.USM));
@@ -2713,7 +2701,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setCollectEmailAddresses(access.isCollectEmailAddresses());
             user.setMultipleMailAccounts(access.isMultipleMailAccounts());
             user.setSubscription(access.isSubscription());
-            user.setPublication(access.isPublication());
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
             user.setOLOX20(access.isOLOX20());

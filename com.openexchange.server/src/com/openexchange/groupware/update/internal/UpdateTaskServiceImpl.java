@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,6 +65,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.SchemaInfo;
@@ -262,52 +262,39 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
                 Arrays.sort(tasks);
             }
 
-            List<Map<String, Object>> pendingTasks = new LinkedList<>();
-
+            Map<String, Map<String, Object>> aux = new HashMap<>();
             // First get the successfully executed tasks
             Set<String> executedTasks = new HashSet<>();
-            for (ExecutedTask task : tasks) {
-                if (task.isSuccessful()) {
-                    executedTasks.add(task.getTaskName());
-                }
-            }
+            Arrays.stream(tasks).filter(t -> t.isSuccessful()).forEach(t -> executedTasks.add(t.getTaskName()));
 
             // Then collect all tasks from the different sets
             if (pending) {
                 // Add all update tasks that are not in the executed set
-                Set<String> registeredTasks = UpdateTaskToolkit.getRegisteredUpdateTasks();
-                for (String r : registeredTasks) {
-                    if (executedTasks.contains(r)) {
-                        continue;
+                UpdateTaskToolkit.getRegisteredUpdateTasks().stream().filter(t -> false == executedTasks.contains(t)).forEach(t -> aux.put(t, new TaskMetadataBuilder().withTaskName(t).withTaskState(TaskState.pending).withReason("Never executed").build()));
+                // Filter out duplicates
+                if (false == excluded) {
+                    UpdateTaskToolkit.getExcludedUpdateTasks().stream().filter(s -> aux.containsKey(s)).forEach(s -> aux.remove(s));
+                }
+                if (false == namespaceAware) {
+                    for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
+                        entry.getValue().stream().filter(s -> aux.containsKey(s)).forEach(s -> aux.remove(s));
                     }
-                    pendingTasks.add(new TaskMetadataBuilder().withTaskName(r).withTaskState("pending").build());
                 }
             }
 
             // Consider excluded via properties
             if (excluded) {
-                for (String s : UpdateTaskToolkit.getExcludedUpdateTasks()) {
-                    if (executedTasks.contains(s)) {
-                        continue;
-                    }
-                    pendingTasks.add(new TaskMetadataBuilder().withTaskName(s).withTaskState("excluded via file 'excludedupdatetask.properties'").build());
-                }
+                UpdateTaskToolkit.getExcludedUpdateTasks().stream().filter(t -> false == executedTasks.contains(t) || false == aux.containsKey(t)).forEach(t -> aux.put(t, new TaskMetadataBuilder().withTaskName(t).withTaskState(TaskState.pending).withReason("Excluded via file 'excludedupdatetask.properties'").build()));
             }
 
             // Consider excluded via namespace
             if (namespaceAware) {
                 for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
-                    String state = "excluded via namespace '" + entry.getKey() + "'";
-                    for (String s : entry.getValue()) {
-                        if (executedTasks.contains(s)) {
-                            continue;
-                        }
-                        pendingTasks.add(new TaskMetadataBuilder().withTaskName(s).withTaskState(state).build());
-                    }
+                    String reason = "Excluded via namespace '" + entry.getKey() + "'";
+                    entry.getValue().stream().filter(s -> false == executedTasks.contains(s)).forEach(s -> aux.put(s, new TaskMetadataBuilder().withTaskName(s).withTaskState(TaskState.pending).withReason(reason).build()));
                 }
             }
-
-            return pendingTasks;
+            return aux.values().parallelStream().collect(Collectors.toList());
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
@@ -439,7 +426,11 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     /////////////////////////////////// METADATA BUILDER ////////////////////////////////////////
 
     private enum TaskMetadata {
-        taskName, state, successful, lastModified, uuid, schema, className;
+        taskName, state, reason, successful, lastModified, uuid, schema, className;
+    }
+
+    private enum TaskState {
+        running, pending, succeeded, failed
     }
 
     /**
@@ -449,6 +440,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         private String taskName;
         private String taskState;
+        private String reason;
         private String className;
         private String schema;
         private Boolean isSuccessful;
@@ -479,8 +471,19 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param taskState The task state to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withTaskState(String taskState) {
-            this.taskState = taskState;
+        final TaskMetadataBuilder withTaskState(TaskState taskState) {
+            this.taskState = taskState.name();
+            return this;
+        }
+
+        /**
+         * Sets the specified reason
+         * 
+         * @param reason The reason to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withReason(String reason) {
+            this.reason = reason;
             return this;
         }
 
@@ -551,6 +554,9 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             }
             if (Strings.isNotEmpty(taskState)) {
                 taskMap.put(TaskMetadata.state.name(), taskState);
+            }
+            if (Strings.isNotEmpty(reason)) {
+                taskMap.put(TaskMetadata.reason.name(), reason);
             }
             if (Strings.isNotEmpty(className)) {
                 taskMap.put(TaskMetadata.className.name(), className);

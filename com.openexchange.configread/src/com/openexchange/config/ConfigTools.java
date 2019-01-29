@@ -109,7 +109,7 @@ public class ConfigTools {
      *
      * @param span The span description or special identifier <code>"web-browser"</code> to let the Cookie be deleted when the Web browser
      *            exits
-     * @return The parsed time span in milliseconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
+     * @return The parsed time span in milliseconds or <code>-1</code>.
      */
     public static long parseTimespan(final String span) {
         if (null == span) {

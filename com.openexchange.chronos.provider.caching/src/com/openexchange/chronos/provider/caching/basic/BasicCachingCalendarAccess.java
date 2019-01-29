@@ -102,6 +102,7 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -250,7 +251,31 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public CalendarSettings getSettings() {
-        return getCalendarSettings(getExtendedProperties());
+        /*
+         * generate extended properties from account configuration
+         */
+        JSONObject internalConfig = account.getInternalConfiguration();
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        extendedProperties.add(DESCRIPTION(internalConfig.optString(CommonCalendarConfigurationFields.DESCRIPTION, null)));
+        if (CachingCalendarUtils.canBeUsedForSync(account.getProviderId(), session)) {
+            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
+        } else {
+            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        }
+        extendedProperties.add(COLOR(internalConfig.optString(CommonCalendarConfigurationFields.COLOR, null), false));
+        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
+        /*
+         * build calendar settings
+         */
+        CalendarSettings settings = new CalendarSettings();
+        settings.setSubscribed(true);
+        settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
+        settings.setLastModified(account.getLastModified());
+        settings.setConfig(account.getUserConfiguration());
+        settings.setExtendedProperties(extendedProperties);
+        settings.setError(optAccountError());
+        return settings;
     }
 
     /**
@@ -536,6 +561,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (!alarmUpdates.getAddedItems().isEmpty()) {
                 for (Alarm alarm : alarmUpdates.getAddedItems()) {
                     alarm.setId(alarmStorage.nextId());
+                    alarm.setTimestamp(System.currentTimeMillis());
                 }
                 alarmStorage.insertAlarms(event, userId, alarmUpdates.getAddedItems());
             }
@@ -553,6 +579,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                     Alarm update = itemUpdate.getUpdate();
                     update.setId(itemUpdate.getOriginal().getId());
                     update.setUid(itemUpdate.getOriginal().getUid());
+                    update.setTimestamp(System.currentTimeMillis());
                     alarms.add(update);
                 }
                 alarmStorage.updateAlarms(event, userId, alarms);
@@ -808,6 +835,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if (null != importedEvent.getAlarms() && !importedEvent.getAlarms().isEmpty()) {
             for (Alarm alarm : importedEvent.getAlarms()) {
                 alarm.setId(calendarStorage.getAlarmStorage().nextId());
+                alarm.setTimestamp(System.currentTimeMillis());
             }
             calendarStorage.getAlarmStorage().insertAlarms(importedEvent, session.getUserId(), importedEvent.getAlarms());
         }
@@ -824,6 +852,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
                 for (Alarm alarm : importedChangeException.getAlarms()) {
                     alarm.setId(calendarStorage.getAlarmStorage().nextId());
+                    alarm.setTimestamp(System.currentTimeMillis());
                 }
                 calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, session.getUserId(), importedChangeException.getAlarms());
             }
@@ -923,60 +952,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             }
         }
         return eventsByUID;
-    }
-
-    /**
-     * Creates and returns a new {@link CalendarSettings} instance. The following properties are
-     * read from the {@link CalendarAccount#getInternalConfiguration()}:
-     * <ul>
-     * <li>{@link CommonCalendarConfigurationFields#NAME}</li>
-     * <li>{@link CommonCalendarConfigurationFields#SUBSCRIBED} (default: <code>false</code></li>
-     * </ul>
-     * 
-     * It also sets the user configuration, the last modified timestamp, the specified {@link ExtendedProperties}
-     * and whether there was an error while previously persisting the account configuration.
-     * 
-     * @param extendedProperties The {@link ExtendedProperties} to set
-     * @return The {@link CalendarSettings}
-     */
-    protected CalendarSettings getCalendarSettings(ExtendedProperties extendedProperties) {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        CalendarSettings settings = new CalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
-        settings.setExtendedProperties(extendedProperties);
-        settings.setSubscribed(internalConfig.optBoolean(CommonCalendarConfigurationFields.SUBSCRIBED, false));
-        settings.setError(optAccountError());
-
-        return settings;
-
-    }
-
-    /**
-     * Creates and returns a new instance of the {@link ExtendedProperties}. The following properties are
-     * read from the {@link CalendarAccount#getInternalConfiguration()}:
-     * <ul>
-     * <li>{@link CommonCalendarConfigurationFields#DESCRIPTION}</li>
-     * <li>{@link CommonCalendarConfigurationFields#USED_FOR_SYNC}</li>
-     * <li>{@link CommonCalendarConfigurationFields#COLOR}</li>
-     * <li>{@link CachingCalendarAccessConstants#LAST_UPDATE}</li>
-     * </ul>
-     * 
-     * @return The {@link ExtendedProperties}
-     */
-    protected ExtendedProperties getExtendedProperties() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString(CommonCalendarConfigurationFields.DESCRIPTION, null)));
-        extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
-        extendedProperties.add(COLOR(internalConfig.optString(CommonCalendarConfigurationFields.COLOR, null), false));
-        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
-
-        return extendedProperties;
     }
 
 }

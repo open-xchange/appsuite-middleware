@@ -55,6 +55,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 
 /**
@@ -209,4 +210,10 @@ public final class GeneratedSession implements Session, Serializable {
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
+
+    @Override
+    public Origin getOrigin() {
+        return Origin.SYNTHETIC;
+    }
+
 }

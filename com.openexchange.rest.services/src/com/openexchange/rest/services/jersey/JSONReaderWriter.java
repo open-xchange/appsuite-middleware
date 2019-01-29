@@ -102,6 +102,11 @@ public class JSONReaderWriter implements MessageBodyReader<JSONValue>, MessageBo
         try {
             return JSONObject.parse(new InputStreamReader(entityStream, charset));
         } catch (JSONException e) {
+            // In case the payload is missing or malformed, return with an empty object
+            // and let the framework handle the error case.
+            if (e.getMessage().contains("Neither a JSONObject nor a JSONArray")) {
+                return new JSONObject();
+            }
             throw JSONParserUtil.convertJSONException(e);
         }
     }

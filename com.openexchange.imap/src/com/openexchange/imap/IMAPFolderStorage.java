@@ -1540,15 +1540,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             ListLsubEntry renameEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null == renameEntry || !renameEntry.exists()) {
                 ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, renameMe);
-                if (null == listInfo && false == canBeOpened(renameMe)) {
-                    renameMe = checkForNamespaceFolder(fullName);
-                    if (null == renameMe) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                if (null == listInfo) {
+                    if (false == canBeOpened(renameMe)) {
+                        renameMe = checkForNamespaceFolder(fullName);
+                        if (null == renameMe) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                        throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
                     }
-                    throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
+                    separator = getSeparator();
+                    canOpen = true;
+                } else {
+                    separator = listInfo.separator;
+                    canOpen = listInfo.canOpen;
                 }
-                separator = listInfo.separator;
-                canOpen = listInfo.canOpen;
             } else {
                 separator = renameEntry.getSeparator();
                 canOpen = renameEntry.canOpen();
@@ -1719,14 +1724,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             ListLsubEntry moveMeEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null == moveMeEntry || !moveMeEntry.exists()) {
                 ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, moveMe);
-                if (null == listInfo && false == canBeOpened(moveMe)) {
-                    moveMe = checkForNamespaceFolder(fullName);
-                    if (null == moveMe) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                if (null == listInfo) {
+                    if (false == canBeOpened(moveMe)) {
+                        moveMe = checkForNamespaceFolder(fullName);
+                        if (null == moveMe) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                        throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
                     }
-                    throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
+                    separator = getSeparator();
+                } else {
+                    separator = listInfo.separator;
                 }
-                separator = listInfo.separator;
             } else {
                 separator = moveMeEntry.getSeparator();
             }
@@ -2211,10 +2220,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     separator = deleteMeEntry.getSeparator();
                 } else {
                     ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, deleteMe);
-                    if (null == listInfo && false == canBeOpened(deleteMe)) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    if (null == listInfo) {
+                        if (false == canBeOpened(deleteMe)) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                        separator = getSeparator();
+                    } else {
+                        separator = listInfo.separator;
                     }
-                    separator = listInfo.separator;
                 }
             }
             clearListLsubCache = true;

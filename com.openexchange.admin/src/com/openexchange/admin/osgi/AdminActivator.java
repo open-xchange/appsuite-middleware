@@ -63,7 +63,6 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
 import com.openexchange.admin.mysql.CreateCalendarTables;
 import com.openexchange.admin.mysql.CreateContactsTables;
-import com.openexchange.admin.mysql.CreateIcalVcardTables;
 import com.openexchange.admin.mysql.CreateInfostoreTables;
 import com.openexchange.admin.mysql.CreateLdap2SqlTables;
 import com.openexchange.admin.mysql.CreateMiscTables;
@@ -101,9 +100,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RankingAwareRegistryServiceTrackerCustomizer;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -127,7 +125,7 @@ public class AdminActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class };
     }
 
     @Override
@@ -135,7 +133,7 @@ public class AdminActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         AdminServiceRegistry.getInstance().addService(ThreadPoolService.class, getService(ThreadPoolService.class));
 
-        track(PasswordMechFactory.class, new RegistryServiceTrackerCustomizer<PasswordMechFactory>(context, AdminServiceRegistry.getInstance(), PasswordMechFactory.class));
+        track(PasswordMechRegistry.class, new RegistryServiceTrackerCustomizer<PasswordMechRegistry>(context, AdminServiceRegistry.getInstance(), PasswordMechRegistry.class));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
 
@@ -147,7 +145,6 @@ public class AdminActivator extends HousekeepingActivator {
         });
 
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
-        track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         track(ConfigViewFactory.class, new RegistryServiceTrackerCustomizer<ConfigViewFactory>(context, AdminServiceRegistry.getInstance(), ConfigViewFactory.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
@@ -275,7 +272,6 @@ public class AdminActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateInfostoreTables());
         registerService(CreateTableService.class, new CreateAttachmentTables());
         registerService(CreateTableService.class, new CreateMiscTables());
-        registerService(CreateTableService.class, new CreateIcalVcardTables());
 
         // Register authenticator
         AuthenticatorImpl authenticator = new AuthenticatorImpl();

@@ -54,8 +54,9 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -128,6 +129,8 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
+
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractUpdatePerformer.class);
 
     protected final CalendarUser calendarUser;
     protected final int calendarUserId;
@@ -215,6 +218,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Loads the recurrence identifiers of all stored change exception events for a specific event series from the storage.
+     * 
+     * @param seriesId The identifier of the series to load the exception dates for
+     * @return The recurrence identifiers of the change exception events, or an empty set if there are none
+     */
+    protected SortedSet<RecurrenceId> loadChangeExceptionDates(String seriesId) throws OXException {
+        return getRecurrenceIds(storage.getEventStorage().loadExceptions(seriesId, new EventField[] { EventField.RECURRENCE_ID }));
+    }
+
+    /**
      * Adds a specific recurrence identifier to the series master's change exception array and updates the series master event in the
      * storage.
      *
@@ -228,7 +241,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
         }
         if (false == changeExceptionDates.add(recurrenceID)) {
-            // TODO throw/log?
+            LOG.warn("Change exception date for {} already present.", recurrenceID);
         }
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
@@ -450,6 +463,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             for (Alarm alarm : entry.getValue()) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
+                newAlarm.setTimestamp(System.currentTimeMillis());
                 if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
@@ -518,6 +532,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
+                alarm.setTimestamp(System.currentTimeMillis());
                 alarms.add(Check.alarmIsValid(alarm, itemUpdate.getUpdatedFields().toArray(new AlarmField[itemUpdate.getUpdatedFields().size()])));
                 toDelete.add(alarm.getId());
                 toAdd.add(alarm.getId());
@@ -683,6 +698,22 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @see Check#classificationAllowsUpdate
      */
     protected void requireDeletePermissions(Event originalEvent) throws OXException {
+        requireDeletePermissions(originalEvent, false);
+    }
+
+    /**
+     * Checks that the current session's user is able to delete a specific event, by either requiring delete access for <i>own</i> or
+     * <i>all</i> objects, based on the user being the creator of the event or not.
+     * <p/>
+     * Additionally, the event's classification is checked.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (roles.contains(Role.ORGANIZER)) {
             return;
         }
@@ -692,6 +723,57 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         }
         classificationAllowsUpdate(folder, originalEvent);
+        /*
+         * require organizer role in case there are further internal attendees
+         */
+        if (false == isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
+            requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
+        }
+    }
+    
+    /**
+     * Checks that data of a specific attendee of an event can be deleted by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @param deletedAttendee The attendee who is deleted
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent, Attendee deletedAttendee) throws OXException {
+        requireDeletePermissions(originalEvent, deletedAttendee, false);
+    }
+
+    /**
+     * Checks that data of a specific attendee of an event can be deleted by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @param deletedAttendee The attendee who is deleted
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent, Attendee deletedAttendee, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (false == matches(deletedAttendee, calendarUserId)) {
+            /*
+             * always require permissions for whole event in case an attendee different from the calendar user is updated
+             */
+            requireDeletePermissions(originalEvent, assumeExternalOrganizerUpdate);
+        }
+        if (session.getUserId() != calendarUserId) {
+            /*
+             * user acts on behalf of other calendar user, allow attendee deletion based on permissions in underlying folder
+             */
+            if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
+                requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
+            } else {
+                requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+            }
+            classificationAllowsUpdate(folder, originalEvent);
+        }
     }
 
     /**
@@ -731,23 +813,36 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
+        requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
+    }
+
+    /**
+     * Checks that the current session's user is able to act as the organizer in case the event represents a group scheduled event.
+     *
+     * @param originalEvent The event to check the calendar user's role in
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#NOT_ORGANIZER}
+     */
+    private void requireOrganizerSchedulingResource(Event originalEvent, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (PublicType.getInstance().equals(folder.getType())) {
             /*
              * event located in public folder, assume change as or on behalf of organizer
              */
             return;
         }
-        if (isGroupScheduled(originalEvent) && false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
+        if (false == isGroupScheduled(originalEvent)) {
             /*
-             * not allowed attendee change in group scheduled resource, throw error if configured
+             * non group-schedule events, nothing to check
+             */
+            return;
+        }
+        if (false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
+            /*
+             * calendar user is not organizer of group scheduled event, throw error if configured
              */
             OXException e = CalendarExceptionCodes.NOT_ORGANIZER.create(
-                folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
-            if (PublicType.getInstance().equals(folder.getType())) {
-                if (session.getConfig().isRestrictAllowedAttendeeChangesPublic()) {
-                    throw e;
-                }
-            } else if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
+                folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getCn());
+            if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
                 throw e;
             }
             session.addWarning(e);
@@ -884,7 +979,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <li>the event is located in a <i>public folder</i></li>
      * <li>or the event is not <i>group-scheduled</i></li>
      * <li>or the calendar user is the organizer of the event</li>
-     * <li>or the calendar user is the last internal user attendee in the event</li>
+     * <li>or the calendar user is the last <i>non-hidden</i> internal user attendee in the event</li>
      * </ul>
      *
      * @param originalEvent The original event to check
@@ -894,7 +989,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         return PublicType.getInstance().equals(folder.getType()) ||
             false == isGroupScheduled(originalEvent) ||
             isOrganizer(originalEvent, calendarUserId) ||
-            isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)
+            isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId)
         ;
     }
 

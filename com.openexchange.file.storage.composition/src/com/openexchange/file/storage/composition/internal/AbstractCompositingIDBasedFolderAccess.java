@@ -359,9 +359,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
         FolderID folderID = new FolderID(folderId);
-        if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
-            throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
-        }
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
 
@@ -384,6 +381,10 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
                 fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
                 return newFolderID.toUniqueID();
             }
+        }
+
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
+            throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
         }
 
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
@@ -669,7 +670,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
         if (null == rootFolderPermissions || rootFolderPermissions.isEmpty()) {
             DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-            permission.setAdmin(false);
+            permission.setAdmin(true);
             permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
             permission.setEntity(userID);
             rootFolder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));

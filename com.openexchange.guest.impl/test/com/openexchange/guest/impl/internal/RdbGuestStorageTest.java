@@ -102,6 +102,7 @@ public class RdbGuestStorageTest {
     private static final String GROUP_ID = "default";
     private static final String GUEST_PASSWORD = "myToppiPasswordi";
     private static final String GUEST_PASSWORD_MECH = "{BCRYPT}";
+    private static final byte[] GUEST_PASSWORD_SALT = "theSalt".getBytes();
 
     @Before
     public void setUp() throws Exception {
@@ -169,14 +170,14 @@ public class RdbGuestStorageTest {
 
     @Test(expected = OXException.class)
     public void testAddGuestAssignment_connectionNull_throwException() throws OXException, SQLException {
-        rdbGuestStorage.addGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), null);
+        rdbGuestStorage.addGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT), null);
     }
 
     @Test
     public void testAddGuestAssignment_assignmentAdded() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        rdbGuestStorage.addGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), connection);
+        rdbGuestStorage.addGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT), connection);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, CONTEXT_ID);
@@ -358,7 +359,7 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true, false);
         Mockito.when(resultSet.getLong(ArgumentMatchers.anyInt())).thenReturn(GUEST_ID);
 
-        rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), null);
+        rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT), null);
     }
 
     @Test
@@ -367,7 +368,7 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true, false);
         Mockito.when(resultSet.getLong(ArgumentMatchers.anyInt())).thenReturn(GUEST_ID);
 
-        rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), connection);
+        rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT), connection);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.UPDATE_GUEST_PASSWORD);

@@ -123,6 +123,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
+            scanAttachments(req, mailInterface, folderPath, uid, sequenceIds);
             ManagedFile mf = null;
             try {
                 /*

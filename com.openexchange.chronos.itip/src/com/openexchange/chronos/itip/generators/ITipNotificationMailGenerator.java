@@ -74,7 +74,6 @@ import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -95,7 +94,6 @@ import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 
@@ -146,13 +144,13 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS };
 
     public ITipNotificationMailGenerator(final ServiceLookup services, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
-        final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal, String comment) throws OXException {
+        final User onBehalfOf, final Context ctx, final CalendarSession session, CalendarUser principal, String comment) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
         this.calendarUtilities = Services.getService(CalendarUtilities.class);
 
-        this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session, principal);
+        this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session.getSession(), principal);
         this.participants = resolver.getAllParticipants(this.recipients, updated);
         this.resources = resolver.getResources(updated);
         this.comment = comment;
@@ -182,16 +180,15 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             organizer = actor; // Is that so? As a fallback this could be good enough
         }
 
-        CalendarService calendarService = Services.getService(CalendarService.class);
-        this.session = calendarService.init(session);
         this.original = original;
         this.updated = updated;
+        this.session = session;
 
         if (original != null) {
             this.diff = new ITipEventUpdate(original, updated, true, DEFAULT_SKIP);
         }
 
-        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL) || util.isActingOnBehalfOf(updated, session)) {
+        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL) || util.isActingOnBehalfOf(updated, session.getSession())) {
             state = new OrganizerState();
         } else {
             if (organizer.isExternal()) {
@@ -352,7 +349,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
      */
     private NotificationParticipant determinateSender(boolean external) {
         NotificationParticipant n;
-        if (external) {
+        if (external && organizer.isExternal() == false) {
             n = organizer.clone();
             try {
                 String fromAddr;

@@ -86,6 +86,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -439,7 +440,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM prg_dates WHERE cid=? AND intfield01")
-            .append(getPlaceholders(objectIDs.size())).append(';')
+            .append(Databases.getPlaceholders(objectIDs.size())).append(';')
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;

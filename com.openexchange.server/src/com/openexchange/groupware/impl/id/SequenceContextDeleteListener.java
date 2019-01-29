@@ -98,7 +98,6 @@ public class SequenceContextDeleteListener extends ContextDelete {
                 "sequence_resource_group",
                 "sequence_resource",
                 "sequence_reminder",
-                "sequence_publications",
                 "sequence_project",
                 "sequence_principal",
                 "sequence_pinboard",

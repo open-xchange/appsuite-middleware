@@ -82,17 +82,11 @@ public class AutocompleteFields implements PreferencesItemService {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {

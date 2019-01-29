@@ -60,11 +60,10 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
 
 /**
  * {@link ListAction}
@@ -75,6 +74,7 @@ public final class ListAction extends AbstractGroupAction {
 
     /**
      * Initializes a new {@link ListAction}.
+     * 
      * @param services
      */
     public ListAction(final ServiceLookup services) {
@@ -88,25 +88,26 @@ public final class ListAction extends AbstractGroupAction {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
-        Date timestamp = new Date(0);
-        Date lastModified = null;
+        List<Integer> groupIds = new LinkedList<Integer>();
+        for (int a = 0; a < jBody.length(); a++) {
+            JSONObject jData = jBody.getJSONObject(a);
+            groupIds.add(DataParser.checkInt(jData, DataFields.ID));
+        }
+
+        GroupService groupService = this.services.getService(GroupService.class);
+        Group[] groupsResult = groupService.getGroup(req.getSession().getContext(), groupIds.stream().mapToInt(i -> i).toArray());
 
         List<Group> groupList = new LinkedList<Group>();
-        GroupStorage groupStorage = GroupStorage.getInstance();
-
-        int length = jBody.length();
-        for (int a = 0; a < length; a++) {
-            JSONObject jData = jBody.getJSONObject(a);
-
-            Group group = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID), req.getSession().getContext());
+        Date timestamp = new Date(0);
+        for (int a = 0; a < groupsResult.length; a++) {
+            Group group = groupsResult[a];
             groupList.add(group);
 
-            lastModified = group.getLastModified();
-            if (null != lastModified && timestamp.getTime() < lastModified.getTime()) {
-                timestamp = lastModified;
+            Date lastModified = group.getLastModified();
+            if (null != lastModified && lastModified.after(timestamp)) {
+                timestamp = group.getLastModified();
             }
         }
         return new AJAXRequestResult(groupList, timestamp, "group");
     }
-
 }

@@ -192,11 +192,6 @@ public class UserConfiguration implements Serializable, Cloneable {
     public static final int SUBSCRIPTION = UserPermissionBits.SUBSCRIPTION;
 
     /**
-     * The permission bit for publication access.
-     */
-    public static final int PUBLICATION = UserPermissionBits.PUBLICATION;
-
-    /**
      * The permission bit for active sync access.
      */
     public static final int ACTIVE_SYNC = UserPermissionBits.ACTIVE_SYNC;
@@ -639,15 +634,6 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean isSubscription() {
         return capabilities.contains(Permission.SUBSCRIPTION.getCapabilityName());
-    }
-
-    /**
-     * Checks if this user configuration indicates to enable publication.
-     *
-     * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
-     */
-    public boolean isPublication() {
-        return capabilities.contains(Permission.PUBLICATION.getCapabilityName());
     }
 
     /**

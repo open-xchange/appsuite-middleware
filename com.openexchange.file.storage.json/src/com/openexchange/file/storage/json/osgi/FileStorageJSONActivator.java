@@ -55,6 +55,8 @@ import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -84,12 +86,14 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class FileStorageJSONActivator extends AJAXModuleActivator {
 
+    //@formatter:off
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class,
             AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
-            ThreadControlService.class};
+            ThreadControlService.class };
     }
+    //@formatter:on
 
     @Override
     protected void startBundle() throws Exception {
@@ -105,6 +109,8 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             trackService(PreviewService.class);
             trackService(CryptographicAwareIDBasedFileAccessFactory.class);
             trackService(CryptographicServiceAuthenticationFactory.class);
+            trackService(AntiVirusService.class);
+            trackService(AntiVirusResultEvaluatorService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");

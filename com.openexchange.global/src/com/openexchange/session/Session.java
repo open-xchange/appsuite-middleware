@@ -184,13 +184,6 @@ public interface Session {
     public static final String PARAM_TOKEN = "__session.token".intern();
 
     /**
-     * The parameter to indicate a publication session.
-     *
-     * @type <code>java.lang.Boolean</code>
-     */
-    static final String PARAM_PUBLICATION = "__session.publication".intern();
-
-    /**
      * The parameter to indicate a guest session.
      *
      * @type <code>java.lang.Boolean</code>
@@ -266,6 +259,11 @@ public interface Session {
      * @type <code>java.lang.Boolean</code>
      */
     public static final String PARAM_IS_OAUTH = "__session.oauth".intern();
+
+    /**
+     * The session parameter used to hold the client's push token
+     */
+    public static final String PARAM_PUSH_TOKEN = "__session.pushtoken".intern();
 
     /**
      * @return the context identifier.
@@ -431,4 +429,12 @@ public interface Session {
      * @return the names of all parameters in this session.
      */
     Set<String> getParameterNames();
+
+    /**
+     * Gets this session's origin.
+     *
+     * @return The origin or <code>null</code>
+     */
+    Origin getOrigin();
+
 }

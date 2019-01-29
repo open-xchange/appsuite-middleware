@@ -88,7 +88,7 @@ specific field data of single or multiple objects.
 | 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder.|
 | 319 | folder_name |String|The raw and therefore untranslated name of this folder|
 | 320 | origin |String|The folder's origin path.|
-| 3010 | com.openexchange.publish.publicationFlag |Boolean|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin|
+| 3010 | **_DEPRECATED_** com.openexchange.publish.publicationFlag |Boolean|**_DEPRECATED_** The publication feature has been removed with v7.10.2. This column is igonred.|
 | 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin|
 | 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only|
 | 3060 | com.openexchange.share.extendedPermissions |Array|Each element is an object described in [Extended permission object](#extended-permission-object). Read Only.|

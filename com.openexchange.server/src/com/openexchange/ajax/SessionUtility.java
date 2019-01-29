@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SHARD_COOKIE_NAME;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
@@ -488,7 +489,8 @@ public final class SessionUtility {
     /**
      * Checks if a valid session exists in terms of the passed ID and servlet request.
      * If the session ID is valid, the according sessions secret will be checked against
-     * the cookies of the servlet request.
+     * the cookies of the servlet request. Validates also the shard cookie and resets
+     * it, if invalid.
      *
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
@@ -509,7 +511,8 @@ public final class SessionUtility {
     /**
      * Checks if a valid session exists in terms of the passed ID and servlet request.
      * If the session ID is valid, the according sessions secret will be checked against
-     * the cookies of the servlet request.
+     * the cookies of the servlet request. Validates also the shard cookie and resets
+     * it, if invalid.
      *
      * @param source defines how the cookie should be found
      * @param req The associated HTTP request
@@ -531,7 +534,8 @@ public final class SessionUtility {
     /**
      * Checks if a valid session exists in terms of the passed ID and servlet request.
      * If the session ID is valid, the according sessions secret will be checked against
-     * the cookies of the servlet request.
+     * the cookies of the servlet request. Validates also the shard cookie and resets
+     * it, if invalid.
      *
      * @param source defines how the cookie should be found
      * @param req The associated HTTP request
@@ -584,6 +588,7 @@ public final class SessionUtility {
                 LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
+            rewriteShardCookieIfNeeded(req, resp, session);
             return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
         } catch (OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
@@ -944,6 +949,14 @@ public final class SessionUtility {
             }
         }
 
+        // Drop "open-xchange-shard" cookie
+        {
+            Cookie cookie = cookies.get(SHARD_COOKIE_NAME);
+            if (null != cookie) {
+                removeCookie(cookie, "invalid", domain, resp);
+            }
+        }
+
         // Drop "open-xchange-secret" cookie
         {
             Cookie cookie = cookies.get(SECRET_PREFIX + hash);
@@ -977,6 +990,7 @@ public final class SessionUtility {
      * <li>A cookie named "open-xchange-secret-<code>{session.getHash()}</code>"</li>
      * <li>A cookie named "open-xchange-public-session-<code>{HashCalculator.getUserAgentHash(request)}</code>" matching the sessions alternative identifier</li>
      * <li>A cookie named "open-xchange-share-<code>{HashCalculator.getUserAgentHash(request)}</code>" in case of a guest session</li>
+     * <li>A cookie named "open-xchange-shard"</li>
      * </ul>
      *
      * @param session The session to remove the cookies for
@@ -997,6 +1011,7 @@ public final class SessionUtility {
         }
 
         removeCookie(cookies, response, SESSION_PREFIX + sessionHash, domain);
+        removeCookie(cookies, response, SHARD_COOKIE_NAME, domain);
         removeCookie(cookies, response, SECRET_PREFIX + sessionHash, domain);
         removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID), domain);
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
@@ -1028,7 +1043,7 @@ public final class SessionUtility {
         for (final String cookieName : cookieNames) {
             Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                if (startsWithOXPrefix(cookieName)) {
+                if (isOXCookieName(cookieName)) {
                     removeCookie(cookie, "invalid", domain, resp);
                 } else {
                     removeCookie(cookie, null, domain, resp);
@@ -1132,6 +1147,22 @@ public final class SessionUtility {
         return null;
     }
 
+
+    /**
+     * Checks if the <code>open-xchange-shard</code> cookie is available and has a correct value.
+     * If not, it gets reset.
+     *
+     * @param request The {@link HttpServletRequest}
+     * @param response The {@link HttpServletResponse}
+     * @param session The {@link Session}
+     */
+    public static void rewriteShardCookieIfNeeded(HttpServletRequest request, HttpServletResponse response, Session session) {
+        if (needsShardCookieRefresh(request)) {
+            LOG.debug("Value of open-xchange-shard cookie invalid or no cookie available, rewrite cookie");
+            LoginServlet.writeShardCookie(response, session, request.isSecure(), request.getServerName());
+        }
+    }
+
     /**
      * Get session by public-session cookie for userId in contextId
      *
@@ -1218,7 +1249,7 @@ public final class SessionUtility {
         if (null != existingCookies) {
             Cookie cookie = existingCookies.get(name);
             if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
-                if (startsWithOXPrefix(name)) {
+                if (isOXCookieName(name)) {
                     removeCookie(cookie, "invalid", domain, response);
                 } else {
                     removeCookie(cookie, null, domain, response);
@@ -1229,8 +1260,37 @@ public final class SessionUtility {
         return false;
     }
 
-    private static boolean startsWithOXPrefix(String name) {
-        return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX));
+    private static boolean isOXCookieName(String name) {
+        return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX) || name.equals(SHARD_COOKIE_NAME));
+    }
+
+    private static boolean needsShardCookieRefresh(HttpServletRequest request) {
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        Cookie shardCookie = cookies.get(LoginServlet.SHARD_COOKIE_NAME);
+        return isValidShardCookie(shardCookie) == false;
+    }
+
+    /**
+     * Checks if the given cookie is valid, by checking its existence and value against the stored
+     * configuration stored in property {@link ServerConfig.Property}.SHARD_NAMRE
+     *
+     * @param cookie
+     * @return
+     */
+    public static boolean isValidShardCookie(Cookie cookie) {
+        return cookie != null && cookie.getValue().equals(getShardCookieValue());
+    }
+
+    /**
+     * Gets the shard cookie value and replaces the value with the default
+     * value if the loaded one is blank.
+     *
+     * @return The shard cookie value
+     */
+    public static String getShardCookieValue() {
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        String defaultValue = ServerConfig.Property.SHARD_NAME.getDefaultValue().trim();
+        return configService.getProperty(ServerConfig.Property.SHARD_NAME.getPropertyName(), defaultValue).trim();
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //

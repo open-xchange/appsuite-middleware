@@ -56,8 +56,17 @@ package com.openexchange.filestore.s3.internal;
  * @since v7.10.1
  */
 public enum EncryptionType {
+    /**
+     * No encryption at all
+     */
     NONE("none", true),
+    /**
+     * Client side encryption via rsa
+     */
     RSA("rsa", true),
+    /**
+     * Server side encryption
+     */
     SSE_S3("sse-s3", false);
 
     private String name;
@@ -91,7 +100,7 @@ public enum EncryptionType {
 
     /**
      * Returns the {@link EncryptionType} or null if no {@link EncryptionType} with this name exists.
-     * 
+     *
      * @param name The name of the {@link EncryptionType}
      * @return The {@link EncryptionType} or null
      */

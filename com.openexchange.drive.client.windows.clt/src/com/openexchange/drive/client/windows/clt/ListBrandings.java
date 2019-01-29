@@ -66,6 +66,10 @@ import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRe
  */
 public class ListBrandings extends AbstractRmiCLI<Void> {
 
+    private static final String AVAILABLE_STR = "The following brands are available:";
+    private static final String AVAILABLE_AND_VALID_STR = "The following brands are available and valid:";
+    private static final String INVALID_STR = "The following brands are invalid:";
+
     private final static String VALIDATE_LONG = "validate";
     private final static String VALIDATE_SHORT = "v";
 
@@ -99,14 +103,13 @@ public class ListBrandings extends AbstractRmiCLI<Void> {
         List<String> brands = remote.getBrandings(validate, invalid_only);
 
         if (invalid_only) {
-            System.out.println("The following brands are invalid:");
+            System.out.println(INVALID_STR);
         } else {
             if (validate) {
-                System.out.println("The following brands are available and valid:");
+                System.out.println(AVAILABLE_AND_VALID_STR);
             } else {
-                System.out.println("The following brands are available:");
+                System.out.println(AVAILABLE_STR);
             }
-
         }
         for (String brand : brands) {
             System.out.println("\t -" + brand);

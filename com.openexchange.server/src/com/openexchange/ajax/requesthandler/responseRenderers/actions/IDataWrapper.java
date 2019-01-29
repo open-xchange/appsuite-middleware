@@ -77,70 +77,251 @@ public interface IDataWrapper {
     static final String VIEW = "view";
     static final String SAVE_AS_TYPE = "application/octet-stream";
 
+    /**
+     * Gets the delivery type
+     *
+     * @return The delivery type
+     */
     public String getDelivery();
 
+    /**
+     * Sets the delivery type
+     *
+     * @param delivery The delivery type to set
+     * @return This object
+     */
     public IDataWrapper setDelivery(String delivery);
 
+    /**
+     * Gets the content type.
+     *
+     * @return The content type
+     */
     public String getContentType();
 
+    /**
+     * Sets the content type
+     *
+     * @param contentType The content type to set
+     * @return This object
+     */
     public IDataWrapper setContentType(String contentType);
 
+    /**
+     * Gets the content disposition
+     *
+     * @return The content disposition
+     */
     public String getContentDisposition();
 
+    /**
+     * Sets the content disposition
+     *
+     * @param contentDisposition The content disposition to set
+     * @return This object
+     */
     public IDataWrapper setContentDisposition(String contentDisposition);
 
+    /**
+     * Returns contentTypeByParameter flag
+     *
+     * @return The contentTypeByParameter flag
+     */
     public Boolean getContentTypeByParameter();
 
+    /**
+     * Sets the contentTypeByParameter flag
+     *
+     * @param contentTypeByParameter The flag value to set
+     * @return This object
+     */
     public IDataWrapper setContentTypeByParameter(Boolean contentTypeByParameter);
 
+    /**
+     * Gets the data as a {@link Readable}
+     *
+     * @return The data
+     */
     public Readable getDocumentData();
 
+    /**
+     * Sets the data
+     *
+     * @param documentData The data as a {@link Readable}
+     * @return This object
+     */
     public IDataWrapper setDocumentData(Readable documentData);
 
+    /**
+     * Gets the length of the data
+     * 
+     * @return The length in bytes
+     */
     public long getLength();
 
+    /**
+     * Sets the length of the data
+     * 
+     * @param length The length in bytes
+     * @return This object
+     */
     public IDataWrapper setLength(long length);
 
+    /**
+     * Gets the file
+     * 
+     * @return The file as a {@link IFileHolder}
+     */
     public IFileHolder getFile();
 
+    /**
+     * Sets the file
+     * 
+     * @param file The file as a {@link IFileHolder}
+     * @return This object
+     */
     public IDataWrapper setFile(IFileHolder file);
 
+    /**
+     * Gets the request
+     * 
+     * @return The {@link HttpServletRequest}
+     */
     public HttpServletRequest getRequest();
 
+    /**
+     * Sets the request
+     * 
+     * @param req The {@link HttpServletRequest}
+     * @return This object
+     */
     public IDataWrapper setRequest(HttpServletRequest req);
 
+    /**
+     * Gets the content type of the file
+     * 
+     * @return The content type of the file
+     */
     public String getFileContentType();
 
+    /**
+     * Sets the content type of the file
+     * 
+     * @param fileContentType The content type of the file
+     * @return This object
+     */
     public IDataWrapper setFileContentType(String fileContentType);
 
+    /**
+     * Gets the name of the file
+     * 
+     * @return The file name
+     */
     public String getFileName();
 
+    /**
+     * Sets the name of the file
+     * 
+     * @param fileName The file name
+     * @return This object
+     */
     public IDataWrapper setFileName(String fileName);
 
+    /**
+     * Gets the request data
+     * 
+     * @return The {@link AJAXRequestData}
+     */
     public AJAXRequestData getRequestData();
 
+    /**
+     * Sets the request data
+     * 
+     * @param data The {@link AJAXRequestData}
+     * @return This object
+     */
     public IDataWrapper setRequestData(AJAXRequestData data);
 
+    /**
+     * Gets the response object
+     * 
+     * @return The {@link HttpServletResponse}
+     */
     public HttpServletResponse getResponse();
 
+    /**
+     * Sets the response object
+     * 
+     * @param response The {@link HttpServletResponse}
+     * @return This object
+     */
     public IDataWrapper setResponse(HttpServletResponse response);
 
+    /**
+     * Gets the user agent of the client
+     * 
+     * @return The user agent of the client
+     */
     public String getUserAgent();
 
+    /**
+     * Sets the user agent of the client
+     * 
+     * @param userAgent The user agent of the client
+     * @return This object
+     */
     public IDataWrapper setUserAgent(String userAgent);
 
+    /**
+     * Adds a {@link Closeable} to this wrapper
+     * 
+     * @param closeable A {@link Closeable}
+     */
     public void addCloseable(Closeable closeable);
 
+    /**
+     * Sets the list of {@link Closeable}s to the given list.
+     * 
+     * @param closeables A list of {@link Closeable}s
+     * @return This object
+     */
     public IDataWrapper setCloseAbles(List<Closeable> closeables);
 
+    /**
+     * Gets the list of {@link Closeable}s
+     * 
+     * @return The list of {@link Closeable}s
+     */
     public List<Closeable> getCloseables();
 
+    /**
+     * Gets the {@link AJAXRequestResult}
+     * 
+     * @return The {@link AJAXRequestResult}
+     */
     public AJAXRequestResult getResult();
 
+    /**
+     * Set the {@link AJAXRequestResult}
+     * 
+     * @param result The {@link AJAXRequestResult}
+     * @return This object
+     */
     public IDataWrapper setResult(AJAXRequestResult result);
 
+    /**
+     * Gets an {@link AtomicReference} to the temporal directory.
+     * 
+     * @return The {@link AtomicReference}
+     */
     public AtomicReference<File> getTmpDirReference();
 
+    /**
+     * Sets the temporal directory
+     * 
+     * @param tmpDirReference The {@link AtomicReference}
+     * @return This object
+     */
     public IDataWrapper setTmpDirReference(AtomicReference<File> tmpDirReference);
 
 }

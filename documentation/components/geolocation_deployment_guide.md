@@ -1,6 +1,7 @@
 ---
-title: Deployment Guide for the OX Geolocation Service and Country IP Check
+title: Geolocation
 classes: toc
+icon: fa-globe
 ---
 
 # Installation on OX App Suite

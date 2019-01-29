@@ -62,6 +62,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,8 +73,9 @@ import com.openexchange.cli.AbstractCLI;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 
 /**
  * {@link GenerateMasterPasswordCLT}
@@ -90,10 +92,10 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
     }
 
     private static final String SYNTAX = "generatempasswd [-A <adminuser>] [-P <adminpassword>] [-e <encryption>] [-f </path/for/mpasswdfile>]";
-    private static final String FOOTER = "Valid encryption/hashing algorithms: " + getValidEncHashAlgos();
+    private static final String FOOTER = "Command-line tool to generate the master password file.";
 
     enum Parameter {
-        adminuser, adminpass, encryption, mpasswdfile
+        adminuser, adminpass, encryption, mpasswdfile, salt
     }
 
     private final Map<Parameter, String> parameters = new EnumMap<>(GenerateMasterPasswordCLT.Parameter.class);
@@ -174,9 +176,14 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
                     clearPassword = bufferRead.readLine();
                 }
             }
-            String encPassword = encryptPassword(parameters.get(Parameter.encryption), clearPassword);
+            PasswordDetails passwordDetails = encryptPassword(parameters.get(Parameter.encryption), clearPassword);
             clearPassword = null;
-            parameters.put(Parameter.adminpass, encPassword);
+            parameters.put(Parameter.adminpass, passwordDetails.getEncodedPassword());
+            byte[] salt = passwordDetails.getSalt();
+            if (salt != null) {
+                String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
+                parameters.put(Parameter.salt, saltString);
+            }
             if (cmd.hasOption("f")) {
                 parameters.put(Parameter.mpasswdfile, cmd.getOptionValue("f"));
             }
@@ -228,7 +235,11 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             StringBuilder builder = new StringBuilder(96);
             for (String line; (line = br.readLine()) != null;) {
                 if (!line.startsWith("#") && Strings.isNotEmpty(line)) {
-                    lines.add(builder.append(context.get(Parameter.adminuser)).append(":").append(context.get(Parameter.encryption)).append(":").append(context.get(Parameter.adminpass)).toString());
+                    builder.append(context.get(Parameter.adminuser)).append(":").append(context.get(Parameter.encryption)).append(":").append(context.get(Parameter.adminpass));
+                    if (Strings.isNotEmpty(context.get(Parameter.salt))) {
+                        builder.append(":").append(context.get(Parameter.salt));
+                    }
+                    lines.add(builder.toString());
                     updated = true;
                 } else {
                     lines.add(line);
@@ -237,7 +248,11 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             }
 
             if (!updated) {
-                lines.add(builder.append(context.get(Parameter.adminuser)).append(":").append(context.get(Parameter.encryption)).append(":").append(context.get(Parameter.adminpass)).toString());
+                builder.append(context.get(Parameter.adminuser)).append(":").append(context.get(Parameter.encryption)).append(":").append(context.get(Parameter.adminpass));
+                if (Strings.isNotEmpty(context.get(Parameter.salt))) {
+                    builder.append(":").append(context.get(Parameter.salt));
+                }
+                lines.add(builder.toString());
             }
             return lines;
         }
@@ -275,12 +290,12 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
      *
      * @param encryption The encryption algorithm
      * @param password The plain-text password to encrypt
-     * @return The encrypted password
+     * @return {@link PasswordDetails} containing the password details
      * @throws OXException
      * @throws IllegalArgumentException if the request encryption algorithm string is either <code>null</code>, or empty, or unknown
      */
-    private String encryptPassword(final String encryption, final String password) throws OXException {
-        IPasswordMech pm = getPasswordMechFor(encryption);
+    private PasswordDetails encryptPassword(final String encryption, final String password) throws OXException {
+        PasswordMech pm = getPasswordMechFor(encryption);
         return pm.encode(password);
     }
 
@@ -305,27 +320,13 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
     }
 
     /**
-     * Get valid encryption/hashing algorithms
-     *
-     * @return
-     */
-    private static String getValidEncHashAlgos() {
-        StringBuilder builder = new StringBuilder();
-        for (PasswordMech p : PasswordMech.values()) {
-            builder.append(Strings.toLowerCase(p.toString())).append(", ");
-        }
-        builder.setLength(builder.length() - 2);
-        return builder.toString();
-    }
-
-    /**
      * Gets the password mechanism for given identifier
      *
      * @param identifier The identifier
      * @return The password mechanism
      * @throws IllegalArgumentException if the identifier is either <code>null</code>, or empty, or unknown
      */
-    private IPasswordMech getPasswordMechFor(String identifier) {
+    private PasswordMech getPasswordMechFor(String identifier) {
         if (Strings.isEmpty(identifier)) {
             throw new IllegalArgumentException("The identifier for the password mechanism can neither be 'null' nor empty.");
         }
@@ -337,9 +338,9 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
         }
 
-        for (IPasswordMech pm : PasswordMech.values()) {
-            if (id.equals(pm.getIdentifier())) {
-                return pm;
+        for (StockPasswordMechs value : StockPasswordMechs.values()) {
+            if (id.equals(value.getIdentifier())) {
+                return value.getPasswordMech();
             }
         }
         throw new IllegalArgumentException("The identifier '" + identifier + "' for the password mechanism is unknown.");

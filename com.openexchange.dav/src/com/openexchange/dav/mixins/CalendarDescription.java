@@ -55,7 +55,6 @@ import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.folderstorage.CalendarFolderConverter;
-import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -82,18 +81,9 @@ public class CalendarDescription extends SingleXMLPropertyMixin {
     }
 
     @Override
-    protected void configureProperty(WebdavProperty property) {
-        property.setXML(true);
-        property.setValue(getValue());
-    }
-
-    @Override
     protected String getValue() {
         if (null != collection.getFolder()) {
-            Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(collection.getFolder()), DESCRIPTION_LITERAL);
-            if (null != value && String.class.isInstance(value)) {
-                return (String) value;
-            }
+            return optPropertyValue(CalendarFolderConverter.getExtendedProperties(collection.getFolder()), DESCRIPTION_LITERAL, String.class);
         }
         return null;
     }

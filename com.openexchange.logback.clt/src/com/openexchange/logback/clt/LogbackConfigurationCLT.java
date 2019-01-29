@@ -117,7 +117,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
         // The following option 'level' is a "polymorphic" option that can be used either as a switch or an argument option depending on other present options and switches.
         Option o = createOption("l", "level", false, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
-        o.setArgs(Short.MAX_VALUE);
+        o.setArgs(Option.UNLIMITED_VALUES);
         options.addOption(o);
 
         options.addOption(createSwitch("ll", "list-loggers", "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));

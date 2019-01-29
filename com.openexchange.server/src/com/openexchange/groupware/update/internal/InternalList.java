@@ -54,8 +54,6 @@ import java.util.List;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
-import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
-import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask;
@@ -70,8 +68,6 @@ import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAtt
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
 import com.openexchange.groupware.update.tasks.CorrectFileAsInContacts;
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
-import com.openexchange.groupware.update.tasks.CreateIcalIdsPrimaryKeyTask;
-import com.openexchange.groupware.update.tasks.CreateIcalPrincipalPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.DateExternalCreateForeignKeyUpdateTask;
@@ -99,8 +95,6 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReserv
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
-import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
-import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
@@ -355,23 +349,8 @@ public final class InternalList {
         //Add Uuid column to prg_links table
         list.add(new PrgLinksAddUuidUpdateTask());
 
-        //Add Uuid column to prg_contacts_linkage table
-        list.add(new PrgContactsLinkageAddUuidUpdateTask());
-
         //Add Uuid column to dlist tables
         list.add(new AddUUIDForDListTables());
-
-        //Add primary key to ical_ids table
-        list.add(new CreateIcalIdsPrimaryKeyTask());
-
-        //Add primary key to ical_principal table
-        list.add(new CreateIcalPrincipalPrimaryKeyTask());
-
-        //Add primary key to vcard_ids table
-        list.add(new AddPrimaryKeyVcardIdsTask());
-
-        //Add primary key to vcard_principal table
-        list.add(new AddPrimaryKeyVcardPrincipalTask());
 
         // Add UUID column to user_attribute table
         list.add(new AddUUIDForUserAttributeTable());
@@ -436,9 +415,6 @@ public final class InternalList {
 
             //Add primary key to prg_links table
             list.add(new PrgLinksAddPrimaryKeyUpdateTask());
-
-            //Add primary key to prg_contacts_linkage table
-            list.add(new PrgContactsLinkageAddPrimaryKeyUpdateTask());
 
             //Add primary key to dlist tables
             list.add(new MakeUUIDPrimaryForDListTables());
@@ -701,7 +677,7 @@ public final class InternalList {
         // Converts "contextAttribute" to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task());
 
-        // Converts prg_dlist, del_dlist, prg_contacts_linkage, prg_contacts_image, del_contacts_image, del_contacts, prg_contacts tables to utf8mb4
+        // Converts prg_dlist, del_dlist, prg_contacts_image, del_contacts_image, del_contacts, prg_contacts tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.ContactTablesUtf8Mb4UpdateTask());
 
         // Converts infostore tables to utf8mb4.
@@ -720,14 +696,30 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4());
         list.add(new com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4());
 
-        // Convert iCal/vCard tables to utf8mb4
-        list.add(new com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4());
-
         // Convert legacy calendar tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.LegacyCalendarTablesUtf8Mb4UpdateTask());
 
         // Drops the unused "Shared address book" from database
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
+        
+        // +++++++++++++++++++++++++++++++++ Version 7.10.1 starts here. +++++++++++++++++++++++++++++++++
+        
+        // Adds the 'salt' column to 'user' and 'del_user' table in preparation for usage in the following release
+        list.add(new com.openexchange.groupware.update.tasks.AddUserSaltColumnTask());
+        
+        // +++++++++++++++++++++++++++++++++ Version 7.10.2 starts here. +++++++++++++++++++++++++++++++++
+
+        // Drop unused tables, see MW-1092
+        list.add(new com.openexchange.groupware.update.tasks.DropICalIDsTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropICalPrincipalTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropVCardIDsTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipalTableTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkageTableTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
+        // TODO Enable UpdateTask with 7.10.3, see MW-1108
+        // list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
+        // list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

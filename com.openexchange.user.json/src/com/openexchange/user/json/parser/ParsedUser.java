@@ -176,6 +176,11 @@ public final class ParsedUser implements User {
     }
 
     @Override
+    public byte[] getSalt() {
+        return null;
+    }
+
+    @Override
     public boolean isMailEnabled() {
         return true;
     }

@@ -73,6 +73,11 @@ public interface User extends FileStorageInfo, Serializable {
     String getPasswordMech();
 
     /**
+     * @return the salt used for encrypting the password.
+     */
+    byte[] getSalt();
+
+    /**
      * Getter for uid.
      * @return User identifier.
      */

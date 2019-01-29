@@ -66,10 +66,12 @@ import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -355,7 +357,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_attendee WHERE cid=? AND account=? AND event")
-            .append(getPlaceholders(eventIds.size())).append(';');
+            .append(Databases.getPlaceholders(eventIds.size())).append(';');
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -464,7 +466,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
-            .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
+            .append(" WHERE cid=? AND account=? AND event").append(Databases.getPlaceholders(eventIds.length))
         ;
         if (null != internal) {
             stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
@@ -494,7 +496,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,COUNT(*) FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
-            .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
+            .append(" WHERE cid=? AND account=? AND event").append(Databases.getPlaceholders(eventIds.length))
         ;
         if (null != internal) {
             stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
@@ -526,7 +528,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM calendar_attendee WHERE cid=? AND account=? AND ")
             .append(isInternal(attendee) ? "entity" : "uri").append("=?")
-            .append(" AND event").append(getPlaceholders(eventIds.length)).append(';')
+            .append(" AND event").append(Databases.getPlaceholders(eventIds.length)).append(';')
         ;
         Map<String, Attendee> attendeeByEventId = new HashMap<String, Attendee>(eventIds.length);
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
@@ -550,7 +552,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         return attendeeByEventId;
     }
-    
+
     private Attendee readAttendee(String eventId, ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {
         Attendee attendee = MAPPER.fromResultSet(resultSet, fields);
         try {
@@ -562,14 +564,35 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                  */
                 Attendee fallback = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
                 fallback.removeUri();
-                fallback = entityProcessor.adjustAfterLoad(fallback);
-                String message = "Invalid stored calendar user address \"" + attendee.getUri() + "\" for entity " + 
-                    attendee.getEntity() + ", falling back to default address \"" + fallback.getUri() + "\"";
+                try {
+                    fallback = entityProcessor.adjustAfterLoad(fallback);
+                } catch (OXException e2) {
+                    fallback = fallBackNotFound(e2, eventId, attendee);
+                    if (fallback == null) {
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + attendee, e);
+                    }
+                }
+                String message = "Invalid stored calendar user address \"" + attendee.getUri() + "\" for entity " + attendee.getEntity() + ", falling back to default address \"" + fallback.getUri() + "\"";
                 addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, message, e);
                 return fallback;
-            } 
+            }
             throw e;
         }
+    }
+
+    private Attendee fallBackNotFound(OXException e, String eventId, Attendee attendee) throws OXException {
+        if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+            /*
+             * invalid calendar user; possibly a no longer existing user - add as external attendee as fallback if possible
+             */
+            Attendee externalAttendee = CalendarUtils.asExternal(attendee, AttendeeMapper.getInstance().getMappedFields());
+            if (externalAttendee != null) {
+                String message = "Falling back to external attendee representation for non-existent user " + attendee;
+                addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
+                return (entityProcessor.getEntityResolver().applyEntityData(externalAttendee));
+            }
+        }
+        return null;
     }
 
 }

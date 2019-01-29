@@ -75,7 +75,7 @@ public class RevertAction extends AbstractWriteAction {
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
         TimedResult<File> versions = fileAccess.getVersions(request.getId());
-        List<String> versionIdentifiers = new ArrayList<String>(10);
+        List<String> versionIdentifiers = new ArrayList<>(10);
 
         final SearchIterator<File> results = versions.results();
         try {

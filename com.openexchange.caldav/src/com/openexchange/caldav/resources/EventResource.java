@@ -145,7 +145,7 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     protected String getFileExtension() {
-        return CalDAVResource.EXTENSION_ICS;
+        return parent.getFileExtension();
     }
 
     @Override

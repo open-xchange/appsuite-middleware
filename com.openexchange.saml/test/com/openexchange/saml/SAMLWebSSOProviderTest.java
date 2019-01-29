@@ -115,6 +115,7 @@ import com.openexchange.saml.state.SimStateManagement;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.saml.tools.SignatureHelper;
 import com.openexchange.server.SimpleServiceLookup;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.SimSessionReservationService;
@@ -350,7 +351,7 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(reservationToken);
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
-     
+
      @Test
      public void testAutoLogin() throws Exception {
         /*
@@ -967,6 +968,11 @@ public class SAMLWebSSOProviderTest {
             @Override
             public String getUserAgent() {
                 return "User-Agent";
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return Origin.HTTP_JSON;
             }
         };
     }

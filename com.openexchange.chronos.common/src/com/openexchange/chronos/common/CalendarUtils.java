@@ -499,6 +499,22 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific user is the only / the last internal non-<i>hidden</i> user attendee in an attendee list.
+     *
+     * @param attendees The attendees to check
+     * @param userID The identifier of the user to lookup in the attendee list
+     * @return <code>true</code> if there are no other internal non-<i>hidden</i> user attendees despite the specified one, <code>false</code>, otherwise
+     */
+    public static boolean isLastNonHiddenUserAttendee(List<Attendee> attendees, int userID) {
+        for (Attendee userAttendee : filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+            if (false == userAttendee.isHidden() && userAttendee.getEntity() != userID) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Gets a date representing the supplied date-time's value.
      *
      * @param dateTime The date-time to get the corresponding date for
@@ -2254,6 +2270,27 @@ public class CalendarUtils {
             flags.add(EventFlag.OVERRIDDEN);
         }
         return flags;
+    }
+
+    /**
+     * Initializes a new attendee based on the supplied internal attendee and copies over all properties, excluding the internal entity identifier field.
+     *
+     * @param internalAttendee The internal attendee to get an external representation for
+     * @param mappedFields Fields to map
+     * @return The external attendee, or <code>null</code> if no external representation is possible due to missing mandatory data
+     */
+    public static Attendee asExternal(Attendee internalAttendee, AttendeeField[] mappedFields) throws OXException {
+        if (null == internalAttendee) {
+            return null;
+        }
+        String email = CalendarUtils.extractEMailAddress(internalAttendee.getUri());
+        if (Strings.isEmpty(email)) {
+            return null;
+        }
+        Attendee attendee = AttendeeMapper.getInstance().copy(internalAttendee, new Attendee(), mappedFields);
+        attendee.removeEntity();
+        attendee.setUri(CalendarUtils.getURI(email));
+        return attendee;
     }
 
 }

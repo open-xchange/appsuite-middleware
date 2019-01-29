@@ -31,6 +31,8 @@ public class UserImpl4Test implements User {
 
     private final String passwordMech = null;
 
+    private final byte[] salt = null;
+
     private final boolean mailEnabled = false;
 
     private final int shadowLastChange = -1;
@@ -91,6 +93,11 @@ public class UserImpl4Test implements User {
     }
 
     @Override
+    public byte[] getSalt() {
+        return salt;
+    }
+
+    @Override
     public boolean isMailEnabled() {
         return mailEnabled;
     }
@@ -140,10 +147,10 @@ public class UserImpl4Test implements User {
         return null;
     }
 
-	@Override
+    @Override
     public Map<String, String> getAttributes() {
-		return Collections.emptyMap();
-	}
+        return Collections.emptyMap();
+    }
 
     @Override
     public String getDisplayName() {

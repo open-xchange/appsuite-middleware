@@ -87,9 +87,9 @@ public class Obfuscator {
         if (null == credentials) {
             return null;
         }
-        DefaultCredentials defaultCredentials = new DefaultCredentials(credentials);
-        defaultCredentials.setPassword(obfuscate(credentials.getPassword()));
-        return defaultCredentials;
+        DefaultCredentials.Builder defaultCredentials = DefaultCredentials.builder().copyFromCredentials(credentials);
+        defaultCredentials.withPassword(obfuscate(credentials.getPassword()));
+        return defaultCredentials.build();
     }
 
     private String obfuscate(String string) {
@@ -115,9 +115,9 @@ public class Obfuscator {
         if (null == credentials) {
             return null;
         }
-        DefaultCredentials defaultCredentials = new DefaultCredentials(credentials);
-        defaultCredentials.setPassword(unobfuscate(credentials.getPassword()));
-        return defaultCredentials;
+        DefaultCredentials.Builder defaultCredentials = DefaultCredentials.builder().copyFromCredentials(credentials);
+        defaultCredentials.withPassword(unobfuscate(credentials.getPassword()));
+        return defaultCredentials.build();
     }
 
     private String unobfuscate(String string) {

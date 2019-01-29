@@ -279,7 +279,7 @@ public class ShowMailAction extends AppointmentAction {
         final Event original = (appointments.length > 1) ? appointments[0] : null;
         final Event appointment = (appointments.length > 1) ? appointments[1] : appointments[0];
 
-        final ITipMailGenerator generator = service.create(original, appointment, session.getSession(), session.getUserId(), ITipUtils.getPrincipal(session));
+        final ITipMailGenerator generator = service.create(original, appointment, session, session.getUserId(), ITipUtils.getPrincipal(session));
 
         final String type = request.getParameter("type");
         if (type.equalsIgnoreCase("create")) {

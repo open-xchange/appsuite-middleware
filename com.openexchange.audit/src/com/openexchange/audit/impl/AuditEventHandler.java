@@ -287,24 +287,7 @@ public class AuditEventHandler implements EventHandler {
         logBuilder.append("OBJECT TYPE: FILE; ");
 
         final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_PUBLICATION))) {
-            String remoteAddress = null;
-            try {
-                remoteAddress = (String) event.getProperty("remoteAddress");
-            } catch (ClassCastException e) {
-                remoteAddress = "unknown";
-            }
-
-            if (remoteAddress == null) {
-                remoteAddress = "unknown";
-            }
-
-            logBuilder.append("PUBLISH: ");
-            logBuilder.append(remoteAddress);
-            logBuilder.append("; ");
-        } else {
-            appendUserInformation(session.getUserId(), session.getContextId(), logBuilder);
-        }
+        appendUserInformation(session.getUserId(), session.getContextId(), logBuilder);
         logBuilder.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
         logBuilder.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
         {

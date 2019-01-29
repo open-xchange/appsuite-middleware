@@ -87,7 +87,7 @@ public class MicrosoftGraphAPI {
      *
      * @return The oneDriveAPI
      */
-    public MicrosoftGraphOneDriveAPI getOneDriveAPI() {
+    public MicrosoftGraphOneDriveAPI drive() {
         return oneDriveAPI;
     }
 }

@@ -59,7 +59,10 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -67,6 +70,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -77,12 +81,24 @@ import com.openexchange.session.Session;
 public final class ICalMailPartDataSource extends MailPartDataSource {
 
     public static final String PROPERTY_OWNER = "com.openexchange.conversion.owner";
+    private ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link ICalMailPartDataSource}
      */
     public ICalMailPartDataSource() {
         super();
+    }
+
+    /**
+     * Sets the ServiceLookup
+     *
+     * @param serviceLookup
+     * @return this
+     */
+    public ICalMailPartDataSource setServiceLookup(ServiceLookup serviceLookup) {
+        this.serviceLookup = serviceLookup;
+        return this;
     }
 
     @Override
@@ -146,6 +162,15 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
+            if(serviceLookup != null) {
+                CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
+                if(cryptoMailAccessFactory != null) {
+                    mailAccess = cryptoMailAccessFactory.createAccess(
+                        (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
+                        session,
+                        null);
+                }
+            }
             mailAccess.connect();
             MailFolder folder = mailAccess.getFolderStorage().getFolder(fullname);
             if (folder.isShared()) {

@@ -1540,7 +1540,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (bool_tmp != null) {
             user.setConvertDriveUserFolders(bool_tmp.booleanValue());
         }
-        
+
         bool_tmp = soapUser.isLoadRemoteMailContentByDefault();
         if (bool_tmp != null) {
             user.setLoadRemoteMailContentByDefault(bool_tmp);
@@ -2437,11 +2437,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             moduleAccess.setOLOX20(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isPublication();
-        if (tmp != null) {
-            moduleAccess.setPublication(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isPublicFolderEditable();
         if (tmp != null) {
             moduleAccess.setPublicFolderEditable(booleanValue(tmp));
@@ -2518,7 +2513,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapModuleAccess.setInfostore(Boolean.valueOf(moduleAccess.getInfostore()));
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
-        soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));
         soapModuleAccess.setSubscription(Boolean.valueOf(moduleAccess.isSubscription()));

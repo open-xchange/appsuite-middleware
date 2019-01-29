@@ -75,7 +75,6 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
-import com.openexchange.chronos.provider.caching.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.config.GoogleCalendarConfig;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
@@ -337,15 +336,8 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        ExtendedProperties extendedProperties = getExtendedProperties();
-        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, true));
-
-        CalendarSettings settings = getCalendarSettings(extendedProperties);
-        settings.setSubscribed(true);
-        settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
-
+        CalendarSettings settings = super.getSettings();
+        settings.getExtendedProperties().replace(USED_FOR_SYNC(Boolean.FALSE, true)); // never synchronizable
         return settings;
     }
 

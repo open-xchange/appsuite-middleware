@@ -119,7 +119,6 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
 
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_LARGE));
         checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
-        System.out.println();
     }
 
     @SuppressWarnings("unchecked")
@@ -140,6 +139,16 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
 
         assertEquals("FILE_STORAGE-0029", checkLimits.getCode());
         assertNull(checkLimits.getData());
+    }
+
+    @Test
+    public void testFileQuota_bug622059_fileQuotaSetWithoutLimit_doNotReturnError() throws Exception {
+        user.setUserAttribute("config", "com.openexchange.quota.infostore", "0");
+        iface.change(context, user, credentials);
+        List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_SMALL));
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
+
+        assertEquals(0, checkLimits.getData().getErrors().size());
     }
 
 }

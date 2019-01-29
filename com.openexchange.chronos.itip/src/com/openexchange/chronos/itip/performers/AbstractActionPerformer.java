@@ -138,7 +138,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         }
         original = constructOriginalForMail(action, original, update, session, owner);
 
-        final ITipMailGenerator generator = mailGenerators.create(original, update, session.getSession(), owner, principal);
+        final ITipMailGenerator generator = mailGenerators.create(original, update, session, owner, principal);
         switch (action) {
             case CREATE:
                 if (!generator.userIsTheOrganizer()) {
@@ -148,7 +148,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 for (final NotificationParticipant p : recipients) {
                     final NotificationMail mail = generator.generateCreateExceptionMailFor(p);
                     if (mail != null) {
-                        sender.sendMail(mail, session.getSession(), principal, null);
+                        sender.sendMail(mail, session, principal, null);
                     }
                 }
                 break;
@@ -160,7 +160,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 for (final NotificationParticipant p : recipients) {
                     final NotificationMail mail = generator.generateUpdateMailFor(p);
                     if (mail != null) {
-                        sender.sendMail(mail, session.getSession(), principal, null);
+                        sender.sendMail(mail, session, principal, null);
                     }
                 }
                 break;
@@ -169,7 +169,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 for (final NotificationParticipant p : recipients) {
                     final NotificationMail mail = generator.generateDeclineCounterMailFor(p);
                     if (mail != null) {
-                        sender.sendMail(mail, session.getSession(), principal, null);
+                        sender.sendMail(mail, session, principal, null);
                     }
                 }
                 break;
@@ -178,7 +178,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 for (final NotificationParticipant p : recipients) {
                     final NotificationMail mail = generator.generateCreateMailFor(p);
                     if (mail != null) {
-                        sender.sendMail(mail, session.getSession(), principal, null);
+                        sender.sendMail(mail, session, principal, null);
                     }
                 }
                 break;
@@ -187,7 +187,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 for (final NotificationParticipant p : recipients) {
                     final NotificationMail mail = generator.generateRefreshMailFor(p);
                     if (mail != null) {
-                        sender.sendMail(mail, session.getSession(), principal, null);
+                        sender.sendMail(mail, session, principal, null);
                     }
                 }
                 break;
@@ -196,7 +196,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 for (final NotificationParticipant p : recipients) {
                     final NotificationMail mail = generator.generateUpdateMailFor(p);
                     if (mail != null) {
-                        sender.sendMail(mail, session.getSession(), principal, null);
+                        sender.sendMail(mail, session, principal, null);
                     }
                 }
         }

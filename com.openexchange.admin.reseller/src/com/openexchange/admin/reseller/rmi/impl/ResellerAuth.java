@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
@@ -70,10 +68,6 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
 
-    public ResellerAuth() throws StorageException {
-        super();
-    }
-
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXBasicAuthenticatorPluginInterface#doAuthentication(com.openexchange.admin.rmi.dataobjects.Credentials)
@@ -89,7 +83,7 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
         try {
             OXResellerStorageInterface oxresell = OXResellerStorageInterface.getInstance();
             ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(authdata.getLogin())})[0];
-            if( ! GenericChecks.authByMech(adm.getPassword(), authdata.getPassword(), adm.getPasswordMech()) ) {
+            if( ! GenericChecks.authByMech(adm.getPassword(), authdata.getPassword(), adm.getPasswordMech(), adm.getSalt()) ) {
                 throw new InvalidCredentialsException("authentication failed");
             }
         } catch (StorageException e) {
@@ -98,12 +92,6 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
         } catch (InvalidCredentialsException e) {
             log.error("",e);
             throw e;
-        } catch (NoSuchAlgorithmException e) {
-            log.error("",e);
-            throw new InvalidCredentialsException("authentication failed");
-        } catch (UnsupportedEncodingException e) {
-            log.error("",e);
-            throw new InvalidCredentialsException("authentication failed");
         }
     }
 

@@ -410,6 +410,28 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
                 object.removeExtendedProperties();
             }
         });
+        mappings.put(AlarmField.TIMESTAMP, new DefaultMapping<Long, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsTimestamp();
+            }
+
+            @Override
+            public void set(Alarm object, Long value) throws OXException {
+                object.setTimestamp(value);
+            }
+
+            @Override
+            public Long get(Alarm object) {
+                return object.getTimestamp();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeTimestamp();
+            }
+        });
         return mappings;
     }
 

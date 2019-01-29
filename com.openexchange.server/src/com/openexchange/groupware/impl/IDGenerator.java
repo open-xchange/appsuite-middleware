@@ -332,7 +332,6 @@ public final class IDGenerator {
             tmp.put(Types.MAIL_SERVICE, "sequence_mail_service");
             tmp.put(Types.GENERIC_CONFIGURATION, "sequence_genconf");
             tmp.put(Types.SUBSCRIPTION, "sequence_subscriptions");
-            tmp.put(Types.PUBLICATION, "sequence_publications");
             tmp.put(Types.EAV_NODE, "sequence_uid_eav_node");
             TABLES = tmp;
         }
@@ -458,7 +457,6 @@ public final class IDGenerator {
             tmp.put(Types.MAIL_SERVICE, "sequence_mail_service");
             tmp.put(Types.GENERIC_CONFIGURATION, "sequence_genconf");
             tmp.put(Types.SUBSCRIPTION, "sequence_subscriptions");
-            tmp.put(Types.PUBLICATION, "sequence_publications");
             tmp.put(Types.EAV_NODE, "sequence_uid_eav_node");
             TABLES = tmp;
         }

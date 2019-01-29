@@ -82,6 +82,8 @@ public class Tools {
 
     public static final String DEFAULT_ACCOUNT_PREFIX = "cal://0/";
 
+    public static final String EXTENSION_ICS = ".ics";
+
     /**
      * The OAuth scope token for CalDAV
      */

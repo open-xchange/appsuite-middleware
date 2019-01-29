@@ -51,6 +51,7 @@ package com.openexchange.dav.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.dav.DAVClientInfoProvider;
 import com.openexchange.dav.DAVServlet;
@@ -81,7 +82,7 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class, GroupService.class, ResourceService.class, UserAgentParser.class };
+        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class, GroupService.class, ResourceService.class, UserAgentParser.class, ConfigViewFactory.class };
     }
 
     @Override

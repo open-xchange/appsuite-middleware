@@ -80,6 +80,8 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
@@ -90,7 +92,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
-import com.openexchange.session.Session;
 
 /**
  * {@link ITipHandler}
@@ -329,7 +330,7 @@ public class ITipHandler implements CalendarHandler {
     }
 
     private void handle(CalendarEvent event, State.Type type, Event original, Event update, List<Event> exceptions) throws OXException {
-        Session session = event.getSession();
+        CalendarSession session = getCalendarService().init(event.getSession(), event.getCalendarParameters());
         int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
         String comment = event.getCalendarParameters().get(CalendarParameters.PARAMETER_COMMENT, String.class);
@@ -374,7 +375,7 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private int onBehalfOf(int calendarUser, Session session) {
+    private int onBehalfOf(int calendarUser, CalendarSession session) {
         return calendarUser == session.getUserId() ? -1 : calendarUser;
     }
 
@@ -395,8 +396,12 @@ public class ITipHandler implements CalendarHandler {
             .ignoreDefaults(true)
             .build(); //@formatter:on
         /*
-         * Exception was created to add/change/remove an alarm without changing anything else. So ignore it 
+         * Exception was created to add/change/remove an alarm without changing anything else. So ignore it
          */
         return eventUpdate.isEmpty();
+    }
+
+    private CalendarService getCalendarService() throws OXException {
+        return Services.get().getServiceSafe(CalendarService.class);
     }
 }

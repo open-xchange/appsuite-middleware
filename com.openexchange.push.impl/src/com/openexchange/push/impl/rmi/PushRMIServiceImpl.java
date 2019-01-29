@@ -114,7 +114,7 @@ public class PushRMIServiceImpl implements PushRMIService {
      * @see com.openexchange.push.rmi.PushRMIService#listRegisteredPushUsers()
      */
     @Override
-    public List<List<String>> listRegisteredPushUsers() throws RemoteException {
+    public List<List<String>> listClientRegistrations() throws RemoteException {
         try {
             List<PushUserClient> pushClients = PushManagerRegistry.getInstance().listRegisteredPushUsers();
 

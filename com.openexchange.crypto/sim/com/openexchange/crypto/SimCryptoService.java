@@ -51,7 +51,6 @@ package com.openexchange.crypto;
 
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link SimCryptoService}
  *
@@ -59,7 +58,6 @@ import com.openexchange.exception.OXException;
  *
  */
 public class SimCryptoService implements CryptoService {
-
 
     private final String encrypted;
     private final String decrypted;
@@ -89,5 +87,4 @@ public class SimCryptoService implements CryptoService {
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
     }
-
 }

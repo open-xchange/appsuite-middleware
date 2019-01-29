@@ -58,7 +58,7 @@ package com.openexchange.chronos;
  */
 public class Repeat {
 
-	private String duration;
+    private String duration;
     private int count;
 
     /**
@@ -101,6 +101,15 @@ public class Repeat {
     @Override
     public String toString() {
         return "Repeat [count=" + count + ", duration=" + duration + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + count;
+        result = prime * result + ((duration == null) ? 0 : duration.hashCode());
+        return result;
     }
 
 }

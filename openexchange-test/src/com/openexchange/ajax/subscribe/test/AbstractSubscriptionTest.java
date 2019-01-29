@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -70,12 +69,14 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
     protected SubscriptionTestManager subMgr;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         subMgr = new SubscriptionTestManager(getClient());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

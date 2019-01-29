@@ -35,7 +35,7 @@ Description: The Open-Xchange Meta package for OX on a single server
 
 Package: open-xchange-meta-pubsub
 Architecture: all
-Depends: open-xchange-publish, open-xchange-subscribe
+Depends: open-xchange-subscribe
 Description: The Open-Xchange Meta package for Publish and Subscribe
 
 Package: open-xchange-meta-appsuite-push

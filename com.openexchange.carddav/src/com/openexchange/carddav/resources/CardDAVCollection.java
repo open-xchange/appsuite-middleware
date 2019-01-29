@@ -79,10 +79,11 @@ import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.SimilarityException;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.reports.SyncStatus;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Strings;
@@ -99,6 +100,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavStatusImpl;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
@@ -106,7 +108,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CardDAVCollection extends CommonFolderCollection<Contact> {
+public class CardDAVCollection extends FolderCollection<Contact> {
 
     /** A list of basic contact fields that are fetched when getting contacts from the storage */
     protected static final ContactField[] BASIC_FIELDS = {
@@ -318,6 +320,62 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
     }
 
     @Override
+    protected WebdavPath constructPathForChildResource(Contact object) {
+        String fileName = object.getFilename();
+        if (null == fileName || 0 == fileName.length()) {
+            fileName = object.getUid();
+        }
+        String fileExtension = getFileExtension().toLowerCase();
+        if (false == fileExtension.startsWith(".")) {
+            fileExtension = "." + fileExtension;
+        }
+        return constructPathForChildResource(fileName + fileExtension);
+    }
+
+    @Override
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+        SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
+        //      Date nextSyncToken = new Date(since.getTime());
+        if (null == since) {
+            since = new Date(0L);
+        }
+        boolean initialSync = 0 == since.getTime();
+        Date nextSyncToken = Tools.getLatestModified(since, this.folder);
+        /*
+         * new and modified objects
+         */
+        Collection<Contact> modifiedObjects = this.getModifiedObjects(since);
+        for (Contact object : modifiedObjects) {
+            // add resource to multistatus
+            WebdavResource resource = createResource(object, constructPathForChildResource(object));
+            int status = null != object.getCreationDate() && object.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
+            multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
+            // remember aggregated last modified for next sync token
+            nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
+        }
+        /*
+         * deleted objects
+         */
+        Collection<Contact> deletedObjects = this.getDeletedObjects(since);
+        for (Contact object : deletedObjects) {
+            // only include objects that are not also modified (due to move operations)
+            if (null != object.getUid() && false == contains(modifiedObjects, object.getUid())) {
+                if (false == initialSync) {
+                    // add resource to multistatus
+                    WebdavResource resource = createResource(object, constructPathForChildResource(object));
+                    multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), resource));
+                }
+                // remember aggregated last modified for parent folder
+                nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
+            }
+        }
+        /*
+         * Return response with new next sync-token in response
+         */
+        multistatus.setToken(Long.toString(nextSyncToken.getTime()));
+        return multistatus;
+    }
+
     protected Collection<Contact> getModifiedObjects(Date since) throws OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         for (UserizedFolder folder : getFolders()) {
@@ -332,7 +390,6 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
         return contacts;
     }
 
-    @Override
     protected Collection<Contact> getDeletedObjects(Date since) throws OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         for (UserizedFolder folder : getFolders()) {
@@ -584,6 +641,15 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
         filenameTerm.addOperand(new ConstantOperand<String>(resourceName));
         orTerm.addSearchTerm(filenameTerm);
         return orTerm;
+    }
+
+    private static <T extends CommonObject> boolean contains(Collection<T> objects, String uid) {
+        for (T object : objects) {
+            if (uid.equals(object.getUid())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

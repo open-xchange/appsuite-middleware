@@ -128,14 +128,14 @@ public class CredStoragePasswordChangeHandler implements EventHandler {
                 userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
 
                 // Create credentials
-                DefaultCredentials credentials = new DefaultCredentials();
-                credentials.setContextId(contextId);
-                credentials.setUserId(userId);
-                credentials.setPassword(newPassword);
-                credentials.setLogin(loginName);
+                DefaultCredentials.Builder credentials = DefaultCredentials.builder();
+                credentials.withContextId(contextId);
+                credentials.withUserId(userId);
+                credentials.withPassword(newPassword);
+                credentials.withLogin(loginName);
 
                 // Store credentials
-                credentialStorage.storeCredentials(credentials);
+                credentialStorage.storeCredentials(credentials.build());
             } catch (Exception e) {
                 if (userId > 0 && contextId > 0) {
                     LOGGER.warn("Failed to update changed password for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);

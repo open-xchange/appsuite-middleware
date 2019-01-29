@@ -138,6 +138,7 @@ Connecting to JMX via remote can be difficult, especially in environments with N
 	JMXBindAddress=localhost
 	JMXLogin=
 	JMXPassword=
+	JMXPasswordHashAlgorithm=
 
 On the JMX client machine, pick an arbitrary port (e.g. 7777), and create a SOCKS tunnel with SSH ("centos" is the remote user on the target / middleware machine "10.20.28.116"):
 

@@ -91,6 +91,7 @@ import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -554,7 +555,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id").append(getPlaceholders(eventIds.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id").append(Databases.getPlaceholders(eventIds.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -692,7 +693,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == alarmIds || 0 == alarmIds.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(getPlaceholders(alarmIds.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(Databases.getPlaceholders(alarmIds.size())).append(';');
         try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextId);

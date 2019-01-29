@@ -1,0 +1,5 @@
+open-xchange-antivirus (7.10.2-0) stable; urgency=low
+
+  * Initial packaging for the Anti-Virus service
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Tue, 11 Dec 2018 13:37:07 +0200

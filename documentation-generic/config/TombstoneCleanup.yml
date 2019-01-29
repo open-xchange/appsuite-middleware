@@ -1,0 +1,34 @@
+feature_name: Database Tombstone Cleanup
+properties:
+    - key: com.openexchange.database.tombstone.cleanup.enabled
+      description: |
+        Enables or disables the cleanup of tombstone tables.
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: cleanup.properties
+      packageName: open-xchange-core
+      tags: ["Database", "Cleanup", "Tombstone"]
+    - key: com.openexchange.database.tombstone.cleanup.timespan
+      description: |
+        Defines the time-span an entry in any tombstone tables is kept before removing it.
+     
+        A time-span specification consists of a number and a unit of measurement. Units are: 
+        <ul>
+          <li><code>ms</code> - for milliseconds</li>
+          <li><code>s</code> - for seconds</li>
+          <li><code>m</code> - for minutes</li>
+          <li><code>h</code> - for hours</li>
+          <li><code>D</code> - for days</li>
+          <li><code>W</code> - for weeks</li>
+        </ul>
+      defaultValue: 12w
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.database.tombstone.cleanup.enabled
+      file: cleanup.properties
+      packageName: open-xchange-core
+      tags: ["Database", "Cleanup", "Tombstone"]      

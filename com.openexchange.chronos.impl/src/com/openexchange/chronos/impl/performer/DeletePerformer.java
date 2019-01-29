@@ -117,7 +117,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          * check current session user's permissions
          */
         Check.eventIsInFolder(originalEvent, folder);
-        requireDeletePermissions(originalEvent);
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
         if (null == recurrenceId) {
             deleteEvent(originalEvent);
@@ -138,6 +137,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
+            requireDeletePermissions(originalEvent);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent);
             } else {
@@ -150,6 +150,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion as one of the attendees
              */
+            requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent, userAttendee);
             } else {
@@ -174,6 +175,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
+            requireDeletePermissions(originalEvent);
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
                 if (null != recurrenceId.getRange()) {
@@ -242,6 +244,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion as attendee
              */
+            requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
                 if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
@@ -298,14 +301,28 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         }
         if (false == deleteExceptionDates.add(recurrenceId)) {
             /*
-             * cannot delete a no longer existing occurrence
+             * delete exception data already exists, ignore
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalMasterEvent.getId(), String.valueOf(recurrenceId));
+            LOG.warn("Delete exeception data for {} already exists, ignoring.", recurrenceId);
         }
         /*
          * check if there are any further occurrences left
          */
-        if (hasFurtherOccurrences(originalMasterEvent, deleteExceptionDates)) {
+        if (false == hasFurtherOccurrences(originalMasterEvent, deleteExceptionDates)) {
+            /*
+             * delete series master
+             */
+            delete(originalMasterEvent);
+        } else {
+            /*
+             * re-build exception date lists based on existing series master to guarantee consistency
+             */
+            SortedSet<RecurrenceId> changeExceptionDates = loadChangeExceptionDates(originalMasterEvent.getSeriesId());
+            for (RecurrenceId changeExceptionDate : changeExceptionDates) {
+                if (deleteExceptionDates.remove(changeExceptionDate)) {
+                    LOG.warn("Skipping {} in delete exception date collection due to existing change exception event.", changeExceptionDate);
+                }
+            }
             /*
              * update series master accordingly
              */
@@ -313,11 +330,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalMasterEvent.getId());
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
-            SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
-            if (null != originalMasterEvent.getChangeExceptionDates()) {
-                changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
-            }
-            if (changeExceptionDates.remove(recurrenceId)) {
+            if (false == changeExceptionDates.equals(originalMasterEvent.getChangeExceptionDates())) {
                 eventUpdate.setChangeExceptionDates(changeExceptionDates);
             }
             eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
@@ -329,11 +342,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * track update of master in result
              */
             resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
-        } else {
-            /*
-             * delete series master
-             */
-            delete(originalMasterEvent);
         }
     }
 

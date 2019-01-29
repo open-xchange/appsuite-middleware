@@ -164,7 +164,7 @@ public final class MIMEParse {
                 return fitness < o.fitness ? -1 : 1;
             }
 
-            return quality == o.quality ? 0 : quality < o.quality ? -1 : 1;
+            return Float.compare(quality, o.quality);
         }
     }
 

@@ -52,6 +52,8 @@ package com.openexchange.file.storage.json.services;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -167,5 +169,15 @@ public class Services {
     public static ThreadControlService getThreadControlService() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(ThreadControlService.class);
+    }
+
+    public static AntiVirusService getAntiVirusService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(AntiVirusService.class);
+    }
+
+    public static AntiVirusResultEvaluatorService getAntiVirusResultEvaluatorService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(AntiVirusResultEvaluatorService.class);
     }
 }

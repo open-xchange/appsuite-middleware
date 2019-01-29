@@ -82,7 +82,6 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     private Pattern regex_exe;
     private Pattern regex_msi;
 
-
     @Override
     public void init(UpdateFilesProvider provider) throws OXException {
         if (provider == null) {
@@ -206,6 +205,13 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         return provider.getSize(branding, fileName);
     }
 
+    /**
+     * Loads the icon for the given branding
+     *
+     * @param branding The branding
+     * @return The icon as a base64 string
+     * @throws OXException
+     */
     private String loadIcon(String branding) throws OXException {
         return provider.getIcon(branding);
     }
@@ -216,6 +222,12 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         return conf.getProperty(Constants.BRANDING_CONF, "generic");
     }
 
+    /**
+     * Checks if the branding is valid
+     *
+     * @param branding The name of the brand
+     * @return true if it is valid, false otherwise
+     */
     private boolean isValid(String branding){
         boolean provBool = provider.contains(branding);
         boolean confBool = BrandingConfig.containsBranding(branding);

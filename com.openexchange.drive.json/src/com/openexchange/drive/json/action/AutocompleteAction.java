@@ -88,7 +88,6 @@ public class AutocompleteAction extends AbstractDriveAction {
             mode = "invite";
         }
         parameters.put("mode", mode);
-        parameters.put("exclude_admin", Boolean.TRUE);
         parameters.put("require_email", Boolean.TRUE);
         /*
          * get result & return appropriate JSON result

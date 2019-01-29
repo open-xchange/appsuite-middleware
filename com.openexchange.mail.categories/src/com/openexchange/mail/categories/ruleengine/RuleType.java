@@ -57,8 +57,13 @@ package com.openexchange.mail.categories.ruleengine;
  * @since v7.8.2
  */
 public enum RuleType {
-
+    /**
+     * A user created category
+     */
     CATEGORY("category"),
+    /**
+     * A system category
+     */
     SYSTEM_CATEGORY("syscategory");
 
     String name;
@@ -67,6 +72,11 @@ public enum RuleType {
         this.name = name;
     }
 
+    /**
+     * Gets the name of this {@link RuleType}
+     * 
+     * @return The name
+     */
     public String getName() {
         return name;
     }

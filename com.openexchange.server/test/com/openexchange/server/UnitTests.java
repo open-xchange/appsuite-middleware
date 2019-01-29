@@ -102,7 +102,6 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.mail.json.actions.GetMultipleAttachmentActionTest.class,
     com.openexchange.mail.json.parser.MessageParserTest.class,
     OAuthDispatcherServletTest.class,
-    com.openexchange.passwordchange.DefaultBasicPasswordChangeServiceTest.class,
     com.openexchange.mail.config.Bug38266Test.class,
     com.openexchange.mailaccount.UnifiedInboxUIDTest.class,
     com.openexchange.sessiond.impl.IPRangeTest.class,
@@ -112,7 +111,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.groupware.contact.Bug53690Test.class,
     com.openexchange.groupware.contact.Bug59522Test.class,
     com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
-    com.openexchange.folderstorage.database.DatabaseFolderTest.class
+    com.openexchange.folderstorage.database.DatabaseFolderTest.class,
+    com.openexchange.config.admin.internal.HideAdminServiceImplTest.class
 })
 public class UnitTests {
 

@@ -88,7 +88,7 @@ public class FolderManager {
     public String createFolder(String parent, String name, String module) throws ApiException {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(FolderFactory.getSimpleFolder(name, module));
-        FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null);
+        FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
         rememberFolder(createFolder.getData());
         lastTimestamp = createFolder.getTimestamp();
@@ -110,7 +110,7 @@ public class FolderManager {
     }
 
     public void cleanUp() throws ApiException {
-        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, true, false, false);
+        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, true, false, false, null);
     }
 
     /**
@@ -149,7 +149,7 @@ public class FolderManager {
         folder.setFolderId(newParent);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, Long.valueOf(lastTimestamp), tree, null, Boolean.TRUE);
+        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, Long.valueOf(lastTimestamp), tree, null, Boolean.TRUE, null);
         checkResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData());
         lastTimestamp = updateFolder.getTimestamp();
     }

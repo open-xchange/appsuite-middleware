@@ -393,3 +393,16 @@ properties:
       file: AdminUser.properties
       packageName: open-xchange-admin
       tags: ["Admin", "User"]
+    - key: DEFAULT_PASSWORD_MECHANISM
+      description: |
+        Defines the hash algorithm that will be used to hash the user password.
+
+        Possible values are: CRYPT / SHA / BCRYPT
+      defaultValue: SHA
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: AdminDaemon.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "Authentication"]

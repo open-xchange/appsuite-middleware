@@ -59,11 +59,11 @@ package com.openexchange.drive;
 public interface BrandedDriveVersionService {
 
     /**
-     * Add a new branding version or update an old one.
-     * 
-     * @param branding
-     * @param minSoftVersion
-     * @param minHardVersion
+     * Adds or updates the soft and hard versions for a given branding.
+     *
+     * @param branding The branding
+     * @param minSoftVersion The soft minimum version
+     * @param minHardVersion The hard minimum version
      */
     public void putBranding(String branding, String minSoftVersion, String minHardVersion);
 
@@ -74,7 +74,7 @@ public interface BrandedDriveVersionService {
 
     /**
      * Retrieves the soft minimum of the given brand
-     * 
+     *
      * @param branding The name of the branding
      * @return The soft minimum version or null
      */
@@ -82,7 +82,7 @@ public interface BrandedDriveVersionService {
 
     /**
      * Retrieves the hard minimum of the given brand
-     * 
+     *
      * @param branding The name of the branding
      * @return The hard minimum version or null
      */

@@ -66,6 +66,7 @@ import org.scribe.oauth.OAuth20ServiceImpl;
 import org.scribe.oauth.OAuthService;
 import org.scribe.utils.OAuthEncoder;
 import org.scribe.utils.Preconditions;
+import com.openexchange.java.Strings;
 
 /**
  * {@link MicrosoftGraphApi}
@@ -202,6 +203,9 @@ public class MicrosoftGraphApi extends DefaultApi20 {
                         request.addBodyParameter(OAuthConstants.CLIENT_SECRET, config.getApiSecret());
                     }
                     if (requestToken == null) {
+                        if (verifier == null || Strings.isEmpty(verifier.getValue())) {
+                            throw new IllegalArgumentException("The verifier must neither be 'null' nor empty! To retrieve an 'authorization_code' an OAuth 'code' must be obtained first. Check your OAuth workflow!");
+                        }
                         request.addBodyParameter(OAuthConstants.CODE, verifier.getValue());
                         request.addBodyParameter(OAuthConstants.REDIRECT_URI, config.getCallback());
                         request.addBodyParameter(OAuthConstants.GRANT_TYPE, OAuthConstants.GRANT_TYPE_AUTHORIZATION_CODE);
@@ -210,18 +214,8 @@ public class MicrosoftGraphApi extends DefaultApi20 {
                         request.addBodyParameter(OAuthConstants.GRANT_TYPE, OAuthConstants.GRANT_TYPE_REFRESH_TOKEN);
                     }
                     break;
-                case GET:
                 default:
-                    request.addQuerystringParameter(OAuthConstants.CLIENT_ID, config.getApiKey());
-                    // API Secret is optional
-                    if (config.getApiSecret() != null && config.getApiSecret().length() > 0) {
-                        request.addQuerystringParameter(OAuthConstants.CLIENT_SECRET, config.getApiSecret());
-                    }
-                    request.addQuerystringParameter(OAuthConstants.CODE, verifier.getValue());
-                    request.addQuerystringParameter(OAuthConstants.REDIRECT_URI, config.getCallback());
-                    if (config.hasScope()) {
-                        request.addQuerystringParameter(OAuthConstants.SCOPE, config.getScope());
-                    }
+                    throw new IllegalArgumentException("The method '" + api.getAccessTokenVerb() + "' is invalid for this request. The OAuth workflow for Microsoft Graph API requires a POST method.");
             }
             Response response = request.send();
             return api.getAccessTokenExtractor().extract(response.getBody());

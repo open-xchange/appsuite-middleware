@@ -139,6 +139,7 @@ public interface CalendarParameters {
      * {@link Boolean}
      * <p/>
      * Specifies that attendees should be notified about the changes when saving a meeting or not.
+     * The value <code>true</code> means that notifications should be send.
      */
     static final String PARAMETER_NOTIFICATION = "notification";
 
@@ -157,7 +158,7 @@ public interface CalendarParameters {
     static final String PARAMETER_RIGHT_HAND_LIMIT = "right_hand_limit";
 
     /**
-     * {@link String[]}
+     * {@link String}
      * <p/>
      * A collection of values that should be "ignored" when retrieving results, currently known values are <code>deleted</code> and
      * <code>changed</code> when serving the "updates" request.

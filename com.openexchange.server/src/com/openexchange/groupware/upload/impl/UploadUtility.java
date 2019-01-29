@@ -1069,7 +1069,7 @@ public final class UploadUtility {
                     }
                 }
             } catch (Exception e) {
-                // Ignore
+                logger.debug("{}", e);
             }
         }
 

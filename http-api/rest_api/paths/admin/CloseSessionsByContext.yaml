@@ -6,34 +6,35 @@
       summary: Close all sessions belonging to a context
       parameters:
         - $ref: "#/parameters/globalQuery"
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              type: object
-              properties:
-                contextIds:
-                  type: array
-                  description: "Array of context IDs"
-                  items:
-                    type: integer
-                examples:
-                  default:
-                    value: "[332453, 54534]"
+        - in: body
+          name: body
+          description: A JSON object containing an array of context ids.
+          required: true
+          schema: 
+            type: object
+            title: CloseSessionsByContextBody
+            properties:
+              contextIds:
+                type: array
+                description: "Array of context IDs"
+                items:
+                  type: integer
       produces:
         - application/json
       responses:
-        '200':
-          description: OK
-        '400':
+        description: |
+          A JSON object containing all identifiers of the successfully closed sessions.
+        schema:
+          $ref: "#/definitions/CloseSessionsData"
+        400:
           description: 'Bad request, response contains error message.'
-        '401':
+        401:
           description: Not authorized
-        '403':
+        403:
           description: Forbidden
-        '404':
+        404:
           description: Not found. If path is wrong. Response contains error message.
-        '500':
+        500:
           description: 'Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.'
       security: 
         - masterAdminAuth: []

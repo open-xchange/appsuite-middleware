@@ -70,6 +70,8 @@ import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
@@ -347,7 +349,7 @@ public class NotificationMail {
         return true;
     }
 
-    public boolean shouldBeSent() throws OXException {
+    public boolean shouldBeSent(CalendarSession session) throws OXException {
         if (null != event) {
             if (endsInPast(event)) {
                 // No mail for events in the past
@@ -365,10 +367,10 @@ public class NotificationMail {
         if (!recipientIsOrganizerAndHasNoAccess()) {
             return false;
         }
-        // TODO
-        //        if (event != null && event.containsNotification() && !event.getNotification()) {
-        //            return false;
-        //        }
+        if (false == recipient.isExternal() && false == session.get(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.class, Boolean.TRUE).booleanValue()) {
+            // Don't send notification mails for internal users if the flag is set. See bug 62098.
+            return false;
+        }
 
         // Does the appointment have any change to notify about?
         if (!anInterestingFieldChanged()) {

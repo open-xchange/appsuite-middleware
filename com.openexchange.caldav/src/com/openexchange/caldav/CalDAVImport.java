@@ -222,8 +222,8 @@ public class CalDAVImport {
     private static String extractResourceName(WebdavPath url) {
         String name = url.name();
         if (Strings.isNotEmpty(name)) {
-            if (name.toLowerCase().endsWith(com.openexchange.caldav.resources.CalDAVResource.EXTENSION_ICS)) {
-                name = name.substring(0, name.length() - com.openexchange.caldav.resources.CalDAVResource.EXTENSION_ICS.length());
+            if (name.toLowerCase().endsWith(Tools.EXTENSION_ICS)) {
+                name = name.substring(0, name.length() - Tools.EXTENSION_ICS.length());
             }
         }
         return name;

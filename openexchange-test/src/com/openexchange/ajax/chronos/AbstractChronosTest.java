@@ -149,7 +149,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
             try {
                 if (folderToDelete != null) {
-                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
+                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
                 }
             } catch (Exception e) {
                 exception = e;
@@ -216,7 +216,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE);
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();

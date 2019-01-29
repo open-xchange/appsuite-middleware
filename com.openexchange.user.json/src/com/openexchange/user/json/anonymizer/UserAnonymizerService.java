@@ -117,6 +117,11 @@ public class UserAnonymizerService implements AnonymizerService<User> {
         }
 
         @Override
+        public byte[] getSalt() {
+            return null;
+        }
+
+        @Override
         public int getId() {
             return delegate.getId();
         }

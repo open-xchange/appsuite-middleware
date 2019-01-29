@@ -64,8 +64,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.antivirus.AntiVirusResult;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
+import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
@@ -76,6 +81,7 @@ import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentConfig;
@@ -84,6 +90,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -410,5 +417,49 @@ public abstract class ChronosAction extends AbstractChronosAction {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Scans the specified IFileHolder and sends a 403 error to the client if the enclosed stream is infected.
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @param fileHolder The {@link IFileHolder}
+     * @param uniqueId the unique identifier
+     * @return <code>true</code> if a scan was performed; <code>false</code> otherwise
+     * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
+     *             or if the file is infected, or if a timeout or any other error is occurred.
+     */
+    protected boolean scan(AJAXRequestData requestData, IFileHolder fileHolder, String uniqueId) throws OXException {
+        String scan = requestData.getParameter("scan");
+        Boolean s = Strings.isEmpty(scan) ? Boolean.FALSE : Boolean.valueOf(scan);
+        if (false == s.booleanValue()) {
+            LOG.debug("No anti-virus scanning was performed.");
+            return false;
+        }
+        AntiVirusService antiVirusService = services.getOptionalService(AntiVirusService.class);
+        if (antiVirusService == null) {
+            throw AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_ABSENT.create();
+        }
+        if (false == antiVirusService.isEnabled(requestData.getSession())) {
+            return false;
+        }
+        AntiVirusResult result = antiVirusService.scan(fileHolder, uniqueId);
+        services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, fileHolder.getName());
+        return result.isStreamScanned();
+    }
+
+    /**
+     * Retrieves a unique id for the attachment
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @param eventId The {@link EventID}
+     * @param managedId The managed ID
+     * @return A unique ID for the attachment to scan
+     */
+    protected String getUniqueId(AJAXRequestData requestData, EventID eventId, String managedId) {
+        int contextId = requestData.getSession().getContextId();
+        // Use also the occurrence id to distinguish any exceptions in the series
+        // and in case that exception may have different attachments that the master series?
+        return IDMangler.mangle(Integer.toString(contextId), eventId.getFolderID(), eventId.getObjectID(), /* eventId.getRecurrenceID().toString(), */ managedId);
     }
 }

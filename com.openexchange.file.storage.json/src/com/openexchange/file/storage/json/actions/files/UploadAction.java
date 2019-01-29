@@ -88,6 +88,7 @@ public class UploadAction extends AbstractWriteAction {
         if (Strings.isEmpty(request.getParameter(File.Field.FILENAME.getName()))) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FILENAME.getName());
         }
+
         IDBasedFileAccess fileAccess = request.getFileAccess();
         File file = request.getFile();
         String originalFileName = file.getFileName();

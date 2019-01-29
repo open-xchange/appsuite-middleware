@@ -56,11 +56,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.MappedProblematic;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -132,6 +135,10 @@ public abstract class CalendarStorageWarnings {
      */
     public OXException addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
         OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
+        Mapping<? extends Object, Event> mapping = com.openexchange.chronos.common.mapping.EventMapper.getInstance().opt(field);
+        if (null != mapping) {
+            warning.addProblematic(new MappedProblematic<Event>(mapping));
+        }
         if (0 > ProblemSeverity.NORMAL.compareTo(severity)) {
             LOG.info(warning.getLogMessage());
         } else {
@@ -170,8 +177,11 @@ public abstract class CalendarStorageWarnings {
      */
     public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) throws OXException {
         OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
+        Mapping<? extends Object, Event> mapping = com.openexchange.chronos.common.mapping.EventMapper.getInstance().opt(field);
+        if (null != mapping) {
+            error.addProblematic(new MappedProblematic<Event>(mapping));
+        }
         if (null == unsupportedDataThreshold || 0 > unsupportedDataThreshold.compareTo(severity)) {
-            //            error.setCategory(Category.CATEGORY_ERROR);
             throw error;
         }
         addInvalidDataWaring(eventId, field, severity, message, error);

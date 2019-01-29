@@ -129,7 +129,8 @@ public class RateImpl implements Rate {
         MyProc procedure = new MyProc(lastStart);
         callHistory.forEachDescending(procedure);
 
-        return procedure.count < permits ? (procedure.firstPeriodCall + 1) : (procedure.firstPeriodCall + timeInMillis + 1);
+        long retval = procedure.count < permits ? (procedure.firstPeriodCall + 1) : (procedure.firstPeriodCall + timeInMillis + 1);
+        return retval > procedure.firstPeriodCall ? retval : procedure.firstPeriodCall;
     }
 
     @Override

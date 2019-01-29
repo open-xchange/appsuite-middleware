@@ -19,8 +19,6 @@
         <foreach list="${contextLinks}" target="createContextLink" param="linkName" />
         <property name="userLinks" value="deleteuser,changeuser,listuser,listuserfilestores,listusersbyaliasdomain,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,moveuserfilestore,movecontextfilestore2user,moveuserfilestore2context,movemasterfilestore2user,moveuserfilestore2master,listresource,getaccesscombinationnameforuser,getusercapabilities,changeaccessglobal" />
         <foreach list="${userLinks}" target="createUserLink" param="linkName" />
-    	<property name="publicationLinks" value="deletepublication" />
-    	<foreach list="${publicationLinks}" target="getPublicationLink" param="linkName" />
     </target>
 
     <target name="createContextLink">
@@ -30,9 +28,5 @@
     <target name="createUserLink">
         <symlink resource="${prefix}/${sbinDir}/createuser" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
     </target>
-
-	<target name="getPublicationLink">
-	        <symlink resource="${prefix}/${sbinDir}/getpublication" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
-	</target>
 
 </project>

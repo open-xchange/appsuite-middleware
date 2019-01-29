@@ -93,6 +93,12 @@ public class ImapConfigSearchTermVisitor extends AbstractSearchTermVisitor{
         term.getSecondTerm().accept(this);
     }
 
+    /**
+     * If necessary surrounds the given term with an AND TERM which also checks whether the deleted flag is set to false.
+     *
+     * @param currentTerm The term to check
+     * @return The eventually adjusted {@link SearchTerm}
+     */
     public SearchTerm<?> checkTerm(SearchTerm<?> currentTerm) {
         if (needsSourroundingAndTerm) {
             FlagTerm secondTerm = new FlagTerm(MailMessage.FLAG_DELETED, false);

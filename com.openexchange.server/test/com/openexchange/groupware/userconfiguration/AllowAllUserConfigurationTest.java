@@ -195,11 +195,6 @@ public class AllowAllUserConfigurationTest {
     }
 
      @Test
-     public void testIsPublication() {
-        assertTrue(userPermission.isPublication());
-    }
-
-     @Test
      public void testHasActiveSync() {
         assertTrue(userPermission.hasActiveSync());
     }

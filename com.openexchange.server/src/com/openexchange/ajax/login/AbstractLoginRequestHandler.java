@@ -240,7 +240,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     } catch (RateLimitedException rateLimitExceeded) {
                         // Double the rate
                         if (doubleRate) {
-                            RateLimiter.doubleRateLimitWindow(rateLimitKey);
+                            RateLimiter.doubleRateLimitWindow(rateLimitKey, maxLoginRateTimeWindow * 2);
                         }
                         throw rateLimitExceeded;
                     }

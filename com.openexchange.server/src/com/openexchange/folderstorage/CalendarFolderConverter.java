@@ -124,6 +124,7 @@ public class CalendarFolderConverter {
             folder.setParentID(groupwareCalendarFolder.getParentId());
             folder.setType(getStorageType(groupwareCalendarFolder.getType()));
             folder.setDefault(groupwareCalendarFolder.isDefaultFolder());
+            folder.setMeta(groupwareCalendarFolder.getMeta());
         } else {
             folder.setParentID(CalendarFolderStorage.PRIVATE_ID);
             folder.setType(PrivateType.getInstance());
@@ -256,6 +257,7 @@ public class CalendarFolderConverter {
         calendarFolder.setAccountError(optAccountError(folder));
         calendarFolder.setSupportedCapabilites(getCapabilities(folder.getSupportedCapabilities()));
         calendarFolder.setSubscribed(folder.isSubscribed());
+        calendarFolder.setMeta(folder.getMeta());
         return calendarFolder;
     }
 

@@ -86,6 +86,7 @@ public abstract class AbstractAttributeChanger {
         super();
 
         Map<Class<?>, Setter> s = new HashMap<>();
+        s.put(Byte.class, (stmt, x, parameterIndex) -> stmt.setBytes(parameterIndex, (byte[]) x));
         s.put(String.class, (stmt, x, parameterIndex) -> stmt.setString(parameterIndex, (String) x));
         s.put(Boolean.class, (stmt, x, parameterIndex) -> stmt.setBoolean(parameterIndex, (Boolean) x));
         s.put(Integer.class, (stmt, x, parameterIndex) -> stmt.setInt(parameterIndex, (Integer) x));
@@ -93,6 +94,7 @@ public abstract class AbstractAttributeChanger {
         s.put(Date.class, (stmt, x, parameterIndex) -> stmt.setTimestamp(parameterIndex, new Timestamp((long) x)));
 
         Map<Class<?>, Unsetter> u = new HashMap<>();
+        u.put(Byte.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.BINARY));
         u.put(String.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.VARCHAR));
         u.put(Boolean.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.BOOLEAN));
         u.put(Integer.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.INTEGER));

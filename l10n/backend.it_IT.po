@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-11-09 07:31+0100\n"
+"PO-Revision-Date: 2019-01-22 11:10+0100\n"
 "Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.comm>\n"
 "Language-Team: Italian <it@workshop-chapina.com>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Poedit 2.1.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -3418,7 +3418,7 @@ msgstr "nella descrizione"
 #. The 'user input' part is always prepended, please heed this in translations.
 #: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:74
 msgid "in location"
-msgstr "nella posizione"
+msgstr "nel luogo"
 
 #. Context: Searching in appointments.
 #. Displayed as: [Search for] 'user input' in appointments.

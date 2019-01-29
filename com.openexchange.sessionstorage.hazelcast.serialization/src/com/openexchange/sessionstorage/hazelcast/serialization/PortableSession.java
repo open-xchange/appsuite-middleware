@@ -68,6 +68,8 @@ import com.hazelcast.nio.serialization.VersionedPortable;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAppender;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageConfiguration;
 import com.openexchange.sessionstorage.StoredSession;
@@ -113,7 +115,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
      * This number should be incremented whenever fields are added;
      * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
      */
-    public static final int CLASS_VERSION = 2;
+    public static final int CLASS_VERSION = 3;
 
     public static final String PARAMETER_LOGIN_NAME = "loginName";
     public static final String PARAMETER_PASSWORD = "password";
@@ -134,6 +136,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
     public static final String PARAMETER_LOCAL_LAST_ACTIVE = "localLastActive";
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
+    public static final String PARAMETER_ORIGIN = "origin";
 
     /** The class definition for PortableSession */
     public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
@@ -156,6 +159,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         .addLongField(PARAMETER_LOCAL_LAST_ACTIVE)
         .addUTFField(PARAMETER_REMOTE_PARAMETER_NAMES)
         .addUTFField(PARAMETER_REMOTE_PARAMETER_VALUES)
+        .addUTFField(PARAMETER_ORIGIN)
         .build();
 
     // -------------------------------------------------------------------------------------------------
@@ -263,6 +267,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             Long localLastActive = this.localLastActive;
             writer.writeLong(PARAMETER_LOCAL_LAST_ACTIVE, null != localLastActive ? localLastActive.longValue() : -1L);
         }
+        writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
             StringAppender names = null;
@@ -337,6 +342,11 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         {
             long localLastActive = reader.readLong(PARAMETER_LOCAL_LAST_ACTIVE);
             this.localLastActive = localLastActive > 0 ? Long.valueOf(localLastActive) : null;
+        }
+        {
+
+            String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
+            origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
         }
         {
             String sNames = reader.readUTF(PARAMETER_REMOTE_PARAMETER_NAMES);

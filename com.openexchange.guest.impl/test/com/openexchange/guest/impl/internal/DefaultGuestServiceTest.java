@@ -79,7 +79,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.impl.storage.GuestStorage;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -97,6 +97,7 @@ public class DefaultGuestServiceTest {
     private static final String GUEST_MAIL_ADDRESS = "hotte@example.com";
     private static final String GUEST_PASSWORD = "myToppiPasswordi";
     private static final String GUEST_PASSWORD_MECH = "{BCRYPT}";
+    private static final byte[] GUEST_PASSWORD_SALT = "theSalt".getBytes();
     private static final String GROUP_ID = "default";
     private static final long GUEST_ID = 77;
     private static final int CONTEXT_ID = 1;
@@ -129,7 +130,7 @@ public class DefaultGuestServiceTest {
     private GuestStorage guestStorage;
 
     @Mock
-    private PasswordMechFactory passwordMechFactory;
+    private PasswordMechRegistry passwordMechFactory;
 
     @Mock
     private ServiceLookup services;
@@ -174,12 +175,13 @@ public class DefaultGuestServiceTest {
         user.setMail(GUEST_MAIL_ADDRESS);
         user.setUserPassword(GUEST_PASSWORD);
         user.setPasswordMech(GUEST_PASSWORD_MECH);
+        user.setSalt(GUEST_PASSWORD_SALT);
 
         contact = new Contact();
         contact.setInternalUserId((int) GUEST_ID);
 
-        assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH));
-        assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech"));
+        assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT));
+        assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech", "salt".getBytes()));
 
         this.defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory, passwordMechFactory);
     }
@@ -188,7 +190,7 @@ public class DefaultGuestServiceTest {
     public void testAddGuest_alreadyExistingGuestAndAssignment_doNotAdd() throws OXException {
         Mockito.when(guestStorage.isAssignmentExisting(ArgumentMatchers.anyLong(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Connection) ArgumentMatchers.any())).thenReturn(true);
 
-        defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH);
+        defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT);
 
         Mockito.verify(guestStorage, Mockito.never()).addGuestAssignment(ArgumentMatchers.any(GuestAssignment.class), ArgumentMatchers.any(Connection.class));
         Mockito.verify(guestStorage, Mockito.never()).addGuest(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), (Connection) ArgumentMatchers.any());
@@ -199,7 +201,7 @@ public class DefaultGuestServiceTest {
     public void testAddGuest_alreadyExistingGuest_addAssignment() throws OXException {
         Mockito.when(guestStorage.isAssignmentExisting(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Connection) ArgumentMatchers.any())).thenReturn(false);
 
-        defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH);
+        defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT);
 
         Mockito.verify(guestStorage, Mockito.times(1)).addGuestAssignment((GuestAssignment) ArgumentMatchers.any(), (Connection) ArgumentMatchers.any());
         Mockito.verify(guestStorage, Mockito.never()).addGuest(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), (Connection) ArgumentMatchers.any());
@@ -213,7 +215,7 @@ public class DefaultGuestServiceTest {
         Mockito.when(guestStorage.addGuest(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), (Connection) ArgumentMatchers.any())).thenReturn(GUEST_ID);
         Mockito.when(guestStorage.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, connection)).thenReturn(GUEST_ID);
 
-        defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH);
+        defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH, GUEST_PASSWORD_SALT);
 
         Mockito.verify(guestStorage, Mockito.times(1)).addGuestAssignment((GuestAssignment) ArgumentMatchers.any(), (Connection) ArgumentMatchers.any());
         Mockito.verify(guestStorage, Mockito.times(1)).addGuest(GUEST_MAIL_ADDRESS, GROUP_ID, connection);
@@ -234,7 +236,7 @@ public class DefaultGuestServiceTest {
     @Test
     public void testRemoveGuest_assignmentStillExisting_doNotDeleteUser() throws OXException {
         Mockito.when(guestStorage.getNumberOfAssignments(ArgumentMatchers.anyLong(), ArgumentMatchers.any(Connection.class))).thenReturn(10L);
-        
+
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
         Mockito.verify(guestStorage, Mockito.times(1)).removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
@@ -279,7 +281,7 @@ public class DefaultGuestServiceTest {
 
         defaultGuestService.removeGuests(CONTEXT_ID);
 
-        Mockito.verify(guestStorage, Mockito.times(removedGuests.size())).removeGuest(ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any(Connection.class));
+        Mockito.verify(guestStorage, Mockito.times(removedGuests.size())).removeGuest(ArgumentMatchers.anyLong(), ArgumentMatchers.any(Connection.class));
         Mockito.verify(databaseService, Mockito.times(1)).backWritableForGlobal(CONTEXT_ID, connection);
     }
 
@@ -491,6 +493,7 @@ public class DefaultGuestServiceTest {
         user.setLoginInfo(GUEST_MAIL_ADDRESS);
         user.setPasswordMech(GUEST_PASSWORD_MECH);
         user.setUserPassword(GUEST_PASSWORD);
+        user.setSalt(GUEST_PASSWORD_SALT);
         String timeZone = "Europe/Belgrade";
         user.setTimeZone(timeZone);
         String language = "de_DE";

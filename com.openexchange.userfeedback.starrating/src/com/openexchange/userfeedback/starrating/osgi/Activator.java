@@ -68,15 +68,6 @@ public class Activator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         registerService(FeedbackType.class, new StarRatingV1());
     }
-
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
-
 }

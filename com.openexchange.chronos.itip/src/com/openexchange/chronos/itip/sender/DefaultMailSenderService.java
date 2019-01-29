@@ -129,12 +129,12 @@ public class DefaultMailSenderService implements MailSenderService {
     }
 
     @Override
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
-        if (!mail.shouldBeSent()) {
+    public void sendMail(NotificationMail mail, CalendarSession session, CalendarUser principal, String comment) throws OXException {
+        if (!mail.shouldBeSent(session)) {
             return;
         }
 
-        send(mail, session, mail.getStateType());
+        send(mail, session.getSession(), mail.getStateType());
     }
 
     private void send(NotificationMail mail, Session session, State.Type type) {

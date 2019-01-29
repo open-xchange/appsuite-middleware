@@ -71,8 +71,10 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -286,10 +288,15 @@ public class PasswordResetServlet extends AbstractShareServlet {
         User guest = userService.getUser(userId, context);
         UserImpl user = new UserImpl(guest);
 
-        PasswordMechFactory passwordMechFactory = ShareServiceLookup.getService(PasswordMechFactory.class, true);
-        IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
-        user.setPasswordMech(iPasswordMech.getIdentifier());
-        user.setUserPassword(iPasswordMech.encode(newPassword));
+        PasswordMechRegistry passwordMechRegistry = ShareServiceLookup.getService(PasswordMechRegistry.class, true);
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
+        if (passwordMech == null) {
+            passwordMech = StockPasswordMechs.BCRYPT.getPasswordMech();
+        }
+        PasswordDetails passwordDetails = passwordMech.encode(newPassword);
+        user.setPasswordMech(passwordDetails.getPasswordMech());
+        user.setUserPassword(passwordDetails.getEncodedPassword());
+        user.setSalt(passwordDetails.getSalt());
         userService.updatePassword(user, context);
         userService.invalidateUser(context, userId);
         return userService.getUser(userId, context);

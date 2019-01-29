@@ -117,7 +117,7 @@ public class EventConverter {
         CalendarUser calendarUser = new CalendarUser();
         calendarUser.setEntity(calendarUserId);
         event.setCalendarUser(calendarUser);
-        event.setRecurrenceRule("FREQ=YEARLY");
+        event.setRecurrenceRule("FREQ=YEARLY;SKIP=BACKWARD");
         event.setTransp(TimeTransparency.TRANSPARENT);
         event.setClassification(Classification.PUBLIC);
         Calendar calendar = truncateTime(initCalendar(TimeZones.UTC, contact.getBirthday()));
@@ -155,12 +155,15 @@ public class EventConverter {
         return events;
     }
 
-    public List<Event> getOccurrences(Contact contact, Date from, Date until) throws OXException {
-        List<Event> occurrences = new ArrayList<>();
+    public List<Event> getOccurrences(Contact contact, Date from, Date until, TimeZone timeZone) throws OXException {
+        List<Event> occurrences = new ArrayList<Event>();
         Event seriesEvent = getSeriesMaster(contact);
         RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(seriesEvent, from, until);
         while (iterator.hasNext()) {
-            occurrences.add(nextOccurrence(iterator, contact));
+            Event occurrence = nextOccurrence(iterator, contact);
+            if (null != occurrence && isInRange(occurrence, from, until, timeZone)) {
+                occurrences.add(occurrence);
+            }
         }
         return occurrences;
     }
@@ -171,7 +174,7 @@ public class EventConverter {
         }
         List<Event> occurrences = new ArrayList<>();
         for (Contact contact : contacts) {
-            occurrences.addAll(getOccurrences(contact, from, until));
+            occurrences.addAll(getOccurrences(contact, from, until, timeZone));
         }
         return occurrences;
     }

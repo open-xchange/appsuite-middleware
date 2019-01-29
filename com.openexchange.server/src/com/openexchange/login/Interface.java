@@ -49,6 +49,8 @@
 
 package com.openexchange.login;
 
+import com.openexchange.session.Origin;
+
 /**
  * {@link Interface}
  *
@@ -76,5 +78,39 @@ public enum Interface {
 
     CALDAV,
 
-    CARDDAV
+    CARDDAV;
+
+    /**
+     * Gets the session origin for specified login interface.
+     *
+     * @param interfaze The login interface
+     * @return The session's origin or <code>null</code>
+     */
+    public static Origin originFor(Interface interfaze) {
+        if (null == interfaze) {
+            return null;
+        }
+
+        switch (interfaze) {
+            case CALDAV:
+                return Origin.CALDAV;
+            case CARDDAV:
+                return Origin.CARDDAV;
+            case DRIVE_UPDATER:
+                return Origin.DRIVE_UPDATER;
+            case HTTP_JSON:
+                return Origin.HTTP_JSON;
+            case OUTLOOK_UPDATER:
+                return Origin.OUTLOOK_UPDATER;
+            case WEBDAV_ICAL:
+                return Origin.WEBDAV_ICAL;
+            case WEBDAV_INFOSTORE:
+                return Origin.WEBDAV_INFOSTORE;
+            case WEBDAV_VCARD:
+                return Origin.WEBDAV_VCARD;
+            default:
+                return null;
+        }
+    }
+
 }

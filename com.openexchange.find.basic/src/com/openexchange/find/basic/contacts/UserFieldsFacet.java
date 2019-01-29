@@ -68,13 +68,15 @@ public class UserFieldsFacet extends ContactSearchFieldFacet {
      * serialVersionUID
      */
     private static final long serialVersionUID = -5647640557042838626L;
-    
+
+    // @formatter:off
     static final ContactField[] USER_FIELDS = {
-        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06, 
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06,
         ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10, ContactField.USERFIELD11, ContactField.USERFIELD12,
         ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15, ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18,
         ContactField.USERFIELD19, ContactField.USERFIELD20
     };
+    // @formatter:on
 
     /**
      * Initializes a new {@link UserFieldsFacet}.

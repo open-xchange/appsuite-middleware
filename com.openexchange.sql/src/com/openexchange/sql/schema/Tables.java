@@ -78,5 +78,4 @@ public class Tables {
 
     public static final Table subscriptions = new Table("subscriptions");
 
-    public static final Table publications = new Table("publications");
 }

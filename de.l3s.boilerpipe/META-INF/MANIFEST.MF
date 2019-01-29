@@ -32,8 +32,4 @@ Import-Package: org.apache.xerces.dom,
  org.apache.xerces.util,
  org.apache.xerces.xni,
  org.apache.xerces.xni.parser,
- org.cyberneko.html,
- org.cyberneko.html.filters,
- org.cyberneko.html.parsers,
- org.cyberneko.html.xercesbridge,
  org.xml.sax

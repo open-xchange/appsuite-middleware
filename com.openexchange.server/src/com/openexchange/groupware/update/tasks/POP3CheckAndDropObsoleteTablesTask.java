@@ -49,69 +49,19 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Tools;
-
 /**
  * {@link POP3CheckAndDropObsoleteTablesTask} - Checks and drops obsolete tables possibly created for managing POP3 accounts.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter {
+public class POP3CheckAndDropObsoleteTablesTask extends AbstractDropTableTask {
 
     /**
      * Initializes a new {@link POP3CheckAndDropObsoleteTablesTask}.
      */
     public POP3CheckAndDropObsoleteTablesTask() {
-        super();
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] {};
-    }
-
-    @Override
-    public void perform(final PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        int rollback = 0;
-        try {
-            con.setAutoCommit(false);
-            rollback = 1;
-
-            for (String table : new String[] { "user_pop3_user_flag", "user_pop3_data" }) {
-                dropTable(table, con);
-            }
-
-            con.commit();
-            rollback = 2;
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback > 0) {
-                if (rollback == 1) {
-                    Databases.rollback(con);
-                }
-                Databases.autocommit(con);
-            }
-        }
-
-    }
-
-    private boolean dropTable(final String table, final Connection con) throws SQLException {
-        if (!Tools.tableExists(con, table)) {
-            return false;
-        }
-        return Tools.dropTable(con, table);
+        super("user_pop3_user_flag", "user_pop3_data");
     }
 
 }

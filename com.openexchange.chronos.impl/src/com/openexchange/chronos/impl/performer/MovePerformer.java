@@ -58,10 +58,15 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
+import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
+import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.List;
@@ -117,10 +122,14 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * load original event & check current session user's permissions
          */
-        Event originalEvent = loadEventData(objectId);
+        Event originalEvent = requireUpToDateTimestamp(loadEventData(objectId), clientTimestamp);
         Check.eventIsInFolder(originalEvent, folder);
-        requireWritePermissions(originalEvent);
-        requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
+        if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+        }
+        requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         /*
          * check if move is supported
          */
@@ -163,6 +172,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * move from personal to public folder, take over common public folder identifier for user attendees & update any existing alarms
          */
+        requireWritePermissions(originalEvent);
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
         for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
             updateAttendeeFolderId(originalEvent, originalAttendee, null);
@@ -179,6 +189,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * move from public to personal folder, require same organizer for group-scheduled events
          */
+        requireWritePermissions(originalEvent);
         if (isGroupScheduled(originalEvent)) {
             CalendarUser targetCalendarUser = getCalendarUser(session, targetFolder);
             if (false == matches(targetCalendarUser, originalEvent.getOrganizer())) {
@@ -214,6 +225,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * move from one public folder to another, update event's common folder & update any existing alarms
          */
+        requireWritePermissions(originalEvent);
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
         for (Map.Entry<Integer, List<Alarm>> entry : originalAlarms.entrySet()) {
             updateAttendeeAlarms(originalEvent, entry.getValue(), entry.getKey().intValue(), targetFolder.getId());
@@ -335,6 +347,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                     return true;
                 }
             };
+            originalAlarms.stream().forEach(a -> a.setTimestamp(System.currentTimeMillis()));
             storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
         }
     }

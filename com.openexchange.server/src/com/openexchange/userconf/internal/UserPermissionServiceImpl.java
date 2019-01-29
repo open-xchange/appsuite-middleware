@@ -177,7 +177,6 @@ public class UserPermissionServiceImpl implements UserPermissionService {
             acc.setEditPassword(user.hasPermission(UserConfiguration.EDIT_PASSWORD));
             acc.setCollectEmailAddresses(user.hasPermission(UserConfiguration.COLLECT_EMAIL_ADDRESSES));
             acc.setMultipleMailAccounts(user.hasPermission(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS));
-            acc.setPublication(user.hasPermission(UserConfiguration.PUBLICATION));
             acc.setSubscription(user.hasPermission(UserConfiguration.SUBSCRIPTION));
             acc.setActiveSync(user.hasPermission(UserConfiguration.ACTIVE_SYNC));
             acc.setUSM(user.hasPermission(UserConfiguration.USM));

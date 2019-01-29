@@ -91,6 +91,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage.DefaultAttachmentStorageContext;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -169,7 +170,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
                     }
                 }
             }
-        }  catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.warn("Interrupted during periodic cleanup task for shared mail attachments: {}", e.getMessage(), e);
         } catch (Exception e) {
@@ -520,6 +521,12 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         public Set<String> getParameterNames() {
             return parameters.keySet();
         }
+
+        @Override
+        public Origin getOrigin() {
+            return Origin.SYNTHETIC;
+        }
+
     }
 
     private static final class ExpiredFolder {

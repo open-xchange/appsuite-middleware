@@ -58,11 +58,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import javax.activation.MailcapCommandMap;
-import javax.management.ObjectName;
 import javax.servlet.ServletException;
+import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.json.FileBackedJSONStringProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -146,6 +145,7 @@ import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.internal.FilteringGroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
@@ -159,6 +159,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteFileVersionsLoginHandler;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.FilteringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -221,7 +222,6 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
@@ -234,13 +234,11 @@ import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.osgi.Tools;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
@@ -265,6 +263,7 @@ import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
+import com.openexchange.user.FilteringUserService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -328,7 +327,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -574,9 +573,6 @@ public final class ServerActivator extends HousekeepingActivator {
         serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
         serviceTrackerList.add(new AttachmentListenerTracker(context));
 
-        // PublicationTargetDiscoveryService
-        track(PublicationTargetDiscoveryService.class, new PublicationTargetDiscoveryServiceTrackerCustomizer(context));
-
         // Folder Fields
         track(AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields()));
 
@@ -605,7 +601,6 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track QuotaFileStorageService
          */
         track(QuotaFileStorageService.class, new RegistryCustomizer<QuotaFileStorageService>(context, QuotaFileStorageService.class));
-
         /*
          * Track QuotaAwareSnippetService
          */
@@ -617,20 +612,15 @@ public final class ServerActivator extends HousekeepingActivator {
         UserAliasStorage aliasStorage;
         {
             String regionName = "UserAlias";
-            byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
-                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
-                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
-                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
-                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" +
+                            "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                            "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" +
+                            "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                            "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                            "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                            "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" +
+                            "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
+                            "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
 
             aliasStorage = new CachingAliasStorage(new RdbAliasStorage());
@@ -643,7 +633,7 @@ public final class ServerActivator extends HousekeepingActivator {
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
 
-        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
+        UserService userService = new FilteringUserService(new UserServiceImpl(interceptorRegistry, getService(PasswordMechRegistry.class)), this);
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
@@ -669,15 +659,15 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         registerService(FileBackedJSONStringProvider.class, new FileBackedJSONStringProviderImpl());
-        final GroupService groupService = new GroupServiceImpl();
+        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(), this);
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
-        
+
         registerService(Remote.class, new GABRestorerRMIServiceImpl());
-        
+
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
@@ -748,7 +738,7 @@ public final class ServerActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
-            registerService(DataSource.class, new ICalMailPartDataSource(), props);
+            registerService(DataSource.class, new ICalMailPartDataSource().setServiceLookup(this), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
@@ -903,9 +893,10 @@ public final class ServerActivator extends HousekeepingActivator {
         EventFiringInfostoreFacade eventFiringInfostoreFacade = new EventFiringInfostoreFacadeImpl(dbProvider);
         eventFiringInfostoreFacade.setTransactional(true);
         eventFiringInfostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
-        registerService(InfostoreFacade.class, infostoreFacade);
+        FilteringInfostoreFacadeImpl filteringInfostoreFacadeImpl = new FilteringInfostoreFacadeImpl(infostoreFacade, this);
+        registerService(InfostoreFacade.class, filteringInfostoreFacadeImpl);
         registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
-        registerService(InfostoreSearchEngine.class, infostoreFacade);
+        registerService(InfostoreSearchEngine.class, filteringInfostoreFacadeImpl);
         registerService(LoginHandlerService.class, new InfostoreAutodeleteFileVersionsLoginHandler(infostoreFacade));
     }
 

@@ -122,7 +122,8 @@ public interface Types {
 
     public static final int SUBSCRIPTION = 126;
 
-    public static final int PUBLICATION = 127;
+    /* Removed with v7.10.2, see MW-1089 */
+    // public static final int PUBLICATION = 127;
 
     /**
      * Identifier for principals. This can be groups and users. This type is used to generate not intersecting identifiers for groups and

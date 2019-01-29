@@ -84,21 +84,23 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
     private static final String FILE_NAME = "quotaCheck";
     private static final String FILE_ENDING = ".txt";
 
-    private Credentials credentials = null;
-    private OXUserInterface iface = null;
+    protected Credentials credentials = null;
+    protected OXUserInterface iface = null;
 
     protected int testUserId = 0;
     protected String quotaTestFolderId;
 
     protected TestUser quotaTestuser;
     private FoldersApi foldersApi;
+    protected Context context;
+    protected User user;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
-        User user = createUserObj();
+        this.user = createUserObj();
         this.quotaTestuser = new TestUser(user.getName(), Integer.toString(getClient().getValues().getContextId()), "secret");
         this.testUserId = createNewUserWithQuota(user);
         quotaApiClient = generateApiClient(quotaTestuser);
@@ -124,7 +126,10 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
 
     protected int createNewUserWithQuota(User user) throws Exception {
         UserModuleAccess userModuleAccess = new UserModuleAccess();
-        return iface.create(new Context(getClient().getValues().getContextId()), user, userModuleAccess, credentials).getId();
+        context = new Context(getClient().getValues().getContextId());
+        Integer userId = iface.create(context, user, userModuleAccess, credentials).getId();
+        user.setId(userId);
+        return userId;
     }
 
     protected void deleteUser() throws Exception {

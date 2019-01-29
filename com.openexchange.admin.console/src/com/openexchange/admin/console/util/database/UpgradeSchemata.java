@@ -72,9 +72,10 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
+import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -85,7 +86,6 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.groupware.update.tools.Constants;
 import com.openexchange.java.Strings;
 
@@ -159,7 +159,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.console.ObjectNamingAbstraction#getObjectName()
+     * @see com.openexchange.admin.plugin.hosting.console.ObjectNamingAbstraction#getObjectName()
      */
     @Override
     protected String getObjectName() {

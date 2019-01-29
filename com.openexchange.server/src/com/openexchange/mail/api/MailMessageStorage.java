@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.api;
 
+import javax.mail.Flags;
+import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
@@ -60,7 +62,9 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAware;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
@@ -292,7 +296,35 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
-            final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
+            MailMessage filledMail = null;
+            if (draftMail instanceof ContentAware) {
+                try {
+                    final Object content = draftMail.getContent();
+                    if (content instanceof MimeMessage) {
+                        final MimeMessage mimeMessage = (MimeMessage) content;
+                        mimeMessage.removeHeader("x-original-headers");
+                        /*
+                         * Set extra headers
+                         */
+                        final MimeMessageFiller filler = new MimeMessageFiller(draftMail.getSession(), draftMail.getContext());
+                        filler.setAccountId(draftMail.getAccountId());
+                        filler.setCommonHeaders(mimeMessage);
+                        mimeMessage.setFlag(Flags.Flag.DRAFT, true);
+                        /*
+                         * Convert to MailMessage
+                         */
+                        filledMail = MimeMessageConverter.convertMessage(mimeMessage);
+                    }
+                } catch (final Exception e) {
+                    filledMail = null;
+                }
+            }
+            /*
+             * Fill if not yet initialized
+             */
+            if (filledMail == null) {
+                filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
+            }
             filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
             /*
              * Append message to draft folder

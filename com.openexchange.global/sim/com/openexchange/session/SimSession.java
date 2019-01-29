@@ -73,7 +73,7 @@ public class SimSession implements Session {
     private String client;
 
     public SimSession() {
-
+        super();
     }
 
     public SimSession(int user, int context) {
@@ -239,6 +239,11 @@ public class SimSession implements Session {
     @Override
     public Set<String> getParameterNames() {
         return parameters.keySet();
+    }
+
+    @Override
+    public Origin getOrigin() {
+        return null;
     }
 
 }

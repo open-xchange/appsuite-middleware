@@ -1,0 +1,31 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The item id
+  infected:
+    type: boolean
+    description: Whether the item is infected
+  threatName:
+    type: string
+    description: If the item is infected, threatName portaits the infection's name
+  warnings:
+    type: array
+    description: |
+      An array with any warnings that might have occurred during scanning, e.g. remote service down, file too large to scan,
+      I/O errors, etc.
+    items:
+      type: object
+      properties:
+        error:
+          type: string
+          description: The translated error message. Present in case of errors.
+        displayMessage:
+          type: string
+          description: The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.
+        code:
+          type: string
+          description: Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"
+        categories:
+          type: string
+          description: Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.

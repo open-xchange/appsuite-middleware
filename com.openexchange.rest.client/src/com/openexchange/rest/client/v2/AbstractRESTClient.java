@@ -90,11 +90,15 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Initialises a new {@link AbstractRESTClient}.
+     * 
+     * @param userAgent The user agent to use for this RESTClient
+     * @param timeout The timeout for socket read and connections
+     * @param parser The {@link RESTResponseParser} to use when parsing the responses
      */
-    public AbstractRESTClient(String userAgent, RESTResponseParser parser) {
+    public AbstractRESTClient(String userAgent, int timeout, RESTResponseParser parser) {
         super();
         this.parser = parser;
-        this.httpClient = initializeHttpClient(userAgent);
+        this.httpClient = initializeHttpClient(userAgent, timeout);
     }
 
     /**
@@ -251,11 +255,14 @@ public abstract class AbstractRESTClient implements Closeable {
      * Initialises the HTTP client
      *
      * @param userAgent The user agent
+     * @param timeout The timeout to use for connections and socket reads
      * @return The initialised {@link CloseableHttpClient}
      */
-    private CloseableHttpClient initializeHttpClient(String userAgent) {
+    private CloseableHttpClient initializeHttpClient(String userAgent, int timeout) {
         ClientConfig clientConfig = ClientConfig.newInstance();
         clientConfig.setUserAgent(userAgent);
+        clientConfig.setConnectionTimeout(timeout);
+        clientConfig.setSocketReadTimeout(timeout);
 
         return HttpClients.getHttpClient(clientConfig);
     }

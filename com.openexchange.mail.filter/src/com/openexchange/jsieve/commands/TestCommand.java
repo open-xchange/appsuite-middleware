@@ -52,9 +52,10 @@ package com.openexchange.jsieve.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import com.openexchange.jsieve.commands.test.ITestCommand;
@@ -220,10 +221,10 @@ public class TestCommand extends Command {
          * <p>Specifies the match types ':over' and ':under' as described
          * in <a href="https://tools.ietf.org/html/rfc5228#section-5.9">RFC-5228: Test size</a>.</p>
          *
-         * @return A {@link Hashtable} with the size match types
+         * @return A {@link Map} with the size match types
          */
-        private static Hashtable<String, String> matchTypeSize() {
-            final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
+        private static Map<String, String> matchTypeSize() {
+            final Map<String, String> match_type_size = new HashMap<String, String>(2);
             match_type_size.put(MatchType.over.getArgumentName(), MatchType.over.getRequire());
             match_type_size.put(MatchType.under.getArgumentName(), MatchType.under.getRequire());
             return match_type_size;
@@ -233,10 +234,10 @@ public class TestCommand extends Command {
          * <p>Specifies the addresspart arguments ':localpart', ':domain', ':all' as described
          * in <a href="href=https://tools.ietf.org/html/rfc5228#section-2.7.4">RFC-5228</a>.</p>
          *
-         * @return A {@link Hashtable} with the standard addressparts
+         * @return A {@link Map} with the standard addressparts
          */
-        private static Hashtable<String, String> standardAddressPart() {
-            final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
+        private static Map<String, String> standardAddressPart() {
+            final Map<String, String> standard_address_part = new HashMap<String, String>(3);
             standard_address_part.put(AddressParts.localpart.getSieveArgument(), AddressParts.localpart.getNeededCapabilities());
             standard_address_part.put(AddressParts.domain.getSieveArgument(), AddressParts.domain.getNeededCapabilities());
             standard_address_part.put(AddressParts.all.getSieveArgument(), AddressParts.all.getNeededCapabilities());
@@ -248,10 +249,10 @@ public class TestCommand extends Command {
          * <p>Specifies the match types ':content' and ':text' as described
          * in <a https://tools.ietf.org/html/rfc5173#section-5">RFC-5173: Body transform</a>.</p>
          *
-         * @return A {@link Hashtable} with the body match types
+         * @return A {@link Map} with the body match types
          */
-        private static Hashtable<String, String> standardBodyPart() {
-            final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
+        private static Map<String, String> standardBodyPart() {
+            final Map<String, String> standard_address_part = new HashMap<String, String>(3);
             //standard_address_part.put(":raw", "");
             standard_address_part.put(":content", "");
             standard_address_part.put(":text", "");
@@ -264,10 +265,10 @@ public class TestCommand extends Command {
          * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a> in addition to the
          * standard addressparts (see #{@link TestCommand.Commands#standardAddressPart())}.</p>
          *
-         * @return A {@link Hashtable} with the subaddress addressparts
+         * @return A {@link Map} with the subaddress addressparts
          */
-        private static Hashtable<String, String> addressParts() {
-            final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
+        private static Map<String, String> addressParts() {
+            final Map<String, String> standard_address_parts = new HashMap<>(5);
             for (AddressParts part : AddressParts.values()) {
                 standard_address_parts.put(part.getSieveArgument(), part.getNeededCapabilities());
             }
@@ -278,10 +279,10 @@ public class TestCommand extends Command {
          * <p>Specifies the standard match types ':is', ':contains', ':matches' as described
          * in <a href=https://tools.ietf.org/html/rfc5228#section-2.7.1">RFC-5228</a>.</p>
          *
-         * @return A {@link Hashtable} with tthe standard match types
+         * @return A {@link Map} with tthe standard match types
          */
-        private static Hashtable<String, String> standardMatchTypes() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(4);
+        private static Map<String, String> standardMatchTypes() {
+            final Map<String, String> standard_match_types = new HashMap<String, String>(4);
             standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
             standard_match_types.put(MatchType.contains.getArgumentName(), MatchType.contains.getRequire());
             standard_match_types.put(MatchType.matches.getArgumentName(), MatchType.matches.getRequire());
@@ -294,10 +295,10 @@ public class TestCommand extends Command {
         /**
          * The match types that are applicable to dates
          *
-         * @return A {@link Hashtable} with the match types
+         * @return A {@link Map} with the match types
          */
-        private static Hashtable<String, String> dateMatchTypes() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
+        private static Map<String, String> dateMatchTypes() {
+            final Map<String, String> standard_match_types = new HashMap<String, String>(2);
             standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
             standard_match_types.put(MatchType.value.getArgumentName(), MatchType.value.getRequire());
             return standard_match_types;
@@ -309,8 +310,8 @@ public class TestCommand extends Command {
          *
          * @return A hashtable with the argument
          */
-        private static Hashtable<String, String> dateOtherArguments() {
-            final Hashtable<String, String> arguments = new Hashtable<String, String>(2);
+        private static Map<String, String> dateOtherArguments() {
+            final Map<String, String> arguments = new HashMap<String, String>(2);
             arguments.put(":zone", "");
             arguments.put(":originalzone", "");
             return arguments;
@@ -322,8 +323,8 @@ public class TestCommand extends Command {
          *
          * @return A hashtable with the argument
          */
-        private static Hashtable<String, String> currentDateOtherArguments() {
-            final Hashtable<String, String> arguments = new Hashtable<String, String>(1);
+        private static Map<String, String> currentDateOtherArguments() {
+            final Map<String, String> arguments = new HashMap<String, String>(1);
             arguments.put(":zone", "");
             return arguments;
         }
@@ -416,10 +417,10 @@ public class TestCommand extends Command {
         /**
          * Specifies the standard comparators used for matching.
          *
-         * @return A {@link Hashtable} with the comparators
+         * @return A {@link Map} with the comparators
          */
-        private static Hashtable<String, String> standardComparators() {
-            final Hashtable<String, String> standard_comparators = new Hashtable<String, String>(2);
+        private static Map<String, String> standardComparators() {
+            final Map<String, String> standard_comparators = new HashMap<String, String>(2);
             standard_comparators.put("i;ascii-casemap", "");
             standard_comparators.put("i;octet", "");
             // Add further extensions to comparator here
@@ -431,12 +432,12 @@ public class TestCommand extends Command {
         /**
          * Defines if this command can take a address argument or not
          */
-        private Hashtable<String, String> address;
+        private final Map<String, String> address;
 
         /**
          * The number of arguments which this command takes
          */
-        private int numberOfArguments;
+        private final int numberOfArguments;
 
         /**
          * Defines how many arguments this test can have at max
@@ -446,22 +447,22 @@ public class TestCommand extends Command {
         /**
          * The name of the command
          */
-        private String commandName;
+        private final String commandName;
 
         /**
          * Defines if this command can take a comparator argument or not
          */
-        private Hashtable<String, String> comparator;
+        private final Map<String, String> comparator;
 
         /**
          * Defines if this command can take a match-type argument or not
          */
-        private Hashtable<String, String> matchTypes;
+        private final Map<String, String> matchTypes;
 
         /**
          * Defines additional allowed arguments
          */
-        private Hashtable<String, String> otherArguments;
+        private final Map<String, String> otherArguments;
 
         /**
          * Needed for the resolution of the configuration parameters for JSON
@@ -471,7 +472,7 @@ public class TestCommand extends Command {
         /**
          * Defines if this command needs a require or not
          */
-        private List<String> required;
+        private final List<String> required;
 
         /**
          * Initializes a new {@link Commands}.
@@ -486,7 +487,7 @@ public class TestCommand extends Command {
          * @param required The 'require'
          * @param otherArguments Other optional arguments
          */
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final List<String> required, final Hashtable<String, String> otherArguments) {
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Map<String, String> address, final Map<String, String> comparator, final Map<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final List<String> required, final Map<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -514,57 +515,33 @@ public class TestCommand extends Command {
         }
 
         @Override
-        public final Hashtable<String, String> getAddress() {
-            return address;
+        public final Map<String, String> getAddress() {
+            return null == address ? null : Collections.unmodifiableMap(address);
         }
 
         @Override
-        public final Hashtable<String, String> getOtherArguments() {
-            return otherArguments;
+        public final Map<String, String> getOtherArguments() {
+            return null == otherArguments ? null : Collections.unmodifiableMap(otherArguments);
         }
 
         @Override
-        public final Hashtable<String, String> getComparator() {
-            return comparator;
+        public final Map<String, String> getComparator() {
+            return null == comparator ? null : Collections.unmodifiableMap(comparator);
         }
 
         @Override
         public final List<String> getRequired() {
-            return required;
-        }
-
-        public final void setAddress(final Hashtable<String, String> address) {
-            this.address = address;
-        }
-
-        public final void setNumberOfArguments(final int arguments) {
-            this.numberOfArguments = arguments;
-        }
-
-        public final void setCommandName(final String commandname) {
-            this.commandName = commandname;
-        }
-
-        public final void setComparator(final Hashtable<String, String> comparator) {
-            this.comparator = comparator;
-        }
-
-        public final void setRequire(final List<String> required) {
-            this.required = required;
+            return null == required ? null : Collections.unmodifiableList(required);
         }
 
         @Override
-        public final Hashtable<String, String> getMatchTypes() {
-            return matchTypes;
-        }
-
-        public final void setMatchTypes(final Hashtable<String, String> matchtypes) {
-            this.matchTypes = matchtypes;
+        public final Map<String, String> getMatchTypes() {
+            return null == matchTypes ? null : Collections.unmodifiableMap(matchTypes);
         }
 
         @Override
         public List<JSONMatchType> getJsonMatchTypes() {
-            return jsonMatchTypes;
+            return null == jsonMatchTypes ? null : Collections.unmodifiableList(jsonMatchTypes);
         }
     }
 
@@ -620,11 +597,11 @@ public class TestCommand extends Command {
     private void checkCommand() throws SieveException {
         if (null != this.tagArguments) {
             final ArrayList<String> tagArray = new ArrayList<String>(this.tagArguments);
-            final Hashtable<String, String> matchTypes = this.command.getMatchTypes();
+            final Map<String, String> matchTypes = this.command.getMatchTypes();
             if (null != matchTypes) {
                 tagArray.removeAll(matchTypes.keySet());
             }
-            final Hashtable<String, String> address = this.command.getAddress();
+            final Map<String, String> address = this.command.getAddress();
             if (null != address) {
                 tagArray.removeAll(address.keySet());
             }
@@ -632,7 +609,7 @@ public class TestCommand extends Command {
                 throw new SieveException("Sieve comparators aren't supported by this implementation");
             }
 
-            final Hashtable<String, String> otherArguments = this.command.getOtherArguments();
+            final Map<String, String> otherArguments = this.command.getOtherArguments();
             if (null != otherArguments) {
                 tagArray.removeAll(otherArguments.keySet());
             }

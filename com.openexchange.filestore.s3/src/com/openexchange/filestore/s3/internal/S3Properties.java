@@ -58,49 +58,101 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.1
  */
 public enum S3Properties implements Property {
-    ENDPOINT("endpoint", "s3.amazonaws.com"),
-    BUCKET_NAME("bucketName", null),
-    REGION("region", "us-west-2"),
-    PATH_STYLE_ACCESS("pathStyleAccess", true),
-    ACCESS_KEY("accessKey", null),
-    SECRET_KEY("secretKey", null),
-    ENCRYPTION("encryption", EncryptionType.NONE.getName()),
-    SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
-    CHUNK_SIZE("chunkSize", "5 MB"),
-    RSA_KEYSTORE("encryption.rsa.keyStore", null),
-    RSA_PASSWORD("encryption.rsa.password", null),
 
-    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", false)
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].endpoint"
+     */
+    ENDPOINT("endpoint", "s3.amazonaws.com"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].bucketName"
+     */
+    BUCKET_NAME("bucketName"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].region"
+     */
+    REGION("region", "us-west-2"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].pathStyleAccess"
+     */
+    PATH_STYLE_ACCESS("pathStyleAccess", Boolean.TRUE),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].accessKey"
+     */
+    ACCESS_KEY("accessKey"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].secretKey"
+     */
+    SECRET_KEY("secretKey"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].encryption"
+     */
+    ENCRYPTION("encryption", EncryptionType.NONE.getName()),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].signerOverride"
+     */
+    SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].chunkSize"
+     */
+    CHUNK_SIZE("chunkSize", "5 MB"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].encryption.rsa.keyStore"
+     */
+    RSA_KEYSTORE("encryption.rsa.keyStore"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].encryption.rsa.password"
+     */
+    RSA_PASSWORD("encryption.rsa.password"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].connectTimeout"
+     */
+    CONNECT_TIMEOUT("connectTimeout", "10000"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].readTimeout"
+     */
+    READ_TIMEOUT("readTimeout", "50000"),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].maxConnectionPoolSize"
+     */
+    MAX_CONNECTION_POOL_SIZE("maxConnectionPoolSize", "50"),
+
+    /**
+     * "com.openexchange.filestore.s3.metricCollection"
+     */
+    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", Boolean.FALSE)
     ;
 
     public static final String OPTIONAL_NAME = "filestoreID";
     private static final String PREFIX = "com.openexchange.filestore.s3.[" + OPTIONAL_NAME + "].";
 
     private final Object defaultValue;
-    private final String propName;
-    private final String prefix;
+    private final String fqn;
 
     /**
      * Initializes a new {@link S3Properties}.
      */
-    private S3Properties(String prefix, String propName, Object defaultValue) {
-        this.propName = propName;
-        this.defaultValue = defaultValue;
-        this.prefix = prefix;
+    private S3Properties(String propName) {
+        this(propName, null);
     }
 
     /**
      * Initializes a new {@link S3Properties}.
      */
     private S3Properties(String propName, Object defaultValue) {
-        this.propName = propName;
+        this(PREFIX, propName, defaultValue);
+    }
+
+    /**
+     * Initializes a new {@link S3Properties}.
+     */
+    private S3Properties(String prefix, String propName, Object defaultValue) {
+        this.fqn = prefix + propName;
         this.defaultValue = defaultValue;
-        this.prefix = PREFIX;
     }
 
     @Override
     public String getFQPropertyName() {
-        return prefix + propName;
+        return fqn;
     }
 
     @Override

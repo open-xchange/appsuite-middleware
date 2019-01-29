@@ -112,6 +112,13 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         return result;
     }
 
+    /**
+     * Parses the {@link PictureSearchData} from the given {@link AJAXRequestData}
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @return The {@link PictureSearchData}
+     * @throws OXException
+     */
     private PictureSearchData getData(AJAXRequestData requestData) throws OXException {
         if (null == requestData) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();

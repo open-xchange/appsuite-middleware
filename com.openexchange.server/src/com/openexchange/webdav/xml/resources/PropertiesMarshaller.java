@@ -168,7 +168,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	public Element marshalProperty(WebdavProperty property, Protocol protocol) {
 		Element propertyElement = new Element(property.getName(), getNamespace(property));
-		if (null == property.getValue()) {
+        if (null == property.getValue() && null == property.getChildren()) {
 			return propertyElement;
 		}
 		if (property.isXML()) {
@@ -192,7 +192,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
                 }
 			} catch (JDOMException e) {
 				// NO XML
-				LOG.error(e.toString());
+                LOG.error("", e);
 				propertyElement.setText(property.getValue());
 			} catch (IOException e) {
 				LOG.error("", e);
@@ -202,6 +202,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				propertyElement.setAttribute("dt", "dateTime.rfc1123", DATE_NS);
 			}
 			propertyElement.setText(property.getValue());
+            if (null != property.getChildren()) {
+                propertyElement.addContent(property.getChildren());
+            }
 		}
 		return propertyElement;
 	}

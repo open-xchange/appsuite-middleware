@@ -90,6 +90,6 @@ public class MicrosoftGraphAPIActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         MicrosoftGraphAPI microsoftGraphAPI = new MicrosoftGraphAPI();
         registerService(MicrosoftGraphContactsService.class, new MicrosoftGraphContactsServiceImpl(microsoftGraphAPI.contacts()));
-        registerService(MicrosoftGraphDriveService.class, new MicrosoftGraphDriveServiceImpl(microsoftGraphAPI.getOneDriveAPI()));
+        registerService(MicrosoftGraphDriveService.class, new MicrosoftGraphDriveServiceImpl(microsoftGraphAPI.drive()));
     }
 }

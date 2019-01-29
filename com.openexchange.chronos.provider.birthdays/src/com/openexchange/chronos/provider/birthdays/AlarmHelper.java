@@ -55,6 +55,7 @@ import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,8 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
@@ -74,6 +77,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.conversion.ConversionService;
@@ -112,7 +116,10 @@ public class AlarmHelper {
 
     /**
      * Loads and applies all alarm data of the account user associated with the supplied event.
-     *
+     * <p/>
+     * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
+     * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
+     * 
      * @param event The event to load and apply the alarm data for
      * @return The event, enhanced with the loaded alarm data
      */
@@ -122,6 +129,9 @@ public class AlarmHelper {
 
     /**
      * Loads and applies all alarm data of the account user associated with the supplied events.
+     * <p/>
+     * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
+     * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
      *
      * @param events The events to load and apply the alarm data for
      * @return The events, enhanced with the loaded alarm data
@@ -291,6 +301,44 @@ public class AlarmHelper {
         }.executeUpdate();
     }
 
+    /**
+     * Returns the latest timestamp of alarms for this user.
+     * Can be limited to an event.
+     *
+     * @param eventIds The optional event identifiers, can be null
+     * @param userId The user identifier
+     * @return The latest timestamp
+     * @throws OXException
+     */
+    public Map<String, Long> getLatestTimestamps(final List<String> eventIds, final int userId) throws OXException {
+        return new OSGiCalendarStorageOperation<Map<String, Long>>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected Map<String, Long> call(CalendarStorage storage) throws OXException {
+                AlarmStorage alarmStorage = storage.getAlarmStorage();
+                return eventIds == null || eventIds.isEmpty() ? Collections.emptyMap() : alarmStorage.getLatestTimestamp(eventIds, userId);
+            }
+        }.executeQuery();
+    }
+
+    /**
+     * Returns the latest timestamp of alarms for this user.
+     *
+     * @param userId The user identifier
+     * @return The latest timestamp
+     * @throws OXException
+     */
+    public long getLatestTimestamp(final int userId) throws OXException {
+        return new OSGiCalendarStorageOperation<Long>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected Long call(CalendarStorage storage) throws OXException {
+                AlarmStorage alarmStorage = storage.getAlarmStorage();
+                return alarmStorage.getLatestTimestamp(userId);
+            }
+        }.executeQuery();
+    }
+
     boolean updateAlarms(CalendarStorage storage, Event event, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
@@ -314,6 +362,7 @@ public class AlarmHelper {
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
+                alarm.setTimestamp(System.currentTimeMillis());
                 alarms.add(alarm);
                 //                alarms.add(Check.alarmIsValid(alarm));//TODO
             }
@@ -328,6 +377,7 @@ public class AlarmHelper {
             for (Alarm alarm : addedItems) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
+                newAlarm.setTimestamp(System.currentTimeMillis());
                 if (false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
@@ -357,6 +407,7 @@ public class AlarmHelper {
             Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
             newAlarm.setId(storage.getAlarmStorage().nextId());
             newAlarm.setUid(UUID.randomUUID().toString());
+            newAlarm.setTimestamp(System.currentTimeMillis());
             AlarmUtils.addExtendedProperty(newAlarm, new ExtendedProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"), true);
             newAlarms.add(newAlarm);
         }
@@ -365,6 +416,9 @@ public class AlarmHelper {
 
     /**
      * Applies a specific list of alarms for an event.
+     * <p/>
+     * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
+     * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
      *
      * @param event The event to apply the alarms for
      * @param alarms The alarms to apply
@@ -385,6 +439,28 @@ public class AlarmHelper {
             public boolean containsAlarms() {
                 return true;
             }
+
+            @Override
+            public long getTimestamp() {
+                long timestamp = super.getTimestamp();
+                if (null != alarms && 0 < alarms.size()) {
+                    for (Alarm alarm : alarms) {
+                        timestamp = Math.max(timestamp, alarm.getTimestamp());
+                    }
+                }
+                return timestamp;
+            }
+
+            @Override
+            public EnumSet<EventFlag> getFlags() {
+                EnumSet<EventFlag> flags = super.getFlags();
+                if (null != alarms && 0 < alarms.size()) {
+                    flags = EnumSet.copyOf(flags);
+                    flags.add(EventFlag.ALARMS);
+                }
+                return flags;
+            }
+
         };
     }
 

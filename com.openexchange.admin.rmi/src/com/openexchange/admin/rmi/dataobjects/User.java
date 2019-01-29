@@ -54,6 +54,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,6 +98,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private String passwordMech;
 
     private boolean passwordMechset = false;
+
+    private byte[] salt;
+
+    private boolean saltSet = false;
 
     private String primaryEmail;
 
@@ -4343,6 +4348,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.name = null;
         this.password = null;
         this.passwordMech = null;
+        this.salt = null;
         this.primaryEmail = null;
         this.email1 = null;
         this.email2 = null;
@@ -4569,6 +4575,18 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         // NOTE: Check is done in OXUser
         this.passwordMech = passwordMech;
+    }
+
+    @Override
+    final public byte[] getSalt() {
+        return salt;
+    }
+
+    final public void setSalt(final byte[] salt) {
+        if (null == salt) {
+            this.saltSet = true;
+        }
+        this.salt = salt;
     }
 
     /**
@@ -5010,6 +5028,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
+        result = prime * result + ((salt == null) ? 0 : Arrays.hashCode(salt));
+        result = prime * result + (saltSet ? 1231 : 1237);
         result = prime * result + ((password_expired == null) ? 0 : password_expired.hashCode());
         result = prime * result + (password_expiredset ? 1231 : 1237);
         result = prime * result + (passwordset ? 1231 : 1237);
@@ -5731,6 +5751,16 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if (passwordMechset != other.passwordMechset) {
+            return false;
+        }
+        if (salt == null) {
+            if (other.salt != null) {
+                return false;
+            }
+        } else if (!Arrays.equals(salt, other.salt)) {
+            return false;
+        }
+        if (saltSet != other.saltSet) {
             return false;
         }
         if (password_expired == null) {

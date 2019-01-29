@@ -82,6 +82,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -414,7 +415,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_event WHERE cid=? AND account=? AND id")
-            .append(getPlaceholders(ids.size())).append(';')
+            .append(Databases.getPlaceholders(ids.size())).append(';')
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;

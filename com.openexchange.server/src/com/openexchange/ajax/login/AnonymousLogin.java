@@ -65,8 +65,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
@@ -148,13 +148,13 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
     @Override
     protected void authenticateUser(LoginInfo loginInfo, User user, Context context) throws OXException {
         // Get needed service
-        PasswordMechFactory factory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class);
-        if (null == factory) {
-            throw ServiceExceptionCode.absentService(PasswordMechFactory.class);
+        PasswordMechRegistry registry = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
+        if (null == registry) {
+            throw ServiceExceptionCode.absentService(PasswordMechRegistry.class);
         }
 
-        IPasswordMech iPasswordMech = factory.get(user.getPasswordMech());
-        if (!iPasswordMech.check(loginInfo.getPassword(), user.getUserPassword())) {
+        PasswordMech passwordMech = registry.get(user.getPasswordMech());
+        if (!passwordMech.check(loginInfo.getPassword(), user.getUserPassword(), user.getSalt())) {
             throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
         }
     }

@@ -87,9 +87,8 @@ public class CalDAV extends DAVServlet {
                 if (oAuthAccess == null) {
                     // basic auth took place
                     return true;
-                } else {
-                    return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
                 }
+                return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
             }
         } catch (OXException e) {
             //

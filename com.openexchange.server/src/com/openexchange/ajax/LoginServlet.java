@@ -166,7 +166,31 @@ public class LoginServlet extends AJAXServlet {
     /**
      * The default error page template
      */
-    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    private static final String ERROR_PAGE_TEMPLATE =
+        // @formatter:off
+            "<html>\n" +
+            "<script type=\"text/javascript\">\n" +
+            "// Display normal HTML for 5 seconds, then redirect via referrer.\n" +
+            "setTimeout(redirect,5000);\n" +
+            "function redirect(){\n" +
+            " var referrer=document.referrer;\n" +
+            " var redirect_url;\n" +
+            " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
+            " if(referrer.indexOf(\"login=failed\")>=0){\n" +
+            "  redirect_url=referrer;\n" + " }else{\n" +
+            "  // Check if referrer contains multiple parameter\n" +
+            "  if(referrer.indexOf(\"?\")<0){\n" +
+            "   redirect_url=referrer+\"?login=failed\";\n" +
+            "  }else{\n" +
+            "   redirect_url=referrer+\"&login=failed\";\n" +
+            "  }\n" + " }\n" + " // Redirect to referrer\n" +
+            " window.location.href=redirect_url;\n" +
+            "}\n" + "</script>\n" +
+            "<body>\n" +
+            "<h1>ERROR_MESSAGE</h1>\n" +
+            "</body>\n" +
+            "</html>\n";
+        // @formatter:on
 
     /**
      * <code>"open-xchange-session-"</code>
@@ -187,6 +211,11 @@ public class LoginServlet extends AJAXServlet {
      * <code>"open-xchange-public-session-"</code>
      */
     public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
+
+    /**
+     * <code>"open-xchange-shard"</code>
+     */
+    public static final String SHARD_COOKIE_NAME = "open-xchange-shard".intern();
 
     public static final String ACTION_FORMLOGIN = "formlogin";
 
@@ -946,6 +975,19 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /**
+     * Writes the (groupware's) shard cookie to specified HTTP servlet response whose name is
+     * <code>"open-xchange-shard"</code>.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
+        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session)));
+    }
+
+    /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
      *
@@ -960,6 +1002,7 @@ public class LoginServlet extends AJAXServlet {
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
         resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
+        writeShardCookie(resp, session, secure, serverName);
         session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
     }
 
@@ -1080,5 +1123,4 @@ public class LoginServlet extends AJAXServlet {
         boolean shareTransientSessions = Boolean.valueOf(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
         return new ShareLoginConfiguration(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
-
 }

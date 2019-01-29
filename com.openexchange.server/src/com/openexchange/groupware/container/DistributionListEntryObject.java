@@ -295,15 +295,21 @@ public class DistributionListEntryObject implements Serializable {
 
     @Override
     public boolean equals(final Object o) {
-        if (o instanceof DistributionListEntryObject) {
-            final DistributionListEntryObject distributionlistentry = (DistributionListEntryObject) o;
-
-            if (emailaddress.equals(distributionlistentry.getEmailaddress())) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DistributionListEntryObject)) {
+            return false;
+        }
+        DistributionListEntryObject distributionlistentry = (DistributionListEntryObject) o;
+        if (emailaddress == null) {
+            if (distributionlistentry.emailaddress == null) {
                 return true;
             }
+        } else if (emailaddress.equals(distributionlistentry.emailaddress)) {
+            return true;
         }
         return false;
-
     }
 
     public boolean searchDlistObject(final DistributionListEntryObject dleo) {

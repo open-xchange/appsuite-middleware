@@ -58,6 +58,10 @@ package com.openexchange.drive.client.windows.service;
  */
 public class Constants {
 
+    private Constants() {
+        // private constructor to prevent initialization
+    }
+
     /**
      * The updater template configuration key
      */
