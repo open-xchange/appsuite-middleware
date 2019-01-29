@@ -23,8 +23,6 @@ First things first. As with every OAuth provider, you will first need to registe
  * [openid](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
  * [profile](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
 
-   
-
 # Configuration
 
 In addition you have to configure the following properties in file `/opt/open-xchange/etc/microsoftgraphauth.properties`:
@@ -42,3 +40,11 @@ In addition you have to configure the following properties in file `/opt/open-xc
       E.g. "https://myappsuite.mydomain.invalid/ajax/defer" 
 
 You can define them system-wide or via the config cascade mechanism.
+
+# Upgrade to Microsoft Graph API
+
+Back in 2017 Microsoft [announced](https://developer.microsoft.com/en-us/office/blogs/outlook-rest-api-v1-0-office-365-discovery-and-live-connect-api-deprecation/) the deprecation of Live SDK and Live Connect APIs, urging API consumers to [migrate](https://docs.microsoft.com/en-us/onedrive/developer/rest-api/concepts/migrating-from-live-sdk) to their new Graph API. The deprecated APIs will no longer be available after **November 1st, 2018**.
+
+Regarding specific module APIs within the Live SDK and Live Connect, the Contacts API functionality ceased to return user data on **December 1st, 2017** and the OneDrive REST API on **November 1st, 2018**.
+
+Furthermore, the OAuth tokens obtained for the previously, now deprecated APIs, will not work with the new Graph API, hence all consumers are advised to generate new tokens via the [Microsoft Application Registration Portal](https://apps.dev.microsoft.com) for their Apps.

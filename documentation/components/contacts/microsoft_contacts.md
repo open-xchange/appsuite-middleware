@@ -24,3 +24,5 @@ The permissions can be enabled via the [Microsoft Application Registration Porta
 Note that the contact synchronisation will NOT happen automatically every time a new contact is added to the third-party provider's address book. A full sync will happen once the user has created her account, and periodically once per day. The periodic update can be enabled or disabled via the `com.openexchange.subscribe.autorun` server property.
 
 Also note that this is an one-way sync, i.e. from the third-party provider towards the AppSuite and NOT vice versa.
+
+Finally, ensure that in case of an upgrade to 7.10.2 you will need to generate new access tokens. More information [here]({{ site.baseurl }}/middleware/components/oauth/microsoft.html#upgrade-to-microsoft-graph-api).

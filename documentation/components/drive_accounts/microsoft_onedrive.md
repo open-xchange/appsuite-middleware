@@ -20,3 +20,5 @@ The following Microsoft Graph Permissions are required to enable the OneDrive cl
  * [offline_access](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
  * [openid](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
  * [profile](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
+ 
+ Ensure that in case of an upgrade to 7.10.2 you will need to generate new access tokens. More information [here]({{ site.baseurl }}/middleware/components/oauth/microsoft.html#upgrade-to-microsoft-graph-api).
