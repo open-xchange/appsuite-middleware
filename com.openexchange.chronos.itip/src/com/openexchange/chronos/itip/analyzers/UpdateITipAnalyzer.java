@@ -450,7 +450,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     private boolean isOrganizerChange(ITipChange change, Event originalEvent, Event updatedEvent) {
         Organizer original = originalEvent.getOrganizer();
         if (null != original) {
-            return CalendarUtils.matches(original, updatedEvent.getOrganizer());
+            return false == CalendarUtils.matches(original, updatedEvent.getOrganizer());
         }
         return false;
     }
