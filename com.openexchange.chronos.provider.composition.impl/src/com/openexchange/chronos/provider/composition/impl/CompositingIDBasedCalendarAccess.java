@@ -572,11 +572,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
     
     @Override
-    public CalendarResult updateOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
+    public CalendarResult changeOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateOrganizer(getRelativeId(eventID), organizer, clientTimestamp);
+            CalendarResult result = calendarAccess.changeOrganizer(getRelativeId(eventID), organizer, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);

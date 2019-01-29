@@ -440,7 +440,7 @@ public interface CalendarService {
      * @return The updated event
      * @throws OXException In case the organizer change is not allowed
      */
-    CalendarResult updateOrganizer(CalendarSession session, EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
+    CalendarResult changeOrganizer(CalendarSession session, EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.

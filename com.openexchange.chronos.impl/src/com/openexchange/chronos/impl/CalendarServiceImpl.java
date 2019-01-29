@@ -84,7 +84,7 @@ import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ImportPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
-import com.openexchange.chronos.impl.performer.UpdateOrganizerPerformer;
+import com.openexchange.chronos.impl.performer.ChangeOrganizerPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
 import com.openexchange.chronos.impl.performer.SplitPerformer;
@@ -391,7 +391,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult updateOrganizer(CalendarSession session, EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
+    public CalendarResult changeOrganizer(CalendarSession session, EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
         /*
          * update organizer, notify handlers & return userized result
          */
@@ -399,7 +399,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateOrganizerPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), organizer, L(clientTimestamp));
+                return new ChangeOrganizerPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), organizer, L(clientTimestamp));
 
             }
         }.executeUpdate()).getUserizedResult();

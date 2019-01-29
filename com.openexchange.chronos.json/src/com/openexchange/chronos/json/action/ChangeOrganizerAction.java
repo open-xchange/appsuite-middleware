@@ -75,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ChangeOrganizerAction} - "/chronos/updateOrganizer" endpoint for updating an organizer
+ * {@link ChangeOrganizerAction} - "/chronos/changeOrganizer" endpoint for updating an organizer
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
@@ -104,7 +104,7 @@ public class ChangeOrganizerAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         LeanConfigurationService service = services.getServiceSafe(LeanConfigurationService.class);
         if (false == service.getBooleanProperty(ChronosLeanConfigurationProperties.ALLOWED_ORGANIZER_CHANGE.getProperty())) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create("updateOrganizer");
+            throw AjaxExceptionCodes.DISABLED_ACTION.create("changeOrganizer");
         }
 
         long clientTimestamp = parseClientTimestamp(requestData);
@@ -126,7 +126,7 @@ public class ChangeOrganizerAction extends ChronosAction {
 
         try {
             Event deserialize = EventMapper.getInstance().deserialize(jsonObject, ORGANIZER_FIELD);
-            CalendarResult calendarResult = calendarAccess.updateOrganizer(eventId, deserialize.getOrganizer(), clientTimestamp);
+            CalendarResult calendarResult = calendarAccess.changeOrganizer(eventId, deserialize.getOrganizer(), clientTimestamp);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.MISSING_FIELD.create(ORGANIZER);

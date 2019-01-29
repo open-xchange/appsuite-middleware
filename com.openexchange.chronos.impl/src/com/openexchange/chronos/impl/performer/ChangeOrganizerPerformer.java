@@ -71,12 +71,12 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link UpdateOrganizerPerformer}
+ * {@link ChangeOrganizerPerformer}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
  */
-public class UpdateOrganizerPerformer extends AbstractUpdatePerformer {
+public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
 
     /**
      * Initializes a new {@link DeletePerformer}.
@@ -85,7 +85,7 @@ public class UpdateOrganizerPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public UpdateOrganizerPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
+    public ChangeOrganizerPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -97,7 +97,7 @@ public class UpdateOrganizerPerformer extends AbstractUpdatePerformer {
      * @param folder The calendar folder representing the current view on the events
      * @param roles The {@link Role}
      */
-    public UpdateOrganizerPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder, EnumSet<Role> roles) throws OXException {
+    public ChangeOrganizerPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder, EnumSet<Role> roles) throws OXException {
         super(storage, session, folder, roles);
     }
 

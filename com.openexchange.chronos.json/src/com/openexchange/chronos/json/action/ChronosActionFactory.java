@@ -86,7 +86,7 @@ public class ChronosActionFactory implements AJAXActionServiceFactory {
         actions.put("freeBusy", new FreeBusyAction(services));
         actions.put("needsAction", new NeedsActionAction(services));
         actions.put("resolve", new ResolveAction(services));
-        actions.put("updateOrganizer", new ChangeOrganizerAction(services));
+        actions.put("changeOrganizer", new ChangeOrganizerAction(services));
         this.actions = actions.build();
     }
 

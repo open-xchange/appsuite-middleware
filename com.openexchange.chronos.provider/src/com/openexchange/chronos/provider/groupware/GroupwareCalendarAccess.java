@@ -234,7 +234,7 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * @return The updated event
      * @throws OXException In case the organizer change is not allowed
      */
-    CalendarResult updateOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
+    CalendarResult changeOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.

@@ -1,9 +1,9 @@
-/chronos?action=updateOrganizer:
+/chronos?action=changeOrganizer:
   put:
-    operationId: updateOrganizer
+    operationId: changeOrganizer
     tags:
       - Chronos
-    summary: Updates an organizer of an event.
+    summary: Changes an organizer of an event.
     consumes:
       - application/json
     parameters:
@@ -20,7 +20,7 @@
         description: Timestamp of the last update of the event.
         required: true
       - in: body
-        name: updateOrganizerBody
+        name: changeOrganizerBody
         description: A JSON object containing the new organizer and an optional comment.
         required: true
         schema:
