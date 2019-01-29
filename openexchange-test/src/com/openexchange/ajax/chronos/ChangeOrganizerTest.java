@@ -138,7 +138,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update to internal
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, false);
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
@@ -148,7 +148,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update to internal and set comment
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, "Comment4U", null, null, false);
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, "Comment4U", null, null, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
@@ -160,7 +160,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update an non group scheduled
-        eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -170,7 +170,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
 
         // Update to external
         newOrganizer = AttendeeFactory.createOrganizerFrom(AttendeeFactory.createIndividual("external@example.org"));
-        eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -181,7 +181,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update with external attendee
-        eventManager.updateEventOrganizer(event, newOrganizer, null, null, null, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -200,7 +200,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         assertThat("Unable to find change exception", (occurrence = getOccurrence(master.getChangeExceptionDates().get(0), master.getId())), is(notNullValue()));
 
         // update on occurrence
-        eventManager.updateEventOrganizer(occurrence, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, true);
+        eventManager.changeEventOrganizer(occurrence, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, true);
     }
 
     @Test
@@ -212,7 +212,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
 
         EventData occurrence = getOccurrence();
         // THISANDFUTURE
-        EventData data = eventManager.updateEventOrganizer(event, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, false);
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
@@ -224,7 +224,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // THISANDPRIOR
-        eventManager.updateEventOrganizer(event, newOrganizer, null, getOccurrence().getRecurrenceId(), THISANDPRIOR, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, getOccurrence().getRecurrenceId(), THISANDPRIOR, true);
     }
 
     // ----------------------------- HELPER -----------------------------

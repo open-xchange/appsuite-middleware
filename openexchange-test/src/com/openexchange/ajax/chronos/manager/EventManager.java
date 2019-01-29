@@ -79,6 +79,7 @@ import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.CalendarUser;
+import com.openexchange.testing.httpclient.models.ChangeOrganizerBody;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
@@ -89,7 +90,6 @@ import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.UpdateBody;
-import com.openexchange.testing.httpclient.models.UpdateOrganizerBody;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
@@ -641,11 +641,11 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData updateEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
+    public EventData changeEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse updateResponse 
-        = userApi.getChronosApi().updateOrganizer(
+        = userApi.getChronosApi().changeOrganizer(
             userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), 
-            new UpdateOrganizerBody().organizer(organizer).comment(comment), 
+            new ChangeOrganizerBody().organizer(organizer).comment(comment), 
             recurrenceId, null == range ? null : range.name(), null);
         return handleUpdate(updateResponse, expectException);
     }
