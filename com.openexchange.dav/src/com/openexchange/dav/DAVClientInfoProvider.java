@@ -60,6 +60,7 @@ import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoType;
 import com.openexchange.java.Strings;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.uadetector.UserAgentParser;
 import net.sf.uadetector.ReadableUserAgent;
@@ -88,6 +89,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
     private static final String DAVDROID = "davdroid";
     private static final String WINDOWS_PHONE = "windows_phone";
     private static final String WINDOWS = "windows";
+    private static final String KONQUEROR = "konqueror";
     private static final String GENERIC_CALDAV = "generic_caldav";
     private static final String GENERIC_CARDDAV = "generic_carddav";
     private static final String UNKNOWN = "unknown";
@@ -157,6 +159,11 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                     if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("akonadi")) {
                         return new DAVClientInfo("KDE/Plasma DAV Client", "linux", null, "akonadi", null, "akonadi", ClientInfoType.DAV);
                     }
+
+                    // Maybe konqueror?
+                    if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("Linux") && sUserAgent.contains("Konqueror")) {
+                        return new DAVClientInfo(KONQUEROR, "linux", null, KONQUEROR, null, KONQUEROR, ClientInfoType.DAV);
+                    }
                 }
                 return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
             }
@@ -170,6 +177,10 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             return null;
         }
 
+        if (!isDAV(session)) {
+            return null;
+        }
+
         String sUserAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
         if (Strings.isEmpty(sUserAgent)) {
             // Unknown User-Agent
@@ -178,7 +189,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
 
         try {
             DAVClientInfo davClientInfo = clientInfoCache.get(sUserAgent);
-            return UNKNOWN.equals(davClientInfo.getClientFamily()) ? null : davClientInfo;
+            return davClientInfo;
         } catch (ExecutionException e) {
             LOG.error("Failed to determine client info for User-Agent {}", sUserAgent, e.getCause());
             return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName(), getClientFamily(DAVUserAgent.UNKNOWN));
@@ -270,6 +281,10 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             default:
                 return "unknown";
         }
+    }
+
+    private boolean isDAV(Session session) {
+        return Origin.CALDAV.equals(session.getOrigin()) || Origin.CARDDAV.equals(session.getOrigin());
     }
 
 }
