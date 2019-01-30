@@ -236,7 +236,7 @@ public class Recurrence {
                 while (iterator.hasNext()) {
                     DateTime occurrenceStart = iterator.next().getValue();
                     if (occurrenceStart.after(until)) {
-                        nextOccurrenceStart = occurrenceStart;
+                        nextOccurrenceStart = recurrenceData.getSeriesStart().isFloating() ? occurrenceStart : new DateTime(recurrenceData.getSeriesStart().getTimeZone(), occurrenceStart.getTimestamp());
                         break;
                     }
                 }
