@@ -64,17 +64,15 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Iterator;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -99,7 +97,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.FreeBusyConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -109,8 +106,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringReader;
-import com.openexchange.tools.TimeZoneUtils;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -124,20 +119,6 @@ public class ICal4JParser implements ICalParser {
     private static final Charset UTF8 = Charsets.UTF_8;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JParser.class);
-    
-    private static final String TZ_REGEX = ";TZID=([^:]+):\\\\s*([0-9]{8}T[0-9]{6})";
-
-    private static final Pattern WORKAROUND_30027 = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*");
-
-    private static final Pattern TRIGGER = Pattern.compile("TRIGGER" + TZ_REGEX);
-
-    private static final Pattern CREATED = Pattern.compile("CREATED" + TZ_REGEX);
-
-    private static final Pattern LAST_MODIFIED = Pattern.compile("LAST-MODIFIED" + TZ_REGEX);
-
-    private static final Pattern COMPLETED = Pattern.compile("COMPLETED" + TZ_REGEX);
-
-    private static final Pattern DTSTAMP = Pattern.compile("DTSTAMP" + TZ_REGEX);
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {
@@ -179,10 +160,13 @@ public class ICal4JParser implements ICalParser {
 
     @Override
     public ParseResult<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        BufferedReader reader = null;
         try {
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
+
             TruncationInfo truncationInfo = null;
             List<CalendarDataObject> appointments = null;
-            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(ical)) != null;) {
+            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 final ComponentList vevents = calendar.getComponents("VEVENT");
 
                 int size = vevents.size();
@@ -216,7 +200,9 @@ public class ICal4JParser implements ICalParser {
             // IGNORE
         } catch (final ConversionError e){
         	errors.add(e);
-        } 
+        } finally {
+            closeSafe(reader);
+        }
 
         return DefaultParseResult.emptyParseResult();
     }
@@ -238,7 +224,7 @@ public class ICal4JParser implements ICalParser {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
             TruncationInfo truncationInfo = null;
             List<FreeBusyInformation> fbInfos = null;
-            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(ical)) != null;) {
+            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 ComponentList freebusies = calendar.getComponents("VFREEBUSY");
                 int size = freebusies.size();
                 int myLimit;
@@ -295,8 +281,10 @@ public class ICal4JParser implements ICalParser {
         if (null == propertyName || null == ical) {
             return null;
         }
+        BufferedReader reader = null;
         try {
-            final net.fortuna.ical4j.model.Calendar calendar = parse(ical);
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
+            final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
             if (calendar == null) {
                 return null;
             }
@@ -309,6 +297,8 @@ public class ICal4JParser implements ICalParser {
             return null;
         } catch (final RuntimeException e){
             return null;
+        } finally {
+            closeSafe(reader);
         }
     }
 
@@ -324,10 +314,12 @@ public class ICal4JParser implements ICalParser {
 
     @Override
     public ParseResult<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        BufferedReader reader = null;
         try {
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
             TruncationInfo truncationInfo = null;
             List<Task> tasks = null;
-            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(ical)) != null;) {
+            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 ComponentList todos = calendar.getComponents("VTODO");
                 int size = todos.size();
                 int myLimit;
@@ -357,7 +349,9 @@ public class ICal4JParser implements ICalParser {
             return DefaultParseResult.<Task> builder().importedObjects(tasks).truncationInfo(truncationInfo).build();
         } catch (final UnsupportedCharsetException e) {
             // IGNORE
-        } 
+        } finally {
+            closeSafe(reader);
+        }
 
         return DefaultParseResult.emptyParseResult();
     }
@@ -458,171 +452,194 @@ public class ICal4JParser implements ICalParser {
         return tz.getID();
     }
 
-	protected net.fortuna.ical4j.model.Calendar parse(InputStream inputstream) throws ConversionError {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new InputStreamReader(inputstream, Charsets.UTF_8));
-			return parse(reader);
-		} catch (OXException | IOException | ParserException e) {
-			throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e.getMessage());
-		} finally {
-			Streams.close(reader);
-		}
+	protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
+	    return parse(reader, null);
 	}
 
-	protected net.fortuna.ical4j.model.Calendar parse(BufferedReader reader) throws OXException, IOException, ParserException {
-		CalendarBuilder builder = new CalendarBuilder();
-		StringBuilder ical = new StringBuilder();
-		StringBuilder chunk = new StringBuilder();
-		int lines = 0;
-		int eventCount = 0;
-		for (String line; (line = reader.readLine()) != null;) {
-			if (limit > -1 && line.startsWith("BEGIN:VEVENT")) {
-				// Track numbers of events
-				eventCount++;
-				if (eventCount > limit) {
-					LOG.info("The defined maximum value of {} events for the property \"com.openexchange.import.ical.limit\" was exceeded. Aborting the import.", Integer.valueOf(limit));
-					throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION,"The file contains too many elements. Aborting the import.");
-				}
-			}
-			chunk.append(line).append('\n');
-			if (++lines > 1000) {
-				// Apply workarounds in smaller chunks to keep the used heap space as small as
-				// feasible
-				ical.append(applyWorkarounds(chunk));
-				lines = 0;
-				chunk = new StringBuilder();
-			}
-		}
-		if (lines > 0) {
-			ical.append(applyWorkarounds(chunk));
-		}
+    protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader, final Collection<Exception> exceptions) throws ConversionError {
+        final CalendarBuilder builder = new CalendarBuilder();
+        try {
+            final StringBuilder chunk = new StringBuilder();
+            boolean read = false;
+            boolean timezoneStarted = false; //hack to fix bug 11958
+            boolean timezoneEnded = false; //hack to fix bug 11958
+            boolean timezoneRead = false; //hack to fix bug 11958
+            final StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
+            // Copy until we find an END:VCALENDAR
+            boolean beginFound = false;
+            for (String line; (line = reader.readLine()) != null;) {
+            	if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
+            		line = removeByteOrderMarks(line);
+            	}
+                if(line.startsWith("BEGIN:VCALENDAR")) {
+                    beginFound = true;
+                } else if ( !beginFound && !"".equals(line)) {
+                    continue; // ignore bad lines between "VCALENDAR" Tags.
+                }
+                if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
+                	if(line.matches("^\\s*BEGIN:VTIMEZONE")){
+                		timezoneStarted = true;
+                	}
+                    if(!line.matches("\\s*")) {
+                        read = true;
+                        if(timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
+                        	timezoneInfo.append(line).append('\n');
+                        } else {
+                        	chunk.append(line).append('\n');
+                        }
+                    }
+                	if(line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958
+                		timezoneEnded = true;
+                		timezoneRead = true && timezoneStarted;
+                	}
+                } else {
+                    break;
+                }
+            }
+            if(!read) {  return null; }
+            chunk.append("END:VCALENDAR\n");
+            if(timezoneRead){
+            	int locationForInsertion = chunk.indexOf("BEGIN:");
+            	if(locationForInsertion > -1){
+            		locationForInsertion = chunk.indexOf("BEGIN:", locationForInsertion + 1);
+            		if(locationForInsertion > -1){
+            			chunk.insert(locationForInsertion, timezoneInfo);
+            		}
+            	}
+            }
+            final UnsynchronizedStringReader chunkedReader = new UnsynchronizedStringReader(
+            	workaroundFor19463(
+            	workaroundFor16895(
+            	workaroundFor16613(
+            	workaroundFor16367(
+            	workaroundFor17492(
+            	workaroundFor17963(
+            	workaroundFor20453(
+            	workaroundFor27706And28942(
+            	workaroundFor29282(
+            	workaroundFor30027(
+            	removeAnnoyingWhitespaces(chunk.toString()
+                )))))))))))
+            ); // FIXME: Encoding?
+            try {
+                return builder.build(chunkedReader);
+            } catch (NullPointerException e) {
+                LOG.warn(composeErrorMessage(e, chunkedReader.getString()), e);
+                throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
+            }
+        } catch (final IOException e) {
+            if (null == exceptions) {
+                LOG.error("", e);
+            } else {
+                exceptions.add(e);
+            }
+        } catch (final ParserException e) {
+            LOG.warn("", e);
+            throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
+        }
+        return null;
+    }
 
-		return builder.build(new UnsynchronizedStringReader(ical.toString()));// FIXME: Encoding?
-	}
-
-	private String applyWorkarounds(StringBuilder sb) {
-		return workaroundFor19463(workaroundFor16895(workaroundFor16613(
-				workaroundFor16367(workaroundFor17492(workaroundFor17963(workaroundFor20453(workaroundFor27706And28942(
-						workaroundFor29282(workaroundFor30027(removeAnnoyingWhitespaces(sb.toString())))))))))));
-	}
-
-	private String workaroundFor17963(final String input) {
-		return input.replaceAll("EXDATE:(\\d+)([\\n\\r])", "EXDATE:$1T000000$2");
+    private String workaroundFor17963(final String input) {
+    	return input.replaceAll("EXDATE:(\\d+)([\\n\\r])", "EXDATE:$1T000000$2");
 	}
 
 	private String workaroundFor17492(final String input) {
-		return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
+    	return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
 	}
 
 	private String workaroundFor19463(final String input) {
-		return input.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
-				.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)", "TZOFFSETTO:+$1");
+		return input
+			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
+			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
+			;
 	}
 
 	private String workaroundFor20453(final String input) {
-		return input.replaceAll("DTEND;\\s*\n", "");
+		return input
+			.replaceAll("DTEND;\\s*\n", "")
+			;
 	}
 
 	private String workaroundFor29282(final String input) {
-		return input.replaceAll("0000([0-9]{4}T[0-9]{6}Z)", "1970$1");
+	    return input.replaceAll("0000([0-9]{4}T[0-9]{6}Z)", "1970$1");
 	}
 
 	private String workaroundFor27706And28942(final String input) {
-        Map<TimeZone, SimpleDateFormat> zones = new HashMap<>();
-        Matcher m = DTSTAMP.matcher(input);
-        final StringBuffer sb = new StringBuffer(input.length());
+	    Matcher m = Pattern.compile("DTSTAMP;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(input);
+	    final StringBuffer sb = new StringBuffer(input.length());
+	    while (m.find()) {
+	        final TimeZone tz = getTimeZone(m.group(1));
+	        m.appendReplacement(sb, Strings.quoteReplacement("DTSTAMP:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+	    m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
+
+	    m = Pattern.compile("COMPLETED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
         while (m.find()) {
-            final TimeZone tz = getTimeZone(zones, m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("DTSTAMP:" + getUtcPropertyFrom(m.group(2), zones, tz)));
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = COMPLETED.matcher(sb.toString());
-        sb.delete(0, sb.length());
+        m = Pattern.compile("LAST-MODIFIED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
         while (m.find()) {
-            final TimeZone tz = getTimeZone(zones, m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), zones, tz)));
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("LAST-MODIFIED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = LAST_MODIFIED.matcher(sb.toString());
-        sb.delete(0, sb.length());
+        m = Pattern.compile("CREATED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
         while (m.find()) {
-            final TimeZone tz = getTimeZone(zones, m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("LAST-MODIFIED:" + getUtcPropertyFrom(m.group(2), zones, tz)));
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
         // -------------------------------------------------------------------------------------------------- //
 
-        m = CREATED.matcher(sb.toString());
-        sb.delete(0, sb.length());
+        m = Pattern.compile("TRIGGER;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
         while (m.find()) {
-            final TimeZone tz = getTimeZone(zones, m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), zones, tz)));
-        }
-        m.appendTail(sb);
-
-        // -------------------------------------------------------------------------------------------------- //
-
-        m = TRIGGER.matcher(sb.toString());
-        sb.delete(0, sb.length());
-        while (m.find()) {
-            final TimeZone tz = getTimeZone(zones, m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("TRIGGER:" + getUtcPropertyFrom(m.group(2), zones, tz)));
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("TRIGGER:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
         return sb.toString();
     }
 
-	private TimeZone getTimeZone(Map<TimeZone, SimpleDateFormat> zones, String ID) {
-		if (Strings.isEmpty(ID)) {
-			return TimeZone.getDefault();
-		}
-		for (Iterator<Entry<TimeZone, SimpleDateFormat>> iterator = zones.entrySet().iterator(); iterator.hasNext();) {
-			Entry<TimeZone, SimpleDateFormat> entry = iterator.next();
-			if (entry.getKey().getID().equals(ID)) {
-				// Found
-				return entry.getKey();
-			}
-		}
-
-		// Insert new time zone
-		TimeZone zone = TimeZoneUtils.getTimeZone(ID);
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-		format.setTimeZone(zone);
-		zones.put(zone, format);
-		return zone;
-	}
-
 	private static final SimpleDateFormat UTC_PROPERTY;
 
 	static {
-		final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-		sdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
-		UTC_PROPERTY = sdf;
+	    final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+	    sdf.setTimeZone(getTimeZone("UTC"));
+	    UTC_PROPERTY = sdf;
 	}
 
-	private String getUtcPropertyFrom(final String s, Map<TimeZone, SimpleDateFormat> zones, final TimeZone tz) {
-		try {
-			SimpleDateFormat sdf = zones.get(tz);
-			final Date d = sdf.parse(s);
-			synchronized (UTC_PROPERTY) {
-				return UTC_PROPERTY.format(d);
-			}
-		} catch (final ParseException e) {
-			return s;
-		}
+	private String getUtcPropertyFrom(final String s, final TimeZone tz) {
+	    try {
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+            sdf.setTimeZone(tz);
+            final Date d = sdf.parse(s);
+            synchronized (UTC_PROPERTY) {
+                return UTC_PROPERTY.format(d);
+            }
+        } catch (final ParseException e) {
+            return s;
+        }
 	}
 
 	private String workaroundFor30027(final String input) {
-        final Matcher m = WORKAROUND_30027.matcher(input);
+        final Matcher m = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*").matcher(input);
         final StringBuffer sb = new StringBuffer(input.length());
         while (m.find()) {
             m.appendReplacement(sb, ": $1");
