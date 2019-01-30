@@ -144,6 +144,9 @@ public class InfostoreTestManager implements TestManager {
 
     @Override
     public void cleanUp() {
+        if (createdEntities.isEmpty()) {
+            return;
+        }
         List<String> objectIDs = new ArrayList<String>(createdEntities.size());
         List<String> folderIDs = new ArrayList<String>(createdEntities.size());
         for (File metadata : createdEntities) {
