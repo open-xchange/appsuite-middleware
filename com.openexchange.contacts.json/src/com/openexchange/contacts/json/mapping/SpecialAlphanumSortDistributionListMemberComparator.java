@@ -83,7 +83,8 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  * {@link SpecialAlphanumSortDistributionListMemberComparator} - Sorts with respect to {@link Contact#SPECIAL_SORTING}. Considering given names, too, if
  * last names are equal.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
 public class SpecialAlphanumSortDistributionListMemberComparator implements Comparator<DistributionListEntryObject> {
 

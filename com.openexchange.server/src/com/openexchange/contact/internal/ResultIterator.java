@@ -215,19 +215,16 @@ public class ResultIterator implements SearchIterator<Contact> {
         member.setSortName(getSortedName(contact.getYomiLastName(), contact.getYomiFirstName(), contact.getSurName(), contact.getGivenName()));
 	}
 	
-	private String getSortedName(String yomiLastName,
-	                             String yomiFirtName,
-	                             String surName,
-	                             String givenName) {
-	    
-	    Locale locale;
+    private String getSortedName(String yomiLastName, String yomiFirtName, String surName, String givenName) {
+
+        Locale locale;
         try {
             locale = ServerSessionAdapter.valueOf(session).getUser().getLocale();
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             locale = null;
         }
-	     /*
+        /*
          * for contacts, use last- and firstname, preferring the yomi names if suitable
          */
         boolean preferYomiFields = null != locale && Locale.JAPANESE.getLanguage().equals(locale.getLanguage());
@@ -255,7 +252,7 @@ public class ResultIterator implements SearchIterator<Contact> {
          * fallback to empty sortname
          */
         return "";
-	}
+    }
 
 	private Contact[] getReferencedContacts(DistributionListEntryObject[] members) {
 		Contact[] contacts = new Contact[members.length];
