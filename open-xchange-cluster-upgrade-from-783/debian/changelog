@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-783 (7.8.4-38) stable; urgency=medium
+
+  * Build for patch 2019-01-29 (5116)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 30 Jan 2019 14:57:31 +0100
+
 open-xchange-cluster-upgrade-from-783 (7.8.4-37) stable; urgency=medium
 
   * Build for patch 2019-01-28 (5074)
