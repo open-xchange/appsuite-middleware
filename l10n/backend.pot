@@ -959,6 +959,21 @@ msgid ""
 msgstr ""
 
 #. *
+#. * The organizer of the appointment has changed. New organizer is: %1$s
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The organizer of the appointment has changed. New organizer is: %1$s"
+msgstr ""
+
+#. *
+#. * The organizer of the appointment has changed. This operation is not allowed.
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+msgid ""
+"The organizer of the appointment has changed. This operation is not allowed."
+msgstr ""
+
+#. *
 #. * The event %s couldn't be deleted: %s
 #.
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
@@ -1496,6 +1511,12 @@ msgstr ""
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "The appointment contains too many reminders."
+msgstr ""
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
+msgid ""
+"The operation could not be completed. The event contains at least one "
+"external attendee."
 msgstr ""
 
 #. Your selection is not supported.
