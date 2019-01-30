@@ -86,8 +86,6 @@ public class PayloadTreeTest {
 
     private PayloadElement payloadElement3;
 
-    private List<PayloadTreeNode> emptyPayloadTreeNodeList;
-
     private List<PayloadTreeNode> filledPayloadTreeNodeList;
 
     private PayloadTree emptyTree;
@@ -133,7 +131,6 @@ public class PayloadTreeTest {
         payloadTreeNode2 = new PayloadTreeNode(payloadElement2);
         payloadTreeNode3 = new PayloadTreeNode(payloadElement3);
 
-        emptyPayloadTreeNodeList = new ArrayList<PayloadTreeNode>();
         filledPayloadTreeNodeList = new ArrayList<PayloadTreeNode>();
         filledPayloadTreeNodeList.add(payloadTreeNode1);
         filledPayloadTreeNodeList.add(payloadTreeNode2);
@@ -297,15 +294,4 @@ public class PayloadTreeTest {
         System.out.println(filledTreePayloadTreeNode4.recursiveToString(0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testPayloadCreateWithNull() {
-        PayloadTreeNode nullElement = null;
-        new PayloadTreeNode(nullElement);
-    }
-
-    @Test
-    public void testPayloadCreateWithoutElement() {
-        PayloadTreeNode nullElement = new PayloadTreeNode();
-        new PayloadTreeNode(nullElement);
-    }
 }

@@ -108,26 +108,6 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
     }
 
     /**
-     * Initializes a new {@link PayloadTreeNode} based on another PayloadTreeNode
-     *
-     * @param otherTreeNode the other PayloadTreeNode, must not be null
-     * @throws IllegalArgumentException if the other PayloadTreeNode is null
-     */
-    public PayloadTreeNode(PayloadTreeNode otherTreeNode) {
-        this();
-        if (otherTreeNode == null) {
-            throw new IllegalArgumentException("Other PayloadTreeNode must not be null.");
-        }
-        PayloadElement otherPayloadElement = otherTreeNode.payloadElement;
-        if (otherPayloadElement != null) {
-            this.payloadElement = new PayloadElement(otherPayloadElement);
-        }
-        for (PayloadTreeNode otherChild : otherTreeNode.children) {
-            children.add(new PayloadTreeNode(otherChild));
-        }
-    }
-
-    /**
      * Gets the parent node
      *
      * @return The parent
@@ -334,9 +314,8 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
     public String getNamespace() {
         if (payloadElement != null) {
             return payloadElement.getNamespace();
-        } else {
-            return elementPath.getNamespace();
         }
+        return elementPath.getNamespace();
     }
 
     /**

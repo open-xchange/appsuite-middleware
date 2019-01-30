@@ -154,28 +154,6 @@ public class Presence extends Stanza {
     }
 
     /**
-     * Initializes a new {@link Presence} based on another Presence. This will produce a deep copy up to the leafs of the PayloadTreeNode,
-     * more exactly the data Portion of the PayloadElement in the PayloadTreeNode as we are dealing with Objects that must not neccessarily
-     * implement Cloneable or Serializable.
-     * 
-     * @param other The Presence to copy, must not be null
-     * @throws IllegalArgumentException if the other Presence is null
-     */
-    public Presence(Presence other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Other Presence must not be null.");
-        }
-        super.setFrom(other.getFrom());
-        super.setTo(other.getTo());
-        this.error = other.error;
-        this.message = other.message;
-        this.payloads = other.deepCopyPayloads();
-        this.priority = other.priority;
-        this.state = other.state;
-        this.type = other.type;
-    }
-
-    /**
      * Optional attribute. The default of none means the client is available.
      */
     private Type type = Type.NONE;
@@ -288,7 +266,7 @@ public class Presence extends Stanza {
     }
 
     @Override
-    public void initializeDefaults() throws OXException {
+    public void initializeDefaults() {
         Initializer initializer = new Initializer();
         Collection<PayloadTree> defaultPayloads = getDefaultPayloads();
         initializer.initializeFromDefaults(defaultPayloads);
@@ -314,7 +292,7 @@ public class Presence extends Stanza {
          * @param defaultPayloads the PayloadTrees containing the PayloadElements needed to initialize the default Stanza fields
          * @throws OXException when the Stanza couldn't be initialized
          */
-        public void initializeFromDefaults(Collection<PayloadTree> defaultPayloads) throws OXException {
+        public void initializeFromDefaults(Collection<PayloadTree> defaultPayloads) {
             initShow(defaultPayloads);
             initStatus(defaultPayloads);
             initPriority(defaultPayloads);

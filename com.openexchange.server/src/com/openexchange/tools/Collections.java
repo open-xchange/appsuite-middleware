@@ -51,12 +51,8 @@ package com.openexchange.tools;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -406,33 +402,6 @@ public final class Collections {
             return n;
         }
 
-    }
-
-    /**
-     * Returns a copy of the object, or <tt>null</tt> if the object cannot be serialized.
-     */
-    public static Object copy(final Serializable orig) {
-        try {
-            /*
-             * Write the object out to a byte array
-             */
-            final FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
-            final ObjectOutputStream out = new ObjectOutputStream(fbos);
-            out.writeObject(orig);
-            out.flush();
-            out.close();
-            /*
-             * Retrieve an input stream from the byte array and read a copy of the object back in
-             */
-            final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
-            return in.readObject();
-        } catch (final IOException e) {
-            LOG.error("", e);
-            return null;
-        } catch (final ClassNotFoundException cnfe) {
-            LOG.error("", cnfe);
-            return null;
-        }
     }
 
     public static <T> Enumeration<T> iter2enum(final Iterator<T> iter) {

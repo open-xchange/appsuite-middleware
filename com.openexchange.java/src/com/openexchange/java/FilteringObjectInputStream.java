@@ -47,39 +47,45 @@
  *
  */
 
-package com.openexchange.realtime.util;
+package com.openexchange.java;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.ObjectStreamClass;
 
 /**
- * {@link CopyObject}
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link FilteringObjectInputStream} prevents invalid deserialization whitelisting allowed classes
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public class CopyObject {
+public class FilteringObjectInputStream extends ObjectInputStream {
 
-    @SuppressWarnings("unchecked")
-    public static <T extends Object & Serializable> T copyObject(final T original) {
-        try {
-            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(original);
+    private final Class<?>[] whitelist;
 
-            final byte[] objectbytes = byteArrayOutputStream.toByteArray();
-            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(objectbytes);
-            final ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-            return (T) objectInputStream.readObject();
-        } catch (final IOException e) {
-            // impossible as we use an ByteArray
-        } catch (final ClassNotFoundException e) {
-            // impossible as we just wrote an object of this class
-        }
-        // impossible case, just to keep compiler happy
-        throw new IllegalStateException("copyObject failed to copy object of type: " + original.getClass());
+    /**
+     * Initializes a new {@link FilteringObjectInputStream}.
+     * 
+     * @param in The {@link InputStream}
+     * @param classes A list of whitelisted classes. Resolving of all other classes will be denied.
+     * @throws IOException
+     */
+    public FilteringObjectInputStream(InputStream in, Class<?>... classes) throws IOException {
+        super(in);
+        this.whitelist = classes;
     }
+
+    @Override
+    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+        for (Class<?> clazz : whitelist) {
+            if (desc.getName().equals(clazz.getName())) {
+                return super.resolveClass(desc);
+            }
+        }
+
+        throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
+    }
+
 }

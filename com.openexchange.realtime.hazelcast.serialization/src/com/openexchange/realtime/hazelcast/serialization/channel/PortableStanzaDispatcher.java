@@ -52,7 +52,6 @@ package com.openexchange.realtime.hazelcast.serialization.channel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,6 +64,7 @@ import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.java.FilteringObjectInputStream;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -217,15 +217,16 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
      * imports.
      *
      * @param stanzaBytes The byte array representation of the Stanza
-     * @return The deserialzed {@link Stanza}
+     * @return The deserialized {@link Stanza}
      * @throws IOException If reading the byte array fails
      * @throws ClassNotFoundException If the OSGI imports are too restrictive and not all classes that make up a {@link Stanza} subclass are
      *             accessible
      */
     private static Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
-        final ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        return Stanza.class.cast(objectInputStream.readObject());
+        try (FilteringObjectInputStream objectInputStream = new FilteringObjectInputStream(byteArrayInputStream, Stanza.class);) {
+            return Stanza.class.cast(objectInputStream.readObject());
+        }
     }
 
 }
