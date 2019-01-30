@@ -155,7 +155,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             AJAXConfig.init();
             DavPropertyNameSet props = new DavPropertyNameSet();
             props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
-            propFind = new PropFindMethod(Config.getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+            propFind = new PropFindMethod(Config.getBaseUri() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
             HttpClient httpClient = new HttpClient();
             httpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, UserAgents.IOS_12_0);
             assertEquals("Unexpected response status", HttpServletResponse.SC_UNAUTHORIZED, httpClient.executeMethod(propFind));
