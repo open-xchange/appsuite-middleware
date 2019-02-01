@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.external.javax.inject-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external.javax.inject.source-2.4.0-b10.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.locator-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external-hk2-locator.source-2.4.0-b10.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.io.source_2.2.0.v201405211200.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-csv-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-csv-1.4-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-csv-1.6.jar" sourcepath="/com.openexchange.bundles/source/commons-csv-1.6-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.media.multipart_2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.media.multipart.source_2.17.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-server-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-server.source_2.17.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-media-json-jackson-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-media-json-jackson-2.17-sources.jar"/>
