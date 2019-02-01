@@ -67,6 +67,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOR
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_ALARM_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CONFIGURATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RECURRENCE_ID_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
@@ -81,6 +82,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NOT_ORGANIZER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.OUT_OF_SEQUENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
@@ -221,6 +223,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     CONCURRENT_MODIFICATION("Concurrent modification [id %1$s, client timestamp %2$d, actual timestamp %3$d]", CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 4120),
     /**
+     * <li>The changes could not be applied because a newer version of the appointment already exists.</li>
+     * <li>Out of sequence [id %1$s, client sequence %2$d, actual sequence %3$d]</li>
+     */
+    OUT_OF_SEQUENCE("Concurrent modification [id %1$s, client sequence %2$d, actual sequence %3$d]", OUT_OF_SEQUENCE_MSG, Category.CATEGORY_CONFLICT, 4121),
+    /**
      * <li>The appointment could not be created due to another conflicting appointment with the same unique identifier.</li>
      * <li>UID conflict [uid %1$s, conflicting id %2$s]</li>
      */
@@ -315,6 +322,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Invalid alarm [alarm %1$s]</li>
      */
     INVALID_ALARM("Invalid alarm [alarm %1$s]", INVALID_ALARM_MSG, Category.CATEGORY_USER_INPUT, 4005),
+    /**
+     * <li>The value for \"%1$s\" is invalid and cannot applied.</li>
+     * <li>Invalid data [field %1$s, message %2$s]</li>
+     */
+    INVALID_DATA("Invalid data [field %1$s, message %2$s]", INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 4006),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>Unexpected error [%1$s]</li>

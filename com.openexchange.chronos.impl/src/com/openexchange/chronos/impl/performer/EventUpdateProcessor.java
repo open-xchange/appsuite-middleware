@@ -127,6 +127,8 @@ import com.openexchange.groupware.tools.mappings.Mapping;
  */
 public class EventUpdateProcessor implements EventUpdate {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
+
     private final CalendarSession session;
     private final CalendarUser calendarUser;
     private final CalendarFolder folder;
@@ -137,8 +139,6 @@ public class EventUpdateProcessor implements EventUpdate {
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
-
-    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
 
     /**
      * Initializes a new {@link EventUpdateProcessor}.
@@ -230,6 +230,12 @@ public class EventUpdateProcessor implements EventUpdate {
     @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
         return attachmentUpdates;
+    }
+
+    @Override
+    public String toString() {
+        return "EventUpdateProcessor [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates + 
+            ", attachmentUpdates=" + attachmentUpdates + ", exceptionUpdates=" + exceptionUpdates + "]";
     }
 
     /**

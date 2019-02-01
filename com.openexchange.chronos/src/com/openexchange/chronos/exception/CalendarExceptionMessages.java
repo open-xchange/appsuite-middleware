@@ -87,6 +87,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
 
+    public static final String OUT_OF_SEQUENCE_MSG = "The changes could not be applied because a newer version of the appointment already exists.";
+
     public static final String UID_CONFLICT_MSG = "The appointment could not be created due to another conflicting appointment with the same unique identifier.";
 
     public static final String EVENT_CONFLICTS_MSG = "The appointment conflicts with one or more other appointments.";
@@ -136,6 +138,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String MAX_ACCOUNTS_EXCEEDED_MSG = "The maximum number of calendar subscriptions is exceeded.";
 
     public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't applied.";
+
+    public static final String INVALID_DATA_MSG = "The value for \"%1$s\" is invalid and cannot be applied.";
 
     public static final String UNSUPPORTED_DATA_MSG = "The value for \"%2$s\" is not supported and wasn't applied.";
 

@@ -59,6 +59,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
@@ -187,6 +188,21 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(event.getId(), L(clientTimestamp), L(event.getTimestamp()));
         }
         return event;
+    }
+
+    /**
+     * Checks that an incoming event update has no sequence number smaller than the original event's sequence number.
+     *
+     * @param originalEvent The original event being updated
+     * @param eventUpdate The updated event data
+     * @return The passed event update, after the sequence number was checked
+     * @throws OXException {@link CalendarExceptionCodes#OUT_OF_SEQUENCE}
+     */
+    public static Event requireInSequence(Event originalEvent, Event eventUpdate) throws OXException {
+        if (eventUpdate.containsSequence() && eventUpdate.getSequence() < originalEvent.getSequence()) {
+            throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(eventUpdate.getSequence()));
+        }
+        return eventUpdate;
     }
 
     /**
@@ -340,6 +356,49 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
         }
         return uid;
+    }
+
+    /**
+     * Checks that the unique identifier (UID) matches in all events from a calendar object resource, i.e. it is either undefined, or
+     * equal in all events.
+     *
+     * @param event The primary event to check the UID in, or <code>null</code> to just check the further events
+     * @param events Further events to check the UID for equality, or <code>null</code> to just check the first event
+     * @return The event's common unique identifier, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String uidMatches(Event event, Event... events) throws OXException {
+        String uid = null != event ? event.getUid() : null != events && 0 < events.length ? events[0].getUid() : null;
+        if (null != events) {
+            for (Event e : events) {
+                if (false == Objects.equals(uid, e.getUid())) {
+                    throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
+                }
+            }
+        }
+        return uid;
+    }
+
+    /**
+     * Checks that the organizer matches in all events from a calendar object resource, i.e. it is either undefined, or equal in all 
+     * events.
+     *
+     * @param event The primary event to check the organizer in, or <code>null</code> to just check the further events
+     * @param events Further events to check the organizer for equality, or <code>null</code> to just check the first event
+     * @return The event's common organizer, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     * @see CalendarUtils#matches(CalendarUser, CalendarUser)
+     */
+    public static Organizer organizerMatches(Event event, Event... events) throws OXException {
+        Organizer organizer = null != event ? event.getOrganizer() : null != events && 0 < events.length ? events[0].getOrganizer() : null;
+        if (null != events) {
+            for (Event e : events) {
+                if (false == CalendarUtils.matches(organizer, e.getOrganizer())) {
+                    throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ORGANIZER, "Organizer mismatch");
+                }
+            }
+        }
+        return organizer;
     }
 
     /**
