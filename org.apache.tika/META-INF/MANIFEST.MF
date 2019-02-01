@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Apache Tika
 Bundle-SymbolicName: org.apache.tika
-Bundle-Version: 1.19.1
+Bundle-Version: 1.20
 Bundle-Vendor: Apache Software Foundation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/tika-core-1.19.1.jar,
- lib/tika-parsers-1.19.1.jar,
+ lib/tika-core-1.20.jar,
+ lib/tika-parsers-1.20.jar,
  lib/cdm-4.5.5.jar,
  lib/ctakes-core-4.0.0.jar,
- lib/curvesapi-1.04.jar,
+ lib/curvesapi-1.05.jar,
  lib/geoapi-3.0.1.jar,
  lib/grib-4.5.5.jar,
  lib/httpservices-4.5.5.jar,
@@ -23,17 +23,17 @@ Bundle-ClassPath: .,
  lib/jempbox-1.8.16.jar,
  lib/jhighlight-1.0.3.jar,
  lib/jmatio-1.5.jar,
- lib/junrar-0.7.jar,
+ lib/junrar-2.0.0.jar,
  lib/netcdf4-4.5.5.jar,
  lib/opennlp-tools-1.9.0.jar,
- lib/parso-2.0.9.jar,
- lib/pdfbox-tools-2.0.12.jar,
- lib/poi-4.0.0.jar,
- lib/poi-ooxml-4.0.0.jar,
- lib/poi-ooxml-schemas-4.0.0.jar,
- lib/poi-scratchpad-4.0.0.jar,
- lib/rome-1.5.1.jar,
- lib/rome-utils-1.5.1.jar,
+ lib/parso-2.0.10.jar,
+ lib/pdfbox-tools-2.0.13.jar,
+ lib/poi-4.0.1.jar,
+ lib/poi-ooxml-4.0.1.jar,
+ lib/poi-ooxml-schemas-4.0.1.jar,
+ lib/poi-scratchpad-4.0.1.jar,
+ lib/rome-1.12.0.jar,
+ lib/rome-utils-1.12.0.jar,
  lib/sentiment-analysis-parser-0.1.jar,
  lib/sis-metadata-0.8.jar,
  lib/sis-netcdf-0.8.jar,
@@ -52,7 +52,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.language.translate,
    org.apache.tika.metadata,
    org.apache.tika.parser",
- org.apache.tika.concurrent;version="1.19.0",
+ org.apache.tika.concurrent;version="1.20",
  org.apache.tika.config;version="1.0.0";
   uses:="javax.xml.transform,
    org.apache.tika.detect,
@@ -71,7 +71,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.xml.sax",
- org.apache.tika.embedder;version="1.19.0";
+ org.apache.tika.embedder;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
@@ -93,9 +93,9 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.xml.sax",
  org.apache.tika.io;version="1.0.0";uses:="org.apache.tika.exception,org.apache.tika.metadata",
- org.apache.tika.language;version="1.19.0";uses:="org.apache.tika.exception,org.apache.tika.sax",
- org.apache.tika.language.detect;version="1.19.0";uses:="org.apache.tika.config,org.apache.tika.sax",
- org.apache.tika.language.translate;version="1.19.0";uses:="org.apache.tika.config,org.apache.tika.exception",
+ org.apache.tika.language;version="1.20";uses:="org.apache.tika.exception,org.apache.tika.sax",
+ org.apache.tika.language.detect;version="1.20";uses:="org.apache.tika.config,org.apache.tika.sax",
+ org.apache.tika.language.translate;version="1.20";uses:="org.apache.tika.config,org.apache.tika.exception",
  org.apache.tika.metadata;version="1.0.0",
  org.apache.tika.mime;version="1.2.0";
   uses:="org.apache.tika.detect,
@@ -115,26 +115,26 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.mime,
    org.apache.tika.sax,
    org.xml.sax",
- org.apache.tika.parser.apple;version="1.19.0";
+ org.apache.tika.parser.apple;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.asm;version="1.19.0";
+ org.apache.tika.parser.asm;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.audio;version="1.19.0";
+ org.apache.tika.parser.audio;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.captioning;version="1.19.0";uses:="org.apache.tika.parser.recognition",
- org.apache.tika.parser.captioning.tf;version="1.19.0";
+ org.apache.tika.parser.captioning;version="1.20";uses:="org.apache.tika.parser.recognition",
+ org.apache.tika.parser.captioning.tf;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
@@ -143,43 +143,43 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser.captioning,
    org.apache.tika.parser.recognition,
    org.xml.sax",
- org.apache.tika.parser.chm;version="1.19.0";
+ org.apache.tika.parser.chm;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.chm.accessor;version="1.19.0";uses:="org.apache.tika.exception,org.apache.tika.parser.chm.core",
- org.apache.tika.parser.chm.assertion;version="1.19.0";
+ org.apache.tika.parser.chm.accessor;version="1.20";uses:="org.apache.tika.exception,org.apache.tika.parser.chm.core",
+ org.apache.tika.parser.chm.assertion;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.parser.chm.accessor,
    org.apache.tika.parser.chm.core,
    org.apache.tika.parser.chm.exception",
- org.apache.tika.parser.chm.core;version="1.19.0";
+ org.apache.tika.parser.chm.core;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.parser.chm.accessor,
    org.apache.tika.parser.chm.exception,
    org.apache.tika.parser.chm.lzx",
- org.apache.tika.parser.chm.exception;version="1.19.0";uses:="org.apache.tika.exception",
- org.apache.tika.parser.chm.lzx;version="1.19.0";
+ org.apache.tika.parser.chm.exception;version="1.20";uses:="org.apache.tika.exception",
+ org.apache.tika.parser.chm.lzx;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.parser.chm.accessor,
    org.apache.tika.parser.chm.core,
    org.apache.tika.parser.chm.exception",
- org.apache.tika.parser.code;version="1.19.0";
+ org.apache.tika.parser.code;version="1.20";
   uses:="org.apache.tika.detect,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.crypto;version="1.19.0";
+ org.apache.tika.parser.crypto;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.ctakes;version="1.19.0";
+ org.apache.tika.parser.ctakes;version="1.20";
   uses:="org.apache.ctakes.typesystem.type.textsem,
    org.apache.tika.config,
    org.apache.tika.exception,
@@ -191,39 +191,39 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.uima.resource,
    org.apache.uima.util,
    org.xml.sax",
- org.apache.tika.parser.dbf;version="1.19.0";
+ org.apache.tika.parser.dbf;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.dif;version="1.19.0";
+ org.apache.tika.parser.dif;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax,
    org.xml.sax.helpers",
- org.apache.tika.parser.digest;version="1.19.0";uses:="org.apache.tika.metadata,org.apache.tika.parser",
- org.apache.tika.parser.dwg;version="1.19.0";
+ org.apache.tika.parser.digest;version="1.20";uses:="org.apache.tika.metadata,org.apache.tika.parser",
+ org.apache.tika.parser.dwg;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.envi;version="1.19.0";
+ org.apache.tika.parser.envi;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.epub;version="1.19.0";
+ org.apache.tika.parser.epub;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.executable;version="1.19.0";
+ org.apache.tika.parser.executable;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
@@ -238,25 +238,25 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.w3c.dom,
    org.xml.sax",
- org.apache.tika.parser.feed;version="1.19.0";
+ org.apache.tika.parser.feed;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.font;version="1.19.0";
+ org.apache.tika.parser.font;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.gdal;version="1.19.0";
+ org.apache.tika.parser.gdal;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.geo.topic;version="1.19.0";
+ org.apache.tika.parser.geo.topic;version="1.20";
   uses:="opennlp.tools.namefind,
    org.apache.tika.exception,
    org.apache.tika.metadata,
@@ -264,27 +264,27 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.apache.tika.parser.geo.topic.gazetteer,
    org.xml.sax",
- org.apache.tika.parser.geo.topic.gazetteer;version="1.19.0";uses:="org.apache.tika.parser.geo.topic",
- org.apache.tika.parser.geoinfo;version="1.19.0";
+ org.apache.tika.parser.geo.topic.gazetteer;version="1.20";uses:="org.apache.tika.parser.geo.topic",
+ org.apache.tika.parser.geoinfo;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.grib;version="1.19.0";
+ org.apache.tika.parser.grib;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.hdf;version="1.19.0";
+ org.apache.tika.parser.hdf;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax,
    ucar.nc2",
- org.apache.tika.parser.html;version="1.19.0";
+ org.apache.tika.parser.html;version="1.20";
   uses:="de.l3s.boilerpipe,
    de.l3s.boilerpipe.document,
    de.l3s.boilerpipe.sax,
@@ -295,79 +295,79 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.image;version="1.19.0";
+ org.apache.tika.parser.image;version="1.20";
   uses:="com.drew.metadata,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.image.xmp;version="1.19.0";uses:="org.apache.jempbox.xmp,org.apache.tika.exception,org.apache.tika.metadata",
- org.apache.tika.parser.iptc;version="1.19.0";
+ org.apache.tika.parser.image.xmp;version="1.20";uses:="org.apache.jempbox.xmp,org.apache.tika.exception,org.apache.tika.metadata",
+ org.apache.tika.parser.iptc;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.isatab;version="1.19.0";
+ org.apache.tika.parser.isatab;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.apache.tika.sax,
    org.xml.sax",
- org.apache.tika.parser.iwork;version="1.19.0";
+ org.apache.tika.parser.iwork;version="1.20";
   uses:="org.apache.commons.compress.archivers.zip,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.iwork.iwana;version="1.19.0";
+ org.apache.tika.parser.iwork.iwana;version="1.20";
   uses:="org.apache.commons.compress.archivers.zip,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.jdbc;version="1.19.0";
+ org.apache.tika.parser.jdbc;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.journal;version="1.19.0";
+ org.apache.tika.parser.journal;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.jpeg;version="1.19.0";
+ org.apache.tika.parser.jpeg;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.mail;version="1.19.0";
+ org.apache.tika.parser.mail;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.mat;version="1.19.0";
+ org.apache.tika.parser.mat;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.mbox;version="1.19.0";
+ org.apache.tika.parser.mbox;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.microsoft;version="1.19.0";
+ org.apache.tika.parser.microsoft;version="1.20";
   uses:="org.apache.poi.hssf.extractor,
    org.apache.poi.hwpf,
    org.apache.poi.hwpf.usermodel,
@@ -382,7 +382,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.apache.tika.sax,
    org.xml.sax",
- org.apache.tika.parser.microsoft.ooxml;version="1.19.0";
+ org.apache.tika.parser.microsoft.ooxml;version="1.20";
   uses:="org.apache.poi,
    org.apache.poi.openxml4j.opc,
    org.apache.poi.ss.usermodel,
@@ -404,7 +404,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.xmlbeans,
    org.xml.sax,
    org.xml.sax.helpers",
- org.apache.tika.parser.microsoft.ooxml.xps;version="1.19.0";
+ org.apache.tika.parser.microsoft.ooxml.xps;version="1.20";
   uses:="org.apache.poi,
    org.apache.poi.openxml4j.exceptions,
    org.apache.poi.openxml4j.opc,
@@ -414,12 +414,12 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.sax,
    org.apache.xmlbeans,
    org.xml.sax",
- org.apache.tika.parser.microsoft.ooxml.xslf;version="1.19.0";
+ org.apache.tika.parser.microsoft.ooxml.xslf;version="1.20";
   uses:="org.apache.poi,
    org.apache.poi.openxml4j.exceptions,
    org.apache.poi.openxml4j.opc,
    org.apache.xmlbeans",
- org.apache.tika.parser.microsoft.ooxml.xwpf;version="1.19.0";
+ org.apache.tika.parser.microsoft.ooxml.xwpf;version="1.20";
   uses:="org.apache.poi,
    org.apache.poi.openxml4j.exceptions,
    org.apache.poi.openxml4j.opc,
@@ -428,33 +428,33 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.apache.xmlbeans,
    org.xml.sax",
- org.apache.tika.parser.microsoft.ooxml.xwpf.ml2006;version="1.19.0";
+ org.apache.tika.parser.microsoft.ooxml.xwpf.ml2006;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.apache.tika.parser.microsoft,
    org.xml.sax",
- org.apache.tika.parser.microsoft.xml;version="1.19.0";
+ org.apache.tika.parser.microsoft.xml;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.mp3;version="1.19.0";
+ org.apache.tika.parser.mp3;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.mp4;version="1.19.0";
+ org.apache.tika.parser.mp4;version="1.20";
   uses:="com.googlecode.mp4parser,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.ner;version="1.19.0";
+ org.apache.tika.parser.ner;version="1.20";
   uses:="org.apache.tika,
    org.apache.tika.exception,
    org.apache.tika.metadata,
@@ -462,19 +462,19 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.slf4j,
    org.xml.sax",
- org.apache.tika.parser.ner.corenlp;version="1.19.0";uses:="com.github.openjson,org.apache.tika.parser.ner",
- org.apache.tika.parser.ner.grobid;version="1.19.0";uses:="org.apache.tika.parser.ner,org.json.simple",
- org.apache.tika.parser.ner.mitie;version="1.19.0";uses:="org.apache.tika.parser.ner",
- org.apache.tika.parser.ner.nltk;version="1.19.0";uses:="org.apache.tika.parser.ner",
- org.apache.tika.parser.ner.opennlp;version="1.19.0";uses:="org.apache.tika.parser.ner",
- org.apache.tika.parser.ner.regex;version="1.19.0";uses:="org.apache.tika.parser.ner",
- org.apache.tika.parser.netcdf;version="1.19.0";
+ org.apache.tika.parser.ner.corenlp;version="1.20";uses:="com.github.openjson,org.apache.tika.parser.ner",
+ org.apache.tika.parser.ner.grobid;version="1.20";uses:="org.apache.tika.parser.ner,org.json.simple",
+ org.apache.tika.parser.ner.mitie;version="1.20";uses:="org.apache.tika.parser.ner",
+ org.apache.tika.parser.ner.nltk;version="1.20";uses:="org.apache.tika.parser.ner",
+ org.apache.tika.parser.ner.opennlp;version="1.20";uses:="org.apache.tika.parser.ner",
+ org.apache.tika.parser.ner.regex;version="1.20";uses:="org.apache.tika.parser.ner",
+ org.apache.tika.parser.netcdf;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.ocr;version="1.19.0";
+ org.apache.tika.parser.ocr;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
@@ -482,7 +482,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.apache.tika.sax,
    org.xml.sax",
- org.apache.tika.parser.odf;version="1.19.0";
+ org.apache.tika.parser.odf;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
@@ -490,8 +490,8 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser.xml,
    org.apache.tika.sax,
    org.xml.sax",
- org.apache.tika.parser.opendocument;version="1.19.0";uses:="org.apache.tika.parser.odf",
- org.apache.tika.parser.pdf;version="1.19.0";
+ org.apache.tika.parser.opendocument;version="1.20";uses:="org.apache.tika.parser.odf",
+ org.apache.tika.parser.pdf;version="1.20";
   uses:="org.apache.pdfbox.rendering,
    org.apache.tika.config,
    org.apache.tika.exception,
@@ -499,7 +499,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.pkg;version="1.19.0";
+ org.apache.tika.parser.pkg;version="1.20";
   uses:="org.apache.poi.openxml4j.opc,
    org.apache.tika.config,
    org.apache.tika.detect,
@@ -509,26 +509,26 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser,
    org.apache.tika.sax,
    org.xml.sax",
- org.apache.tika.parser.pot;version="1.19.0";
+ org.apache.tika.parser.pot;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.prt;version="1.19.0";
+ org.apache.tika.parser.prt;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.recognition;version="1.19.0";
+ org.apache.tika.parser.recognition;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.recognition.tf;version="1.19.0";
+ org.apache.tika.parser.recognition.tf;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
@@ -537,27 +537,27 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.parser.external,
    org.apache.tika.parser.recognition,
    org.xml.sax",
- org.apache.tika.parser.rtf;version="1.19.0";
+ org.apache.tika.parser.rtf;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.sentiment;version="1.19.0";
+ org.apache.tika.parser.sentiment;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.strings;version="1.19.0";
+ org.apache.tika.parser.strings;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.txt;version="1.19.0";
+ org.apache.tika.parser.txt;version="1.20";
   uses:="org.apache.tika.config,
    org.apache.tika.detect,
    org.apache.tika.exception,
@@ -565,20 +565,20 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.utils;version="1.19.0";uses:="org.apache.tika.exception,org.apache.tika.mime,org.apache.tika.parser.digest",
- org.apache.tika.parser.video;version="1.19.0";
+ org.apache.tika.parser.utils;version="1.20";uses:="org.apache.tika.exception,org.apache.tika.mime,org.apache.tika.parser.digest",
+ org.apache.tika.parser.video;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.wordperfect;version="1.19.0";
+ org.apache.tika.parser.wordperfect;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,
    org.apache.tika.parser,
    org.xml.sax",
- org.apache.tika.parser.xml;version="1.19.0";
+ org.apache.tika.parser.xml;version="1.20";
   uses:="org.apache.tika.exception,
    org.apache.tika.metadata,
    org.apache.tika.mime,

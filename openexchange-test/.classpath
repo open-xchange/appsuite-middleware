@@ -189,7 +189,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.6.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-collections-3.2.2.jar"/>
-	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.19.1.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.19.1-sources.jar"/>
-	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.19.1.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.19.1-sources.jar"/>
+	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.20-sources.jar"/>
+	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.20-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
