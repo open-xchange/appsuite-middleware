@@ -47,71 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.update.tools.console;
+package com.openexchange.groupware.update;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.groupware.update.TaskStatus;
-import com.openexchange.groupware.update.UpdateTaskService;
+import java.io.Serializable;
 
 /**
- * {@link UpdateTaskRunAllUpdateCLT} - Command-Line access to run update process for a certain schema via update task toolkit.
+ * {@link TaskStatus}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
-public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void> {
+public class TaskStatus implements Serializable {
+
+    private static final long serialVersionUID = 1117834466553992385L;
+
+    private final String jobId;
+    private final String statusText;
 
     /**
-     * Entry point
-     * 
-     * @param args the command line arguments
+     * Initialises a new {@link TaskStatus}.
      */
-    public static void main(String[] args) {
-        new UpdateTaskRunAllUpdateCLT().execute(args);
+    public TaskStatus(String jobId, String statusText) {
+        super();
+        this.jobId = jobId;
+        this.statusText = statusText;
     }
-
-    boolean failOnError = false;
 
     /**
-     * Initializes a new {@link UpdateTaskRunAllUpdateCLT}.
+     * Gets the jobId
+     *
+     * @return The jobId
      */
-    private UpdateTaskRunAllUpdateCLT() {
-        super("runallupdate [-e] " + BASIC_MASTER_ADMIN_USAGE, "Runs the update on all schemas.");
+    public String getJobId() {
+        return jobId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
+    /**
+     * Gets the statusText
+     *
+     * @return The statusText
      */
-    @Override
-    protected void addOptions(Options options) {
-        options.addOption(createSwitch("e", "error", "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.", false));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
-    @Override
-    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
-        TaskStatus taskStatus = updateTaskService.runAllUpdates(failOnError);
-        System.out.println("Scheduled an asynchronous job with id: " + taskStatus.getJobId() + "\n" + taskStatus.getStatusText());
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        if (cmd.hasOption("error")) {
-            failOnError = true;
-        }
+    public String getStatusText() {
+        return statusText;
     }
 }

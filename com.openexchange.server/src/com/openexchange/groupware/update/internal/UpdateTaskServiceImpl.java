@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
+import com.openexchange.groupware.update.TaskStatus;
 import com.openexchange.groupware.update.UpdateTaskService;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkitJob;
@@ -147,11 +148,11 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @see com.openexchange.groupware.update.UpdateTaskService#runAllUpdates(boolean)
      */
     @Override
-    public String runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException {
+    public TaskStatus runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException {
         try {
             UpdateTaskToolkitJob<Void> job = UpdateTaskToolkit.runUpdateOnAllSchemas(throwExceptionOnFailure);
             addJob(job);
-            return job.getId();
+            return new TaskStatus(job.getId(), job.getStatusText());
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);

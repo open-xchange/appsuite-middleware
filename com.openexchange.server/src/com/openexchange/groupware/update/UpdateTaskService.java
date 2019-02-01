@@ -86,9 +86,9 @@ public interface UpdateTaskService extends Remote {
      * Schedules an asynchronous task to execute all update tasks on all available schemata.
      * 
      * @param throwExceptionOnFailure Whether a possible exception is supposed to abort process
-     * @return The job identifier of the scheduled task
+     * @return The {@link TaskStatus} including the job identifier of the scheduled task and the status text
      */
-    String runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException;
+    TaskStatus runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException;
 
     /**
      * Force (re-)run of update task denoted by given class name for the specified context.

@@ -51,16 +51,15 @@ package com.openexchange.groupware.update.tools.console;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.groupware.update.TaskStatus;
 import com.openexchange.groupware.update.UpdateTaskService;
 
 /**
- * {@link UpdateTaskRunAllUpdateCLT} - Command-Line access to run update process for a certain schema via update task toolkit.
+ * {@link GetJobStatusCLT}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
-public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void> {
+public class GetJobStatusCLT extends AbstractUpdateTasksCLT<Void> {
 
     /**
      * Entry point
@@ -68,16 +67,18 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new UpdateTaskRunAllUpdateCLT().execute(args);
+        new GetJobStatusCLT().execute(args);
     }
 
-    boolean failOnError = false;
-
     /**
-     * Initializes a new {@link UpdateTaskRunAllUpdateCLT}.
+     * Initialises a new {@link GetJobStatusCLT}.
      */
-    private UpdateTaskRunAllUpdateCLT() {
-        super("runallupdate [-e] " + BASIC_MASTER_ADMIN_USAGE, "Runs the update on all schemas.");
+    public GetJobStatusCLT() {
+        //@formatter:off
+        super("getJobStatus -j <job-id> " + BASIC_MASTER_ADMIN_USAGE, "Retrieves the status of a running or completed job.  If the job already finished and its "
+            + "status has not yet retrieved, then its status will be returned and it will be removed from the pool. A further invocation of this tool will "
+            + "yield no results for the same job identifier. If the job is still running then its invocation will return its current status.");
+        //@formatter:on
     }
 
     /*
@@ -87,7 +88,7 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createSwitch("e", "error", "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.", false));
+        options.addOption(createArgumentOption("j", "job-id", "job-id", "The job identifier for which to retrieve its status.", true));
     }
 
     /*
@@ -98,8 +99,13 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
-        TaskStatus taskStatus = updateTaskService.runAllUpdates(failOnError);
-        System.out.println("Scheduled an asynchronous job with id: " + taskStatus.getJobId() + "\n" + taskStatus.getStatusText());
+        String jobId = cmd.getOptionValue('j');
+        String jobStatus = updateTaskService.getJobStatus(jobId);
+        if (jobStatus == null) {
+            System.out.println("No job found for id '" + jobId + "'.");
+            return null;
+        }
+        System.out.println(jobStatus);
         return null;
     }
 
@@ -110,8 +116,6 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        if (cmd.hasOption("error")) {
-            failOnError = true;
-        }
+        //no-op
     }
 }
