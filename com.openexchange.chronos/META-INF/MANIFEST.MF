@@ -26,6 +26,7 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.slf4j
 Export-Package: com.openexchange.chronos,
  com.openexchange.chronos.exception,
+ com.openexchange.chronos.rmi,
  com.openexchange.chronos.service,
  org.dmfs.rfc5545,
  org.dmfs.rfc5545.calendarmetrics

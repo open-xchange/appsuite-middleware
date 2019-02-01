@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.impl.osgi;
 
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +61,10 @@ import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.groupware.CalendarDeleteListener;
 import com.openexchange.chronos.impl.groupware.CalendarDowngradeListener;
 import com.openexchange.chronos.impl.osgi.event.EventAdminServiceTracker;
+import com.openexchange.chronos.impl.rmi.ChronosRMIServiceImpl;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.rmi.ChronosRMIService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -134,6 +139,11 @@ public class ChronosActivator extends HousekeepingActivator {
              * register services
              */
             DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
+            {
+                Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+                props.put("RMIName", ChronosRMIService.RMI_NAME);
+                registerService(Remote.class, new ChronosRMIServiceImpl(calendarUtilities), props);
+            }
             registerService(CalendarService.class, new CalendarServiceImpl(notificationService));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);

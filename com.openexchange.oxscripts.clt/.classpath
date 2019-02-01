@@ -13,6 +13,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.configuration"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.configread"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.push"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessiond"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-classic-1.2.2-sources.jar"/>
