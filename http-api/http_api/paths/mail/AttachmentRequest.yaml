@@ -42,6 +42,15 @@
         description:  A value of "false" leads to light-weight JSON objects for nested messages containing only the "id" field
         required: false
       - in: query
+        name: scan
+        type: boolean
+        description: |
+        	Flag to request an Anti-Virus scan for the specified e-mail attachment before downloading it. 
+        	Note that if there is a max file limitation set on the middleware, the URL parameter 'exact_length'
+        	has to be set to 'true' to instruct the middleware to calculate the attachment's size before passing
+        	it to the Anti-Virus scanner.
+        required: false
+      - in: query
         name: as_json
         type: boolean
         description:  Nested messages are parsed into full JSON objects. Can lead to longer loading times, for multiple nested messages.

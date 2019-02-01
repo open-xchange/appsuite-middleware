@@ -26,6 +26,12 @@
         type: string
         description: If present the response declares the given `content_type` in the Content-Type header and not the attachments file MIME type.
         required: false
+      - in: query
+        name: scan
+        type: boolean
+        description: |
+        	Flag to request an Anti-Virus scan for the specified attachment before downloading it. 
+        required: false
     responses:
       200:
         description: The raw byte data of the document. The response type for the HTTP request is set accordingly to the defined MIME type for this attachment or the content_type given.

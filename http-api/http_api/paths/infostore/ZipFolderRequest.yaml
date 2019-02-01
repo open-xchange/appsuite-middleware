@@ -19,6 +19,12 @@
         type: boolean
         description: "`true` to also include subfolders and their infoitems respectively; otherwise `false` to only consider the infoitems of specified."
         required: false
+      - in: query
+        name: scan
+        type: boolean
+        description: |
+        	Flag to request an Anti-Virus scan for the ifoitems in the specified folder before downloading them. 
+        required: false
     responses:
       200:
         description: The raw byte data of the ZIP archive. The response type for the HTTP request is set to `application/zip`.

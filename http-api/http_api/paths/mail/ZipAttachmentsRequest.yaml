@@ -19,6 +19,12 @@
         type: string
         description:  A comma-separated list of IDs of the requested attachments.
         required: true
+      - in: query
+        name: scan
+        type: boolean
+        description: |
+        	Flag to request an Anti-Virus scan for the specified e-mail attachments before downloading them. 
+        required: false
     responses:
       200:
         description: The raw byte data of the ZIP file.

@@ -18,6 +18,12 @@
           type: array
           items:
             $ref: "#/definitions/InfoItemZipElement"
+      - in: query
+        name: scan
+        type: boolean
+        description: |
+        	Flag to request an Anti-Virus scan for the specified documents before downloading them. 
+        required: false
     responses:
       200:
         description: The raw byte data of the ZIP archive. The response type for the HTTP request is set to `application/zip`.

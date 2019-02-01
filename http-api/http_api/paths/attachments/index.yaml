@@ -6,4 +6,3 @@ requests:
   - UpdatesRequest.yaml
   - GetRequest.yaml
   - DocumentRequest.yaml
-  - ScanRequest.yaml
