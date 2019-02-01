@@ -404,7 +404,7 @@ public class EventPatches {
                             EventUpdate eventUpdate = DefaultEventUpdate.builder()
                                 .originalEvent(originalOccurrence)
                                 .updatedEvent(newChangeException)
-                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES)
+                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES)
                                 .considerUnset(true)
                                 .ignoreDefaults(true)
                             .build();
