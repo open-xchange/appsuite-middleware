@@ -1,0 +1,5 @@
+open-xchange-cluster-upgrade-from-7100-7101 (7.10.2-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 01 Feb 2019 12:56:27 +0200
