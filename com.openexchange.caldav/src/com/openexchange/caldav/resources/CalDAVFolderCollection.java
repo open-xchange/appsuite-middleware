@@ -319,7 +319,12 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
             //            }
             //            CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.SCHEDULE_TRANSP(value));
         } else if (matches(property, CalendarTimezone.NAMESPACE, CalendarTimezone.NAME)) {
-            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            /*
+             * protected property if folder already exists
+             */
+            if (exists()) {
+                throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
         }
     }
 
