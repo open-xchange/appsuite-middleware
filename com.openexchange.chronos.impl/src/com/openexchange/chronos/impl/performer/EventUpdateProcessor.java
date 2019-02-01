@@ -371,6 +371,9 @@ public class EventUpdateProcessor implements EventUpdate {
                     }
                 }
                 break;
+            case SEQUENCE:
+                Check.requireInSequence(originalEvent, updatedEvent);
+                break;
             case ORGANIZER:
                 /*
                  * (re-)check organizer

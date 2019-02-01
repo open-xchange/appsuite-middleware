@@ -60,6 +60,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
@@ -266,15 +267,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     protected Event updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
         /*
-         * Check if an incoming event update can be treated as initiated by the (external) organizer of a scheduling object resource or
-         * not. If yes, certain checks may be skipped, i.e. the existence check in the calendar user's folder, or the check against allowed
-         * attendee changes later on
+         * check if folder view on event is allowed as needed
          */
-        boolean assumeExternalOrganizerUpdate = false;
-        if (hasExternalOrganizer(originalEvent)) {
-            Check.requireInSequence(originalEvent, eventData);
-            assumeExternalOrganizerUpdate = true;
-        } else {
+        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
+        if (false == assumeExternalOrganizerUpdate) {
             Check.eventIsInFolder(originalEvent, folder);
         }
         /*
@@ -347,6 +343,33 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
         return updatedEvent;
+    }
+
+    /**
+     * Determines if an incoming event update can be treated as initiated by the (external) organizer of a scheduling object resource or
+     * not. If yes, certain checks may be skipped, i.e. the existence check in the calendar user's folder, or the check against allowed
+     * attendee changes.
+     * <p/>
+     * An update is considered as <i>organizer-update</i> under certain circumstances, particularly:
+     * <ul>
+     * <li>the event has an <i>external</i> organizer</li>
+     * <li>the organizer matches in the original and in the updated event</li>
+     * <li>the unique identifier matches in the original and in the updated event</li>
+     * <li>the updated event's sequence number is not smaller than the sequence number of the original event</li>
+     * </ul>
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @return <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>,
+     *      <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
+     */
+    private boolean assumeExternalOrganizerUpdate(Event originalEvent, Event updatedEvent) {
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && 
+            originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
+            return true;
+        }
+        return false;
     }
 
     /**
