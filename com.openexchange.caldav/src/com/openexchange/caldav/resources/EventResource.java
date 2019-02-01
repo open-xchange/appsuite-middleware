@@ -673,6 +673,8 @@ public class EventResource extends DAVObjectResource<Event> {
             case "CAL-4227":
             case "CAL-42210":
                 return new PreconditionException(e, DAVProtocol.CALENDARSERVER_NS.getURI(), "valid-access-restriction", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            case "CAL-40310":
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "same-organizer-in-all-components", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             default:
                 return DAVProtocol.protocolException(getUrl(), e);
         }

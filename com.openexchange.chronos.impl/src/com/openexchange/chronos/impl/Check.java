@@ -380,13 +380,13 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
-     * Checks that the organizer matches in all events from a calendar object resource, i.e. it is either undefined, or equal in all 
+     * Checks that the organizer matches in all events from a calendar object resource, i.e. it is either undefined, or equal in all
      * events.
      *
      * @param event The primary event to check the organizer in, or <code>null</code> to just check the further events
      * @param events Further events to check the organizer for equality, or <code>null</code> to just check the first event
      * @return The event's common organizer, after it was checked to be equal in all events, or <code>null</code> if not assigned
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     * @throws OXException {@link CalendarExceptionCodes#DIFFERENT_ORGANIZER}
      * @see CalendarUtils#matches(CalendarUser, CalendarUser)
      */
     public static Organizer organizerMatches(Event event, Event... events) throws OXException {
@@ -394,7 +394,8 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (null != events) {
             for (Event e : events) {
                 if (false == CalendarUtils.matches(organizer, e.getOrganizer())) {
-                    throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ORGANIZER, "Organizer mismatch");
+                    String id = null != event ? event.getId() : null != events && 0 < events.length ? events[0].getId() : null;
+                    throw CalendarExceptionCodes.DIFFERENT_ORGANIZER.create(id, organizer, e.getOrganizer());
                 }
             }
         }

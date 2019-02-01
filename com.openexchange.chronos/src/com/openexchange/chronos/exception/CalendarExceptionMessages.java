@@ -81,6 +81,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String MISSING_ORGANIZER_MSG = "Organizer must also be an attendee.";
 
+    public static final String DIFFERENT_ORGANIZER_MSG = "All appointments of a series must contain the same organizer.";
+
     public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";
 
     public static final String UNSUPPORTED_FOLDER_MSG = "The supplied folder is not supported. Please select a valid folder and try again.";

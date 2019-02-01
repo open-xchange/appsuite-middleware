@@ -57,6 +57,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.AUTH_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.BAD_AUTH_CONFIGURATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.DATA_TRUNCATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.DIFFERENT_ORGANIZER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
@@ -197,6 +198,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Missing organizer.</li>
      */
     MISSING_ORGANIZER("Missing organizer.", MISSING_ORGANIZER_MSG, Category.CATEGORY_USER_INPUT, 4039),
+    /**
+     * <li>All appointments of a series must contain the same organizer.</li>
+     * <li>Different organizer [id %1$s, organizer %2$s, existing organizer %3$s]</li>
+     */
+    DIFFERENT_ORGANIZER("Different organizer [id %1$s, organizer %2$s, existing organizer %3$s]", DIFFERENT_ORGANIZER_MSG, Category.CATEGORY_USER_INPUT, 40310),
     /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [folder %1$s, content type %2$s]</li>
