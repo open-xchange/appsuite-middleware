@@ -54,12 +54,12 @@ import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
 
 /**
- * {@link GetJobStatusCLT}
+ * {@link GetUpdateTaskStatusCLT}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class GetJobStatusCLT extends AbstractUpdateTasksCLT<Void> {
+public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
 
     /**
      * Entry point
@@ -67,15 +67,15 @@ public class GetJobStatusCLT extends AbstractUpdateTasksCLT<Void> {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new GetJobStatusCLT().execute(args);
+        new GetUpdateTaskStatusCLT().execute(args);
     }
 
     /**
-     * Initialises a new {@link GetJobStatusCLT}.
+     * Initialises a new {@link GetUpdateTaskStatusCLT}.
      */
-    public GetJobStatusCLT() {
+    public GetUpdateTaskStatusCLT() {
         //@formatter:off
-        super("getJobStatus -j <job-id> " + BASIC_MASTER_ADMIN_USAGE, "Retrieves the status of a running or completed job.  If the job already finished and its "
+        super("getUpdateTaskStatus -j <job-id> " + BASIC_MASTER_ADMIN_USAGE, "Retrieves the status of a running or completed update task job.  If the job already finished and its "
             + "status has not yet retrieved, then its status will be returned and it will be removed from the pool. A further invocation of this tool will "
             + "yield no results for the same job identifier. If the job is still running then its invocation will return its current status.");
         //@formatter:on
