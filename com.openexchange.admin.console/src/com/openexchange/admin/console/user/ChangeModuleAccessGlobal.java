@@ -167,6 +167,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, required, extended);
         this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, required, extended);
         this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, required, extended);
+        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off) [DEPRECATED]", true, required, extended);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, required, extended);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, required, extended);
         this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off) [DEPRECATED]", true, required, extended);
@@ -345,6 +346,13 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 addAccess.setSubscription(true);
             } else {
                 removeAccess.setSubscription(true);
+            }
+        }
+        if (parser.getOptionValue(accessPublication) != null) {
+            if (accessOption2Boolean(parser, accessPublication)) {
+                addAccess.setPublication(true);
+            } else {
+                removeAccess.setPublication(true);
             }
         }
         if (parser.getOptionValue(accessActiveSync) != null) {
