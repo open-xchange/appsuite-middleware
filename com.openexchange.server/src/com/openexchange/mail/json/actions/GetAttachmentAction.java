@@ -280,7 +280,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                             }
 
                             mailPart = ret;
-                            boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                            boolean exactLength = calculateExactLength(req);
                             if (exactLength) {
                                 sink = new ThresholdFileHolder();
                                 InputStream in = Streams.getNonEmpty(ret.getInputStream());
@@ -370,7 +370,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         if (isEmpty(mailPart.getFileName())) {
                             mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, getBaseType(mailPart)));
                         }
-                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                        boolean exactLength = calculateExactLength(req);
                         if (exactLength) {
                             if (null == sink) {
                                 sink = new ThresholdFileHolder();
@@ -398,7 +398,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                     }
 
-                    boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                    boolean exactLength = calculateExactLength(req);
                     if (exactLength) {
                         sink = new ThresholdFileHolder();
                         InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
@@ -417,8 +417,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 // Read from stream
                 if (saveToDisk) {
                     if (null == sink) {
-                        @SuppressWarnings("resource")
-                        FileHolder tmp = new FileHolder(isClosure, size, baseType, filename);
+                        @SuppressWarnings("resource") FileHolder tmp = new FileHolder(isClosure, size, baseType, filename);
                         tmp.setDelivery("download");
                         fileHolder = tmp;
                     } else {
@@ -487,6 +486,25 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         }
     }
 
+    /**
+     * Determine whether to calculate the exact length of an e-mail attachment.
+     * It does so by first examining whether the <code>scan</code> URL parameter
+     * is set and if it is whether it is set to <code>true</code>. In that case
+     * <code>true</code> is returned. Otherwise, the URL parameter <code>exact_length</code>
+     * is evaluated and its value is returned instead.
+     * 
+     * @param req The {@link com.openexchange.ajax.request.MailRequest}
+     * @return <code>true</code> if the exact length of the e-mail attachment should be
+     *         calculated, <code>false</code> otherwise
+     */
+    private boolean calculateExactLength(MailRequest req) {
+        String scan = req.getParameter("scan");
+        if (Strings.isEmpty(scan) ? Boolean.FALSE : Boolean.valueOf(scan)) {
+            return true;
+        }
+        return AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+    }
+
     private String getBaseType(MailPart mailPart) {
         return getContentType(mailPart, false);
     }
@@ -494,11 +512,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     private String getContentType(MailPart mailPart, boolean includeCharsetParameterIfText) {
         ContentType contentType = mailPart.getContentType();
         if (includeCharsetParameterIfText && contentType.containsCharsetParameter() && contentType.startsWith("text/")) {
-            return new ContentType()
-                .setPrimaryType(contentType.getPrimaryType())
-                .setSubType(contentType.getSubType())
-                .setCharsetParameter(contentType.getCharsetParameter())
-                .toString();
+            return new ContentType().setPrimaryType(contentType.getPrimaryType()).setSubType(contentType.getSubType()).setCharsetParameter(contentType.getCharsetParameter()).toString();
         }
         return contentType.getBaseType();
     }
