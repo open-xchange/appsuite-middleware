@@ -51,6 +51,7 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.COMMENT;
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.ORGANIZER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
@@ -63,12 +64,10 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
-import com.openexchange.chronos.property.ChronosLeanConfigurationProperties;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -82,7 +81,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class ChangeOrganizerAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_PUSH_TOKEN);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS, PARAMETER_PUSH_TOKEN);
 
     @Override
     protected Set<String> getOptionalParameters() {
@@ -102,11 +101,6 @@ public class ChangeOrganizerAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        LeanConfigurationService service = services.getServiceSafe(LeanConfigurationService.class);
-        if (false == service.getBooleanProperty(ChronosLeanConfigurationProperties.ALLOWED_ORGANIZER_CHANGE.getProperty())) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create("changeOrganizer");
-        }
-
         long clientTimestamp = parseClientTimestamp(requestData);
         EventID eventId = parseIdParameter(requestData);
 

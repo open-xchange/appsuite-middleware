@@ -487,13 +487,13 @@ properties:
       tags: ["Calendar", "SMS"]
     - key: com.openexchange.calendar.allowChangeOfOrganizer
       description: |
-        Defines a value that indicates wether an organizer is allowed to hand over an event to another calendar user, efficently making the
-        other calendar user the new organizer of the event. Also if activated the organizer can only be changed if the new organizer and all 
+        Defines a value that indicates whether an organizer is allowed to hand over an event to another calendar user, efficiently making the
+        other calendar user the new organizer of the event. Even if activated, the organizer can only be changed if the new organizer and all 
         attendees of the event are internal users.
       defaultValue: false
       version: 7.10.2
       reloadable: true
-      configcascadeAware: false      
+      configcascadeAware: true
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar"]      

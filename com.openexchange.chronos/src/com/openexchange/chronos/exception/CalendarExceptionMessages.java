@@ -161,8 +161,6 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_MANY_ALARMS_MSG = "The appointment contains too many reminders.";
     
-    public static final String UNSUPPORTED_FOR_EXTERNAL_ATTENDEES_MSG = "The operation could not be completed. The event contains at least one external attendee.";
-    
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

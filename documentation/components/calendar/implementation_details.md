@@ -150,8 +150,9 @@ In the Chronos stack, there's no dedicated "principal". Instead, it is ensured t
 ## Changing the organizer
 
 Since v.7.10.2 the organizer of an event can hand the event over to another *internal* CU. Doing so, the other CU becomes the new organizer of the event thus is able to change the event.
-In case external attendees are part of the changed event an iTIP message is triggered. The feature is part of iTIP standard but isn't well supported by other platforms. Therefore the feature is deactivated by default and can be activated by setting the property ``com.openexchange.calendar.restrictAllowedOrganizerChange`` to ``true``.
-When changing the organizer the server will generate a notification to all attendees, optional giving the old organizer the possibility to announce why he transmitted the event to another CU.
+The feature is deactivated by default and can be activated by setting the property ``com.openexchange.calendar.allowChangeOfOrganizer`` to ``true``. When changing the organizer the server will generate a notification to all attendees, optional giving the old organizer the possibility to announce why the event was transmitted to another CU.
+
+The change can only be performed if all attendees, the acting and the new organizer are internal users. The reason for this restriction is that even though the iTIP standard supports such changes most implementations do not. Changing the organizer on events with external CUs will lead to inconsistent events across the different systems and is therefore prohibited.
 
 ## Conversion 
 

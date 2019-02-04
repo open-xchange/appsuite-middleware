@@ -430,7 +430,7 @@ public interface CalendarService {
      * <li>The change has to be performed for one of these:
      * <ul> a single event</ul>
      * <ul> a series master, efficiently updating for the complete series</ul>
-     * <ul> a specific recurrence of the series, efficiently performing a series split</ul>
+     * <ul> a specific recurrence of the series, efficiently performing a series split. Only allowed if {@link com.openexchange.chronos.RecurrenceRange#THISANDFUTURE} is set</ul>
      * </li>
      * 
      * @param session The calendar session

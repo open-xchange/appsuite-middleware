@@ -12,6 +12,8 @@
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceRange"
+      - $ref: "#/parameters/QueryParamChronosExpand"
+      - $ref: "#/parameters/QueryParamChronosFields"
       - $ref: "#/parameters/QueryParamChronosPushToken"
       - in: query
         name: timestamp
@@ -19,6 +21,19 @@
         format: int64
         description: Timestamp of the last update of the event.
         required: true
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a lower inclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which start on or after this date are returned.
+        required: false
+      - in: query
+        name: rangeEnd
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which end before this date are returned.
       - in: body
         name: changeOrganizerBody
         description: A JSON object containing the new organizer and an optional comment.
@@ -30,7 +45,7 @@
               $ref: "#/definitions/CalendarUser"
             comment:
               type: string
-              description: Optional comment for the user to provide information about the update of the event. This will not be peristed and is just used to inform the attendees via notifications and invitation mails
+              description: Optional comment for the acting organizer to provide information about the reason of transmitting the event to an new organizer. This will not be peristed and is just used to inform the attendees via notification mails
     responses:
       200:
         description: |

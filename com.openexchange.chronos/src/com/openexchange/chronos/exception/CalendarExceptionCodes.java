@@ -61,7 +61,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.DIFFE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOR_EXTERNAL_ATTENDEES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.FOLDER_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOMPATIBLE_DATE_TYPES_MSG;
@@ -430,11 +429,6 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     AUTH_FAILED_FOR_SHARE("Authentication failed to access a shared calendar at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_USER_INPUT, 4011),
     
-    /**
-     * The operation could not be completed. The event contains at least one external attendee.
-     */
-    UNSUPPORTED_FOR_EXTERNAL_ATTENDEES("The operation could not be completed. The event contains at least one external attendee.", UNSUPPORTED_FOR_EXTERNAL_ATTENDEES_MSG, Category.CATEGORY_USER_INPUT, 4012),
-
     ;
 
     public static final String PREFIX = "CAL".intern();
