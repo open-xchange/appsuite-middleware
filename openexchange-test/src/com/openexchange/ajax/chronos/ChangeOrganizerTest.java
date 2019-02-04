@@ -52,8 +52,10 @@ package com.openexchange.ajax.chronos;
 import static com.openexchange.ajax.chronos.manager.EventManager.RecurrenceRange.THISANDFUTURE;
 import static com.openexchange.ajax.chronos.manager.EventManager.RecurrenceRange.THISANDPRIOR;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,7 +71,9 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
@@ -77,7 +82,6 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.UserData;
 import com.openexchange.testing.httpclient.models.UserResponse;
-import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
  * {@link ChangeOrganizerTest}
@@ -92,7 +96,17 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
 
     private CalendarUser newOrganizer;
 
+    private Attendee newOrganizerAttendee;
+
     private EventData event;
+
+    private ApiClient apiClient2;
+
+    private UserApi userApi2;
+
+    private EventManager eventManager2;
+
+    private String folderId2;
 
     @Override
     @Before
@@ -103,11 +117,11 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
 
         // The internal attendees
         Attendee organizer = createAttendee(getClient().getValues().getUserId());
-        Attendee attendee = createAttendee(getClient2().getValues().getUserId());
+        newOrganizerAttendee = createAttendee(getClient2().getValues().getUserId());
 
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizer);
-        attendees.add(attendee);
+        attendees.add(newOrganizerAttendee);
         event.setAttendees(attendees);
 
         // The original organizer
@@ -116,8 +130,16 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event.setCalendarUser(originalOrganizer);
 
         // The new organizer
-        newOrganizer = AttendeeFactory.createOrganizerFrom(attendee);
+        newOrganizer = AttendeeFactory.createOrganizerFrom(newOrganizerAttendee);
 
+        apiClient2 = generateApiClient(testUser2);
+        rememberClient(apiClient2);
+        EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
+        rememberClient(enhancedClient);
+        userApi2 = new UserApi(apiClient2, enhancedClient, testUser2, true);
+
+        folderId2 = getDefaultFolder(userApi2.getSession(), apiClient2);
+        eventManager2 = new EventManager(userApi2, folderId2);
     }
 
     @Override
@@ -126,8 +148,18 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         if (null != event) {
             EventId id = new EventId();
             id.setId(event.getId());
-            id.setFolder(null != event.getFolder() ? event.getFolder() : defaultFolderId);
-            eventManager.deleteEvent(id);
+            try {
+                id.setFolder(null != event.getFolder() ? event.getFolder() : defaultFolderId);
+                eventManager.deleteEvent(id);
+            } catch (Exception e) {
+                // Ignore
+            }
+            try {
+                id.setFolder(null != event.getFolder() ? event.getFolder() : folderId2);
+                eventManager2.deleteEvent(id);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         super.tearDown();
     }
@@ -150,6 +182,15 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         // Update to internal and set comment
         EventData data = eventManager.changeEventOrganizer(event, newOrganizer, "Comment4U", null, null, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
+    }
+
+    @Test(expected = ChronosApiException.class)
+    public void testUpdateToNone() throws Exception {
+        // Create event
+        event = eventManager.createEvent(event);
+
+        // Update to 'null'
+        eventManager.changeEventOrganizer(event, null, null, null, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -227,6 +268,50 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         eventManager.changeEventOrganizer(event, newOrganizer, null, getOccurrence().getRecurrenceId(), THISANDPRIOR, true);
     }
 
+    @Test(expected = ChronosApiException.class)
+    public void testUpdateAsAttendee() throws Exception {
+        // Create event
+        event = eventManager.createEvent(event);
+
+        // Load from users view
+        EventData data = eventManager2.getEvent(folderId2, event.getId());
+
+        // Update as attendee
+        eventManager2.changeEventOrganizer(data, newOrganizer, null, null, null, true);
+    }
+
+    @Test
+    public void testDeleteOriginalOrganizer() throws Exception {
+        // Create event
+        event = eventManager.createEvent(event);
+
+        // Update to internal
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, false);
+        assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
+
+
+        // Remove original organizer
+        ArrayList<Attendee> attendees = new ArrayList<>();
+        attendees.add(AttendeeFactory.createIndividual("external@example.org"));
+        attendees.add(newOrganizerAttendee);
+        
+        data = eventManager2.getEvent(folderId2, data.getId());
+        data.setAttendees(attendees);
+        data.setLastModified(Long.valueOf(System.currentTimeMillis()));
+        data = eventManager2.updateEvent(data);
+
+        // Check if original has been removed
+        for (Attendee attendee : data.getAttendees()) {
+            Assert.assertThat("Old organizer found!", attendee.getUri(), is(not(originalOrganizer.getUri())));
+        }
+
+        // Check if changes as new organizer are possible
+        String summary = "New summary: ChangeOrganizerTest";
+        data.setSummary(summary);
+        data = eventManager2.updateEvent(data);
+        Assert.assertThat("Summary can't be changed by new organizer", data.getSummary(), is(summary));
+    }
+
     // ----------------------------- HELPER -----------------------------
 
     protected Attendee createAttendee(int userId) throws ApiException {
@@ -242,7 +327,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
     }
 
     private UserData getUserInformation(int userId) throws ApiException {
-        UserApi api = new UserApi(getApiClient());
+        com.openexchange.testing.httpclient.modules.UserApi api = new com.openexchange.testing.httpclient.modules.UserApi(getApiClient());
         UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
         return userResponse.getData();
     }

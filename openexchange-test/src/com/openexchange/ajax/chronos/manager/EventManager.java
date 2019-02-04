@@ -636,17 +636,13 @@ public class EventManager extends AbstractManager {
      * @param comment An optional comment to send to the attendees
      * @param recurrenceId the recurrence identifier
      * @param range The {@link RecurrenceRange}
-     * @param expectException <code>true</code>
+     * @param expectException <code>true</code> if the action should have caused an exception
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData changeEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse updateResponse 
-        = userApi.getChronosApi().changeOrganizer(
-            userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), 
-            new ChangeOrganizerBody().organizer(organizer).comment(comment), 
-            recurrenceId, null == range ? null : range.name(), null);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().changeOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), new ChangeOrganizerBody().organizer(organizer).comment(comment), recurrenceId, null == range ? null : range.name(), null);
         return handleUpdate(updateResponse, expectException);
     }
 
