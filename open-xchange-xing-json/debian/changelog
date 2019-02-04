@@ -1,3 +1,9 @@
+open-xchange-xing-json (7.8.3-53) stable; urgency=medium
+
+  * Build for patch 2019-02-11 (5105)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 04 Feb 2019 10:02:12 +0100
+
 open-xchange-xing-json (7.8.3-52) stable; urgency=medium
 
   * 2018-11-26 (4994)
