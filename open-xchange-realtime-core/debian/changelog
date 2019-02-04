@@ -1,3 +1,9 @@
+open-xchange-realtime-core (7.8.4-51) stable; urgency=medium
+
+  * Build for patch 2019-02-11 (5106)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Feb 2019 12:38:55 +0100
+
 open-xchange-realtime-core (7.8.4-50) stable; urgency=medium
 
   * Build for patch 2019-01-29 (5116)
