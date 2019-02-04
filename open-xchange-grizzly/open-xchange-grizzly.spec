@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -97,6 +97,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Feb 04 2019 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2019-02-11 (5107)
 * Fri Jan 18 2019 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2019-01-28 (5075)
 * Mon Jan 07 2019 Marc Arens <marc.arens@open-xchange.com>
