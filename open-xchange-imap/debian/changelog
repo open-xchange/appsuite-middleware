@@ -1,3 +1,9 @@
+open-xchange-imap (7.10.1-7) stable; urgency=medium
+
+  * Build for patch 2019-02-11 (5108)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Feb 2019 13:34:16 +0100
+
 open-xchange-imap (7.10.1-6) stable; urgency=medium
 
   * Build for patch 2019-01-31 (5103)
