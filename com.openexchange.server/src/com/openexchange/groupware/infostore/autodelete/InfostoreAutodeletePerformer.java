@@ -182,7 +182,7 @@ public class InfostoreAutodeletePerformer {
         /*
          * query elapsed versions in folder
          */
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere("infostore.folder_id = " + folderId + " AND infostore_document.last_modified < " + maxLastModified.getTime() + " AND infostore_document.file_store_location IS NOT NULL" + (optOwner > 0 ? " AND infostore.created_by="+optOwner : ""), Metadata.VALUES_ARRAY, infostoreFacade, session.getContext()).asList();
+        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere("infostore.folder_id = " + folderId + " AND infostore_document.last_modified < " + maxLastModified.getTime() + " AND infostore_document.file_store_location IS NOT NULL AND (infostore.version <> infostore_document.version_number)" + (optOwner > 0 ? " AND infostore.created_by="+optOwner : ""), Metadata.VALUES_ARRAY, infostoreFacade, session.getContext()).asList();
         if (allVersions.isEmpty()) {
             return;
         }
