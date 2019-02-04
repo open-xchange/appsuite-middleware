@@ -49,14 +49,15 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.EventField.ORGANIZER;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
@@ -84,6 +85,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
+     * @throws OXException If the calendar user can't be resolved
      */
     public ChangeOrganizerPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
@@ -96,6 +98,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      * @param roles The {@link Role}
+     * @throws OXException If the calendar user can't be resolved
      */
     public ChangeOrganizerPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder, EnumSet<Role> roles) throws OXException {
         super(storage, session, folder, roles);
@@ -113,31 +116,46 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      */
     public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, CalendarUser organizer, Long clientTimestamp) throws OXException {
         /*
-         * load original event data & check permissions
+         * Check if feature is enabled
+         */
+        if (false == session.getConfig().isOrganizerChangeAllowed()) {
+            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
+        }
+
+        /*
+         * Load original event data & check permissions
          */
         Event originalEvent = loadEventData(eventId);
         Check.eventIsVisible(folder, originalEvent);
-        Check.eventIsInFolder(originalEvent, folder);
+        Check.eventIsInFolder(originalEvent, folder); 
         requireWritePermissions(originalEvent);
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
 
         /*
-         * Check if event is group scheduled
+         * Ensure that new organizer is set and internal
+         */
+        if (null == organizer || false == CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Integer.valueOf(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
+        }
+        /*
+         * Ensure that current user is the organizer
+         */
+        if (false == CalendarUtils.isOrganizer(originalEvent, calendarUserId)) {
+            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), eventId, organizer.getUri(), organizer.getCn());
+        }
+        /*
+         * Ensure that event is group scheduled
          */
         if (CalendarUtils.isPseudoGroupScheduled(originalEvent) || false == CalendarUtils.isGroupScheduled(originalEvent)) {
-            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, EventField.ORGANIZER);
+            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
         }
-
         /*
-         * Check if attendees and new organizer are internal users
+         * Ensure that attendees and current organizer are internal users
          */
-        if (containsExternal(originalEvent.getAttendees()) || false == CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_FOR_EXTERNAL_ATTENDEES.create();
-        }
-        if (false == CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL)) {
-            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Integer.valueOf(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
+        if (containsExternal(originalEvent.getAttendees()) || false == CalendarUtils.isInternal(originalEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
         }
 
         /*
@@ -145,9 +163,9 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
          */
         if (false == CalendarUtils.isSeriesMaster(originalEvent)) {
             if (CalendarUtils.isSeriesException(originalEvent)) {
-                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, EventField.ORGANIZER);
+                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateEvent(eventId, organizer, originalEvent);
+            updateEvent(originalEvent, organizer);
             return resultTracker.getResult();
         }
 
@@ -156,9 +174,9 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
          */
         if (null == recurrenceId) {
             if (CalendarUtils.isSeriesException(originalEvent)) {
-                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, EventField.ORGANIZER);
+                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateSeries(eventId, organizer, originalEvent);
+            updateSeries(originalEvent, organizer);
             return resultTracker.getResult();
         }
 
@@ -171,7 +189,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         /*
          * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
          */
-        updateSeries(eventId, organizer, originalEvent);
+        updateSeries(originalEvent, organizer);
 
         return resultTracker.getResult();
     }
@@ -180,13 +198,19 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * Applies the organizer change to a new {@link Event} so that only relevant fields will be updated
      * 
      * @param organizer The new organizer
-     * @param eventId The identifier of the event to update
+     * @param originalEvent The original event
      * @return A delta {@link Event}
      * @throws OXException If resolving fails
      */
-    private Event prepareChanges(CalendarUser organizer, String eventId) throws OXException {
+    private Event prepareChanges(Event originalEvent, CalendarUser organizer) throws OXException {
         Event updatedEvent = new Event();
-        updatedEvent.setId(eventId);
+        updatedEvent.setId(originalEvent.getId());
+
+        if (originalEvent.containsSeriesId()) {
+            updatedEvent.setSeriesId(originalEvent.getSeriesId());
+        }
+
+        // Set new organizer
         if (Organizer.class.isAssignableFrom(organizer.getClass())) {
             updatedEvent.setOrganizer((Organizer) organizer);
         } else {
@@ -197,9 +221,20 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             prepared.setSentBy(organizer.getSentBy());
             prepared.setUri(organizer.getUri());
         }
-        updatedEvent.setSequence(updatedEvent.getSequence() + 1);
+
+        // Ensure new organizer is attendee
+        if (false == CalendarUtils.contains(originalEvent.getAttendees(), organizer)) {
+            Attendee attendee = session.getEntityResolver().prepareUserAttendee(organizer.getEntity());
+            LinkedList<Attendee> updatedAttendees = new LinkedList<>(originalEvent.getAttendees());
+            updatedAttendees.add(attendee);
+            updatedEvent.setAttendees(updatedAttendees);
+        }
+
+        // Update meta data
+        updatedEvent.setSequence(originalEvent.getSequence() + 1);
         updatedEvent.setTimestamp(timestamp.getTime());
         updatedEvent.setModifiedBy(calendarUser);
+
         return updatedEvent;
     }
 
@@ -216,29 +251,27 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * Applies the new organizer to a series master and all its change exceptions.
      * Results will be tracked.
      * 
-     * @param eventId The event identifier of the series master
      * @param organizer The new organizer
      * @param originalEvent The original event
      * @throws OXException If update fails
      */
-    private void updateSeries(String eventId, CalendarUser organizer, Event originalEvent) throws OXException {
-        Event updatedEvent = updateEvent(eventId, organizer, originalEvent);
+    private void updateSeries(Event originalEvent, CalendarUser organizer) throws OXException {
+        Event updatedEvent = updateEvent(originalEvent, organizer);
         updateExceptions(originalEvent, updatedEvent, organizer);
     }
 
     /**
      * Update the organizer for a single event.
      * 
-     * @param eventId The identifier of the event
      * @param organizer The new organizer
      * @param originalEvent The original event
      * @return The updated {@link Event}
      * @throws OXException If updating fails
      */
-    private Event updateEvent(String eventId, CalendarUser organizer, Event originalEvent) throws OXException {
-        Event eventUpdate = prepareChanges(organizer, eventId);
+    private Event updateEvent(Event originalEvent, CalendarUser organizer) throws OXException {
+        Event eventUpdate = prepareChanges(originalEvent, organizer);
         storage.getEventStorage().updateEvent(eventUpdate);
-        Event updatedEvent = loadEventData(eventId);
+        Event updatedEvent = loadEventData(originalEvent.getId());
         resultTracker.trackUpdate(originalEvent, updatedEvent);
         return updatedEvent;
     }
@@ -254,8 +287,8 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      */
     private void updateExceptions(Event originalEvent, Event updatedEvent, CalendarUser organizer) throws OXException {
         for (Event e : loadExceptionData(updatedEvent)) {
-            storage.getEventStorage().updateEvent(prepareChanges(organizer, e.getId()));
-            resultTracker.trackUpdate(originalEvent, loadEventData(e.getId()));
+            storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
+            resultTracker.trackUpdate(e, loadEventData(e.getId()));
         }
     }
 }
