@@ -1205,7 +1205,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 parameters.getDocument().setVersion(getNextVersionNumberForInfostoreObject(parameters.getContext().getContextId(), parameters.getDocument().getId(), con));
                 parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
             } catch (final SQLException e) {
-                LOG.error("SQLException: ", e);
+                LOG.error("SQL error", e);
             } finally {
                 releaseReadConnection(parameters.getContext(), con);
             }
@@ -1762,7 +1762,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) throws OXException {
-        return removeVersion(id, versionIds, true, session);
+        return removeVersion(id, versionIds, true, true, session);
     }
 
     /**
@@ -1771,11 +1771,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param id The document identifier
      * @param versionIds The identifiers of the versions to remove
      * @param allowRemoveCurrentVersion <code>true</code> to allow removing the current version; otherwise <code>false</code>
+     * @param updateLastModified Whether last-modified information is supposed to be updated
      * @param session The session
      * @return The identifiers of those versions that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, ServerSession session) throws OXException {
+    public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, boolean updateLastModified, ServerSession session) throws OXException {
         if (null == versionIds || 0 == versionIds.length) {
             return new int[0];
         }
@@ -1843,8 +1844,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         update.setModifiedBy(session.getUserId());
 
         final Set<Metadata> updatedFields = new HashSet<>();
-        updatedFields.add(Metadata.LAST_MODIFIED_LITERAL);
-        updatedFields.add(Metadata.MODIFIED_BY_LITERAL);
+        if (updateLastModified || removeCurrent) {
+            updatedFields.add(Metadata.LAST_MODIFIED_LITERAL);
+            updatedFields.add(Metadata.MODIFIED_BY_LITERAL);
+        }
 
         if (removeCurrent) {
 
@@ -1877,7 +1880,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     updatedFields.add(Metadata.TITLE_LITERAL);
                 }
             }
-            perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata, updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
+            if (!updatedFields.isEmpty()) {
+                perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata, updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
+            }
 
             // Remove Versions
             perform(new DeleteVersionAction(this, QUERIES, context, allVersions, session), true);

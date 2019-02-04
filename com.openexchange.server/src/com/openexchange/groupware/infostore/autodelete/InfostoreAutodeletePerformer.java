@@ -203,7 +203,7 @@ public class InfostoreAutodeletePerformer {
          */
         for (TIntObjectIterator<TIntList> it = groupedByDocument.iterator(); it.hasNext();) {
             it.advance();
-            infostoreFacade.removeVersion(it.key(), it.value().toArray(), false, session);
+            infostoreFacade.removeVersion(it.key(), it.value().toArray(), false, true, session);
         }
     }
 
@@ -231,6 +231,16 @@ public class InfostoreAutodeletePerformer {
 
                     @Override
                     public int compare(DocumentMetadata d1, DocumentMetadata d2) {
+                        if (d1.isCurrentVersion()) {
+                            if (!d2.isCurrentVersion()) {
+                                return 1;
+                            }
+                        } else if (d2.isCurrentVersion()) {
+                            if (!d1.isCurrentVersion()) {
+                                return -1;
+                            }
+                        }
+
                         int x = d1.getVersion();
                         int y = d2.getVersion();
                         return (x < y) ? -1 : ((x == y) ? 0 : 1);
@@ -242,7 +252,7 @@ public class InfostoreAutodeletePerformer {
                 for (int i = numberOfVersionsToDelete; i-- > 0;) {
                     versionsToDelete.add(versionsOfDocumentIter.next().getVersion());
                 }
-                infostoreFacade.removeVersion(id, versionsToDelete.toArray(), session);
+                infostoreFacade.removeVersion(id, versionsToDelete.toArray(), false, false, session);
             }
         } finally {
             SearchIterators.close(iterator);
