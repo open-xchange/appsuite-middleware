@@ -744,14 +744,14 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                 myList = ps;
                             } else {
                                 executor.submitToMember(new PortableStartPermanentListenerCallable(ps, _2secNanos) , candidate);
-                                LOG.info("Requested to start the following permanent listeners on member \"{}\": {}", candidate, ps);
+                                LOG.info("Requested to start the {} permanent listeners on member \"{}\"", Integer.valueOf(ps.size()), candidate);
                             }
                             pos++;
                         }
 
                         // Apply newly calculated initial permanent listeners
                         List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(null == myList ? Collections.<PushUser>emptyList() : myList, _2secNanos);
-                        LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", localMember, startedOnes.size());
+                        LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", localMember, Integer.valueOf(startedOnes.size()));
                     } else {
                         LOG.info("Awaiting the permanent listeners to start as dictated by master \"{}\"", master);
                     }
