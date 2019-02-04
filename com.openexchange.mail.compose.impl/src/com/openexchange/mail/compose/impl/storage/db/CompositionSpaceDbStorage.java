@@ -182,6 +182,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Deletes those composition spaces, which are idle for longer than given max. idle time.
+     *
+     * @param maxIdleTimeMillis The max. idle time in milliseconds
+     * @return The identifiers of the composition spaces that were deleted
+     * @throws OXException If composition spaces cannot be deleted
+     */
     public List<UUID> deleteExpired(long maxIdleTimeMillis) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         boolean modified = true;
@@ -402,6 +409,10 @@ public class CompositionSpaceDbStorage {
     }
 
     private List<UUID> deleteExpired(Connection connection, long maxIdleTimeMillis) throws SQLException {
+        if (!Databases.tableExists(connection, "compositionSpace")) {
+            return Collections.emptyList();
+        }
+
         long maxLastModifiedStamp = System.currentTimeMillis() - maxIdleTimeMillis;
 
         PreparedStatement stmt = null;
