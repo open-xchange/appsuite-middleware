@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.ajax.requesthandler.AJAXRequestDataTools.parseBoolParameter;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.mail.mime.MimeTypes.equalPrimaryTypes;
 import java.io.IOException;
@@ -217,7 +218,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             boolean saveToDisk;
             {
                 String saveParam = req.getParameter(PARAMETER_SAVE);
-                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(PARAMETER_DELIVERY)));
+                saveToDisk = parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(PARAMETER_DELIVERY)));
             }
             boolean filter;
             {
@@ -337,7 +338,12 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         // Read HTML content
                         final byte[] bytes;
                         {
-                            String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                            String htmlContent;
+                            if (null == sink) {
+                                htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                            } else {
+                                htmlContent = MessageUtility.readStream(new FileHolderInputStreamProvider(sink), cs, false, MailProperties.getInstance().getBodyDisplaySize());
+                            }
                             if (htmlContent.length() > HtmlServices.htmlThreshold()) {
                                 // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                                 OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
@@ -492,17 +498,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
      * is set and if it is whether it is set to <code>true</code>. In that case
      * <code>true</code> is returned. Otherwise, the URL parameter <code>exact_length</code>
      * is evaluated and its value is returned instead.
-     * 
+     *
      * @param req The {@link com.openexchange.ajax.request.MailRequest}
      * @return <code>true</code> if the exact length of the e-mail attachment should be
      *         calculated, <code>false</code> otherwise
      */
     private boolean calculateExactLength(MailRequest req) {
-        String scan = req.getParameter("scan");
-        if (Strings.isEmpty(scan) ? Boolean.FALSE : Boolean.valueOf(scan)) {
-            return true;
-        }
-        return AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+        return parseBoolParameter(req.getParameter("scan")) || parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
     }
 
     private String getBaseType(MailPart mailPart) {
@@ -675,6 +677,30 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
+
+    private final class FileHolderInputStreamProvider implements com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider {
+
+        private final IFileHolder tfh;
+
+        FileHolderInputStreamProvider(IFileHolder tfh) {
+            this.tfh = tfh;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            try {
+                return tfh.getStream();
+            } catch (OXException e) {
+                Throwable cause = e.getCause();
+                throw (cause instanceof IOException) ? ((IOException) cause) : new IOException(null == cause ? e : cause);
+            }
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+    }
 
     private static final class ReconnectingInputStreamClosure implements IFileHolder.InputStreamClosure {
 
