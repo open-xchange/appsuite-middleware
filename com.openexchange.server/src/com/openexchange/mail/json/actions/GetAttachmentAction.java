@@ -678,7 +678,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
-    private final class FileHolderInputStreamProvider implements com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider {
+    private static final class FileHolderInputStreamProvider implements com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider {
 
         private final IFileHolder tfh;
 
