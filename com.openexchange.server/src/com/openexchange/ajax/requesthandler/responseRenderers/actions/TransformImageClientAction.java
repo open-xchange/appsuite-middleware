@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
@@ -100,22 +101,28 @@ public class TransformImageClientAction extends TransformImageAction {
     }
 
     /**
-     * @return
+     * Gets the IImageClient service to use (if any available and if connected).
+     *
+     * @return The IImageClient service (if any available and if connected) or <code>null</code>
      */
-    public boolean isValid() {
-        boolean ret = false;
-
+    public IImageClient getImageClientIfValid() {
         IImageClient imageClient = this.m_imageClient.get();
-        if (null != imageClient) {
-            try {
-                ret = imageClient.isConnected();
-            } catch (OXException e) {
-                // only tracing here
-                LOG.trace(Throwables.getRootCause(e).getMessage());
-            }
+        if (null == imageClient) {
+            // No IImageClient set
+            return null;
         }
 
-        return ret;
+        try {
+            if (imageClient.isConnected()) {
+                return imageClient;
+            }
+        } catch (OXException e) {
+            // Only tracing here
+            LOG.trace("", e);
+        }
+
+        // No valid IImageClient service
+        return null;
     }
 
     /* (non-Javadoc)
@@ -126,7 +133,7 @@ public class TransformImageClientAction extends TransformImageAction {
         String cacheKey = null;
         final long size = repetitiveFile.getLength();
 
-        if (isValid()) {
+        if (null != getImageClientIfValid()) {
             // calculate Adler32 of image
             final Checksum crcImage = new Adler32();
 
@@ -156,9 +163,9 @@ public class TransformImageClientAction extends TransformImageAction {
         IFileHolder ret = null;
 
         if (isNotEmpty(cacheKey)) {
-            if (isValid()) {
+            IImageClient imageClient = getImageClientIfValid();
+            if (null != imageClient) {
                 try {
-                    IImageClient imageClient = this.m_imageClient.get();
                     final String requestFormatString = getRequestFormatString(xformParams, "auto");
                     final InputStream imageInputStm = imageClient.getImage(cacheKey, requestFormatString, Integer.toString(session.getContext().getContextId()));
 
@@ -186,7 +193,7 @@ public class TransformImageClientAction extends TransformImageAction {
 
         // method is empty and superclass method mustn't (!) be called
         // if valid, since all caching is done on ImageServer side
-        if (!isValid()) {
+        if (null == getImageClientIfValid()) {
             super.writeCachedResource(session, cacheKey, targetMimeType, transformedImage, transformedFile, fileName, size);
         }
 
@@ -199,38 +206,34 @@ public class TransformImageClientAction extends TransformImageAction {
     protected BasicTransformedImage performTransformImage(@NonNull final ServerSession session, @NonNull final IFileHolder file, @NonNull final TransformImageParameters xformParams, final String cacheKey, final String fileName)
         throws OXException, IOException {
 
-        BasicTransformedImage ret = null;
-
         // check for valid IImageClient interface and use this one for transformation of image =>
         // if not successful, rely on ImageTransformation implementation and call super class method
-        if (isValid() && isNotEmpty(cacheKey)) {
-            final InputStream srcImageStm = file.getStream();
+        IImageClient imageClient = getImageClientIfValid();
+        if (null != imageClient && isNotEmpty(cacheKey)) {
+            InputStream srcImageStm = file.getStream();
             if (null != srcImageStm) {
                 try {
-                    final IImageClient imageClient = this.m_imageClient.get();
-                    final String requestFormatString = getRequestFormatString(xformParams, "auto");
-                    InputStream resultImageStm;
-					try {
-						resultImageStm = imageClient.cacheAndGetImage(cacheKey, requestFormatString, srcImageStm, getContextIdString(session));
-					} catch (ImageConverterException e) {
-						throw OXException.general("Communication with Image Converter failed", e);
-					}
-
-                    if (null != resultImageStm) {
-                        try {
+                    String requestFormatString = getRequestFormatString(xformParams, "auto");
+                    InputStream resultImageStm = null;
+                    try {
+                        resultImageStm = imageClient.cacheAndGetImage(cacheKey, requestFormatString, srcImageStm, getContextIdString(session));
+                        if (null != resultImageStm) {
                             ThresholdFileHolder imageData = new ThresholdFileHolder();
                             try {
                                 imageData.write(resultImageStm);
                                 imageData.setContentType(xformParams.getImageMimeType());
                                 imageData.setName(cacheKey);
-                                ret = new FileHolderBasicTransformedImage(imageData, xformParams);
-                                imageData = null; // Avoid rpemature closing
+                                BasicTransformedImage ret = new FileHolderBasicTransformedImage(imageData, xformParams);
+                                imageData = null; // Avoid premature closing
+                                return ret;
                             } finally {
                                 Streams.close(imageData);
                             }
-                        } finally {
-                            Streams.close(resultImageStm);
                         }
+                    } catch (ImageConverterException e) {
+                        throw OXException.general("Communication with Image Converter failed", e);
+                    } finally {
+                        Streams.close(resultImageStm);
                     }
                 } finally {
                     Streams.close(srcImageStm);
@@ -238,11 +241,7 @@ public class TransformImageClientAction extends TransformImageAction {
             }
         }
 
-        if (null != ret) {
-            return ret;
-        }
-
-        return (isValid() ? null : super.performTransformImage(session, file, xformParams, cacheKey, fileName));
+        return (null != imageClient ? null : super.performTransformImage(session, file, xformParams, cacheKey, fileName));
     }
 
     // - Implementation --------------------------------------------------------
@@ -251,17 +250,16 @@ public class TransformImageClientAction extends TransformImageAction {
         return Integer.toString(session.getContext().getContextId());
     }
 
+    private static final Pattern PATTERN_FORMAT_STRING = Pattern.compile("^[a-zA-Z]*:");
+
     /**
      * @param xformParams
      * @param targetFormat
      * @return
      */
     private static String getRequestFormatString(@NonNull final TransformImageParameters xformParams, final String targetFormat) {
-        final String ret = xformParams.getFormatString();
-
-        return (isNotEmpty(targetFormat)) ?
-            ret.replaceFirst("^[a-zA-Z]*:", targetFormat + ":") :
-                ret;
+        String ret = xformParams.getFormatString();
+        return (isNotEmpty(targetFormat)) ? PATTERN_FORMAT_STRING.matcher(ret).replaceFirst(targetFormat + ':') : ret;
     }
 
     // - Members ---------------------------------------------------------------
