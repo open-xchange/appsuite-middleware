@@ -131,8 +131,12 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
 
     @Override
     protected void stopBundle() throws Exception {
-        this.tombstoneCleanerWorker.stop();
-        this.cleanupTask.cancel(true);
+        if (this.tombstoneCleanerWorker != null) {
+            this.tombstoneCleanerWorker.stop();
+        }
+        if (this.cleanupTask != null) {
+            this.cleanupTask.cancel(true);
+        }
         Services.setServiceLookup(null);
 
         super.stopBundle();
@@ -144,7 +148,9 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
         LeanConfigurationService leanConfig;
         try {
             leanConfig = Tools.requireService(LeanConfigurationService.class, this);
-            cleanupTask.cancel(true);
+            if (this.cleanupTask != null) {
+                cleanupTask.cancel(true);
+            }
 
             initCleanupTimerTask(leanConfig);
         } catch (OXException e) {
