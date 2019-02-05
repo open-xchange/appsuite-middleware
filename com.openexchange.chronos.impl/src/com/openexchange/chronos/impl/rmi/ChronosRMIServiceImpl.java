@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.Utils;
@@ -110,7 +109,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             CalendarStorage storage = getStorage(contextId, dbProvider, context);
             EntityResolver entityResolver = calendarUtilities.getEntityResolver(contextId);
             Event event = loadEvent(eventId, storage);
-            if (noop(event, userId)) {
+            if (isNoop(event, userId)) {
                 return;
             }
 
@@ -123,6 +122,8 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             } else {
                 handleSingle(event, userId, storage, entityResolver);
             }
+        } catch (RemoteException re) {
+            throw re;
         } catch (Exception e) {
             LOG.error("", e);
             String message = e.getMessage();
@@ -176,7 +177,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
         return newOrganizerAttendee;
     }
 
-    private boolean noop(Event event, int newOrganizer) {
+    private boolean isNoop(Event event, int newOrganizer) {
         if (!CalendarUtils.isOrganizer(event, newOrganizer)) {
             return false;
         }
