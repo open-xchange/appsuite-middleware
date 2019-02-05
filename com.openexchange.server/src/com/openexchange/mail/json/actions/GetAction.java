@@ -50,7 +50,9 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,12 +73,14 @@ import org.json.JSONStringOutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -86,6 +90,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.mime.ContentType;
@@ -93,8 +98,19 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.processing.MimeProcessingUtility;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.preview.PreviewOutput;
+import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.startup.ThreadControlService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -109,6 +125,7 @@ public final class GetAction extends AbstractMailAction {
 
     private static final byte[] CHUNK1 = "{\"data\":\"".getBytes();
     private static final byte[] CHUNK2 = "\"}".getBytes();
+    private static final String PARAMETER_PREGENERATE_PREVIEWS = "pregenerate_previews";
 
     /**
      * Initializes a new {@link GetAction}.
@@ -405,6 +422,16 @@ public final class GetAction extends AbstractMailAction {
                     mail.setAccountId(mailInterface.getAccountID());
                 }
                 /*
+                 * Check whether preview should be pre-generated
+                 */
+                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS))) {
+                    PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+                    ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                    if (null != previewService && null != threadPool) {
+                        threadPool.submit(new TriggerPreviewServiceTask(folderPath, uid, req, previewService, ServerServiceRegistry.getInstance().getService(ThreadControlService.class)));
+                    }
+                }
+                /*
                  * Check if source shall be attached
                  */
                 ThresholdFileHolder fileHolder = null;
@@ -555,6 +582,119 @@ public final class GetAction extends AbstractMailAction {
             }
         }
         return sb.toString();
+    }
+
+    private static final class TriggerPreviewServiceTask extends AbstractTask<Void> {
+
+        private final ThreadControlService threadControl;
+        private final ServerSession session;
+        private final AJAXRequestData requestData;
+        private final PreviewService previewService;
+        private final String folderId;
+        private final String mailId;
+
+        TriggerPreviewServiceTask(String folderId, String mailId, MailRequest request, PreviewService previewService, ThreadControlService threadControl) throws OXException {
+            super();
+            this.folderId = folderId;
+            this.mailId = mailId;
+            this.session = request.getSession();
+            this.previewService = previewService;
+            this.threadControl = null == threadControl ? ThreadControlService.DUMMY_CONTROL : threadControl;
+
+            AJAXRequestData requestData = request.getRequest().copyOf();
+            requestData.putParameter("width", "160");
+            requestData.putParameter("height", "160");
+            requestData.putParameter("delivery", "view");
+            requestData.putParameter("scaleType", "cover");
+            this.requestData = requestData;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            threadRenamer.renamePrefix("Async-DC-Trigger");
+        }
+
+        @Override
+        public Void call() throws OXException {
+            MailServletInterface mailInterface = null;
+            try {
+                mailInterface = MailServletInterface.getInstance(session);
+
+                // Get mail
+                MailMessage mail = mailInterface.getMessage(folderId, mailId, false);
+                if (null == mail) {
+                    return null;
+                }
+
+                // Determine non-inline parts
+                List<MailPart> nonInlineParts;
+                if (mail.getContentType().startsWith("multipart/")) {
+                    // Grab first seen text from original message and check for possible referenced inline images
+                    List<String> contentIds = new ArrayList<String>();
+                    MimeProcessingUtility.getTextForForward(mail, true, false, contentIds, session);
+
+                    // Get mail's non-inline parts
+                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+                    if (false == contentIds.isEmpty()) {
+                        handler.setImageContentIds(contentIds);
+                    }
+                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mail, handler);
+                    nonInlineParts = handler.getNonInlineParts();
+                } else {
+                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mail, handler);
+                    nonInlineParts = handler.getNonInlineParts();
+                }
+
+                // Check non-inline parts
+                if (null == nonInlineParts || nonInlineParts.isEmpty()) {
+                    // Mail has no file attachments
+                    return null;
+                }
+
+                // Trigger preview generation
+                Thread currentThread = Thread.currentThread();
+                boolean added = threadControl.addThread(currentThread);
+                try {
+                    for (MailPart mailPart : nonInlineParts) {
+                        triggerFor(mailPart);
+                    }
+                } finally {
+                    if (added) {
+                        threadControl.removeThread(currentThread);
+                    }
+                }
+            } finally {
+                if (null != mailInterface) {
+                    mailInterface.close(true);
+                }
+            }
+            return null;
+        }
+
+        private void triggerFor(final MailPart mailPart) {
+            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, mailPart.getFileName(), PreviewOutput.IMAGE, session);
+            if (null != candidate) {
+                // Create appropriate IFileHolder instance
+                IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        InputStream inputStream = mailPart.getInputStream();
+                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                            return inputStream;
+                        }
+                        return new BufferedInputStream(inputStream, 65536);
+                    }
+                };
+                FileHolder fileHolder = new FileHolder(isClosure, -1, mailPart.getContentType().getBaseType(), mailPart.getFileName());
+
+                AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
+                LOG.debug("Triggered to create preview from file attachment {} of mail {} in folder {} for user {} in context {}", mailPart.getFileName(), mailId, folderId, session.getUserId(), session.getContextId());
+            } else {
+                LOG.debug("Found no suitable {} service to trigger preview creation from file attachment {} of mail {} in folder {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), mailPart.getFileName(), mailId, folderId, session.getUserId(), session.getContextId());
+            }
+        }
     }
 
 }

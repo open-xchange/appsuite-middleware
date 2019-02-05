@@ -256,6 +256,7 @@ import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -489,6 +490,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // CacheEventService
         track(CacheEventService.class, new RegistryCustomizer<CacheEventService>(context, CacheEventService.class));
+
+        // ThreadControlService
+        track(ThreadControlService.class, new RegistryCustomizer<ThreadControlService>(context, ThreadControlService.class));
 
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));

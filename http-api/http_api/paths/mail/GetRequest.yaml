@@ -73,6 +73,11 @@
         type: boolean
         description: If set to "true" the "size" field for mail attachments is adjusted by applying an estimation based on attachment's Content-Transfer-Encoding header
         required: false
+      - in: query
+        name: pregenerate_previews
+        type: boolean
+        description: If set to "true" preview generation is triggered in the background for all file attachments of the referenced mail message
+        required: false
       - $ref: "#/parameters/gblQueryParamsDecrypt"
       - $ref: "#/parameters/glbQueryParamsCryptoAuth"
     responses:
