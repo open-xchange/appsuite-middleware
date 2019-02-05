@@ -22,7 +22,7 @@
         name: scan
         type: boolean
         description: |
-        	Flag to request an Anti-Virus scan for the specified documents before downloading them. 
+          Flag to request an Anti-Virus scan for the specified documents before downloading them. 
         required: false
     responses:
       200:

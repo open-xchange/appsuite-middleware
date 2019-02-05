@@ -30,7 +30,7 @@
         name: scan
         type: boolean
         description: |
-        	Flag to request an Anti-Virus scan for the specified attachment before downloading it. 
+          Flag to request an Anti-Virus scan for the specified attachment before downloading it.
         required: false
     responses:
       200:

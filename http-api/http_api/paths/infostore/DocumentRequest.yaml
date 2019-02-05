@@ -35,7 +35,7 @@
         name: scan
         type: boolean
         description: |
-        	Flag to request an Anti-Virus scan for the specified document before downloading them. 
+          Flag to request an Anti-Virus scan for the specified document before downloading them. 
         required: false
       - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
       - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
@@ -45,7 +45,7 @@
       - $ref: "#/parameters/glbQueryParamsImageTransformationCropWidth"
       - $ref: "#/parameters/glbQueryParamsImageTransformationCropHeight"
       - $ref: "#/parameters/glbQueryParamsImageTransformationCropX"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"       
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"
     responses:
       200:
         description: The raw byte data of the document. The response type for the HTTP request is set accordingly to the defined mimetype for this infoitem or the content_type given.

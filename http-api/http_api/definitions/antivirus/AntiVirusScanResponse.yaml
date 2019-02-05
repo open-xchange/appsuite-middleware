@@ -1,8 +1,0 @@
-type: object
-properties:
-  $ref: ../common/CommonResponseData.yaml
-  data:
-    type: array
-    description: The scan results
-    items:
-      $ref: "#/definitions/AntiVirusScanResultData"

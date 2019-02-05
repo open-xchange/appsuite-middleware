@@ -19,7 +19,7 @@
       - in: query
         name: transformationNeeded
         type: boolean
-        description: Indicate if the image needs to be transformed. 
+        description: Indicate if the image needs to be transformed.
         required: false
       - in: query
         name: cropWidth
@@ -65,7 +65,7 @@
           - containforcedimension
           - cover
           - coverandcrop
-        required: false  
+        required: false
     responses:
       200:
         description: The content of the requested image is directly written into output stream.

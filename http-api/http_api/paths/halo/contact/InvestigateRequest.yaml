@@ -31,7 +31,7 @@
         type: integer
         format: int32
         description: The internal id of the user
-        required: false         
+        required: false
       - in: query
         name: timezone
         type: string

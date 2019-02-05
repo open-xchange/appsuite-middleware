@@ -23,7 +23,7 @@
         name: scan
         type: boolean
         description: |
-        	Flag to request an Anti-Virus scan for the ifoitems in the specified folder before downloading them. 
+          Flag to request an Anti-Virus scan for the ifoitems in the specified folder before downloading them.
         required: false
     responses:
       200:
