@@ -159,9 +159,9 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     }
 
     /**
-     * Sets the image scaler.
+     * Sets the client reference to the image service.
      *
-     * @param scaler The image scaler
+     * @param imageClient The client reference to the image service
      */
     public void setImageClient(IImageClient imageClient) {
         imageClientAction.setImageClient(imageClient);
