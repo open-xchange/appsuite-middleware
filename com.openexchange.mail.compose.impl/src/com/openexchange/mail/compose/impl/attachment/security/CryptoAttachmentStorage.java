@@ -108,25 +108,32 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
 
     @Override
     public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session) throws OXException {
-        SizeProvider sizeProviderToUse = sizeProvider;
-        InputStream inputToUse = input;
-        if (needsEncryption(session)) {
-            Key key = getKeyFor(attachment.getCompositionSpaceId(), session);
-
-            if (null == sizeProviderToUse) {
-                final CountingInputStream countingStream = new CountingInputStream(input, -1);
-                inputToUse = countingStream;
-                sizeProviderToUse = new CountingInputStreamSizeProvider(countingStream);
-            }
-
-            inputToUse = CryptoUtility.encryptingStreamFor(inputToUse, key);
-
-            String name = attachment.getName();
-            if (Strings.isNotEmpty(name)) {
-                attachment.setName(encrypt(name , key));
-            }
+        if (false == needsEncryption(session)) {
+            return attachmentStorage.saveAttachment(input, attachment, sizeProvider, session);
         }
-        return attachmentStorage.saveAttachment(inputToUse, attachment, sizeProviderToUse, session);
+
+        // Grab space-associated key
+        Key key = getKeyFor(attachment.getCompositionSpaceId(), session);
+
+        // Adjust input stream and size provider
+        InputStream inputToUse = input;
+        SizeProvider sizeProviderToUse = sizeProvider;
+        if (null == sizeProviderToUse) {
+            final CountingInputStream countingStream = new CountingInputStream(input, -1);
+            inputToUse = countingStream;
+            sizeProviderToUse = new CountingInputStreamSizeProvider(countingStream);
+        }
+        inputToUse = CryptoUtility.encryptingStreamFor(inputToUse, key);
+
+        // Encrypt attachment's file name
+        String name = attachment.getName();
+        if (Strings.isNotEmpty(name)) {
+            attachment.setName(encrypt(name , key));
+        }
+
+        // Save attachment & return decrypted view on it
+        Attachment savedAttachment = attachmentStorage.saveAttachment(inputToUse, attachment, sizeProviderToUse, session);
+        return new DecryptingAttachment(savedAttachment, key);
     }
 
     @Override
