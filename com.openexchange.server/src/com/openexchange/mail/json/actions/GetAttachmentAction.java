@@ -680,16 +680,16 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private static final class FileHolderInputStreamProvider implements com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider {
 
-        private final IFileHolder tfh;
+        private final IFileHolder fileHolder;
 
-        FileHolderInputStreamProvider(IFileHolder tfh) {
-            this.tfh = tfh;
+        FileHolderInputStreamProvider(IFileHolder fileHolder) {
+            this.fileHolder = fileHolder;
         }
 
         @Override
         public InputStream getInputStream() throws IOException {
             try {
-                return tfh.getStream();
+                return fileHolder.getStream();
             } catch (OXException e) {
                 Throwable cause = e.getCause();
                 throw (cause instanceof IOException) ? ((IOException) cause) : new IOException(null == cause ? e : cause);
@@ -700,7 +700,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         public String getName() {
             return null;
         }
-    }
+    } // End of class FileHolderInputStreamProvider
 
     private static final class ReconnectingInputStreamClosure implements IFileHolder.InputStreamClosure {
 
