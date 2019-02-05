@@ -247,7 +247,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 } else {
                     // Obtain size from SizeProvider instance after saving to storage
                     try {
-                        storageIdentifier = saveData(input, size, session);
+                        storageIdentifier = saveData(input, -1, session);
                     } finally {
                         Streams.close(input);
                     }
