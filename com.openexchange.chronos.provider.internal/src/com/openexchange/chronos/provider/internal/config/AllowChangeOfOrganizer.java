@@ -51,8 +51,8 @@ package com.openexchange.chronos.provider.internal.config;
 
 import static com.openexchange.osgi.Tools.requireService;
 import org.json.JSONObject;
-import com.openexchange.chronos.property.ChronosLeanConfigurationProperties;
-import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -65,6 +65,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.2
  */
 public class AllowChangeOfOrganizer extends ReadOnlyChronosJSlobEntry {
+
+    private static final String CHANGE_ORGANIZER_PROPERTY = "com.openexchange.calendar.allowChangeOfOrganizer";
 
     /**
      * Initializes a new {@link AllowChangeOfOrganizer}.
@@ -82,7 +84,13 @@ public class AllowChangeOfOrganizer extends ReadOnlyChronosJSlobEntry {
 
     @Override
     protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
-        return Boolean.valueOf(requireService(LeanConfigurationService.class, services).getBooleanProperty(-1, session.getContextId(), ChronosLeanConfigurationProperties.ALLOWED_ORGANIZER_CHANGE.getProperty()));
+        ConfigViewFactory configViewFactory = requireService(ConfigViewFactory.class, services);
+        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+        if (null != view) {
+            Boolean changeOrganizer = view.get(CHANGE_ORGANIZER_PROPERTY, Boolean.class);
+            return null == changeOrganizer ? Boolean.FALSE : changeOrganizer;
+        }
+        return Boolean.FALSE;
     }
 
 }

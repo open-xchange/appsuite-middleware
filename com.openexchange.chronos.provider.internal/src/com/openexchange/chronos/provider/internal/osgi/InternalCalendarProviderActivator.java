@@ -55,12 +55,12 @@ import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
 import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
+import com.openexchange.chronos.provider.internal.config.AllowChangeOfOrganizer;
 import com.openexchange.chronos.provider.internal.config.DefaultAlarmDate;
 import com.openexchange.chronos.provider.internal.config.DefaultAlarmDateTime;
 import com.openexchange.chronos.provider.internal.config.DefaultFolderId;
 import com.openexchange.chronos.provider.internal.config.RestrictAllowedAttendeeChanges;
 import com.openexchange.chronos.provider.internal.config.RestrictAllowedAttendeeChangesPublic;
-import com.openexchange.chronos.provider.internal.config.AllowChangeOfOrganizer;
 import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
@@ -68,7 +68,7 @@ import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.jslob.JSlobEntry;
@@ -99,7 +99,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class,
-            CalendarAccountService.class, CalendarStorageFactory.class, CalendarUtilities.class, LeanConfigurationService.class
+            CalendarAccountService.class, CalendarStorageFactory.class, CalendarUtilities.class, ConfigViewFactory.class
         };
     }
 
