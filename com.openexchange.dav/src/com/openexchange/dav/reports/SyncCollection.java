@@ -103,39 +103,41 @@ public class SyncCollection extends PROPFINDAction {
         /*
          * marshal multistatus response
          */
-        ResourceMarshaller marshaller = getMarshaller(request, requireRequestBody(request));
-        PropertiesMarshaller helper = new PropertiesMarshaller(request.getURLPrefix(), request.getCharset());
         Element multistatusElement = prepareMultistatusElement();
-        for (int status : syncStatus.getStatusCodes()) {
-            if (HttpServletResponse.SC_NOT_FOUND == status) {
-                /*
-                 * marshal explicit "not found" response for each deleted resource
-                 */
-                for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
-                    WebdavResource resource = webdavStatus.getAdditional();
-                    multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
-                        .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
-                        .addContent(helper.marshalStatus(status))
-                    );
-                }
-            } else if (DAVProtocol.SC_INSUFFICIENT_STORAGE == status) {
-                /*
-                 * marshal HTTP 507 response in case of truncated results 
-                 */
-                for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
-                    WebdavResource resource = webdavStatus.getAdditional();
-                    multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
-                        .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
-                        .addContent(helper.marshalStatus(status))
-                        .addContent(new Element("error", Protocol.DAV_NS).addContent(new Element("number-of-matches-within-limits", Protocol.DAV_NS.getURI())))
-                    );
-                }
-            } else {
-                /*
-                 * marshal common multistatus response for each new/updated resource
-                 */
-                for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
-                    multistatusElement.addContent(marshaller.marshal(webdavStatus.getAdditional()));
+        if (null != syncStatus) {
+            ResourceMarshaller marshaller = getMarshaller(request, requireRequestBody(request));
+            PropertiesMarshaller helper = new PropertiesMarshaller(request.getURLPrefix(), request.getCharset());
+            for (int status : syncStatus.getStatusCodes()) {
+                if (HttpServletResponse.SC_NOT_FOUND == status) {
+                    /*
+                     * marshal explicit "not found" response for each deleted resource
+                     */
+                    for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
+                        WebdavResource resource = webdavStatus.getAdditional();
+                        multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                            .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
+                            .addContent(helper.marshalStatus(status))
+                            );
+                    }
+                } else if (DAVProtocol.SC_INSUFFICIENT_STORAGE == status) {
+                    /*
+                     * marshal HTTP 507 response in case of truncated results
+                     */
+                    for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
+                        WebdavResource resource = webdavStatus.getAdditional();
+                        multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                            .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
+                            .addContent(helper.marshalStatus(status))
+                            .addContent(new Element("error", Protocol.DAV_NS).addContent(new Element("number-of-matches-within-limits", Protocol.DAV_NS.getURI())))
+                            );
+                    }
+                } else {
+                    /*
+                     * marshal common multistatus response for each new/updated resource
+                     */
+                    for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
+                        multistatusElement.addContent(marshaller.marshal(webdavStatus.getAdditional()));
+                    }
                 }
             }
         }
