@@ -63,7 +63,6 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -86,7 +85,11 @@ import com.openexchange.session.Session;
  */
 public class CompositionSpaceDbStorage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CompositionSpaceDbStorage.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositionSpaceDbStorage.class);
+    }
+
     private static final MessageMapper MAPPER = MessageMapper.getInstance();
 
     // private final DBTransactionPolicy txPolicy;
@@ -132,10 +135,10 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    public CompositionSpaceContainer select(UUID id) throws OXException {
+    public CompositionSpaceContainer select(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
-            return select(connection, id);
+            return select(connection, compositionSpaceId);
         } catch (SQLException e) {
             throw handleException(e);
         } finally {
@@ -143,6 +146,12 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Inserts the composition space
+     *
+     * @param compositionSpace The instance to insert
+     * @throws OXException If insertion fails
+     */
     public void insert(CompositionSpaceContainer compositionSpace, int maxSpacesPerUser) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         try {
@@ -154,6 +163,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    /**
+     * Updates the composition space
+     *
+     * @param compositionSpace The instance providing the changes to apply
+     * @return The updated composition space
+     * @throws OXException If update fails
+     */
     public CompositionSpaceContainer updateCompositionSpace(CompositionSpaceContainer compositionSpace) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         try {
@@ -171,10 +187,17 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    public boolean delete(UUID id) throws OXException {
+    /**
+     * Deletes denoted composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @return <code>true</code> for successful deletion; otherwise <code>false</code>
+     * @throws OXException If deletion fails due to an error
+     */
+    public boolean delete(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         try {
-            return delete(connection, id);
+            return delete(connection, compositionSpaceId);
         } catch (SQLException e) {
             throw handleException(e);
         } finally {
@@ -207,10 +230,17 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    public void addAttachment(UUID id, Attachment attachment) throws OXException {
+    /**
+     * Adds given attachment to specified composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param attachment The attachment to add
+     * @throws OXException If adding fails
+     */
+    public void addAttachment(UUID compositionSpaceId, Attachment attachment) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         try {
-            updateAttachments(id, attachment, connection, true);
+            updateAttachments(compositionSpaceId, attachment, true, connection);
         } catch (SQLException e) {
             throw handleException(e);
         } finally {
@@ -218,10 +248,17 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    public void removeAttachment(UUID id, Attachment attachment) throws OXException {
+    /**
+     * Removes given attachment from specified composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param attachment The attachment to remove
+     * @throws OXException If removal fails
+     */
+    public void removeAttachment(UUID compositionSpaceId, Attachment attachment) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         try {
-            updateAttachments(id, attachment, connection, false);
+            updateAttachments(compositionSpaceId, attachment, false, connection);
         } catch (SQLException e) {
             throw handleException(e);
         } finally {
@@ -229,54 +266,66 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    private void updateAttachments(UUID id, Attachment attachment, Connection connection, boolean add) throws SQLException, OXException {
-        String select = "SELECT attachments FROM compositionSpace WHERE cid=? AND user=? AND uuid=?;";
-        JSONArray jsonArray = new JSONArray();
-        try (PreparedStatement stmt = connection.prepareStatement(select)) {
+    /**
+     * Either adds or removes specified attachment to/from given composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param attachment The attachment to add/remove
+     * @param add <code>true</code> to add attachment; otherwise <code>false</code> to remove it
+     * @param connection The connection to use
+     * @throws SQLException If an SQL error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    private void updateAttachments(UUID compositionSpaceId, Attachment attachment, boolean add, Connection connection) throws SQLException, OXException {
+        JSONArray jAttachments;
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT attachments FROM compositionSpace WHERE cid=? AND user=? AND uuid=?")) {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setBytes(3, UUIDs.toByteArray(id));
+            stmt.setBytes(3, UUIDs.toByteArray(compositionSpaceId));
 
-            String oldAttachments = "[]";
             try (ResultSet rs = stmt.executeQuery()) {
                 if (!rs.next()) {
-                    throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(UUIDs.getUnformattedString(id));
+                    throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(UUIDs.getUnformattedString(compositionSpaceId));
                 }
 
-                oldAttachments = rs.getString("attachments");
-                if (!rs.wasNull()) {
-                    jsonArray = new JSONArray(oldAttachments);
+                String oldAttachments = rs.getString("attachments");
+                if (rs.wasNull()) {
+                    // No attachments
+                    jAttachments = new JSONArray(1);
+                } else {
+                    // Parse attachments to JSON
+                    jAttachments = new JSONArray(oldAttachments);
                 }
             } catch (JSONException e) {
-                LOG.error("Unable to generate JSONObject.", e);
+                LoggerHolder.LOG.error("Unable to parse JSON.", e);
+                throw CompositionSpaceErrorCode.ERROR.create(e, e.getMessage());
             }
+        }
 
-            int size = jsonArray.length();
-
-            if (add) {
-                jsonArray.put(UUIDs.getUnformattedString(attachment.getId()));
-            } else {
-                Iterator<Object> i = jsonArray.iterator();
-                while (i.hasNext()) {
-                    if (i.next().equals(UUIDs.getUnformattedString(attachment.getId()))) {
-                        i.remove();
-                        break;
-                    }
+        // Either add given attachment identifier or remove matching one
+        String sAttachmentId = UUIDs.getUnformattedString(attachment.getId());
+        if (add) {
+            jAttachments.put(sAttachmentId);
+        } else {
+            boolean found = false;
+            for (Iterator<Object> i = jAttachments.iterator(); !found && i.hasNext();) {
+                if (i.next().equals(sAttachmentId)) {
+                    i.remove();
+                    found = true;
                 }
             }
 
-            if (jsonArray.length() == size) {
+            if (!found) {
                 // No-Op
                 return;
             }
         }
 
-        String update = "UPDATE compositionSpace SET attachments=? WHERE cid=? AND user=? AND uuid=?;";
-        try (PreparedStatement stmt = connection.prepareStatement(update)) {
-            stmt.setString(1, jsonArray.toString());
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE compositionSpace SET attachments=? WHERE cid=? AND user=? AND uuid=?")) {
+            stmt.setString(1, jAttachments.toString());
             stmt.setInt(2, contextId);
             stmt.setInt(3, userId);
-            stmt.setBytes(4, UUIDs.toByteArray(id));
+            stmt.setBytes(4, UUIDs.toByteArray(compositionSpaceId));
             stmt.executeUpdate();
         }
     }
@@ -311,13 +360,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    private CompositionSpaceContainer select(Connection connection, UUID id) throws SQLException, OXException {
+    private CompositionSpaceContainer select(Connection connection, UUID compositionSpaceId) throws SQLException, OXException {
         MessageField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder().append("SELECT lastModified, ").append(MAPPER.getColumns(mappedFields)).append(" FROM compositionSpace WHERE cid=? AND user=? AND uuid=?").toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setBytes(3, UUIDs.toByteArray(id));
+            stmt.setBytes(3, UUIDs.toByteArray(compositionSpaceId));
             try (ResultSet rs = stmt.executeQuery()) {
                 if (!rs.next()) {
                     return null;
@@ -327,7 +376,7 @@ public class CompositionSpaceDbStorage {
                 CompositionSpaceContainer retval = new CompositionSpaceContainer();
                 retval.setLastModified(new Date(rs.getLong("lastModified")));
                 retval.setMessage(messageDescription);
-                retval.setUuid(id);
+                retval.setUuid(compositionSpaceId);
                 return retval;
             }
         }
@@ -399,11 +448,11 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    private boolean delete(Connection connection, UUID id) throws SQLException {
+    private boolean delete(Connection connection, UUID compositionSpaceId) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM compositionSpace WHERE cid=? AND user=? AND uuid=?")) {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setBytes(3, UUIDs.toByteArray(id));
+            stmt.setBytes(3, UUIDs.toByteArray(compositionSpaceId));
             return stmt.executeUpdate() > 0;
         }
     }
@@ -456,7 +505,7 @@ public class CompositionSpaceDbStorage {
         try {
             return services.getService(ContextService.class).getContext(contextId);
         } catch (OXException e) {
-            LOG.error("Unable to resolve context.", e);
+            LoggerHolder.LOG.error("Unable to resolve context.", e);
         }
         return null;
     }

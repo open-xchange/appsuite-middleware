@@ -241,6 +241,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      */
     public CompositionSpaceServiceImpl(CompositionSpaceStorageService storageService, AttachmentStorageService attachmentStorageService, ServiceLookup services) {
         super();
+        if (null == storageService) {
+            throw new IllegalArgumentException("Storage service must not be null");
+        }
+        if (null == attachmentStorageService) {
+            throw new IllegalArgumentException("Attachment storage service must not be null");
+        }
+        if (null == services) {
+            throw new IllegalArgumentException("Service registry must not be null");
+        }
         this.storageService = storageService;
         this.attachmentStorageService = attachmentStorageService;
         this.services = services;
@@ -666,9 +675,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
 
         Message m = compositionSpace.getMessage();
-        if (null == m) {
-            return null;
-        }
 
         MailServletInterface mailInterface = null;
         try {
@@ -988,12 +994,17 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     private void addNestedMessage(Attachment attachment, Multipart mp) throws MessagingException, OXException {
         String fn;
         if (null == attachment.getName()) {
-            String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(attachment.getData()).getHeader(MessageHeaders.HDR_SUBJECT, null));
-            if (null == subject || subject.length() == 0) {
-                fn = "part.eml";
-            } else {
-                subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
-                fn = subject.replaceAll("\\p{Blank}+", "_") + ".eml";
+            InputStream data = attachment.getData();
+            try {
+                String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(data).getHeader(MessageHeaders.HDR_SUBJECT, null));
+                if (null == subject || subject.length() == 0) {
+                    fn = "part.eml";
+                } else {
+                    subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
+                    fn = subject.replaceAll("\\p{Blank}+", "_") + ".eml";
+                }
+            } finally {
+                Streams.close(data);
             }
         } else {
             fn = attachment.getName();
@@ -2952,8 +2963,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             return htmlContent;
         }
 
+        ImageDataSource imageDataSource = AttachmentImageDataSource.getInstance();
         StringBuffer sb = new StringBuffer(htmlContent.length());
-        ImageDataSource imageDataSource = ImageActionFactory.getImageDataSourceByRegistrationName(AttachmentStorage.IMAGE_REGISTRATION_NAME);
         do {
             String imageTag = matcher.group();
             String srcValue = matcher.group(1);

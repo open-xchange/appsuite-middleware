@@ -88,7 +88,7 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentMailPart.class);
     }
 
-    private final Attachment attachment;
+    private final transient Attachment attachment;
     private transient DataSource dataSource;
     private transient Object cachedContent;
 

@@ -77,9 +77,16 @@ public class MessageMapper extends DefaultDbMapper<MessageDescription, MessageFi
 
     private static final MessageMapper INSTANCE = new MessageMapper();
 
+    /**
+     * Gets the <code>MessageMapper</code> instance.
+     *
+     * @return The instance
+     */
     public static MessageMapper getInstance() {
         return INSTANCE;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private MessageMapper() {
         super();

@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.json.rest;
 
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.rest.AbstractRestServlet;
@@ -65,7 +64,7 @@ public final class MailComposeRestServlet extends AbstractRestServlet {
 
     private static final long serialVersionUID = 531054544302924919L;
 
-    private final Map<Method, MethodHandler> handlerMap;
+    private final transient Map<Method, MethodHandler> handlerMap;
 
     /**
      * Initializes a new {@link MailComposeRestServlet}.
@@ -79,7 +78,7 @@ public final class MailComposeRestServlet extends AbstractRestServlet {
         m.put(Method.PUT, new PutMethodHandler());
         m.put(Method.POST, new PostMethodHandler());
         m.put(Method.DELETE, new DeleteMethodHandler());
-        handlerMap = Collections.unmodifiableMap(m);
+        handlerMap = m;
     }
 
     @Override

@@ -103,6 +103,10 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         columns = null;
 
         List<CompositionSpace> compositionSpaces = compositionSpaceService.getCompositionSpaces(fields, session);
+        if (null == compositionSpaces) {
+            return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
+        }
+
         int size = compositionSpaces.size();
         if (size <= 0) {
             return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");

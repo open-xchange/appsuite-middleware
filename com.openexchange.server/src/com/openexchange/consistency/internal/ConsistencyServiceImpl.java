@@ -941,8 +941,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
 
         // Get files residing in file storages
         LOG.info("Listing all files in filestores");
-        SortedSet<String> filestoreset = new TreeSet<String>();
-        filestoreset = fileStorage.getFileList();
+        SortedSet<String> filestoreset = fileStorage.getFileList();
         LOG.info("Found {} files in the filestore for this entity {}", I(filestoreset.size()), entity);
 
         try {

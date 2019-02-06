@@ -98,26 +98,28 @@ public class DeleteBrokenMailComposeAttachmentReferenceResolver implements Probl
             con = Database.get(entity.getContext(), true);
 
             if (DBUtils.tableExists(con, "compositionSpaceAttachmentMeta") && DBUtils.tableExists(con, "compositionSpace")) {
-                for (String referenceId : problems) {
+                NextReferenceId: for (String referenceId : problems) {
                     // Find corresponding Composition Space and attachment Id
-                    UUID spaceId = null;
-                    UUID attachmentId = null;
+                    UUID spaceId;
+                    UUID attachmentId;
                     try (PreparedStatement stmt = con.prepareStatement(SELECT_UUID)) {
                         stmt.setString(1, referenceId);
                         try (ResultSet rs = stmt.executeQuery()) {
-                            if (rs.next()) {
-                                spaceId = UUIDs.toUUID(rs.getBytes("csid"));
-                                attachmentId = UUIDs.toUUID(rs.getBytes("uuid"));
+                            if (!rs.next()) {
+                                continue NextReferenceId;
                             }
+
+                            spaceId = UUIDs.toUUID(rs.getBytes("csid"));
+                            attachmentId = UUIDs.toUUID(rs.getBytes("uuid"));
                         }
                     }
 
-                    // Get attachments of the corresponding Compostion Space
+                    // Get attachments of the corresponding composition space
                     try (PreparedStatement stmt = con.prepareStatement(SELECT_SPACE)) {
                         stmt.setBytes(1, UUIDs.toByteArray(spaceId));
                         try (ResultSet rs = stmt.executeQuery()) {
                             if (rs.next()) {
-                                // Remove attachment from Composition Space
+                                // Remove attachment from composition space
                                 String attachments = rs.getString(1);
                                 String newAttachments = removeAttachment(attachments, attachmentId);
                                 try (PreparedStatement stmt2 = con.prepareStatement(UPDATE_SPACE)) {
