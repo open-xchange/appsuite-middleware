@@ -166,9 +166,6 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
                     this.fileHolder = fileHolder;
                     stream1 = new InterruptibleInputStream(fileHolder.getStream());
                     this.stream = stream1;
-                    LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
-                } else {
-                    LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                 }
                 ModifyableFileHolder modifyableFileHolder = new ModifyableFileHolder(fileHolder);
                 modifyableFileHolder.setContentType(mimeType);
