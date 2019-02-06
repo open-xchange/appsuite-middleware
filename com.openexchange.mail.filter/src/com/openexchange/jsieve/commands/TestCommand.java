@@ -779,16 +779,15 @@ public class TestCommand extends Command {
             retval.addAll(command.getRequired());
         }
         for (final String text : this.tagArguments) {
-            String string = this.command.getMatchTypes().get(text);
+            Map<String, String> matchTypes = this.command.getMatchTypes();
+            String string = null == matchTypes ? null : matchTypes.get(text);
             if (null != string && (0 != string.length())) {
                 retval.add(string);
-                continue;
-            }
-            if (this.command.getAddress() != null) {
-                string = this.command.getAddress().get(text);
+            } else {
+                Map<String, String> address = this.command.getAddress();
+                string = null == address ? null :address.get(text);
                 if (null != string && (0 != string.length())) {
                     retval.add(string);
-                    continue;
                 }
             }
         }
