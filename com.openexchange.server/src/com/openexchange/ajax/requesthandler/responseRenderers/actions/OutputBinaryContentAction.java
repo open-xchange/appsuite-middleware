@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
-import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -230,9 +229,9 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
                  * For the next write attempt by us, the peer's TCP stack will issue an RST,
                  * which results in this exception and message at the sender.
                  */
-                LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(data.getFileName()) ? "" : " " + data.getFileName()), e);
+                LOG.debug("Client dropped connection while trying to output file", e);
             } else {
-                LOG.warn("Lost connection to input or output end-point while trying to output file{}", (isEmpty(data.getFileName()) ? "" : " " + data.getFileName()), e);
+                LOG.warn("Lost connection to input or output end-point while trying to output file", e);
             }
         }
 
