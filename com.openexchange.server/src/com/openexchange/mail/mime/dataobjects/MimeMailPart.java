@@ -69,6 +69,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
@@ -89,10 +90,12 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.sun.mail.smtp.CountingOutputStream;
 import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.QPDecoderStream;
 
@@ -104,6 +107,27 @@ import com.sun.mail.util.QPDecoderStream;
 public final class MimeMailPart extends MailPart implements MimeRawSource, MimeCleanUp {
 
     private static final long serialVersionUID = -1142595512657302179L;
+
+    /** The default max. serialization size (10MB) */
+    private static final long DEFAULT_MAX_SERIALIZATION_SIZE = 10485760L;
+
+    private static long getMaxSerializationSize() {
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configService) {
+            return DEFAULT_MAX_SERIALIZATION_SIZE;
+        }
+
+        String property = configService.getProperty("com.openexchange.mail.maxMailSize");
+        if (Strings.isEmpty(property)) {
+            return DEFAULT_MAX_SERIALIZATION_SIZE;
+        }
+
+        try {
+            return Long.parseLong(property);
+        } catch (NumberFormatException e) {
+            return DEFAULT_MAX_SERIALIZATION_SIZE;
+        }
+    }
 
     static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMailPart.class);
 
@@ -959,7 +983,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         byte[] data;
         {
             final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
-            part.writeTo(out);
+            long maxSerializationSize = getMaxSerializationSize();
+            part.writeTo(maxSerializationSize > 0 ? new CountingOutputStream(out, maxSerializationSize) : out);
             data = out.toByteArray();
         }
         return stripEmptyStartingLine(data);
@@ -977,7 +1002,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         byte[] data;
         {
             final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
-            multipart.writeTo(out);
+            long maxSerializationSize = getMaxSerializationSize();
+            multipart.writeTo(maxSerializationSize > 0 ? new CountingOutputStream(out, maxSerializationSize) : out);
             data = out.toByteArray();
         }
         return stripEmptyStartingLine(data);
