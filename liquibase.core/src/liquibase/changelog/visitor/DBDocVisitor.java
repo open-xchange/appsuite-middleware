@@ -40,15 +40,15 @@ import liquibase.util.StreamUtil;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
-    private Database database;
+    private final Database database;
 
-    private SortedSet<ChangeLogInfo> changeLogs;
-    private Map<DatabaseObject, List<Change>> changesByObject;
-    private Map<String, List<Change>> changesByAuthor;
+    private final SortedSet<ChangeLogInfo> changeLogs;
+    private final Map<DatabaseObject, List<Change>> changesByObject;
+    private final Map<String, List<Change>> changesByAuthor;
 
-    private Map<DatabaseObject, List<Change>> changesToRunByObject;
-    private Map<String, List<Change>> changesToRunByAuthor;
-    private List<Change> changesToRun;
+    private final Map<DatabaseObject, List<Change>> changesToRunByObject;
+    private final Map<String, List<Change>> changesToRunByAuthor;
+    private final List<Change> changesToRun;
     private List<Change> recentChanges;
 
     private String rootChangeLogName;
@@ -149,8 +149,9 @@ public class DBDocVisitor implements ChangeSetVisitor {
         new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
-        for (String author : changesByAuthor.keySet()) {
-            authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
+        for (Map.Entry<String, List<Change>> authorEntry : changesByAuthor.entrySet()) {
+            String author = authorEntry.getKey();
+            authorWriter.writeHTML(author, authorEntry.getValue(), changesToRunByAuthor.get(author), rootChangeLogName);
         }
 
         for (Table table : snapshot.get(Table.class)) {
@@ -180,7 +181,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         if (inputStream == null) {
             throw new IOException("Can not find " + fileToCopy);
         }
-        
+
         FileOutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(new File(rootOutputDir, fileToCopy.replaceFirst(".*\\/", "")), false);
@@ -213,8 +214,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             ChangeLogInfo that = (ChangeLogInfo) o;
 
