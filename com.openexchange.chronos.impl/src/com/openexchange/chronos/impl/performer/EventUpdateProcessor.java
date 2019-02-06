@@ -330,18 +330,20 @@ public class EventUpdateProcessor implements EventUpdate {
         } else {
             adjustForGroupScheduled(originalEvent, updatedEvent);
         }
-        /*
-         * reset attendee's partstats if required
-         */
-        if (needsParticipationStatusReset(originalEvent, updatedEvent)) {
-            resetParticipationStatus(updatedEvent.getAttendees());
+        if (CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity())) {
+            /*
+             * reset attendee's partstats if required & increment sequence number as needed
+             */
+            if (needsParticipationStatusReset(originalEvent, updatedEvent)) {
+                resetParticipationStatus(updatedEvent.getAttendees());
+            }
+            if (originalEvent.getSequence() >= updatedEvent.getSequence() && needsSequenceNumberIncrement(originalEvent, updatedEvent)) {
+                updatedEvent.setSequence(originalEvent.getSequence() + 1);
+            }
         }
         /*
-         * apply timestamp/last-modified info & increment sequence number as needed
+         * apply timestamp/last-modified info
          */
-        if (originalEvent.getSequence() >= updatedEvent.getSequence() && needsSequenceNumberIncrement(originalEvent, updatedEvent)) {
-            updatedEvent.setSequence(originalEvent.getSequence() + 1);
-        }
         Consistency.setModified(session, timestamp, updatedEvent, session.getUserId());
     }
 
