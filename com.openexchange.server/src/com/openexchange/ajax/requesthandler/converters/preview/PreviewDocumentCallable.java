@@ -185,17 +185,7 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
             dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
 
             // Generate preview
-            PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
-
-            LOG.debug(
-                "Obtained preview for file {} with MIME type {} from {} for user {} in context {}",
-                fileHolder.getName(),
-                mimeType,
-                previewService.getClass().getSimpleName(),
-                session.getUserId(),
-                session.getContextId());
-
-            return previewDocument;
+            return previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
         } catch (RuntimeException rte) {
             throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
         }
