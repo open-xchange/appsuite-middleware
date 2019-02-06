@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -634,16 +635,40 @@ public class EventManager extends AbstractManager {
      * @param eventData The data of the event
      * @param organizer The new organizer to set
      * @param comment An optional comment to send to the attendees
-     * @param recurrenceId the recurrence identifier
-     * @param range The {@link RecurrenceRange}
      * @param expectException <code>true</code> if the action should have caused an exception
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData changeEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().changeOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), new ChangeOrganizerBody().organizer(organizer).comment(comment), recurrenceId, null == range ? null : range.name(), null);
+    public EventData changeEventOrganizer(EventData eventData, CalendarUser organizer, String comment, boolean expectException) throws ApiException, ChronosApiException {
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().changeOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), new ChangeOrganizerBody().organizer(organizer).comment(comment), null, null, Boolean.TRUE, null, null, null, null);
         return handleUpdate(updateResponse, expectException);
+    }
+    
+    /**
+     * Updates an organizer on the given event. Performs a series split with the given recurrence ID and range.
+     *
+     * @param eventData The data of the event
+     * @param organizer The new organizer to set
+     * @param comment An optional comment to send to the attendees
+     * @param recurrenceId the recurrence identifier
+     * @param range The {@link RecurrenceRange}
+     * @param expectException <code>true</code> if the action should have caused an exception
+     * @return The updated <b>master</b> event
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     * @throws NoSuchElementException If master was not updated
+     */
+    public EventData changeEventOrganizer(EventData eventData, CalendarUser organizer, String comment, String recurrenceId, RecurrenceRange range, boolean expectException) throws ApiException, ChronosApiException {
+        String masterId = null == eventData.getSeriesId() ? eventData.getId() : eventData.getSeriesId();
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().changeOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), new ChangeOrganizerBody().organizer(organizer).comment(comment), recurrenceId, null == range ? null : range.name(),  Boolean.TRUE, null, null, null, null);
+        if (expectException) {
+            assertNotNull("An error was expected", updateResponse.getError());
+            throw new ChronosApiException(updateResponse.getCode(), updateResponse.getError());
+        }
+        CalendarResult calendarResult = checkResponse(updateResponse.getErrorDesc(), updateResponse.getError(), updateResponse.getCategories(), updateResponse.getData());
+        setLastTimeStamp(calendarResult.getUpdated().get(0).getTimestamp());
+        return calendarResult.getUpdated().stream().filter(e -> masterId.equalsIgnoreCase(e.getId())).findFirst().get();
     }
 
     /**

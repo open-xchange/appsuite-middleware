@@ -170,7 +170,8 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update to internal
-        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, false);
+        // Might fail if the original organizer shared the calendar with the new organizer, so both updated events will be returned to the client
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
@@ -180,7 +181,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update to internal and set comment
-        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, "Comment4U", null, null, false);
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, "Comment4U", false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
 
@@ -190,7 +191,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update to 'null'
-        eventManager.changeEventOrganizer(event, null, null, null, null, true);
+        eventManager.changeEventOrganizer(event, null, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -201,7 +202,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update an non group scheduled
-        eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -211,7 +212,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
 
         // Update to external
         newOrganizer = AttendeeFactory.createOrganizerFrom(AttendeeFactory.createIndividual("external@example.org"));
-        eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -222,7 +223,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update with external attendee
-        eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, true);
+        eventManager.changeEventOrganizer(event, newOrganizer, null, true);
     }
 
     @Test(expected = ChronosApiException.class)
@@ -253,6 +254,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
 
         EventData occurrence = getOccurrence();
         // THISANDFUTURE
+        //TODO
         EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, occurrence.getRecurrenceId(), THISANDFUTURE, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
     }
@@ -277,7 +279,7 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         EventData data = eventManager2.getEvent(folderId2, event.getId());
 
         // Update as attendee
-        eventManager2.changeEventOrganizer(data, newOrganizer, null, null, null, true);
+        eventManager2.changeEventOrganizer(data, newOrganizer, null, true);
     }
 
     @Test
@@ -286,15 +288,14 @@ public class ChangeOrganizerTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         // Update to internal
-        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, null, null, false);
+        EventData data = eventManager.changeEventOrganizer(event, newOrganizer, null, false);
         assertThat("Organizer did not change", data.getOrganizer().getUri(), is(newOrganizer.getUri()));
-
 
         // Remove original organizer
         ArrayList<Attendee> attendees = new ArrayList<>();
         attendees.add(AttendeeFactory.createIndividual("external@example.org"));
         attendees.add(newOrganizerAttendee);
-        
+
         data = eventManager2.getEvent(folderId2, data.getId());
         data.setAttendees(attendees);
         data.setLastModified(Long.valueOf(System.currentTimeMillis()));
