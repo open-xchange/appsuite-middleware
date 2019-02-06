@@ -51,14 +51,15 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.EventField.ORGANIZER;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 
 /**
  * {@link ChangeOrganizerPerformer}
@@ -127,7 +129,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
          */
         Event originalEvent = loadEventData(eventId);
         Check.eventIsVisible(folder, originalEvent);
-        Check.eventIsInFolder(originalEvent, folder); 
+        Check.eventIsInFolder(originalEvent, folder);
         requireWritePermissions(originalEvent);
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
@@ -222,14 +224,6 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             prepared.setUri(organizer.getUri());
         }
 
-        // Ensure new organizer is attendee
-        if (false == CalendarUtils.contains(originalEvent.getAttendees(), organizer)) {
-            Attendee attendee = session.getEntityResolver().prepareUserAttendee(organizer.getEntity());
-            LinkedList<Attendee> updatedAttendees = new LinkedList<>(originalEvent.getAttendees());
-            updatedAttendees.add(attendee);
-            updatedEvent.setAttendees(updatedAttendees);
-        }
-
         // Update meta data
         updatedEvent.setSequence(originalEvent.getSequence() + 1);
         updatedEvent.setTimestamp(timestamp.getTime());
@@ -269,8 +263,9 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @throws OXException If updating fails
      */
     private Event updateEvent(Event originalEvent, CalendarUser organizer) throws OXException {
-        Event eventUpdate = prepareChanges(originalEvent, organizer);
-        storage.getEventStorage().updateEvent(eventUpdate);
+        Event prepareChanges = prepareChanges(originalEvent, organizer);
+        storage.getEventStorage().updateEvent(prepareChanges);
+        insertOrganizerAsAttendee(originalEvent, organizer);
         Event updatedEvent = loadEventData(originalEvent.getId());
         resultTracker.trackUpdate(originalEvent, updatedEvent);
         return updatedEvent;
@@ -288,7 +283,30 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
     private void updateExceptions(Event originalEvent, Event updatedEvent, CalendarUser organizer) throws OXException {
         for (Event e : loadExceptionData(updatedEvent)) {
             storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
+            insertOrganizerAsAttendee(e, organizer);
             resultTracker.trackUpdate(e, loadEventData(e.getId()));
         }
+    }
+
+    /**
+     * Adds the new organizer to the list of attendees if necessary
+     * 
+     * @param originalEvent The original {@link Event}
+     * @param organizer The new organizer as {@link CalendarUser}
+     * @throws OXException If updating fails
+     */
+    private void insertOrganizerAsAttendee(Event originalEvent, CalendarUser organizer) throws OXException {
+        // Ensure new organizer is attendee
+        if (CalendarUtils.contains(originalEvent.getAttendees(), organizer)) {
+            return;
+        }
+
+        // Add organizer as attendee
+        Attendee attendee = session.getEntityResolver().prepareUserAttendee(organizer.getEntity());
+        attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+        if (false == PublicType.getInstance().equals(folder.getType())) {
+            attendee.setFolderId(session.getConfig().getDefaultFolderId(organizer.getEntity()));
+        }
+        storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(attendee));
     }
 }
