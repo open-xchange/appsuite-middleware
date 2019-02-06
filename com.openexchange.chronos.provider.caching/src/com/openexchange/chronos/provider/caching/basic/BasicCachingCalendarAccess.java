@@ -1254,7 +1254,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         settings.setConfig(account.getUserConfiguration());
         settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
         settings.setExtendedProperties(extendedProperties);
-        settings.setSubscribed(internalConfig.optBoolean("subscribed", false));
+        settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
         settings.setError(optAccountError());
 
         return settings;
