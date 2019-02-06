@@ -242,7 +242,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             }
             return;
         } catch (OXException e) {
-            String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
+            String message = "Exception while trying to output file";
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
@@ -262,12 +262,11 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             }
         } catch (ImageTransformationDeniedIOException e) {
             // Quit with 406
-            String message = isEmpty(fileName) ? "Exception while trying to output image" : new StringBuilder("Exception while trying to output image ").append(fileName).toString();
-            LOG.error(message, e);
+            LOG.error("Exception while trying to output image", e);
             sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
         } catch (Exception e) {
-            String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
-            LOG.error(message, e);
+            String message = "Exception while trying to output file";
+            LOG.error("Exception while trying to output file", e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
             close(data.getDocumentData(), data.getFile());
