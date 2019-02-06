@@ -59,11 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
-import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -115,21 +111,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess i
     @Override
     public void close() {
         // no-op
-    }
-
-    @Override
-    public CalendarSettings getSettings() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-        ExtendedProperties extendedProperties = getExtendedProperties();
-        if (CachingCalendarUtils.canBeUsedForSync(BasicSchedJoulesCalendarProvider.PROVIDER_ID, session)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
-        } else {
-            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        }
-
-        CalendarSettings settings = getCalendarSettings(extendedProperties);
-        settings.setSubscribed(true);
-        return settings;
     }
 
     @Override
