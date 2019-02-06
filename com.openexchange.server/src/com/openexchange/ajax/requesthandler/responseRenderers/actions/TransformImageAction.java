@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
+import static com.openexchange.java.Strings.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.lowerCase;
 import java.io.File;
 import java.io.FileInputStream;
@@ -154,7 +154,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction#call(com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper)
      */
     @Override

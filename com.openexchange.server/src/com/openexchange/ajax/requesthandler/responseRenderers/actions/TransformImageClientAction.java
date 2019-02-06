@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static com.openexchange.java.Strings.isNotEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
