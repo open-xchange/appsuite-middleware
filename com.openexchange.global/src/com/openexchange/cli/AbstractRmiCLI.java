@@ -77,6 +77,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
     protected final static String BASIC_USAGE = "[--responsetimeout <responseTimeout>] | [-h]";
     protected final static String BASIC_MASTER_ADMIN_USAGE = "-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
     protected final static String BASIC_CONTEXT_ADMIN_USAGE = "-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
+    protected final static String BASIC_CONTEXT_ONLY_ADMIN_USAGE = "-A <contextAdmin> -P <contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
 
     protected final static AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
 
@@ -147,8 +148,9 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             // Check if administrative permission is required
             boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Master admin username", true));
-                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Master admin password", true));
+                // TODO: Distinguish between master administrative permission and context administrative permission
+                options.addOption(createArgumentOption("A", "adminuser", "adminuser", "Admin username", true));
+                options.addOption(createArgumentOption("P", "adminpass", "adminpassword", "Admin password", true));
             }
 
             // Add other options
