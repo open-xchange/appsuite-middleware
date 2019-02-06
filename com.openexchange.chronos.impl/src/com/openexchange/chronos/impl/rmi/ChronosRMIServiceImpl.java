@@ -114,11 +114,11 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             }
 
             checkPreConditions(event, userId, context);
-            
+
             if (CalendarUtils.isSeriesMaster(event)) {
-                handleMaster(event, userId, storage, entityResolver);
+                handleMaster(event.getId(), userId, storage, entityResolver);
             } else if (CalendarUtils.isSeriesException(event)) {
-                handleException(event, userId, storage, entityResolver);
+                handleMaster(event.getSeriesId(), userId, storage, entityResolver);
             } else {
                 handleSingle(event, userId, storage, entityResolver);
             }
@@ -134,33 +134,57 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
         }
     }
 
-    private void handleException(Event exception, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException, RemoteException {
-        Event master = storage.getEventStorage().loadEvent(exception.getSeriesId(), null);
-        master.setAttendees(storage.getAttendeeStorage().loadAttendees(master.getId()));
-        handleMaster(master, userId, storage, entityResolver);
-    }
-
-    private void handleMaster(Event master, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException, RemoteException {
-        List<Event> exceptions = storage.getEventStorage().loadExceptions(master.getId(), null);
+    /**
+     * Handles the series master and all of it's exceptions.
+     *
+     * @param seriesId The master id
+     * @param userId The user who should become organizer
+     * @param storage The calendar storage
+     * @param entityResolver The entity resolver
+     * @throws OXException if an error occurs
+     * @throws RemoteException if an error occurs
+     */
+    private void handleMaster(String seriesId, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException, RemoteException {
+        List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
         for (Event exception : exceptions) {
             exception.setAttendees(storage.getAttendeeStorage().loadAttendees(exception.getId()));
             handleSingle(exception, userId, storage, entityResolver);
         }
-        handleSingle(master, userId, storage, entityResolver);
+
+        Event master = storage.getEventStorage().loadEvent(seriesId, null);
+        if (master != null) {
+            master.setAttendees(storage.getAttendeeStorage().loadAttendees(master.getId()));
+            handleSingle(master, userId, storage, entityResolver);
+        }
     }
 
+    /**
+     * Handles a single event (either a series master, an exception or just a plain single event).
+     *
+     * @param event The event to handle
+     * @param userId The user who should become organizer
+     * @param storage The calendar storage
+     * @param entityResolver The entity resolver
+     * @throws OXException if an error occurs
+     * @throws RemoteException if an error occurs
+     */
     private void handleSingle(Event event, int userId, CalendarStorage storage, EntityResolver entityResolver) throws RemoteException, OXException {
         Attendee newOrganizerAttendee = modifyEventObject(event, userId, entityResolver);
-        save(event, storage, newOrganizerAttendee);
-    }
-
-    private void save(Event event, CalendarStorage storage, Attendee newOrganizerAttendee) throws OXException {
         storage.getEventStorage().updateEvent(event);
         if (newOrganizerAttendee != null) {
             storage.getAttendeeStorage().insertAttendees(event.getId(), Collections.singletonList(newOrganizerAttendee));
         }
     }
 
+    /**
+     * Modifies the given event by adding the new Organizer (also as attendee if missing).
+     * 
+     * @param event The event to modify
+     * @param newOrganizer The user who should become organizer
+     * @param entityResolver The entity resolver
+     * @return An attendee if adding is necessary
+     * @throws OXException if an error occurs
+     */
     private Attendee modifyEventObject(Event event, int newOrganizer, EntityResolver entityResolver) throws OXException {
         Attendee newOrganizerAttendee = null;
         if (!CalendarUtils.isOrganizer(event, newOrganizer)) {
@@ -177,6 +201,13 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
         return newOrganizerAttendee;
     }
 
+    /**
+     * Checks if any changes need to be performed or if this is a no-op.
+     *
+     * @param event The event to check
+     * @param newOrganizer The potential new organizer
+     * @return true if this is a no-op, false otherwise
+     */
     private boolean isNoop(Event event, int newOrganizer) {
         if (!CalendarUtils.isOrganizer(event, newOrganizer)) {
             return false;

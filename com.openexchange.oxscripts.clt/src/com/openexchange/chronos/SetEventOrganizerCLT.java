@@ -68,6 +68,7 @@ public class SetEventOrganizerCLT extends AbstractRmiCLI<Void> {
     private static final String SYNTAX = "seteventorganizer -c <contextId> -e <eventId> -u <userId>" + BASIC_CONTEXT_ADMIN_USAGE;
     private static final String FOOTER =
         "Sets a new organizer for the given event in the given context.\n" +
+        "If this is performed on a recurring event (master or exception), all exceptions and the master are changed.\n" +
         "The new organizer must be an internal user and the old organizer must not be an external user.\n" + 
         "If the organizer is no attendee, the organizer will automatically be added as attendee.\n" +
         "If the organizer is already set but not yet an attendee, the organizer will be added as attendee as well.\n" +

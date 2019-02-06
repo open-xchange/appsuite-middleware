@@ -63,6 +63,7 @@ public interface ChronosRMIService extends java.rmi.Remote {
 
     /**
      * Sets a new organizer for the given event in the given context.
+     * If this is performed on a recurring event (master or exception), all exceptions and the master are changed.
      * The new organizer must be an internal user and the old organizer must not be an external user.
      * If the organizer is no attendee, the organizer will automatically be added as attendee.
      * If the organizer is already set but not yet an attendee, the organizer will be added as attendee as well.
