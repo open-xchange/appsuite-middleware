@@ -345,6 +345,7 @@ public class AlarmHelper {
                 if (touchEvent) {
                     touch(storage, event.getId());
                     updated = storage.getEventStorage().loadEvent(event.getId(), null);
+                    updated.setFolderId(event.getFolderId());
                 }
                 /*
                  * (re)-schedule any alarm triggers & return appropriate update result

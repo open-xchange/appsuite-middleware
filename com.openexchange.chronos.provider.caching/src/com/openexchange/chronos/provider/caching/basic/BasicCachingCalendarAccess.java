@@ -610,6 +610,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate) throws OXException {
         Event delta = update(calendarStorage, eventUpdate, true);
         if (!Collections.disjoint(eventUpdate.getUpdatedFields(), ALARM_CHANGE)) {
+            setDefaultFolder(Collections.singleton(delta));
             getAlarmHelper().updateAlarmTriggers(calendarStorage, delta);
         }
     }
@@ -934,9 +935,19 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                     insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), null);
                 }
             }
+            setDefaultFolder(existingEvents);
             getAlarmHelper().insertDefaultAlarms(calendarStorage, externalEvents);
             notificationService.notifyHandlers(getCreateEvent(externalEvents));
         }
+    }
+
+    /**
+     * Adds the default folder 0 to all events without a default folder
+     * 
+     * @param events The events
+     */
+    private void setDefaultFolder(Collection<Event> events) {
+        events.stream().filter((Event eve) -> eve.getFolderId() == null).forEach((Event eve) -> eve.setFolderId("0"));
     }
 
     /**
@@ -1194,7 +1205,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     protected CalendarResult updateAlarmsInternal(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         Event originalEvent = getEvent(eventID.getObjectID(), eventID.getRecurrenceID());
+        originalEvent.setFolderId(eventID.getFolderID());
         AlarmPreparator.getInstance().prepareEMailAlarms(session, calendarUtilities, alarms);
+        setDefaultFolder(Collections.singleton(originalEvent));
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms, true);
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);
@@ -1303,6 +1316,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     public void updateDefaultAlarms() throws OXException {
         final List<Event> existingEvents = getExistingEvents();
+        setDefaultFolder(existingEvents);
         new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), getParameters()) {
 
             @Override
