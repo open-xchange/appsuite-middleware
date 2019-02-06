@@ -271,14 +271,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                             mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
                             stream = fileHolder.getStream();
                             error = false;
-                            LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
                         } finally {
                             if (error) {
                                 Streams.close(tfh);
                             }
                         }
-                    } else {
-                        LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                     }
                     ModifyableFileHolder mfh = new ModifyableFileHolder(fileHolder);
                     mfh.setContentType(mimeType);
