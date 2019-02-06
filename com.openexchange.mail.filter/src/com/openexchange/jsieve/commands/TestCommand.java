@@ -683,7 +683,7 @@ public class TestCommand extends Command {
      * Retrieves the position of an argument
      *
      * @param arg The argument
-     * @return The position or -1
+     * @return The position or <code>-1</code>
      */
     public int getArgumentPosition(Object arg) {
         for (int x = 0; x < arguments.size(); x++) {
@@ -695,36 +695,35 @@ public class TestCommand extends Command {
     }
 
     /**
-     * This method returns the matchtype of this command
+     * This method returns the match type of this command
      *
-     * @return
+     * @return The match type or <code>null</code>
      */
     public final String getMatchType() {
-        if (this.command.getMatchTypes() == null) {
+        Map<String, String> matchTypes = this.command.getMatchTypes();
+        if (matchTypes == null) {
             return null;
         }
-        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
+
+        List<String> arrayList = new ArrayList<String>(matchTypes.keySet());
         arrayList.retainAll(this.tagArguments);
-        if (1 == arrayList.size()) {
-            return arrayList.get(0);
-        } else {
-            return null;
-        }
+        return 1 == arrayList.size() ? arrayList.get(0) : null;
     }
 
     /**
-     * This method returns the addresspart of this command
+     * This method returns the address part of this command
      *
-     * @return
+     * @return The address part or <code>null</code>
      */
     public final String getAddressPart() {
-        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getAddress().keySet());
-        arrayList.retainAll(this.tagArguments);
-        if (1 == arrayList.size()) {
-            return arrayList.get(0);
-        } else {
+        Map<String, String> address = this.command.getAddress();
+        if (null == address) {
             return null;
         }
+
+        List<String> arrayList = new ArrayList<String>(address.keySet());
+        arrayList.retainAll(this.tagArguments);
+        return 1 == arrayList.size() ? arrayList.get(0) : null;
     }
 
     /**
