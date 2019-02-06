@@ -51,6 +51,7 @@ package com.openexchange.textxtraction.internal;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 import org.apache.poi.POITextExtractor;
@@ -142,7 +143,7 @@ public class ReadFileFormat {
                     final long size = LittleEndian.getUInt(btoWrite, i + 4);
                     if (type == 4008) {
                         try {
-                            final String s = new String(btoWrite, i + 4 + 1, (int) size + 3).replace(ch0, ' ').replace(ch11, ' ');
+                            final String s = new String(btoWrite, i + 4 + 1, (int) size + 3, StandardCharsets.ISO_8859_1).replace(ch0, ' ').replace(ch11, ' ');
                             if (s.trim().startsWith("Click to edit") == false) {
                                 sb.append(s);
                             }
