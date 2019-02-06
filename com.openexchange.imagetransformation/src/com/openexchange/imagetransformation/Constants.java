@@ -57,7 +57,7 @@ import com.openexchange.imagetransformation.osgi.Services;
 
 
 /**
- * {@link Constants} - Provides constants for <i>com.openexchange.tools.images</i> package.
+ * {@link Constants} - Provides constants for <i>com.openexchange.imagetransformation</i> package.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
