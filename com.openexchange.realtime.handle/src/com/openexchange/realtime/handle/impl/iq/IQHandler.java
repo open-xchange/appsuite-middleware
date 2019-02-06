@@ -50,11 +50,8 @@
 package com.openexchange.realtime.handle.impl.iq;
 
 import java.util.concurrent.BlockingQueue;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
 import com.openexchange.realtime.handle.impl.HandlerStrategy;
-import com.openexchange.realtime.handle.impl.HandlerUtils;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.IQ.Type;
 
@@ -66,22 +63,23 @@ import com.openexchange.realtime.packet.IQ.Type;
  */
 public class IQHandler extends AbstractStrategyHandler<IQ> {
 
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IQHandler.class);
-    
     public IQHandler(BlockingQueue<IQ> queue) {
         super(queue, new HandlerStrategy<IQ>());
     }
-    
+
+    /*-
+     *
     private void handleInbound(IQ iq) throws OXException {
         if (HandlerUtils.applyPrivacyLists(iq)) {
             ID to = iq.getTo();
             if (to.isGeneralForm()) {
-                
+
             } else {
-                
+
             }
         }
     }
+     */
 
     @Override
     public void handleToIsNull(IQ stanza) {
@@ -89,7 +87,7 @@ public class IQHandler extends AbstractStrategyHandler<IQ> {
         if (type == null) {
             // TODO: throw Exception
         }
-        
+
         if (type == Type.GET || type == Type.SET) {
             /*
              * If the server receives an IQ stanza of type "get" or "set" with no 'to' attribute and
@@ -103,25 +101,25 @@ public class IQHandler extends AbstractStrategyHandler<IQ> {
     @Override
     public void handleAccountNotExists(IQ stanza) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void handleInboundStanzaWithGeneralRecipient(IQ stanza) {
         // TODO Auto-generated method stub
-        
+
     }
-    
+
     @Override
     public void handleInboundStanzaWithConcreteRecipient(IQ stanza) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void handleOutboundStanza(IQ stanza) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
