@@ -70,6 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.ratelimit.Rate;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.user.UserService;
 
@@ -83,20 +84,20 @@ public class SMSNotificationService implements AlarmNotificationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SMSNotificationService.class);
 
-    private final SMSServiceSPI smsService;
     private final TranslatorFactory translatorFactory;
     private final UserService userService;
     private final LeanConfigurationService leanConfigurationService;
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link SMSNotificationService}.
      */
-    public SMSNotificationService(  SMSServiceSPI smsService,
+    public SMSNotificationService(  ServiceLookup serviceLookup,
                                     TranslatorFactory translatorFactory,
                                     UserService userService,
                                     LeanConfigurationService leanConfigurationService) {
         super();
-        this.smsService = smsService;
+        this.serviceLookup = serviceLookup;
         this.translatorFactory = translatorFactory;
         this.userService = userService;
         this.leanConfigurationService = leanConfigurationService;
@@ -110,8 +111,7 @@ public class SMSNotificationService implements AlarmNotificationService {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
         }
-        smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, user), userId, contextId);
-        
+        serviceLookup.getServiceSafe(SMSServiceSPI.class).sendMessage(new String[] { phoneNumber }, generateSMS(event, user), userId, contextId);
     }
 
     /**
