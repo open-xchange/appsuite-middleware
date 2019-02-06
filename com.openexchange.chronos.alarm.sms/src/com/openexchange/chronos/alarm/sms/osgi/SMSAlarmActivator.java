@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.alarm.sms.osgi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.chronos.alarm.sms.SMSNotificationService;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -56,8 +58,6 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.user.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link SMSAlarmActivator}
@@ -71,16 +71,20 @@ public class SMSAlarmActivator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SMSServiceSPI.class, UserService.class, TranslatorFactory.class, LeanConfigurationService.class };
+        return new Class[] { UserService.class, TranslatorFactory.class, LeanConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { SMSServiceSPI.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        SMSServiceSPI smsService = getServiceSafe(SMSServiceSPI.class);
         TranslatorFactory translatorFactory = getServiceSafe(TranslatorFactory.class);
         UserService userService = getServiceSafe(UserService.class);
         LeanConfigurationService leanConfigurationService = getServiceSafe(LeanConfigurationService.class);
-        registerService(AlarmNotificationService.class, new SMSNotificationService(smsService, translatorFactory, userService, leanConfigurationService));
+        registerService(AlarmNotificationService.class, new SMSNotificationService(this, translatorFactory, userService, leanConfigurationService));
         LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
     }
 
