@@ -130,7 +130,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * Deletes a single event.
      *
      * @param originalEvent The original event to delete
-     * @return The result
      */
     private void deleteEvent(Event originalEvent) throws OXException {
         if (deleteRemovesEvent(originalEvent)) {
@@ -168,7 +167,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * Deletes a specific recurrence of a recurring event.
      *
      * @param originalEvent The original exception event, or the targeted series master event
-     * @return The result
      */
     private void deleteRecurrence(Event originalEvent, RecurrenceId recurrenceId) throws OXException {
         if (deleteRemovesEvent(originalEvent)) {

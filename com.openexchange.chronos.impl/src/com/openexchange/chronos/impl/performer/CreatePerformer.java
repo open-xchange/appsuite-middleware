@@ -126,6 +126,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
             Check.internalOrganizerIsAttendee(newEvent);
+            newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? 
+                Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
         }
         /*
          * check for conflicts & quota restrictions

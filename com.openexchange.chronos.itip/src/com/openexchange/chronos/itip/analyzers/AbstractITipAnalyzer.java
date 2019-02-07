@@ -101,7 +101,7 @@ import com.openexchange.user.UserService;
 public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
-        EventField.ALARMS, EventField.FLAGS };
+        EventField.ALARMS, EventField.FLAGS, EventField.ATTENDEE_PRIVILEGES };
     protected ITipIntegrationUtility util;
 
     @Override

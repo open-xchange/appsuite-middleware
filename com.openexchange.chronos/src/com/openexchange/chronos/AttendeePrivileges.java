@@ -47,42 +47,27 @@
  *
  */
 
-package com.openexchange.functions;
-
-import java.util.function.Consumer;
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos;
 
 /**
- * {@link OXConsumer}
+ * {@link AttendeePrivileges} - Define a set of privileges an attendee has on a specific event
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @param <T> The class of the input argument
- * @since v7.10.1
+ * @since v7.10.2
  */
+public interface AttendeePrivileges {
 
-@FunctionalInterface
-public interface OXConsumer<T> {
+    static final String DEFAULT = "DEFAULT";
 
-    /**
-     * Performs this operation on the given argument.
-     *
-     * @param t the input argument
-     * @throws OXException in case of an error
-     */
-    void accept(T t) throws OXException;
+    static final String MODIFY = "MODIFY";
 
     /**
-     * Applies this function to the given argument.
-     *
-     * @param t the function argument
-     * @param exceptionHandler Handles any occurring exception
+     * Get the attendee privilege as {@link String}. Known values are
+     * <li>{@value #DEFAULT}</li>
+     * <li>{@value #MODIFY}</li>
+     * 
+     * @return The attendee privilege.
      */
-    default void handle(T t, Consumer<OXException> exceptionHandler) {
-        try {
-            accept(t);
-        } catch (OXException e) {
-            exceptionHandler.accept(e);
-        }
-    }
+    String getValue();
 
 }

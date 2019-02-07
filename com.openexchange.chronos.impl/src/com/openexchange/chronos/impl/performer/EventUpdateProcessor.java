@@ -352,6 +352,19 @@ public class EventUpdateProcessor implements EventUpdate {
             case GEO:
                 Check.geoLocationIsValid(updatedEvent);
                 break;
+            case ATTENDEE_PRIVILEGES:
+                /*
+                 * check validity based on folder / organizer
+                 */
+                Check.attendeePrivilegesAreValid(updatedEvent.getAttendeePrivileges(), folder, updatedEvent.getOrganizer());
+                /*
+                 * deny different values for change exceptions
+                 */
+                if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                    false == EventMapper.getInstance().get(EventField.ATTENDEE_PRIVILEGES).equals(originalSeriesMaster, updatedEvent))) {
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), updatedField);
+                }
+                break;
             case CLASSIFICATION:
                 if (Classification.PUBLIC.matches(originalEvent.getClassification()) && Classification.PUBLIC.matches(updatedEvent.getClassification())) {
                     /*
@@ -462,8 +475,9 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * only consider whitelist of fields in attendee scheduling resources as needed
          */
-        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity()) &&
-            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+        boolean isAttendeeSchedulingResource = isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity());
+        boolean ignoreForbiddenAttendeenChanges = b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE));
+        if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges) {
             EnumSet<EventField> consideredFields = EnumSet.of(
                 EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
             );
@@ -478,7 +492,7 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         updatedFields.remove(EventField.FOLDER_ID);
         updatedFields.remove(EventField.ALARMS);
-        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity())) {
+        if (isAttendeeSchedulingResource) {
             //TODO: TRANSP is not yet handled as per-user property, so ignore changes in attendee scheduling resources for now
             updatedFields.remove(EventField.TRANSP);
         }
@@ -496,8 +510,7 @@ public class EventUpdateProcessor implements EventUpdate {
             /*
              * only consider 'own' attendee in attendee scheduling resources as needed
              */
-            if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity()) &&
-                b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+            if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges) {
                 Attendee changedUserAttendee = find(changedAttendees, calendarUser);
                 List<Attendee> updatedAttendees = new ArrayList<Attendee>(originalEvent.getAttendees().size());
                 for (Attendee originalAttendee : originalEvent.getAttendees()) {
@@ -617,16 +630,14 @@ public class EventUpdateProcessor implements EventUpdate {
             EventField.COLOR, EventField.URL, EventField.GEO
         };
         for (EventField field : basicFields) {
-            propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions);
+            propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions, false);
         }
         /*
          * always take over a change in classification (to prevent different classification in event series)
          */
-        Mapping<? extends Object, Event> classificationMapping = EventMapper.getInstance().get(EventField.CLASSIFICATION);
-        if (false == classificationMapping.equals(originalMaster, updatedMaster) && false == isNullOrEmpty(changedChangeExceptions)) {
-            for (Event changeException : changedChangeExceptions) {
-                classificationMapping.copy(updatedMaster, changeException);
-            }
+        EventField[] overwrittenFields = { EventField.CLASSIFICATION, EventField.ATTENDEE_PRIVILEGES };
+        for (EventField field : overwrittenFields) {
+            propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions, true);
         }
         /*
          * take over changes in start- and/or end-date based on calculated original timeslot
@@ -655,22 +666,25 @@ public class EventUpdateProcessor implements EventUpdate {
     }
 
     /**
-     * Propagates an update of a specific property in a series master event to any change exception events, i.e. the property is also
-     * updated in the change exception events if their value equals the value of the original series event.
+     * Propagates an update of a specific property in a series master event to any change exception events, i.e. the new property value is
+     * also applied in the change exception events. Optionally, the value is only taken over if the value in the change exception equals
+     * the value of the original series event.
      *
      * @param originalMaster The original series master event being updated
-     * @param updatedmaster The updated series master event
+     * @param updatedMaster The updated series master event
      * @param field The event field to propagate
      * @param changeExceptions The list of events to propagate the field update to
+     * @param overwrite <code>true</code> to always apply the updated value in the change exceptions, <code>false</code> to only apply the
+     *            new value if the property's value is unchanged from the original series master event
      * @return The (possibly adjusted) list of change exception events
      */
-    private static List<Event> propagateFieldUpdate(Event originalMaster, Event updatedMaster, EventField field, List<Event> changeExceptions) throws OXException {
+    private static List<Event> propagateFieldUpdate(Event originalMaster, Event updatedMaster, EventField field, List<Event> changeExceptions, boolean overwrite) throws OXException {
         Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
         if (mapping.equals(originalMaster, updatedMaster) || isNullOrEmpty(changeExceptions)) {
             return changeExceptions;
         }
         for (Event changeException : changeExceptions) {
-            if (mapping.equals(originalMaster, changeException)) {
+            if (overwrite || mapping.equals(originalMaster, changeException)) {
                 mapping.copy(updatedMaster, changeException);
             }
         }

@@ -166,6 +166,8 @@ MultipleFolderEventsResponse:
   $ref: ./chronos/MultipleFolderEventsResponse.yaml
 EventData:
   $ref: ./chronos/EventData.yaml
+ExtendedProperties:
+  $ref: ./chronos/ExtendedProperties.yaml
 MultipleEventData:
   $ref: ./chronos/MultipleEventData.yaml
 EventId:

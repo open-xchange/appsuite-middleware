@@ -47,44 +47,49 @@
  *
  */
 
-package com.openexchange.functions;
-
-import java.util.function.Consumer;
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos;
 
 /**
- * {@link OXFunction} - Extends {@link FunctionalInterface} to be able to handle exceptions
+ * {@link DefaultAttendeePrivileges} - Defines privileges every attendee has on a specific event
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @param <T> The class of the functions parameter
- * @param <R> The class of the function result
- * @since v7.10.1
+ * @since v7.10.2
  */
-@FunctionalInterface
-public interface OXFunction<T, R> {
+public enum DefaultAttendeePrivileges implements AttendeePrivileges {
 
     /**
-     * Applies this function to the given argument.
-     *
-     * @param t the function argument
-     * @return the function result
-     * @throws OXException In case function fails
+     * Represents the default privilege set for attendees.
+     * <p>
+     * Attendees are not allow to change event data besides:
+     * <li> personal alarms</li>
+     * <li> own participation status</li>
+     * <li> remove himself from the event (setting {@link AttendeeField#HIDDEN})</li>
      */
-    R apply(T t) throws OXException;
+    DEFAULT(AttendeePrivileges.DEFAULT),
 
     /**
-     * Applies this function to the given argument.
-     *
-     * @param t the function argument
-     * @param exceptionHandler Handles any occurring exception
-     * @return the function result or <code>null</code> if the function failed
+     * Represent the privilege for every attendee to modify the whole event.
+     * <p>
+     * Attendees still aren't allowed to delete events (expect they are the last internal user attendee)
      */
-    default R handle(T t, Consumer<OXException> exceptionHandler) {
-        try {
-            return apply(t);
-        } catch (OXException e) {
-            exceptionHandler.accept(e);
-        }
-        return null;
+    MODIFY(AttendeePrivileges.MODIFY)
+
+    ;
+
+    private final String value;
+
+    /**
+     * Initializes a new {@link DefaultAttendeePrivileges}.
+     * 
+     * @param value The privilege value
+     */
+    private DefaultAttendeePrivileges(String value) {
+        this.value = value;
     }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
 }

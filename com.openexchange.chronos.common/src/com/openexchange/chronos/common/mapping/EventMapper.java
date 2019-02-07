@@ -80,6 +80,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.AttendeePrivileges;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.TimeTransparency;
@@ -721,6 +722,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeGeo();
+            }
+        });
+        mappings.put(EventField.ATTENDEE_PRIVILEGES, new DefaultMapping<AttendeePrivileges, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsAttendeePrivileges();
+            }
+
+            @Override
+            public void set(Event object, AttendeePrivileges value) throws OXException {
+                object.setAttendeePrivileges(value);
+            }
+
+            @Override
+            public AttendeePrivileges get(Event object) {
+                return object.getAttendeePrivileges();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeAttendeePrivileges();
             }
         });
         mappings.put(EventField.START_DATE, new DefaultMapping<DateTime, Event>() {

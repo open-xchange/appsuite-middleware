@@ -108,7 +108,7 @@ attachments:
   items:
     $ref: "#/definitions/ChronosAttachment"
 extendedProperties:
-  type: string
+  $ref: "#/definitions/ExtendedProperties"
   description: An JSONObject of extended properties of this event.
 geo:
   type: object
@@ -123,6 +123,9 @@ geo:
       type: number
       format: double
       description: The longitude geographic coordinate.
+attendeePrivileges:
+  type: string
+  description: The privileges attendees have on an event.
 url:
   type: string
   description: The uniform resource locator (URL) of the event.

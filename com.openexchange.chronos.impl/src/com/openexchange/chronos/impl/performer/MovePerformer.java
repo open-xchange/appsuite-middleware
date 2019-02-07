@@ -76,9 +76,11 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -183,6 +185,11 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         updateCommonFolderId(originalEvent, targetFolder.getId());
         updateCalendarUser(originalEvent, null);
+        
+        /*
+         * Remove attendee privileges
+         */
+        removeAttendeePrivileges(originalEvent);
     }
 
     private void moveFromPublicToPersonalFolder(Event originalEvent, CalendarFolder targetFolder) throws OXException {
@@ -349,6 +356,16 @@ public class MovePerformer extends AbstractUpdatePerformer {
             };
             originalAlarms.stream().forEach(a -> a.setTimestamp(System.currentTimeMillis()));
             storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
+        }
+    }
+    
+    private void removeAttendeePrivileges(Event originalEvent) throws OXException {
+        if (null != originalEvent.getAttendeePrivileges() && false == CalendarUtils.hasAttendeePrivileges(originalEvent, DefaultAttendeePrivileges.DEFAULT)) {
+            Event eventUpdate = new Event();
+            eventUpdate.setId(originalEvent.getId());
+            Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+            eventUpdate.setAttendeePrivileges(DefaultAttendeePrivileges.DEFAULT);
+            storage.getEventStorage().updateEvent(eventUpdate);
         }
     }
 

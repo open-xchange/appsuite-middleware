@@ -169,6 +169,11 @@ public class DeltaEvent extends DelegatingEvent {
     public boolean containsGeo() {
         return setFields.contains(EventField.GEO);
     }
+    
+    @Override
+    public boolean containsAttendeePrivileges() {
+        return setFields.contains(EventField.ATTENDEE_PRIVILEGES);
+    }
 
     @Override
     public boolean containsId() {

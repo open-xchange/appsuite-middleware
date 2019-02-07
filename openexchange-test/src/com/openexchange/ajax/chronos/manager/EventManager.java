@@ -107,10 +107,10 @@ public class EventManager extends AbstractManager {
     }
 
     private final UserApi userApi;
-    private final String  defaultFolder;
+    private final String defaultFolder;
 
     private List<EventId> eventIds;
-    private long          lastTimeStamp;
+    private long lastTimeStamp;
 
     private static final Boolean EXPAND_SERIES = Boolean.FALSE;
 
@@ -287,7 +287,7 @@ public class EventManager extends AbstractManager {
     }
 
     public EventData getEvent(String folderId, String eventId, String recurrenceId, boolean expectException) throws ApiException, ChronosApiException {
-        EventResponse eventsResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, folderId, recurrenceId, null, null);
+        EventResponse eventsResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, null == folderId ? defaultFolder : folderId, recurrenceId, null, null);
         if (expectException) {
             assertNotNull("An error was expected", eventsResponse.getError());
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
@@ -604,28 +604,25 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, boolean expectException, boolean ignoreConflicts) throws ApiException, ChronosApiException {
-        UpdateBody body = new UpdateBody();
-        body.setEvent(eventData);
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, null, B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
-        return handleUpdate(updateResponse, expectException);
+        return updateOccurenceEvent(eventData, recurrenceId, null, expectException, ignoreConflicts);
     }
 
     /**
-     * Updates the specified recurrence event with specified {@link RecurrenceRange}
+     * Updates the specified recurrence event and ignores conflicts
      *
      * @param eventData The data of the event
      * @param recurrenceId the recurrence identifier
-     * @param range The {@link RecurrenceRange}
+     * @param recurrenceRange The {@link RecurrenceRange} to use
      * @param expectException Whether an exception is expected or not
      * @param ignoreConflicts Whether to ignore conflicts or not
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, RecurrenceRange range, boolean expectException, boolean ignoreConflicts) throws ApiException, ChronosApiException {
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, RecurrenceRange recurrenceRange, boolean expectException, boolean ignoreConflicts) throws ApiException, ChronosApiException {
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, range.name(), B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(this.lastTimeStamp), recurrenceId, null == recurrenceRange ? null : recurrenceRange.name(), B(!ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES);
         return handleUpdate(updateResponse, expectException);
     }
 
@@ -919,6 +916,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Removes the specified {@link EventId} for the specified user from the cache
+     * 
      * @param eventId The {@link EventId}
      */
     protected void forgetEventId(EventId eventId) {

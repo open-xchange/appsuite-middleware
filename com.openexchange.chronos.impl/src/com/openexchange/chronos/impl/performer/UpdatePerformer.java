@@ -577,7 +577,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             RecurrenceRule clientRule = initRecurrenceRule(clientUpdate.getRecurrenceRule());
             RecurrenceRule originalRule = initRecurrenceRule(originalSeriesMaster.getRecurrenceRule());
             if (null != clientRule.getCount() && clientRule.getCount().equals(originalRule.getCount())) {
-                clientRule.setCount(updatedRule.getCount());
+                clientRule.setCount(updatedRule.getCount().intValue());
                 clientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
                 clientUpdate.setRecurrenceRule(clientRule.toString());
                 return new UnmodifiableEvent(clientUpdate);

@@ -85,6 +85,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BirthdayCalendarExportTest.class,
     BasicCommentTest.class,
     ChangeOrganizerTest.class,
+    AttendeePrivilegesTest.class
     // @formatter:on
 
 })

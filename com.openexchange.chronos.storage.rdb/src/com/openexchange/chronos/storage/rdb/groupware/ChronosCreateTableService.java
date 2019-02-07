@@ -136,6 +136,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
+                "attendeePrivileges INT4 UNSIGNED DEFAULT NULL"+
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "filename VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
@@ -187,6 +188,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
+                "attendeePrivileges INT4 UNSIGNED DEFAULT NULL"+
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "filename VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +

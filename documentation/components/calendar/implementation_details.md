@@ -658,9 +658,13 @@ However, iCalendar standards require to consider different *roles* here - mainly
 
 > "Attendees" are allowed to make some changes to a scheduling object resource, though key properties such as start time, end time, location, and summary are typically under the control of the "Organizer".
 
-In order to comply with the standards, the new calendaring stack introduces appropriate restrictions in case the user is not the organizer, or is not acting on behalf of him. Effectively, the permitted changes then boil down to modifications of the user's personal alarms and his own participation status. Additionally, the attendee is still allowed to remove himself from an event (beyond declining it). Those changes can also be performed on a single instance of a recurring event series (which may indirectly cause new change and/or delete exceptions for the series).
+In order to comply with the standards, the new calendaring stack introduces appropriate restrictions (per default) in case the user is not the organizer, or is not acting on behalf of him. Effectively, the permitted changes then boil down to modifications of the user's personal alarms and his own participation status. Additionally, the attendee is still allowed to remove himself from an event (beyond declining it). Those changes can also be performed on a single instance of a recurring event series (which may indirectly cause new change and/or delete exceptions for the series).
 
 When acting on behalf of another user in a *shared* calendar folder, always this shared folder's owner is considered when determining if the event is updated as organizer or attendee. In *public* folders, the original creator is stored as the organizer implicitly. All consecutive changes by other internal users can then be performed on behalf of this organizer, provided that the underlying permissions in the folder are sufficient. See also chapter Permissions below for further details. 
+
+## Attendee Privileges
+
+As stated above, attendees are usually quite limited regarding the allowed changes. To still allow modifications by other calendar users for specific events, the organizer of an event can assign elevated attendee privileges on a per-event basis. Doing so, he allows other attendees to modify event properties that would normally require the <i>organizer role</i>. Those modifications are then performed <i>on behalf</i> of the organizer implicitly. This <i>on behalf</i>-relationship will be used throughout the stack, e.g. also when sending subsequent scheduling messages like iMIP. However, regardless of the granted attendee privileges, the restrictions as per RFC 6638, section 3.2.2.1 still apply when accessing the server via CalDAV.      
 
 ## Delete as Attendee
 

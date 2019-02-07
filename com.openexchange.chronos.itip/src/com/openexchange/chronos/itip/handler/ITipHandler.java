@@ -331,7 +331,7 @@ public class ITipHandler implements CalendarHandler {
 
     private void handle(CalendarEvent event, State.Type type, Event original, Event update, List<Event> exceptions) throws OXException {
         CalendarSession session = getCalendarService().init(event.getSession(), event.getCalendarParameters());
-        int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
+        int onBehalfOf = onBehalfOf(session, update, event.getCalendarUser());
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
         String comment = event.getCalendarParameters().get(CalendarParameters.PARAMETER_COMMENT, String.class);
 
@@ -375,8 +375,8 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private int onBehalfOf(int calendarUser, CalendarSession session) {
-        return calendarUser == session.getUserId() ? -1 : calendarUser;
+    private int onBehalfOf(CalendarSession session, Event event, int calendarUser) {
+        return calendarUser == session.getUserId() ? CalendarUtils.isOrganizer(event, calendarUser) ? -1 : event.getOrganizer().getEntity() : calendarUser;
     }
 
     private UpdateResult getExceptionMaster(CreateResult create, List<UpdateResult> updates) {
@@ -391,7 +391,7 @@ public class ITipHandler implements CalendarHandler {
             .originalEvent(master.getUpdate())
             .updatedEvent(created.getCreatedEvent())
             .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.START_DATE, EventField.END_DATE, EventField.CREATED, EventField.RECURRENCE_RULE,
-                                EventField.RECURRENCE_ID, EventField.ALARMS, EventField.EXTENDED_PROPERTIES, EventField.CHANGE_EXCEPTION_DATES, EventField.ID)
+                                EventField.RECURRENCE_ID, EventField.ALARMS, EventField.EXTENDED_PROPERTIES, EventField.CHANGE_EXCEPTION_DATES, EventField.ID, EventField.ATTENDEE_PRIVILEGES)
             .considerUnset(true)
             .ignoreDefaults(true)
             .build(); //@formatter:on

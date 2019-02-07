@@ -141,7 +141,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
     protected CalendarUtilities calendarUtilities;
 
     public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
-        EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS };
+        EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS, EventField.ATTENDEE_PRIVILEGES };
 
     public ITipNotificationMailGenerator(final ServiceLookup services, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
         final User onBehalfOf, final Context ctx, final CalendarSession session, CalendarUser principal, String comment) throws OXException {

@@ -90,6 +90,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.AttendeePrivileges;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
@@ -171,7 +172,8 @@ public class CalendarUtils {
     private static final Set<EventField> DEFAULT_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.RECURRENCE_DATES, EventField.ORGANIZER
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.RECURRENCE_DATES, EventField.ORGANIZER,
+        EventField.ATTENDEE_PRIVILEGES
     )));
 
     /** A collection of identifying meta fields */
@@ -1692,6 +1694,23 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific attendee privilege is set in an event or not.
+     * 
+     * @param event The event to check
+     * @param privilege The privilege to check
+     * @return <code>true</code> if the privilege is set, <code>false</code>, otherwise
+     */
+    public static boolean hasAttendeePrivileges(Event event, AttendeePrivileges privilege) {
+        if (null == privilege) {
+            return null == event.getAttendeePrivileges();
+        }
+        if (null == event.getAttendeePrivileges()) {
+            return false;
+        }
+        return privilege.getValue().equalsIgnoreCase(event.getAttendeePrivileges().getValue());
+    }
+
+    /**
      * Calculates the effective start date of a specific occurrence of an event series.
      *
      * @param seriesMaster The series master event
@@ -1932,9 +1951,9 @@ public class CalendarUtils {
      *
      * @param originalEvents The original events
      * @param updatedEvents The updated events
-     * @param fieldsToMatch The event fields to consider when checking events for equality
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences between updated items
+     * @param fieldsToMatch The event fields to consider when checking events for equality
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */

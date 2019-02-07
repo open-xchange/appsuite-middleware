@@ -261,6 +261,16 @@ public class UnmodifiableEvent extends DelegatingEvent {
     public void removeGeo() {
         throw new UnsupportedOperationException();
     }
+    
+    @Override
+    public void setAttendeePrivileges(AttendeePrivileges value) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void removeAttendeePrivileges() {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public void setStartDate(DateTime value) {

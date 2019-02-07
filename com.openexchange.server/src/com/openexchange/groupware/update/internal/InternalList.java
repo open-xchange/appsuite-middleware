@@ -720,6 +720,8 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTable());
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV2());
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV3());
+        
+        list.add(new com.openexchange.groupware.update.tasks.ChronosAddAttendeePrivilegesTask());
 
         // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
         // TODO Enable UpdateTask with 7.10.3, see MW-1108

@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
@@ -65,10 +66,12 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeePrivileges;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -255,6 +258,31 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (startDate.isFloating() != endDate.isFloating()) {
             throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(startDate), String.valueOf(endDate));
         }
+    }
+
+    /**
+     * Checks that the attendee privileges are supported based on the given folder's type and event organizer, if it's not <code>null</code>
+     * and different from {@link DefaultAttendeePrivileges#DEFAULT}.
+     *
+     * @param privileges The attendee privileges to check, or <code>null</code> to skip the check
+     * @param folder The target folder for the event
+     * @param organizer The event's organizer
+     * @return The passed privileges, after they were checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static AttendeePrivileges attendeePrivilegesAreValid(AttendeePrivileges privileges, CalendarFolder folder, Organizer organizer) throws OXException {
+        if (null != privileges && DefaultAttendeePrivileges.MODIFY.getValue().equalsIgnoreCase(privileges.getValue())) {
+            /*
+             * 'modify' privilege only allowed in non-public folders, with internal organizer
+             */
+            if (PublicType.getInstance().equals(folder.getType())) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ATTENDEE_PRIVILEGES, "Incompatible folder type");
+            }
+            if (null != organizer && false == isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ATTENDEE_PRIVILEGES, "Not allowed for externally organized events");
+            }
+        }
+        return privileges;
     }
 
     /**
