@@ -67,9 +67,6 @@ import com.openexchange.config.lean.internal.parser.FloatPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.IntegerPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.LongPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.StringPropertyValueParser;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link LeanConfigurationServiceImpl}
@@ -80,16 +77,17 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeanConfigurationServiceImpl.class);
 
-    private final ServiceLookup services;
-
+    private final ConfigurationService configService;
+    private final ConfigViewFactory viewFactory;
     private final Map<Class<?>, PropertyValueParser<?>> valueParsers;
 
     /**
-     * Initialises a new {@link LeanConfigurationServiceImpl}.
+     * Initializes a new {@link LeanConfigurationServiceImpl}.
      */
-    public LeanConfigurationServiceImpl(ServiceLookup services) {
+    public LeanConfigurationServiceImpl(ConfigurationService configService, ConfigViewFactory viewFactory) {
         super();
-        this.services = services;
+        this.configService = configService;
+        this.viewFactory = viewFactory;
 
         // Load parsers
         ImmutableMap.Builder<Class<?>, PropertyValueParser<?>> vps = ImmutableMap.builder();
@@ -101,101 +99,51 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         valueParsers = vps.build();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(com.openexchange.config.lean.Property)
-     */
     @Override
     public String getProperty(Property property) {
         return getProperty(property, String.class, Collections.emptyMap());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(com.openexchange.config.lean.Property)
-     */
     @Override
     public int getIntProperty(Property property) {
         return getProperty(property, Integer.class, Collections.emptyMap()).intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(com.openexchange.config.lean.Property)
-     */
     @Override
     public boolean getBooleanProperty(Property property) {
         return getProperty(property, Boolean.class, Collections.emptyMap()).booleanValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(com.openexchange.config.lean.Property)
-     */
     @Override
     public float getFloatProperty(Property property) {
         return getProperty(property, Float.class, Collections.emptyMap()).floatValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(com.openexchange.config.lean.Property)
-     */
     @Override
     public long getLongProperty(Property property) {
         return getProperty(property, Long.class, Collections.emptyMap()).longValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(int, int, com.openexchange.config.lean.Property)
-     */
     @Override
     public String getProperty(int userId, int contextId, Property property) {
         return getProperty(property, userId, contextId, String.class, Collections.emptyMap());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(int, int, com.openexchange.config.lean.Property)
-     */
     @Override
     public int getIntProperty(int userId, int contextId, Property property) {
         return getProperty(property, userId, contextId, Integer.class, Collections.emptyMap()).intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(int, int, com.openexchange.config.lean.Property)
-     */
     @Override
     public boolean getBooleanProperty(int userId, int contextId, Property property) {
         return getProperty(property, userId, contextId, Boolean.class, Collections.emptyMap()).booleanValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(int, int, com.openexchange.config.lean.Property)
-     */
     @Override
     public float getFloatProperty(int userId, int contextId, Property property) {
         return getProperty(property, userId, contextId, Float.class, Collections.emptyMap()).floatValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(int, int, com.openexchange.config.lean.Property)
-     */
     @Override
     public long getLongProperty(int userId, int contextId, Property property) {
         return getProperty(property, userId, contextId, Long.class, Collections.emptyMap()).longValue();
@@ -264,7 +212,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     private <T> T getProperty(Property property, Class<T> coerceTo, Map<String, String> optionals) {
         String value = null;
         try {
-            ConfigurationService configService = requireService(ConfigurationService.class);
+            ConfigurationService configService = this.configService;
             value = configService.getProperty(property.getFQPropertyName(optionals));
             if (value == null) {
                 T defaultValue = property.getDefaultValue(coerceTo);
@@ -298,8 +246,8 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     private <T> T getProperty(Property property, int userId, int contextId, Class<T> coerceTo, Map<String, String> optionals) {
         try {
-            ConfigViewFactory factory = requireService(ConfigViewFactory.class);
-            ConfigView view = factory.getView(userId, contextId);
+            ConfigViewFactory viewFactory = this.viewFactory;
+            ConfigView view = viewFactory.getView(userId, contextId);
 
             ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(optionals), coerceTo);
             return p.isDefined() ? p.get() : property.getDefaultValue(coerceTo);
@@ -310,19 +258,5 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         }
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The requested service
-     * @throws OXException If the service is not available
-     */
-    private <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
-        final S service = services.getService(clazz);
-        if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
-        }
-        return service;
-    }
 
 }

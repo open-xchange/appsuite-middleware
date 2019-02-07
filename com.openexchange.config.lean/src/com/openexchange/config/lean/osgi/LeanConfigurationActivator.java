@@ -69,31 +69,21 @@ public class LeanConfigurationActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        registerService(LeanConfigurationService.class, new LeanConfigurationServiceImpl(this));
+        registerService(LeanConfigurationService.class, new LeanConfigurationServiceImpl(getService(ConfigurationService.class), getService(ConfigViewFactory.class)));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         unregisterService(LeanConfigurationService.class);
