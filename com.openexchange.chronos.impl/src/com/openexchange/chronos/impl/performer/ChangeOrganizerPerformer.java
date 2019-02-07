@@ -142,12 +142,6 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Integer.valueOf(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
         }
         /*
-         * Ensure that current user is the organizer
-         */
-        if (false == CalendarUtils.isOrganizer(originalEvent, calendarUserId)) {
-            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), eventId, organizer.getUri(), organizer.getCn());
-        }
-        /*
          * Ensure that event is group scheduled
          */
         if (CalendarUtils.isPseudoGroupScheduled(originalEvent) || false == CalendarUtils.isGroupScheduled(originalEvent)) {
