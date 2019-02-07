@@ -132,8 +132,6 @@ public final class MailMessageParser {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageParser.class);
 
-    private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
-
     private static final String HDR_CONTENT_DISPOSITION = MessageHeaders.HDR_CONTENT_DISPOSITION;
 
     private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
@@ -405,7 +403,7 @@ public final class MailMessageParser {
         int partCount = partCountArg;
         final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
         final long size = mailPart.getSize();
-        final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(APPL_OCTET);
+        final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : ContentType.APPLICATION_OCTETSTREAM_CONTENT_TYPE;
         final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
         if (null != mimeFilter && mimeFilter.ignorable(lcct, mailPart)) {
             return;
@@ -1137,7 +1135,7 @@ public final class MailMessageParser {
      * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
      * @return An appropriate filename
      */
-    private static String getFileName(String rawFileName, ContentType contentType, String sequenceId, String baseMimeType) {
+    public static String getFileName(String rawFileName, ContentType contentType, String sequenceId, String baseMimeType) {
         String filename = rawFileName;
         if (Strings.isEmpty(filename)) {
             List<String> exts = MimeType2ExtMap.getFileExtensions(Strings.asciiLowerCase(baseMimeType));
