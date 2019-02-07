@@ -160,6 +160,6 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
 
     @Override
     public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(TombstoneCleanupConfig.ENABLED.getFQPropertyName()).propertiesOfInterest(TombstoneCleanupConfig.TIMESPAN.getFQPropertyName()).build();
+        return DefaultInterests.builder().propertiesOfInterest(TombstoneCleanupConfig.TIMESPAN.getFQPropertyName()).build();
     }
 }

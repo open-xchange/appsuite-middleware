@@ -5,7 +5,7 @@ properties:
         Enables or disables the cleanup of tombstone tables.
       defaultValue: true
       version: 7.10.2
-      reloadable: true
+      reloadable: false
       configcascadeAware: false
       related:
       file: cleanup.properties
