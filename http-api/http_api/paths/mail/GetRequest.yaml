@@ -78,6 +78,11 @@
         type: boolean
         description: If set to "true" preview generation is triggered in the background for all file attachments of the referenced mail message
         required: false
+      - in: query
+        name: no_nested_message
+        type: boolean
+        description: If set to "true" nested messages are handled as regular attachments
+        required: false
       - $ref: "#/parameters/gblQueryParamsDecrypt"
       - $ref: "#/parameters/glbQueryParamsCryptoAuth"
     responses:
