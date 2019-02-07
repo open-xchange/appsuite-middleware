@@ -740,6 +740,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 sizePolicy = b ? SizePolicy.ESTIMATE : SizePolicy.NONE;
             }
         }
+        boolean handleNestedMessageAsAttachment = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("no_nested_message"));
 
         JSONObject jMail;
         try {
@@ -757,6 +758,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                                                             .setToken(token)
                                                             .setTokenTimeout(ttlMillis)
                                                             .setWarnings(warnings)
+                                                            .setHandleNestedMessageAsAttachment(handleNestedMessageAsAttachment)
                                                             .build();
             jMail = MessageWriter.writeMailMessage(params);
         } catch (final OXException e) {
