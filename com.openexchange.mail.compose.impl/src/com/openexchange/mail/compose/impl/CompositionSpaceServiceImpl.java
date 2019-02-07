@@ -217,20 +217,20 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_PLAIN = com.openexchange.mail.compose.Message.ContentType.TEXT_PLAIN;
-    private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML  = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
+    private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
 
     private static final com.openexchange.mail.compose.Attachment.ContentDisposition ATTACHMENT = com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT;
-    private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE     = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
+    private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
 
     private static final String HEADER_X_OX_SHARED_ATTACHMENTS = MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS;
-    private static final String HEADER_X_OX_SECURITY           = MessageHeaders.HDR_X_OX_SECURITY;
-    private static final String HEADER_X_OX_META               = MessageHeaders.HDR_X_OX_META;
-    private static final String HEADER_X_OX_READ_RECEIPT       = MessageHeaders.HDR_X_OX_READ_RECEIPT;
+    private static final String HEADER_X_OX_SECURITY = MessageHeaders.HDR_X_OX_SECURITY;
+    private static final String HEADER_X_OX_META = MessageHeaders.HDR_X_OX_META;
+    private static final String HEADER_X_OX_READ_RECEIPT = MessageHeaders.HDR_X_OX_READ_RECEIPT;
 
-    private final ServiceLookup                  services;
+    private final ServiceLookup services;
     private final CompositionSpaceStorageService storageService;
-    private final AttachmentStorageService       attachmentStorageService;
-    private volatile Set<String>                 octetExtensions;
+    private final AttachmentStorageService attachmentStorageService;
+    private volatile Set<String> octetExtensions;
 
     /**
      * Initializes a new {@link CompositionSpaceServiceImpl}.
@@ -1114,7 +1114,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     private static final String PREFIX_FWD = "Fwd: ";
-    private static final String PREFIX_RE  = "Re: ";
+    private static final String PREFIX_RE = "Re: ";
 
     @Override
     public UUID openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException {

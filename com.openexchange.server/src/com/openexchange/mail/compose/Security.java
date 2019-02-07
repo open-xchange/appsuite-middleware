@@ -72,10 +72,10 @@ public class Security {
         private boolean encrypt;
         private boolean pgpInline;
         private boolean sign;
-        private String  language;
-        private String  message;
-        private String  pin;
-        private String  msgRef;
+        private String language;
+        private String message;
+        private String pin;
+        private String msgRef;
 
         /**
          * Initializes a new {@link Builder}.
@@ -132,10 +132,10 @@ public class Security {
     private final boolean encrypt;
     private final boolean pgpInline;
     private final boolean sign;
-    private final String  language;
-    private final String  message;
-    private final String  pin;
-    private final String  msgRef;
+    private final String language;
+    private final String message;
+    private final String pin;
+    private final String msgRef;
 
     /**
      * Initializes a new {@link Security}.

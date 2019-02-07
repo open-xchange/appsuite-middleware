@@ -77,11 +77,11 @@ public class SecuritySettings {
         private boolean decrypt;
         private boolean sign;
         private boolean pgpInline;
-        private String  authentication;
-        private String  guest_language;
-        private String  guest_message;
-        private String  pin;
-        private String  msgRef;
+        private String authentication;
+        private String guest_language;
+        private String guest_message;
+        private String pin;
+        private String msgRef;
 
         /**
          * Initializes a new {@link DefaultDoveAdmCommand.Builder} with optional identifier default to <code>"1"</code>.
@@ -177,15 +177,15 @@ public class SecuritySettings {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private final boolean                 encrypt;
-    private final boolean                 decrypt;
-    private final boolean                 sign;
-    private final boolean                 pgpInline;
+    private final boolean encrypt;
+    private final boolean decrypt;
+    private final boolean sign;
+    private final boolean pgpInline;
     private final AtomicReference<String> authenticationRef;
-    private final String                  guest_language;
-    private final String                  guest_message;
-    private final String                  pin;
-    private final String                  msgRef;
+    private final String guest_language;
+    private final String guest_message;
+    private final String pin;
+    private final String msgRef;
 
     /**
      *
