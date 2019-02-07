@@ -3749,6 +3749,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 List<SchemaCount> schemaCounts = entry.getValue();
                 Map<String, Integer> containedSchemas = db2ContainedSchemas.get(databases.get(Integer.valueOf(poolId)));
 
+                if (containedSchemas == null || containedSchemas.isEmpty()) {
+                    continue;
+                }
+
                 // Insert with 100-sized batches
                 for (List<SchemaCount> schemaCountSublist : Lists.partition(schemaCounts, 100)) {
                     Set<String> insertLockFor = null;
