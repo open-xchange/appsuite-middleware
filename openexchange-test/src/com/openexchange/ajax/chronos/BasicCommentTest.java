@@ -175,7 +175,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         rememberClient(apiClient2);
         MailApi mailApi = new MailApi(apiClient2);
 
-        MailResponse response = mailApi.getMail(apiClient2.getSession(), INBOX, getMailId(apiClient2, mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null);
+        MailResponse response = mailApi.getMail(apiClient2.getSession(), INBOX, getMailId(apiClient2, mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null, null, null);
         MailData mailData = response.getData();
         Assert.assertThat("No mail data", mailData, notNullValue());
         MailAttachment mailAttachment = mailData.getAttachments().get(0);

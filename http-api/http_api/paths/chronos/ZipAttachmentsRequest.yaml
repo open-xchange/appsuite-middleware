@@ -1,0 +1,29 @@
+/chronos?action=zipAttachments:
+  put:
+    operationId: getZippedEventAttachments
+    tags:
+      - Chronos
+    summary: Gets a ZIP archive for multiple attachments of an event.
+    consumes:
+      - application/json
+    produces:
+      - application/zip
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - in: body
+        name: body
+        description: A JSON array with the identifiers of the attachments, which shall be put into ZIP archive
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: The raw data of the ZIP archive. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          type: string
+          format: binary

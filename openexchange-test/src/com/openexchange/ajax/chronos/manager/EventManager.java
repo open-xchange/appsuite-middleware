@@ -249,7 +249,7 @@ public class EventManager extends AbstractManager {
         }
         return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), sb.toString(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
     }
-    
+
     private void prepareEventAttachment(EventData eventData, Asset asset) {
         if (eventData.getAttachments() == null || eventData.getAttachments().isEmpty()) {
             ChronosAttachment attachment = new ChronosAttachment();
@@ -400,7 +400,29 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * Retrieves all events with in the specified interval (occurences will not be expanded)
+     * Retrieves the attachment of the specified event
+     *
+     * @param eventId The event identifier
+     * @param attachmentId The attachment's identifier
+     * @param folderId The folder id
+     * @return The binary data of the attachment
+     * @throws ApiException if an API error is occurred
+     */
+    public byte[] getZippedAttachments(String eventId, String folderId, int... attachmentIds) throws ApiException {
+        if (null == attachmentIds || attachmentIds.length <= 0) {
+            throw new ApiException("Missing attachment identifiers");
+        }
+        List<String> attachIds = new ArrayList<String>(attachmentIds.length);
+        for (int attachmentId : attachmentIds) {
+            attachIds.add(Integer.toString(attachmentId));
+        }
+        byte[] zippedAttachments = userApi.getChronosApi().getZippedEventAttachments(userApi.getSession(), eventId, folderId, attachIds);
+        assertNotNull(zippedAttachments);
+        return zippedAttachments;
+    }
+
+    /**
+     * Retrieves all events with in the specified interval (occurrences will not be expanded)
      *
      * @param from The starting date
      * @param until The ending date

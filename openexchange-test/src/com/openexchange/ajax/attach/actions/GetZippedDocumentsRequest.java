@@ -47,50 +47,69 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.ajax.attach.actions;
 
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
-import com.openexchange.server.ServiceLookup;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link GetZippedDocumentsRequest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public class GetZippedDocumentsRequest extends AbstractAttachmentRequest<GetZippedDocumentsResponse> {
 
-    private final Map<String, AJAXActionService> actions;
+    private final int objectId;
+    private final int moduleID;
+    private final int folderID;
+    private final int[] attachmentIds;
 
-    public ChronosActionFactory(ServiceLookup services) {
+    private final boolean failOnError;
+
+    public GetZippedDocumentsRequest(int folder, int objectId, int module, int[] attachmentIds) {
+        this(folder, objectId, module, attachmentIds, false);
+    }
+
+    public GetZippedDocumentsRequest(int folder, int objectId, int module, int[] attachmentIds, boolean lFailOnError) {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builderWithExpectedSize(14);
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        actions.put("zipAttachments", new ZipAttachments(services));
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("needsAction", new NeedsActionAction(services));
-        actions.put("resolve", new ResolveAction(services));
-        this.actions = actions.build();
+        this.objectId = objectId;
+        this.moduleID = module;
+        this.folderID = folder;
+        this.failOnError = lFailOnError;
+        this.attachmentIds = attachmentIds;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "zipDocuments"));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, moduleID));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderID));
+        parameters.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, objectId));
+        return parameters.toArray(new Parameter[parameters.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends GetZippedDocumentsResponse> getParser() {
+        return new GetZippedDocumentsParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        JSONArray array = new JSONArray(attachmentIds.length);
+        for (int attachmentId : attachmentIds) {
+            array.put(attachmentId);
+        }
+        return array.toString();
     }
 }

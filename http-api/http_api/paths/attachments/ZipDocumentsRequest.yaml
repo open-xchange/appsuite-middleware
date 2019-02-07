@@ -1,0 +1,31 @@
+# INFO: in the current Swagger spec it is not possible to add optional path parameters. Therefore, the parameter
+# "filename" is not included in the request. Instead, it is described in the description of the request.
+/attachment?action=zipDocuments:
+  put:
+    operationId: getZippedAttachmentDocuments
+    tags:
+      - Attachments
+    summary: Gets a ZIP archive for multipe attachment data.
+    consumes:
+      - application/json
+    produces:
+      - application/zip
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamAttached"
+      - $ref: "#/parameters/gblQueryParamAttachmentsFolder"
+      - $ref: "#/parameters/gblQueryParamAttachmentsModule"
+      - in: body
+        name: body
+        description: A JSON array with the identifiers of the attachments, which shall be put into ZIP archive
+        required: true
+        schema:
+          type: array
+          items:
+            type: integer
+    responses:
+      200:
+        description: The raw byte data of the ZIP archive.
+        schema:
+          type: string
+          format: binary

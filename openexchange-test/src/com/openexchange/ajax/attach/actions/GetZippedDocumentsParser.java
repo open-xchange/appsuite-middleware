@@ -47,50 +47,65 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.ajax.attach.actions;
 
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
-import com.openexchange.server.ServiceLookup;
+import java.io.IOException;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link GetZippedDocumentsParser}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public class GetZippedDocumentsParser extends AbstractAJAXParser<GetZippedDocumentsResponse> {
 
-    private final Map<String, AJAXActionService> actions;
+    private int contentLength;
+    private HttpResponse httpResponse;
+    private String respString;
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builderWithExpectedSize(14);
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        actions.put("zipAttachments", new ZipAttachments(services));
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("needsAction", new NeedsActionAction(services));
-        actions.put("resolve", new ResolveAction(services));
-        this.actions = actions.build();
+    /**
+     * Initializes a new {@link GetZippedDocumentsParser}.
+     */
+    public GetZippedDocumentsParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public GetZippedDocumentsResponse parse(final String body) throws JSONException {
+        final boolean isJSON = body.startsWith("{");
+        if (isJSON) {
+            return super.parse(body);
+        }
+        JSONObject json = new JSONObject();
+        json.put("document", body);
+        return super.parse(json.toString());
     }
+
+    @Override
+    public String checkResponse(HttpResponse response, HttpRequest request) throws ParseException, IOException {
+        httpResponse = response;
+        Header[] headers = response.getAllHeaders();
+        for (Header h : headers) {
+            if (h.getName().equals("Content-Length")) {
+                contentLength = Integer.parseInt(h.getValue());
+                break;
+            }
+        }
+        respString = EntityUtils.toString(response.getEntity());
+        return respString;
+    }
+
+    @Override
+    protected GetZippedDocumentsResponse createResponse(Response response) throws JSONException {
+        return new GetZippedDocumentsResponse(httpResponse, response, contentLength, respString);
+    }
+
 }

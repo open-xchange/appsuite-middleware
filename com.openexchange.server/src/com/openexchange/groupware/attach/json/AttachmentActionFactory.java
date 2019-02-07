@@ -80,6 +80,7 @@ public class AttachmentActionFactory implements AJAXActionServiceFactory {
         actions.put("updates", new com.openexchange.groupware.attach.json.actions.UpdatesAction(services));
         actions.put("all", new com.openexchange.groupware.attach.json.actions.AllAction(services));
         actions.put("list", new com.openexchange.groupware.attach.json.actions.ListAction(services));
+        actions.put("zipDocuments", new com.openexchange.groupware.attach.json.actions.ZipDocumentsAction(services));
         this.actions = actions.build();
     }
 

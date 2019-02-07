@@ -68,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
 public class GetAttachment extends ChronosAction {
 
     /**
-     * Initialises a new {@link GetAttachment}.
+     * Initializes a new {@link GetAttachment}.
      *
      * @param services
      */
@@ -76,11 +76,6 @@ public class GetAttachment extends ChronosAction {
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.json.action.ChronosAction#perform(com.openexchange.chronos.provider.composition.IDBasedCalendarAccess, com.openexchange.ajax.requesthandler.AJAXRequestData)
-     */
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         // Gather the parameters
@@ -99,9 +94,11 @@ public class GetAttachment extends ChronosAction {
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             result.setHeader("ETag", calendarAccess.getSession().getContextId() + "-" + managedId);
+            fileHolder = null; // Avoid premature closing
             return result;
         } finally {
             Streams.close(fileHolder);
         }
     }
+
 }

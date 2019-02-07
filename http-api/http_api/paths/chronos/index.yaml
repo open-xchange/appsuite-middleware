@@ -12,4 +12,5 @@ requests:
   - FreeBusyRequest.yaml
   - NeedsActionRequest.yaml
   - ResolveRequest.yaml
+  - ZipAttachmentsRequest.yaml
   

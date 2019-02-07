@@ -94,6 +94,7 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -112,7 +113,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
         return new Class<?>[] {
             IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class,
             CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
-            ContactService.class, ResourceService.class, GroupService.class
+            ContactService.class, ResourceService.class, GroupService.class, MimeTypeMap.class
         };
     }
 

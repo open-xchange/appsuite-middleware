@@ -64,6 +64,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -271,6 +272,30 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         byte[] actualAttachmentData = eventManager.getAttachment(expectedEventData.getString("id"), expectedEventData.getJSONArray("attachments").getJSONObject(0).getInt("managedId"), folderId);
         assertArrayEquals("The attachment binary data does not match", expectedAttachmentData, actualAttachmentData);
+    }
+
+    /**
+     * Tests retrieving the ZIP archive containing multiple attachments of an event
+     */
+    @Test
+    public void testGetZippedAttachments() throws Exception {
+        Asset asset = assetManager.getRandomAsset(AssetType.jpg);
+
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), "testUpdateSingleWithAttachment", asset, folderId), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
+
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getString("id"));
+
+        asset = assetManager.getRandomAsset(AssetType.png);
+        actualEventData.getAttachments().get(0).setManagedId(actualEventData.getAttachments().get(0).getManagedId());
+        actualEventData.getAttachments().add(EventFactory.createAttachment(asset));
+
+        expectedEventData = eventManager.updateEventWithAttachment(actualEventData, asset);
+        JSONArray jAttachments = expectedEventData.getJSONArray("attachments");
+        assertEquals("The amount of attachments is not correct", 2, jAttachments.length());
+
+        byte[] zipData = eventManager.getZippedAttachments(actualEventData.getId(), folderId, jAttachments.getJSONObject(0).getInt("managedId"), jAttachments.getJSONObject(1).getInt("managedId"));
+        assertNotNull(zipData);
     }
 
     /**
