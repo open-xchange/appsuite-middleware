@@ -625,6 +625,17 @@ EOF
       fi
       ox_scr_done ${SCR}
     }
+
+    SCR=SCR-391
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      if ! contains "video/x-matroska mkv" ${pfile}
+      then
+        cat ${pfile} <(echo "video/x-matroska mkv") | sort -o ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
