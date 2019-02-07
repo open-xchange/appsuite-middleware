@@ -118,8 +118,7 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
             /*
              * Collection of composition spaces
              */
-            @SuppressWarnings("unchecked")
-            Collection<CompositionSpace> compositionSpaces = (Collection<CompositionSpace>) resultObject;
+            @SuppressWarnings("unchecked") Collection<CompositionSpace> compositionSpaces = (Collection<CompositionSpace>) resultObject;
             Set<MessageField> optFields = (Set<MessageField>) result.getParameter("columns");
             final JSONArray jArray = new JSONArray(compositionSpaces.size());
             for (CompositionSpace compositionSpace : compositionSpaces) {
@@ -280,13 +279,14 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
             return null;
         }
 
-        JSONObject jSecurity = new JSONObject(8);
+        JSONObject jSecurity = new JSONObject(9);
         jSecurity.put("encrypt", security.isEncrypt());
         jSecurity.put("pgpInline", security.isPgpInline());
         jSecurity.put("sign", security.isSign());
         jSecurity.put("language", getNullable(security.getLanguage()));
         jSecurity.put("message", getNullable(security.getMessage()));
         jSecurity.put("pin", getNullable(security.getPin()));
+        jSecurity.put("msgRef", getNullable(security.getMsgRef()));
         return jSecurity;
     }
 

@@ -217,20 +217,20 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_PLAIN = com.openexchange.mail.compose.Message.ContentType.TEXT_PLAIN;
-    private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
+    private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML  = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
 
     private static final com.openexchange.mail.compose.Attachment.ContentDisposition ATTACHMENT = com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT;
-    private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
+    private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE     = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
 
     private static final String HEADER_X_OX_SHARED_ATTACHMENTS = MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS;
-    private static final String HEADER_X_OX_SECURITY = MessageHeaders.HDR_X_OX_SECURITY;
-    private static final String HEADER_X_OX_META = MessageHeaders.HDR_X_OX_META;
-    private static final String HEADER_X_OX_READ_RECEIPT = MessageHeaders.HDR_X_OX_READ_RECEIPT;
+    private static final String HEADER_X_OX_SECURITY           = MessageHeaders.HDR_X_OX_SECURITY;
+    private static final String HEADER_X_OX_META               = MessageHeaders.HDR_X_OX_META;
+    private static final String HEADER_X_OX_READ_RECEIPT       = MessageHeaders.HDR_X_OX_READ_RECEIPT;
 
-    private final ServiceLookup services;
+    private final ServiceLookup                  services;
     private final CompositionSpaceStorageService storageService;
-    private final AttachmentStorageService attachmentStorageService;
-    private volatile Set<String> octetExtensions;
+    private final AttachmentStorageService       attachmentStorageService;
+    private volatile Set<String>                 octetExtensions;
 
     /**
      * Initializes a new {@link CompositionSpaceServiceImpl}.
@@ -379,13 +379,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 anyRecipientSet = true;
             }
 
-
             List<Address> cc = m.getCc();
             if (null != cc) {
                 sourceMessage.addCc(toMimeAddresses(cc));
                 anyRecipientSet = true;
             }
-
 
             List<Address> bcc = m.getBcc();
             if (null != bcc) {
@@ -424,7 +422,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
         }
 
-
         // Security
         {
             CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
@@ -443,6 +440,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     .guestLanguage(security.getLanguage())
                     .guestMessage(security.getMessage())
                     .pin(security.getPin())
+                    .msgRef(security.getMsgRef())
                     .build();
                 if (settings.anythingSet()) {
                     sourceMessage.setSecuritySettings(settings);
@@ -579,7 +577,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             // Do the transport...
             HttpServletRequest servletRequest = request.optHttpServletRequest();
             String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
-            List<String> ids =  mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, ComposeType.NEW, accountId, usm, new MtaStatusInfo(), remoteAddress);
+            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, ComposeType.NEW, accountId, usm, new MtaStatusInfo(), remoteAddress);
             if (null != ids && !ids.isEmpty()) {
                 String msgIdentifier = ids.get(0);
                 try {
@@ -664,7 +662,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(nfe, paramName, sLineWrapAfter);
                 }
             }
-        }  else {
+        } else {
             // Disable by default
             usm.setAutoLinebreak(0);
         }
@@ -751,7 +749,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             // Encode state to headers
             {
                 mimeMessage.setHeader(HEADER_X_OX_META, encodeHeaderValue(11, meta2HeaderValue(m.getMeta())));
-                mimeMessage.setHeader(HEADER_X_OX_SECURITY,encodeHeaderValue(15, security2HeaderValue(m.getSecurity())));
+                mimeMessage.setHeader(HEADER_X_OX_SECURITY, encodeHeaderValue(15, security2HeaderValue(m.getSecurity())));
                 mimeMessage.setHeader(HEADER_X_OX_SHARED_ATTACHMENTS, encodeHeaderValue(25, sharedAttachments2HeaderValue(m.getSharedAttachments())));
                 if (m.isRequestReadReceipt()) {
                     mimeMessage.setHeader(HEADER_X_OX_READ_RECEIPT, encodeHeaderValue(19, "true"));
@@ -1116,7 +1114,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     private static final String PREFIX_FWD = "Fwd: ";
-    private static final String PREFIX_RE = "Re: ";
+    private static final String PREFIX_RE  = "Re: ";
 
     @Override
     public UUID openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException {
@@ -1178,7 +1176,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         case FORWARD: {
                             List<MailPath> forwardsFor = parameters.getReferencedMails();
                             metaBuilder.withForwardsFor(forwardsFor);
-                            mailInterface = MailServletInterface.getInstance(session);
+                            mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
                             originalMail = requireMailMessage(forwardsFor.get(0), mailInterface);
                             metaBuilder.withDate(originalMail.getSentDate());
 
@@ -1369,7 +1367,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         case REPLY_ALL: {
                             MailPath replyFor = parameters.getReferencedMails().get(0);
                             metaBuilder.withReplyFor(replyFor);
-                            mailInterface = MailServletInterface.getInstance(session);
+                            mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
                             originalMail = requireMailMessage(replyFor, mailInterface);
                             metaBuilder.withDate(originalMail.getSentDate());
 
@@ -1705,7 +1703,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                             if (type == Type.EDIT) {
                                 metaBuilder.withEditFor(editFor);
                             }
-                            mailInterface = MailServletInterface.getInstance(session);
+                            mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
                             originalMail = requireMailMessage(editFor, mailInterface);
                             metaBuilder.withDate(originalMail.getSentDate());
 
@@ -1842,7 +1840,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                             }
                         }
                             break;
-                        case RESEND:{
+                        case RESEND: {
                             MailPath resendFor = parameters.getReferencedMails().get(0);
                             mailInterface = MailServletInterface.getInstance(session);
                             originalMail = requireMailMessage(resendFor, mailInterface);
@@ -2594,7 +2592,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 attachment.setContentDisposition(ATTACHMENT);
                 attachment.setMimeType(mailPart.getContentType().toString(true));
                 String fileName = mailPart.getFileName();
-                attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i+1), mailPart.getContentType().getBaseType()) : fileName);
+                attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
                 attachment.setOrigin(hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
                 Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
                 newAttachments.add(partAttachment);
@@ -2997,7 +2995,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     /*
      * Something like "/ajax/image/mail/compose/image..."
      */
-    private static final Pattern PATTERN_IMAGE_SRC_START_BY_IMAGE = Pattern.compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + ImageActionFactory.ALIAS_APPENDIX + AttachmentImageDataSource.getInstance().getAlias(), Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_IMAGE_SRC_START_BY_IMAGE = Pattern
+        .compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + ImageActionFactory.ALIAS_APPENDIX + AttachmentImageDataSource.getInstance().getAlias(), Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /*
      * Something like "/appsuite/api/mail/compose/5e9f9b6d15a94a31a8ba175489e5363a/attachments/8f119070e6af4143bd2f3c74bd8973a9..."
@@ -3018,7 +3017,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      * @return The (possibly) processed HTML content
      * @throws OXException If replacing &lt;img&gt; tags fails
      */
-    private static String replaceLinkedInlineImages(String htmlContent, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments,  Session session) throws OXException {
+    private static String replaceLinkedInlineImages(String htmlContent, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments, Session session) throws OXException {
         Matcher matcher = PATTERN_SRC.matcher(htmlContent);
         if (!matcher.find()) {
             return htmlContent;
@@ -3218,7 +3217,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             return JSON_SHARED_ATTACHMENTS_DISABLED;
         }
 
-        return new JSONObject(8).putSafe("enabled", Boolean.valueOf(sharedAttachmentsInfo.isEnabled())).putSafe("language", sharedAttachmentsInfo.getLanguage() == null ? JSONObject.NULL : sharedAttachmentsInfo.getLanguage().toString()).putSafe("autoDelete", Boolean.valueOf(sharedAttachmentsInfo.isAutoDelete())).putSafe("expiryDate", sharedAttachmentsInfo.getExpiryDate() == null ? JSONObject.NULL : Long.valueOf(sharedAttachmentsInfo.getExpiryDate().getTime())).putSafe("password", sharedAttachmentsInfo.getPassword() == null ? JSONObject.NULL : sharedAttachmentsInfo.getPassword()).toString();
+        return new JSONObject(8).putSafe("enabled", Boolean.valueOf(sharedAttachmentsInfo.isEnabled())).putSafe("language", sharedAttachmentsInfo.getLanguage() == null ? JSONObject.NULL : sharedAttachmentsInfo.getLanguage().toString())
+            .putSafe("autoDelete", Boolean.valueOf(sharedAttachmentsInfo.isAutoDelete())).putSafe("expiryDate", sharedAttachmentsInfo.getExpiryDate() == null ? JSONObject.NULL : Long.valueOf(sharedAttachmentsInfo.getExpiryDate().getTime()))
+            .putSafe("password", sharedAttachmentsInfo.getPassword() == null ? JSONObject.NULL : sharedAttachmentsInfo.getPassword()).toString();
     }
 
     private static SharedAttachmentsInfo headerValue2SharedAttachments(String headerValue) {
@@ -3281,6 +3282,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 .withLanguage(jSecurity.optString("language", null))
                 .withMessage(jSecurity.optString("message", null))
                 .withPin(jSecurity.optString("pin", null))
+                .withMsgRef(jSecurity.optString("msgRef", null))
                 .build();
         } catch (JSONException e) {
             LoggerHolder.LOG.warn("Header value cannot be parsed to security settings: {}", headerValue, e);

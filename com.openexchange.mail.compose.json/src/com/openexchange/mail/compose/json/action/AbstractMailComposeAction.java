@@ -95,6 +95,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
+
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailComposeAction.class);
     }
 
@@ -349,6 +350,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
             .withLanguage(jSecurity.optString("language", null))
             .withMessage(jSecurity.optString("message", null))
             .withPin(jSecurity.optString("pin", null))
+            .withMsgRef(jSecurity.optString("msgRef", null))
             .build();
     }
 

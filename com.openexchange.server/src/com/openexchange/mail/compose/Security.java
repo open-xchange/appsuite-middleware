@@ -72,9 +72,10 @@ public class Security {
         private boolean encrypt;
         private boolean pgpInline;
         private boolean sign;
-        private String language;
-        private String message;
-        private String pin;
+        private String  language;
+        private String  message;
+        private String  pin;
+        private String  msgRef;
 
         /**
          * Initializes a new {@link Builder}.
@@ -113,22 +114,28 @@ public class Security {
             return this;
         }
 
+        public Builder withMsgRef(String msgRef) {
+            this.msgRef = msgRef;
+            return this;
+        }
+
         public Security build() {
-            return new Security(encrypt, pgpInline, sign, language, message, pin);
+            return new Security(encrypt, pgpInline, sign, language, message, pin, msgRef);
         }
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /** The constant for disabled security */
-    public static final Security DISABLED = new Security(false, false, false, null, null, null);
+    public static final Security DISABLED = new Security(false, false, false, null, null, null, null);
 
     private final boolean encrypt;
     private final boolean pgpInline;
     private final boolean sign;
-    private final String language;
-    private final String message;
-    private final String pin;
+    private final String  language;
+    private final String  message;
+    private final String  pin;
+    private final String  msgRef;
 
     /**
      * Initializes a new {@link Security}.
@@ -138,9 +145,10 @@ public class Security {
      * @param sign <code>true</code> to sign; otherwise <code>false</code>
      * @param language The language identifier
      * @param message An arbitrary message
+     * @param msgRef Message reference ID for guest emails
      * @param pin The PIN code
      */
-    Security(boolean encrypt, boolean pgpInline, boolean sign, String language, String message, String pin) {
+    Security(boolean encrypt, boolean pgpInline, boolean sign, String language, String message, String pin, String msgRef) {
         super();
         this.encrypt = encrypt;
         this.pgpInline = pgpInline;
@@ -148,6 +156,7 @@ public class Security {
         this.language = language;
         this.message = message;
         this.pin = pin;
+        this.msgRef = msgRef;
     }
 
     /**
@@ -213,6 +222,15 @@ public class Security {
         return sign;
     }
 
+    /**
+     * Gets the msg reference String
+     *
+     * @return
+     */
+    public String getMsgRef() {
+        return msgRef;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder2 = new StringBuilder();
@@ -225,6 +243,9 @@ public class Security {
         }
         if (pin != null) {
             builder2.append("pin=").append(pin);
+        }
+        if (msgRef != null) {
+            builder2.append("msgRef=").append(msgRef);
         }
         builder2.append("]");
         return builder2.toString();

@@ -77,10 +77,11 @@ public class SecuritySettings {
         private boolean decrypt;
         private boolean sign;
         private boolean pgpInline;
-        private String authentication;
-        private String guest_language;
-        private String guest_message;
-        private String pin;
+        private String  authentication;
+        private String  guest_language;
+        private String  guest_message;
+        private String  pin;
+        private String  msgRef;
 
         /**
          * Initializes a new {@link DefaultDoveAdmCommand.Builder} with optional identifier default to <code>"1"</code>.
@@ -102,6 +103,7 @@ public class SecuritySettings {
 
         /**
          * Sets the decrypt flag
+         *
          * @param decrypt The decrypt flag
          * @return This builder
          */
@@ -143,12 +145,12 @@ public class SecuritySettings {
             return this;
         }
 
-        public Builder guestLanguage (String lang) {
+        public Builder guestLanguage(String lang) {
             this.guest_language = lang;
             return this;
         }
 
-        public Builder guestMessage (String message) {
+        public Builder guestMessage(String message) {
             this.guest_message = message;
             return this;
         }
@@ -158,28 +160,48 @@ public class SecuritySettings {
             return this;
         }
 
+        public Builder msgRef(String msgRef) {
+            this.msgRef = msgRef;
+            return this;
+        }
+
         /**
          * Builds the <code>SecuritySettings</code> instance from this builder's arguments.
          *
          * @return The <code>SecuritySettings</code> instance
          */
         public SecuritySettings build() {
-            return new SecuritySettings(encrypt, decrypt, pgpInline, sign, authentication, guest_language, guest_message, pin);
+            return new SecuritySettings(encrypt, decrypt, pgpInline, sign, authentication, guest_language, guest_message, pin, msgRef);
         }
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private final boolean encrypt;
-    private final boolean decrypt;
-    private final boolean sign;
-    private final boolean pgpInline;
+    private final boolean                 encrypt;
+    private final boolean                 decrypt;
+    private final boolean                 sign;
+    private final boolean                 pgpInline;
     private final AtomicReference<String> authenticationRef;
-    private final String guest_language;
-    private final String guest_message;
-    private final String pin;
+    private final String                  guest_language;
+    private final String                  guest_message;
+    private final String                  pin;
+    private final String                  msgRef;
 
-    SecuritySettings(boolean encrypt, boolean decrypt, boolean pgpInline, boolean sign, String authentication, String guest_language, String guest_message, String pin) {
+    /**
+     *
+     * Initializes a new {@link SecuritySettings}.
+     *
+     * @param encrypt If message to be encrypted
+     * @param decrypt Passing decrypt flag
+     * @param pgpInline If message format is pgp inline
+     * @param sign If message to be signed
+     * @param authentication Authentication string
+     * @param guest_language Language to be used for guest
+     * @param guest_message Message to apply to first Guest message
+     * @param pin PIN for guest first time use
+     * @param msgRef Messasge reference for Guest replies
+     */
+    SecuritySettings(boolean encrypt, boolean decrypt, boolean pgpInline, boolean sign, String authentication, String guest_language, String guest_message, String pin, String msgRef) {
         super();
         this.encrypt = encrypt;
         this.decrypt = decrypt;
@@ -189,6 +211,7 @@ public class SecuritySettings {
         this.guest_language = guest_language;
         this.guest_message = guest_message;
         this.pin = pin;
+        this.msgRef = msgRef;
     }
 
     /**
@@ -221,6 +244,7 @@ public class SecuritySettings {
 
     /**
      * Gets the decrypt flag
+     *
      * @return The decrypt flag
      */
     public boolean isDecrypt() {
@@ -238,6 +262,7 @@ public class SecuritySettings {
 
     /**
      * Gets the pgp Inline flag
+     *
      * @return
      */
     public boolean isPgpInline() {
@@ -255,6 +280,7 @@ public class SecuritySettings {
 
     /**
      * Sets the authentication string for the message
+     *
      * @param authentication
      */
     public void setAuthentication(String authentication) {
@@ -263,13 +289,14 @@ public class SecuritySettings {
 
     /**
      * Returns guest greeting message
+     *
      * @return
      */
-    public String getGuestMessage () {
+    public String getGuestMessage() {
         return guest_message;
     }
 
-    public String getGuestLanguage () {
+    public String getGuestLanguage() {
         return guest_language;
     }
 
@@ -281,6 +308,10 @@ public class SecuritySettings {
         return pin;
     }
 
+    public String getMsgRef() {
+        return msgRef;
+    }
+
     public JSONObject getJSON() throws JSONException {
         JSONObject settings = new JSONObject(10);
         settings.put("encrypt", this.isEncrypt());
@@ -289,6 +320,7 @@ public class SecuritySettings {
         settings.put("guest_language", this.getGuestLanguage());
         settings.put("guest_message", this.getGuestMessage());
         settings.put("pin", this.getPin());
+        settings.put("msgRef", this.getMsgRef());
         return settings;
     }
 

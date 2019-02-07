@@ -84,14 +84,15 @@ public abstract class VarCharJsonSecurityMapping<O> extends AbstractVarCharJsonO
             statement.setNull(parameterIndex, getSqlType());
         } else {
 
-            JSONObject jsonSharedAttachmentsInfo = new JSONObject(8);
+            JSONObject jsonSharedAttachmentsInfo = new JSONObject(9);
             try {
-                jsonSharedAttachmentsInfo.put("enabled", value.isEncrypt());
+                jsonSharedAttachmentsInfo.put("encrypt", value.isEncrypt());
                 jsonSharedAttachmentsInfo.put("pgpInline", value.isPgpInline());
                 jsonSharedAttachmentsInfo.put("sign", value.isSign());
                 jsonSharedAttachmentsInfo.put("language", getNullable(value.getLanguage()));
                 jsonSharedAttachmentsInfo.put("message", getNullable(value.getMessage()));
                 jsonSharedAttachmentsInfo.put("pin", getNullable(value.getPin()));
+                jsonSharedAttachmentsInfo.put("msgRef", value.getMsgRef());
             } catch (JSONException e) {
                 LOG.error("Unable to generate JSONObject.", e);
             }
@@ -119,6 +120,7 @@ public abstract class VarCharJsonSecurityMapping<O> extends AbstractVarCharJsonO
                 .withLanguage(jsonSecurity.optString("language", null))
                 .withMessage(jsonSecurity.optString("message", null))
                 .withPin(jsonSecurity.optString("pin", null))
+                .withMsgRef(jsonSecurity.optString("msgRef", null))
                 .build();
             // @formatter:on
         } catch (JSONException | ClassCastException | NumberFormatException e) {
