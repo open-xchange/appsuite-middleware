@@ -301,6 +301,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
 
         ThresholdFileHolder backup = null;
+        boolean closeBackup = true;
         try {
             final Object obj = part.getContent();
             if (obj instanceof MimeMessage) {
@@ -314,14 +315,14 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
                     nestedMessage = mimeMessage;
                     mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
-                    backup = null; // Avoid preliminary closing
+                    closeBackup = false; // Avoid preliminary closing
                 } else if ("base64".equalsIgnoreCase(encoding)) {
                     backup = new ThresholdFileHolder();
                     backup.write(new BASE64DecoderStream(MimeMessageUtility.getStreamFromPart(nestedMessage)));
                     FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
                     nestedMessage = mimeMessage;
                     mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
-                    backup = null; // Avoid preliminary closing
+                    closeBackup = false; // Avoid preliminary closing
                 } else {
                     mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
                 }
@@ -344,8 +345,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } finally {
-            if (null != backup) {
-                backup.close();
+            if (closeBackup) {
+                Streams.close(backup);
             }
         }
     }
