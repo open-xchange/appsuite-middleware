@@ -469,7 +469,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Deletes all removed events and their exceptions
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param diff The {@link EventUpdates}
      * @throws OXException
@@ -489,7 +489,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Delete the given event and all exceptions
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param originalEvent The event to delete
      * @return A list of deleted exceptions
@@ -515,7 +515,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Gets the change exceptions dates
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param seriesId The event series id
      * @return A sorted set of {@link RecurrenceId}s
@@ -529,7 +529,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Deletes all exceptions for the given event series
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param seriesID The event series id
      * @param exceptionDates The exceptions dates
@@ -546,7 +546,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Loads the event data for the given exceptions
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param seriesID The event series id
      * @param recurrenceIDs The recurrence ids of the exceptions
@@ -569,7 +569,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Creates events for all added items
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param diff The {@link EventUpdates}
      * @param existingEvents A list of existing events
@@ -584,7 +584,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Performs updates for the given updated items
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param diff The {@link EventUpdates} containing the updates
      * @throws OXException
@@ -602,7 +602,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Updates the event
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param eventUpdate The {@link EventUpdate}
      * @throws OXException
@@ -617,7 +617,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Updates the event
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param eventUpdate The {@link EventUpdate}
      * @param updateAlarms Whether to update alarms too or not
@@ -652,7 +652,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Updates the alarms
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param event The event to update alarms for
      * @param alarmUpdates The alarm updates
@@ -691,7 +691,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Updates the attendees
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param eventId The event id
      * @param attendeeUpdates The attendee updates
@@ -721,7 +721,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Gets the refresh interval
-     * 
+     *
      * @return The refresh interval in minutes
      */
     protected long getCascadedRefreshInterval() {
@@ -916,7 +916,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Creates the given events
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param externalEvents A list of external events
      * @param existingEvents A list of existing events
@@ -935,7 +935,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                     insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), null);
                 }
             }
-            setDefaultFolder(existingEvents);
+            setDefaultFolder(externalEvents);
             getAlarmHelper().insertDefaultAlarms(calendarStorage, externalEvents);
             notificationService.notifyHandlers(getCreateEvent(externalEvents));
         }
@@ -943,7 +943,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Adds the default folder 0 to all events without a default folder
-     * 
+     *
      * @param events The events
      */
     private void setDefaultFolder(Collection<Event> events) {
@@ -952,7 +952,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Inserts the given master event and its exceptions
-     * 
+     *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param now The current time
      * @param events A sorted list of events
@@ -1004,7 +1004,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Applies default values to the event
-     * 
+     *
      * @param event the event
      * @param now The current time
      * @return The event with adjusted values
@@ -1106,7 +1106,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Constructs a {@link CalendarEvent} for the given deleted events
-     * 
+     *
      * @param events The events
      * @return A {@link CalendarEvent} for this change
      */
@@ -1116,7 +1116,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         for (Event eve : events) {
             deletions.add(new DeleteResultImpl(now.getTime(), eve));
         }
-        
+
         return new DefaultCalendarEvent(session.getContextId(),
             account.getAccountId(),
             account.getUserId(),
@@ -1128,10 +1128,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             null,
             null);
     }
-    
+
     /**
      * Constructs a {@link CalendarEvent} for the given created events
-     * 
+     *
      * @param events A list of created events
      * @return The {@link CalendarEvent}
      */
@@ -1140,7 +1140,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         for(Event eve: events) {
             creations.add(new CreateResultImpl(eve));
         }
-        
+
         return new DefaultCalendarEvent(session.getContextId(),
             account.getAccountId(),
             account.getUserId(),
@@ -1152,10 +1152,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             null,
             null);
     }
-    
+
     /**
      * Creates a {@link CalendarEvent} for the given event updates
-     * 
+     *
      * @param updatedItems A list of {@link EventUpdate}s
      * @return The {@link CalendarEvent}
      * @throws OXException
@@ -1165,7 +1165,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         for(EventUpdate update: updatedItems) {
             updates.add(new UpdateResultImpl(update.getOriginal(), update.getUpdate()));
         }
-        
+
         return new DefaultCalendarEvent(session.getContextId(),
             account.getAccountId(),
             account.getUserId(),
@@ -1196,7 +1196,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Updates the alarms. This can be used as a implementation for the {@link PersonalAlarmAware#updateAlarms(EventID, List, long)} method.
-     * 
+     *
      * @param eventID The event ID
      * @param alarms A list of {@link Alarm}s
      * @param clientTimestamp The client timestamp
@@ -1212,10 +1212,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);
     }
-    
+
     /**
      * Notifies all CalendarHandler
-     * 
+     *
      * @param result The {@link DefaultCalendarResult}
      * @return the result
      */
@@ -1235,7 +1235,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Gets the alarm triggers for the given actions. This can be used as a implementation for the {@link PersonalAlarmAware#getAlarmTriggers(Set)} method.
-     * 
+     *
      * @param actions The actions to retrieve
      * @return A list of {@link AlarmTrigger}s
      * @throws OXException
@@ -1252,10 +1252,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * <li>{@link CommonCalendarConfigurationFields#NAME}</li>
      * <li>{@link CommonCalendarConfigurationFields#SUBSCRIBED} (default: <code>false</code></li>
      * </ul>
-     * 
+     *
      * It also sets the user configuration, the last modified timestamp, the specified {@link ExtendedProperties}
      * and whether there was an error while previously persisting the account configuration.
-     * 
+     *
      * @param extendedProperties The {@link ExtendedProperties} to set
      * @return The {@link CalendarSettings}
      */
@@ -1283,7 +1283,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * <li>{@link CommonCalendarConfigurationFields#COLOR}</li>
      * <li>{@link CachingCalendarAccessConstants#LAST_UPDATE}</li>
      * </ul>
-     * 
+     *
      * @return The {@link ExtendedProperties}
      */
     protected ExtendedProperties getExtendedProperties() {
@@ -1301,7 +1301,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Gets the {@link AlarmHelper}
-     * 
+     *
      * @return The {@link AlarmHelper}
      * @throws OXException
      */
@@ -1311,7 +1311,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Updates the default alarms by removing all previous alarms and inserting the new default alarms
-     * 
+     *
      * @throws OXException
      */
     public void updateDefaultAlarms() throws OXException {
