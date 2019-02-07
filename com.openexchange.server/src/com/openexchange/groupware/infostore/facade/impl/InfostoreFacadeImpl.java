@@ -1067,8 +1067,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             // Acquire needed service
             final MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
+            if (null == extractorService) {
+                // No extractor service available
+                return null;
+            }
 
-            // Obtain resource data
+            // Obtain binary data from file storage
             FileStoragInputStreamProvider streamProvider = new FileStoragInputStreamProvider(document.getFilestoreLocation(), fileStorage);
 
             // Check...
