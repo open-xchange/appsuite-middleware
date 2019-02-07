@@ -49,9 +49,11 @@
 
 package com.openexchange.config.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -61,6 +63,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ConfigProviderServiceImpl} - The implementation of ConfigProviderService for the scope <code>"server"</code>.
@@ -223,13 +226,23 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
 
     private boolean checkMap(Object o, org.slf4j.Logger logger) {
         if (! Map.class.isInstance(o)) {
-            final StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted\n");
-            b.append("Please make sure they are formatted in this fashion:\n");
-            b.append("ui/somepath:\n");
-            b.append("\tprotected: false\n\n");
-            b.append("ui/someOtherpath:\n");
-            b.append("\tprotected: false\n\n");
-            logger.error(b.toString(), new IllegalArgumentException("Invalid .yml file"));
+            List<Object> args = new ArrayList<Object>();
+            StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted{}");
+            args.add(Strings.getLineSeparator());
+            b.append("Please make sure they are formatted in this fashion:{}");
+            args.add(Strings.getLineSeparator());
+            b.append("ui/somepath:{}");
+            args.add(Strings.getLineSeparator());
+            b.append("\tprotected: false{}{}");
+            args.add(Strings.getLineSeparator());
+            args.add(Strings.getLineSeparator());
+            b.append("ui/someOtherpath:{}");
+            args.add(Strings.getLineSeparator());
+            b.append("\tprotected: false{}{}");
+            args.add(Strings.getLineSeparator());
+            args.add(Strings.getLineSeparator());
+            args.add(new IllegalArgumentException("Invalid .yml file"));
+            logger.error(b.toString(), args.toArray(new Object[args.size()]));
             return false;
         }
         return true;
