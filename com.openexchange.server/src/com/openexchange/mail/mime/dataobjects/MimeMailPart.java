@@ -55,7 +55,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
@@ -71,12 +70,12 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ClonedMimeMultipart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.EmptyStringMimeMultipart;
 import com.openexchange.mail.mime.ManagedMimeMessage;
@@ -91,9 +90,6 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.smtp.CountingOutputStream;
 import com.sun.mail.util.BASE64DecoderStream;
@@ -124,7 +120,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
         try {
             return Long.parseLong(property);
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             return DEFAULT_MAX_SERIALIZATION_SIZE;
         }
     }
@@ -480,6 +476,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             p.setHeader("Content-Type", new ContentType(cts).toString(true));
         } catch (final Exception x) {
             // Couldn't sanitize
+            LOG.trace("Sanitizing part failed", x);
             return null;
         }
         return getInputStream0(false);
@@ -500,7 +497,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessageRemovedException me) {
-            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(me);
         } catch (final MessagingException me) {
             me.setNextException(e);
             throw me;
@@ -627,6 +624,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
             } catch (final Exception e) {
                 // Ignore
+                LOG.trace("Failed to set header", e);
             }
         }
     }
@@ -675,7 +673,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         MessageUtility.setContent(ex, mimeBodyPart);
                         this.part = part = mimeBodyPart;
                     } else {
-                        this.part = part = createBodyMultipart(getStreamFromMultipart(ex), contentType.toString());
+                        MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                        MessageUtility.setContent(new ClonedMimeMultipart(ex), mimeBodyPart);
+                        this.part = part = mimeBodyPart;
                     }
                     this.multipart = null;
                     contentLoaded = true;
@@ -887,89 +887,6 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     }
 
     // ------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Compose a new MIME body part with multipart/* data.
-     *
-     * @param data The multipart/* data
-     * @param contentType The multipart's content type (containing important boundary parameter)
-     * @return A new MIME body part with multipart/* data
-     * @throws MessagingException If a messaging error occurs
-     * @throws OXException If an I/O error occurs
-     */
-    private static MimeBodyPart createBodyMultipart(final InputStream data, final String contentType) throws MessagingException, OXException {
-        if (null == data) {
-            return null;
-        }
-        final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        MessageUtility.setContent(new MimeMultipart(MimeMessageUtility.newDataSource(data, contentType)), mimeBodyPart);
-        // mimeBodyPart.setContent(new MimeMultipart(new MessageDataSource(data, contentType)));
-        return mimeBodyPart;
-    }
-
-    /**
-     * Gets the stream of specified multipart's raw data.
-     *
-     * @param multipart A multipart object
-     * @return The stream of specified multipart's raw data (with the optional empty starting line omitted)
-     * @throws IOException If an I/O error occurs
-     */
-    private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
-        if (null == multipart) {
-            return null;
-        }
-        final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
-
-        {
-            final Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        multipart.writeTo(pos);
-                    } catch (final Exception e) {
-                        pin.setException(e);
-                    } finally {
-                        Streams.close(pos);
-                    }
-                }
-            };
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            if (null == threadPool) {
-                new Thread(r, "MimeMailPart.getStreamFromMultipart").start();
-            } else {
-                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
-            }
-        }
-
-        return stripEmptyStartingLine(pin);
-    }
-
-    /**
-     * Strips the possible empty starting characters from specified input stream.
-     *
-     * @param data The input stream
-     * @return The stripped input stream
-     * @throws IOException If an I/O error occurs
-     */
-    private static InputStream stripEmptyStartingLine(final InputStream data) throws IOException {
-        if (null == data) {
-            return data;
-        }
-        // Drop leading white-space character
-        final PushbackInputStream in = new PushbackInputStream(data);
-        int read = in.read();
-        while (Strings.isWhitespace((char) read)) {
-            read = in.read();
-            if (read < 0) {
-                Streams.close(in);
-                throw new IOException("Unexpected end of stream");
-            }
-        }
-        in.unread(read);
-        return in;
-    }
 
     /**
      * Gets the bytes of specified part's raw data.
