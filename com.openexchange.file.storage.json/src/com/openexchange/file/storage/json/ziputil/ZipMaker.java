@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.servlet.http.HttpServletResponse;
@@ -235,7 +236,13 @@ public class ZipMaker {
                         }
                     }
                     entry = new ZipArchiveEntry(pathPrefix + entryName);
-                    entry.setTime(file.getLastModified().getTime());
+                    {
+                        Date date = file.getCaptureDate();
+                        if (null == date) {
+                            date = file.getLastModified();
+                        }
+                        entry.setTime(date.getTime());
+                    }
                     zipOutput.putArchiveEntry(entry);
                     break;
                 } catch (final java.util.zip.ZipException e) {
