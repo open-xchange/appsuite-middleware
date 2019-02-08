@@ -160,6 +160,39 @@ public class OIDCWebSSoProviderImplTest {
     }
 
     @Test
+    public void sendLoginRequestToServerTest() throws Exception {
+        Mockito.when(mockedRequest.getParameter("state")).thenReturn(STATE_VALUE);
+        Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
+
+        PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(mockedRequest);
+
+        JWT mockedIdToken = Mockito.mock(JWT.class);
+        OIDCTokenResponse mockedTokenResponse = new OIDCTokenResponse(new OIDCTokens(mockedIdToken, new AccessToken(AccessTokenType.BEARER) {
+
+            private static final long serialVersionUID = 8087263960430794478L;
+
+            @Override
+            public String toAuthorizationHeader() {
+                return null;
+            }
+        }, new RefreshToken()));
+
+        PowerMockito.doReturn(mockedTokenResponse).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getTokenResponse", TokenRequest.class)).withArguments(mockedTokenRequest);
+
+        IDTokenClaimsSet mockedClaimSet = Mockito.mock(IDTokenClaimsSet.class);
+        Mockito.when(mockedAuthRequestInfo.getNonce()).thenReturn("nonce");
+        Mockito.when(this.mockedBackend.validateIdToken(ArgumentMatchers.any(JWT.class), ArgumentMatchers.anyString())).thenReturn(mockedClaimSet);
+        Mockito.when(mockedAuthRequestInfo.getDomainName()).thenReturn("domainname");
+
+        try {
+            this.provider.authenticateUser(mockedRequest, mockedResponse);
+        } catch (OXException e) {
+            e.printStackTrace();
+            fail("No error should happen");
+        }
+    }
+
+    @Test
     public void getLoginRedirectRequest_LoginRedirectSuccessTest() throws Exception {
         String loginRequest = "loginRequest";
         Mockito.when(mockedBackendConfig.autologinCookieMode()).thenReturn(null);
@@ -251,12 +284,12 @@ public class OIDCWebSSoProviderImplTest {
         Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
 
         PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(mockedRequest);
-        
-        
+
+
         HTTPRequest mockedHttpRequest = Mockito.mock(HTTPRequest.class);
         HTTPResponse mockedHttpResponse = Mockito.mock(HTTPResponse.class);
         Mockito.when(mockedTokenRequest.toHTTPRequest()).thenReturn(mockedHttpRequest);
-        
+
         Mockito.when(mockedBackend.getHttpRequest(ArgumentMatchers.any(HTTPRequest.class))).thenReturn(mockedHttpRequest);
         Mockito.when(mockedHttpRequest.send()).thenReturn(mockedHttpResponse);
 
@@ -431,11 +464,11 @@ public class OIDCWebSSoProviderImplTest {
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getSessionFromId", String.class)).withArguments(sessionID);
         String logoutRequest = "logoutRequest";
         PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(mockedSession, mockedRequest, mockedResponse, logoutRequestInfo);
-        
+
         String result = this.provider.logoutSSOUser(mockedRequest, mockedResponse);
         assertTrue("Wrong request as result", result.equals(logoutRequest));
     }
-    
+
     @Test
     public void validateThirdPartyRequest_NoIssParameterTest() {
         Mockito.when(mockedRequest.getParameter("iss")).thenReturn(null);
@@ -445,7 +478,7 @@ public class OIDCWebSSoProviderImplTest {
         result = provider.validateThirdPartyRequest(mockedRequest);
         assertFalse("Input should not have passed validation", result);
     }
-    
+
     @Test
     public void validateThirdPartyRequest_NoMatchingIssParameterTest() {
         Mockito.when(mockedRequest.getParameter("iss")).thenReturn("wrong");
@@ -453,7 +486,7 @@ public class OIDCWebSSoProviderImplTest {
         boolean result = provider.validateThirdPartyRequest(mockedRequest);
         assertFalse("Input should not have passed validation", result);
     }
-    
+
     @Test
     public void validateThirdPartyRequest_PassTest() {
         Mockito.when(mockedRequest.getParameter("iss")).thenReturn("correct");
