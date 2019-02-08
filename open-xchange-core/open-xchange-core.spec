@@ -626,15 +626,16 @@ EOF
       ox_scr_done ${SCR}
     }
 
-    SCR=SCR-391
-    ox_scr_todo ${SCR} && {
-      pfile=/opt/open-xchange/etc/mime.types
-      if ! contains "video/x-matroska mkv" ${pfile}
-      then
-        cat ${pfile} <(echo "video/x-matroska mkv") | sort -o ${pfile}
-      fi
-      ox_scr_done ${SCR}
-    }
+# Causes SUSE error in build_patchrpmcheck_scr
+#    SCR=SCR-391
+#    ox_scr_todo ${SCR} && {
+#      pfile=/opt/open-xchange/etc/mime.types
+#      if ! contains "video/x-matroska mkv" ${pfile}
+#      then
+#        cat ${pfile} <(echo "video/x-matroska mkv") | sort -o ${pfile}
+#      fi
+#      ox_scr_done ${SCR}
+#    }
 
 fi
 
