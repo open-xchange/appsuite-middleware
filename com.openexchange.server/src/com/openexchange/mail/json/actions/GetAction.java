@@ -593,7 +593,7 @@ public final class GetAction extends AbstractMailAction {
         private final String folderId;
         private final String mailId;
 
-        TriggerPreviewServiceTask(String folderId, String mailId, MailRequest request, PreviewService previewService, ThreadControlService threadControl) throws OXException {
+        TriggerPreviewServiceTask(String folderId, String mailId, MailRequest request, PreviewService previewService, ThreadControlService threadControl) {
             super();
             this.folderId = folderId;
             this.mailId = mailId;
@@ -679,7 +679,7 @@ public final class GetAction extends AbstractMailAction {
                 IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
                     @Override
-                    public InputStream newStream() throws OXException, IOException {
+                    public InputStream newStream() throws OXException {
                         InputStream inputStream = mailPart.getInputStream();
                         if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
                             return inputStream;
