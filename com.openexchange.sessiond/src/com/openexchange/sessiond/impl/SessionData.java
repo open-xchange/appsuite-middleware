@@ -87,6 +87,8 @@ final class SessionData {
     private final long randomTokenTimeout;
     private final boolean autoLogin;
     private final Map<String, String> randoms;
+    private final MetricHandler metrics;
+    
 
     /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'sessionList' is seldom modified (see rotateShort()) */
     private final RotatableCopyOnWriteArrayList<SessionContainer> sessionList;
@@ -119,8 +121,9 @@ final class SessionData {
      * @param randomTokenTimeout The timeout for random tokens
      * @param longTermContainerCount The container count for long-term sessions
      * @param autoLogin Whether auto-login is enabled or not
+     * @param An optional {@link MetricHandler}
      */
-    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount, boolean autoLogin) {
+    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount, boolean autoLogin, MetricHandler metrics) {
         super();
         threadPoolService = new AtomicReference<ThreadPoolService>();
         timerService = new AtomicReference<TimerService>();
@@ -141,14 +144,59 @@ final class SessionData {
             longTermInit[i] = new SessionMap(256);
         }
         longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
+        this.metrics = metrics;
+    }
+    
+    private boolean gatherMetrics() {
+        return metrics != null;
+    }
+
+    private void metricsDecreaseAll(int num) {
+        if (gatherMetrics()) {
+            metrics.decreaseSessionCount(num);
+        }
+    }
+
+    private void metricsDecreaseShort(int num) {
+        if (gatherMetrics()) {
+            metrics.decreaseShortTermSessionCount(num);
+        }
+    }
+
+    private void metricsDecreaseLong(int num) {
+        if (gatherMetrics()) {
+            metrics.decreaseLongTermSessionCount(num);
+        }
+    }
+
+    private void metricsIncreaseAll(int num) {
+        if (gatherMetrics()) {
+            metrics.increaseSessionCount(num);
+        }
+    }
+
+    private void metricsIncreaseShort(int num) {
+        if (gatherMetrics()) {
+            metrics.increaseShortTermSessionCount(num);
+        }
+    }
+
+    private void metricsIncreaseLong(int num) {
+        if (gatherMetrics()) {
+            metrics.increaseLongTermSessionCount(num);
+        }
     }
 
     void clear() {
+        int shortTerm = sessionList.size();
         sessionList.clear();
+        metricsDecreaseShort(shortTerm);
         randoms.clear();
-
+        int longterm =  longTermList.size();
         longTermUserGuardian.clear();
         longTermList.clear();
+        metricsDecreaseLong(longterm);
+        metricsDecreaseAll(longterm + shortTerm);
     }
 
     /**
@@ -165,12 +213,14 @@ final class SessionData {
 
             try {
                 SessionMap first = longTermList.get(0);
+                int numLongTermIncrease = 0;
                 for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
                     final SessionControl control = it.next();
                     final SessionImpl session = control.getSession();
                     if (false == session.isTransient()) {
                         // A regular, non-transient session
                         first.putBySessionId(session.getSessionID(), control);
+                        numLongTermIncrease++;
                         longTermUserGuardian.add(session.getUserId(), session.getContextId());
                     } else {
                         // A transient session -- do not move to long-term container
@@ -181,6 +231,9 @@ final class SessionData {
                         transientSessions.add(control);
                     }
                 }
+                metricsIncreaseLong(numLongTermIncrease);
+                metricsDecreaseShort(removedSessions.size());
+                metricsDecreaseAll(removedSessions.size() - numLongTermIncrease);
             } catch (IndexOutOfBoundsException e) {
                 // About to shut-down
                 LOG.error("First long-term session container does not exist. Likely SessionD is shutting down...", e);
@@ -197,11 +250,12 @@ final class SessionData {
     List<SessionControl> rotateLongTerm() {
         // This is the only location which alters 'longTermList' during runtime
         List<SessionControl> removedSessions = new ArrayList<SessionControl>(longTermList.rotate(new SessionMap(256)).values());
-
         for (SessionControl sessionControl : removedSessions) {
             SessionImpl session = sessionControl.getSession();
             longTermUserGuardian.remove(session.getUserId(), session.getContextId());
         }
+        metricsDecreaseLong(removedSessions.size());
+        metricsDecreaseAll(removedSessions.size());
         return removedSessions;
     }
 
@@ -247,21 +301,29 @@ final class SessionData {
         for (final SessionControl control : retval) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
         }
-
+        metricsDecreaseShort(retval.size());
         if (!hasLongTermSession(userId, contextId)) {
+            metricsDecreaseAll(retval.size());
             return retval.toArray(new SessionControl[retval.size()]);
         }
+        int numShortTerm = retval.size();
+        int numLongTerm = 0;
         for (SessionMap longTerm : longTermList) {
             for (SessionControl control : longTerm.values()) {
                 if (control.equalsUserAndContext(userId, contextId)) {
                     Session session = control.getSession();
-                    longTerm.removeBySessionId(session.getSessionID());
+                    SessionControl removeBySessionId = longTerm.removeBySessionId(session.getSessionID());
+                    if(removeBySessionId != null) {
+                        numLongTerm++;
+                    }
                     longTermUserGuardian.remove(userId, contextId);
                     retval.add(control);
                 }
             }
         }
-
+        
+        metricsDecreaseLong(numLongTerm);
+        metricsDecreaseAll(numShortTerm + numLongTerm);
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
@@ -276,18 +338,29 @@ final class SessionData {
         }
 
         if (!hasLongTermSession(contextId)) {
+            metricsDecreaseShort(list.size());
+            metricsDecreaseAll(list.size());
             return list;
         }
+        int numOfShortTerm = list.size();
+        metricsDecreaseShort(numOfShortTerm);
+        int numOfLongTerm = 0;
         for (SessionMap longTerm : longTermList) {
             for (SessionControl control : longTerm.values()) {
                 if (control.equalsContext(contextId)) {
                     Session session = control.getSession();
-                    longTerm.removeBySessionId(session.getSessionID());
+                    SessionControl removed = longTerm.removeBySessionId(session.getSessionID());
+                    if(removed != null) {
+                       numOfLongTerm++;
+                    }
                     longTermUserGuardian.remove(session.getUserId(), contextId);
                     list.add(control);
                 }
             }
         }
+        
+        metricsDecreaseLong(numOfLongTerm);
+        metricsDecreaseAll(numOfShortTerm + numOfLongTerm);
         return list;
     }
 
@@ -306,25 +379,32 @@ final class SessionData {
         for (final SessionControl control : list) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
         }
-
+        int numShortTerm=list.size();
         TIntSet contextIdsToCheck = new TIntHashSet(contextIds.size());
         for (int contextId : contextIds) {
             if (hasLongTermSession(contextId)) {
                 contextIdsToCheck.add(contextId);
             }
         }
-
+        int numLongTerm=0;
         for (final SessionMap longTerm : longTermList) {
             for (SessionControl control : longTerm.values()) {
                 Session session = control.getSession();
                 int contextId = session.getContextId();
                 if (contextIdsToCheck.contains(contextId)) {
-                    longTerm.removeBySessionId(session.getSessionID());
+                    SessionControl removed = longTerm.removeBySessionId(session.getSessionID());
+                    if(removed != null) {
+                        numLongTerm++;
+                    }
                     longTermUserGuardian.remove(session.getUserId(), contextId);
                     list.add(control);
                 }
             }
         }
+        
+        metricsDecreaseShort(numShortTerm);
+        metricsDecreaseLong(numLongTerm);
+        metricsDecreaseAll(numShortTerm + numLongTerm);
         return list;
     }
 
@@ -541,6 +621,8 @@ final class SessionData {
             randoms.put(session.getRandomToken(), session.getSessionID());
 
             scheduleRandomTokenRemover(session.getRandomToken());
+            metricsIncreaseShort(1);
+            metricsIncreaseAll(1);
             return control;
         } catch (IndexOutOfBoundsException e) {
             // About to shut-down
@@ -681,6 +763,8 @@ final class SessionData {
                 }
 
                 unscheduleTask2MoveSession2FirstContainer(sessionId, true);
+                metricsDecreaseShort(1);
+                metricsDecreaseAll(1);
                 return sessionControl;
             }
         }
@@ -698,6 +782,8 @@ final class SessionData {
                 }
 
                 unscheduleTask2MoveSession2FirstContainer(sessionId, true);
+                metricsDecreaseLong(1);
+                metricsDecreaseAll(1);
                 return sessionControl;
             }
         }
@@ -773,6 +859,7 @@ final class SessionData {
         try {
             SessionContainer firstContainer = sessionList.get(0);
             boolean movedSession = false;
+            int moved=0;
             for (Iterator<SessionMap> iterator = longTermList.iterator(); !movedSession && iterator.hasNext();) {
                 SessionMap longTermMap = iterator.next();
                 control = longTermMap.removeBySessionId(sessionId);
@@ -782,6 +869,7 @@ final class SessionData {
                     longTermUserGuardian.remove(session.getUserId(), session.getContextId());
                     LOG.trace("Moved from long term container to first one.");
                     movedSession = true;
+                    moved++;
                 }
             }
             if (!movedSession) {
@@ -790,6 +878,8 @@ final class SessionData {
                 } else {
                     LOG.warn("Was not able to move the session into the most actual container.");
                 }
+                metricsDecreaseLong(moved);
+                metricsIncreaseShort(moved);
             }
         } catch (final OXException e) {
             LOG.error("", e);

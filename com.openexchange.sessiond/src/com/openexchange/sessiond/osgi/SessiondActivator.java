@@ -77,6 +77,7 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
@@ -274,7 +275,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class, MetricService.class,  };
     }
 
     @Override

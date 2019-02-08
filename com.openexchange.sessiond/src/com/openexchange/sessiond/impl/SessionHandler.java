@@ -81,6 +81,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
@@ -161,11 +162,19 @@ public final class SessionHandler {
      * Initializes the {@link SessionHandler session handler}
      *
      * @param config The appropriate configuration
+     * @throws OXException 
      */
-    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) {
+    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) throws OXException {
         SessionHandler.config = config;
         SessionHandler.userConfigRegistry = userConfigRegistry;
-        SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());
+        // @formatter:off
+        SessionData sessionData = new SessionData(  config.getNumberOfSessionContainers(), 
+                                                    config.getMaxSessions(), 
+                                                    config.getRandomTokenTimeout(), 
+                                                    config.getNumberOfLongTermSessionContainers(), 
+                                                    config.isAutoLogin(), 
+                                                    new MetricHandler(Services.getServiceLookup().getServiceSafe(MetricService.class)));
+        // @formatter:on
         SESSION_DATA_REF.set(sessionData);
         noLimit = (config.getMaxSessions() == 0);
         asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
