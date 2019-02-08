@@ -600,9 +600,11 @@ EOF
     SCR=SCR-391
     ox_scr_todo ${SCR} && {
       pfile=/opt/open-xchange/etc/mime.types
-      if ! contains "video/x-matroska mkv" ${pfile}
+      type="video/x-matroska mkv"
+      if ! contains "${type}" ${pfile}
       then
-        cat ${pfile} <(echo "video/x-matroska mkv") | sort -o ${pfile}
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
       fi
       ox_scr_done ${SCR}
     }
