@@ -63,6 +63,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -273,10 +274,10 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             this.threadControl = null == threadControl ? ThreadControlService.DUMMY_CONTROL : threadControl;
 
             AJAXRequestData requestData = request.getRequestData().copyOf();
-            requestData.putParameter("width", "160");
-            requestData.putParameter("height", "160");
-            requestData.putParameter("delivery", "view");
-            requestData.putParameter("scaleType", "cover");
+            requestData.putParameter("width", Integer.toString(FileResponseRenderer.THUMBNAIL_WIDTH));
+            requestData.putParameter("height", Integer.toString(FileResponseRenderer.THUMBNAIL_HEIGHT));
+            requestData.putParameter("delivery", FileResponseRenderer.THUMBNAIL_DELIVERY);
+            requestData.putParameter("scaleType", FileResponseRenderer.THUMBNAIL_SCALE_TYPE);
             this.requestData = requestData;
 
             List<Field> columns = request.getFieldsToLoad();
@@ -299,7 +300,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
 
         @Override
         public void setThreadName(ThreadRenamer threadRenamer) {
-            threadRenamer.renamePrefix("Async-DC-Trigger");
+            threadRenamer.renamePrefix("Async-Drive-DC-Trigger");
         }
 
         @Override

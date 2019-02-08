@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -98,6 +99,18 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
     private static final String SAVE_AS_TYPE = "application/octet-stream";
+
+    /** The default width when requesting a thumbnail image */
+    public static final int THUMBNAIL_WIDTH = 160;
+
+    /** The default height when requesting a thumbnail image */
+    public static final int THUMBNAIL_HEIGHT = 160;
+
+    /** The default scale type when requesting a thumbnail image */
+    public static final String THUMBNAIL_SCALE_TYPE = ScaleType.COVER.getKeyword();
+
+    /** The default delivery value when requesting a thumbnail image */
+    public static final String THUMBNAIL_DELIVERY = IDataWrapper.VIEW;
 
     // -------------------------------------------------------------------------------------------------------------------------------
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -81,6 +82,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -121,7 +123,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GetAction extends AbstractMailAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     private static final byte[] CHUNK1 = "{\"data\":\"".getBytes();
     private static final byte[] CHUNK2 = "\"}".getBytes();
@@ -602,20 +605,20 @@ public final class GetAction extends AbstractMailAction {
             this.threadControl = null == threadControl ? ThreadControlService.DUMMY_CONTROL : threadControl;
 
             AJAXRequestData requestData = request.getRequest().copyOf();
-            requestData.putParameter("width", "160");
-            requestData.putParameter("height", "160");
-            requestData.putParameter("delivery", "view");
-            requestData.putParameter("scaleType", "cover");
+            requestData.putParameter("width", Integer.toString(FileResponseRenderer.THUMBNAIL_WIDTH));
+            requestData.putParameter("height", Integer.toString(FileResponseRenderer.THUMBNAIL_HEIGHT));
+            requestData.putParameter("delivery", FileResponseRenderer.THUMBNAIL_DELIVERY);
+            requestData.putParameter("scaleType", FileResponseRenderer.THUMBNAIL_SCALE_TYPE);
             this.requestData = requestData;
         }
 
         @Override
         public void setThreadName(ThreadRenamer threadRenamer) {
-            threadRenamer.renamePrefix("Async-DC-Trigger");
+            threadRenamer.renamePrefix("Async-Mail-DC-Trigger");
         }
 
         @Override
-        public Void call() throws OXException {
+        public Void call() {
             MailServletInterface mailInterface = null;
             try {
                 mailInterface = MailServletInterface.getInstance(session);
@@ -657,16 +660,22 @@ public final class GetAction extends AbstractMailAction {
                 boolean added = threadControl.addThread(currentThread);
                 try {
                     for (MailPart mailPart : nonInlineParts) {
-                        triggerFor(mailPart);
+                        try {
+                            triggerFor(mailPart);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to pre-generate preview for attachment {} of mail {} in folder {} of user {} in context {}", mailPart.getSequenceId(), mailId, folderId, I(session.getUserId()), I(session.getContextId()), e);
+                        }
                     }
                 } finally {
                     if (added) {
                         threadControl.removeThread(currentThread);
                     }
                 }
+            } catch (Exception e) {
+                LOG.debug("Failed to pre-generate preview image for mail {} in folder {} of user {} in context {}", mailId, folderId, I(session.getUserId()), I(session.getContextId()), e);
             } finally {
                 if (null != mailInterface) {
-                    mailInterface.close(true);
+                    mailInterface.close();
                 }
             }
             return null;
@@ -690,9 +699,9 @@ public final class GetAction extends AbstractMailAction {
                 FileHolder fileHolder = new FileHolder(isClosure, -1, mailPart.getContentType().getBaseType(), mailPart.getFileName());
 
                 AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
-                LOG.debug("Triggered to create preview from file attachment {} of mail {} in folder {} for user {} in context {}", mailPart.getFileName(), mailId, folderId, session.getUserId(), session.getContextId());
+                LOG.debug("Triggered to create preview from file attachment {} of mail {} in folder {} for user {} in context {}", mailPart.getFileName(), mailId, folderId, I(session.getUserId()), I(session.getContextId()));
             } else {
-                LOG.debug("Found no suitable {} service to trigger preview creation from file attachment {} of mail {} in folder {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), mailPart.getFileName(), mailId, folderId, session.getUserId(), session.getContextId());
+                LOG.debug("Found no suitable {} service to trigger preview creation from file attachment {} of mail {} in folder {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), mailPart.getFileName(), mailId, folderId, I(session.getUserId()), I(session.getContextId()));
             }
         }
     }
