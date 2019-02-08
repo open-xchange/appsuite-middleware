@@ -91,7 +91,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
 
     @Override
     public Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException {
-        BufferedInputStream bufferedInputStream = imageStream instanceof BufferedInputStream ? (BufferedInputStream) imageStream : new BufferedInputStream(imageStream, 64);
+        BufferedInputStream bufferedInputStream = imageStream instanceof BufferedInputStream ? (BufferedInputStream) imageStream : new BufferedInputStream(imageStream, 65536);
         try {
             // Check for heif file
             Dimension result = getDimensionFromHeifFile(bufferedInputStream);
@@ -171,7 +171,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
 
     @Override
     public ImageMetadata getMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions imageMetadataOptions) throws IOException {
-        BufferedInputStream bufferedInputStream = imageStream instanceof BufferedInputStream ? (BufferedInputStream) imageStream : new BufferedInputStream(imageStream, 64);
+        BufferedInputStream bufferedInputStream = imageStream instanceof BufferedInputStream ? (BufferedInputStream) imageStream : new BufferedInputStream(imageStream, 65536);
         try {
             // Check for heif file
             ImageMetadata result = getMetadataFromHeifFile(bufferedInputStream, imageMetadataOptions);
