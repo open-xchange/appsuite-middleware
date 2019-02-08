@@ -87,6 +87,7 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
@@ -188,7 +189,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } catch (OXException e) {
             LOG.debug("Failed to load autologin url for request: {}", request.getRequestURI());
         }
-        
+
         return redirectURL;
     }
 
@@ -290,12 +291,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
 
         URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getOpTokenEndpoint());
-        
+
         Scope scope = this.backend.getScope();
         if (codeGrant.getType() == GrantType.AUTHORIZATION_CODE) {
             scope = null;
         }
-        
+
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, scope);
         return this.backend.getTokenRequest(tokenRequest);
     }
@@ -352,9 +353,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setHost(storedRequestInformation.getDomainName())
                 .setPath(OIDCTools.getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
-                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()));
+                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()))
+                .setParameter(OIDCTools.PARAM_SHARD_NAME, SessionUtility.getShardCookieValue());
             Tools.disableCaching(response);
-            
+
             String deepLink = storedRequestInformation.getDeepLink();
             if (deepLink != null) {
                 redirectLocation.setParameter(OIDCTools.PARAM_DEEP_LINK, deepLink);
@@ -364,7 +366,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             if (clientID != null) {
                 redirectLocation.setParameter(LoginFields.CLIENT_PARAM, clientID);
             }
-            
+
             loginRedirect = redirectLocation.build().toString();
             LOG.trace("Login request to OXServer: {}",loginRedirect);
             response.sendRedirect(loginRedirect);
@@ -425,7 +427,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("Invalid session parameter, no session found.");
         }
         OIDCTools.validateSession(session, request);
-        
+
         return session;
     }
 

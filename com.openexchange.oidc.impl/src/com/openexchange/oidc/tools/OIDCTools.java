@@ -127,6 +127,8 @@ public class OIDCTools {
 
     public static final String PARAM_DEEP_LINK = "hash";
 
+    public static final String PARAM_SHARD_NAME = "shardName";
+
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";
@@ -262,7 +264,7 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
     }
-    
+
     public static String calculateHash(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
         return HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
     }
@@ -367,10 +369,10 @@ public class OIDCTools {
         DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
         return prefixService.getPrefix();
     }
-    
+
     /**
      * Load a session from the given {@link Cookie}.
-     * 
+     *
      * @param oidcAtologinCookie The cookie where the session is stored.
      * @param request Used to validate the found session.
      * @return The loaded session or null, if no session could be found or the validation failed.
@@ -384,18 +386,18 @@ public class OIDCTools {
         if (!sessions.isEmpty()) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
-        
+
         if (session == null) {
             return null;
         }
-        
+
         try {
             OIDCTools.validateSession(session, request);
         } catch (OXException e) {
             LOG.debug("Session validation failed for {}", session.getSessionID());
             session = null;
         }
-        
+
         return session;
     }
 }
