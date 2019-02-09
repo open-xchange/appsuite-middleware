@@ -3396,120 +3396,126 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         final long sharedFilesFolderID = getSharedFilesFolderID(context, user);
         final EffectiveInfostoreFolderPermission folderPermission;
-        InfostoreIterator iterator;
-        if (sharedFilesFolderID == folderId) {
+        InfostoreIterator iterator = null;
+        try {
+            if (sharedFilesFolderID == folderId) {
+                /*
+                 * load readable documents from virtual shared files folder
+                 */
+                folderPermission = null;
+                iterator = InfostoreIterator.sharedDocumentsForUser(context, user, ObjectPermission.READ, cols, sort, order, start, end, db);
+                DocumentCustomizer customizer = new DocumentCustomizer() {
+
+                    @Override
+                    public DocumentMetadata handle(DocumentMetadata document) {
+                        document.setOriginalFolderId(document.getFolderId());
+                        document.setFolderId(sharedFilesFolderID);
+                        return document;
+                    }
+                };
+                if (shouldTriggerMediaDataExtraction) {
+                    QuotaFileStorage fileStorage = getFileStorage(security.getFolderOwner(folderId, context), context.getContextId());
+                    customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession), customizer);
+                }
+                iterator.setCustomizer(customizer);
+            } else {
+                if (null == permissionBits) {
+                    throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+                }
+                /*
+                 * load all / own objects from physical folder
+                 */
+                folderPermission = security.getFolderPermission(folderId, context, user, permissionBits);
+                if (folderPermission.canReadAllObjects()) {
+                    iterator = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
+                } else if (folderPermission.canReadOwnObjects()) {
+                    iterator = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
+                } else {
+                    throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+                }
+                if (shouldTriggerMediaDataExtraction) {
+                    QuotaFileStorage fileStorage = getFileStorage(folderPermission.getFolderOwner(), context.getContextId());
+                    iterator.setCustomizer(new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession)));
+                }
+            }
             /*
-             * load readable documents from virtual shared files folder
+             * check requested metadata
              */
-            folderPermission = null;
-            iterator = InfostoreIterator.sharedDocumentsForUser(context, user, ObjectPermission.READ, cols, sort, order, start, end, db);
-            DocumentCustomizer customizer = new DocumentCustomizer() {
+            boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
+            boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
+            boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
+            boolean addShareable = contains(columns, Metadata.SHAREABLE_LITERAL);
+            if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
+                /*
+                 * stick to plain infostore timed result if no further metadata is needed
+                 */
+                InfostoreTimedResult timedResult = new InfostoreTimedResult(iterator);
+                iterator = null; // Avoid premature closing
+                return timedResult;
+            }
+            /*
+             * prepare customizable timed result to add additional metadata as requested
+             */
+            final List<DocumentMetadata> documents = iterator.asList();
+            if (0 == documents.size()) {
+                return com.openexchange.groupware.results.Results.emptyTimedResult();
+            }
+            long maxSequenceNumber = 0;
+            List<Integer> objectIDs = new ArrayList<>(documents.size());
+            for (DocumentMetadata document : documents) {
+                maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
+                objectIDs.add(Integer.valueOf(document.getId()));
+            }
+            final long sequenceNumber = maxSequenceNumber;
+            TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
 
                 @Override
-                public DocumentMetadata handle(DocumentMetadata document) {
-                    document.setOriginalFolderId(document.getFolderId());
-                    document.setFolderId(sharedFilesFolderID);
-                    return document;
+                public SearchIterator<DocumentMetadata> results() throws OXException {
+                    return new SearchIteratorAdapter<>(documents.iterator());
+                }
+
+                @Override
+                public long sequenceNumber() throws OXException {
+                    return sequenceNumber;
                 }
             };
-            if (shouldTriggerMediaDataExtraction) {
-                QuotaFileStorage fileStorage = getFileStorage(security.getFolderOwner(folderId, context), context.getContextId());
-                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession), customizer);
-            }
-            iterator.setCustomizer(customizer);
-        } else {
-            if (null == permissionBits) {
-                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-            }
             /*
-             * load all / own objects from physical folder
+             * add object permissions if requested or needed to evaluate "shareable" flag
              */
-            folderPermission = security.getFolderPermission(folderId, context, user, permissionBits);
-            if (folderPermission.canReadAllObjects()) {
-                iterator = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
-            } else if (folderPermission.canReadOwnObjects()) {
-                iterator = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
-            } else {
-                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+            if (addObjectPermissions) {
+                timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
             }
-            if (shouldTriggerMediaDataExtraction) {
-                QuotaFileStorage fileStorage = getFileStorage(folderPermission.getFolderOwner(), context.getContextId());
-                iterator.setCustomizer(new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession)));
+            if (addLocked) {
+                timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
             }
-        }
-        /*
-         * check requested metadata
-         */
-        boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
-        boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
-        boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
-        boolean addShareable = contains(columns, Metadata.SHAREABLE_LITERAL);
-        if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
-            /*
-             * stick to plain infostore timed result if no further metadata is needed
-             */
-            return new InfostoreTimedResult(iterator);
-        }
-        /*
-         * prepare customizable timed result to add additional metadata as requested
-         */
-        final List<DocumentMetadata> documents = iterator.asList();
-        if (0 == documents.size()) {
-            return com.openexchange.groupware.results.Results.emptyTimedResult();
-        }
-        long maxSequenceNumber = 0;
-        List<Integer> objectIDs = new ArrayList<>(documents.size());
-        for (DocumentMetadata document : documents) {
-            maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
-            objectIDs.add(Integer.valueOf(document.getId()));
-        }
-        final long sequenceNumber = maxSequenceNumber;
-        TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
+            if (addNumberOfVersions) {
+                timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
+            }
+            if (addShareable) {
+                final boolean hasSharedFolderAccess = permissionBits.hasFullSharedFolderAccess();
+                timedResult = new CustomizableTimedResult<>(timedResult, new Customizer<DocumentMetadata>() {
 
-            @Override
-            public SearchIterator<DocumentMetadata> results() throws OXException {
-                return new SearchIteratorAdapter<>(documents.iterator());
-            }
-
-            @Override
-            public long sequenceNumber() throws OXException {
-                return sequenceNumber;
-            }
-        };
-        /*
-         * add object permissions if requested or needed to evaluate "shareable" flag
-         */
-        if (addObjectPermissions) {
-            timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
-        }
-        if (addLocked) {
-            timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
-        }
-        if (addNumberOfVersions) {
-            timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
-        }
-        if (addShareable) {
-            final boolean hasSharedFolderAccess = permissionBits.hasFullSharedFolderAccess();
-            timedResult = new CustomizableTimedResult<>(timedResult, new Customizer<DocumentMetadata>() {
-
-                @Override
-                public DocumentMetadata customize(DocumentMetadata document) throws OXException {
-                    if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
-                        /*
-                         * no permissions to share or re-share
-                         */
-                        document.setShareable(false);
-                    } else {
-                        /*
-                         * set "shareable" flag based on folder permissions
-                         */
-                        document.setShareable(null != folderPermission && (folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId()));
+                    @Override
+                    public DocumentMetadata customize(DocumentMetadata document) throws OXException {
+                        if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
+                            /*
+                             * no permissions to share or re-share
+                             */
+                            document.setShareable(false);
+                        } else {
+                            /*
+                             * set "shareable" flag based on folder permissions
+                             */
+                            document.setShareable(null != folderPermission && (folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId()));
+                        }
+                        return document;
                     }
-                    return document;
-                }
-            });
+                });
+            }
+            return timedResult;
+        } finally {
+            SearchIterators.close(iterator);
         }
-        return timedResult;
     }
 
     /**
