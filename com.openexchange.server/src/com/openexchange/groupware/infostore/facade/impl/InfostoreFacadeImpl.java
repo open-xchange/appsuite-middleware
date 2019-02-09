@@ -2472,36 +2472,41 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
         InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
-        DocumentCustomizer customizer = new DocumentCustomizer() {
+        try {
+            DocumentCustomizer customizer = new DocumentCustomizer() {
 
-            @Override
-            public DocumentMetadata handle(DocumentMetadata document) {
-                if (false == infoPerm.canReadObjectInFolder()) {
-                    document.setOriginalFolderId(document.getFolderId());
-                    document.setFolderId(getSharedFilesFolderID(session));
-                    /*
-                     * Re-sharing of files is not allowed.
-                     */
-                    document.setShareable(false);
-                } else {
-                    document.setShareable(infoPerm.canShareObject());
+                @Override
+                public DocumentMetadata handle(DocumentMetadata document) {
+                    if (false == infoPerm.canReadObjectInFolder()) {
+                        document.setOriginalFolderId(document.getFolderId());
+                        document.setFolderId(getSharedFilesFolderID(session));
+                        /*
+                         * Re-sharing of files is not allowed.
+                         */
+                        document.setShareable(false);
+                    } else {
+                        document.setShareable(infoPerm.canShareObject());
+                    }
+                    return document;
                 }
-                return document;
+            };
+            if (shouldTriggerMediaDataExtraction) {
+                QuotaFileStorage fileStorage = getFileStorage(infoPerm.getFolderOwner(), context.getContextId());
+                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session, customizer);
             }
-        };
-        if (shouldTriggerMediaDataExtraction) {
-            QuotaFileStorage fileStorage = getFileStorage(infoPerm.getFolderOwner(), context.getContextId());
-            customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session, customizer);
+            iter.setCustomizer(customizer);
+            TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
+            if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
+                timedResult = lockedUntilLoader.add(timedResult, context, Collections.singleton(I(id)));
+            }
+            if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
+                timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
+            }
+            iter = null; // Avoid premature closing
+            return timedResult;
+        } finally {
+            SearchIterators.close(iter);
         }
-        iter.setCustomizer(customizer);
-        TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
-        if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
-            timedResult = lockedUntilLoader.add(timedResult, context, Collections.singleton(I(id)));
-        }
-        if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-            timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
-        }
-        return timedResult;
     }
 
     @Override
