@@ -140,11 +140,14 @@ public class SyncCollection extends PROPFINDAction {
                     }
                 }
             }
+            /*
+             * include next sync-token...
+             */
+            multistatusElement.addContent(new Element("sync-token", Protocol.DAV_NS).setText(syncStatus.getToken()));
         }
         /*
-         * include next sync-token & send response
+         * ... and send response
          */
-        multistatusElement.addContent(new Element("sync-token", Protocol.DAV_NS).setText(syncStatus.getToken()));
         sendMultistatusResponse(response, multistatusElement);
     }
 
