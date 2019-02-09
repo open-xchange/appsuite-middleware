@@ -111,7 +111,7 @@ public final class ThreadPools {
             return new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new ProcessorThreadFactory(name, supportMDC), defaultHandler);
         }
 
-        ScalingQueue scalingQueue = workQueueCapacity > 0 ? new ScalingQueue(workQueueCapacity) : new ScalingQueue();
+        ScalingQueue scalingQueue = new ScalingQueue(workQueueCapacity);
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 60L, TimeUnit.SECONDS, scalingQueue, new ProcessorThreadFactory(name, supportMDC), defaultHandler);
         scalingQueue.setThreadPoolExecutor(threadPoolExecutor);
         threadPoolExecutor.setRejectedExecutionHandler(scalingQueue.createRejectedExecutionHandler(defaultHandler));
