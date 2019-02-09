@@ -53,8 +53,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.infostore.InfostoreStrings;
 import com.openexchange.java.Strings;
@@ -404,11 +406,38 @@ public class Metadata {
         }
 
         for (Metadata meta : metadata) {
-            if (m.equals(meta)) {
+            if (m == meta) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if specified metadata array contains given metadata elements.
+     *
+     * @param metadata The metadata array
+     * @param possiblyContained The metadata elements
+     * @return A set containing those elements, which are contained
+     */
+    public static Set<Metadata> contains(Metadata[] metadata, Metadata... possiblyContained) {
+        if (null == metadata || metadata.length <= 0 || null == possiblyContained || possiblyContained.length <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<Metadata> containedOnes = new HashSet<>(possiblyContained.length);
+        boolean found;
+        for (Metadata m : possiblyContained) {
+            found = false;
+            for (int i = 0; !found && i < metadata.length; i++) {
+                Metadata meta = metadata[i];
+                if (m == meta) {
+                    containedOnes.add(m);
+                    found = true;
+                }
+            }
+        }
+        return containedOnes;
     }
 
     /**

@@ -2966,10 +2966,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          */
         int sharedFilesFolderID = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
         boolean containsSharedFilesResults = null != permissionsByFolderID && permissionsByFolderID.containsKey(I(sharedFilesFolderID));
-        boolean addLocked = contains(fields, Metadata.LOCKED_UNTIL_LITERAL);
-        boolean addNumberOfVersions = contains(fields, Metadata.NUMBER_OF_VERSIONS_LITERAL);
-        boolean addObjectPermissions = contains(fields, Metadata.OBJECT_PERMISSIONS_LITERAL);
-        boolean addShareable = contains(fields, Metadata.SHAREABLE_LITERAL);
+        Set<Metadata> set = Metadata.contains(fields, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL);
+        boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
+        boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
+        boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
+        boolean addShareable = set.contains(Metadata.SHAREABLE_LITERAL);
         if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable && false == containsSharedFilesResults) {
             /*
              * stick to plain search iterator result if no further metadata is needed
@@ -3446,10 +3447,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             /*
              * check requested metadata
              */
-            boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
-            boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
-            boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
-            boolean addShareable = contains(columns, Metadata.SHAREABLE_LITERAL);
+            Set<Metadata> set = Metadata.contains(columns, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL);
+            boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
+            boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
+            boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
+            boolean addShareable = set.contains(Metadata.SHAREABLE_LITERAL);
             if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
                 /*
                  * stick to plain infostore timed result if no further metadata is needed
