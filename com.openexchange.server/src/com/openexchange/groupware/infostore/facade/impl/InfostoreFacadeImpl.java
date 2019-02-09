@@ -356,7 +356,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         @Override
         public DocumentMetadata next() throws OXException {
             DocumentMetadata document = searchIterator.next();
-            if (infostore.considerMediaDataExtraction(document)) {
+            if (document != null && infostore.considerMediaDataExtraction(document)) {
                 int folderOwner = getFolderOwner(document);
                 if (folderOwner > 0) {
                     QuotaFileStorage fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
