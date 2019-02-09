@@ -496,7 +496,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @throws OXException
      */
     protected List<Event> delete(CalendarStorage calendarStorage, Event originalEvent) throws OXException {
-        List<Event> result = null;
+        // List<Event> result = null;
         if (isSeriesMaster(originalEvent)) {
             deleteExceptions(calendarStorage, originalEvent.getSeriesId(), getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId()));
         }
@@ -510,7 +510,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         calendarStorage.getAlarmTriggerStorage().deleteTriggers(id);
         calendarStorage.getEventStorage().deleteEvent(id);
         calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
-        return result == null ? Collections.emptyList() : result;
+        // 'result' can only be null here: return result == null ? Collections.emptyList() : result;
+        return Collections.emptyList();
     }
 
     /**
