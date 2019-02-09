@@ -926,35 +926,35 @@ public class InfostoreQueryCatalog {
     }
 
     public String[] getFieldTuple(final Metadata field, final FieldChooser wins) {
-        final Table t = wins.choose(field);
-        final String col = (String) field.doSwitch(t.getFieldSwitcher());
-        if (col == null) {
-            return null;
-        }
-        return new String[] { t.getTablename(), col };
+        Table t = wins.choose(field);
+        String col = (String) field.doSwitch(t.getFieldSwitcher());
+        return col == null ? null : new String[] { t.getTablename(), col };
     }
 
     private String fieldName(Metadata field, FieldChooser wins, boolean forOrderByClause) {
         if (field == Metadata.CURRENT_VERSION_LITERAL) {
             return "(infostore.version = infostore_document.version_number) AS current_version";
         }
+
         if (field == Metadata.MEDIA_DATE_LITERAL) {
             if (forOrderByClause) {
                 return "COALESCE(infostore_document.capture_date, infostore_document.last_modified)";
             }
             return "COALESCE(infostore_document.capture_date, infostore_document.last_modified) AS media_date";
         }
+
         if (field == Metadata.GEOLOCATION_LITERAL) {
             String[] tuple = getFieldTuple(field, wins);
+            if (tuple == null) {
+                return null;
+            }
             String tableName = tuple[0];
             String col = tuple[1];
             return new StringBuilder("AsText(").append(tableName).append(".").append(col).append(") AS ").append(col).toString();
         }
-        final String[] tuple = getFieldTuple(field, wins);
-        if (tuple == null) {
-            return null;
-        }
-        return new StringBuilder(tuple[0]).append('.').append(tuple[1]).toString();
+
+        String[] tuple = getFieldTuple(field, wins);
+        return tuple == null ? null : new StringBuilder(tuple[0]).append('.').append(tuple[1]).toString();
     }
 
     private String fields(Metadata[] metadata, FieldChooser wins) {
