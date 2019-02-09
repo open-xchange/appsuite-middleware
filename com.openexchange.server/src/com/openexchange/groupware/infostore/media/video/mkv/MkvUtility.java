@@ -52,6 +52,7 @@ package com.openexchange.groupware.infostore.media.video.mkv;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,15 +96,15 @@ public class MkvUtility {
     }
 
     private static void printTree(int i, EbmlBase e, OutputStream os) throws IOException {
-        os.write(printPaddedType(i, e).toString().getBytes());
-        os.write("\n".getBytes());
+        os.write(printPaddedType(i, e).toString().getBytes(StandardCharsets.ISO_8859_1));
+        os.write("\n".getBytes(StandardCharsets.ISO_8859_1));
         if (e instanceof EbmlMaster) {
             EbmlMaster parent = (EbmlMaster) e;
             for (EbmlBase child : parent.children) {
                 printTree(i + 1, child, os);
             }
-            os.write(printPaddedType(i, e).append(" CLOSED.").toString().getBytes());
-            os.write("\n".getBytes());
+            os.write(printPaddedType(i, e).append(" CLOSED.").toString().getBytes(StandardCharsets.ISO_8859_1));
+            os.write("\n".getBytes(StandardCharsets.ISO_8859_1));
         }
     }
 
