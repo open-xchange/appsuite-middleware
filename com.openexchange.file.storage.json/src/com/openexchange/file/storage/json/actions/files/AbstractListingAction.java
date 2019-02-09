@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -211,8 +212,8 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
-                        if(timestamp == null || timestamp<fileMetadata.getSequenceNumber()) {
-                            timestamp = fileMetadata.getSequenceNumber();
+                        if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                            timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                         }
                         files.add(fileMetadata);
                     }
@@ -225,21 +226,21 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             }
         }
 
-        // Calculate eventually missing timestamp
+        // Calculate eventually missing time stamp
         if(timestamp == null && results.hasNext()) {
             List<File> files = new LinkedList<File>();
             while (results.hasNext()) {
                 // Call preview service for next file
                 File fileMetadata = results.next();
-                if(timestamp == null || timestamp < fileMetadata.getSequenceNumber()) {
-                    timestamp = fileMetadata.getSequenceNumber();
+                if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                    timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                 }
                 files.add(fileMetadata);
             }
-            return new AJAXRequestResult(files, new Date(timestamp), "infostore");
+            return new AJAXRequestResult(files, timestamp == null ? null : new Date(timestamp.longValue()), "infostore");
         }
 
-        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp), "infostore");
+        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp.longValue()), "infostore");
     }
 
     /**
@@ -319,7 +320,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                                 fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
                                 triggerFor(id, fileMetadata);
                             } catch (Exception e) {
-                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), I(session.getUserId()), I(session.getContextId()), e);
                             }
                         }
                     } finally {
@@ -334,7 +335,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                             try {
                                 triggerFor(id, fileMetadata);
                             } catch (Exception e) {
-                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), I(session.getUserId()), I(session.getContextId()), e);
                             }
                         }
                     }
@@ -366,10 +367,10 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                 FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
                 AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
-                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
+                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, I(session.getUserId()), I(session.getContextId()));
                 numberOfPregeneratedPreviews--;
             } else {
-                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
+                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, I(session.getUserId()), I(session.getContextId()));
             }
         }
     }
