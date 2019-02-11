@@ -148,7 +148,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     @Override
-    public UUID openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
 
         // Check if user exceeds max. number of composition spaces
@@ -157,17 +157,21 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
             throw CompositionSpaceErrorCode.MAX_NUMBER_OF_COMPOSITION_SPACE_REACHED.create(Integer.valueOf(maxSpacesPerUser));
         }
 
-        CompositionSpaceContainer cs = new CompositionSpaceContainer();
-        cs.setLastModified(new Date(System.currentTimeMillis()));
+        CompositionSpaceContainer csc = new CompositionSpaceContainer();
+        csc.setLastModified(new Date(System.currentTimeMillis()));
         if (compositionSpaceDesc != null) {
-            cs.setUuid(null == compositionSpaceDesc.getUuid() ? UUID.randomUUID() : compositionSpaceDesc.getUuid());
-            cs.setMessage(compositionSpaceDesc.getMessage());
+            csc.setUuid(null == compositionSpaceDesc.getUuid() ? UUID.randomUUID() : compositionSpaceDesc.getUuid());
+            csc.setMessage(compositionSpaceDesc.getMessage());
         } else {
-            cs.setUuid(UUID.randomUUID());
+            csc.setUuid(UUID.randomUUID());
         }
 
-        dbStorage.insert(cs, maxSpacesPerUser);
-        return cs.getUuid();
+        dbStorage.insert(csc, maxSpacesPerUser);
+
+        MessageDescription m = csc.getMessage();
+        resolveAttachments(m, session);
+        Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
+        return new ImmutableCompositionSpace(csc.getUuid(), message, csc.getLastModified().getTime());
     }
 
     @Override
@@ -231,6 +235,10 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
      * @throws OXException
      */
     private void resolveAttachments(MessageDescription messageDescription, Session session) throws OXException {
+        if (null == messageDescription) {
+            return;
+        }
+
         List<Attachment> availableAttachments = messageDescription.getAttachments();
         if (availableAttachments == null) {
             return;

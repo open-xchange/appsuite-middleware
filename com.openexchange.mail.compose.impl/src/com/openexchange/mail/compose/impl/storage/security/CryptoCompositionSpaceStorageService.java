@@ -169,12 +169,14 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
     }
 
     @Override
-    public UUID openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
-        if (needsEncryption(session)) {
-            encryptCompositionSpaceDescription(compositionSpaceDesc, session);
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
+        if (!needsEncryption(session)) {
+            return delegate.openCompositionSpace(session, compositionSpaceDesc);
         }
 
-        return delegate.openCompositionSpace(session, compositionSpaceDesc);
+        encryptCompositionSpaceDescription(compositionSpaceDesc, session);
+        CompositionSpace openedCompositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc);
+        return decryptCompositionSpace(openedCompositionSpace, session);
     }
 
     @Override

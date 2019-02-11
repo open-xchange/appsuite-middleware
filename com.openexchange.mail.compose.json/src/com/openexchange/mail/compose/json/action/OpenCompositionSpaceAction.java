@@ -50,7 +50,6 @@
 package com.openexchange.mail.compose.json.action;
 
 import java.util.List;
-import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -206,8 +205,7 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
         //            }
         //        }
 
-        UUID uuid = compositionSpaceService.openCompositionSpace(parameters.build(), session);
-        CompositionSpace compositionSpace = compositionSpaceService.getCompositionSpace(uuid, session);
+        CompositionSpace compositionSpace = compositionSpaceService.openCompositionSpace(parameters.build(), session);
         return new AJAXRequestResult(compositionSpace, "compositionSpace");
     }
 

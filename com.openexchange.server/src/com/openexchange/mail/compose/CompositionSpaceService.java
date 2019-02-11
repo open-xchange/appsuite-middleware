@@ -98,10 +98,10 @@ public interface CompositionSpaceService {
      * Opens a new composition space for composing a message according to given parameters.
      *
      * @param session The session providing user information
-     * @return The identifier of the opened composition space
+     * @return The opened composition space
      * @throws OXException If no composition space can be opened
      */
-    UUID openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException;
+    CompositionSpace openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException;
 
     /**
      * Closes specified composition space and drops all associated resources.

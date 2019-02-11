@@ -196,14 +196,14 @@ public class InMemoryCompositionSpaceStorageService implements CompositionSpaceS
     }
 
     @Override
-    public UUID openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
-        UUID id = persistentStorage.openCompositionSpace(session, compositionSpaceDesc);
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
+        CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc);
 
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
-        InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(id, messageDesc, bufferingQueue, session.getUserId(), session.getContextId());
-        spacesById.put(id, compositionSpace);
+        InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId());
+        spacesById.put(persistentCompositionSpace.getId(), compositionSpace);
 
-        return id;
+        return compositionSpace;
     }
 
     @Override

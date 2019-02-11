@@ -91,7 +91,7 @@ public interface CompositionSpaceStorageService {
      * @param compositionSpaceDesc The composition space, which shall be opened
      * @return The identifier for the newly created {@link CompositionSpace}
      */
-    UUID openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
+    CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
 
     /**
      * Updates a {@link CompositionSpace}.

@@ -1117,7 +1117,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     private static final String PREFIX_RE = "Re: ";
 
     @Override
-    public UUID openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException {
+    public CompositionSpace openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException {
         UUID uuid = null;
 
         Context context = getContext(session);
@@ -2018,14 +2018,14 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 message.setAttachments(attachments);
             }
 
-            UUID compositionSpaceId = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message));
-            if (!compositionSpaceId.equals(uuid)) {
+            CompositionSpace compositionSpace = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message));
+            if (!compositionSpace.getId().equals(uuid)) {
                 // Composition space identifier is not equal to generated one
-                getStorageService().closeCompositionSpace(session, compositionSpaceId);
+                getStorageService().closeCompositionSpace(session, compositionSpace.getId());
                 throw CompositionSpaceErrorCode.OPEN_FAILED.create();
             }
             attachments = null; // Avoid premature deletion
-            return compositionSpaceId;
+            return compositionSpace;
         } finally {
             if (null != attachments && null != attachmentStorage) {
                 for (Attachment deleteMe : attachments) {
