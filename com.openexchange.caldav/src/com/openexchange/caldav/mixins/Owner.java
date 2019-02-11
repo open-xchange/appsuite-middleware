@@ -84,7 +84,7 @@ public class Owner extends SingleXMLPropertyMixin {
     @Override
     protected String getValue() {
         UserizedFolder folder = collection.getFolder();
-        if (null == folder || PublicType.getInstance().equals(folder.getType())) {
+        if (null == folder || PublicType.getInstance().equals(folder.getType()) || 0 >= folder.getCreatedBy()) {
             return null;
         }
         return "<D:href>" + PrincipalURL.forUser(folder.getCreatedBy()) + "</D:href>";
