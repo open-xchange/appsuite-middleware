@@ -75,6 +75,9 @@ final class MetricHandler {
 
     private static final String COUNT_SHORT = "ShortTermCount.Total";
     private static final String COUNT_SHORT_DESC = "The number of sessions in the short term container";
+    
+    private static final String COUNT_ACTIVE = "ActiveCount.Total";
+    private static final String COUNT_ACTIVE_DESC = "The number of active sessions";
 
     private final MetricDescriptorCache metricDescriptorCache;
     private final MetricService metricService;
@@ -165,6 +168,33 @@ final class MetricHandler {
             return;
         }
         MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, COUNT_SHORT, COUNT_SHORT_DESC, SESSIONS);
+        updateMetric(t -> t.getCounter(descriptor).decrementBy(numberOfRemovedSessions));
+    }
+    
+    
+    /**
+     * Increases the number of active sessions
+     * 
+     * @param numberOfNewSessions
+     */
+    void increaseActiveSessionCount(int numberOfNewSessions) {
+        if (numberOfNewSessions == 0) {
+            return;
+        }
+        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, COUNT_ACTIVE, COUNT_ACTIVE_DESC, SESSIONS);
+        updateMetric(t -> t.getCounter(descriptor).incrementBy(numberOfNewSessions));
+    }
+
+    /**
+     * Decreases the number of active sessions
+     * 
+     * @param numberOfRemovedSessions
+     */
+    void decreaseActiveSessionCount(int numberOfRemovedSessions) {
+        if (numberOfRemovedSessions == 0) {
+            return;
+        }
+        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, COUNT_ACTIVE, COUNT_ACTIVE_DESC, SESSIONS);
         updateMetric(t -> t.getCounter(descriptor).decrementBy(numberOfRemovedSessions));
     }
 

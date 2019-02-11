@@ -169,6 +169,18 @@ final class SessionData {
         }
     }
 
+    private void metricsIncreaseActive(int num) {
+        if (gatherMetrics()) {
+            metrics.increaseActiveSessionCount(num);
+        }
+    }
+    
+    private void metricsDecreaseActive(int num) {
+        if (gatherMetrics()) {
+            metrics.decreaseActiveSessionCount(Math.abs(num));
+        }
+    }
+    
     private void metricsIncreaseAll(int num) {
         if (gatherMetrics()) {
             metrics.increaseSessionCount(num);
@@ -188,11 +200,14 @@ final class SessionData {
     }
 
     void clear() {
-        int shortTerm = sessionList.size();
+
+        int shortTerm = getShortTermSessionIDs().size();
+        int active = getActiveSessionCount();
         sessionList.clear();
         metricsDecreaseShort(shortTerm);
+        metricsDecreaseActive(active);
         randoms.clear();
-        int longterm =  longTermList.size();
+        int longterm = getLongTermSessions().size();
         longTermUserGuardian.clear();
         longTermList.clear();
         metricsDecreaseLong(longterm);
@@ -206,7 +221,14 @@ final class SessionData {
      */
     List<SessionControl> rotateShort() {
         // This is the only location which alters 'sessionList' during runtime
+        int activeBefore = getActiveSessionCount();
         List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
+        int changeActive = getActiveSessionCount() - activeBefore;
+        if (changeActive > 0) {
+            metricsIncreaseActive(changeActive);
+        } else {
+            metricsDecreaseActive(Math.abs(changeActive));
+        }
 
         if (autoLogin && false == removedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
@@ -245,6 +267,20 @@ final class SessionData {
         }
 
         return removedSessions;
+    }
+
+    /**
+     * Gets the number of sessions within the first two short term container
+     * 
+     * @return The number of active sessions
+     */
+    private int getActiveSessionCount() {
+        int[] container = getShortTermSessionsPerContainer();
+        if (container.length <= 2) {
+            return getShortTermSessionIDs().size();
+        }
+
+        return container[0] + container[1];
     }
 
     List<SessionControl> rotateLongTerm() {
@@ -295,8 +331,14 @@ final class SessionData {
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
         // Removing sessions is a write operation.
         final List<SessionControl> retval = new LinkedList<SessionControl>();
+        int containerNum = 1;
         for (final SessionContainer container : sessionList) {
-            retval.addAll(container.removeSessionsByUser(userId, contextId));
+            List<SessionControl> removed = container.removeSessionsByUser(userId, contextId);
+            retval.addAll(removed);
+            if (containerNum <= 2) {
+                metricsDecreaseActive(removed.size());
+            }
+            containerNum++;
         }
         for (final SessionControl control : retval) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
@@ -313,7 +355,7 @@ final class SessionData {
                 if (control.equalsUserAndContext(userId, contextId)) {
                     Session session = control.getSession();
                     SessionControl removeBySessionId = longTerm.removeBySessionId(session.getSessionID());
-                    if(removeBySessionId != null) {
+                    if (removeBySessionId != null) {
                         numLongTerm++;
                     }
                     longTermUserGuardian.remove(userId, contextId);
@@ -330,8 +372,14 @@ final class SessionData {
     List<SessionControl> removeContextSessions(final int contextId) {
         // Removing sessions is a write operation.
         final List<SessionControl> list = new LinkedList<SessionControl>();
+        int containerNum = 1;
         for (final SessionContainer container : sessionList) {
-            list.addAll(container.removeSessionsByContext(contextId));
+            List<SessionControl> removed = container.removeSessionsByContext(contextId);
+            list.addAll(removed);
+            if (containerNum <= 2) {
+                metricsDecreaseActive(removed.size());
+            }
+            containerNum++;
         }
         for (final SessionControl control : list) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
@@ -350,15 +398,15 @@ final class SessionData {
                 if (control.equalsContext(contextId)) {
                     Session session = control.getSession();
                     SessionControl removed = longTerm.removeBySessionId(session.getSessionID());
-                    if(removed != null) {
-                       numOfLongTerm++;
+                    if (removed != null) {
+                        numOfLongTerm++;
                     }
                     longTermUserGuardian.remove(session.getUserId(), contextId);
                     list.add(control);
                 }
             }
         }
-        
+
         metricsDecreaseLong(numOfLongTerm);
         metricsDecreaseAll(numOfShortTerm + numOfLongTerm);
         return list;
@@ -373,27 +421,33 @@ final class SessionData {
     List<SessionControl> removeContextSessions(final Set<Integer> contextIds) {
         // Removing sessions is a write operation.
         final List<SessionControl> list = new ArrayList<SessionControl>();
+        int containerNum = 1;
         for (final SessionContainer container : sessionList) {
-            list.addAll(container.removeSessionsByContexts(contextIds));
+            List<SessionControl> removed = container.removeSessionsByContexts(contextIds);
+            list.addAll(removed);
+            if (containerNum <= 2) {
+                metricsDecreaseActive(removed.size());
+            }
+            containerNum++;
         }
         for (final SessionControl control : list) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
         }
-        int numShortTerm=list.size();
+        int numShortTerm = list.size();
         TIntSet contextIdsToCheck = new TIntHashSet(contextIds.size());
         for (int contextId : contextIds) {
             if (hasLongTermSession(contextId)) {
                 contextIdsToCheck.add(contextId);
             }
         }
-        int numLongTerm=0;
+        int numLongTerm = 0;
         for (final SessionMap longTerm : longTermList) {
             for (SessionControl control : longTerm.values()) {
                 Session session = control.getSession();
                 int contextId = session.getContextId();
                 if (contextIdsToCheck.contains(contextId)) {
                     SessionControl removed = longTerm.removeBySessionId(session.getSessionID());
-                    if(removed != null) {
+                    if (removed != null) {
                         numLongTerm++;
                     }
                     longTermUserGuardian.remove(session.getUserId(), contextId);
@@ -401,7 +455,7 @@ final class SessionData {
                 }
             }
         }
-        
+
         metricsDecreaseShort(numShortTerm);
         metricsDecreaseLong(numLongTerm);
         metricsDecreaseAll(numShortTerm + numLongTerm);
@@ -621,6 +675,7 @@ final class SessionData {
             randoms.put(session.getRandomToken(), session.getSessionID());
 
             scheduleRandomTokenRemover(session.getRandomToken());
+            metricsIncreaseActive(1);
             metricsIncreaseShort(1);
             metricsIncreaseAll(1);
             return control;
@@ -751,6 +806,7 @@ final class SessionData {
 
     SessionControl clearSession(final String sessionId) {
         // Look-up in short-term list
+        int containerNum = 1;
         for (SessionContainer container : sessionList) {
             SessionControl sessionControl = container.removeSessionById(sessionId);
             if (null != sessionControl) {
@@ -765,8 +821,12 @@ final class SessionData {
                 unscheduleTask2MoveSession2FirstContainer(sessionId, true);
                 metricsDecreaseShort(1);
                 metricsDecreaseAll(1);
+                if (containerNum <= 2) {
+                    metricsDecreaseActive(1);
+                }
                 return sessionControl;
             }
+            containerNum++;
         }
 
         // Look-up in long-term list
@@ -826,12 +886,17 @@ final class SessionData {
         // Look for associated session in successor containers
         SessionControl control = null;
         try {
+            boolean isSecond = true;
             while (null == control && iterator.hasNext()) {
                 // Remove from current container & put into first one
                 control = iterator.next().removeSessionById(sessionId);
                 if (null != control) {
                     firstContainer.putSessionControl(control);
+                    if (!isSecond) {
+                        metricsIncreaseActive(1);
+                    }
                 }
+                isSecond = false;
             }
 
             if (null == control) {
@@ -859,12 +924,13 @@ final class SessionData {
         try {
             SessionContainer firstContainer = sessionList.get(0);
             boolean movedSession = false;
-            int moved=0;
+            int moved = 0;
             for (Iterator<SessionMap> iterator = longTermList.iterator(); !movedSession && iterator.hasNext();) {
                 SessionMap longTermMap = iterator.next();
                 control = longTermMap.removeBySessionId(sessionId);
                 if (null != control) {
                     firstContainer.putSessionControl(control);
+                    metricsIncreaseActive(1);
                     final SessionImpl session = control.getSession();
                     longTermUserGuardian.remove(session.getUserId(), session.getContextId());
                     LOG.trace("Moved from long term container to first one.");
