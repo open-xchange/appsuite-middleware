@@ -155,7 +155,6 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.osgi.Tools;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -203,7 +202,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         this.account = account;
         this.parameters = parameters;
         this.calendarUtilities = optCalendarUtilities;
-        this.notificationService = Tools.requireService(CalendarEventNotificationService.class, Services.getServiceLookup());
+        this.notificationService = Services.getService(CalendarEventNotificationService.class);
     }
 
     public Session getSession() {

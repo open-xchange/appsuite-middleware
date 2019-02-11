@@ -73,6 +73,7 @@ import com.openexchange.chronos.provider.caching.basic.exception.BasicCachingCal
 import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
 import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
@@ -109,6 +110,9 @@ public class BasicCachingCalendarAccessTest {
     private CalendarStorageFactory calendarStorageFactory;
 
     @Mock
+    private CalendarEventNotificationService calendarEventNotificationService;
+
+    @Mock
     private DatabaseService databaseService;
 
     @Mock
@@ -123,6 +127,7 @@ public class BasicCachingCalendarAccessTest {
 
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(CalendarStorageFactory.class)).thenReturn(calendarStorageFactory);
+        PowerMockito.when(Services.getService(CalendarEventNotificationService.class)).thenReturn(calendarEventNotificationService);
         PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
         PowerMockito.when(databaseService.getWritable((Context) ArgumentMatchers.any())).thenReturn(connection);
 
