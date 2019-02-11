@@ -2019,6 +2019,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
 
             UUID compositionSpaceId = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message));
+            if (!compositionSpaceId.equals(uuid)) {
+                // Composition space identifier is not equal to generated one
+                getStorageService().closeCompositionSpace(session, compositionSpaceId);
+                throw CompositionSpaceErrorCode.OPEN_FAILED.create();
+            }
             attachments = null; // Avoid premature deletion
             return compositionSpaceId;
         } finally {

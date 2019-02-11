@@ -116,6 +116,10 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * Found no suitable key for composition space %1$s
      */
     MISSING_KEY("Found no suitable key for composition space %1$s", CompositionSpaceExceptionMessages.MISSING_KEY_MSG, CATEGORY_TRY_AGAIN, 13),
+    /**
+     * Composition space could not be opened
+     */
+    OPEN_FAILED("Composition space could not be opened", null, CATEGORY_ERROR, 14),
 
     ;
 
