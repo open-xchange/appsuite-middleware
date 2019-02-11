@@ -50,12 +50,14 @@
 package com.openexchange.oidc.impl.tests;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.sim.SimHttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +85,10 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -95,8 +100,10 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.state.impl.DefaultLogoutRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.session.reservation.SimSessionReservationService;
 
 /**
  * {@link OIDCWebSSoProviderImplTest} Testclass for {@link OIDCWebSSOProviderImpl}
@@ -105,7 +112,8 @@ import com.openexchange.session.reservation.SessionReservationService;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class, OIDCTools.class })
+@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class, OIDCTools.class,
+    ServerServiceRegistry.class, ConfigurationService.class, SimHttpServletResponse.class })
 public class OIDCWebSSoProviderImplTest {
 
     private static final String STATE_VALUE = "stateValue";
@@ -132,7 +140,13 @@ public class OIDCWebSSoProviderImplTest {
     private HttpServletResponse mockedResponse;
 
     @Mock
+    private SimHttpServletResponse mockedSimResponse;
+
+    @Mock
     private SessionReservationService mockedSessionReservation;
+
+    @Mock
+    private SimSessionReservationService mockedSimSessionReservation;
 
     @Mock
     private AuthenticationRequestInfo mockedAuthRequestInfo;
@@ -145,22 +159,28 @@ public class OIDCWebSSoProviderImplTest {
 
     private OIDCWebSSOProviderImpl provider;
 
+    @Mock
+    private ServerServiceRegistry serverServiceRegistry;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
         PowerMockito.mockStatic(OIDCTools.class);
-        PowerMockito.when(Services.getService(SessionReservationService.class)).thenReturn(mockedSessionReservation);
+        PowerMockito.when(Services.getService(SessionReservationService.class)).thenReturn(mockedSimSessionReservation);
 
         PowerMockito.mockStatic(OIDCTokenResponseParser.class);
         Mockito.when(mockedBackend.getBackendConfig()).thenReturn(mockedBackendConfig);
 
         this.provider = PowerMockito.spy(new OIDCWebSSOProviderImpl(mockedBackend, mockedStateManagement, mockedServices, mockedLoginConfiguration));
-
+        PowerMockito.mockStatic(ServerServiceRegistry.class);
+        PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
+        final SimConfigurationService simConfigurationService = new SimConfigurationService();
+        PowerMockito.when(serverServiceRegistry.getService(ConfigurationService.class)).thenReturn(simConfigurationService);
     }
 
     @Test
-    public void sendLoginRequestToServerTest() throws Exception {
+    public void sendLoginRequestToServer_shardNameParameterTest() throws Exception {
         Mockito.when(mockedRequest.getParameter("state")).thenReturn(STATE_VALUE);
         Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
 
@@ -184,12 +204,20 @@ public class OIDCWebSSoProviderImplTest {
         Mockito.when(this.mockedBackend.validateIdToken(ArgumentMatchers.any(JWT.class), ArgumentMatchers.anyString())).thenReturn(mockedClaimSet);
         Mockito.when(mockedAuthRequestInfo.getDomainName()).thenReturn("domainname");
 
+        Mockito.when(this.mockedBackend.resolveAuthenticationResponse(mockedRequest, mockedTokenResponse)).thenReturn(new AuthenticationInfo(0, 0));
+        Mockito.when(mockedTokenResponse.getOIDCTokens().getIDTokenString()).thenReturn("134234235");
+
+        mockedSimResponse = new SimHttpServletResponse();
+
         try {
-            this.provider.authenticateUser(mockedRequest, mockedResponse);
+            this.provider.authenticateUser(mockedRequest, mockedSimResponse);
         } catch (OXException e) {
             e.printStackTrace();
             fail("No error should happen");
         }
+        assertNotNull(mockedSimResponse.getHeaderNames());
+        assertNotNull(mockedSimResponse.getHeader("location"));
+        assertTrue("shardName parameter was modified and is not the default value", mockedSimResponse.getHeader("location").contains(OIDCTools.PARAM_SHARD_NAME+"="+"default"));
     }
 
     @Test
@@ -284,7 +312,6 @@ public class OIDCWebSSoProviderImplTest {
         Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(STATE_VALUE)).thenReturn(mockedAuthRequestInfo);
 
         PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(mockedRequest);
-
 
         HTTPRequest mockedHttpRequest = Mockito.mock(HTTPRequest.class);
         HTTPResponse mockedHttpResponse = Mockito.mock(HTTPResponse.class);
