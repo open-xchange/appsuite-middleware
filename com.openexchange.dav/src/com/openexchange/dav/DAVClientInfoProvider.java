@@ -107,9 +107,24 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 String clientFamily = getClientFamily(userAgent);
                 ReadableUserAgent readableUserAgent = userAgentParser.parse(sUserAgent);
                 if (UNKNOWN.equals(clientFamily) && (null == readableUserAgent || UNKNOWN.equalsIgnoreCase(readableUserAgent.getName()))) {
-                    // Maybe iOS accountsd?
-                    if (Strings.isNotEmpty(sUserAgent) && sUserAgent.contains("iOS") && sUserAgent.contains("accountsd")) {
-                        return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, IOS_DAV, null, IOS_DAV, ClientInfoType.DAV);
+                    if (Strings.isNotEmpty(sUserAgent)) {
+
+                        // Maybe iOS accountsd?
+                        if (sUserAgent.contains("iOS") && sUserAgent.contains("accountsd")) {
+                            return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, IOS_DAV, null, IOS_DAV, ClientInfoType.DAV);
+                        }
+
+                        // DAVx5/2.0.7-ose (2018/12/23; dav4android; okhttp/3.12.0) Android/8.1.0
+                        // Maybe DAVx5 (formerly Davdroid)
+                        if (sUserAgent.contains("DAVx5") || sUserAgent.contains("dav4android")) {
+                            return new DAVClientInfo("DAVx5", "android", null, DAVDROID, null, DAVDROID, ClientInfoType.DAV);
+                        }
+
+                        // CalDavSynchronizer/1.22
+                        // Maybe Outlook CalDAV Synchronizer
+                        if (sUserAgent.contains("CalDavSynchronizer")) {
+                            return new DAVClientInfo("Outlook CalDAV Synchronizer", WINDOWS, null, WINDOWS, null, WINDOWS, ClientInfoType.DAV);
+                        }
                     }
 
                     // Unknown User-Agent
