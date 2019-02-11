@@ -47,45 +47,46 @@
  *
  */
 
-package com.openexchange.java;
+package com.openexchange.utils.serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.java.Reference;
+import com.openexchange.utils.serialization.FilteringObjectInputStream.Configuration;
 
 /**
- * {@link FilteringObjectInputStream} prevents invalid deserialization whitelisting allowed classes
+ * {@link FilteringObjectStreamFactory}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class FilteringObjectInputStream extends ObjectInputStream {
+public class FilteringObjectStreamFactory implements ForcedReloadable {
 
-    private final Class<?>[] whitelist;
-
-    /**
-     * Initializes a new {@link FilteringObjectInputStream}.
-     * 
-     * @param in The {@link InputStream}
-     * @param classes A list of whitelisted classes. Resolving of all other classes will be denied.
-     * @throws IOException
-     */
-    public FilteringObjectInputStream(InputStream in, Class<?>... classes) throws IOException {
-        super(in);
-        this.whitelist = classes;
+    private static final String PATH = "/opt/openexchange/etc/serialkiller.xml";
+    private static final Reference<Configuration> REF = new Reference<FilteringObjectInputStream.Configuration>(null);
+    
+    public static FilteringObjectInputStream createFilteringStream(InputStream stream) throws IOException {
+        if(REF.getValue() == null) {
+            synchronized(REF) {
+                if(REF.getValue() == null) {
+                    try {
+                        REF.setValue(new Configuration(PATH));
+                    } catch (ParserConfigurationException | SAXException | IOException e) {
+                        throw new IOException("Unable to create FilteredObjectStream: "+e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return new FilteringObjectInputStream(stream, REF.getValue());
     }
 
     @Override
-    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-        for (Class<?> clazz : whitelist) {
-            if (desc.getName().equals(clazz.getName())) {
-                return super.resolveClass(desc);
-            }
-        }
-
-        throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
+    public void reloadConfiguration(ConfigurationService configService) {
+        REF.setValue(null);
     }
-
+    
 }
