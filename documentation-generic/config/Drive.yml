@@ -407,8 +407,8 @@ properties:
     - key: com.openexchange.drive.events.gcm.enabled
       description: |
         Enables or disables push event notifications to clients using the Google
-        Cloud Messaging (GCM) service. This requires a valid configuration for the
-        GCM API key.
+        Firebase Cloud Messaging (FCM) service. This requires a valid configuration for the
+        FCM API key.
       defaultValue: false
       version:
       reloadable: false
