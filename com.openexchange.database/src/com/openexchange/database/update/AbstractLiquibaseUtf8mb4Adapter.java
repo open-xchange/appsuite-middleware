@@ -241,7 +241,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
             }
 
             // Compile the "ALTER TABLE..." statement
-            String alterTable = alterTable(table, new ArrayList<>(columnsToModify.values()), tableCharset, tableCollation);
+            String alterTable = alterTable(table, null == columnsToModify ? null : new ArrayList<>(columnsToModify.values()), tableCharset, tableCollation);
             if (Strings.isNotEmpty(alterTable)) {
                 // Execute the "ALTER TABLE..." statement
                 alterStmt = connection.prepareStatement(alterTable);
