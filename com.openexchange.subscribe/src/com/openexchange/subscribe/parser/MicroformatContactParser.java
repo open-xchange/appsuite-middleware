@@ -65,6 +65,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
+import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionHandler;
@@ -128,8 +129,13 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
 
             parse( website );
 
-            storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
-
+            TargetFolderSession targetFolderSession = new TargetFolderSession(subscription);
+            try {
+                targetFolderSession.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+                storeContacts(targetFolderSession, subscription.getFolderIdAsInt(), this.getContacts());
+            } finally {
+                targetFolderSession.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+            }
         } catch (final IOException e) {
             LOG.error("", e);
         } catch (final OXException e) {

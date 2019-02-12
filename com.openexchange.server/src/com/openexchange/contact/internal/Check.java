@@ -371,7 +371,7 @@ public final class Check {
             return;
         }
         if (new OXFolderAccess(ServerSessionAdapter.valueOf(session).getContext()).isSubscriptionFolder(fid, cid)) {
-            throw ContactExceptionCodes.SUBSCRIPTION_NOT_ALLOWED.create(fid);
+            throw ContactExceptionCodes.WRITE_IN_SUBSCRIPTION_NOT_ALLOWED.create(fid);
         }
     }
 

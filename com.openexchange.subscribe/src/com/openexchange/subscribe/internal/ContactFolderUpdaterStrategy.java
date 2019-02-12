@@ -177,7 +177,11 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void closeSession(final Object session) {
-        // Nothing to do
+        if(session instanceof Map<?,?>) {
+            @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
+            Session ses = (Session) userInfo.get(SESSION);
+            ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+        }
     }
 
     @Override
@@ -257,6 +261,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (session == null) {
             session = new TargetFolderSession(target);
         }
+        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
         userInfo.put(SESSION, session);
         return userInfo;
     }

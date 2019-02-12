@@ -314,7 +314,7 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     SET_DISTRIBUTION_LIST_ERROR("Invalid number of properties for distribution list.", ContactExceptionMessages.SET_DISTRIBUTION_LIST_ERROR_DISPLAY, Category.CATEGORY_ERROR, 1002),
 
     /** The operation is not allowed in a folder which has a subscription. */
-    SUBSCRIPTION_NOT_ALLOWED("This operation is not allowed in folder %1$s because it has a subscription.", ContactExceptionMessages.SUBSCRIPTION_NOT_ALLOWED, Category.CATEGORY_PERMISSION_DENIED, 1003),
+    WRITE_IN_SUBSCRIPTION_NOT_ALLOWED("This operation is not allowed in folder %1$s because it has a subscription.", ContactExceptionMessages.SUBSCRIPTION_NOT_ALLOWED, Category.CATEGORY_PERMISSION_DENIED, 1003),
     ;
 
     public static final String PREFIX = "CON".intern();

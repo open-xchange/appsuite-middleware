@@ -95,8 +95,8 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
     @Override
     public void save(SearchIterator<T> data, TargetFolderDefinition target, Collection<OXException> errors) throws OXException {
         final Object session = strategy.startSession(target);
-        final Collection<T> dataInFolder = strategy.getData(target, session);
         try {
+            final Collection<T> dataInFolder = strategy.getData(target, session);
             while (data.hasNext()) {
                 T element = data.next();
                 if (null != element) {

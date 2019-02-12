@@ -81,12 +81,10 @@ public class TargetFolderSession implements Session {
         Session ses = null;
         if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
             session = ServerSessionAdapter.valueOf(ses, target.getContext());
-            session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
             params = null;
         } else {
             session = null;
             params = new HashMap<String, Object>(8);
-            params.put(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
         }
     }
 
