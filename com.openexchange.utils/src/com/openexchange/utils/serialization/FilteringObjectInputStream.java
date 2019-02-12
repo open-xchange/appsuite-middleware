@@ -112,9 +112,8 @@ public class FilteringObjectInputStream extends ObjectInputStream {
 
         private List<Pattern> blacklist;
 
-        Configuration(final String configPath) throws ParserConfigurationException, SAXException, IOException {
+        Configuration(final File configFile) throws ParserConfigurationException, SAXException, IOException {
 
-            File configFile = new File(configPath);
             if(!configFile.exists()) {
                 throw new IOException("File not found");
             }

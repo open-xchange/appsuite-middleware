@@ -49,6 +49,7 @@
 
 package com.openexchange.utils.serialization;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,17 +67,17 @@ import com.openexchange.utils.serialization.FilteringObjectInputStream.Configura
  */
 public class FilteringObjectStreamFactory implements ForcedReloadable {
 
-    private static final String PATH = "/opt/openexchange/etc/serialkiller.xml";
+    private static final String FILENAME = "serialkiller.xml";
     private static final Reference<Configuration> REF = new Reference<FilteringObjectInputStream.Configuration>(null);
-    
+
     public static FilteringObjectInputStream createFilteringStream(InputStream stream) throws IOException {
-        if(REF.getValue() == null) {
-            synchronized(REF) {
-                if(REF.getValue() == null) {
+        if (REF.getValue() == null) {
+            synchronized (REF) {
+                if (REF.getValue() == null) {
                     try {
-                        REF.setValue(new Configuration(PATH));
+                        REF.setValue(new Configuration(new File(System.getProperty("openexchange.propdir"), FILENAME)));
                     } catch (ParserConfigurationException | SAXException | IOException e) {
-                        throw new IOException("Unable to create FilteredObjectStream: "+e.getMessage(), e);
+                        throw new IOException("Unable to create FilteredObjectStream: " + e.getMessage(), e);
                     }
                 }
             }
@@ -88,5 +89,5 @@ public class FilteringObjectStreamFactory implements ForcedReloadable {
     public void reloadConfiguration(ConfigurationService configService) {
         REF.setValue(null);
     }
-    
+
 }
