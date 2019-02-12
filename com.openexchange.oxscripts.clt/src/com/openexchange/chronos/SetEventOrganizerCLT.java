@@ -65,7 +65,7 @@ import com.openexchange.cli.AbstractRmiCLI;
 public class SetEventOrganizerCLT extends AbstractRmiCLI<Void> {
 
     // @formatter:off
-    private static final String SYNTAX = "seteventorganizer -c <contextId> -e <eventId> -u <userId>" + BASIC_CONTEXT_ADMIN_USAGE;
+    private static final String SYNTAX = "seteventorganizer -c <contextId> -e <eventId> -u <userId> " + BASIC_CONTEXT_ADMIN_USAGE;
     private static final String FOOTER =
         "Sets a new organizer for the given event in the given context.\n" +
         "If this is performed on a recurring event (master or exception), all exceptions and the master are changed.\n" +

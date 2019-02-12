@@ -95,15 +95,18 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
 
     @Override
     public void setEventOrganizer(int contextId, int eventId, int userId) throws RemoteException {
-        DatabaseService databaseService = Services.getService(DatabaseService.class);
+        
         Connection readCon = null;
         Connection writeCon = null;
+        DatabaseService databaseService = null;
+        boolean backAfterRead = true;
         try {
+            databaseService = Services.getService(DatabaseService.class, true);
             readCon = databaseService.getReadOnly(contextId);
             writeCon = databaseService.getWritable(contextId);
             SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
 
-            ContextService contextService = Services.getService(ContextService.class);
+            ContextService contextService = Services.getService(ContextService.class, true);
             Context context = contextService.getContext(contextId);
 
             CalendarStorage storage = getStorage(contextId, dbProvider, context);
@@ -112,7 +115,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             if (isNoop(event, userId)) {
                 return;
             }
-
+            backAfterRead = false;
             checkPreConditions(event, userId, context);
 
             if (CalendarUtils.isSeriesMaster(event)) {
@@ -129,8 +132,18 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             String message = e.getMessage();
             throw new RemoteException(message, e);
         } finally {
-            databaseService.backReadOnly(contextId, readCon);
-            databaseService.backWritable(contextId, writeCon);
+            if (databaseService != null) {
+                if(readCon != null) {
+                    databaseService.backReadOnly(contextId, readCon);
+                }
+                if(writeCon != null) {
+                    if(backAfterRead) {
+                        databaseService.backWritableAfterReading(contextId, writeCon);
+                    } else {
+                        databaseService.backWritable(contextId, writeCon);
+                    }
+                }
+            }
         }
     }
 
@@ -144,7 +157,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @throws OXException if an error occurs
      * @throws RemoteException if an error occurs
      */
-    private void handleMaster(String seriesId, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException, RemoteException {
+    private void handleMaster(String seriesId, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException {
         List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
         for (Event exception : exceptions) {
             exception.setAttendees(storage.getAttendeeStorage().loadAttendees(exception.getId()));
@@ -168,7 +181,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @throws OXException if an error occurs
      * @throws RemoteException if an error occurs
      */
-    private void handleSingle(Event event, int userId, CalendarStorage storage, EntityResolver entityResolver) throws RemoteException, OXException {
+    private void handleSingle(Event event, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException {
         Attendee newOrganizerAttendee = modifyEventObject(event, userId, entityResolver);
         storage.getEventStorage().updateEvent(event);
         if (newOrganizerAttendee != null) {
@@ -212,10 +225,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
         if (!CalendarUtils.isOrganizer(event, newOrganizer)) {
             return false;
         }
-        if (event.getAttendees().stream().noneMatch(a -> a.getEntity() == newOrganizer)) {
-            return false;
-        }
-        return true;
+        return !event.getAttendees().stream().noneMatch(a -> a.getEntity() == newOrganizer);
     }
 
     private void checkPreConditions(Event event, int newOrganizer, Context context) throws RemoteException, OXException {
