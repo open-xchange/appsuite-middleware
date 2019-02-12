@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -65,9 +64,11 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.zip.Buffer;
+import com.openexchange.ajax.zip.ZipEntryAdder;
+import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.filemanagement.ManagedFile;
@@ -136,14 +137,9 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 {
                     final AJAXRequestData ajaxRequestData = req.getRequest();
                     if (null != ajaxRequestData) {
-                        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
+                        if (ZipUtility.setHttpResponseHeaders(fullFileName, ajaxRequestData)) {
                             try {
-                                final StringBuilder sb = new StringBuilder(512);
-                                sb.append("attachment");
-                                DownloadUtility.appendFilenameParameter(fullFileName, "application/zip", ajaxRequestData.getUserAgent(), sb);
-                                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
                                 createZipArchive(folderPath, uid, sequenceIds, mailInterface, ajaxRequestData.optOutputStream());
-                                // Streamed
                                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
                             } catch (final IOException e) {
                                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -156,11 +152,10 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 /*
                  * Write from content's input stream to response output stream
                  */
-                ThresholdFileHolder fileHolder = null;
+                ThresholdFileHolder fileHolder = ZipUtility.prepareThresholdFileHolder(fullFileName);
                 try {
                     InputStream zipInputStream = mf.getInputStream();
                     try {
-                        fileHolder = new ThresholdFileHolder();
                         fileHolder.write(zipInputStream);
                     } finally {
                         Streams.close(zipInputStream);
@@ -170,8 +165,6 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                      * Parameterize file holder
                      */
                     req.getRequest().setFormat("file");
-                    fileHolder.setName(fullFileName);
-                    fileHolder.setContentType("application/zip");
                     AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
                     fileHolder = null;
                     return requestResult;
@@ -213,83 +206,99 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         return new StringBuilder(fileName).append(".zip").toString();
     }
 
-    private void createZipArchive(final String folderPath, final String uid, final String[] sequenceIds, final MailServletInterface mailInterface, OutputStream out) throws OXException {
-        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
-        try {
-            final int buflen = 8192;
-            final byte[] buf = new byte[buflen];
-
-            Map<String, Integer> fileNamesInArchive = new HashMap<String, Integer>();
-            if (null == sequenceIds) {
-                for (final MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
-                    addPart2Archive(mailPart, zipOutput, buflen, buf, fileNamesInArchive);
-                }
-            } else {
-                for (final String sequenceId : sequenceIds) {
-                    final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-                    addPart2Archive(mailPart, zipOutput, buflen, buf, fileNamesInArchive);
-                }
-            }
-        } finally {
-            // Complete the ZIP file
-            Streams.close(zipOutput);
-        }
+    private long createZipArchive(final String folderPath, final String uid, final String[] sequenceIds, final MailServletInterface mailInterface, OutputStream out) throws OXException {
+        ZipEntryAdder adder = new MailPartZipEntryAdder(uid, folderPath, sequenceIds, mailInterface);
+        return ZipUtility.writeZipArchive(adder, out, 0);
     }
 
-    private void addPart2Archive(final MailPart mailPart, final ZipArchiveOutputStream zipOutput, final int buflen, final byte[] buf, Map<String, Integer> fileNamesInArchive) throws OXException {
-        final InputStream in = mailPart.getInputStream();
-        try {
-            /*
-             * Add ZIP entry to output stream
-             */
-            String name = mailPart.getFileName();
-            if (null == name) {
-                final List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
-                name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
-            }
-            String entryName = name;
-            Integer count = fileNamesInArchive.get(name);
-            if (null != count) {
-                entryName = FileStorageUtility.enhance(name, count++);
-                fileNamesInArchive.put(name, count);
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class MailPartZipEntryAdder implements ZipEntryAdder {
+
+        private final String[] optSequenceIds;
+        private final MailServletInterface mailInterface;
+        private final String folderPath;
+        private final String uid;
+
+        /**
+         * Initializes a new {@link ZipEntryAdderImplementation}.
+         */
+        MailPartZipEntryAdder(String uid, String folderPath, String[] optSequenceIds, MailServletInterface mailInterface) {
+            super();
+            this.optSequenceIds = optSequenceIds;
+            this.mailInterface = mailInterface;
+            this.folderPath = folderPath;
+            this.uid = uid;
+        }
+
+        @Override
+        public void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
+            if (null == optSequenceIds) {
+                for (MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
+                    addPart2Archive(mailPart, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive);
+                }
             } else {
-                fileNamesInArchive.put(name, 1);
+                for (String sequenceId : optSequenceIds) {
+                    MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
+                    addPart2Archive(mailPart, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive);
+                }
             }
-            ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
-            zipOutput.putArchiveEntry(entry);
-            /*
-             * Transfer bytes from the file to the ZIP file
-             */
-            long size = 0;
-            for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                zipOutput.write(buf, 0, read);
-                size += read;
-            }
-            entry.setSize(size);
-            /*
-             * Complete the entry
-             */
-            zipOutput.closeArchiveEntry();
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            if (IOs.isConnectionReset(e)) {
-                /*-
-                 * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
-                 *
-                 * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
-                 * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
-                 * or the enduser's machine crashed, etc, etc.
+        }
+
+        private void addPart2Archive(MailPart mailPart, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive) throws OXException {
+            InputStream in = mailPart.getInputStream();
+            try {
+                /*
+                 * Add ZIP entry to output stream
                  */
-                oxe.markLightWeight();
+                String name = mailPart.getFileName();
+                if (null == name) {
+                    final List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
+                    name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
+                }
+                String entryName = name;
+                Integer count = fileNamesInArchive.get(name);
+                if (null != count) {
+                    entryName = FileStorageUtility.enhance(name, count++);
+                    fileNamesInArchive.put(name, count);
+                } else {
+                    fileNamesInArchive.put(name, 1);
+                }
+                ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
+                zipOutput.putArchiveEntry(entry);
+                /*
+                 * Transfer bytes from the file to the ZIP file
+                 */
+                long size = 0;
+                for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                    zipOutput.write(buf, 0, read);
+                    size += read;
+                }
+                entry.setSize(size);
+                /*
+                 * Complete the entry
+                 */
+                zipOutput.closeArchiveEntry();
+            } catch (IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                if (IOs.isConnectionReset(e)) {
+                    /*-
+                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                     *
+                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                     * or the enduser's machine crashed, etc, etc.
+                     */
+                    oxe.markLightWeight();
+                }
+                throw oxe;
+            } finally {
+                Streams.close(in);
             }
-            throw oxe;
-        } finally {
-            Streams.close(in);
         }
     }
+
 }

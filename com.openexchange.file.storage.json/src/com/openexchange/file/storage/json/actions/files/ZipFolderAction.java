@@ -53,15 +53,16 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.ziputil.ZipMaker;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -83,18 +84,14 @@ public class ZipFolderAction extends AbstractFileAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
         }
 
-        boolean recursive;
+        boolean recursive = AJAXRequestDataTools.parseBoolParameter(request.getParameter("recursive"));
+
+        String zipFileName;
         {
-            String tmp = request.getParameter("recursive");
-            recursive = AJAXRequestDataTools.parseBoolParameter(tmp);
+            String folderName = saneForFileName(folderAccess.getFolder(folderId).getName());
+            zipFileName = folderName + ".zip";
         }
 
-        String folderName;
-        {
-            folderName = folderAccess.getFolder(folderId).getName();
-            folderName = saneForFileName(folderName);
-        }
-        
         List<IdVersionPair> idVersionPairs = Collections.singletonList(new IdVersionPair(null, null, folderId));
         scan(request, idVersionPairs, fileAccess, folderAccess, recursive);
 
@@ -105,15 +102,7 @@ public class ZipFolderAction extends AbstractFileAction {
         zipMaker.checkThreshold(threshold());
 
         AJAXRequestData ajaxRequestData = request.getRequestData();
-        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            // Set HTTP response headers
-            {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("attachment");
-                DownloadUtility.appendFilenameParameter(folderName + ".zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
-                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-            }
-
+        if (ZipUtility.setHttpResponseHeaders(zipFileName, ajaxRequestData)) {
             // Write ZIP archive
             long bytesWritten = 0;
             try {
@@ -133,17 +122,18 @@ public class ZipFolderAction extends AbstractFileAction {
         // No direct response possible
 
         // Create archive
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        fileHolder.setDisposition("attachment");
-        fileHolder.setName(folderName + ".zip");
-        fileHolder.setContentType("application/zip");
-        fileHolder.setDelivery("download");
+        ThresholdFileHolder fileHolder = ZipUtility.prepareThresholdFileHolder(zipFileName);
+        try {
+            // Create ZIP archive
+            zipMaker.writeZipArchive(fileHolder.asOutputStream());
 
-        // Create ZIP archive
-        zipMaker.writeZipArchive(fileHolder.asOutputStream());
-
-        ajaxRequestData.setFormat("file");
-        return new AJAXRequestResult(fileHolder, "file");
+            ajaxRequestData.setFormat("file");
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null;
+            return requestResult;
+        } finally {
+            Streams.close(fileHolder);
+        }
     }
 
     private static String saneForFileName(final String fileName) {

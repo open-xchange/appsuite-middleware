@@ -51,10 +51,8 @@ package com.openexchange.groupware.attach.json.actions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -64,12 +62,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.zip.Buffer;
+import com.openexchange.ajax.zip.ZipEntryAdder;
+import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.IOs;
 import com.openexchange.java.Streams;
@@ -103,124 +103,14 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
         try {
             ATTACHMENT_BASE.startTransaction();
 
-            if (requestData.setResponseHeader("Content-Type", "application/zip")) {
-                try {
-                    // Prepare further response headers
-                    StringBuilder sb = new StringBuilder(512);
-                    sb.append("attachment");
-                    DownloadUtility.appendFilenameParameter(fullFileName, "application/zip", requestData.getUserAgent(), sb);
-                    requestData.setResponseHeader("Content-Disposition", sb.toString());
-
-                    // Create ZIP archive
-                    long bytesWritten = writeZipArchive(attachmentInfos, requestData.optOutputStream(), session);
-
-                    // Streamed
-                    AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-                    if (bytesWritten != 0) {
-                        result.setResponseProperty("X-Content-Size", Long.valueOf(bytesWritten));
-                    }
-                    return result;
-                } catch (final IOException e) {
-                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                }
-            }
-
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            try {
-                fileHolder.setDisposition("attachment");
-                fileHolder.setName(fullFileName);
-                fileHolder.setContentType("application/zip");
-                fileHolder.setDelivery("download");
-
-                // Create ZIP archive
-                writeZipArchive(attachmentInfos, fileHolder.asOutputStream(), session);
-
-                requestData.setFormat("file");
-                AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
-                fileHolder = null;
-                return requestResult;
-            } finally {
-                Streams.close(fileHolder);
-            }
+            ZipEntryAdder adder = new AttachmentZipEntryAdder(attachmentInfos, session, ATTACHMENT_BASE);
+            return ZipUtility.createZipArchive(adder, fullFileName, 0, requestData);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (Exception e) {
                 // Ignore
             }
-        }
-    }
-
-    private long writeZipArchive(List<AttachmentInfo> attachmentInfos, OutputStream out, ServerSession session) throws OXException {
-        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
-        try {
-            // The buffer to use
-            int buflen = 65536;
-            byte[] buf = new byte[buflen];
-
-            // The map for used names
-            Map<String, Integer> fileNamesInArchive = new HashMap<String, Integer>();
-
-            for (AttachmentInfo attachmentInfo : attachmentInfos) {
-                addAttachmentToArchive(attachmentInfo, zipOutput, buflen, buf, fileNamesInArchive, session);
-            }
-            return zipOutput.getBytesWritten();
-        } finally {
-            // Complete the ZIP file
-            Streams.close(zipOutput);
-        }
-    }
-
-    private void addAttachmentToArchive(AttachmentInfo attachmentInfo, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, ServerSession session) throws OXException {
-        AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, attachmentInfo.folderId, attachmentInfo.attachedId, attachmentInfo.moduleId, attachmentInfo.id, session.getContext(), session.getUser(), session.getUserConfiguration());
-        InputStream in = ATTACHMENT_BASE.getAttachedFile(session, attachmentInfo.folderId, attachmentInfo.attachedId, attachmentInfo.moduleId, attachmentInfo.id, session.getContext(), session.getUser(), session.getUserConfiguration());
-        try {
-            String name = attachment.getFilename();
-            if (null == name) {
-                final List<String> extensions = MimeType2ExtMap.getFileExtensions(attachment.getFileMIMEType());
-                name = extensions == null || extensions.isEmpty() ? "attachment.dat" : "attachment." + extensions.get(0);
-            }
-            String entryName = name;
-            Integer count = fileNamesInArchive.get(name);
-            if (null != count) {
-                entryName = FileStorageUtility.enhance(name, count++);
-                fileNamesInArchive.put(name, count);
-            } else {
-                fileNamesInArchive.put(name, 1);
-            }
-            ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
-            entry.setTime(attachment.getCreationDate().getTime());
-            zipOutput.putArchiveEntry(entry);
-            /*
-             * Transfer bytes from the file to the ZIP file
-             */
-            long size = 0;
-            for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                zipOutput.write(buf, 0, read);
-                size += read;
-            }
-            entry.setSize(size);
-            /*
-             * Complete the entry
-             */
-            zipOutput.closeArchiveEntry();
-        } catch (IOException e) {
-            OXException oxe = OXException.general(e.getMessage(), e);
-            if (IOs.isConnectionReset(e)) {
-                /*-
-                 * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
-                 *
-                 * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
-                 * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
-                 * or the enduser's machine crashed, etc, etc.
-                 */
-                oxe.markLightWeight();
-            }
-            throw oxe;
-        } finally {
-            Streams.close(in);
         }
     }
 
@@ -273,6 +163,80 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class AttachmentZipEntryAdder implements ZipEntryAdder {
+
+        private final List<AttachmentInfo> attachmentInfos;
+        private final ServerSession session;
+        private final AttachmentBase attachmentBase;
+
+        /**
+         * Initializes a new {@link ZipEntryAdderImplementation}.
+         */
+        AttachmentZipEntryAdder(List<AttachmentInfo> attachmentInfos, ServerSession session, AttachmentBase attachmentBase) {
+            this.attachmentInfos = attachmentInfos;
+            this.session = session;
+            this.attachmentBase = attachmentBase;
+        }
+
+        @Override
+        public void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
+            for (AttachmentInfo attachmentInfo : attachmentInfos) {
+                addAttachmentToArchive(attachmentInfo, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive, session);
+            }
+        }
+
+        private void addAttachmentToArchive(AttachmentInfo attachmentInfo, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, ServerSession session) throws OXException {
+            AttachmentMetadata attachment = attachmentBase.getAttachment(session, attachmentInfo.folderId, attachmentInfo.attachedId, attachmentInfo.moduleId, attachmentInfo.id, session.getContext(), session.getUser(), session.getUserConfiguration());
+            InputStream in = attachmentBase.getAttachedFile(session, attachmentInfo.folderId, attachmentInfo.attachedId, attachmentInfo.moduleId, attachmentInfo.id, session.getContext(), session.getUser(), session.getUserConfiguration());
+            try {
+                String name = attachment.getFilename();
+                if (null == name) {
+                    final List<String> extensions = MimeType2ExtMap.getFileExtensions(attachment.getFileMIMEType());
+                    name = extensions == null || extensions.isEmpty() ? "attachment.dat" : "attachment." + extensions.get(0);
+                }
+                String entryName = name;
+                Integer count = fileNamesInArchive.get(name);
+                if (null != count) {
+                    entryName = FileStorageUtility.enhance(name, count++);
+                    fileNamesInArchive.put(name, count);
+                } else {
+                    fileNamesInArchive.put(name, 1);
+                }
+                ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
+                entry.setTime(attachment.getCreationDate().getTime());
+                zipOutput.putArchiveEntry(entry);
+                /*
+                 * Transfer bytes from the file to the ZIP file
+                 */
+                long size = 0;
+                for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                    zipOutput.write(buf, 0, read);
+                    size += read;
+                }
+                entry.setSize(size);
+                /*
+                 * Complete the entry
+                 */
+                zipOutput.closeArchiveEntry();
+            } catch (IOException e) {
+                OXException oxe = OXException.general(e.getMessage(), e);
+                if (IOs.isConnectionReset(e)) {
+                    /*-
+                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                     *
+                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                     * or the enduser's machine crashed, etc, etc.
+                     */
+                    oxe.markLightWeight();
+                }
+                throw oxe;
+            } finally {
+                Streams.close(in);
+            }
+        }
+    }
 
     private static class AttachmentInfo {
 

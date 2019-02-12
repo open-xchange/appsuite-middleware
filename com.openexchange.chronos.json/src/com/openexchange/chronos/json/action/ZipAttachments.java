@@ -51,10 +51,8 @@ package com.openexchange.chronos.json.action;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -63,11 +61,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.zip.Buffer;
+import com.openexchange.ajax.zip.ZipEntryAdder;
+import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -102,130 +101,8 @@ public class ZipAttachments extends ChronosAction {
     }
 
     private AJAXRequestResult createZipArchive(String fullFileName, List<AttachmentId> attachmentIds, IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        // Check if it is possible to directly write to output stream
-        if (requestData.setResponseHeader("Content-Type", "application/zip")) {
-            try {
-                // Prepare further response headers
-                StringBuilder sb = new StringBuilder(512);
-                sb.append("attachment");
-                DownloadUtility.appendFilenameParameter(fullFileName, "application/zip", requestData.getUserAgent(), sb);
-                requestData.setResponseHeader("Content-Disposition", sb.toString());
-
-                // Create ZIP archive
-                long bytesWritten = writeZipArchive(attachmentIds, requestData.optOutputStream(), calendarAccess);
-
-                // Streamed
-                AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-                if (bytesWritten != 0) {
-                    result.setResponseProperty("X-Content-Size", Long.valueOf(bytesWritten));
-                }
-                return result;
-            } catch (final IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
-        }
-
-
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        try {
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName(fullFileName);
-            fileHolder.setContentType("application/zip");
-            fileHolder.setDelivery("download");
-
-            // Create ZIP archive
-            writeZipArchive(attachmentIds, fileHolder.asOutputStream(), calendarAccess);
-
-            requestData.setFormat("file");
-            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
-            fileHolder = null;
-            return requestResult;
-        } finally {
-            Streams.close(fileHolder);
-        }
-    }
-
-    private long writeZipArchive(List<AttachmentId> attachmentIds, OutputStream out, IDBasedCalendarAccess calendarAccess) throws OXException {
-        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
-        try {
-            // The buffer to use
-            int buflen = 65536;
-            byte[] buf = new byte[buflen];
-
-            // The map for used names
-            Map<String, Integer> fileNamesInArchive = new HashMap<String, Integer>();
-
-            for (AttachmentId attachmentId : attachmentIds) {
-                addAttachmentToArchive(attachmentId, zipOutput, buflen, buf, fileNamesInArchive, calendarAccess);
-            }
-            return zipOutput.getBytesWritten();
-        } finally {
-            // Complete the ZIP file
-            Streams.close(zipOutput);
-        }
-    }
-
-    private void addAttachmentToArchive(AttachmentId attachmentId, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, IDBasedCalendarAccess calendarAccess) throws OXException {
-        // Get the attachment and prepare the response
-        IFileHolder attachment = null;
-        try {
-            attachment = calendarAccess.getAttachment(attachmentId.eventId, attachmentId.mid);
-
-            // Get attachment's file name
-            String name = attachment.getName();
-            if (null == name) {
-                MimeTypeMap mimeTypeMap = services.getOptionalService(MimeTypeMap.class);
-                List<String> extensions = null == mimeTypeMap ? null : mimeTypeMap.getFileExtensions(attachment.getContentType());
-                name = extensions == null || extensions.isEmpty() ? "attachment.dat" : "attachment." + extensions.get(0);
-            }
-
-            // Determine unique name for the ZIP entry
-            String entryName = name;
-            Integer count = fileNamesInArchive.get(name);
-            if (null != count) {
-                entryName = FileStorageUtility.enhance(name, count++);
-                fileNamesInArchive.put(name, count);
-            } else {
-                fileNamesInArchive.put(name, 1);
-            }
-            ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
-            // TODO: entry.setTime(attachment.getCreationDate().getTime());
-            zipOutput.putArchiveEntry(entry);
-
-            // Transfer bytes from the attachment to the ZIP file
-            InputStream in = attachment.getStream();
-            try {
-                long size = 0;
-                for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                    zipOutput.write(buf, 0, read);
-                    size += read;
-                }
-                entry.setSize(size);
-            } finally {
-                Streams.close(in);
-            }
-
-            // Complete the entry
-            zipOutput.closeArchiveEntry();
-        } catch (IOException e) {
-            OXException oxe = OXException.general(e.getMessage(), e);
-            if (IOs.isConnectionReset(e)) {
-                /*-
-                 * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
-                 *
-                 * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
-                 * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
-                 * or the enduser's machine crashed, etc, etc.
-                 */
-                oxe.markLightWeight();
-            }
-            throw oxe;
-        } finally {
-            Streams.close(attachment);
-        }
-
+        ZipEntryAdder adder = new ChronosAttachmentZipEntryAdder(calendarAccess, attachmentIds, services);
+        return ZipUtility.createZipArchive(adder, fullFileName, 0, requestData);
     }
 
     private List<AttachmentId> getAttachmentIds(AJAXRequestData requestData) throws OXException {
@@ -269,6 +146,91 @@ public class ZipAttachments extends ChronosAction {
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------
+
+    private static class ChronosAttachmentZipEntryAdder implements ZipEntryAdder {
+
+        private final IDBasedCalendarAccess calendarAccess;
+        private final List<AttachmentId> attachmentIds;
+        private final ServiceLookup services;
+
+        /**
+         * Initializes a new {@link ZipEntryAdderImplementation}.
+         */
+        ChronosAttachmentZipEntryAdder(IDBasedCalendarAccess calendarAccess, List<AttachmentId> attachmentIds, ServiceLookup services) {
+            super();
+            this.calendarAccess = calendarAccess;
+            this.attachmentIds = attachmentIds;
+            this.services = services;
+        }
+
+        @Override
+        public void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
+            for (AttachmentId attachmentId : attachmentIds) {
+                addAttachmentToArchive(attachmentId, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive, calendarAccess);
+            }
+        }
+
+        private void addAttachmentToArchive(AttachmentId attachmentId, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, IDBasedCalendarAccess calendarAccess) throws OXException {
+            // Get the attachment and prepare the response
+            IFileHolder attachment = null;
+            try {
+                attachment = calendarAccess.getAttachment(attachmentId.eventId, attachmentId.mid);
+
+                // Get attachment's file name
+                String name = attachment.getName();
+                if (null == name) {
+                    MimeTypeMap mimeTypeMap = services.getOptionalService(MimeTypeMap.class);
+                    List<String> extensions = null == mimeTypeMap ? null : mimeTypeMap.getFileExtensions(attachment.getContentType());
+                    name = extensions == null || extensions.isEmpty() ? "attachment.dat" : "attachment." + extensions.get(0);
+                }
+
+                // Determine unique name for the ZIP entry
+                String entryName = name;
+                Integer count = fileNamesInArchive.get(name);
+                if (null != count) {
+                    entryName = FileStorageUtility.enhance(name, count++);
+                    fileNamesInArchive.put(name, count);
+                } else {
+                    fileNamesInArchive.put(name, 1);
+                }
+                ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
+                // TODO: entry.setTime(attachment.getCreationDate().getTime());
+                zipOutput.putArchiveEntry(entry);
+
+                // Transfer bytes from the attachment to the ZIP file
+                InputStream in = attachment.getStream();
+                try {
+                    long size = 0;
+                    for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                        zipOutput.write(buf, 0, read);
+                        size += read;
+                    }
+                    entry.setSize(size);
+                } finally {
+                    Streams.close(in);
+                }
+
+                // Complete the entry
+                zipOutput.closeArchiveEntry();
+            } catch (IOException e) {
+                OXException oxe = OXException.general(e.getMessage(), e);
+                if (IOs.isConnectionReset(e)) {
+                    /*-
+                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                     *
+                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                     * or the enduser's machine crashed, etc, etc.
+                     */
+                    oxe.markLightWeight();
+                }
+                throw oxe;
+            } finally {
+                Streams.close(attachment);
+            }
+        }
+
+    }
 
     private static class AttachmentId {
 
