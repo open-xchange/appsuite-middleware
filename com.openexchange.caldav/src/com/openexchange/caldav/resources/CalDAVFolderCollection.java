@@ -78,7 +78,6 @@ import com.openexchange.caldav.mixins.ManagedAttachmentsServerURL;
 import com.openexchange.caldav.mixins.MaxDateTime;
 import com.openexchange.caldav.mixins.MinDateTime;
 import com.openexchange.caldav.mixins.Organizer;
-import com.openexchange.caldav.mixins.Owner;
 import com.openexchange.caldav.mixins.RefreshRate;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
@@ -151,8 +150,7 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
                 new CalendarOwner(this),
                 new Organizer(this), 
                 new CalendarColor(this), 
-                new CalendarTimezone(factory, this),
-                new Owner(this)
+                new CalendarTimezone(factory, this)
             );
             if (NO_ORDER != order) {
                 includeProperties(new CalendarOrder(order));
