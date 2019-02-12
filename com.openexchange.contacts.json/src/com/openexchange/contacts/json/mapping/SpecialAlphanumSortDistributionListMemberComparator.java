@@ -111,15 +111,7 @@ public class SpecialAlphanumSortDistributionListMemberComparator implements Comp
     @Override
     public int compare(DistributionListEntryObject entry1, DistributionListEntryObject entry2) {
         String sortName1 = entry1.getSortName();
-        if (sortName1 == null) {
-            // Fallback to displayname if sortname isn't set
-            sortName1 = entry1.getDisplayname();
-        }
         String sortName2 = entry2.getSortName();
-        if (sortName2 == null) {
-            // Fallback to displayname if sortname isn't set
-            sortName2 = entry2.getDisplayname();
-        }
         if (null == sortName1) {
             return null == sortName2 ? 0 : -1;
         }

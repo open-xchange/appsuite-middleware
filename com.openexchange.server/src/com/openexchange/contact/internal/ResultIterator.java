@@ -62,7 +62,6 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -189,6 +188,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 		member.removeFolderld();
 		member.removeEntryID();
 		member.setEmailfield(DistributionListEntryObject.INDEPENDENT);
+		member.setSortName(member.getDisplayname()+"_"+member.getEmailaddress());
 	}
 
     private void updateMemberInfo(DistributionListEntryObject member, Contact contact) {
@@ -212,10 +212,10 @@ public class ResultIterator implements SearchIterator<Contact> {
 		} catch (OXException e) {
 			LOG.warn("Error setting e-mail address for updated distribution list member", e);
 		}
-        member.setSortName(getSortedName(contact.getYomiLastName(), contact.getYomiFirstName(), contact.getSurName(), contact.getGivenName()));
+        member.setSortName(getSortedName(contact));
 	}
 	
-    private String getSortedName(String yomiLastName, String yomiFirtName, String surName, String givenName) {
+    private String getSortedName(Contact con) {
 
         Locale locale;
         try {
@@ -224,34 +224,8 @@ public class ResultIterator implements SearchIterator<Contact> {
             LOG.error(e.getMessage(), e);
             locale = null;
         }
-        /*
-         * for contacts, use last- and firstname, preferring the yomi names if suitable
-         */
-        boolean preferYomiFields = null != locale && Locale.JAPANESE.getLanguage().equals(locale.getLanguage());
-        {
-            String[] names;
-            if (preferYomiFields) {
-                names = new String[] { yomiLastName, yomiFirtName, surName, givenName };
-            } else {
-                names = new String[] { surName, givenName, yomiLastName, yomiFirtName };
-            }
-            StringBuilder stringBuilder = new StringBuilder(64);
-            for (String value : names) {
-                if (Strings.isNotEmpty(value)) {
-                    if (0 < stringBuilder.length()) {
-                        stringBuilder.append('_');
-                    }
-                    stringBuilder.append(value);
-                }
-            }
-            if (0 < Strings.trim(stringBuilder).length()) {
-                return stringBuilder.toString();
-            }
-        }
-        /*
-         * fallback to empty sortname
-         */
-        return "";
+        
+        return con.getSortName(locale);
     }
 
 	private Contact[] getReferencedContacts(DistributionListEntryObject[] members) {

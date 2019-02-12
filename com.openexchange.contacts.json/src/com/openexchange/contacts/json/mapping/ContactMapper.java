@@ -2359,9 +2359,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                         entry.put(ContactFields.DISPLAY_NAME, tmp.getDisplayname());
                         if (tmp.containsSortName()) {
                             entry.put(ContactFields.SORT_NAME, tmp.getSortName());
-                        } else {
-                            // Fallback to display name if sortname is not set
-                            entry.put(ContactFields.SORT_NAME, tmp.getDisplayname());
                         }
 			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
 			            jsonArray.put(entry);
