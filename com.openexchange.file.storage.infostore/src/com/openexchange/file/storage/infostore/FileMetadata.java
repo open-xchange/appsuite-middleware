@@ -758,12 +758,42 @@ public class FileMetadata implements DocumentMetadata {
             }
 
             @Override
-            public Long getIsoSpeed() {
-                return file.getIsoSpeed();
+            public Long getCameraIsoSpeed() {
+                return file.getCameraIsoSpeed();
             }
 
             @Override
-            public void setIsoSpeed(long isoSpeed) {
+            public void setCameraIsoSpeed(long isoSpeed) {
+                // nothing to do
+            }
+
+            @Override
+            public Double getCameraAperture() {
+                return file.getCameraAperture();
+            }
+
+            @Override
+            public void setCameraAperture(double aperture) {
+                // nothing to do
+            }
+
+            @Override
+            public Double getCameraExposureTime() {
+                return file.getCameraExposureTime();
+            }
+
+            @Override
+            public void setCameraExposureTime(double exposureTime) {
+                // nothing to do
+            }
+
+            @Override
+            public Double getCameraFocalLength() {
+                return file.getCameraFocalLength();
+            }
+
+            @Override
+            public void setCameraFocalLength(double focalLength) {
                 // nothing to do
             }
 
@@ -890,13 +920,43 @@ public class FileMetadata implements DocumentMetadata {
     }
 
     @Override
-    public Long getIsoSpeed() {
-        return file.getIsoSpeed();
+    public Long getCameraIsoSpeed() {
+        return file.getCameraIsoSpeed();
     }
 
     @Override
-    public void setIsoSpeed(long isoSpeed) {
-        file.setIsoSpeed(isoSpeed);
+    public void setCameraIsoSpeed(long isoSpeed) {
+        file.setCameraIsoSpeed(isoSpeed);
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        return file.getCameraAperture();
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        file.setCameraAperture(aperture);
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        return file.getCameraExposureTime();
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        file.setCameraExposureTime(exposureTime);
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        return file.getCameraFocalLength();
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
+        file.setCameraFocalLength(focalLength);
     }
 
     @Override

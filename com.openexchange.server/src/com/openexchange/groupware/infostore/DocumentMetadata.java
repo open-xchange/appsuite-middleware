@@ -322,14 +322,56 @@ public interface DocumentMetadata extends Serializable {
      *
      * @return The ISO speed value or <code>null</code> if unknown/not set
      */
-    Long getIsoSpeed();
+    Long getCameraIsoSpeed();
 
     /**
      * Sets ISO speed value of a camera or input device associated with this file
      *
      * @param isoSpeed The ISO speed value
      */
-    void setIsoSpeed(long isoSpeed);
+    void setCameraIsoSpeed(long isoSpeed);
+
+    /**
+     * Gets the aperture used to create the photo (f-number).
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraAperture();
+
+    /**
+     * Set the aperture used to create the photo (f-number).
+     *
+     * @param aperture The aperture
+     */
+    void setCameraAperture(double aperture);
+
+    /**
+     * Gets the focal length used to create the photo, in millimeters.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraFocalLength();
+
+    /**
+     * Sets the focal length used to create the photo, in millimeters.
+     *
+     * @param focalLength The focal length
+     */
+    void setCameraFocalLength(double focalLength);
+
+    /**
+     * Gets the length of the exposure, in seconds.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraExposureTime();
+
+    /**
+     * Sets the length of the exposure, in seconds.
+     *
+     * @param exposureTime The exposure time
+     */
+    void setCameraExposureTime(double exposureTime);
 
     /**
      * Gets the meta information for the media resource associated with this file

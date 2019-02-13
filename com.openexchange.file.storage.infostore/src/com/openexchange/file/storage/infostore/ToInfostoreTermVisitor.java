@@ -56,6 +56,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.file.storage.search.AndTerm;
+import com.openexchange.file.storage.search.CameraApertureTerm;
+import com.openexchange.file.storage.search.CameraExposureTimeTerm;
+import com.openexchange.file.storage.search.CameraFocalLengthTerm;
 import com.openexchange.file.storage.search.CameraModelTerm;
 import com.openexchange.file.storage.search.CaptureDateTerm;
 import com.openexchange.file.storage.search.CategoriesTerm;
@@ -70,7 +73,7 @@ import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
 import com.openexchange.file.storage.search.HeightTerm;
-import com.openexchange.file.storage.search.IsoSpeedTerm;
+import com.openexchange.file.storage.search.CameraIsoSpeedTerm;
 import com.openexchange.file.storage.search.LastModifiedTerm;
 import com.openexchange.file.storage.search.LastModifiedUtcTerm;
 import com.openexchange.file.storage.search.LockedUntilTerm;
@@ -283,8 +286,23 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(IsoSpeedTerm term) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.IsoSpeedTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    public void visit(CameraIsoSpeedTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CameraIsoSpeedTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(CameraApertureTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CameraApertureTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(CameraExposureTimeTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CameraExposureTimeTerm(new ComparablePatternImpl<Number>(term.getPattern()));
+    }
+
+    @Override
+    public void visit(CameraFocalLengthTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CameraFocalLengthTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     @Override

@@ -119,7 +119,9 @@ public class InfostoreQueryCatalog {
         Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_MD5SUM_LITERAL, Metadata.VERSION_COMMENT_LITERAL,
         Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.META_LITERAL,
         Metadata.CAPTURE_DATE_LITERAL, Metadata.GEOLOCATION_LITERAL, Metadata.WIDTH_LITERAL, Metadata.HEIGHT_LITERAL,
-        Metadata.CAMERA_MODEL_LITERAL, Metadata.ISO_SPEED_LITERAL, Metadata.MEDIA_META_LITERAL, Metadata.MEDIA_STATUS_LITERAL };
+        Metadata.CAMERA_MODEL_LITERAL, Metadata.CAMERA_ISO_SPEED_LITERAL, Metadata.CAMERA_APERTURE_LITERAL,
+        Metadata.CAMERA_EXPOSURE_TIME_LITERAL, Metadata.CAMERA_FOCAL_LENGTH_LITERAL, Metadata.MEDIA_META_LITERAL,
+        Metadata.MEDIA_STATUS_LITERAL };
 
     public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = ImmutableSet.copyOf(INFOSTORE_DOCUMENT_FIELDS);
 
@@ -1153,7 +1155,22 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
-        public Object isoSpeed() {
+        public Object cameraIsoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object cameraAperture() {
+            return null;
+        }
+
+        @Override
+        public Object cameraExposureTime() {
+            return null;
+        }
+
+        @Override
+        public Object cameraFocalLength() {
             return null;
         }
 
@@ -1358,7 +1375,22 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
-        public Object isoSpeed() {
+        public Object cameraIsoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object cameraAperture() {
+            return null;
+        }
+
+        @Override
+        public Object cameraExposureTime() {
+            return null;
+        }
+
+        @Override
+        public Object cameraFocalLength() {
             return null;
         }
 
@@ -1562,8 +1594,23 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
-        public Object isoSpeed() {
-            return "iso_speed";
+        public Object cameraIsoSpeed() {
+            return "camera_iso_speed";
+        }
+
+        @Override
+        public Object cameraAperture() {
+            return "camera_aperture";
+        }
+
+        @Override
+        public Object cameraExposureTime() {
+            return "camera_exposure_time";
+        }
+
+        @Override
+        public Object cameraFocalLength() {
+            return "camera_focal_length";
         }
 
         @Override
@@ -1766,7 +1813,22 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
-        public Object isoSpeed() {
+        public Object cameraIsoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object cameraAperture() {
+            return null;
+        }
+
+        @Override
+        public Object cameraExposureTime() {
+            return null;
+        }
+
+        @Override
+        public Object cameraFocalLength() {
             return null;
         }
 

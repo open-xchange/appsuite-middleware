@@ -463,7 +463,22 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         }
 
         @Override
-        public Object isoSpeed() {
+        public Object cameraIsoSpeed() {
+            return null;
+        }
+
+        @Override
+        public Object cameraAperture() {
+            return null;
+        }
+
+        @Override
+        public Object cameraExposureTime() {
+            return null;
+        }
+
+        @Override
+        public Object cameraFocalLength() {
             return null;
         }
 

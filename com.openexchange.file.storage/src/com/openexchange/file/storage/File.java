@@ -312,14 +312,56 @@ public interface File {
      *
      * @return The ISO speed value or <code>null</code> if unknown/not set
      */
-    Long getIsoSpeed();
+    Long getCameraIsoSpeed();
 
     /**
      * Sets ISO speed value of a camera or input device associated with this file
      *
      * @param isoSpeed The ISO speed value
      */
-    void setIsoSpeed(long isoSpeed);
+    void setCameraIsoSpeed(long isoSpeed);
+
+    /**
+     * Gets the aperture used to create the photo (f-number).
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraAperture();
+
+    /**
+     * Set the aperture used to create the photo (f-number).
+     *
+     * @param aperture The aperture
+     */
+    void setCameraAperture(double aperture);
+
+    /**
+     * Gets the focal length used to create the photo, in millimeters.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraFocalLength();
+
+    /**
+     * Sets the focal length used to create the photo, in millimeters.
+     *
+     * @param focalLength The focal length
+     */
+    void setCameraFocalLength(double focalLength);
+
+    /**
+     * Gets the length of the exposure, in seconds.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraExposureTime();
+
+    /**
+     * Sets the length of the exposure, in seconds.
+     *
+     * @param exposureTime The exposure time
+     */
+    void setCameraExposureTime(double exposureTime);
 
     /**
      * Gets the meta information for the media resource associated with this file
@@ -411,14 +453,17 @@ public interface File {
         WIDTH("width", 715),
         HEIGHT("height", 716),
         CAMERA_MODEL("camera_model", 717),
-        ISO_SPEED("iso_speed", 718),
-        MEDIA_META("media_meta", 719),
-        MEDIA_STATUS("media_status", 720),
-        MEDIA_DATE("media_date", 721),
+        CAMERA_ISO_SPEED("camera_iso_speed", 718),
+        CAMERA_APERTURE("camera_aperture", 719),
+        CAMERA_EXPOSURE_TIME("camera_exposure_time", 720),
+        CAMERA_FOCAL_LENGTH("camera_focal_length", 721),
+        MEDIA_META("media_meta", 722),
+        MEDIA_STATUS("media_status", 723),
+        MEDIA_DATE("media_date", 724),
         ;
 
         /** The set containing all media-associated fields */
-        public static final Set<Field> MEDIA_FIELDS = EnumSet.of(CAPTURE_DATE, GEOLOCATION, WIDTH, HEIGHT, CAMERA_MODEL, ISO_SPEED, MEDIA_META, MEDIA_STATUS, MEDIA_DATE);
+        public static final Set<Field> MEDIA_FIELDS = EnumSet.of(CAPTURE_DATE, GEOLOCATION, WIDTH, HEIGHT, CAMERA_MODEL, CAMERA_APERTURE, CAMERA_EXPOSURE_TIME, CAMERA_FOCAL_LENGTH, CAMERA_ISO_SPEED, MEDIA_META, MEDIA_STATUS, MEDIA_DATE);
 
         private final int number;
         private final String name;
@@ -519,8 +564,14 @@ public interface File {
                 return switcher.height(args);
             case CAMERA_MODEL:
                 return switcher.cameraModel(args);
-            case ISO_SPEED:
-                return switcher.isoSpeed(args);
+            case CAMERA_ISO_SPEED:
+                return switcher.cameraIsoSpeed(args);
+            case CAMERA_APERTURE:
+                return switcher.cameraAperture(args);
+            case CAMERA_EXPOSURE_TIME:
+                return switcher.cameraExposureTime(args);
+            case CAMERA_FOCAL_LENGTH:
+                return switcher.cameraFocalLength(args);
             case MEDIA_META:
                 return switcher.mediaMeta(args);
             case MEDIA_STATUS:

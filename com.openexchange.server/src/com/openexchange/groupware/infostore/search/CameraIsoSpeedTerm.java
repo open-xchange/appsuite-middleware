@@ -47,54 +47,52 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.groupware.infostore.search;
+
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * A {@link FileFieldSwitcher} allows to generically do work for a certain field
+ * {@link CameraIsoSpeedTerm}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.2
  */
-public interface FileFieldSwitcher {
+public class CameraIsoSpeedTerm extends AbstractNumberSearchTerm {
 
-    Object lastModified(Object...args);
-    Object created(Object...args);
-    Object modifiedBy(Object...args);
-    Object folderId(Object...args);
-    Object title(Object...args);
-    Object version(Object...args);
-    Object content(Object...args);
-    Object id(Object...args);
-    Object fileSize(Object...args);
-    Object description(Object...args);
-    Object url(Object...args);
-    Object createdBy(Object...args);
-    Object filename(Object...args);
-    Object fileMimetype(Object...args);
-    Object sequenceNumber(Object...args);
-    Object categories(Object...args);
-    Object lockedUntil(Object...args);
-    Object fileMd5sum(Object...args);
-    Object versionComment(Object...args);
-    Object currentVersion(Object...args);
-    Object colorLabel(Object...args);
-    Object lastModifiedUtc(Object...args);
-    Object numberOfVersions(Object...args);
-    Object meta(Object...args);
-    Object objectPermissions(Object...args);
-    Object shareable(Object...args);
-    Object origin(Object...args);
-    Object captureDate(Object... args);
-    Object geolocation(Object... args);
-    Object width(Object... args);
-    Object height(Object... args);
-    Object cameraModel(Object... args);
-    Object cameraIsoSpeed(Object... args);
-    Object cameraAperture(Object... args);
-    Object cameraExposureTime(Object... args);
-    Object cameraFocalLength(Object... args);
-    Object mediaMeta(Object... args);
-    Object mediaStatus(Object[] args);
-    Object mediaDate(Object[] args);
+    /**
+     * Initializes a new {@link CameraIsoSpeedTerm}.
+     * @param pattern
+     */
+    public CameraIsoSpeedTerm(ComparablePattern<Number> pattern) {
+        super(pattern);
+    }
+
+    @Override
+    public void visit(SearchTermVisitor visitor) throws OXException {
+        if (null != visitor) {
+            visitor.visit(this);
+        }
+    }
+
+    @Override
+    public void addField(Collection<Metadata> col) {
+        if (null != col) {
+            col.add(Metadata.CAMERA_ISO_SPEED_LITERAL);
+        }
+    }
+
+    @Override
+    protected Number getNumber(DocumentMetadata file) {
+        return file.getCameraIsoSpeed();
+    }
+
+    @Override
+    protected boolean compareLongValues() {
+        return true;
+    }
 
 }

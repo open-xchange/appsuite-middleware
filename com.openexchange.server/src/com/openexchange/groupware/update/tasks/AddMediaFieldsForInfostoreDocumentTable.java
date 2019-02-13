@@ -103,8 +103,20 @@ public class AddMediaFieldsForInfostoreDocumentTable extends UpdateTaskAdapter {
                 Tools.addColumns(con, "infostore_document", new Column("camera_model", "VARCHAR(128) DEFAULT NULL"));
             }
 
-            if (!Tools.columnExists(con, "infostore_document", "iso_speed")) {
-                Tools.addColumns(con, "infostore_document", new Column("iso_speed", "int8 UNSIGNED DEFAULT NULL"));
+            if (!Tools.columnExists(con, "infostore_document", "camera_iso_speed")) {
+                Tools.addColumns(con, "infostore_document", new Column("camera_iso_speed", "int8 UNSIGNED DEFAULT NULL"));
+            }
+
+            if (!Tools.columnExists(con, "infostore_document", "camera_aperture")) {
+                Tools.addColumns(con, "infostore_document", new Column("camera_aperture", "double DEFAULT NULL"));
+            }
+
+            if (!Tools.columnExists(con, "infostore_document", "camera_exposure_time")) {
+                Tools.addColumns(con, "infostore_document", new Column("camera_exposure_time", "double DEFAULT NULL"));
+            }
+
+            if (!Tools.columnExists(con, "infostore_document", "camera_focal_length")) {
+                Tools.addColumns(con, "infostore_document", new Column("camera_focal_length", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "media_meta")) {

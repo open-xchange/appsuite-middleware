@@ -226,8 +226,23 @@ public class GetSwitch implements MetadataSwitcher {
     }
 
     @Override
-    public Object isoSpeed() {
-        return metadata.getIsoSpeed();
+    public Object cameraIsoSpeed() {
+        return metadata.getCameraIsoSpeed();
+    }
+
+    @Override
+    public Object cameraAperture() {
+        return metadata.getCameraAperture();
+    }
+
+    @Override
+    public Object cameraExposureTime() {
+        return metadata.getCameraExposureTime();
+    }
+
+    @Override
+    public Object cameraFocalLength() {
+        return metadata.getCameraFocalLength();
     }
 
     @Override

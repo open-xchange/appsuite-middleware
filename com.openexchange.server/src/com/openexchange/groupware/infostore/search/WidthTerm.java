@@ -58,8 +58,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 /**
  * {@link WidthTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.2
  */
 public class WidthTerm extends AbstractNumberSearchTerm {
 

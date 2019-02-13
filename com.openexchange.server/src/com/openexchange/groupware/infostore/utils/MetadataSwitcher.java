@@ -117,7 +117,13 @@ public interface MetadataSwitcher {
 
     Object cameraModel();
 
-    Object isoSpeed();
+    Object cameraIsoSpeed();
+
+    Object cameraAperture();
+
+    Object cameraExposureTime();
+
+    Object cameraFocalLength();
 
     Object mediaMeta();
 

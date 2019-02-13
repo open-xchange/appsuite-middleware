@@ -293,8 +293,26 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     }
 
     @Override
-    public Object isoSpeed(Object... args) {
-        md(args).setIsoSpeed(longValue(1, args));
+    public Object cameraIsoSpeed(Object... args) {
+        md(args).setCameraIsoSpeed(longValue(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object cameraAperture(Object... args) {
+        md(args).setCameraAperture(doubleValue(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object cameraExposureTime(Object... args) {
+        md(args).setCameraExposureTime(doubleValue(1, args));
+        return ret(args);
+    }
+
+    @Override
+    public Object cameraFocalLength(Object... args) {
+        md(args).setCameraFocalLength(doubleValue(1, args));
         return ret(args);
     }
 

@@ -243,7 +243,22 @@ public class FieldCollectorVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(IsoSpeedTerm term) throws OXException {
+    public void visit(CameraIsoSpeedTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(CameraApertureTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(CameraExposureTimeTerm term) throws OXException {
+        handleTerm(term);
+    }
+
+    @Override
+    public void visit(CameraFocalLengthTerm term) throws OXException {
         handleTerm(term);
     }
 

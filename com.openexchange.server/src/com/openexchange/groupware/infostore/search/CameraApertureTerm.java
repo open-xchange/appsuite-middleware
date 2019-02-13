@@ -56,18 +56,18 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link IsoSpeedTerm}
+ * {@link CameraApertureTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.2
  */
-public class IsoSpeedTerm extends AbstractNumberSearchTerm {
+public class CameraApertureTerm extends AbstractNumberSearchTerm {
 
     /**
-     * Initializes a new {@link IsoSpeedTerm}.
+     * Initializes a new {@link CameraApertureTerm}.
      * @param pattern
      */
-    public IsoSpeedTerm(ComparablePattern<Number> pattern) {
+    public CameraApertureTerm(ComparablePattern<Number> pattern) {
         super(pattern);
     }
 
@@ -81,13 +81,13 @@ public class IsoSpeedTerm extends AbstractNumberSearchTerm {
     @Override
     public void addField(Collection<Metadata> col) {
         if (null != col) {
-            col.add(Metadata.ISO_SPEED_LITERAL);
+            col.add(Metadata.CAMERA_APERTURE_LITERAL);
         }
     }
 
     @Override
     protected Number getNumber(DocumentMetadata file) {
-        return file.getIsoSpeed();
+        return file.getCameraAperture();
     }
 
     @Override

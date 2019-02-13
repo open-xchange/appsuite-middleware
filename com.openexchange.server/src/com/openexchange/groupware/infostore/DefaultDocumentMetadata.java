@@ -102,7 +102,10 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected Long width = null;
     protected Long height = null;
     private String cameraModel = null;
-    private Long isoSpeed = null;
+    private Long cameraIsoSpeed = null;
+    private Double cameraAperture = null;
+    private Double cameraExposureTime = null;
+    private Double cameraFocalLength = null;
     protected Map<String, Object> mediaMeta;
     protected MediaStatus mediaStatus = null;
 
@@ -471,16 +474,58 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     }
 
     @Override
-    public Long getIsoSpeed() {
-        return isoSpeed;
+    public Long getCameraIsoSpeed() {
+        return cameraIsoSpeed;
     }
 
     @Override
-    public void setIsoSpeed(long isoSpeed) {
+    public void setCameraIsoSpeed(long isoSpeed) {
         if (isoSpeed < 0) {
-            this.isoSpeed = null;
+            this.cameraIsoSpeed = null;
         } else {
-            this.isoSpeed = Long.valueOf(isoSpeed);
+            this.cameraIsoSpeed = Long.valueOf(isoSpeed);
+        }
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        return cameraAperture;
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        if (aperture < 0) {
+            this.cameraAperture = null;
+        } else {
+            this.cameraAperture = Double.valueOf(aperture);
+        }
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        return cameraExposureTime;
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        if (exposureTime < 0) {
+            this.cameraExposureTime = null;
+        } else {
+            this.cameraExposureTime = Double.valueOf(exposureTime);
+        }
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        return cameraFocalLength;
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
+        if (focalLength < 0) {
+            this.cameraFocalLength = null;
+        } else {
+            this.cameraFocalLength = Double.valueOf(focalLength);
         }
     }
 

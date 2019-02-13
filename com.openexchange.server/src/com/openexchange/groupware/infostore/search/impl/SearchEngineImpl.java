@@ -703,8 +703,17 @@ public class SearchEngineImpl extends DBService {
                 case Metadata.CAMERA_MODEL:
                     retval.add("infostore_document.camera_model");
                     break Metadata2DBSwitch;
-                case Metadata.ISO_SPEED:
-                    retval.add("infostore_document.iso_speed");
+                case Metadata.CAMERA_ISO_SPEED:
+                    retval.add("infostore_document.camera_iso_speed");
+                    break Metadata2DBSwitch;
+                case Metadata.CAMERA_APERTURE:
+                    retval.add("infostore_document.camera_aperture");
+                    break Metadata2DBSwitch;
+                case Metadata.CAMERA_EXPOSURE_TIME:
+                    retval.add("infostore_document.camera_exposure_time");
+                    break Metadata2DBSwitch;
+                case Metadata.CAMERA_FOCAL_LENGTH:
+                    retval.add("infostore_document.camera_focal_length");
                     break Metadata2DBSwitch;
                 case Metadata.MEDIA_META:
                     retval.add("infostore_document.media_meta");
@@ -980,10 +989,28 @@ public class SearchEngineImpl extends DBService {
                             retval.setHeight(height);
                         }
                         break;
-                    case Metadata.ISO_SPEED:
-                        long duration = result.getLong(++columnIndex);
+                    case Metadata.CAMERA_ISO_SPEED:
+                        long l = result.getLong(++columnIndex);
                         if (!result.wasNull()) {
-                            retval.setIsoSpeed(duration);
+                            retval.setCameraIsoSpeed(l);
+                        }
+                        break;
+                    case Metadata.CAMERA_APERTURE:
+                        double d = result.getDouble(++columnIndex);
+                        if (!result.wasNull()) {
+                            retval.setCameraAperture(d);
+                        }
+                        break;
+                    case Metadata.CAMERA_EXPOSURE_TIME:
+                        double d2 = result.getDouble(++columnIndex);
+                        if (!result.wasNull()) {
+                            retval.setCameraExposureTime(d2);
+                        }
+                        break;
+                    case Metadata.CAMERA_FOCAL_LENGTH:
+                        double d3 = result.getDouble(++columnIndex);
+                        if (!result.wasNull()) {
+                            retval.setCameraFocalLength(d3);
                         }
                         break;
                     case Metadata.CAMERA_MODEL:

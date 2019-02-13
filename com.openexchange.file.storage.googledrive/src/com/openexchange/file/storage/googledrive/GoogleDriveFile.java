@@ -239,9 +239,24 @@ public final class GoogleDriveFile extends DefaultFile {
                             }
                         }
                     }
-                    if (set.contains(Field.ISO_SPEED)) {
+                    if (set.contains(Field.CAMERA_ISO_SPEED)) {
                         if (null != imageMediaMetadata.getIsoSpeed()) {
-                            setIsoSpeed(imageMediaMetadata.getIsoSpeed().longValue());
+                            setCameraIsoSpeed(imageMediaMetadata.getIsoSpeed().longValue());
+                        }
+                    }
+                    if (set.contains(Field.CAMERA_APERTURE)) {
+                        if (null != imageMediaMetadata.getAperture()) {
+                            setCameraAperture(imageMediaMetadata.getAperture().doubleValue());
+                        }
+                    }
+                    if (set.contains(Field.CAMERA_EXPOSURE_TIME)) {
+                        if (null != imageMediaMetadata.getExposureTime()) {
+                            setCameraExposureTime(imageMediaMetadata.getExposureTime().doubleValue());
+                        }
+                    }
+                    if (set.contains(Field.CAMERA_FOCAL_LENGTH)) {
+                        if (null != imageMediaMetadata.getFocalLength()) {
+                            setCameraFocalLength(imageMediaMetadata.getFocalLength().doubleValue());
                         }
                     }
                 } else {

@@ -383,7 +383,10 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                                 documentToPass.setGeoLocation(null);
                                 documentToPass.setWidth(-1);
                                 documentToPass.setHeight(-1);
-                                documentToPass.setIsoSpeed(-1);
+                                documentToPass.setCameraIsoSpeed(-1);
+                                documentToPass.setCameraAperture(-1);
+                                documentToPass.setCameraExposureTime(-1);
+                                documentToPass.setCameraFocalLength(-1);
                                 documentToPass.setCameraModel(null);
                                 documentToPass.setMediaMeta(null);
                             }
@@ -396,7 +399,10 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                                 documentToPass.setGeoLocation(null);
                                 documentToPass.setWidth(-1);
                                 documentToPass.setHeight(-1);
-                                documentToPass.setIsoSpeed(-1);
+                                documentToPass.setCameraIsoSpeed(-1);
+                                documentToPass.setCameraAperture(-1);
+                                documentToPass.setCameraExposureTime(-1);
+                                documentToPass.setCameraFocalLength(-1);
                                 documentToPass.setCameraModel(null);
                                 documentToPass.setMediaMeta(null);
                             }
@@ -410,7 +416,10 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                     documentToPass.setGeoLocation(null);
                     documentToPass.setWidth(-1);
                     documentToPass.setHeight(-1);
-                    documentToPass.setIsoSpeed(-1);
+                    documentToPass.setCameraIsoSpeed(-1);
+                    documentToPass.setCameraAperture(-1);
+                    documentToPass.setCameraExposureTime(-1);
+                    documentToPass.setCameraFocalLength(-1);
                     documentToPass.setCameraModel(null);
                     documentToPass.setMediaMeta(null);
                 }

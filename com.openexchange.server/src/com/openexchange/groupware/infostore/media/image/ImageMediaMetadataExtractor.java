@@ -175,12 +175,14 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
     // --------------------------------------------------------------------------------------------------------------------------------
 
     private final Set<FileType> fastTypes;
+    private final boolean writeMediaMetadata;
 
     /**
      * Initializes a new {@link ImageMediaMetadataExtractor}.
      */
     private ImageMediaMetadataExtractor() {
         super();
+        writeMediaMetadata = false;
         this.fastTypes = EnumSet.of(FileType.Jpeg, FileType.Psd, FileType.Eps, FileType.Bmp, FileType.Ico, FileType.Pcx, FileType.Heif);
     }
 
@@ -301,7 +303,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                 String model = null;
                 String make = null;
 
-                Map<String, Object> mediaMeta = new LinkedHashMap<String, Object>(4);
+                Map<String, Object> mediaMeta = writeMediaMetadata ? new LinkedHashMap<String, Object>(4) : null;
 
                 Thread currentThread = Thread.currentThread();
                 for (Directory directory : metadata.getDirectories()) {
@@ -316,11 +318,14 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                     // Check for a known directory
                     KnownDirectory knownDirectory = KnownDirectory.knownDirectoryFor(directory);
 
-                    // Get tag list & initialize appropriate map for current metadata directory
-                    boolean discardDirectory = putMediaMeta(null == knownDirectory ? directory.getName() : knownDirectory.name(), directory, mediaMeta);
-                    if (discardDirectory) {
-                        // Nothing put into media metadata for current metadata directory
-                        continue;
+                    // Check if media meta-data are supposed to be written
+                    if (writeMediaMetadata) {
+                        // Get tag list & initialize appropriate map for current metadata directory
+                        boolean discardDirectory = putMediaMeta(null == knownDirectory ? directory.getName() : knownDirectory.name(), directory, mediaMeta);
+                        if (discardDirectory) {
+                            // Nothing put into media metadata for current metadata directory
+                            continue;
+                        }
                     }
 
                     if (null != knownDirectory) {
@@ -354,11 +359,29 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                         document.setHeight(longObject.longValue());
                                     }
                                 }
-                                if (document.getIsoSpeed() == null) {
+                                if (document.getCameraIsoSpeed() == null) {
                                     Object value = directory.getObject(ExifDirectoryBase.TAG_ISO_EQUIVALENT);
                                     Long longObject = MediaMetadataExtractors.getLongValue(value);
                                     if (null != longObject) {
-                                        document.setIsoSpeed(longObject.longValue());
+                                        document.setCameraIsoSpeed(longObject.longValue());
+                                    }
+                                }
+                                if (document.getCameraAperture() == null) {
+                                    Double aperture = directory.getDoubleObject(ExifDirectoryBase.TAG_APERTURE);
+                                    if (aperture != null) {
+                                        document.setCameraAperture(aperture.doubleValue());
+                                    }
+                                }
+                                if (document.getCameraExposureTime() == null) {
+                                    Double exposureTime = directory.getDoubleObject(ExifDirectoryBase.TAG_SHUTTER_SPEED);
+                                    if (exposureTime != null) {
+                                        document.setCameraExposureTime(exposureTime.doubleValue());
+                                    }
+                                }
+                                if (document.getCameraFocalLength() == null) {
+                                    Double focalLength = directory.getDoubleObject(ExifDirectoryBase.TAG_FOCAL_LENGTH);
+                                    if (focalLength != null) {
+                                        document.setCameraFocalLength(focalLength.doubleValue());
                                     }
                                 }
                                 if (null == make) {

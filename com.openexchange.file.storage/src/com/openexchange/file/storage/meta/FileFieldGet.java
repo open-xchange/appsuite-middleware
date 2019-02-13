@@ -52,7 +52,6 @@ package com.openexchange.file.storage.meta;
 import java.util.Date;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.MediaStatus;
 
 
 /**
@@ -223,8 +222,23 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
     }
 
     @Override
-    public Object isoSpeed(Object... args) {
-        return md(args).getIsoSpeed();
+    public Object cameraIsoSpeed(Object... args) {
+        return md(args).getCameraIsoSpeed();
+    }
+
+    @Override
+    public Object cameraAperture(Object... args) {
+        return md(args).getCameraAperture();
+    }
+
+    @Override
+    public Object cameraExposureTime(Object... args) {
+        return md(args).getCameraExposureTime();
+    }
+
+    @Override
+    public Object cameraFocalLength(Object... args) {
+        return md(args).getCameraFocalLength();
     }
 
     @Override

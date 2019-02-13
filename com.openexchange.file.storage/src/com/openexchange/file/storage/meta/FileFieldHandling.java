@@ -321,8 +321,23 @@ public class FileFieldHandling {
         }
 
         @Override
-        public Object isoSpeed(Object... args) {
-            return handler.handle(Field.ISO_SPEED, args);
+        public Object cameraIsoSpeed(Object... args) {
+            return handler.handle(Field.CAMERA_ISO_SPEED, args);
+        }
+
+        @Override
+        public Object cameraAperture(Object... args) {
+            return handler.handle(Field.CAMERA_APERTURE, args);
+        }
+
+        @Override
+        public Object cameraExposureTime(Object... args) {
+            return handler.handle(Field.CAMERA_EXPOSURE_TIME, args);
+        }
+
+        @Override
+        public Object cameraFocalLength(Object... args) {
+            return handler.handle(Field.CAMERA_FOCAL_LENGTH, args);
         }
 
         @Override

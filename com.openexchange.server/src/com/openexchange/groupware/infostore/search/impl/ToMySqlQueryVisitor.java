@@ -61,6 +61,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
 import com.openexchange.groupware.infostore.search.AndTerm;
+import com.openexchange.groupware.infostore.search.CameraApertureTerm;
+import com.openexchange.groupware.infostore.search.CameraExposureTimeTerm;
+import com.openexchange.groupware.infostore.search.CameraFocalLengthTerm;
 import com.openexchange.groupware.infostore.search.CameraModelTerm;
 import com.openexchange.groupware.infostore.search.CaptureDateTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
@@ -76,7 +79,7 @@ import com.openexchange.groupware.infostore.search.FileMimeTypeTerm;
 import com.openexchange.groupware.infostore.search.FileNameTerm;
 import com.openexchange.groupware.infostore.search.FileSizeTerm;
 import com.openexchange.groupware.infostore.search.HeightTerm;
-import com.openexchange.groupware.infostore.search.IsoSpeedTerm;
+import com.openexchange.groupware.infostore.search.CameraIsoSpeedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedUtcTerm;
 import com.openexchange.groupware.infostore.search.LockedUntilTerm;
@@ -385,9 +388,27 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(IsoSpeedTerm isoSpeedTerm) throws OXException {
-        String comp = getComparionType(isoSpeedTerm.getPattern());
-        filterBuilder.append(DOCUMENT).append("iso_speed").append(comp).append(isoSpeedTerm.getPattern().getPattern()).append(" ");
+    public void visit(CameraIsoSpeedTerm cameraIsoSpeedTerm) throws OXException {
+        String comp = getComparionType(cameraIsoSpeedTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_iso_speed").append(comp).append(cameraIsoSpeedTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraApertureTerm cameraApertureTerm) throws OXException {
+        String comp = getComparionType(cameraApertureTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_aperture").append(comp).append(cameraApertureTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraExposureTimeTerm cameraExposureTimeTerm) throws OXException {
+        String comp = getComparionType(cameraExposureTimeTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_exposure_time").append(comp).append(cameraExposureTimeTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraFocalLengthTerm cameraFocalLengthTerm) throws OXException {
+        String comp = getComparionType(cameraFocalLengthTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_focal_length").append(comp).append(cameraFocalLengthTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override

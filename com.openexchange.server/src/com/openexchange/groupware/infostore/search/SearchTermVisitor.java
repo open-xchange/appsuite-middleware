@@ -279,10 +279,34 @@ public interface SearchTermVisitor {
     /**
      * The visitation for ISO speed term.
      *
-     * @param isoSpeedTerm The visited ISO speed term
+     * @param cameraIsoSpeedTerm The visited ISO speed term
      * @throws OXException If visit attempt fails
      */
-    void visit(IsoSpeedTerm isoSpeedTerm) throws OXException;
+    void visit(CameraIsoSpeedTerm cameraIsoSpeedTerm) throws OXException;
+
+    /**
+     * The visitation for aperture term.
+     *
+     * @param cameraApertureTerm The visited term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraApertureTerm cameraApertureTerm) throws OXException;
+
+    /**
+     * The visitation for exposure time term.
+     *
+     * @param cameraExposureTimeTerm The visited term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraExposureTimeTerm cameraExposureTimeTerm) throws OXException;
+
+    /**
+     * The visitation for focal length term.
+     *
+     * @param cameraFocalLengthTerm The visited term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraFocalLengthTerm cameraFocalLengthTerm) throws OXException;
 
     /**
      * The visitation for width term.

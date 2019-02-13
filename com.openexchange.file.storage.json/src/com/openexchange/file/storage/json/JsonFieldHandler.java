@@ -67,6 +67,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.FileStorageConstants;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
+import com.openexchange.file.storage.FileStorageMediaUtility;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
@@ -242,6 +243,18 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                                 break;
                             case GEOLOCATION:
                                 value = value.toString();
+                                break;
+                            case CAMERA_APERTURE:
+                                double aperture = ((Number) value).doubleValue();
+                                value = FileStorageMediaUtility.getCameraApertureDescription(aperture, request.getSession().getUser().getLocale());
+                                break;
+                            case CAMERA_EXPOSURE_TIME:
+                                double exposureTime = ((Number) value).doubleValue();
+                                value = FileStorageMediaUtility.getCameraExposureTimeDescription(exposureTime, request.getSession().getUser().getLocale());
+                                break;
+                            case CAMERA_FOCAL_LENGTH:
+                                double focalLength = ((Number) value).doubleValue();
+                                value = FileStorageMediaUtility.getCameraFocalLengthDescription(focalLength, request.getSession().getUser().getLocale());
                                 break;
                             default: // do nothing;
                         }

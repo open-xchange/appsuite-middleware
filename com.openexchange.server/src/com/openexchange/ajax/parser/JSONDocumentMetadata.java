@@ -669,12 +669,42 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     }
 
     @Override
-    public Long getIsoSpeed() {
+    public Long getCameraIsoSpeed() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setIsoSpeed(long isoSpeed) {
+    public void setCameraIsoSpeed(long isoSpeed) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
         throw new UnsupportedOperationException();
     }
 

@@ -56,18 +56,18 @@ import com.openexchange.file.storage.File.Field;
 
 
 /**
- * {@link IsoSpeedTerm}
+ * {@link CameraApertureTerm}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.10.2
  */
-public class IsoSpeedTerm extends AbstractNumberSearchTerm {
+public class CameraApertureTerm extends AbstractNumberSearchTerm {
 
     /**
-     * Initializes a new {@link IsoSpeedTerm}.
+     * Initializes a new {@link CameraApertureTerm}.
      * @param pattern
      */
-    public IsoSpeedTerm(ComparablePattern<Number> pattern) {
+    public CameraApertureTerm(ComparablePattern<Number> pattern) {
         super(pattern);
     }
 
@@ -81,13 +81,13 @@ public class IsoSpeedTerm extends AbstractNumberSearchTerm {
     @Override
     public void addField(Collection<Field> col) {
         if (null != col) {
-            col.add(Field.ISO_SPEED);
+            col.add(Field.CAMERA_APERTURE);
         }
     }
 
     @Override
     protected Number getNumber(File file) {
-        return file.getIsoSpeed();
+        return file.getCameraAperture();
     }
 
     @Override

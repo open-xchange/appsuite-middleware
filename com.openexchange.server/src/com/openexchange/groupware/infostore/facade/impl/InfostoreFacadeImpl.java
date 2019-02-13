@@ -1164,8 +1164,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                     if (document.getHeight() != null) {
                                         Metadata.addIfAbsent(updatedColumns, Metadata.HEIGHT_LITERAL);
                                     }
-                                    if (document.getIsoSpeed() != null) {
-                                        Metadata.addIfAbsent(updatedColumns, Metadata.ISO_SPEED_LITERAL);
+                                    if (document.getCameraIsoSpeed() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_ISO_SPEED_LITERAL);
+                                    }
+                                    if (document.getCameraAperture() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_APERTURE_LITERAL);
+                                    }
+                                    if (document.getCameraExposureTime() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_EXPOSURE_TIME_LITERAL);
+                                    }
+                                    if (document.getCameraFocalLength() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_FOCAL_LENGTH_LITERAL);
                                     }
                                     if (document.getCameraModel() != null) {
                                         Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_MODEL_LITERAL);
@@ -1639,11 +1648,27 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 parameters.getDocument().setGeoLocation(null);
                 parameters.getDocument().setWidth(-1);
                 parameters.getDocument().setHeight(-1);
-                parameters.getDocument().setIsoSpeed(-1);
+                parameters.getDocument().setCameraIsoSpeed(-1);
+                parameters.getDocument().setCameraAperture(-1);
+                parameters.getDocument().setCameraExposureTime(-1);
+                parameters.getDocument().setCameraFocalLength(-1);
                 parameters.getDocument().setCameraModel(null);
                 parameters.getDocument().setMediaMeta(null);
-                parameters.getDocument().setMediaStatus(MediaStatus.none());
-                parameters.getUpdatedCols().addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.CAPTURE_DATE_LITERAL, Metadata.GEOLOCATION_LITERAL, Metadata.WIDTH_LITERAL, Metadata.HEIGHT_LITERAL, Metadata.CAMERA_MODEL_LITERAL, Metadata.ISO_SPEED_LITERAL, Metadata.MEDIA_META_LITERAL, Metadata.MEDIA_STATUS_LITERAL));
+                parameters.getDocument().setMediaStatus(null);
+                parameters.getUpdatedCols().addAll(Arrays.asList(
+                    Metadata.FILE_MD5SUM_LITERAL,
+                    Metadata.FILE_SIZE_LITERAL,
+                    Metadata.CAPTURE_DATE_LITERAL,
+                    Metadata.GEOLOCATION_LITERAL,
+                    Metadata.WIDTH_LITERAL,
+                    Metadata.HEIGHT_LITERAL,
+                    Metadata.CAMERA_MODEL_LITERAL,
+                    Metadata.CAMERA_ISO_SPEED_LITERAL,
+                    Metadata.CAMERA_APERTURE_LITERAL,
+                    Metadata.CAMERA_EXPOSURE_TIME_LITERAL,
+                    Metadata.CAMERA_FOCAL_LENGTH_LITERAL,
+                    Metadata.MEDIA_META_LITERAL,
+                    Metadata.MEDIA_STATUS_LITERAL));
 
                 Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, qfs, session);
                 if (null != extraction) {
@@ -1660,7 +1685,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 parameters.getDocument().setFilestoreLocation(saveFile.getFileStorageID());
                 parameters.getDocument().setFileSize(saveFile.getByteCount());
                 parameters.getDocument().setFileMD5Sum(saveFile.getChecksum());
-                parameters.getDocument().setMediaStatus(MediaStatus.none());
+                parameters.getDocument().setMediaStatus(null);
                 parameters.getUpdatedCols().addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL, Metadata.MEDIA_STATUS_LITERAL));
 
                 Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, qfs, session);

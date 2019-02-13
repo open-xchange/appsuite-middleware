@@ -417,13 +417,43 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     }
 
     @Override
-    public Long getIsoSpeed() {
-        return document.getIsoSpeed();
+    public Long getCameraIsoSpeed() {
+        return document.getCameraIsoSpeed();
     }
 
     @Override
-    public void setIsoSpeed(long isoSpeed) {
-        document.setIsoSpeed(isoSpeed);
+    public void setCameraIsoSpeed(long isoSpeed) {
+        document.setCameraIsoSpeed(isoSpeed);
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        return document.getCameraAperture();
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        document.setCameraAperture(aperture);
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        return document.getCameraExposureTime();
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        document.setCameraExposureTime(exposureTime);
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        return document.getCameraFocalLength();
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
+        document.setCameraFocalLength(focalLength);
     }
 
     @Override

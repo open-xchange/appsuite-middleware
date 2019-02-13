@@ -346,9 +346,33 @@ public class SetSwitch implements MetadataSwitcher {
     }
 
     @Override
-    public Object isoSpeed() {
+    public Object cameraIsoSpeed() {
         if (null != value) {
-            impl.setIsoSpeed(((Number) value).longValue());
+            impl.setCameraIsoSpeed(((Number) value).longValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Object cameraAperture() {
+        if (null != value) {
+            impl.setCameraAperture(((Number) value).doubleValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Object cameraExposureTime() {
+        if (null != value) {
+            impl.setCameraExposureTime(((Number) value).doubleValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Object cameraFocalLength() {
+        if (null != value) {
+            impl.setCameraFocalLength(((Number) value).doubleValue());
         }
         return null;
     }

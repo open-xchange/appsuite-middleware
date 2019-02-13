@@ -323,7 +323,10 @@ public class MediaMetadataExtractors {
         documentToPass.setGeoLocation(null);
         documentToPass.setWidth(-1);
         documentToPass.setHeight(-1);
-        documentToPass.setIsoSpeed(-1);
+        documentToPass.setCameraIsoSpeed(-1);
+        documentToPass.setCameraAperture(-1);
+        documentToPass.setCameraExposureTime(-1);
+        documentToPass.setCameraFocalLength(-1);
         documentToPass.setCameraModel(null);
         documentToPass.setMediaMeta(null);
         documentToPass.setSequenceNumber(document.getSequenceNumber());
@@ -371,8 +374,17 @@ public class MediaMetadataExtractors {
             if (document.getHeight() != null) {
                 modifiedColumns.add(Metadata.HEIGHT_LITERAL);
             }
-            if (document.getIsoSpeed() != null) {
-                modifiedColumns.add(Metadata.ISO_SPEED_LITERAL);
+            if (document.getCameraIsoSpeed() != null) {
+                modifiedColumns.add(Metadata.CAMERA_ISO_SPEED_LITERAL);
+            }
+            if (document.getCameraAperture() != null) {
+                modifiedColumns.add(Metadata.CAMERA_APERTURE_LITERAL);
+            }
+            if (document.getCameraExposureTime() != null) {
+                modifiedColumns.add(Metadata.CAMERA_EXPOSURE_TIME_LITERAL);
+            }
+            if (document.getCameraFocalLength() != null) {
+                modifiedColumns.add(Metadata.CAMERA_FOCAL_LENGTH_LITERAL);
             }
             if (document.getCameraModel() != null) {
                 modifiedColumns.add(Metadata.CAMERA_MODEL_LITERAL);

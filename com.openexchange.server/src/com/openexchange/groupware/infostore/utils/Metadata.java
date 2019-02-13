@@ -96,10 +96,14 @@ public class Metadata {
     public static final int WIDTH = 715;
     public static final int HEIGHT = 716;
     public static final int CAMERA_MODEL = 717;
-    public static final int ISO_SPEED = 718;
-    public static final int MEDIA_META = 719;
-    public static final int MEDIA_STATUS = 720;
-    public static final int MEDIA_DATE = 721;
+    public static final int CAMERA_ISO_SPEED = 718;
+    public static final int CAMERA_APERTURE = 719;
+    public static final int CAMERA_EXPOSURE_TIME = 720;
+    public static final int CAMERA_FOCAL_LENGTH = 721;
+
+    public static final int MEDIA_META = 722;
+    public static final int MEDIA_STATUS = 723;
+    public static final int MEDIA_DATE = 724;
 
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED, "last_modified");
@@ -135,7 +139,10 @@ public class Metadata {
     public static final Metadata WIDTH_LITERAL = new Metadata(WIDTH, "width");
     public static final Metadata HEIGHT_LITERAL = new Metadata(HEIGHT, "height");
     public static final Metadata CAMERA_MODEL_LITERAL = new Metadata(CAMERA_MODEL, "camera_model");
-    public static final Metadata ISO_SPEED_LITERAL = new Metadata(ISO_SPEED, "iso_speed");
+    public static final Metadata CAMERA_ISO_SPEED_LITERAL = new Metadata(CAMERA_ISO_SPEED, "camera_iso_speed");
+    public static final Metadata CAMERA_APERTURE_LITERAL = new Metadata(CAMERA_APERTURE, "camera_aperture");
+    public static final Metadata CAMERA_EXPOSURE_TIME_LITERAL = new Metadata(CAMERA_EXPOSURE_TIME, "camera_exposure_time");
+    public static final Metadata CAMERA_FOCAL_LENGTH_LITERAL = new Metadata(CAMERA_FOCAL_LENGTH, "camera_focal_length");
     public static final Metadata MEDIA_META_LITERAL = new Metadata(MEDIA_META, "media_meta");
     public static final Metadata MEDIA_STATUS_LITERAL = new Metadata(MEDIA_STATUS, "media_status");
     public static final Metadata MEDIA_DATE_LITERAL = new Metadata(MEDIA_DATE, "media_date");
@@ -174,7 +181,10 @@ public class Metadata {
         WIDTH_LITERAL,
         HEIGHT_LITERAL,
         CAMERA_MODEL_LITERAL,
-        ISO_SPEED_LITERAL,
+        CAMERA_ISO_SPEED_LITERAL,
+        CAMERA_APERTURE_LITERAL,
+        CAMERA_EXPOSURE_TIME_LITERAL,
+        CAMERA_FOCAL_LENGTH_LITERAL,
         MEDIA_META_LITERAL,
         MEDIA_STATUS_LITERAL
     };
@@ -211,7 +221,10 @@ public class Metadata {
         WIDTH_LITERAL,
         HEIGHT_LITERAL,
         CAMERA_MODEL_LITERAL,
-        ISO_SPEED_LITERAL,
+        CAMERA_ISO_SPEED_LITERAL,
+        CAMERA_APERTURE_LITERAL,
+        CAMERA_EXPOSURE_TIME_LITERAL,
+        CAMERA_FOCAL_LENGTH_LITERAL,
         MEDIA_META_LITERAL,
         MEDIA_STATUS_LITERAL
     };
@@ -222,7 +235,10 @@ public class Metadata {
         WIDTH_LITERAL,
         HEIGHT_LITERAL,
         CAMERA_MODEL_LITERAL,
-        ISO_SPEED_LITERAL,
+        CAMERA_ISO_SPEED_LITERAL,
+        CAMERA_APERTURE_LITERAL,
+        CAMERA_EXPOSURE_TIME_LITERAL,
+        CAMERA_FOCAL_LENGTH_LITERAL,
         MEDIA_META_LITERAL,
         MEDIA_STATUS_LITERAL
     };
@@ -303,7 +319,10 @@ public class Metadata {
         case WIDTH: return WIDTH_LITERAL;
         case HEIGHT: return HEIGHT_LITERAL;
         case CAMERA_MODEL: return CAMERA_MODEL_LITERAL;
-        case ISO_SPEED: return ISO_SPEED_LITERAL;
+        case CAMERA_ISO_SPEED: return CAMERA_ISO_SPEED_LITERAL;
+        case CAMERA_APERTURE: return CAMERA_APERTURE_LITERAL;
+        case CAMERA_EXPOSURE_TIME: return CAMERA_EXPOSURE_TIME_LITERAL;
+        case CAMERA_FOCAL_LENGTH: return CAMERA_FOCAL_LENGTH_LITERAL;
         case MEDIA_META: return MEDIA_META_LITERAL;
         case MEDIA_STATUS: return MEDIA_STATUS_LITERAL;
         case MEDIA_DATE: return MEDIA_DATE_LITERAL;
@@ -364,7 +383,10 @@ public class Metadata {
         case WIDTH: return switcher.width();
         case HEIGHT: return switcher.height();
         case CAMERA_MODEL: return switcher.cameraModel();
-        case ISO_SPEED: return switcher.isoSpeed();
+        case CAMERA_ISO_SPEED: return switcher.cameraIsoSpeed();
+        case CAMERA_APERTURE: return switcher.cameraAperture();
+        case CAMERA_EXPOSURE_TIME: return switcher.cameraExposureTime();
+        case CAMERA_FOCAL_LENGTH: return switcher.cameraFocalLength();
         case MEDIA_META: return switcher.mediaMeta();
         case MEDIA_STATUS: return switcher.mediaStatus();
         case MEDIA_DATE: return switcher.mediaDate();
