@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.Date;
-import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class GetSwitch implements MetadataSwitcher {
@@ -238,8 +237,7 @@ public class GetSwitch implements MetadataSwitcher {
 
     @Override
     public Object mediaStatus() {
-        MediaStatus status = metadata.getMediaStatus();
-        return null == status ? MediaStatus.none() : status;
+        return metadata.getMediaStatus();
     }
 
     @Override

@@ -448,8 +448,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public MediaStatus getMediaStatus() {
-        MediaStatus status = document.getMediaStatus();
-        return null == status ? MediaStatus.none() : status;
+        return document.getMediaStatus();
     }
 
     @Override

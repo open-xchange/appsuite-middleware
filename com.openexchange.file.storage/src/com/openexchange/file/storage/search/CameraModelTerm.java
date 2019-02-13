@@ -59,6 +59,7 @@ import com.openexchange.file.storage.File.Field;
  * {@link CameraModelTerm}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.2
  */
 public class CameraModelTerm extends AbstractStringSearchTerm {
 

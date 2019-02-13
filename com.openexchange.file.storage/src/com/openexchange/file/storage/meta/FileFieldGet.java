@@ -234,8 +234,7 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object mediaStatus(Object[] args) {
-        MediaStatus mediaStatus = md(args).getMediaStatus();
-        return null == mediaStatus ? MediaStatus.none() : mediaStatus;
+        return md(args).getMediaStatus();
     }
 
     @Override

@@ -98,10 +98,10 @@ public abstract class AbstractDateSearchTerm implements SearchTerm<ComparablePat
     }
 
     /**
-     * Gets the number to compare with.
+     * Gets the date to compare with.
      *
-     * @param file The file to retrieve the number from
-     * @return The number
+     * @param file The file to retrieve the date from
+     * @return The date
      */
     protected abstract Date getDate(DocumentMetadata file);
 

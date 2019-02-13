@@ -100,7 +100,7 @@ public class DefaultFile extends AbstractFile {
     private String cameraModel = null;
     private Long isoSpeed = null;
     private Map<String, Object> mediaMeta = null;
-    private MediaStatus mediaStatus = MediaStatus.none();
+    private MediaStatus mediaStatus = null;
 
     /**
      * Initializes a new {@link DefaultFile}.
@@ -510,7 +510,7 @@ public class DefaultFile extends AbstractFile {
 
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
-        this.mediaStatus = mediaStatus == null ? MediaStatus.none() : mediaStatus;
+        this.mediaStatus = mediaStatus;
     }
 
 }

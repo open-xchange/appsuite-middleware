@@ -91,7 +91,8 @@ public class MediaDateTerm extends AbstractDateSearchTerm {
 
     @Override
     protected Date getDate(DocumentMetadata file) {
-        return file.getLastModified();
+        Date captureDate = file.getCaptureDate();
+        return null == captureDate ? file.getLastModified() : captureDate;
     }
 
 }

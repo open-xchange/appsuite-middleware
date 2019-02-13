@@ -55,23 +55,23 @@ import com.openexchange.filestore.FileStorage;
 
 
 /**
- * {@link FileStoragInputStreamProvider} - Provides an input stream from a file storage resource.
+ * {@link FileStorageInputStreamProvider} - Provides an input stream from a file storage resource.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class FileStoragInputStreamProvider implements InputStreamProvider {
+public class FileStorageInputStreamProvider implements InputStreamProvider {
 
     private final String fileStorageLocation;
     private final FileStorage fileStorage;
 
     /**
-     * Initializes a new {@link FileStoragInputStreamProvider}.
+     * Initializes a new {@link FileStorageInputStreamProvider}.
      *
      * @param fileStorageLocation The identifier of the file resource in the given storage
      * @param fileStorage The file storage
      */
-    public FileStoragInputStreamProvider(String fileStorageLocation, FileStorage fileStorage) {
+    public FileStorageInputStreamProvider(String fileStorageLocation, FileStorage fileStorage) {
         super();
         this.fileStorageLocation = fileStorageLocation;
         this.fileStorage = fileStorage;

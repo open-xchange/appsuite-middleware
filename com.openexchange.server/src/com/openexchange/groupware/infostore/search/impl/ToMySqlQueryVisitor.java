@@ -341,7 +341,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(MediaDateTerm mediaDateTerm) throws OXException {
         String comp = getComparionType(mediaDateTerm.getPattern());
-        filterBuilder.append("COALESCE(").append(DOCUMENT).append("capture_date").append(',').append(INFOSTORE).append("last_modified").append(')').append(comp).append(mediaDateTerm.getPattern().getPattern().getTime()).append(" ");
+        filterBuilder.append("COALESCE(").append(DOCUMENT).append("capture_date").append(',').append(DOCUMENT).append("last_modified").append(')').append(comp).append(mediaDateTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override

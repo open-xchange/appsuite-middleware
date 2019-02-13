@@ -135,7 +135,7 @@ import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
 import com.openexchange.groupware.infostore.media.ExtractorResult;
 import com.openexchange.groupware.infostore.media.EstimationResult;
-import com.openexchange.groupware.infostore.media.FileStoragInputStreamProvider;
+import com.openexchange.groupware.infostore.media.FileStorageInputStreamProvider;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractor;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractors;
@@ -186,6 +186,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -272,6 +273,27 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         /**
+         * Gets the real folder owner for given document; provided that document's original folder is set.
+         *
+         * @param document The document
+         * @param dbService The database service
+         * @param context The associated context
+         * @return The real folder owner
+         * @throws OXException If real folder owner cannot be returned
+         */
+        public static int getFolderOwnerFor(DocumentMetadata document, DBService dbService, Context context) throws OXException {
+            Connection readCon = null;
+            try {
+                readCon = dbService.getReadConnection(context);
+                OXFolderAccess folderAccess = new OXFolderAccess(readCon, context);
+                FolderObject folder = folderAccess.getFolderObject((int) document.getOriginalFolderId());
+                return InfostoreSecurityImpl.getFolderOwner(folder);
+            } finally {
+                dbService.releaseReadConnection(context, readCon);
+            }
+        }
+
+        /**
          * Gets the identifier of the owner for the folder, in which given document resides.
          *
          * @param document The document providing the folder identifier
@@ -281,7 +303,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         protected int getFolderOwner(DocumentMetadata document) throws OXException {
             TIntIntMap folderOwners = this.folderOwners;
             if (null == folderOwners) {
-                int folderOwner = infostore.security.getFolderOwner(document, session.getContext());
+                int folderOwner = getFolderOwnerFor(document, infostore, session.getContext());
                 folderOwners = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
                 this.folderOwners = folderOwners;
                 folderOwners.put((int) document.getFolderId(), folderOwner);
@@ -291,7 +313,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             int folderId = (int) document.getFolderId();
             int folderOwner = folderOwners.get(folderId);
             if (folderOwner < 0) {
-                folderOwner = infostore.security.getFolderOwner(document, session.getContext());
+                folderOwner = getFolderOwnerFor(document, infostore, session.getContext());
                 folderOwners.put(folderId, folderOwner);
             }
             return folderOwner;
@@ -542,13 +564,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         /*
-         * trigger media meta-data extraction
-         */
-        if (considerMediaDataExtraction(document)) {
-            QuotaFileStorage fileStorage = getFileStorage(permission.getFolderOwner(), context.getContextId());
-            triggerMediaDataExtraction(document, null, true, fileStorage, session);
-        }
-        /*
          * adjust parent folder if required
          */
         if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
@@ -560,6 +575,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             document.setShareable(false);
         } else {
             document.setShareable(permission.canShareObject());
+        }
+        /*
+         * trigger media meta-data extraction
+         */
+        if (considerMediaDataExtraction(document)) {
+            int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(document, this, context);
+            QuotaFileStorage fileStorage = getFileStorage(folderOwner, context.getContextId());
+            triggerMediaDataExtraction(document, null, true, fileStorage, session);
         }
         /*
          * add further metadata and return
@@ -579,7 +602,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (considerMediaDataExtraction(document)) {
             ServerSession session = getSession(null);
             if (null != session) {
-                int folderOwner = security.getFolderOwner(document, context);
+                int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(document, this, context);
                 if (folderOwner > 0) {
                     QuotaFileStorage fileStorage = getFileStorage(folderOwner, context.getContextId());
                     triggerMediaDataExtraction(document, null, true, fileStorage, session);
@@ -649,13 +672,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         /*
-         * trigger media meta-data extraction
-         */
-        if (considerMediaDataExtraction(metadata)) {
-            QuotaFileStorage fileStorage = getFileStorage(permission.getFolderOwner(), context.getContextId());
-            triggerMediaDataExtraction(metadata, null, true, fileStorage, session);
-        }
-        /*
          * adjust parent folder if required, add further metadata
          */
         if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
@@ -668,6 +684,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         } else {
             metadata.setShareable(permission.canShareObject());
         }
+        /*
+         * trigger media meta-data extraction
+         */
+        QuotaFileStorage fileStorage = null;
+        if (considerMediaDataExtraction(metadata)) {
+            int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(metadata, this, context);
+            fileStorage = getFileStorage(folderOwner, context.getContextId());
+            triggerMediaDataExtraction(metadata, null, true, fileStorage, session);
+        }
         metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
          * check client E-Tag if supplied
@@ -679,13 +704,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * add file to result, otherwise
          */
-        final FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
+        if (null == fileStorage) {
+            int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(metadata, this, context);
+            fileStorage = getFileStorage(folderOwner, context.getContextId());
+        }
+        final FileStorage fs = fileStorage;
         final String filestoreLocation = metadata.getFilestoreLocation();
         InputStreamClosure isClosure = new InputStreamClosure() {
 
             @Override
             public InputStream newStream() throws OXException, IOException {
-                return null == filestoreLocation ? Streams.EMPTY_INPUT_STREAM : fileStorage.getFile(filestoreLocation);
+                return null == filestoreLocation ? Streams.EMPTY_INPUT_STREAM : fs.getFile(filestoreLocation);
             }
         };
         return new DocumentAndMetadataImpl(metadata, isClosure, eTag);
@@ -1073,7 +1102,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
 
             // Obtain binary data from file storage
-            FileStoragInputStreamProvider streamProvider = new FileStoragInputStreamProvider(document.getFilestoreLocation(), fileStorage);
+            FileStorageInputStreamProvider streamProvider = new FileStorageInputStreamProvider(document.getFilestoreLocation(), fileStorage);
 
             // Check...
             EstimationResult result = extractorService.estimateEffort(streamProvider, document);
@@ -2491,8 +2520,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 }
             };
             if (shouldTriggerMediaDataExtraction) {
-                QuotaFileStorage fileStorage = getFileStorage(infoPerm.getFolderOwner(), context.getContextId());
-                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session, customizer);
+                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
             }
             iter.setCustomizer(customizer);
             TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
@@ -2594,10 +2622,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                          */
                         document.setShareable(false);
                     } else {
-                        if (considerMediaDataExtraction(document)) {
-                            QuotaFileStorage fileStorage = getFileStorage(folderPermission.getFolderOwner(), session.getContextId());
-                            triggerMediaDataExtraction(document, null, true, fileStorage, session);
-                        }
                         document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == user.getId());
                     }
                 }
@@ -2656,8 +2680,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 }
             };
             if (shouldTriggerMediaDataExtraction) {
-                QuotaFileStorage fileStorage = getFileStorage(security.getFolderOwner(folderId, context), context.getContextId());
-                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session, customizer);
+                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
             }
             newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             newIter.setCustomizer(customizer);
@@ -3420,8 +3443,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     }
                 };
                 if (shouldTriggerMediaDataExtraction) {
-                    QuotaFileStorage fileStorage = getFileStorage(security.getFolderOwner(folderId, context), context.getContextId());
-                    customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession), customizer);
+                    customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, getSession(optSession), customizer);
                 }
                 iterator.setCustomizer(customizer);
             } else {

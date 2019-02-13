@@ -58,8 +58,8 @@ import com.openexchange.file.storage.File.Field;
 /**
  * {@link HeightTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.2
  */
 public class HeightTerm extends AbstractNumberSearchTerm {
 

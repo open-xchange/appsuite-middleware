@@ -382,7 +382,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                                 MediaStatus mediaStatus = MediaStatus.valueFor(status);
                                 set.setValue(null == mediaStatus ? MediaStatus.none() : mediaStatus);
                             } else {
-                                set.setValue(MediaStatus.none());
+                                set.setValue(null);
                             }
                             break;
                         case Metadata.CAPTURE_DATE:

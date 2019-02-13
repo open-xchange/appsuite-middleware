@@ -104,7 +104,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     private String cameraModel = null;
     private Long isoSpeed = null;
     protected Map<String, Object> mediaMeta;
-    protected MediaStatus mediaStatus = MediaStatus.none();
+    protected MediaStatus mediaStatus = null;
 
     /**
      * Initializes a new {@link DefaultDocumentMetadata}.
@@ -165,11 +165,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
 
     @Override
     public long getOriginalFolderId() {
-        if (originalFolderId < 0) {
-            return getFolderId();
-        }
-
-        return originalFolderId;
+        return originalFolderId >= 0 ? originalFolderId : getFolderId();
     }
 
     @Override
@@ -515,7 +511,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
 
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
-        this.mediaStatus = mediaStatus == null ? MediaStatus.none() : mediaStatus;
+        this.mediaStatus = mediaStatus;
     }
 
     @Override

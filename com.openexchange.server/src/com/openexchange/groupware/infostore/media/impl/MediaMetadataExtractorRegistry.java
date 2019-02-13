@@ -64,7 +64,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.media.EstimationResult;
 import com.openexchange.groupware.infostore.media.ExtractorResult;
-import com.openexchange.groupware.infostore.media.FileStoragInputStreamProvider;
+import com.openexchange.groupware.infostore.media.FileStorageInputStreamProvider;
 import com.openexchange.groupware.infostore.media.InputStreamProvider;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractor;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
@@ -368,7 +368,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                 DocumentMetadataImpl documentToPass = new DocumentMetadataImpl(document);
 
                 try {
-                    ExtractorResult extractorResult = registry.extractAndApplyMediaMetadata(new FileStoragInputStreamProvider(document.getFilestoreLocation(), fileStorage), documentToPass, optArguments);
+                    ExtractorResult extractorResult = registry.extractAndApplyMediaMetadata(new FileStorageInputStreamProvider(document.getFilestoreLocation(), fileStorage), documentToPass, optArguments);
                     switch (extractorResult) {
                         case SUCCESSFUL:
                             documentToPass.setMediaStatus(MediaStatus.success());

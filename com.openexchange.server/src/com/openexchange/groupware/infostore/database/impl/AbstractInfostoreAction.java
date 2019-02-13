@@ -243,7 +243,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
     private final void setMediaStatus(int parameterIndex, final PreparedStatement stmt, final DocumentMetadata doc) throws SQLException {
         MediaStatus status = doc.getMediaStatus();
-        if (null == status || MediaStatus.Status.NONE == status.getStatus()) {
+        if (null == status) {
             stmt.setNull(parameterIndex, java.sql.Types.VARCHAR);
         } else {
             stmt.setString(parameterIndex, status.toString());

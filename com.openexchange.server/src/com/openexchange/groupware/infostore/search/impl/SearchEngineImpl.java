@@ -1001,7 +1001,7 @@ public class SearchEngineImpl extends DBService {
                             MediaStatus mediaStatus = MediaStatus.valueFor(status);
                             retval.setMediaStatus(null == mediaStatus ? MediaStatus.none() : mediaStatus);
                         } else {
-                            retval.setMediaStatus(MediaStatus.none());
+                            retval.setMediaStatus(null);
                         }
                         break;
                     default:
