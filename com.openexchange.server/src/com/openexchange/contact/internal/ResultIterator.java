@@ -188,7 +188,11 @@ public class ResultIterator implements SearchIterator<Contact> {
 		member.removeFolderld();
 		member.removeEntryID();
 		member.setEmailfield(DistributionListEntryObject.INDEPENDENT);
-		member.setSortName(member.getDisplayname()+"_"+member.getEmailaddress());
+		
+		Contact contact = new Contact();
+		contact.setDisplayName(member.getDisplayname());
+		contact.setEmail1(member.getEmailaddress());
+		member.setSortName(contact.getSortName());
 	}
 
     private void updateMemberInfo(DistributionListEntryObject member, Contact contact) {
