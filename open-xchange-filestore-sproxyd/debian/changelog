@@ -1,3 +1,9 @@
+open-xchange-filestore-sproxyd (7.6.3-44) stable; urgency=medium
+
+  * Build for patch 2019-02-11 (5104)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 01 Feb 2019 12:38:15 +0100
+
 open-xchange-filestore-sproxyd (7.6.3-43) stable; urgency=medium
 
   * Build for patch 2018-11-19 (4895)

@@ -54,10 +54,11 @@ export LANG=C
 export LC_ALL=C
 
 # some defaults
+GLOBAL_PARAMETER="${0} ${@}"
 PATH="${PATH}:/opt/open-xchange/sbin"
 TMP=/tmp
 TMP_LONG=tempdir
-LOGDIR=ox_support_infos-$(date +%Y%m%d-%H%M%S)
+LOGDIR=ox_support_infos_$(hostname -s)-$(date +%Y%m%d-%H%M%S)
 LOGDIR_LONG=logdir
 LOGARC=${TMP}/${LOGDIR}.tar
 LOGARC_SUFFIX=".gz"
@@ -72,6 +73,9 @@ CREATE_THREAD_DUMP_VALUES="true false"
 CREATE_HEAP_DUMP=false
 CREATE_HEAP_DUMP_LONG=heap-dump
 CREATE_HEAP_DUMP_VALUES="true false"
+REPORT_CLIENT=false
+REPORT_CLIENT_LONG=report-client
+REPORT_CLIENT_VALUES="true false"
 SKIP_COMPRESSION=false
 SKIP_COMPRESSION_LONG=skip-compression
 SKIP_COMPRESSION_VALUES="true false"
@@ -79,20 +83,48 @@ SKIP_RUN_COMMANDS=false
 SKIP_RUN_COMMANDS_LONG=skip-system-tools
 SKIP_RUN_COMMANDS_VALUES="true false"
 SPINNER='/-\|'
-EXCLUDE_OLDER_LOGS_THAN=disabled
+EXCLUDE_OLDER_LOGS_THAN=5
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
-EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
+EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days or 'all'"
 EXCLUDE_SECRETS=true
 EXCLUDE_SECRETS_LONG=exclude-ox-secrets
 EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
-PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version;listconfigdiff'
+READEREINGINE_CACHE_DIR=/var/spool/open-xchange/documentconverter/readerengine.cache
+PROCS='
+    cat /proc/cpuinfo;
+    df;
+    dmesg;
+    free;
+    getmissingservices;
+    java -version;
+    listbundles;
+    listconfigdiff;
+    listservices;
+    logconf -ll;
+    mount;
+    netstat -putane;
+    ox_java_vm_limits;
+    oxsysreport_parameter;
+    ps -eLf;
+    ps faux;
+    readerengine_cache_overview;
+    route -n;
+    showruntimestats -a;
+    showruntimestats -c;
+    showruntimestats -f;
+    showruntimestats -g;
+    showruntimestats --port 9998 -y;
+    top -bHn 1;
+    ulimit -a;
+    uname -a'
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$REPORT_CLIENT_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cut cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar tr xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
+OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc /opt/open-xchange/mobile-api-facade/etc"
+OTHER_CONFIGS="/etc/security/limits.conf /etc/*-release"
 
 ###############################################################################
 #                                   Functions                                 #
@@ -138,32 +170,58 @@ busyEnd(){
 }
 
 collect_command_output() {
-   echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
-   cd /${TMP}
-   OIFS=${IFS}
-   IFS=";"
-   for i in ${PROCS}; do
-       IFS=${OIFS}
-       # slashes are forbidden in file names
-       removed_path=$(echo ${i} | sed 's|/.*/||g')
-       tool_name=$(echo ${removed_path} | awk '{print $1}')
-       # bash functions may use the busy spinner and have to write the output file directly
-       if [ -n "$(type ${tool_name} 2>/dev/null | grep 'function' )" ]; then
-           echo -n "  ${i}  "
-           ${i} "/${TMP}/${LOGDIR}/commands/${removed_path}"
-           echo
-       else
-           echo "  ${i}"
-           ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
-       fi
-       IFS=";"
-   done
-   IFS=${OIFS}
-   cd - > /dev/null 2>&1
+    # Drop leading blanks from commands
+    PROCS=$(echo ${PROCS} | sed 's|;[[:blank:]]*|;|g')
+    echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
+    cd /${TMP}
+    OIFS=${IFS}
+    IFS=";"
+    for i in ${PROCS}; do
+        IFS=${OIFS}
+        # slashes are forbidden in file names
+        removed_path=$(echo ${i} | sed 's|/.*/||g')
+        tool_name=$(echo ${removed_path} | awk '{print $1}')
+        # bash functions may use the busy spinner and have to write the output file directly
+        if [ -n "$(type ${tool_name} 2>/dev/null | grep 'function' )" ]; then
+            echo -n "  ${i}  "
+            ${i} "/${TMP}/${LOGDIR}/commands/${removed_path}"
+            echo
+        else
+            echo "  ${i}"
+            ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
+        fi
+        IFS=";"
+    done
+    IFS=${OIFS}
+    cd - > /dev/null 2>&1
+    if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+        if [ -f "${TMP}/${LOGDIR}/commands/ucr dump" ]; then
+            echo "Removing secrets: ${TMP}/${LOGDIR}/commands/ucr dump"
+            exclude_secret_entries "${TMP}/${LOGDIR}/commands/ucr dump"
+        fi
+    fi
+    echo "Removing secrets: ${TMP}/${LOGDIR}/commands/listconfigdiff"
+    exclude_secret_entries "${TMP}/${LOGDIR}/commands/listconfigdiff"
+}
+
+oxsysreport_parameter(){
+    # print tool parameter
+    local _output="${1}"
+    echo "${GLOBAL_PARAMETER}" > ${_output}
+}
+
+ox_java_vm_limits() {
+    local _output="${1}"
+    PROC_LIMITS="/proc/$(get_ox_java_pid)/limits";
+    if [ -f "${PROC_LIMITS}" ]; then
+        cat ${PROC_LIMITS}
+    else
+        echo "File does not exist: ${PROC_LIMITS}"
+    fi &> ${_output}
 }
 
 collect_httpd_configs() {
-    # Be very selective on what to add to the archive (Bug#28830)
+    # be very selective on what to add to the archive (Bug#28830)
     for dir in /etc/httpd /etc/apache*; do
         if [ -d "${dir}" ]; then
             local _tmp=$(mktemp)
@@ -173,39 +231,74 @@ collect_httpd_configs() {
             echo "Collecting httpd configuration into ${_httpd_config_copy}"
             mkdir -p $(dirname ${_httpd_config_copy})
             cp -a ${dir} ${_httpd_config_copy}
-            # Drop dangling links
+            # drop dangling links
             find ${_httpd_config_copy} -type l -xtype l | xargs -r rm
-            # Drop all files without name schema '.conf' or which are stored outside
+            # drop all files without name schema '.conf' or which are stored outside
             # <name>-enabled or <name>-available directories
             find ${_httpd_config_copy} -type f | \
                 egrep -v '^.*\.conf$|^.*-(enabled|available)/.*$' | \
                 sed 's| |\\ |g' >> ${_tmp}
-            # Drop all files with SSL suffix types
+            # drop all files with SSL suffix types
             find ${_httpd_config_copy} -type f | \
                 egrep '^.*\.crt$|^.*\.key$|^.*\.csr$|^.*\.prm$' | \
                 sed 's| |\\ |g' >> ${_tmp}
-            # Drop all which could be identified as cert or key file
+            # drop all which could be identified as cert or key file
             find ${_httpd_config_copy} -type f | \
                 sed 's| |\\ |g' | \
                 xargs -r file | \
-                egrep '*[cC]ertificate*|*[kK]ey*' | \
+                egrep -i '.*certificate.*|.*key.*' | \
                 awk -F ':' '{print $1}' >> ${_tmp}
-            cat ${_tmp} | sort -u > ${_tmp_exclude_status}
-            rm ${_tmp}
-            cat ${_tmp_exclude_status} | xargs -r rm
-            # Delete empty directories
+            # check also on configured auth files
+            local _auth_files=$(find ${_httpd_config_copy} -type f | \
+                xargs grep -rH 'Auth[A-Za-z]*File' | \
+                awk '{print $2}' | \
+                sed "s|'||g" | \
+                sed 's|"||g' | \
+                sed 's/\(^\.\.\|^\.\)//g' | \
+                sed 's| |\\ |g')
+            for file in ${_auth_files}; do
+                find ${_httpd_config_copy} -type f | grep "${file}" >> ${_tmp}
+            done
+            # sort status file
+            sort -u ${_tmp} >> ${_tmp_exclude_status}
+            # delete tmp and secret files
+            rm -f ${_tmp} $(cat ${_tmp_exclude_status})
+            # delete empty directories
             find ${_httpd_config_copy} -depth -type d -empty | \
                 sed 's| |\\ |g' | \
                 xargs -r rmdir
+            if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+                echo "Removing secrets: ${_httpd_config_copy}"
+                exclude_secret_entries ${_httpd_config_copy}
+            fi
             print_hint_to_line_end ${_tmp_exclude_status} "removed"
             ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
         fi
     done
 }
 
+readerengine_cache_overview() {
+    local _output="${1}"
+    if [ -d "${READEREINGINE_CACHE_DIR}" ]; then
+        echo "Show readerengine disc usage (du -ks):"
+        du -ks "$(dirname ${READEREINGINE_CACHE_DIR})/"*
+        echo
+
+        echo "Listing the ten oldest modified cache files (ls -ltr | head -n 10):"
+        ls -ltr "${READEREINGINE_CACHE_DIR}" | head -n 10
+        echo
+
+        echo "Listing the ten newest modified cache files (ls -lt | head -n 10):"
+        ls -lt "${READEREINGINE_CACHE_DIR}" | head -n 10
+        echo
+    else
+    echo "Skipping, readerengine cache does not exist: ${READEREINGINE_CACHE_DIR}"
+    fi &> ${_output}
+}
+
 collect_logs() {
    local _log_dir=${1}
-   local _name=$(basename $(find ${_log_dir} -maxdepth 0 -type d | head -n 1))
+   local _name=$(basename $(find ${_log_dir} -maxdepth 0 | head -n 1))
    local _bname=$(echo ${_name} | sed 's/\(^.\)/\U\1/' | sed 's|-xchange|-Xchange|g')
    local _logs_archive=$(normalize_path \
        ${TMP}/${LOGDIR}/${_name}-logs.tar)
@@ -240,8 +333,13 @@ collect_other_configs() {
     if [ -n "${OTHER_CONFIGS}" ]; then
         echo "Collecting other system configurations into $(normalize_path ${TMP}/${LOGDIR}/etc)"
         for config in ${OTHER_CONFIGS}; do
-            mkdir -p ${TMP}/${LOGDIR}/$(dirname ${config})
-            cp -aL ${config} ${TMP}/${LOGDIR}/$(dirname ${config})
+            local _config_copy=${TMP}/${LOGDIR}${config}
+            mkdir -p $(dirname ${_config_copy})
+            cp -aL ${config} ${_config_copy}
+            if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+                echo "Removing secrets: ${_config_copy}"
+                exclude_secret_entries ${_config_copy}
+            fi
         done
     fi
 }
@@ -255,11 +353,11 @@ collect_ox_configs() {
             if [ "$(normalize_path ${ox_config_dir})" == "$(normalize_path ${_ox_config_copy})" ]; then
                 die "${0}: Internal Tool Error, tried to modify original data: ${ox_config_dir}"
             fi
-            cp -rL ${ox_config_dir} ${_ox_config_copy}
+            cp -aL ${ox_config_dir} ${_ox_config_copy}
             if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
-                echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
-                exclude_secret_ox_properties_entries ${_ox_config_copy}
+                echo "Removing secrets: ${_ox_config_copy}"
                 exclude_secret_ox_config_files ${_ox_config_copy}
+                exclude_secret_entries ${_ox_config_copy}
             fi
         fi
     done
@@ -283,9 +381,9 @@ create_heap_dump() {
 # will fail on some systems.
     echo "Creating Java heap dump of Open-Xchange groupware..."
     if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
-        local _heap_dump="${TMP}/${LOGDIR}/commands/heapdump.bin"
+        local _heap_dump="${TMP}/${LOGDIR}/commands/heapdump.hprof"
         local _heap_dump_cmd="heapdump -f ${_heap_dump}"
-        local _heap_dump_log="${TMP}/${LOGDIR}/commands/heapdump -f heapdump.bin"
+        local _heap_dump_log="${TMP}/${LOGDIR}/commands/heapdump -f $(basename ${_heap_dump})"
 
         # Grant write permissions for ox user
         chmod a+w ${TMP}/${LOGDIR}/commands
@@ -380,6 +478,10 @@ verify_ox_dpkg_packages(){
         egrep 'open-xchange|readerengine|calcengine' | \
         awk '{print $2}')
 
+    if [ 'true' != "${_dpkg_verify_support}" ]; then
+        echo "Info: dpkg does not support the needed '-V' option in this version." > "${_output}"
+    fi
+
     for package in ${_ox_packages}; do
         busySpin
         if [ -n "$(type apt-cache)" ]; then
@@ -403,8 +505,6 @@ verify_ox_dpkg_packages(){
                 # use dpkg verify
                 dpkg -V "${package}" | \
                     sed 's|^|  Change: |g'
-            else
-                    echo "  Info: dpkg does not support the needed '-V' option in this version."
             fi
         else
             echo "Error, missing tool: apt-cache"
@@ -431,7 +531,7 @@ verify_ox_rpm_packages(){
                     local _origin=$(yum repolist "${_repo_id}" -v | \
                         grep 'Repo-baseurl' | \
                         awk '{print $3}' | \
-                        sed 's|http.*@||g')
+                        sed 's|http.*@|https://<REMOVED BY OXSYSREPORT>@//|g')
                 else
                     echo "Error, missing tool: yum"
                 fi
@@ -444,7 +544,7 @@ verify_ox_rpm_packages(){
                         local _origin=$(zypper -n --no-refresh repos "${_repo_id}" | \
                             grep '^URI' | \
                             awk '{print $3}' | \
-                            sed 's|http.*@||g')
+                            sed 's|http.*@|https://<REMOVED BY OXSYSREPORT>@//|g')
                     fi
                 else
                     echo "Error, missing tool: zypper"
@@ -460,7 +560,7 @@ verify_ox_rpm_packages(){
                 tr [a-z] [A-Z] | \
                 cut -c 9- | \
                 sed 's|^|  Signature Key ID: |g'
-            # strip runtime generated CSS files
+            # use rpm verify
             rpm -V "${package}" | \
                 sed 's|^|  Change: |g'
         else
@@ -487,12 +587,10 @@ distribution_check() {
          test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
      elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
          echo "SuSE system detected"
-         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/SuSE-release"
          PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages SuSE'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
          echo "Redhat system detected"
-         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/*-release"
          PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages Redhat'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      else
@@ -500,69 +598,110 @@ distribution_check() {
      fi
 }
 
-exclude_secret_ox_properties_entries() {
-# This function only works on .properies* files and replace secret entries with an
-# '<REMOVED BY OXSYSREPORT>' marker on a working copy.
+exclude_secret_entries() {
+# this function replace secret entries with a '<REMOVED BY OXSYSREPORT>' marker on a working copy.
 # _file=/tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
 # _original_line=com.openexchange.oauth.msn.apiSecret=secret
 # _plain_property=com.openexchange.oauth.msn.apiSecret=
 # _secret_part=secret
 # _modified_line=com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
-    local _ox_config_copy=${1}
-    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-secret-exclude)
-    local _whitelist='enabledMailCapableKey|UserAttributePassword|^[[:blank:]]*#'
-    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*=|SSLKey(Pass|Name)[[:blank:]]*=|[lL]ogin[[:blank:]]*='
-    find ${_ox_config_copy} -type f -name "*.properties*" | \
-        xargs egrep -HrIv "${_whitelist}" | \
-        egrep "${_blacklist}" >> ${_tmp_exclude_status}
+    local _config_copy=${1}
+    local _tmp_exclude_status=$(mktemp)
+    local _exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
+    local _separator='@SEPARATOR@'
+    local _pattern='[[:blank:]]*(=|:)'
+    local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|secretSource'
+    local _blacklist="pass(word|wd|crypt)*${_pattern}"
+    local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
+    local _blacklist="${_blacklist}|key${_pattern}"
+    local _blacklist="${_blacklist}|salt${_pattern}"
+    local _blacklist="${_blacklist}|(${_separator}|\.|JMX|JDBC|[[:blank:]])login(name)*${_pattern}"
+    local _blacklist="${_blacklist}|(${_separator}|\.|[[:blank:]]|=)user(name)*${_pattern}"
 
+    # strip all comments, remove empty files and delete empty files
+    IFS_BA=${IFS}
+    IFS='
+'
+    for config in $(find "${_config_copy}" -type f | sed 's|[[:blank:]]|\ |g'); do
+        sed -i '/^[[:blank:]]*#/d' ${config}
+        sed -i '/^[[:blank:]]*$/d' ${config}
+        if [ ! -s "${config}" ] ; then
+            rm ${config}
+        fi
+    done
+    IFS=${IFS_BA}
+    find "${_config_copy}" -type f | \
+        sed 's|[[:blank:]]|\\ |g' | \
+        xargs egrep -iHrIv "${_whitelist}" | \
+        sed -r 's/(:)/@SEPARATOR@/' | \
+        egrep -i "${_blacklist}" > ${_tmp_exclude_status}
+
+    # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties:com.openexchange.oauth.msn.apiSecret=secret
     while read line; do
-        local _file=$(echo ${line} | awk -F ':' '{print $1}')
-        local _original_line=$(echo ${line} | awk -F '\\.properties.*:' '{print $2}')
-        local _plain_property=$(echo ${_original_line} | sed 's|=.*$|=|g')
-        local _secret_part=$(echo ${_original_line} | \
-            sed "s|${_plain_property}||g" | \
-            sed 's|password=||g' )
+        # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
+        local _file=$(echo "${line}" | \
+            awk -F "${_separator}" '{print $1}' | \
+            sed 's|[[:blank:]]|\ |g')
+        # com.openexchange.oauth.msn.apiSecret=secret
+        local _original_line=$(echo "${line}" | \
+            sed "s|^${_file}${_separator}||g")
 
-        # Replace special chars to wildcards (bug 43117)
-        local _secret_part=$(echo ${_secret_part} | \
-            sed 's|\[|.|g' | \
-            sed 's|\]|.|g' | \
-            sed 's|\||.|g' | \
-            sed 's|\*|.|g' | \
-            sed "s|'|.|g" )
-        local _original_line=$(echo ${_original_line} | \
-            sed 's|\[|.|g' | \
-            sed 's|\]|.|g' | \
-            sed 's|\||.|g' | \
-            sed 's|\*|.|g' | \
-            sed "s|'|.|g" )
-
-        if [ -n "${_secret_part}" ]; then
-            local _modified_line=$(echo ${_original_line} | \
-                sed "s|${_secret_part}|<REMOVED BY OXSYSREPORT>|g")
+        if [ -n "$(echo ${_file} | grep 'listconfigdiff' || true)" ]; then
+            # com.openexchange.oauth.msn.apiSecret=
+            local _plain_property=$(echo "${_original_line}" | sed 's|=.*$|=|g')
         else
+            # com.openexchange.oauth.msn.apiSecret=
+            local _plain_property=$(echo "${_original_line}" | \
+                sed 's|=.*$|=|g' | \
+                sed 's|:.*$|:|g')
+        fi
+
+        # secret
+        local _secret_part=$(echo "${_original_line}" | \
+            sed "s|${_plain_property}||g" | \
+            sed 's|=password=||g' | \
+            sed 's|=user=||g')
+        # replace special chars to wildcards (bug 43117) e.g. secr[et -> secr.et
+        local _secret_part=$(echo "${_secret_part}" | \
+            sed 's|\[|.|g' | \
+            sed 's|\]|.|g' | \
+            sed 's|\||.|g' | \
+            sed 's|\*|.|g' | \
+            sed "s|'|.|g")
+        # com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
+        if [ -n "${_secret_part}" ]; then
+            local _modified_line=$(echo "${_original_line}" | \
+                sed "s|${_secret_part}$|<REMOVED BY OXSYSREPORT>|g")
+            local _original_line=$(echo "${_original_line}" | \
+                sed "s|${_secret_part}$|${_secret_part}|g")
+        else
+            # set this marker also if no value was set
             local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
         fi
-        sed -i "s|^${_original_line}$|${_modified_line}|g" ${_file}
-        sed -i "s|:${_original_line}$|:${_modified_line}|g" ${_tmp_exclude_status}
+        sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
+        sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"
-    ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+    cat ${_tmp_exclude_status} >> ${_exclude_status}
+    ALL_EXCLUDED="${_exclude_status} ${ALL_EXCLUDED}"
+    rm -rf ${_tmp_exclude_status}
 }
 
 exclude_secret_ox_config_files() {
 # This function removes every file which is not whitelisted.
     local _ox_config_copy=${1}
-    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
-    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names'
+    local _tmp_exclude_status=$(mktemp)
+    local _exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
+    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names|readerengine.*list|\.conf$'
     find ${_ox_config_copy} -type f | \
         egrep -v "${_whitelist}" | \
         sed 's| |// |g' >> ${_tmp_exclude_status}
     cat ${_tmp_exclude_status} | \
         xargs -r rm -f
     print_hint_to_line_end ${_tmp_exclude_status} "removed"
-    ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+    cat ${_tmp_exclude_status} >> ${_exclude_status}
+    ALL_EXCLUDED="${_exclude_status} ${ALL_EXCLUDED}"
+    rm -f ${_tmp_exclude_status}
 }
 
 fix_log_archive_tarball_name() {
@@ -746,6 +885,65 @@ read -p "Press ENTER to continue or [ctrl+c] to cancel..."
 echo
 }
 
+check_and_warn_on_log_path(){
+   if [ -z "$(find "${OX_LOG_DIR}/" -mtime 0 -type f)" ]; then
+      local _logback_xml='/opt/open-xchange/etc/logback.xml'
+      if [ -f "${_logback_xml}" ]; then
+            local _logback_file_settings=$(grep -h '<file>' ${_logback_xml} | \
+                sed 's|[[:blank:]]*||g' | \
+                sort -u | \
+                sed 's|<file>||g' | \
+                sed 's|</file>||g')
+            local _changed_path=$(for setting in ${_logback_file_settings}; do
+                local _dirname=$(dirname ${setting})
+                if [ "${OX_LOG_DIR}" != "${_dirname}" ]; then
+                    echo ${_dirname}
+                fi
+            done | sort -u)
+            local _changed_path=$(echo ${_changed_path})
+            if [ -n "${_changed_path}" ]; then
+                warn_on_log_path
+            fi
+        fi
+    fi
+}
+
+warn_on_log_path(){
+cat << EOF
+###############################################################################
+                                  WARNING
+The default log directory contain no files which are modified within the last
+24 hours, this is a strong indicator that a different log path is configured
+and as a result, mandatory support information will be missing in the tarball.
+
+Default Log Dir: ${OX_LOG_DIR}
+Configured Log Dir: ${_changed_path}
+Configuration File: ${_logback_xml}
+
+If you configured a different log path on purpose, you can solve this issue by
+creating a symbolic link from our default to your configured directory.
+
+Please note, this support tool will potentially include all content within the
+default log dir and with this link, this will also apply to your configured log
+directory. Hence you have to check in advance what your configured log dir
+contains. When e.g other services are writing into the same folder, you need
+to separated this first!
+
+   # backup and remove default log directory.
+   mv ${OX_LOG_DIR} /var/log/open-xchange_backup
+
+   # create symbolic link to configured location.
+   ln -s <global_path_to_configured_log_directory> ${OX_LOG_DIR}
+
+   # fix permissions to allow the open-xchange service the creation of e.g
+   # console and osgi logs.
+   chown open-xchange:open-xchange ${OX_LOG_DIR}
+
+EOF
+read -p "Press ENTER to continue or [ctrl+c] to cancel..."
+echo
+}
+
 ###############################################################################
 #                              Runtime Checks                                 #
 ###############################################################################
@@ -836,6 +1034,13 @@ for argument in ${@}; do
                 die "${0}: Error, open-xchange service is not running"
             fi
         ;;
+        --${REPORT_CLIENT_LONG})
+            REPORT_CLIENT=$(check_argument ${1} ${2})
+            if [ 'true' == "${REPORT_CLIENT}" ]; then
+                PROCS=${PROCS}';report -o -d'
+            fi
+            shift 2
+        ;;
         --${SKIP_COMPRESSION_LONG})
             SKIP_COMPRESSION=$(check_argument ${1} ${2})
             # disable also commands when compression is an issue
@@ -851,11 +1056,15 @@ for argument in ${@}; do
             shift 2
         ;;
         --${EXCLUDE_OLDER_LOGS_THAN_LONG})
-            if [ '0' -le "${2}" ] 2> /dev/null ; then
+            if [ "all" == "${2}" ]; then
                 EXCLUDE_OLDER_LOGS_THAN=${2}
             else
-                usage
-                die "Error, option '${1}' requires positive numbers: ${2}"
+                if [ '0' -le "${2}" ] 2> /dev/null ; then
+                    EXCLUDE_OLDER_LOGS_THAN=${2}
+                else
+                    usage
+                    die "Error, numbers or keyword 'all' required: --${EXCLUDE_OLDER_LOGS_THAN_LONG} ${2}"
+                fi
             fi
             shift 2
        ;;
@@ -960,10 +1169,14 @@ fi
 if [ 'true' == "${CREATE_HEAP_DUMP}" ]; then
     create_heap_dump
 fi
-collect_logs ${OX_LOG_DIR}
-if [ -n "${UNIVENTION_LOG_DIR}" ]; then
-    collect_logs ${UNIVENTION_LOG_DIR}
+if [ "all" != "${EXCLUDE_OLDER_LOGS_THAN}" ]; then
+    collect_logs ${OX_LOG_DIR}
+    check_and_warn_on_log_path
+    if [ -n "${UNIVENTION_LOG_DIR}" ]; then
+        collect_logs ${UNIVENTION_LOG_DIR}
+    fi
 fi
+
 create_excluded_and_modified_overview modified-and-excluded-files.txt
 echo "Creating final archive: $(normalize_path ${LOGARC})"
 tar cvf ${LOGARC%%.gz}  -C ${TMP} ${LOGDIR} > /dev/null 2>&1
