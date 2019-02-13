@@ -218,58 +218,28 @@ public class JavaImageMetadataService implements ImageMetadataService {
     }
     
     /**
-     * Checks whether the given image is a heif file and uses {@link ImageMetadataReader} to get the metadata
+     * Gets the image metadata from the given file, if it is a heif file.
      * 
      * @param bufferedInputStream The stream containing the image
-     * @param imageMetadataOptions The {@link ImageMetadataOptions}
-     * @return The {@link ImageMetadata} or null
+     * @param imageMetadataOptions The options to consider when retrieving image's meta-data 
+     * @return The {@link ImageMetadata} if it is a heif file, null otherwise
      * @throws IOException
-     * @throws ImageProcessingException
      */
     private ImageMetadata getMetadataFromHeifFile(BufferedInputStream bufferedInputStream, ImageMetadataOptions imageMetadataOptions) throws IOException {
-        // Use ImageMetadataReader if the image is a heif file
-        FileType detectedFileType;
-        try {
-            detectedFileType = FileTypeDetector.detectFileType(bufferedInputStream);
-        } catch (AssertionError e) {
-            detectedFileType = FileType.Unknown;
-        }
-        bufferedInputStream.reset();
-        if (FileType.Heif == detectedFileType) {
-            Metadata metadata;
-            try {
-                metadata = ImageMetadataReader.readMetadata(bufferedInputStream, -1, detectedFileType);
-            } catch (ImageProcessingException e) {
-                throw new IOException(e.getMessage(), e);
+        Dimension dimension = getDimensionFromHeifFile(bufferedInputStream);
+        if (null != dimension) {
+            ImageMetadata.Builder builder = ImageMetadata.builder();
+            if (imageMetadataOptions.isDimension()) {
+                builder.withDimension(dimension);
             }
-            Directory heifDirectory = metadata.getFirstDirectoryOfType(HeifDirectory.class);
-            if (heifDirectory != null) {
-                long width = -1;
-                Long longObject = heifDirectory.getLongObject(HeifDirectory.TAG_IMAGE_WIDTH);
-                if (null != longObject) {
-                    width = longObject.longValue();
-                }
-                long height = -1;
-                longObject = heifDirectory.getLongObject(HeifDirectory.TAG_IMAGE_HEIGHT);
-                if (null != longObject) {
-                    height = longObject.longValue();
-                }
 
-                ImageMetadata.Builder builder = ImageMetadata.builder();
-                if (imageMetadataOptions.isDimension()) {
-                    builder.withDimension(new Dimension(Math.toIntExact(width), Math.toIntExact(height)));
-                }
-
-                if (imageMetadataOptions.isFormatName()) {
-                    builder.withFormatName(HEIF_FILE_FORMAT);
-                }
-
-                return builder.build();
+            if (imageMetadataOptions.isFormatName()) {
+                builder.withFormatName(HEIF_FILE_FORMAT);
             }
-            // Don't contain a heif directory -> reset stream and return null
-            bufferedInputStream.reset();
+
+            return builder.build();
         }
         return null;
     }
-
+    
 }
