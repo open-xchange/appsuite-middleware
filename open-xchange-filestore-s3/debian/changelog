@@ -1,3 +1,9 @@
+open-xchange-filestore-s3 (7.10.0-25) stable; urgency=medium
+
+  * Build for patch 2019-02-11 (5107)
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Thu, 07 Feb 2019 10:58:28 +0100
+
 open-xchange-filestore-s3 (7.10.0-24) stable; urgency=medium
 
   * Build for patch 2019-01-28 (5075)

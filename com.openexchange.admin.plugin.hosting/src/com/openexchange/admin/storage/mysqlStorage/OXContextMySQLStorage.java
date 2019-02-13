@@ -3615,48 +3615,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             {
                 long now = System.currentTimeMillis();
                 for (Map.Entry<Database, Set<String>> entry : db2ExistingSchemas.entrySet()) {
-                    Database db = entry.getKey();
-                    Set<String> schemas = entry.getValue();
-                    if (null != schemas && !schemas.isEmpty()) {
-                        for (Set<String> schemasToInsert : Sets.partition(schemas, 25)) {
-                            PreparedStatement insertStmt = null;
-                            PreparedStatement insertLockStmt = null;
-                            try {
-                                Map<String, Integer> containedSchemas = db2ContainedSchemas.get(db);
-                                for (String schema : schemasToInsert) {
-                                    if (false == containedSchemas.containsKey(schema)) {
-                                        // Not yet contained
-                                        if (null == insertStmt) {
-                                            insertStmt = configCon.prepareStatement("INSERT IGNORE INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?)");
-                                        }
-                                        insertStmt.setInt(1, db.getId().intValue());
-                                        insertStmt.setString(2, schema);
-                                        insertStmt.setInt(3, 0);
-                                        insertStmt.setLong(4, now);
-                                        insertStmt.addBatch();
-
-                                        if (null == insertLockStmt) {
-                                            insertLockStmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
-                                        }
-                                        insertLockStmt.setInt(1, db.getId().intValue());
-                                        insertLockStmt.setString(2, schema);
-                                        insertLockStmt.addBatch();
-
-                                        containedSchemas.put(schema, Integer.valueOf(0));
-                                    }
-                                }
-                                if (null != insertStmt) {
-                                    insertStmt.executeBatch();
-                                }
-                                if (null != insertLockStmt) {
-                                    insertLockStmt.executeBatch();
-                                }
-                            } finally {
-                                Databases.closeSQLStuff(insertLockStmt);
-                                Databases.closeSQLStuff(insertStmt);
-                            }
-                        }
-                    }
+                    insertToContextsPerDbSchema(entry.getKey(), entry.getValue(), db2ContainedSchemas, configCon, now);
                 }
             }
 
@@ -3734,6 +3693,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 List<SchemaCount> schemaCounts = entry.getValue();
                 Map<String, Integer> containedSchemas = db2ContainedSchemas.get(databases.get(Integer.valueOf(poolId)));
 
+                if (containedSchemas == null || containedSchemas.isEmpty()) {
+                    continue;
+                }
+                
                 // Insert with 100-sized batches
                 for (List<SchemaCount> schemaCountSublist : Lists.partition(schemaCounts, 100)) {
                     Set<String> insertLockFor = null;
@@ -3807,5 +3770,62 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             threadPool.submit(task, CallerRunsBehavior.<V> getInstance());
         }
 
+    }
+
+    /**
+     * Inserts existing schemas to 'contexts_per_dbschema' (if not contained).
+     * 
+     * @param database The {@link Database}
+     * @param schemata The schemata to insert
+     * @param db2ContainedSchemata A map with the already contained database schemata
+     * @param configCon A connection to the configdb
+     * @param now The current timestamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private void insertToContextsPerDbSchema(Database database, Set<String> schemata, Map<Database, Map<String, Integer>> db2ContainedSchemata, Connection configCon, long now) throws SQLException {
+        if (null == schemata || schemata.isEmpty()) {
+            return;
+        }
+        Map<String, Integer> containedSchemata = db2ContainedSchemata.get(database);
+        if (containedSchemata == null || containedSchemata.isEmpty()) {
+            return;
+        }
+        for (Set<String> schemataToInsert : Sets.partition(schemata, 25)) {
+            PreparedStatement insertStmt = null;
+            PreparedStatement insertLockStmt = null;
+            try {
+                for (String schema : schemataToInsert) {
+                    if (containedSchemata.containsKey(schema)) {
+                        continue;
+                    }
+                    if (null == insertStmt) {
+                        insertStmt = configCon.prepareStatement("INSERT IGNORE INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?)");
+                    }
+                    insertStmt.setInt(1, database.getId().intValue());
+                    insertStmt.setString(2, schema);
+                    insertStmt.setInt(3, 0);
+                    insertStmt.setLong(4, now);
+                    insertStmt.addBatch();
+
+                    if (null == insertLockStmt) {
+                        insertLockStmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+                    }
+                    insertLockStmt.setInt(1, database.getId().intValue());
+                    insertLockStmt.setString(2, schema);
+                    insertLockStmt.addBatch();
+
+                    containedSchemata.put(schema, Integer.valueOf(0));
+                }
+                if (null != insertStmt) {
+                    insertStmt.executeBatch();
+                }
+                if (null != insertLockStmt) {
+                    insertLockStmt.executeBatch();
+                }
+            } finally {
+                Databases.closeSQLStuff(insertLockStmt);
+                Databases.closeSQLStuff(insertStmt);
+            }
+        }
     }
 }

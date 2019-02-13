@@ -60,13 +60,24 @@ public enum Endpoint {
     /**
      * The API end-point for <a href="https://firebase.google.com/docs/cloud-messaging/http-server-ref">FCM</a>; <code>"https://fcm.googleapis.com/fcm/send"</code>
      */
-    FCM(Constants.FCM_SEND_ENDPOINT),
+    FCM("FCM", Constants.FCM_SEND_ENDPOINT),
     ;
 
+    private final String name;
     private final String endpoint;
 
-    private Endpoint(String endpoint) {
+    private Endpoint(String name, String endpoint) {
+        this.name= name;
         this.endpoint = endpoint;
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
     }
 
     /**

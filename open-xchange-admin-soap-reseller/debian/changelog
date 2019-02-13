@@ -1,3 +1,9 @@
+open-xchange-admin-soap-reseller (7.10.0-25) stable; urgency=medium
+
+  * Build for patch 2019-02-11 (5107)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 07 Feb 2019 10:57:47 +0100
+
 open-xchange-admin-soap-reseller (7.10.0-24) stable; urgency=medium
 
   * Build for patch 2019-01-28 (5075)

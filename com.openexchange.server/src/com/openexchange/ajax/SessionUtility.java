@@ -94,6 +94,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.sessiond.impl.SubnetMask;
@@ -819,6 +820,46 @@ public final class SessionUtility {
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Removes all sessions from cluster, which carry the specified secret string.
+     *
+     * @param secret The secret string
+     * @param userId The (optional) user identifier
+     * @param contextId The (optional) context identifier
+     * @throws OXException If removing sessions fails
+     */
+    public static void removeSessionBySecret(String secret, int userId, int contextId) throws OXException {
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (sessiondService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+        }
+
+        SessionFilter sessionFilter;
+        if (userId > 0 && contextId > 0) {
+            StringBuilder sb = new StringBuilder("(&");
+            sb.append("(").append(SessionFilter.SECRET).append("=").append(secret).append(")");
+            sb.append("(").append(SessionFilter.CONTEXT_ID).append("=").append(contextId).append(")");
+            sb.append("(").append(SessionFilter.USER_ID).append("=").append(userId).append(")");
+            sb.append(")");
+            sessionFilter = SessionFilter.create(sb.toString());
+            sb = null;
+        } else {
+            sessionFilter = SessionFilter.createSecretFilter(secret);
+        }
+
+        // Check if associated session is locally available (which is likely the case since JSESSIONID cookie should not be changed)
+        Collection<String> foundSessions = sessiondService.findSessions(sessionFilter);
+        if (foundSessions.isEmpty()) {
+            // Issue a global removal task
+            sessiondService.removeSessionsGlobally(sessionFilter);
+        } else {
+            // Session found on local node
+            for (String sessionId : foundSessions) {
+                sessiondService.removeSession(sessionId);
+            }
+        }
+    }
 
     /**
      * Gets the appropriate hash for specified request.
