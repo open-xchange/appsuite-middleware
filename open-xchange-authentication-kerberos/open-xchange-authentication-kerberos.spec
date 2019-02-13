@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: open-xchange-sessionstorage-hazelcast
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -64,6 +64,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Feb 07 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-02-11 (5108)
 * Tue Jan 29 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-01-31 (5103)
 * Mon Jan 21 2019 Marcus Klein <marcus.klein@open-xchange.com>

@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-11-08 22:11+0100\n"
+"PO-Revision-Date: 2019-01-31 13:26+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@workshop-chapina.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Poedit 2.1.1\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
@@ -9536,7 +9536,7 @@ msgstr "Conceptbericht kon niet worden opgeslagen."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:176
 msgid "Maximum message size is exceeded. Max. is %1$s."
-msgstr "Maximale berichtgrote is bereikt. Maximaal is %1$s."
+msgstr "Maximale berichtgrootte is bereikt. Maximum is %1$s."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
 msgid ""

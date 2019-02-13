@@ -47,33 +47,52 @@
  *
  */
 
-package com.openexchange.dav.caldav;
+package com.openexchange.admin.rmi;
+
+import static org.junit.Assert.assertFalse;
+import java.util.Random;
+import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
- * {@link UserAgents} - Contains user-agent definitions.
+ * 
+ * {@link Bug62360Test}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public final class UserAgents {
+public final class Bug62360Test extends AbstractRMITest {
 
-    public static final String MACOS_10_7_3 = "CalendarStore/5.0.2 (1166); iCal/5.0.2 (1571); Mac OS X/10.7.3 (11D50d)";
+    private int contextId = getRandomNumberInRange(11, 10000);
+    private Context context;
 
-    public static final String LIGHTNING_1_7 = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:15.0) Gecko/20120907 Thunderbird/15.0.1 Lightning/1.7";
+    private static int getRandomNumberInRange(int min, int max) {
+        Random r = new Random();
+        return r.ints(min, (max + 1)).findFirst().getAsInt();
+    }
 
-    public static final String LIGHTNING_4_0_3_1 = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:38.0) Gecko/20100101 Thunderbird/38.3.0 Lightning/4.0.3.1";
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        context = createContext("bug62360context.com", contextId);
+    }
 
-    public static final String LIGHTNING_4_7_7 = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Thunderbird/45.7.0 Lightning/4.7.7";
+    @Test
+    public void test() throws Throwable {
+        getContextManager().disable(context);
+        Context data = getContextManager().getData(context);
+        assertFalse(data.isEnabled());
 
-    public static final String IOS_9_1 = "iOS/9.1 (13B143) dataaccessd/1.0";
+        getContextManager().disable(context);
+        assertFalse(data.isEnabled());
+    }
 
-    public static final String IOS_12_0 = "iOS/12.0 (16A366) dataaccessd/1.0";
-
-    public static final String EM_CLIENT_6_0 = "eM Client/6.0.24144.0";
-
-    public static final String[] MACOS_ALL = { MACOS_10_7_3
-    };
-
-    private UserAgents() {
-        // prevent instantiation
+    private Context createContext(String name, int cid) throws Exception {
+        Context newContext = ContextFactory.createContext(cid, name);
+        User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        return getContextManager().create(newContext, newAdmin);
     }
 }

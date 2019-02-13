@@ -119,15 +119,17 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     private final List<FilterAndPath> initialFilters;
     private final Map<Bundle, OSGiMainHandler> httpHandlers;
     private final boolean supportHierachicalLookupOnNotFound;
+    private final int sessionTimeoutInSeconds;
 
-    public HttpServiceFactory(HttpServer httpServer, List<FilterAndPath> initialFilters, boolean supportHierachicalLookupOnNotFound, Bundle bundle) {
+    public HttpServiceFactory(HttpServer httpServer, List<FilterAndPath> initialFilters, boolean supportHierachicalLookupOnNotFound, int sessionTimeoutInSeconds, Bundle bundle) {
         super();
         this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
+        this.sessionTimeoutInSeconds = sessionTimeoutInSeconds;
         Map<Bundle, OSGiMainHandler> httpHandlers = new HashMap<>(128, 0.9F);
         this.httpHandlers = httpHandlers;
         List<FilterAndPath> filters = new CopyOnWriteArrayList<>(initialFilters);
         this.initialFilters = filters;
-        mainHttpHandler = new OSGiMainHandler(filters, supportHierachicalLookupOnNotFound, bundle);
+        mainHttpHandler = new OSGiMainHandler(filters, supportHierachicalLookupOnNotFound, sessionTimeoutInSeconds, bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
         httpHandlers.put(bundle, mainHttpHandler);
     }
@@ -168,7 +170,7 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     public synchronized HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
-        OSGiMainHandler bundleHttpHandler = new OSGiMainHandler(initialFilters, supportHierachicalLookupOnNotFound, bundle);
+        OSGiMainHandler bundleHttpHandler = new OSGiMainHandler(initialFilters, supportHierachicalLookupOnNotFound, sessionTimeoutInSeconds, bundle);
         httpHandlers.put(bundle, bundleHttpHandler);
         return new HttpServiceImpl(bundleHttpHandler, bundle);
     }

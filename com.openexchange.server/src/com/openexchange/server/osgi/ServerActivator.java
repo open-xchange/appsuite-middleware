@@ -745,7 +745,7 @@ public final class ServerActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
-            registerService(DataSource.class, new ICalMailPartDataSource(), props);
+            registerService(DataSource.class, new ICalMailPartDataSource().setServiceLookup(this), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);

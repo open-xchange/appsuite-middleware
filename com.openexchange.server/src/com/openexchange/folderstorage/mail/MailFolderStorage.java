@@ -1242,17 +1242,14 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             try {
                 return mailAccess.getFolderStorage().getFolder(fullname);
             } catch (final OXException e) {
-                if (count < max && MimeMailExceptionCode.STORE_CLOSED.equals(e)) {
-                    MailAccess.reconnect(mailAccess);
+                if (count < max && (MimeMailExceptionCode.STORE_CLOSED.equals(e)) || e.equalsCode(2001, "IMAP")) {
+                    MailAccess.reconnect(mailAccess, true);
                     exc = e;
                 } else {
-                    if (!createIfAbsent) {
-                        throw e;
+                    if (createIfAbsent && MailExceptionCode.FOLDER_NOT_FOUND.equals(e) && false == FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                        return recreateMailFolder(accountId, fullname, session, mailAccess);
                     }
-                    if ((!e.isPrefix("MSG") || MailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                        throw e;
-                    }
-                    return recreateMailFolder(accountId, fullname, session, mailAccess);
+                    throw e;
                 }
             }
         }
