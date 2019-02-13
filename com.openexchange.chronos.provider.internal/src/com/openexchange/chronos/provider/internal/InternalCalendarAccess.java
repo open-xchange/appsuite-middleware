@@ -81,10 +81,10 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
@@ -352,7 +352,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
     
     @Override
-    public CalendarResult changeOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException {
+    public CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
         return getCalendarService().changeOrganizer(session, eventID, organizer, clientTimestamp);
     }
 

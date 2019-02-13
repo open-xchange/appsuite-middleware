@@ -58,9 +58,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -440,7 +440,7 @@ public interface CalendarService {
      * @return The updated event
      * @throws OXException In case the organizer change is not allowed
      */
-    CalendarResult changeOrganizer(CalendarSession session, EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
+    CalendarResult changeOrganizer(CalendarSession session, EventID eventID, Organizer organizer, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.

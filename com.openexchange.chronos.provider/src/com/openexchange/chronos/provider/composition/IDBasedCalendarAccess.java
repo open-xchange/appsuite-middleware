@@ -61,9 +61,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -529,7 +529,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The updated event
      * @throws OXException In case the organizer change is not allowed
      */
-    CalendarResult changeOrganizer(EventID eventID, CalendarUser organizer, long clientTimestamp) throws OXException;
+    CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.

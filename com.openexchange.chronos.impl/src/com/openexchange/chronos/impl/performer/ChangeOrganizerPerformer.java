@@ -52,20 +52,22 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.EventField.ORGANIZER;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.service.CalendarSession;
@@ -116,7 +118,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @return The update result
      * @throws OXException If data could not be loaded or constraints are not fulfilled
      */
-    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, CalendarUser organizer, Long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Organizer organizer, Long clientTimestamp) throws OXException {
         /*
          * Check if feature is enabled
          */
@@ -161,7 +163,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             if (CalendarUtils.isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateEvent(originalEvent, organizer);
+            updateEvent(originalEvent, organizer, new Date(System.currentTimeMillis()));
             return resultTracker.getResult();
         }
 
@@ -172,7 +174,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             if (CalendarUtils.isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateSeries(originalEvent, organizer);
+            updateSeries(originalEvent, organizer, new Date(System.currentTimeMillis()));
             return resultTracker.getResult();
         }
 
@@ -185,7 +187,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         /*
          * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
          */
-        updateSeries(originalEvent, organizer);
+        updateSeries(loadEventData(originalEvent.getId()), organizer, new Date(System.currentTimeMillis()));
 
         return resultTracker.getResult();
     }
@@ -195,10 +197,11 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * 
      * @param organizer The new organizer
      * @param originalEvent The original event
+     * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @return A delta {@link Event}
      * @throws OXException If resolving fails
      */
-    private Event prepareChanges(Event originalEvent, CalendarUser organizer) throws OXException {
+    private Event prepareChanges(Event originalEvent, Organizer organizer, Date lastModified) throws OXException {
         Event updatedEvent = new Event();
         updatedEvent.setId(originalEvent.getId());
 
@@ -207,21 +210,13 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         }
 
         // Set new organizer
-        if (Organizer.class.isAssignableFrom(organizer.getClass())) {
-            updatedEvent.setOrganizer((Organizer) organizer);
-        } else {
-            Organizer prepared = session.getEntityResolver().prepare(new Organizer(), CalendarUserType.INDIVIDUAL);
-            prepared.setCn(organizer.getCn());
-            prepared.setEMail(prepared.getEMail());
-            prepared.setEntity(prepared.getEntity());
-            prepared.setSentBy(organizer.getSentBy());
-            prepared.setUri(organizer.getUri());
-        }
+        updatedEvent.setOrganizer(organizer);
 
         // Update meta data
         updatedEvent.setSequence(originalEvent.getSequence() + 1);
         updatedEvent.setTimestamp(timestamp.getTime());
         updatedEvent.setModifiedBy(calendarUser);
+        Consistency.setModified(lastModified, updatedEvent, calendarUser);
 
         return updatedEvent;
     }
@@ -241,11 +236,12 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * 
      * @param organizer The new organizer
      * @param originalEvent The original event
+     * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If update fails
      */
-    private void updateSeries(Event originalEvent, CalendarUser organizer) throws OXException {
-        Event updatedEvent = updateEvent(originalEvent, organizer);
-        updateExceptions(originalEvent, updatedEvent, organizer);
+    private void updateSeries(Event originalEvent, Organizer organizer, Date lastModified) throws OXException {
+        Event updatedEvent = updateEvent(originalEvent, organizer, lastModified);
+        updateExceptions(originalEvent, updatedEvent, organizer, lastModified);
     }
 
     /**
@@ -254,10 +250,11 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param organizer The new organizer
      * @param originalEvent The original event
      * @return The updated {@link Event}
+     * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
      */
-    private Event updateEvent(Event originalEvent, CalendarUser organizer) throws OXException {
-        Event prepareChanges = prepareChanges(originalEvent, organizer);
+    private Event updateEvent(Event originalEvent, Organizer organizer, Date lastModified) throws OXException {
+        Event prepareChanges = prepareChanges(originalEvent, organizer, lastModified);
         storage.getEventStorage().updateEvent(prepareChanges);
         insertOrganizerAsAttendee(originalEvent, organizer);
         Event updatedEvent = loadEventData(originalEvent.getId());
@@ -272,11 +269,12 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original event
      * @param updatedEvent The updated series master
      * @param organizer The new organizer
+     * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
      */
-    private void updateExceptions(Event originalEvent, Event updatedEvent, CalendarUser organizer) throws OXException {
+    private void updateExceptions(Event originalEvent, Event updatedEvent, Organizer organizer, Date lastModified) throws OXException {
         for (Event e : loadExceptionData(updatedEvent)) {
-            storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
+            storage.getEventStorage().updateEvent(prepareChanges(e, organizer, lastModified));
             insertOrganizerAsAttendee(e, organizer);
             resultTracker.trackUpdate(e, loadEventData(e.getId()));
         }
@@ -289,18 +287,27 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param organizer The new organizer as {@link CalendarUser}
      * @throws OXException If updating fails
      */
-    private void insertOrganizerAsAttendee(Event originalEvent, CalendarUser organizer) throws OXException {
+    private void insertOrganizerAsAttendee(Event originalEvent, Organizer organizer) throws OXException {
         // Ensure new organizer is attendee
         if (CalendarUtils.contains(originalEvent.getAttendees(), organizer)) {
             return;
         }
 
         // Add organizer as attendee
-        Attendee attendee = session.getEntityResolver().prepareUserAttendee(organizer.getEntity());
-        attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+        int organizerId = organizer.getEntity();
+        Attendee attendee = session.getEntityResolver().prepareUserAttendee(organizerId);
         if (false == PublicType.getInstance().equals(folder.getType())) {
-            attendee.setFolderId(session.getConfig().getDefaultFolderId(organizer.getEntity()));
+            attendee.setFolderId(session.getConfig().getDefaultFolderId(organizerId));
+            attendee.setPartStat(session.getConfig().getInitialPartStat(organizerId, false));
+        } else {
+            attendee.setPartStat(session.getConfig().getInitialPartStat(organizerId, true));
         }
         storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(attendee));
+
+        // Add default alarm
+        List<Alarm> alarms = session.getConfig().getDefaultAlarmDateTime(organizerId);
+        if (null != alarms && false == alarms.isEmpty()) {
+            storage.getAlarmStorage().insertAlarms(originalEvent, organizerId, alarms);
+        }
     }
 }
