@@ -70,10 +70,22 @@ properties:
     format: int64
     description: The height of the media resource
     readOnly: true
-  iso_speed:
+  camera_iso_speed:
     type: integer
     format: int64
     description: The ISO speed value of a camera or input device associated with the media resource
+    readOnly: true
+  camera_aperture:
+    type: string
+    description: The aperture used to create the photo (f-number)
+    readOnly: true
+  camera_exposure_time:
+    type: string
+    description: The length of the exposure, in seconds
+    readOnly: true
+  camera_focal_length:
+    type: string
+    description: The focal length used to create the photo, in millimeters
     readOnly: true
   camera_model:
     type: string
