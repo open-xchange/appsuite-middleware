@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.EventField.ORGANIZER;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
@@ -163,7 +162,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             if (CalendarUtils.isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateEvent(originalEvent, organizer, new Date(System.currentTimeMillis()));
+            updateEvent(originalEvent, organizer);
             return resultTracker.getResult();
         }
 
@@ -174,7 +173,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             if (CalendarUtils.isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateSeries(originalEvent, organizer, new Date(System.currentTimeMillis()));
+            updateSeries(originalEvent, organizer);
             return resultTracker.getResult();
         }
 
@@ -187,7 +186,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         /*
          * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
          */
-        updateSeries(loadEventData(originalEvent.getId()), organizer, new Date(System.currentTimeMillis()));
+        updateSeries(loadEventData(originalEvent.getId()), organizer);
 
         return resultTracker.getResult();
     }
@@ -201,7 +200,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @return A delta {@link Event}
      * @throws OXException If resolving fails
      */
-    private Event prepareChanges(Event originalEvent, Organizer organizer, Date lastModified) throws OXException {
+    private Event prepareChanges(Event originalEvent, Organizer organizer) throws OXException {
         Event updatedEvent = new Event();
         updatedEvent.setId(originalEvent.getId());
 
@@ -214,9 +213,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
 
         // Update meta data
         updatedEvent.setSequence(originalEvent.getSequence() + 1);
-        updatedEvent.setTimestamp(timestamp.getTime());
-        updatedEvent.setModifiedBy(calendarUser);
-        Consistency.setModified(lastModified, updatedEvent, calendarUser);
+        Consistency.setModified(timestamp, updatedEvent, calendarUser);
 
         return updatedEvent;
     }
@@ -239,9 +236,9 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If update fails
      */
-    private void updateSeries(Event originalEvent, Organizer organizer, Date lastModified) throws OXException {
-        Event updatedEvent = updateEvent(originalEvent, organizer, lastModified);
-        updateExceptions(originalEvent, updatedEvent, organizer, lastModified);
+    private void updateSeries(Event originalEvent, Organizer organizer) throws OXException {
+        Event updatedEvent = updateEvent(originalEvent, organizer);
+        updateExceptions(originalEvent, updatedEvent, organizer);
     }
 
     /**
@@ -253,8 +250,8 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
      */
-    private Event updateEvent(Event originalEvent, Organizer organizer, Date lastModified) throws OXException {
-        Event prepareChanges = prepareChanges(originalEvent, organizer, lastModified);
+    private Event updateEvent(Event originalEvent, Organizer organizer) throws OXException {
+        Event prepareChanges = prepareChanges(originalEvent, organizer);
         storage.getEventStorage().updateEvent(prepareChanges);
         insertOrganizerAsAttendee(originalEvent, organizer);
         Event updatedEvent = loadEventData(originalEvent.getId());
@@ -272,9 +269,9 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
      */
-    private void updateExceptions(Event originalEvent, Event updatedEvent, Organizer organizer, Date lastModified) throws OXException {
+    private void updateExceptions(Event originalEvent, Event updatedEvent, Organizer organizer) throws OXException {
         for (Event e : loadExceptionData(updatedEvent)) {
-            storage.getEventStorage().updateEvent(prepareChanges(e, organizer, lastModified));
+            storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
             insertOrganizerAsAttendee(e, organizer);
             resultTracker.trackUpdate(e, loadEventData(e.getId()));
         }
