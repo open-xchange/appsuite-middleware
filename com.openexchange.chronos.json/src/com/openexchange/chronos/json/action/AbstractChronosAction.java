@@ -78,6 +78,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.Category;
@@ -243,6 +244,22 @@ public abstract class AbstractChronosAction implements AJAXActionService {
             }
         }
         return eventIDs;
+    }
+
+    /**
+     * Parses the attachment identifier from given request data
+     *
+     * @param requestData The request data
+     * @return The parsed attachment identifier
+     * @throws OXException If attachment identifier cannot be parsed
+     */
+    protected int parseAttachmentId(AJAXRequestData requestData) throws OXException {
+        String managedId = requestData.requireParameter(ChronosJsonFields.Attachment.MANAGED_ID);
+        try {
+            return Integer.parseInt(managedId);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER.create(e, ChronosJsonFields.Attachment.MANAGED_ID);
+        }
     }
 
     protected long parseClientTimestamp(AJAXRequestData requestData) throws OXException {

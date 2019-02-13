@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.zip;
 
+import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.IOs;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ZipEntryAdder} - Responsible for adding appropriate ZIP entries to ZIP archive's output stream
@@ -71,4 +74,19 @@ public interface ZipEntryAdder {
      * @throws OXException If adding ZIP entries fails
      */
     void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException;
+
+    /**
+     * Handles given {@code IOException} instance and returns an appropriate {@code OXException} for it.
+     *
+     * @param ioe The I/O exception to handle
+     * @return The resulting {@code OXException} instance
+     */
+    default OXException handleIOException(IOException ioe) {
+        OXException oxe = AjaxExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
+        if (IOs.isConnectionReset(ioe)) {
+            oxe.markLightWeight();
+        }
+        return oxe;
+    }
+
 }

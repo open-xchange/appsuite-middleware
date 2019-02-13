@@ -71,7 +71,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.java.IOs;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
@@ -88,6 +87,8 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
 
     /**
      * Initializes a new {@link ZipDocumentsAction}.
+     *
+     * @param serviceLookup The service look-up
      */
     public ZipDocumentsAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -198,10 +199,11 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
                 String entryName = name;
                 Integer count = fileNamesInArchive.get(name);
                 if (null != count) {
-                    entryName = FileStorageUtility.enhance(name, count++);
+                    count = Integer.valueOf(count.intValue() + 1);
+                    entryName = FileStorageUtility.enhance(name, count.intValue());
                     fileNamesInArchive.put(name, count);
                 } else {
-                    fileNamesInArchive.put(name, 1);
+                    fileNamesInArchive.put(name, Integer.valueOf(1));
                 }
                 ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
                 entry.setTime(attachment.getCreationDate().getTime());
@@ -220,18 +222,7 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
                  */
                 zipOutput.closeArchiveEntry();
             } catch (IOException e) {
-                OXException oxe = OXException.general(e.getMessage(), e);
-                if (IOs.isConnectionReset(e)) {
-                    /*-
-                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
-                     *
-                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
-                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
-                     * or the enduser's machine crashed, etc, etc.
-                     */
-                    oxe.markLightWeight();
-                }
-                throw oxe;
+                throw handleIOException(e);
             } finally {
                 Streams.close(in);
             }

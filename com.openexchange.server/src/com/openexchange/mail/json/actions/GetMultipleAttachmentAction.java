@@ -259,10 +259,11 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 String entryName = name;
                 Integer count = fileNamesInArchive.get(name);
                 if (null != count) {
-                    entryName = FileStorageUtility.enhance(name, count++);
+                    count = Integer.valueOf(count.intValue() + 1);
+                    entryName = FileStorageUtility.enhance(name, count.intValue());
                     fileNamesInArchive.put(name, count);
                 } else {
-                    fileNamesInArchive.put(name, 1);
+                    fileNamesInArchive.put(name, Integer.valueOf(1));
                 }
                 ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
                 zipOutput.putArchiveEntry(entry);
@@ -279,19 +280,14 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                  * Complete the entry
                  */
                 zipOutput.closeArchiveEntry();
+            } catch (com.sun.mail.util.MessageRemovedIOException e) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             } catch (IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                if (e.getCause() instanceof MessageRemovedException) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 if (IOs.isConnectionReset(e)) {
-                    /*-
-                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
-                     *
-                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
-                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
-                     * or the enduser's machine crashed, etc, etc.
-                     */
                     oxe.markLightWeight();
                 }
                 throw oxe;

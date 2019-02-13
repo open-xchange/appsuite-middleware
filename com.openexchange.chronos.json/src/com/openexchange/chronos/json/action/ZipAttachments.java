@@ -71,7 +71,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.java.IOs;
 import com.openexchange.java.Streams;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.server.ServiceLookup;
@@ -109,9 +108,8 @@ public class ZipAttachments extends ChronosAction {
         JSONValue jBody = requestData.getData(JSONValue.class);
         if (null == jBody) {
             EventID eventId = parseIdParameter(requestData);
-            String managedId = requestData.getParameter("managedId");
-            int mid = Integer.parseInt(managedId);
-            return Collections.singletonList(new AttachmentId(mid, eventId));
+            int managedId = parseAttachmentId(requestData);
+            return Collections.singletonList(new AttachmentId(managedId, eventId));
         }
 
         try {
@@ -188,10 +186,11 @@ public class ZipAttachments extends ChronosAction {
                 String entryName = name;
                 Integer count = fileNamesInArchive.get(name);
                 if (null != count) {
-                    entryName = FileStorageUtility.enhance(name, count++);
+                    count = Integer.valueOf(count.intValue() + 1);
+                    entryName = FileStorageUtility.enhance(name, count.intValue());
                     fileNamesInArchive.put(name, count);
                 } else {
-                    fileNamesInArchive.put(name, 1);
+                    fileNamesInArchive.put(name, Integer.valueOf(1));
                 }
                 ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
                 // TODO: entry.setTime(attachment.getCreationDate().getTime());
@@ -213,18 +212,7 @@ public class ZipAttachments extends ChronosAction {
                 // Complete the entry
                 zipOutput.closeArchiveEntry();
             } catch (IOException e) {
-                OXException oxe = OXException.general(e.getMessage(), e);
-                if (IOs.isConnectionReset(e)) {
-                    /*-
-                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
-                     *
-                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
-                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
-                     * or the enduser's machine crashed, etc, etc.
-                     */
-                    oxe.markLightWeight();
-                }
-                throw oxe;
+                throw handleIOException(e);
             } finally {
                 Streams.close(attachment);
             }

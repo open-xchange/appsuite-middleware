@@ -80,16 +80,15 @@ public class GetAttachment extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         // Gather the parameters
         EventID eventId = parseIdParameter(requestData);
-        String managedId = requestData.getParameter("managedId");
-        int mid = Integer.parseInt(managedId);
+        int managedId = parseAttachmentId(requestData);
 
         // Get the attachment and prepare the response
         IFileHolder fileHolder = null;
         try {
-            fileHolder = calendarAccess.getAttachment(eventId, mid);
-            boolean scanned = scan(requestData, fileHolder, getUniqueId(requestData, eventId, managedId));
+            fileHolder = calendarAccess.getAttachment(eventId, managedId);
+            boolean scanned = scan(requestData, fileHolder, getUniqueId(requestData, eventId, Integer.toString(managedId)));
             if (scanned && false == fileHolder.repetitive()) {
-                fileHolder = calendarAccess.getAttachment(eventId, mid);
+                fileHolder = calendarAccess.getAttachment(eventId, managedId);
             }
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
