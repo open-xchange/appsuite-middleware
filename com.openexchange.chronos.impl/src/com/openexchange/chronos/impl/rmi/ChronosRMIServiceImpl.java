@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.rmi;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
@@ -95,7 +96,8 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
 
     @Override
     public void setEventOrganizer(int contextId, int eventId, int userId) throws RemoteException {
-        
+        DBTransactionPolicy txPolicy = DBTransactionPolicy.NORMAL_TRANSACTIONS;
+
         Connection readCon = null;
         Connection writeCon = null;
         DatabaseService databaseService = null;
@@ -104,6 +106,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             databaseService = Services.getService(DatabaseService.class, true);
             readCon = databaseService.getReadOnly(contextId);
             writeCon = databaseService.getWritable(contextId);
+            txPolicy.setAutoCommit(writeCon, false);
             SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
 
             ContextService contextService = Services.getService(ContextService.class, true);
@@ -125,6 +128,8 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             } else {
                 handleSingle(event, userId, storage, entityResolver);
             }
+            txPolicy.commit(writeCon);
+            txPolicy.setAutoCommit(writeCon, true);
         } catch (RemoteException re) {
             throw re;
         } catch (Exception e) {
@@ -133,11 +138,19 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
             throw new RemoteException(message, e);
         } finally {
             if (databaseService != null) {
-                if(readCon != null) {
+                if (readCon != null) {
                     databaseService.backReadOnly(contextId, readCon);
                 }
-                if(writeCon != null) {
-                    if(backAfterRead) {
+                if (writeCon != null) {
+                    try {
+                        if (!writeCon.getAutoCommit()) {
+                            txPolicy.rollback(writeCon);
+                            txPolicy.setAutoCommit(writeCon, true);
+                        }
+                    } catch (SQLException e) {
+                        throw new RemoteException("SQL Error", e);
+                    }
+                    if (backAfterRead) {
                         databaseService.backWritableAfterReading(contextId, writeCon);
                     } else {
                         databaseService.backWritable(contextId, writeCon);
@@ -155,7 +168,6 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @param storage The calendar storage
      * @param entityResolver The entity resolver
      * @throws OXException if an error occurs
-     * @throws RemoteException if an error occurs
      */
     private void handleMaster(String seriesId, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException {
         List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
@@ -179,7 +191,6 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @param storage The calendar storage
      * @param entityResolver The entity resolver
      * @throws OXException if an error occurs
-     * @throws RemoteException if an error occurs
      */
     private void handleSingle(Event event, int userId, CalendarStorage storage, EntityResolver entityResolver) throws OXException {
         Attendee newOrganizerAttendee = modifyEventObject(event, userId, entityResolver);
@@ -222,12 +233,29 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
      * @return true if this is a no-op, false otherwise
      */
     private boolean isNoop(Event event, int newOrganizer) {
+        // Check if new organizer is different from the current one.
         if (!CalendarUtils.isOrganizer(event, newOrganizer)) {
             return false;
         }
-        return !event.getAttendees().stream().noneMatch(a -> a.getEntity() == newOrganizer);
+
+        // Check if the new organizer is already an attendee.
+        if (event.getAttendees().stream().noneMatch(a -> a.getEntity() == newOrganizer)) {
+            return false;
+        }
+
+        // Fall through, nothing to do.
+        return true;
     }
 
+    /**
+     * Checks if the current organizer is an internal user and if the new organizer is an existing internal user.
+     *
+     * @param event The event to handle
+     * @param newOrganizer The id of the new organizer
+     * @param context The context
+     * @throws RemoteException if an error occurs
+     * @throws OXException if an error occurs
+     */
     private void checkPreConditions(Event event, int newOrganizer, Context context) throws RemoteException, OXException {
         if (CalendarUtils.hasExternalOrganizer(event)) {
             throw new RemoteException("Current organizer '" + event.getOrganizer().toString() + "' is external.");
@@ -251,7 +279,7 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
 
     private CalendarStorage getStorage(int contextId, DBProvider dbProvider, Context context) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(contextId);
-        return Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS);
+        return Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
 }

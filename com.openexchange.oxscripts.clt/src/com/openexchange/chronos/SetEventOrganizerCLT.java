@@ -104,6 +104,7 @@ public class SetEventOrganizerCLT extends AbstractRmiCLI<Void> {
         try {
             ChronosRMIService rmiService = getRmiStub(optRmiHostName, ChronosRMIService.RMI_NAME);
             rmiService.setEventOrganizer(contextId.intValue(), eventId.intValue(), userId.intValue());
+            error = false;
         } catch (final Exception e) {
             final String errMsg = e.getMessage();
             System.out.println(errMsg == null ? "An error occurred." : errMsg);
