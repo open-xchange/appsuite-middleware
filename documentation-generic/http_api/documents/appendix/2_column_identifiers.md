@@ -493,10 +493,10 @@ specific field data of single or multiple objects.
 |715 | width | Number | Thhe width of the media resource. Since 7.10.2. |
 |716 | height | Number | The height of the media resource. Since 7.10.2. |
 |717 | camera_model | Time | The name of the camera model. Since 7.10.2. |
-|718 | camera_iso_speed | Number | The ISO speed value of a camera or input device. Since 7.10.2. |
-|719 | camera_aperture | Number | TThe aperture used to create the photo (f-number). Since 7.10.2. |
-|720 | camera_exposure_time | Number | The length of the exposure, in seconds. Since 7.10.2. |
-|721 | camera_focal_length | Number | The focal length used to create the photo, in millimeters. Since 7.10.2. |
+|718 | camera_iso\_speed | Number | The ISO speed value of a camera or input device. Since 7.10.2. |
+|719 | camera_aperture | Number | The aperture used to create the photo (f-number). Since 7.10.2. |
+|720 | camera_exposure\_time | Number | The length of the exposure, in seconds. Since 7.10.2. |
+|721 | camera_focal\_length | Number | The focal length used to create the photo, in millimeters. Since 7.10.2. |
 |722 | media_meta | JSON | The meta information for the media resource. Since 7.10.2. |
 |723 | media_status | String | The status of parsing/analyzing media meta-data from the media resource. Since 7.10.2. |
 |724 | media_date | Time | The media date represents the capture date, which falls-back to last-modified date if there is capture date. Useful for sorting. Since 7.10.2. |
