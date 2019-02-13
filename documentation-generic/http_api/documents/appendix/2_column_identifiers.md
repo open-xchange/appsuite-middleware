@@ -486,7 +486,7 @@ specific field data of single or multiple objects.
 |708 | file_md5sum | String | MD5Sum of the document, if available. |
 |709 | version_comment | String | A version comment is used to file a changelog for the file. |
 |710 | current_version | Boolean | “true” if this version is the current version “false” otherwise. Note: This is not writeable |
-|711 | number_of_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |
+|711 | number_of\_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |
 |712 | origin | String | The file's origin path. Since 7.10.0. |
 |713 | capture_date | Time | The capture/creation date of the media resource. Since 7.10.2. |
 |714 | geolocation | String | The geo location of the media resource as a parenthesized latitude and longitude pair. Since 7.10.2. |
