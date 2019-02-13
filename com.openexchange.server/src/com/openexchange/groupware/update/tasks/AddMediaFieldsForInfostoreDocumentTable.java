@@ -53,7 +53,9 @@ import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -82,6 +84,22 @@ public class AddMediaFieldsForInfostoreDocumentTable extends UpdateTaskAdapter {
         try {
             startTransaction(con);
             rollback = 1;
+
+            // Drop "old" column
+            if (Tools.columnExists(con, "infostore_document", "iso_speed")) {
+                Tools.dropColumns(con, "infostore_document", new Column("iso_speed", "int8 UNSIGNED DEFAULT NULL"));
+
+                // Drop old contents, too
+                PreparedStatement stmt = null;
+                try {
+                    stmt = con.prepareStatement("UPDATE infostore_document SET capture_date=NULL, geolocation=NULL, width=NULL, height=NULL, camera_model=null, media_meta=NULL, media_status=NULL");
+                    stmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                }
+            }
+
+            // ----------------------------------------------------------------------------------------------------------------------
 
             if (!Tools.columnExists(con, "infostore_document", "capture_date")) {
                 Tools.addColumns(con, "infostore_document", new Column("capture_date", "int8 DEFAULT NULL"));
