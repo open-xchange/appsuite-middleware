@@ -1033,7 +1033,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 document.setFilestoreLocation(saveFile.getFileStorageID());
                 document.setFileMD5Sum(saveFile.getChecksum());
                 document.setFileSize(saveFile.getByteCount());
-                document.setMediaStatus(MediaStatus.pending());
 
                 Runnable extraction = triggerMediaDataExtraction(document, null, false, fileStorage, session);
                 if (null != extraction) {
@@ -1096,7 +1095,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             // Acquire needed service
             final MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
-            if (null == extractorService) {
+            if (true || null == extractorService) {
                 // No extractor service available
                 return null;
             }
