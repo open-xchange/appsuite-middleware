@@ -67,7 +67,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositonSpaces;
-import com.openexchange.mail.compose.DefaultAttachment.DataProvider;
+import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 

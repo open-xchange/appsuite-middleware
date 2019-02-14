@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -72,8 +73,10 @@ import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageReference;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.DefaultAttachment;
 import com.openexchange.mail.compose.SizeProvider;
+import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -112,7 +115,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @return The data provider
      * @throws OXException If data provider cannot be returned
      */
-    protected abstract DefaultAttachment.DataProvider getDataProviderFor(String storageIdentifier, Session session) throws OXException;
+    protected abstract DataProvider getDataProviderFor(String storageIdentifier, Session session) throws OXException;
 
     /**
      * Saves the specified data to storage.
@@ -209,6 +212,144 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             attachment.withCompositionSpaceId(UUIDs.toUUID(rs.getBytes(11)));
             attachment.withDataProvider(getDataProviderFor(storageIdentifier, session));
             return attachment.build();
+        } catch (SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public List<Attachment> getAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
+        DatabaseService databaseService = requireDatabaseService();
+        Connection con = databaseService.getReadOnly(session.getContextId());
+        try {
+            return getAttachmentsByCompositionSpace(compositionSpaceId, session, con);
+        } finally {
+            databaseService.backReadOnly(session.getContextId(), con);
+        }
+    }
+
+    /**
+     * Gets the attachments associated with given composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param session The session providing user information
+     * @param con The connection to use
+     * @return The attachments or an empty list if there are no attachments associated with given composition space
+     * @throws OXException If attachments cannot be returned
+     */
+    public List<Attachment> getAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session, Connection con) throws OXException {
+        if (null == con) {
+            return getAttachmentsByCompositionSpace(compositionSpaceId, session);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, uuid FROM compositionSpaceAttachmentMeta WHERE csid=?");
+            stmt.setBytes(1, UUIDs.toByteArray(compositionSpaceId));
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            List<Attachment> attachments = new LinkedList<>();
+            do {
+                if (session.getContextId() != rs.getInt(1)) {
+                    // Context does not match
+                    continue;
+                }
+                if (session.getUserId() != rs.getInt(2)) {
+                    // User does not match
+                    continue;
+                }
+                if (getStorageType().getType() != rs.getInt(3)) {
+                    // Storage type does not match
+                    continue;
+                }
+                String storageIdentifier = rs.getString(4);
+
+                DefaultAttachment.Builder attachment = DefaultAttachment.builder(UUIDs.toUUID(rs.getBytes(11)));
+                attachment.withStorageReference(new AttachmentStorageReference(storageIdentifier, getStorageType()));
+                attachment.withName(rs.getString(5));
+                attachment.withSize(rs.getLong(6));
+                attachment.withMimeType(rs.getString(7));
+                attachment.withContentId(rs.getString(8));
+                attachment.withDisposition(ContentDisposition.dispositionFor(rs.getString(9)));
+                attachment.withOrigin(AttachmentOrigin.getOriginFor(rs.getString(10)));
+                attachment.withCompositionSpaceId(compositionSpaceId);
+                attachment.withDataProvider(getDataProviderFor(storageIdentifier, session));
+                attachments.add(attachment.build());
+            } while (rs.next());
+            return attachments;
+        } catch (SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public SizeReturner getSizeOfAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
+        DatabaseService databaseService = requireDatabaseService();
+        Connection con = databaseService.getReadOnly(session.getContextId());
+        try {
+            return getSizeOfAttachmentsByCompositionSpace(compositionSpaceId, session, con);
+        } finally {
+            databaseService.backReadOnly(session.getContextId(), con);
+        }
+    }
+
+    /**
+     * Gets the total size of attachments associated with given composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param session The session providing user information
+     * @param con The connection to use
+     * @return The attachments' size or <code>0</code> (zero) if there are no attachments associated with given composition space
+     * @throws OXException If attachments' size cannot be returned
+     */
+    public SizeReturner getSizeOfAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session, Connection con) throws OXException {
+        if (null == con) {
+            return getSizeOfAttachmentsByCompositionSpace(compositionSpaceId, session);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, user, refType, refId, size FROM compositionSpaceAttachmentMeta WHERE csid=?");
+            stmt.setBytes(1, UUIDs.toByteArray(compositionSpaceId));
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return SizeReturner.sizeReturnerFor(0);
+            }
+
+            SizeReturner.Builder sizeReturner = SizeReturner.builder();
+            do {
+                if (session.getContextId() != rs.getInt(1)) {
+                    // Context does not match
+                    continue;
+                }
+                if (session.getUserId() != rs.getInt(2)) {
+                    // User does not match
+                    continue;
+                }
+                if (getStorageType().getType() != rs.getInt(3)) {
+                    // Storage type does not match
+                    continue;
+                }
+
+                long size = rs.getLong(5);
+                if (size < 0) {
+                    // Need to count...
+                    String storageIdentifier = rs.getString(4);
+                    sizeReturner.addDataProvider(getDataProviderFor(storageIdentifier, session));
+                } else {
+                    sizeReturner.addSize(size);
+                }
+            } while (rs.next());
+            return sizeReturner.build();
         } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {

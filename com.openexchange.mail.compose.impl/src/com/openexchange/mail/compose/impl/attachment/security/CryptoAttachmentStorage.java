@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl.attachment.security;
 import static com.openexchange.mail.compose.impl.CryptoUtility.encrypt;
 import java.io.InputStream;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
@@ -60,7 +61,9 @@ import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageType;
+import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.SizeProvider;
+import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.mail.compose.impl.AbstractCryptoAware;
 import com.openexchange.mail.compose.impl.CryptoUtility;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
@@ -104,6 +107,37 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             attachment = new DecryptingAttachment(attachment, key);
         }
         return attachment;
+    }
+
+    @Override
+    public List<Attachment> getAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
+        List<Attachment> attachments = attachmentStorage.getAttachmentsByCompositionSpace(compositionSpaceId, session);
+        if (null == attachments || attachments.isEmpty() || false == needsEncryption(session)) {
+            return attachments;
+        }
+
+        Key key = getKeyFor(compositionSpaceId, session);
+        List<Attachment> decryptedAttachments = new ArrayList<Attachment>(attachments.size());
+        for (Attachment attachment : attachments) {
+            decryptedAttachments.add(new DecryptingAttachment(attachment, key));
+        }
+        return decryptedAttachments;
+    }
+
+    @Override
+    public SizeReturner getSizeOfAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
+        SizeReturner sizeReturner = attachmentStorage.getSizeOfAttachmentsByCompositionSpace(compositionSpaceId, session);
+        if (!sizeReturner.hasDataProviders() || false == needsEncryption(session)) {
+            return sizeReturner;
+        }
+
+        Key key = getKeyFor(compositionSpaceId, session);
+        SizeReturner.Builder decryptingSizeReturner = SizeReturner.builder();
+        decryptingSizeReturner.withSize(sizeReturner.getSize());
+        for (DataProvider dataProvider : sizeReturner.getDataProviders()) {
+            decryptingSizeReturner.addDataProvider(new DecryptingDataProvider(dataProvider, key));
+        }
+        return decryptingSizeReturner.build();
     }
 
     @Override

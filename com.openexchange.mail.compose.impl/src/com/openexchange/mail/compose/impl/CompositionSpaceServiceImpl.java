@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
@@ -149,6 +150,7 @@ import com.openexchange.mail.compose.Meta.MetaType;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
+import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.mail.compose.Type;
 import com.openexchange.mail.compose.VCardAndFileName;
 import com.openexchange.mail.compose.impl.attachment.AttachmentComparator;
@@ -2807,10 +2809,32 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      * @throws OXException If saving attachment fails
      */
     private static Attachment saveAttachment(InputStream input, AttachmentDescription attachmentDesc, Session session, AttachmentStorage attachmentStorage) throws OXException {
+        Attachment savedAttachment = null;
+        InputStream in = input;
         try {
-            return attachmentStorage.saveAttachment(input, attachmentDesc, null, session);
+            // Optimistic save
+            savedAttachment = attachmentStorage.saveAttachment(in, attachmentDesc, null, session);
+            Streams.close(in);
+            in = null;
+
+            // Check if max. mail size might be exceeded
+            long maxMailSize = MailProperties.getInstance().getMaxMailSize(session.getUserId(), session.getContextId());
+            if (maxMailSize > 0) {
+                SizeReturner sizeReturner = attachmentStorage.getSizeOfAttachmentsByCompositionSpace(savedAttachment.getCompositionSpaceId(), session);
+                if (sizeReturner.getTotalSize() > maxMailSize) {
+                    throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(maxMailSize, 0, false, true));
+                }
+            }
+
+            // All fine. Return newly saved attachment
+            Attachment retval = savedAttachment;
+            savedAttachment = null; // Avoid premature deletion
+            return retval;
         } finally {
-            Streams.close(input);
+            Streams.close(in);
+            if (null != savedAttachment) {
+                attachmentStorage.deleteAttachment(savedAttachment.getId(), session);
+            }
         }
     }
 

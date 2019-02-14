@@ -63,32 +63,6 @@ import com.openexchange.mail.compose.AttachmentStorageReference;
  */
 public class DefaultAttachment implements RandomAccessAttachment {
 
-    /** Provider for an attachment's binary stream */
-    public static interface DataProvider {
-
-        /**
-         * Gets the attachment's binary data
-         *
-         * @return The binary data
-         * @throws OXException If binary data cannot be returned
-         */
-        InputStream getData() throws OXException;
-    }
-
-    /** Provider for (a part of) an attachment's binary stream */
-    public static interface SeekingDataProvider extends DataProvider {
-
-        /**
-         * Gets (a part of) the attachment's binary data
-         *
-         * @param offset The requested start offset of the file stream in bytes
-         * @param length The requested length in bytes, starting from the offset
-         * @return The binary data
-         * @throws OXException If binary data cannot be returned
-         */
-        InputStream getData(long offset, long length) throws OXException;
-    }
-
     /**
      * Creates a new instance of <code>DefaultAttachment</code> carrying given attachment and composition space identifier.
      *

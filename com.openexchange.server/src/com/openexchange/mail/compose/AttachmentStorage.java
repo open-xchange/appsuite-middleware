@@ -94,6 +94,26 @@ public interface AttachmentStorage {
     Attachment getAttachment(UUID id, Session session) throws OXException;
 
     /**
+     * Gets the attachments associated with given composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param session The session providing user information
+     * @return The attachments or an empty list if there are no attachments associated with given composition space
+     * @throws OXException If attachments cannot be returned
+     */
+    List<Attachment> getAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException;
+
+    /**
+     * Gets the total size of attachments associated with given composition space.
+     *
+     * @param compositionSpaceId The composition space identifier
+     * @param session The session providing user information
+     * @return The attachments' size
+     * @throws OXException If attachments' size cannot be returned
+     */
+    SizeReturner getSizeOfAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException;
+
+    /**
      * Saves the specified attachment binary data and meta data
      *
      * @param input The input stream providing binary data
