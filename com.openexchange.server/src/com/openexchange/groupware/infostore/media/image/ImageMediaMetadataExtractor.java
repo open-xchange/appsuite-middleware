@@ -596,10 +596,10 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                 }
                 return ExtractorResult.SUCCESSFUL;
             } catch (com.drew.imaging.ImageProcessingException e) {
-                LOGGER.warn("Failed to extract {} image metadata from document {} ({}) with version {}", detectedFileType.getName(), I(document.getId()), document.getFileName(), I(document.getVersion()), e);
+                LOGGER.debug("Failed to extract {} image metadata from document {} ({}) with version {}", detectedFileType.getName(), I(document.getId()), document.getFileName(), I(document.getVersion()), e);
                 return ExtractorResult.ACCEPTED_BUT_FAILED;
             } catch (Exception e) {
-                LOGGER.warn("Failed to extract {} image metadata from document {} ({}) with version {}", detectedFileType.getName(), I(document.getId()), document.getFileName(), I(document.getVersion()), e);
+                LOGGER.debug("Failed to extract {} image metadata from document {} ({}) with version {}", detectedFileType.getName(), I(document.getId()), document.getFileName(), I(document.getVersion()), e);
                 throw e instanceof OXException ? (OXException) e : OXException.general("Failed to extract image metadata from document " + document.getId() + " with version " + document.getVersion(), e);
             }
         } finally {

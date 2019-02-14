@@ -1095,7 +1095,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             // Acquire needed service
             final MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
-            if (true || null == extractorService) {
+            if (null == extractorService) {
                 // No extractor service available
                 return null;
             }
