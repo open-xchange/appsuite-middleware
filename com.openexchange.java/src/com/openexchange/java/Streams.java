@@ -462,7 +462,7 @@ public class Streams {
             return 0L;
         }
         try {
-            final int blen = 2048;
+            final int blen = 65536;
             final byte[] buf = new byte[blen];
             long count = 0;
             for (int read; (read = in.read(buf, 0, blen)) > 0;) {
