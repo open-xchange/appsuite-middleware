@@ -271,8 +271,11 @@ public class ChronosRMIServiceImpl implements ChronosRMIService {
         }
     }
 
-    private Event loadEvent(int eventId, CalendarStorage storage) throws OXException {
+    private Event loadEvent(int eventId, CalendarStorage storage) throws OXException, RemoteException {
         Event event = storage.getEventStorage().loadEvent(Integer.toString(eventId), null);
+        if (event == null) {
+            throw new RemoteException("Invalid event id: " + eventId);
+        }
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         return event;
     }
