@@ -1513,12 +1513,6 @@ msgstr ""
 msgid "The appointment contains too many reminders."
 msgstr ""
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
-msgid ""
-"The operation could not be completed. The event contains at least one "
-"external attendee."
-msgstr ""
-
 #. Your selection is not supported.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
 msgid "Your selection is not supported."
