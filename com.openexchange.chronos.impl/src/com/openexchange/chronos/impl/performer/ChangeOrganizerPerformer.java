@@ -305,7 +305,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         List<Alarm> alarms = CalendarUtils.isAllDay(originalEvent) ? session.getConfig().getDefaultAlarmDate(organizerId) : session.getConfig().getDefaultAlarmDateTime(organizerId);
         if (null != alarms && false == alarms.isEmpty()) {
             storage.getAlarmStorage().insertAlarms(originalEvent, organizerId, alarms);
+            storage.getAlarmTriggerStorage().insertTriggers(originalEvent, Collections.singletonMap(Integer.valueOf(organizerId), alarms));
         }
-        storage.getAlarmTriggerStorage().insertTriggers(originalEvent, Collections.singletonMap(Integer.valueOf(organizerId), alarms));
     }
 }
