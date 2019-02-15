@@ -73,6 +73,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -214,7 +215,11 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
+    }
+
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<>();
 
@@ -266,7 +271,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             try {
                 extractorService.scheduleMediaMetadataExtraction(document, fileStorage, optArguments, session);
             } catch (Exception e) {
-                LOG.warn("Failed scheduling of media metadata extraction for document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
+                LoggerHolder.LOG.warn("Failed scheduling of media metadata extraction for document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
             }
         }
     }
@@ -907,7 +912,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 usage = fileStorage.getUsage();
             }
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for user {} in context {}", I(folderOwner), I(contextId), e);
+            LoggerHolder.LOG.warn("Error getting file storage quota for user {} in context {}", I(folderOwner), I(contextId), e);
         }
 
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
@@ -1278,7 +1283,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                     }
                 } catch (Exception e) {
-                    LOG.error("Failed to extract media metadata from document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
+                    LoggerHolder.LOG.error("Failed to extract media metadata from document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
                     document.setMediaStatus(MediaStatus.error());
                     if (null != updatedColumns) {
                         Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
@@ -1295,11 +1300,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 try {
                     extractorService.scheduleMediaMetadataExtraction(document, fileStorage, result.getOptionalArguments(), session);
                 } catch (Exception e) {
-                    LOG.warn("Failed scheduling of media metadata extraction for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
+                    LoggerHolder.LOG.warn("Failed scheduling of media metadata extraction for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
                     try {
                         MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
                     } catch (Exception x) {
-                        LOG.warn("Failed restoring '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), x);
+                        LoggerHolder.LOG.warn("Failed restoring '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), x);
                     }
                 }
                 return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
@@ -1307,7 +1312,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Runnable scheduleTask = new ScheduledExtractionTask(document, fileStorage, extractorService, result.getOptionalArguments(), session);
             return new TriggerMediaMetaDataExtractionResult(scheduleTask);
         } catch (OXException e) {
-            LOG.warn("Failed extraction of media metadata for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
+            LoggerHolder.LOG.warn("Failed extraction of media metadata for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
         } finally {
             Streams.close(documentData);
         }
@@ -1320,7 +1325,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             try {
                 MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
             } catch (OXException e) {
-                LOG.warn("Failed setting '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
+                LoggerHolder.LOG.warn("Failed setting '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
             }
         }
         return null;
@@ -1445,14 +1450,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (null != args && 3 < args.length && Long.class.isInstance(args[3])) {
                     long actualSize = ((Long) args[3]).longValue();
                     if (actualSize != metadata.getFileSize()) {
-                        LOG.debug("Detected invalid file size {} in stored metadata for file {}", L(length), I(metadata.getId()), e);
+                        LoggerHolder.LOG.debug("Detected invalid file size {} in stored metadata for file {}", L(length), I(metadata.getId()), e);
                         try {
                             DocumentMetadataImpl updatedMetadata = new DocumentMetadataImpl(metadata);
                             updatedMetadata.setFileSize(actualSize);
                             perform(new UpdateVersionAction(this, QUERIES, session.getContext(), updatedMetadata, metadata, new Metadata[] { Metadata.FILE_SIZE_LITERAL }, metadata.getSequenceNumber(), session), true);
-                            LOG.info("Auto-corrected invalid file size in stored metadata for file {}", I(metadata.getId()));
+                            LoggerHolder.LOG.info("Auto-corrected invalid file size in stored metadata for file {}", I(metadata.getId()));
                         } catch (Exception x) {
-                            LOG.warn("Error auto-correcting invalid file size in stored metadata for file {}", I(metadata.getId()), x);
+                            LoggerHolder.LOG.warn("Error auto-correcting invalid file size in stored metadata for file {}", I(metadata.getId()), x);
                         }
                     }
                 }
@@ -1805,7 +1810,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     parameters.getDocument().setVersion(getNextVersionNumberForInfostoreObject(parameters.getContext().getContextId(), parameters.getDocument().getId(), con));
                     parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
                 } catch (final SQLException e) {
-                    LOG.error("SQL error", e);
+                    LoggerHolder.LOG.error("SQL error", e);
                 } finally {
                     releaseReadConnection(parameters.getContext(), con);
                 }
@@ -1848,7 +1853,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
             return InfostoreAutodeleteSettings.hasAutodeleteCapability(folderAdmin, session.getContextId());
         } catch (Exception e) {
-            LOG.error("Failed to check for the capability required to perform auto-deletion of versions. Assumin that capability is not granted for now.", e);
+            LoggerHolder.LOG.error("Failed to check for the capability required to perform auto-deletion of versions. Assumin that capability is not granted for now.", e);
             return false;
         }
     }
@@ -2396,7 +2401,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             checkWriteLock(metadata, session);
         } catch (OXException x) {
-            LOG.trace("", x);
+            LoggerHolder.LOG.trace("", x);
             return versionIds;
         }
         EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
@@ -3291,7 +3296,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             try {
                                 fileStorage.deleteFile(removeInfo.fileId);
                             } catch (Exception e) {
-                                LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, I(removeInfo.folderAdmin), I(removeInfo.contextId), e);
+                                LoggerHolder.LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, I(removeInfo.folderAdmin), I(removeInfo.contextId), e);
                             }
                             return null;
                         }
@@ -3320,7 +3325,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 try {
                                     fileStorage.deleteFiles(locations.toArray(new String[locations.size()]));
                                 } catch (Exception e) {
-                                    LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, I(key.getUserId()), I(key.getContextId()), e);
+                                    LoggerHolder.LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, I(key.getUserId()), I(key.getContextId()), e);
                                 }
                                 return null;
                             }
@@ -3350,7 +3355,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 try {
                                     shareService.scheduleGuestCleanup(contextID, guestIDs);
                                 } catch (Exception e) {
-                                    LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), I(contextID), e);
+                                    LoggerHolder.LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), I(contextID), e);
                                 }
                                 return null;
                             }
@@ -3369,7 +3374,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 try {
                     task.run();
                 } catch (Exception e) {
-                    LOG.error("Failed to perform task {}", task.getClass().getName(), e);
+                    LoggerHolder.LOG.error("Failed to perform task {}", task.getClass().getName(), e);
                 }
             }
         }
