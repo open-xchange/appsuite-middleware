@@ -71,6 +71,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -144,13 +145,36 @@ public abstract class AbstractReminderAction implements AJAXActionService {
             } catch (NumberFormatException e) {
                 int module = AJAXServlet.getModuleInteger(str);
                 if (module >= 0) {
-                    result.add(module);
-                    continue;
+                    int typesConstant = getTypesConstant(module);
+                    if (typesConstant >= 0) {
+                        result.add(typesConstant);
+                        continue;
+                    }
                 }
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MODULES_PARAMETER, parameter);
             }
         }
         return result.isEmpty() ? null : result;
+    }
+
+    /**
+     * Translates a FolderObject value to a Types value.
+     */
+    public static int getTypesConstant(final int folderObjectConstant) throws OXException {
+        switch (folderObjectConstant) {
+            case FolderObject.CONTACT:
+                return Types.CONTACT;
+            case FolderObject.INFOSTORE:
+                return Types.INFOSTORE;
+            case FolderObject.MAIL:
+                return Types.EMAIL;
+            case FolderObject.TASK:
+                return Types.TASK;
+            case FolderObject.CALENDAR:
+                return Types.APPOINTMENT;
+            default:
+                return -1;
+        }
     }
 
     /**
