@@ -74,7 +74,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -225,6 +227,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         QFS_REF.set(service);
     }
 
+    static int getMaxCallerRunsCountForMediaDataExtraction(ServerSession session) {
+        int defaultValue = 100;
+
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null != viewFactory) {
+            try {
+                ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+                int maxCallerCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.groupware.infostore.media.maxCallerRunsCount", defaultValue, view);
+                return maxCallerCount <= 0 ? defaultValue : maxCallerCount;
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        return defaultValue;
+    }
+
     /** A simple task to schedule a new media metadata extraction */
     private static class ScheduledExtractionTask implements Runnable {
 
@@ -326,6 +344,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         private final QuotaFileStorage optFileStorage;
         private final DocumentCustomizer optSuccessor;
+        private int maxTriggerCount;
 
         /**
          * Initializes a new {@link TriggerMediaMetaDataExtractionDocumentCustomizer}.
@@ -341,6 +360,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             super(infostore, session);
             this.optFileStorage = optFileStorage;
             this.optSuccessor = optSuccessor;
+            maxTriggerCount = getMaxCallerRunsCountForMediaDataExtraction(session);
         }
 
         @Override
@@ -351,7 +371,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     int folderOwner = getFolderOwner(document);
                     fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
                 }
-                infostore.triggerMediaDataExtraction(document, null, true, fileStorage, session);
+
+                boolean forceBackground = maxTriggerCount == 0; // If expired, background extraction is supposed to be performed
+                TriggerMediaMetaDataExtractionResult result = infostore.triggerMediaDataExtraction(document, null, true, forceBackground, fileStorage, session);
+                if (result.performedByCaller) {
+                    maxTriggerCount--;
+                }
             }
             return optSuccessor == null ? document : optSuccessor.handle(document);
         }
@@ -361,6 +386,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     private static class TriggerMediaMetaDataExtractionSearchIterator extends AbstractFolderOwnerProvider implements SearchIterator<DocumentMetadata> {
 
         private final SearchIterator<DocumentMetadata> searchIterator;
+        private int maxTriggerCount;
 
         /**
          * Initializes a new {@link SearchIteratorImplementation}.
@@ -368,6 +394,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         TriggerMediaMetaDataExtractionSearchIterator(SearchIterator<DocumentMetadata> searchIterator, InfostoreFacadeImpl infostore, ServerSession session) {
             super(infostore, session);
             this.searchIterator = searchIterator;
+            maxTriggerCount = getMaxCallerRunsCountForMediaDataExtraction(session);
         }
 
         @Override
@@ -382,7 +409,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 int folderOwner = getFolderOwner(document);
                 if (folderOwner > 0) {
                     QuotaFileStorage fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
-                    infostore.triggerMediaDataExtraction(document, null, true, fileStorage, session);
+
+                    boolean forceBackground = maxTriggerCount == 0; // If expired, background extraction is supposed to be performed
+                    TriggerMediaMetaDataExtractionResult result = infostore.triggerMediaDataExtraction(document, null, true, forceBackground, fileStorage, session);
+                    if (result.performedByCaller) {
+                        maxTriggerCount--;
+                    }
                 }
             }
             return document;
@@ -417,6 +449,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     private static class TriggerMediaMetaDataExtractionByCollection extends AbstractFolderOwnerProvider {
 
         private final Collection<DocumentMetadata> documents;
+        private int maxTriggerCount;
 
         /**
          * Initializes a new {@link SearchIteratorImplementation}.
@@ -424,6 +457,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         TriggerMediaMetaDataExtractionByCollection(Collection<DocumentMetadata> documents, InfostoreFacadeImpl infostore, ServerSession session) {
             super(infostore, session);
             this.documents = documents;
+            maxTriggerCount = getMaxCallerRunsCountForMediaDataExtraction(session);
         }
 
         /**
@@ -437,10 +471,51 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     int folderOwner = getFolderOwner(document);
                     if (folderOwner > 0) {
                         QuotaFileStorage fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
-                        infostore.triggerMediaDataExtraction(document, null, true, fileStorage, session);
+
+                        boolean forceBackground = maxTriggerCount == 0; // If expired, background extraction is supposed to be performed
+                        TriggerMediaMetaDataExtractionResult result = infostore.triggerMediaDataExtraction(document, null, true, forceBackground, fileStorage, session);
+                        if (result.performedByCaller) {
+                            maxTriggerCount--;
+                        }
                     }
                 }
             }
+        }
+    }
+
+    private static class TriggerMediaMetaDataExtractionResult {
+
+        static final TriggerMediaMetaDataExtractionResult NEITHER_NOR = new TriggerMediaMetaDataExtractionResult(null, false);
+
+        static final TriggerMediaMetaDataExtractionResult CALLER_RAN = new TriggerMediaMetaDataExtractionResult(null, true);
+
+        // ---------------------------------------------------------------------------------------------------------------------------------
+
+        /** The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed by caller) */
+        final Runnable extraction;
+
+        /** <code>true</code> if extraction has been performed by caller; otherwise <code>false</code> */
+        final boolean performedByCaller;
+
+        /**
+         * Initializes a new {@link TriggerMediaMetaDataExtractionResult}.
+         *
+         * @param scheduleExtraction The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed by caller)
+         */
+        TriggerMediaMetaDataExtractionResult(Runnable scheduleExtraction) {
+            this(scheduleExtraction, false);
+        }
+
+        /**
+         * Initializes a new {@link TriggerMediaMetaDataExtractionResult}.
+         *
+         * @param extraction The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed by caller)
+         * @param performedByCaller <code>true</code> if extraction has been performed by caller; otherwise <code>false</code>
+         */
+        private TriggerMediaMetaDataExtractionResult(Runnable extraction, boolean performedByCaller) {
+            super();
+            this.extraction = extraction;
+            this.performedByCaller = performedByCaller;
         }
     }
 
@@ -582,7 +657,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (considerMediaDataExtraction(document)) {
             int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(document, this, context);
             QuotaFileStorage fileStorage = getFileStorage(folderOwner, context.getContextId());
-            triggerMediaDataExtraction(document, null, true, fileStorage, session);
+            triggerMediaDataExtraction(document, null, true, false, fileStorage, session);
         }
         /*
          * add further metadata and return
@@ -605,7 +680,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(document, this, context);
                 if (folderOwner > 0) {
                     QuotaFileStorage fileStorage = getFileStorage(folderOwner, context.getContextId());
-                    triggerMediaDataExtraction(document, null, true, fileStorage, session);
+                    triggerMediaDataExtraction(document, null, true, false, fileStorage, session);
                 }
             }
         }
@@ -691,7 +766,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (considerMediaDataExtraction(metadata)) {
             int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(metadata, this, context);
             fileStorage = getFileStorage(folderOwner, context.getContextId());
-            triggerMediaDataExtraction(metadata, null, true, fileStorage, session);
+            triggerMediaDataExtraction(metadata, null, true, false, fileStorage, session);
         }
         metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
@@ -1034,7 +1109,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 document.setFileMD5Sum(saveFile.getChecksum());
                 document.setFileSize(saveFile.getByteCount());
 
-                Runnable extraction = triggerMediaDataExtraction(document, null, false, fileStorage, session);
+                Runnable extraction = triggerMediaDataExtraction(document, null, false, false, fileStorage, session).extraction;
                 if (null != extraction) {
                     List<Runnable> tasks = pendingInvocations.get();
                     if (null == tasks) {
@@ -1086,18 +1161,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param document The document to extract from
      * @param updatedColumns The optional updated columns
      * @param save Whether to immediately save current media metadata
+     * @param forceBackground Whether extraction is forced to be performed as background task
      * @param fileStorage The storage holding file content
      * @param session The session
-     * @return The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed inline)
+     * @return The result
      */
-    Runnable triggerMediaDataExtraction(final DocumentMetadata document, Collection<Metadata> updatedColumns, boolean save, final QuotaFileStorage fileStorage, final ServerSession session) {
+    TriggerMediaMetaDataExtractionResult triggerMediaDataExtraction(final DocumentMetadata document, Collection<Metadata> updatedColumns, boolean save, boolean forceBackground, final QuotaFileStorage fileStorage, final ServerSession session) {
         InputStream documentData = null;
         try {
             // Acquire needed service
             final MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
             if (null == extractorService) {
                 // No extractor service available
-                return null;
+                return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
             }
 
             // Obtain binary data from file storage
@@ -1114,11 +1190,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (save) {
                     MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
                 }
-                return null;
+                return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
             }
 
             // Check for low effort
-            if (result.isLowEffort()) {
+            if (result.isLowEffort() && !forceBackground) {
                 // Low effort... Perform with current thread
                 try {
                     ExtractorResult extractorResult;
@@ -1144,7 +1220,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             if (save) {
                                 MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.failure(), document, session);
                             }
-                            return null;
+                            return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                         case SUCCESSFUL:
                             {
                                 document.setMediaStatus(MediaStatus.success());
@@ -1187,7 +1263,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                     documentToPass.setSequenceNumber(document.getSequenceNumber());
                                     MediaMetadataExtractors.saveMediaMetaDataFromDocument(documentToPass, session);
                                 }
-                                return null;
+                                return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                             }
                         case NONE:
                             // fall-through
@@ -1199,7 +1275,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             if (save) {
                                 MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
                             }
-                            return null;
+                            return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                     }
                 } catch (Exception e) {
                     LOG.error("Failed to extract media metadata from document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
@@ -1210,7 +1286,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     if (save) {
                         MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.error(), document, session);
                     }
-                    return null;
+                    return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                 }
             }
 
@@ -1226,9 +1302,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         LOG.warn("Failed restoring '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), x);
                     }
                 }
-                return null;
+                return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
             }
-            return new ScheduledExtractionTask(document, fileStorage, extractorService, result.getOptionalArguments(), session);
+            Runnable scheduleTask = new ScheduledExtractionTask(document, fileStorage, extractorService, result.getOptionalArguments(), session);
+            return new TriggerMediaMetaDataExtractionResult(scheduleTask);
         } catch (OXException e) {
             LOG.warn("Failed extraction of media metadata for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
         } finally {
@@ -1664,7 +1741,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     Metadata.MEDIA_META_LITERAL,
                     Metadata.MEDIA_STATUS_LITERAL));
 
-                Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, qfs, session);
+                Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, false, qfs, session).extraction;
                 if (null != extraction) {
                     List<Runnable> tasks = pendingInvocations.get();
                     if (null == tasks) {
@@ -1682,7 +1759,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 parameters.getDocument().setMediaStatus(null);
                 parameters.getUpdatedCols().addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL, Metadata.MEDIA_STATUS_LITERAL));
 
-                Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, qfs, session);
+                Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, false, qfs, session).extraction;
                 if (null != extraction) {
                     List<Runnable> tasks = pendingInvocations.get();
                     if (null == tasks) {

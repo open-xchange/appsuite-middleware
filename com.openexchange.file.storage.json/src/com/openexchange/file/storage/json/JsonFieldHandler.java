@@ -218,8 +218,8 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 }
 
                 if ((field == File.Field.MEDIA_STATUS) && (value == null)) {
-                    if (optJsonFile instanceof UserizedFile) {
-                        UserizedFile userizedFile = (UserizedFile) optJsonFile;
+                    if (args.length > 0 && (args[0] instanceof UserizedFile)) {
+                        UserizedFile userizedFile = (UserizedFile) args[0];
                         value = userizedFile.getMediaStatusForClient(request.getSession());
                     }
                 }
