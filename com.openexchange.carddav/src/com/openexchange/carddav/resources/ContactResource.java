@@ -299,7 +299,7 @@ public class ContactResource extends CommonResource<Contact> {
              */
             contact.setContextId(session.getContextId());
             String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(getId(parent));
-            if (contact.getMarkAsDistribtuionlist()) {
+            if (contact.getMarkAsDistribtuionlist() && false == parent.isSyncDistributionLists()) {
                 /*
                  * insert & delete not supported contact group (next sync cleans up the client)
                  */

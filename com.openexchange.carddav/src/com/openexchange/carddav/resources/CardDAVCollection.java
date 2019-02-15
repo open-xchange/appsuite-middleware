@@ -277,6 +277,15 @@ public class CardDAVCollection extends FolderCollection<Contact> {
     }
 
     /**
+     * Gets a value indicating whether synchronization of distribution lists is enabled or not.
+     * 
+     * @return <code>true</code> if distribution lists can be synchronized, <code>false</code>, otherwise
+     */
+    public boolean isSyncDistributionLists() {
+        return false;
+    }
+
+    /**
      * Gets a list of one or more folders represented by the collection.
      *
      * @return The folder identifiers
@@ -302,7 +311,9 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         try {
             CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
             searchTerm.addSearchTerm(getFolderTerm(getFolders()));
-            searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+            if (false == isSyncDistributionLists()) {
+                searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+            }
             searchTerm.addSearchTerm(term);
             searchIterator = factory.getContactService().searchContacts(factory.getSession(), term);
             while (searchIterator.hasNext()) {
@@ -403,9 +414,13 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         /*
          * prepare search term
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        searchTerm.addSearchTerm(getFolderTerm(getFolders()));
-        searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+        SearchTerm<?> searchTerm = getFolderTerm(getFolders());
+        if (false == isSyncDistributionLists()) {
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getExcludeDistributionlistTerm())
+            ;
+        }
         SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
         sortOptions.setLimit(factory.getState().getContactLimit());
         /*
@@ -424,7 +439,9 @@ public class CardDAVCollection extends FolderCollection<Contact> {
     protected Contact getObject(String resourceName) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         searchTerm.addSearchTerm(getFolderTerm(getFolders()));
-        searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+        if (false == isSyncDistributionLists()) {
+            searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+        }
         searchTerm.addSearchTerm(getResourceNameTerm(resourceName));
         SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
         sortOptions.setLimit(1);
@@ -531,8 +548,8 @@ public class CardDAVCollection extends FolderCollection<Contact> {
      * @param contact The contact to check
      * @return <code>true</code> if the contact is synchronized, <code>false</code>, otherwise
      */
-    protected static boolean isSynchronized(Contact contact) {
-        if (contact.getMarkAsDistribtuionlist()) {
+    protected boolean isSynchronized(Contact contact) {
+        if (contact.getMarkAsDistribtuionlist() && false == isSyncDistributionLists()) {
             return false;
         }
         if (Strings.isEmpty(contact.getUid())) {
@@ -566,7 +583,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
      * @return The passed contact list reference
      * @throws OXException
      */
-    protected static List<Contact> addSynchronizedContacts(SearchIterator<Contact> searchIterator, List<Contact> contacts) throws OXException {
+    protected List<Contact> addSynchronizedContacts(SearchIterator<Contact> searchIterator, List<Contact> contacts) throws OXException {
         if (null != searchIterator) {
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
