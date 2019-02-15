@@ -200,14 +200,17 @@ public class CachingContextStorage extends ContextStorage {
 
     @Override
     public void invalidateContexts(int[] contextIDs) throws OXException {
+        if (contextIDs == null || contextIDs.length == 0) {
+            return;
+        }
+
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
             // Cache not initialized.
             return;
         }
-        /*
-         * gather cache keys to invalidate
-         */
+
+        // Gather cache keys to invalidate
         Cache cache = cacheService.getCache(REGION_NAME);
         List<Serializable> keys = new LinkedList<Serializable>();
         for (int contextID : contextIDs) {
