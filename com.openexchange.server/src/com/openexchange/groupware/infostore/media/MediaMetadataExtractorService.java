@@ -67,7 +67,7 @@ public interface MediaMetadataExtractorService {
     /**
      * Checks the effort of extracting media metadata from given input stream.
      *
-     * @param provider The provider for the input stream to examine
+     * @param provider The provider to obtain the input stream to examine
      * @param document The document associated with given stream
      * @return The effort estimation result
      * @throws OXException If effort estimation fails
@@ -79,7 +79,7 @@ public interface MediaMetadataExtractorService {
      *
      * @param extractor The extractor to use
      * @param optStream The optional initial stream
-     * @param provider The input stream provider to extract from
+     * @param provider The input stream provider once a new stream needs to be obtained
      * @param document The document to apply to
      * @param optArguments Optional (immutable) additional arguments
      * @return The extractor result
@@ -90,7 +90,7 @@ public interface MediaMetadataExtractorService {
     /**
      * Extracts media metadata from given stream and applies them to specified document.
      *
-     * @param provider The provider for the input stream to extract from
+     * @param provider The provider to obtain the input stream to extract from
      * @param document The document to apply to
      * @param optArguments Optional (immutable) additional arguments
      * @return The extractor result
@@ -111,5 +111,15 @@ public interface MediaMetadataExtractorService {
      * @throws OXException If scheduling fails
      */
     String scheduleMediaMetadataExtraction(DocumentMetadata document, FileStorage fileStorage, Map<String, Object> optArguments, Session session) throws OXException;
+
+    /**
+     * Checks specified document is currently scheduled for media metadata extraction.
+     *
+     * @param document The document
+     * @param session The session providing user information
+     * @return <code>true</code> if currently scheduled; otherwise <code>false</code> if there is no such scheduled document or extraction is already in execution
+     * @throws OXException If check fails
+     */
+    boolean isScheduledForMediaMetadataExtraction(DocumentMetadata document, Session session) throws OXException;
 
 }

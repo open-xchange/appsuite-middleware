@@ -56,7 +56,10 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
 import com.openexchange.java.GeoLocation;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultDocumentMetadata}
@@ -552,6 +555,25 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public MediaStatus getMediaStatus() {
         return mediaStatus;
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(Session session) {
+        MediaStatus mediaStatus = this.mediaStatus;
+        if (null != mediaStatus) {
+            return mediaStatus;
+        }
+
+        MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
+        if (null == extractorService) {
+            return null;
+        }
+
+        try {
+            return extractorService.isScheduledForMediaMetadataExtraction(this, session) ? MediaStatus.pending() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

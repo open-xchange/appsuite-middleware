@@ -728,4 +728,9 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public MediaStatus getMediaStatusForClient(com.openexchange.session.Session session) {
+        throw new UnsupportedOperationException();
+    }
+
 }

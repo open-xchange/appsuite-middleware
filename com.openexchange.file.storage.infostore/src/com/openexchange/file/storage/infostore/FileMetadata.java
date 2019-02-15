@@ -68,6 +68,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.java.GeoLocation;
+import com.openexchange.session.Session;
 
 
 /**
@@ -827,6 +828,11 @@ public class FileMetadata implements DocumentMetadata {
                 // nothing to do
             }
 
+            @Override
+            public MediaStatus getMediaStatusForClient(Session session) {
+                return file.getMediaStatus();
+            }
+
         };
         return metaData;
     }
@@ -987,6 +993,11 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public void setMediaStatus(MediaStatus infostoreMediaStatus) {
         file.setMediaStatus(infostoreMediaStatus);
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(Session session) {
+        return file.getMediaStatus();
     }
 
 }

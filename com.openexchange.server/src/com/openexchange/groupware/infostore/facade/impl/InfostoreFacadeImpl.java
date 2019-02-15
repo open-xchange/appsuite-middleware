@@ -1215,12 +1215,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
 
             // Schedule...
-            document.setMediaStatus(MediaStatus.pending());
-            if (null != updatedColumns) {
-                Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
-            }
             if (save) {
-                MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.pending(), document, session);
                 try {
                     extractorService.scheduleMediaMetadataExtraction(document, fileStorage, result.getOptionalArguments(), session);
                 } catch (Exception e) {

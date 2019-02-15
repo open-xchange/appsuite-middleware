@@ -226,6 +226,18 @@ public class StripedProcessor {
         return true;
     }
 
+    /**
+     * Checks if a task associated with given task key is currently enqueued in scheduling queue.
+     *
+     * @param taskKey The task key
+     * @return <code>true</code> if enqueued; otherwise <code>false</code> if there is no such task or task is already in execution
+     */
+    public boolean isEnqueued(String taskKey) {
+        synchronized (stripes) {
+            return task2Stripe.containsKey(taskKey);
+        }
+    }
+
     // -----------------------------------------------------------------------------------------------------------------------------
 
     /**

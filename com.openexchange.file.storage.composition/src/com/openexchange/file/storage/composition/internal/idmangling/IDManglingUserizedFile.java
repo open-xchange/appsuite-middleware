@@ -49,9 +49,12 @@
 
 package com.openexchange.file.storage.composition.internal.idmangling;
 
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.session.Session;
 
 
 /**
@@ -62,14 +65,15 @@ import com.openexchange.file.storage.composition.FolderID;
  */
 public class IDManglingUserizedFile extends IDManglingFile implements UserizedFile {
 
-    private String originalId;
-    private String originalFolder;
+    private final String originalId;
+    private final String originalFolder;
 
     /**
      * Initializes a new {@link IDManglingUserizedFile}.
-     * @param file
-     * @param service
-     * @param account
+     *
+     * @param file The delegate file
+     * @param service The service identifier
+     * @param account The account identifier
      */
     IDManglingUserizedFile(UserizedFile file, String service, String account) {
         super(file, service, account);
@@ -84,7 +88,7 @@ public class IDManglingUserizedFile extends IDManglingFile implements UserizedFi
 
     @Override
     public void setOriginalId(String id) {
-        throw new IllegalStateException("IDs are only read only with this class");
+        throw new IllegalStateException("IDs are only read-only with this class");
     }
 
     @Override
@@ -94,7 +98,13 @@ public class IDManglingUserizedFile extends IDManglingFile implements UserizedFi
 
     @Override
     public void setOriginalFolderId(String id) {
-        throw new IllegalStateException("IDs are only read only with this class");
+        throw new IllegalStateException("IDs are only read-only with this class");
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(Session session) {
+        File delegate = getDelegate();
+        return delegate instanceof UserizedFile ? ((UserizedFile) delegate).getMediaStatusForClient(session) : getMediaStatus();
     }
 
 }

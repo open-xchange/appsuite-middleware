@@ -61,11 +61,11 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class UserizedInfostoreFile extends InfostoreFile implements UserizedFile {
 
     private String originalId;
-
     private String originalFolderId;
 
     /**
      * Initializes a new {@link UserizedInfostoreFile}.
+     *
      * @param documentMetadata
      */
     public UserizedInfostoreFile(DocumentMetadata documentMetadata) {
@@ -90,11 +90,12 @@ public class UserizedInfostoreFile extends InfostoreFile implements UserizedFile
         return originalFolderId;
     }
 
-
+    @Override
     public void setOriginalId(String originalId) {
         this.originalId = originalId;
     }
 
+    @Override
     public void setOriginalFolderId(String originalFolderId) {
         this.originalFolderId = originalFolderId;
     }

@@ -16,6 +16,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.java.GeoLocation;
+import com.openexchange.session.Session;
 
 /*
  *
@@ -484,6 +485,11 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
         document.setMediaStatus(mediaStatus);
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(Session session) {
+        return document.getMediaStatusForClient(session);
     }
 
 }

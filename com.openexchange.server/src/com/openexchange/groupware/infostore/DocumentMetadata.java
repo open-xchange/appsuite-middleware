@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.java.GeoLocation;
+import com.openexchange.session.Session;
 
 public interface DocumentMetadata extends Serializable {
 
@@ -388,18 +389,26 @@ public interface DocumentMetadata extends Serializable {
     void setMediaMeta(Map<String, Object> mediaMeta);
 
     /**
-     * Gets the status of parsing/analyzing media meta-data from the media resource associated with this file
+     * Gets the status of parsing/analyzing media meta-data from the media resource
      *
      * @return The media status
      */
     MediaStatus getMediaStatus();
 
     /**
-     * Sets the status of parsing/analyzing media meta-data from the media resource associated with this file
+     * Sets the status of parsing/analyzing media meta-data from the media resource
      *
      * @param infostoreMediaStatus The media status
      */
     void setMediaStatus(MediaStatus infostoreMediaStatus);
+
+    /**
+     * Gets the status of parsing/analyzing media meta-data from the media resource for the client
+     *
+     * @param session The client-associated session
+     * @return The media status
+     */
+    MediaStatus getMediaStatusForClient(Session session);
 
     // --------------------------------------------------------- END OF MEDIA STUFF --------------------------------------------------------
 

@@ -71,6 +71,7 @@ import com.openexchange.file.storage.FileStorageMediaUtility;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.meta.FileFieldGet;
@@ -215,8 +216,16 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                     // Output a NamedValue in case we're serializing to a JSON object
                     mediaStruct = new MediaNamedValue("media", new JSONObject(8));
                 }
+
+                if ((field == File.Field.MEDIA_STATUS) && (value == null)) {
+                    if (optJsonFile instanceof UserizedFile) {
+                        UserizedFile userizedFile = (UserizedFile) optJsonFile;
+                        value = userizedFile.getMediaStatusForClient(request.getSession());
+                    }
+                }
+
                 if (value == null) {
-                    if (field == File.Field.MEDIA_STATUS && mediaStruct == null) {
+                    if ((field == File.Field.MEDIA_STATUS) && (mediaStruct == null)) {
                         value = MediaStatus.Status.NONE.getIdentifier();
                     }
                 } else {

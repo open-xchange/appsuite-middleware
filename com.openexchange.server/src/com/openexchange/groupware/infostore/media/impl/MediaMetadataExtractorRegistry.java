@@ -343,6 +343,21 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
         return taskKey;
     }
 
+    @Override
+    public boolean isScheduledForMediaMetadataExtraction(DocumentMetadata document, Session session) throws OXException {
+        if (null == document) {
+            throw OXException.general("Document must not be null.");
+        }
+        if (null == session) {
+            throw OXException.general("Session must not be null.");
+        }
+
+        LOGGER.debug("Going to schedule media metadata from document {} ({}) with version {}", I(document.getId()), document.getFileName(), I(document.getVersion()));
+
+        String taskKey = generateTaskKey(document.getVersion(), document.getId(), session);
+        return stripedProcessor.isEnqueued(taskKey);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static class MediaMetadataExtractionTask implements Runnable {

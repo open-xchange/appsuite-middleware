@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.session.Session;
 
 /**
  * A {@link File} is usually requested in the name of a certain user. Thus the contained
@@ -96,5 +97,13 @@ public interface UserizedFile extends File {
      * @param id The original ID; not <code>null</code>
      */
     void setOriginalFolderId(String id);
+
+    /**
+     * Gets the status of parsing/analyzing media meta-data from the media resource for the client
+     *
+     * @param session The client-associated session
+     * @return The media status
+     */
+    MediaStatus getMediaStatusForClient(Session session);
 
 }
