@@ -1015,6 +1015,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if (null != event.getRecurrenceId()) {
             event.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(event.getRecurrenceId())));
         }
+        if (event.containsAlarms() && event.getAlarms() != null) {
+            event.getAlarms().stream().forEach((x) -> x.setTimestamp(x.getTimestamp() != 0 ? x.getTimestamp() : now.getTime()));
+        }
         return event;
     }
 
