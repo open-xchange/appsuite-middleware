@@ -139,7 +139,10 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         /*
          * Ensure that new organizer is set and internal
          */
-        if (null == organizer || false == CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
+        if (null == organizer) {
+            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
+        }
+        if (false == CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Integer.valueOf(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
         }
         /*
@@ -193,7 +196,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
 
     /**
      * Applies the organizer change to a new {@link Event} so that only relevant fields will be updated
-     * 
+     *
      * @param organizer The new organizer
      * @param originalEvent The original event
      * @param lastModified The date to set the {@link Event#getLastModified()} to
@@ -230,7 +233,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
     /**
      * Applies the new organizer to a series master and all its change exceptions.
      * Results will be tracked.
-     * 
+     *
      * @param organizer The new organizer
      * @param originalEvent The original event
      * @param lastModified The date to set the {@link Event#getLastModified()} to
@@ -243,7 +246,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
 
     /**
      * Update the organizer for a single event.
-     * 
+     *
      * @param organizer The new organizer
      * @param originalEvent The original event
      * @return The updated {@link Event}
@@ -262,7 +265,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
     /**
      * Loads series exceptions and applies the new organizer to them.
      * Results will be tracked.
-     * 
+     *
      * @param originalEvent The original event
      * @param updatedEvent The updated series master
      * @param organizer The new organizer
@@ -279,7 +282,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
 
     /**
      * Adds the new organizer to the list of attendees if necessary
-     * 
+     *
      * @param originalEvent The original {@link Event}
      * @param organizer The new organizer as {@link CalendarUser}
      * @throws OXException If updating fails
