@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-76x (7.10.0-26) stable; urgency=medium
+
+  * Build for patch 2019-02-25 (5132)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 18 Feb 2019 10:59:44 +0100
+
 open-xchange-cluster-upgrade-from-76x (7.10.0-25) stable; urgency=medium
 
   * Build for patch 2019-02-11 (5107)
