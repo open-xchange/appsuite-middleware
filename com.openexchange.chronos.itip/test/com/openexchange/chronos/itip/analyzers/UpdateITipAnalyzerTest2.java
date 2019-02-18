@@ -135,7 +135,7 @@ public class UpdateITipAnalyzerTest2 {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        original = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        original = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         update = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         wrapper = new HTMLWrapper();
 
@@ -151,7 +151,9 @@ public class UpdateITipAnalyzerTest2 {
         // Mock used service classes
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(UserService.class)).thenReturn(this.userService);
+        PowerMockito.when(Services.getService(UserService.class, true)).thenReturn(this.userService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
+        PowerMockito.when(Services.getService(ContextService.class, true)).thenReturn(this.contextService);
 
         // Mock settings
         PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);
