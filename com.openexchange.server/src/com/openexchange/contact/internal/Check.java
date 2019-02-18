@@ -53,6 +53,8 @@ import static com.openexchange.contact.internal.Tools.parse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
@@ -228,7 +230,7 @@ public final class Check {
     		    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
     				searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
     				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-    				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, update.getDisplayName()));
+    				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, sanitizeDisplayName(update.getDisplayName())));
     				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
     				    ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
     				SearchIterator<Contact> searchIterator = null;
@@ -255,7 +257,37 @@ public final class Check {
 		}
 	}
 
-	/**
+    private static final Pattern MULTIPLE_WILDCARD_PATTERN = Pattern.compile("\\*");
+    
+    private static final Pattern SINGLE_WILDCARD_PATTERN = Pattern.compile("\\?");
+
+    /**
+     * Sanitize special characters to avoid generic searches
+     * 
+     * @param update The updated display name to search for
+     * @return A sanitized version of the display name
+     */
+    private static String sanitizeDisplayName(String displayName) {
+        // Sanitize '*'
+        Matcher matcher = MULTIPLE_WILDCARD_PATTERN.matcher(displayName);
+        StringBuffer sb = new StringBuffer(displayName.length());
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "\\\\*");
+        }
+        matcher.appendTail(sb);
+
+        // Sanitize '?'
+        matcher = SINGLE_WILDCARD_PATTERN.matcher(sb.toString());
+        sb.setLength(0);
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "\\\\?");
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
+    }
+
+    /**
 	 * Checks the supplied delta contact for possible changes to read-only fields. If read-only are about to be modified to a value
 	 * different from the currently stored value, an appropriate exception is thrown. If they're going to be set to the property's
 	 * default value, the properties are removed from the delta reference.
