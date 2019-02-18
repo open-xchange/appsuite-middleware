@@ -69,6 +69,9 @@ public interface AttachmentStorage {
     /** The registration name for registered image data source backed by attachments */
     public static final String IMAGE_REGISTRATION_NAME = "com.openexchange.mail.compose.image";
 
+    /** The alias for the image data source backed by an attachment */
+    public static final String IMAGE_DATA_SOURCE_ALIAS = "/mail/compose/image";
+
     /**
      * Gets the type for this attachment storage.
      *

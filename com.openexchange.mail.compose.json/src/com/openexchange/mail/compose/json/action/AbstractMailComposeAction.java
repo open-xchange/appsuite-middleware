@@ -72,7 +72,7 @@ import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
-import com.openexchange.mail.compose.CompositonSpaces;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DefaultAttachment;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.Security;
@@ -469,7 +469,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
      * @throws OXException If passed string in invalid
      */
     protected static UUID parseCompositionSpaceId(String id) throws OXException {
-        return CompositonSpaces.parseCompositionSpaceId(id);
+        return CompositionSpaces.parseCompositionSpaceId(id);
     }
 
     /**
@@ -480,7 +480,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
      * @throws OXException If passed string in invalid
      */
     protected static UUID parseAttachmentId(String id) throws OXException {
-        return CompositonSpaces.parseAttachmentId(id);
+        return CompositionSpaces.parseAttachmentId(id);
     }
 
     @Override

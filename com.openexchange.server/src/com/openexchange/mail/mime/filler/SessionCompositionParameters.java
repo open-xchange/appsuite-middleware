@@ -65,7 +65,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.log.LogProperties;
-import com.openexchange.mail.compose.CompositonSpaces;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -238,12 +238,12 @@ public final class SessionCompositionParameters implements CompositionParameters
 
     @Override
     public String getUserVCardFileName() throws OXException {
-        return CompositonSpaces.getUserVCardFileName(session);
+        return CompositionSpaces.getUserVCardFileName(session);
     }
 
     @Override
     public byte[] getUserVCard() throws OXException {
-        return CompositonSpaces.getUserVCardBytes(session);
+        return CompositionSpaces.getUserVCardBytes(session);
     }
 
     @Override

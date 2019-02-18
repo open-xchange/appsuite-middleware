@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
-import com.openexchange.mail.compose.CompositonSpaces;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -151,7 +151,7 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
     }
 
     private boolean deleteData(String storageIdentifier, Session session, Connection con) throws OXException {
-        UUID uuid = CompositonSpaces.parseAttachmentIdIfValid(storageIdentifier);
+        UUID uuid = CompositionSpaces.parseAttachmentIdIfValid(storageIdentifier);
         if (null == uuid) {
             return false;
         }
@@ -210,7 +210,7 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
             boolean closeStuff = true;
             try {
                 stmt = con.prepareStatement("SELECT data FROM compositionSpaceAttachmentBinary WHERE uuid=? AND cid=? AND user=?");
-                stmt.setBytes(1, UUIDs.toByteArray(CompositonSpaces.parseAttachmentId(storageIdentifier)));
+                stmt.setBytes(1, UUIDs.toByteArray(CompositionSpaces.parseAttachmentId(storageIdentifier)));
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, session.getUserId());
                 rs = stmt.executeQuery();

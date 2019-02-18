@@ -51,14 +51,10 @@ package com.openexchange.mail.compose.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
-import static com.openexchange.mail.MailExceptionCode.getSize;
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,7 +63,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +70,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -87,60 +80,41 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
-import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.html.HtmlService;
-import com.openexchange.i18n.LocaleTools;
-import com.openexchange.image.ImageActionFactory;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.MailSessionCache;
-import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.api.FromAddressProvider;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.compose.Address;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
+import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
-import com.openexchange.mail.compose.CompositonSpaces;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.Message.Priority;
 import com.openexchange.mail.compose.MessageDescription;
@@ -150,11 +124,14 @@ import com.openexchange.mail.compose.Meta.MetaType;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
-import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.mail.compose.Type;
 import com.openexchange.mail.compose.VCardAndFileName;
 import com.openexchange.mail.compose.impl.attachment.AttachmentComparator;
-import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
+import com.openexchange.mail.compose.impl.open.EditCopy;
+import com.openexchange.mail.compose.impl.open.Forward;
+import com.openexchange.mail.compose.impl.open.OpenState;
+import com.openexchange.mail.compose.impl.open.Reply;
+import com.openexchange.mail.compose.impl.open.Resend;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -172,31 +149,22 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
-import com.openexchange.mail.mime.processing.TextAndContentType;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.InlineContentHandler;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
-import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.ContactCollectorUtility;
-import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -221,13 +189,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_PLAIN = com.openexchange.mail.compose.Message.ContentType.TEXT_PLAIN;
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
 
-    private static final com.openexchange.mail.compose.Attachment.ContentDisposition ATTACHMENT = com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT;
     private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
-
-    private static final String HEADER_X_OX_SHARED_ATTACHMENTS = MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS;
-    private static final String HEADER_X_OX_SECURITY = MessageHeaders.HDR_X_OX_SECURITY;
-    private static final String HEADER_X_OX_META = MessageHeaders.HDR_X_OX_META;
-    private static final String HEADER_X_OX_READ_RECEIPT = MessageHeaders.HDR_X_OX_READ_RECEIPT;
 
     private final ServiceLookup services;
     private final CompositionSpaceStorageService storageService;
@@ -353,7 +315,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                             contentId2InlineAttachment.put(attachment.getContentId(), attachment);
                         }
                     }
-                    content = replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments, session);
+                    content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
                 }
             }
         }
@@ -750,11 +712,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Encode state to headers
             {
-                mimeMessage.setHeader(HEADER_X_OX_META, encodeHeaderValue(11, meta2HeaderValue(m.getMeta())));
-                mimeMessage.setHeader(HEADER_X_OX_SECURITY, encodeHeaderValue(15, security2HeaderValue(m.getSecurity())));
-                mimeMessage.setHeader(HEADER_X_OX_SHARED_ATTACHMENTS, encodeHeaderValue(25, sharedAttachments2HeaderValue(m.getSharedAttachments())));
+                mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_META, HeaderUtility.encodeHeaderValue(11, HeaderUtility.meta2HeaderValue(m.getMeta())));
+                mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_SECURITY, HeaderUtility.encodeHeaderValue(15, HeaderUtility.security2HeaderValue(m.getSecurity())));
+                mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS, HeaderUtility.encodeHeaderValue(25, HeaderUtility.sharedAttachments2HeaderValue(m.getSharedAttachments())));
                 if (m.isRequestReadReceipt()) {
-                    mimeMessage.setHeader(HEADER_X_OX_READ_RECEIPT, encodeHeaderValue(19, "true"));
+                    mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_READ_RECEIPT, HeaderUtility.encodeHeaderValue(19, "true"));
                 }
             }
 
@@ -858,7 +820,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         contentId2InlineAttachment.put(attachment.getContentId(), attachment);
                     }
                 }
-                content = replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments, session);
+                content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
                 HtmlService htmlService = services.getService(HtmlService.class);
                 content = htmlService.getConformHTML(content, charset);
             }
@@ -1115,15 +1077,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         return Strings.asciiLowerCase(pos > 0 ? fileName.substring(pos + 1) : fileName);
     }
 
-    private static final String PREFIX_FWD = "Fwd: ";
-    private static final String PREFIX_RE = "Re: ";
-
     @Override
     public CompositionSpace openCompositionSpace(OpenCompositionSpaceParameters parameters, Session session) throws OXException {
         UUID uuid = null;
-
-        Context context = getContext(session);
-        UserSettingMail usm = parameters.getMailSettings();
 
         AttachmentStorage attachmentStorage = null;
         List<Attachment> attachments = null;
@@ -1168,812 +1124,27 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (Type.NEW == type) {
                 message.setMeta(Meta.META_NEW);
             } else {
-                MailServletInterface mailInterface = null;
+                OpenState args = new OpenState(uuid, message, Meta.builder());
                 try {
-                    Meta.Builder metaBuilder = Meta.builder();
+                    Meta.Builder metaBuilder = args.metaBuilder;
                     metaBuilder.withType(Meta.MetaType.typeFor(type));
 
-                    MailMessage originalMail = null;
                     switch (type) {
-                        case FORWARD: {
-                            List<MailPath> forwardsFor = parameters.getReferencedMails();
-                            metaBuilder.withForwardsFor(forwardsFor);
-                            mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
-                            originalMail = requireMailMessage(forwardsFor.get(0), mailInterface);
-                            metaBuilder.withDate(originalMail.getSentDate());
-
-                            // Forward, pre-set subject
-                            String origSubject = originalMail.getSubject();
-                            if (Strings.isEmpty(origSubject)) {
-                                message.setSubject(PREFIX_FWD);
-                            } else {
-                                if (origSubject.regionMatches(true, 0, PREFIX_FWD, 0, PREFIX_FWD.length())) {
-                                    message.setSubject(origSubject);
-                                } else {
-                                    message.setSubject(new StringBuilder(PREFIX_FWD.length() + origSubject.length()).append(PREFIX_FWD).append(origSubject).toString());
-                                }
-                            }
-
-                            // Determine "From"
-                            {
-                                FromAddressProvider fromAddressProvider = FromAddressProvider.byAccountId();
-                                boolean fromSet = false;
-                                if (null != fromAddressProvider) {
-                                    if (fromAddressProvider.isDetectBy()) {
-                                        InternetAddress from = MimeProcessingUtility.determinePossibleFrom(true, originalMail, forwardsFor.get(0).getAccountId(), session, context);
-                                        if (null != from) {
-                                            message.setFrom(toAddress(from));
-                                            fromSet = true;
-                                        }
-                                    } else if (fromAddressProvider.isSpecified()) {
-                                        InternetAddress from = fromAddressProvider.getFromAddress();
-                                        if (null != from) {
-                                            message.setFrom(toAddress(from));
-                                            fromSet = true;
-                                        }
-                                    }
-                                }
-                                if (!fromSet) {
-                                    String sendAddr = usm.getSendAddr();
-                                    if (sendAddr != null) {
-                                        message.setFrom(toAddress(new QuotedInternetAddress(sendAddr, false)));
-                                    }
-                                }
-                            }
-
-                            if (forwardsFor.size() == 1) {
-                                String owner = MimeProcessingUtility.getFolderOwnerIfShared(forwardsFor.get(0).getFolder(), forwardsFor.get(0).getAccountId(), session);
-                                if (null != owner) {
-                                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, context);
-                                    if (null != users && users.length > 0) {
-                                        InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
-                                        message.setFrom(toAddress(onBehalfOf));
-                                        QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
-                                        message.setSender(toAddress(sender));
-                                    }
-                                }
-                            }
-
-                            if (usm.isForwardAsAttachment() || forwardsFor.size() > 1) {
-                                metaBuilder.withType(Meta.MetaType.FORWARD_ATTACHMENT);
-                                // Forward as attachment, add mail(s) as attachment(s)
-
-                                // Obtain attachment storage (can only be null here)
-                                attachmentStorage = getAttachmentStorage(session);
-
-                                // Add each mail
-                                attachments = new ArrayList<>(forwardsFor.size());
-                                int i = 0;
-                                for (MailPath forwardFor : forwardsFor) {
-                                    ThresholdFileHolder sink = new ThresholdFileHolder();
-                                    try {
-                                        MailMessage forwardedMail = i == 0 ? originalMail : requireMailMessage(forwardFor, mailInterface);
-                                        forwardedMail.writeTo(sink.asOutputStream());
-
-                                        // Compile attachment
-                                        AttachmentDescription attachment = new AttachmentDescription();
-                                        attachment.setCompositionSpaceId(uuid);
-                                        attachment.setContentDisposition(ATTACHMENT);
-                                        attachment.setMimeType(MimeTypes.MIME_MESSAGE_RFC822);
-                                        String fwdSubject = forwardedMail.getSubject();
-                                        attachment.setName((Strings.isEmpty(fwdSubject) ? "mail" + Integer.toString(i + 1) : fwdSubject.replaceAll("\\p{Blank}+", "_")) + ".eml");
-                                        attachment.setSize(sink.getLength());
-                                        attachment.setOrigin(AttachmentOrigin.MAIL);
-                                        Attachment emlAttachment = saveAttachment(sink.getStream(), attachment, session, attachmentStorage);
-                                        attachments.add(emlAttachment);
-                                    } finally {
-                                        Streams.close(sink);
-                                    }
-                                    i++;
-                                }
-                            } else {
-                                metaBuilder.withType(Meta.MetaType.FORWARD_INLINE);
-                                // Forward inline
-
-                                // Fix possible "application/smil" parts
-                                MailMessage forwardedMail;
-                                {
-                                    ContentType contentType = originalMail.getContentType();
-                                    if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(com.openexchange.java.Strings.toLowerCase("type"))))) {
-                                        forwardedMail = MimeSmilFixer.getInstance().process(originalMail);
-                                    } else {
-                                        forwardedMail = originalMail;
-                                    }
-                                }
-
-                                // Grab first seen text from original message and check for possible referenced inline images
-                                boolean multipart = forwardedMail.getContentType().startsWith("multipart/");
-                                List<String> contentIds = multipart ? new ArrayList<String>() : null;
-                                {
-                                    TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, usm.isDisplayHtmlInlineContent(), false, contentIds, session);
-                                    if (null == textForForward) {
-                                        message.setContent("");
-                                        message.setContentType(usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN);
-                                    } else {
-                                        message.setContent(textForForward.getText());
-                                        message.setContentType(textForForward.isHtml() ? TEXT_HTML : TEXT_PLAIN);
-                                    }
-                                }
-
-                                // Check if original mail may contain attachments
-                                if (multipart) {
-                                    // Add mail's non-inline parts
-                                    {
-                                        NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                                        if (null != contentIds && !contentIds.isEmpty()) {
-                                            handler.setImageContentIds(contentIds);
-                                        }
-                                        new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(forwardedMail, handler);
-                                        List<MailPart> nonInlineParts = handler.getNonInlineParts();
-                                        if (null != nonInlineParts && !nonInlineParts.isEmpty()) {
-                                            attachmentStorage = getAttachmentStorage(session);
-                                            attachments = new ArrayList<>(nonInlineParts.size());
-                                            int i = 0;
-                                            for (MailPart mailPart : nonInlineParts) {
-                                                // Compile & store attachment
-                                                AttachmentDescription attachment = new AttachmentDescription();
-                                                attachment.setCompositionSpaceId(uuid);
-                                                attachment.setContentDisposition(ATTACHMENT);
-                                                attachment.setMimeType(mailPart.getContentType().toString(true));
-                                                String fileName = mailPart.getFileName();
-                                                attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                                attachment.setOrigin(hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
-                                                Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                                attachments.add(partAttachment);
-                                                i++;
-                                            }
-                                        }
-                                    }
-
-                                    // Add mail's inline images
-                                    if (TEXT_HTML == message.getContentType() && null != contentIds && !contentIds.isEmpty()) {
-                                        InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
-                                        new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
-                                        Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
-                                        if (null != inlineParts && !inlineParts.isEmpty()) {
-                                            if (null == attachmentStorage) {
-                                                attachmentStorage = getAttachmentStorage(session);
-                                            }
-                                            if (null == attachments) {
-                                                attachments = new ArrayList<>(inlineParts.size());
-                                            }
-
-                                            Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
-                                            int i = 0;
-                                            for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
-                                                // Compile & store attachment
-                                                MailPart mailPart = inlineEntry.getValue();
-                                                AttachmentDescription attachment = new AttachmentDescription();
-                                                attachment.setCompositionSpaceId(uuid);
-                                                attachment.setContentDisposition(INLINE);
-                                                attachment.setContentId(inlineEntry.getKey());
-                                                attachment.setMimeType(mailPart.getContentType().toString(true));
-                                                String fileName = mailPart.getFileName();
-                                                attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                                attachment.setOrigin(AttachmentOrigin.MAIL);
-                                                Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                                attachments.add(partAttachment);
-                                                inlineAttachments.put(inlineEntry.getKey(), partAttachment);
-                                                i++;
-                                            }
-
-                                            message.setContent(replaceCidInlineImages(message.getContent(), inlineAttachments, session));
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        case FORWARD:
+                            new Forward(attachmentStorageService, services).doOpenForForward(parameters, args, session);
                             break;
                         case REPLY:
                             // fall-through
-                        case REPLY_ALL: {
-                            MailPath replyFor = parameters.getReferencedMails().get(0);
-                            metaBuilder.withReplyFor(replyFor);
-                            mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
-                            originalMail = requireMailMessage(replyFor, mailInterface);
-                            metaBuilder.withDate(originalMail.getSentDate());
-
-                            int accountId = replyFor.getAccountId();
-                            boolean replyAll = (type == Type.REPLY_ALL);
-                            boolean preferToAsRecipient = false;
-                            {
-                                String originalMailFolder = replyFor.getFolder();
-                                String[] arr = MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
-                                if (arr == null) {
-                                    MailAccess<?, ?> mailAccess = mailInterface.getMailAccess();
-                                    IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-                                    preferToAsRecipient = originalMailFolder.equals(folderStorage.getSentFolder()) || originalMailFolder.equals(folderStorage.getDraftsFolder());
-                                } else {
-                                    preferToAsRecipient = originalMailFolder.equals(arr[StorageUtility.INDEX_SENT]) || originalMailFolder.equals(arr[StorageUtility.INDEX_DRAFTS]);
-                                }
-                            }
-
-                            // Reply, pre-set subject
-                            String origSubject = originalMail.getSubject();
-                            if (Strings.isEmpty(origSubject)) {
-                                message.setSubject(PREFIX_RE);
-                            } else {
-                                if (origSubject.regionMatches(true, 0, PREFIX_RE, 0, PREFIX_RE.length())) {
-                                    message.setSubject(origSubject);
-                                } else {
-                                    message.setSubject(new StringBuilder(PREFIX_RE.length() + origSubject.length()).append(PREFIX_RE).append(origSubject).toString());
-                                }
-                            }
-
-                            // Determine "From"
-                            InternetAddress from = null;
-                            {
-                                FromAddressProvider fromAddressProvider = FromAddressProvider.byAccountId();
-                                if (null != fromAddressProvider) {
-                                    if (fromAddressProvider.isDetectBy()) {
-                                        from = MimeProcessingUtility.determinePossibleFrom(false, originalMail, accountId, session, context);
-                                        /*
-                                         * Set if a "From" candidate applies
-                                         */
-                                        if (null != from) {
-                                            message.setFrom(toAddress(from));
-                                        }
-                                    } else if (fromAddressProvider.isSpecified()) {
-                                        from = fromAddressProvider.getFromAddress();
-                                        if (null != from) {
-                                            message.setFrom(toAddress(from));
-                                        }
-                                    }
-                                }
-                            }
-
-                            /*
-                             * Set the appropriate recipients. Taken from RFC 822 section 4.4.4: If the "Reply-To" field exists, then the reply should go to
-                             * the addresses indicated in that field and not to the address(es) indicated in the "From" field.
-                             */
-                            InternetAddress[] recipientAddrs;
-                            if (preferToAsRecipient) {
-                                recipientAddrs = originalMail.getTo();
-                            } else {
-                                Set<InternetAddress> tmpSet = new LinkedHashSet<InternetAddress>(4);
-                                boolean fromAdded;
-                                {
-                                    String[] replyTo = originalMail.getHeader(MessageHeaders.HDR_REPLY_TO);
-                                    if (MimeMessageUtility.isEmptyHeader(replyTo)) {
-                                        String owner = MimeProcessingUtility.getFolderOwnerIfShared(replyFor.getFolder(), replyFor.getAccountId(), session);
-                                        if (null != owner) {
-                                            final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, context);
-                                            if (null != users && users.length > 0) {
-                                                InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
-                                                message.setFrom(toAddress(onBehalfOf));
-                                                QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
-                                                message.setSender(toAddress(sender));
-                                            }
-                                        }
-                                        /*
-                                         * Set from as recipient
-                                         */
-                                        tmpSet.addAll(Arrays.asList(originalMail.getFrom()));
-                                        fromAdded = true;
-                                    } else {
-                                        /*
-                                         * Message holds header 'Reply-To'
-                                         */
-                                        tmpSet.addAll(Arrays.asList(MimeMessageUtility.getAddressHeader(unfold(replyTo[0]))));
-                                        fromAdded = false;
-                                    }
-                                }
-                                if (replyAll) {
-                                    /*-
-                                     * Check 'From' has been added
-                                     */
-                                    if (!fromAdded) {
-                                        tmpSet.addAll(Arrays.asList(originalMail.getFrom()));
-                                    }
-                                }
-                                recipientAddrs = tmpSet.toArray(new InternetAddress[tmpSet.size()]);
-                            }
-
-                            if (replyAll) {
-                                /*
-                                 * Create a filter which is used to sort out addresses before adding them to either field 'To' or 'Cc'
-                                 */
-                                Set<InternetAddress> filter = new HashSet<InternetAddress>();
-                                if (null != from) {
-                                    filter.add(from);
-                                }
-                                /*
-                                 * Add user's address to filter
-                                 */
-                                if (accountId == MailAccount.DEFAULT_ID) {
-                                    MimeProcessingUtility.addUserAliases(filter, session, context);
-                                } else {
-                                    // Check for Unified Mail account
-                                    UnifiedInboxManagement management = services.getService(UnifiedInboxManagement.class);
-                                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                                        int realAccountId;
-                                        try {
-                                            UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
-                                            realAccountId = uid.getAccountId();
-                                        } catch (OXException e) {
-                                            // No Unified Mail identifier
-                                            LoggerHolder.LOG.trace("", e);
-                                            FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(originalMail.getFolder());
-                                            realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
-                                        }
-
-                                        if (realAccountId == MailAccount.DEFAULT_ID) {
-                                            MimeProcessingUtility.addUserAliases(filter, session, context);
-                                        } else {
-                                            MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
-                                            if (null == mass) {
-                                                MimeProcessingUtility.addUserAliases(filter, session, context);
-                                            } else {
-                                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
-                                            }
-                                        }
-                                    } else {
-                                        MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
-                                        if (null == mass) {
-                                            MimeProcessingUtility.addUserAliases(filter, session, context);
-                                        } else {
-                                            filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
-                                        }
-                                    }
-                                }
-                                /*
-                                 * Determine if other original recipients should be added to 'Cc'.
-                                 */
-                                final boolean replyallcc = usm.isReplyAllCc();
-                                /*
-                                 * Filter the recipients of 'Reply-To'/'From' field
-                                 */
-                                final Set<InternetAddress> filteredAddrs = filter(filter, recipientAddrs);
-                                /*
-                                 * Add filtered recipients from 'To' field
-                                 */
-                                String hdrVal = originalMail.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
-                                InternetAddress[] toAddrs = null;
-                                if (hdrVal != null) {
-                                    filteredAddrs.addAll(filter(filter, (toAddrs = parseAddressList(hdrVal, true))));
-                                }
-                                /*
-                                 * ... and add filtered addresses to either 'To' or 'Cc' field
-                                 */
-                                if (!filteredAddrs.isEmpty()) {
-                                    if (replyallcc) {
-                                        // Put original sender into 'To'
-                                        message.setTo(toAddresses(recipientAddrs));
-                                        // All other into 'Cc'
-                                        filteredAddrs.removeAll(Arrays.asList(recipientAddrs));
-                                        message.setCc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
-                                    } else {
-                                        message.setTo(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
-                                    }
-                                } else if (toAddrs != null) {
-                                    final Set<InternetAddress> tmpSet = new HashSet<InternetAddress>(Arrays.asList(recipientAddrs));
-                                    tmpSet.removeAll(Arrays.asList(toAddrs));
-                                    if (tmpSet.isEmpty()) {
-                                        /*
-                                         * The message was sent from the user to himself. In this special case allow user's own address in field 'To' to
-                                         * avoid an empty 'To' field
-                                         */
-                                        message.setTo(toAddresses(recipientAddrs));
-                                    }
-                                }
-                                /*
-                                 * Filter recipients from 'Cc' field
-                                 */
-                                filteredAddrs.clear();
-                                hdrVal = originalMail.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
-                                if (hdrVal != null) {
-                                    filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
-                                }
-                                if (!filteredAddrs.isEmpty()) {
-                                    message.setCc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
-                                }
-                                /*
-                                 * Filter recipients from 'Bcc' field
-                                 */
-                                filteredAddrs.clear();
-                                hdrVal = originalMail.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
-                                if (hdrVal != null) {
-                                    filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
-                                }
-                                if (!filteredAddrs.isEmpty()) {
-                                    message.setBcc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
-                                }
-                            } else {
-                                /*
-                                 * Plain reply: Just put original sender into 'To' field
-                                 */
-                                message.setTo(toAddresses(recipientAddrs));
-                            }
-
-                            // Check whether to attach original message
-                            if (usm.getAttachOriginalMessage() > 0) {
-                                // Obtain attachment storage (can only be null here)
-                                attachmentStorage = getAttachmentStorage(session);
-
-                                ThresholdFileHolder sink = new ThresholdFileHolder();
-                                try {
-                                    originalMail.writeTo(sink.asOutputStream());
-
-                                    // Compile attachment
-                                    AttachmentDescription attachment = new AttachmentDescription();
-                                    attachment.setCompositionSpaceId(uuid);
-                                    attachment.setContentDisposition(ATTACHMENT);
-                                    attachment.setMimeType(MimeTypes.MIME_MESSAGE_RFC822);
-                                    attachment.setName((Strings.isEmpty(origSubject) ? "mail" : origSubject.replaceAll("\\p{Blank}+", "_")) + ".eml");
-                                    attachment.setSize(sink.getLength());
-                                    attachment.setOrigin(AttachmentOrigin.MAIL);
-                                    Attachment emlAttachment = saveAttachment(sink.getStream(), attachment, session, attachmentStorage);
-                                    attachments = new ArrayList<>(1);
-                                    attachments.add(emlAttachment);
-                                } finally {
-                                    Streams.close(sink);
-                                }
-                            }
-
-                            {
-                                TextAndContentType textForReply = usm.isIgnoreOriginalMailTextOnReply() ? null : MimeProcessingUtility.getTextForReply(originalMail, usm.isDisplayHtmlInlineContent(), false, session);
-                                if (null == textForReply) {
-                                    message.setContent("");
-                                    message.setContentType(usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN);
-                                } else {
-                                    message.setContent(textForReply.getText());
-                                    message.setContentType(textForReply.isHtml() ? TEXT_HTML : TEXT_PLAIN);
-                                }
-                            }
-
-                            // Add mail's inline images
-                            List<String> contentIds = new ArrayList<String>();
-                            if (TEXT_HTML == message.getContentType()) {
-                                MimeProcessingUtility.getTextForForward(originalMail, true, false, contentIds, session);
-
-                                if (!contentIds.isEmpty()) {
-                                    InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
-                                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
-                                    Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
-                                    if (null != inlineParts && !inlineParts.isEmpty()) {
-                                        if (null == attachmentStorage) {
-                                            attachmentStorage = getAttachmentStorage(session);
-                                        }
-                                        if (null == attachments) {
-                                            attachments = new ArrayList<>(inlineParts.size());
-                                        }
-
-                                        Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
-                                        int i = 0;
-                                        for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
-                                            MailPart mailPart = inlineEntry.getValue();
-                                            // Compile & store attachment
-                                            AttachmentDescription attachment = new AttachmentDescription();
-                                            attachment.setCompositionSpaceId(uuid);
-                                            attachment.setContentDisposition(INLINE);
-                                            attachment.setContentId(inlineEntry.getKey());
-                                            attachment.setMimeType(mailPart.getContentType().toString(true));
-                                            String fileName = mailPart.getFileName();
-                                            attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                            attachment.setOrigin(AttachmentOrigin.MAIL);
-                                            Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                            attachments.add(partAttachment);
-
-                                            inlineAttachments.put(inlineEntry.getKey(), partAttachment);
-                                            i++;
-                                        }
-
-                                        message.setContent(replaceCidInlineImages(message.getContent(), inlineAttachments, session));
-                                    }
-                                }
-                            }
-
-                            if (parameters.isAppendOriginalAttachments()) {
-                                // Add mail's non-inline parts
-                                NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                                if (false == contentIds.isEmpty()) {
-                                    handler.setImageContentIds(contentIds);
-                                }
-                                new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, handler);
-                                List<MailPart> nonInlineParts = handler.getNonInlineParts();
-                                if (null != nonInlineParts && !nonInlineParts.isEmpty()) {
-                                    // Obtain attachment storage
-                                    if (null == attachmentStorage) {
-                                        attachmentStorage = getAttachmentStorage(session);
-                                    }
-                                    if (null == attachments) {
-                                        attachments = new ArrayList<>(nonInlineParts.size());
-                                    }
-
-                                    int i = attachments.size();
-                                    for (MailPart mailPart : nonInlineParts) {
-                                        // Compile & store attachment
-                                        AttachmentDescription attachment = new AttachmentDescription();
-                                        attachment.setCompositionSpaceId(uuid);
-                                        attachment.setContentDisposition(ATTACHMENT);
-                                        attachment.setMimeType(mailPart.getContentType().toString(true));
-                                        String fileName = mailPart.getFileName();
-                                        attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                        attachment.setOrigin(hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
-                                        Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                        attachments.add(partAttachment);
-                                        i++;
-                                    }
-                                }
-                            }
-                        }
+                        case REPLY_ALL:
+                            new Reply(attachmentStorageService, services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
                             break;
                         case EDIT:
                             // fall-through
-                        case COPY: {
-                            MailPath editFor = parameters.getReferencedMails().get(0);
-                            if (type == Type.EDIT) {
-                                metaBuilder.withEditFor(editFor);
-                            }
-                            mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
-                            originalMail = requireMailMessage(editFor, mailInterface);
-                            metaBuilder.withDate(originalMail.getSentDate());
-
-                            // Restore meta, security, and shared attachments info from draft message
-                            {
-                                String headerValue = decodeHeaderValue(originalMail.getFirstHeader(HEADER_X_OX_META));
-                                Meta parsedMeta = headerValue2Meta(headerValue);
-                                metaBuilder.applyFromDraft(parsedMeta);
-
-                                headerValue = decodeHeaderValue(originalMail.getFirstHeader(HEADER_X_OX_SECURITY));
-                                Security parsedSecurity = headerValue2Security(headerValue);
-                                message.setSecurity(parsedSecurity);
-
-                                headerValue = decodeHeaderValue(originalMail.getFirstHeader(HEADER_X_OX_SHARED_ATTACHMENTS));
-                                SharedAttachmentsInfo parsedSharedAttachments = headerValue2SharedAttachments(headerValue);
-                                message.setsharedAttachmentsInfo(parsedSharedAttachments);
-
-                                headerValue = decodeHeaderValue(originalMail.getFirstHeader(HEADER_X_OX_READ_RECEIPT));
-                                if ("true".equalsIgnoreCase(headerValue)) {
-                                    message.setRequestReadReceipt(true);
-                                }
-                            }
-
-                            // Pre-set subject
-                            String origSubject = originalMail.getSubject();
-                            if (Strings.isNotEmpty(origSubject)) {
-                                message.setSubject(origSubject);
-                            }
-
-                            // Set "From"
-                            {
-                                InternetAddress[] from = originalMail.getFrom();
-                                if (null != from && from.length > 0) {
-                                    message.setFrom(toAddress(from[0]));
-                                }
-                            }
-
-                            // Pre-set recipients
-                            {
-                                InternetAddress[] recipients = originalMail.getTo();
-                                if (null != recipients && recipients.length > 0) {
-                                    message.setTo(toAddresses(recipients));
-                                }
-                                recipients = originalMail.getCc();
-                                if (null != recipients && recipients.length > 0) {
-                                    message.setCc(toAddresses(recipients));
-                                }
-                                recipients = originalMail.getBcc();
-                                if (null != recipients && recipients.length > 0) {
-                                    message.setBcc(toAddresses(recipients));
-                                }
-                            }
-
-                            // Grab first seen text from original message and check for possible referenced inline images
-                            boolean multipart = originalMail.getContentType().startsWith("multipart/");
-                            List<String> contentIds = multipart ? new ArrayList<String>() : null;
-                            {
-                                TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, usm.isDisplayHtmlInlineContent(), false, contentIds, session);
-                                if (null == textForForward) {
-                                    message.setContent("");
-                                    message.setContentType(usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN);
-                                } else {
-                                    message.setContent(textForForward.getText());
-                                    message.setContentType(textForForward.isHtml() ? TEXT_HTML : TEXT_PLAIN);
-                                }
-                            }
-
-                            // Check if original mail may contain attachments
-                            if (multipart) {
-                                // Add mail's non-inline parts
-                                {
-                                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                                    if (null != contentIds && !contentIds.isEmpty()) {
-                                        handler.setImageContentIds(contentIds);
-                                    }
-                                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, handler);
-                                    List<MailPart> nonInlineParts = handler.getNonInlineParts();
-                                    if (null != nonInlineParts && !nonInlineParts.isEmpty()) {
-                                        attachmentStorage = getAttachmentStorage(session);
-                                        attachments = new ArrayList<>(nonInlineParts.size());
-                                        int i = 0;
-                                        for (MailPart mailPart : nonInlineParts) {
-                                            // Compile & store attachment
-                                            AttachmentDescription attachment = new AttachmentDescription();
-                                            attachment.setCompositionSpaceId(uuid);
-                                            attachment.setContentDisposition(ATTACHMENT);
-                                            attachment.setMimeType(mailPart.getContentType().toString(true));
-                                            String fileName = mailPart.getFileName();
-                                            attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                            attachment.setOrigin(hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
-                                            Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                            attachments.add(partAttachment);
-                                            i++;
-                                        }
-                                    }
-                                }
-
-                                // Add mail's inline images
-                                if (TEXT_HTML == message.getContentType() && null != contentIds && !contentIds.isEmpty()) {
-                                    InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
-                                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
-                                    Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
-                                    if (null != inlineParts && !inlineParts.isEmpty()) {
-                                        if (null == attachmentStorage) {
-                                            attachmentStorage = getAttachmentStorage(session);
-                                        }
-                                        if (null == attachments) {
-                                            attachments = new ArrayList<>(inlineParts.size());
-                                        }
-
-                                        Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
-                                        int i = 0;
-                                        for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
-                                            MailPart mailPart = inlineEntry.getValue();
-                                            // Compile & store attachment
-                                            AttachmentDescription attachment = new AttachmentDescription();
-                                            attachment.setCompositionSpaceId(uuid);
-                                            attachment.setContentDisposition(INLINE);
-                                            attachment.setContentId(inlineEntry.getKey());
-                                            attachment.setMimeType(mailPart.getContentType().toString(true));
-                                            String fileName = mailPart.getFileName();
-                                            attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                            attachment.setOrigin(AttachmentOrigin.MAIL);
-                                            Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                            attachments.add(partAttachment);
-
-                                            inlineAttachments.put(inlineEntry.getKey(), partAttachment);
-                                            i++;
-                                        }
-
-                                        message.setContent(replaceCidInlineImages(message.getContent(), inlineAttachments, session));
-                                    }
-                                }
-                            }
-                        }
+                        case COPY:
+                            new EditCopy(attachmentStorageService, services).doOpenForEditCopy(type == Type.EDIT, parameters, args, session);
                             break;
-                        case RESEND: {
-                            MailPath resendFor = parameters.getReferencedMails().get(0);
-                            mailInterface = MailServletInterface.getInstance(session);
-                            originalMail = requireMailMessage(resendFor, mailInterface);
-                            metaBuilder.withDate(originalMail.getSentDate());
-
-                            // Pre-set subject
-                            String origSubject = originalMail.getSubject();
-                            if (Strings.isNotEmpty(origSubject)) {
-                                message.setSubject(origSubject);
-                            }
-
-                            // Determine "From"
-                            InternetAddress from = null;
-                            {
-                                FromAddressProvider fromAddressProvider = FromAddressProvider.byAccountId();
-                                if (null != fromAddressProvider) {
-                                    if (fromAddressProvider.isDetectBy()) {
-                                        from = MimeProcessingUtility.determinePossibleFrom(false, originalMail, resendFor.getAccountId(), session, context);
-                                        /*
-                                         * Set if a "From" candidate applies
-                                         */
-                                        if (null != from) {
-                                            message.setFrom(toAddress(from));
-                                        }
-                                    } else if (fromAddressProvider.isSpecified()) {
-                                        from = fromAddressProvider.getFromAddress();
-                                        if (null != from) {
-                                            message.setFrom(toAddress(from));
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Pre-set recipients
-                            {
-                                InternetAddress[] recipients = originalMail.getTo();
-                                if (null != recipients && recipients.length > 0) {
-                                    message.setTo(toAddresses(recipients));
-                                }
-                                recipients = originalMail.getCc();
-                                if (null != recipients && recipients.length > 0) {
-                                    message.setCc(toAddresses(recipients));
-                                }
-                                recipients = originalMail.getBcc();
-                                if (null != recipients && recipients.length > 0) {
-                                    message.setBcc(toAddresses(recipients));
-                                }
-                            }
-
-                            // Grab first seen text from original message and check for possible referenced inline images
-                            boolean multipart = originalMail.getContentType().startsWith("multipart/");
-                            List<String> contentIds = multipart ? new ArrayList<String>() : null;
-                            {
-                                TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, usm.isDisplayHtmlInlineContent(), false, contentIds, session);
-                                if (null == textForForward) {
-                                    message.setContent("");
-                                    message.setContentType(usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN);
-                                } else {
-                                    message.setContent(textForForward.getText());
-                                    message.setContentType(textForForward.isHtml() ? TEXT_HTML : TEXT_PLAIN);
-                                }
-                            }
-
-                            // Check if original mail may contain attachments
-                            if (multipart) {
-                                // Add mail's non-inline parts
-                                {
-                                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                                    if (null != contentIds && !contentIds.isEmpty()) {
-                                        handler.setImageContentIds(contentIds);
-                                    }
-                                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, handler);
-                                    List<MailPart> nonInlineParts = handler.getNonInlineParts();
-                                    if (null != nonInlineParts && !nonInlineParts.isEmpty()) {
-                                        attachmentStorage = getAttachmentStorage(session);
-                                        attachments = new ArrayList<>(nonInlineParts.size());
-                                        int i = 0;
-                                        for (MailPart mailPart : nonInlineParts) {
-                                            // Compile & store attachment
-                                            AttachmentDescription attachment = new AttachmentDescription();
-                                            attachment.setCompositionSpaceId(uuid);
-                                            attachment.setContentDisposition(ATTACHMENT);
-                                            attachment.setMimeType(mailPart.getContentType().toString(true));
-                                            String fileName = mailPart.getFileName();
-                                            attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                            attachment.setOrigin(hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
-                                            Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                            attachments.add(partAttachment);
-                                            i++;
-                                        }
-                                    }
-                                }
-
-                                // Add mail's inline images
-                                if (TEXT_HTML == message.getContentType() && null != contentIds && !contentIds.isEmpty()) {
-                                    InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
-                                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
-                                    Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
-                                    if (null != inlineParts && !inlineParts.isEmpty()) {
-                                        if (null == attachmentStorage) {
-                                            attachmentStorage = getAttachmentStorage(session);
-                                        }
-                                        if (null == attachments) {
-                                            attachments = new ArrayList<>(inlineParts.size());
-                                        }
-
-                                        Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
-                                        int i = 0;
-                                        for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
-                                            MailPart mailPart = inlineEntry.getValue();
-                                            // Compile & store attachment
-                                            AttachmentDescription attachment = new AttachmentDescription();
-                                            attachment.setCompositionSpaceId(uuid);
-                                            attachment.setContentDisposition(INLINE);
-                                            attachment.setContentId(inlineEntry.getKey());
-                                            attachment.setMimeType(mailPart.getContentType().toString(true));
-                                            String fileName = mailPart.getFileName();
-                                            attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                                            attachment.setOrigin(AttachmentOrigin.MAIL);
-                                            Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
-                                            attachments.add(partAttachment);
-
-                                            inlineAttachments.put(inlineEntry.getKey(), partAttachment);
-                                            i++;
-                                        }
-
-                                        message.setContent(replaceCidInlineImages(message.getContent(), inlineAttachments, session));
-                                    }
-                                }
-                            }
-                        }
+                        case RESEND:
+                            new Resend(attachmentStorageService, services).doOpenForResend(parameters, args, session);
                             break;
                         default:
                             break;
@@ -1983,10 +1154,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 } catch (MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 } finally {
-                    if (null != mailInterface) {
-                        mailInterface.close(true);
+                    if (null != args.mailInterface) {
+                        args.mailInterface.close(true);
                     }
                 }
+
+                attachmentStorage = args.attachmentStorage;
+                attachments = args.attachments;
             }
 
             // Check if vCard of session-associated user is supposed to be attached
@@ -1997,18 +1171,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 }
 
                 // Create VCard
-                VCardAndFileName userVCard = getUserVCard(session);
+                VCardAndFileName userVCard = CompositionSpaces.getUserVCard(session);
                 byte[] vcard = userVCard.getVcard();
 
                 // Compile attachment
-                AttachmentDescription attachment = new AttachmentDescription();
-                attachment.setCompositionSpaceId(uuid);
-                attachment.setContentDisposition(ATTACHMENT);
-                attachment.setMimeType(MimeTypes.MIME_TEXT_VCARD + "; charset=\"UTF-8\"");
-                attachment.setName(userVCard.getFileName());
-                attachment.setSize(vcard.length);
-                attachment.setOrigin(AttachmentOrigin.VCARD);
-                Attachment vcardAttachment = saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
+                AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, uuid);
+                Attachment vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
                 if (null == attachments) {
                     attachments = new ArrayList<>(1);
                 }
@@ -2037,52 +1205,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
     }
 
-    /**
-     * Checks if specified mail part has the vCard marker.
-     *
-     * @param mailPart The mail part to check
-     * @param session The session
-     * @return <code>true</code> if vCard marker is present; otherwise <code>false</code>
-     */
-    private boolean hasVCardMarker(MailPart mailPart, Session session) {
-        String userId = new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
-        return userId.equals(mailPart.getFirstHeader(MessageHeaders.HDR_X_OX_VCARD));
-    }
-
-    private Context getContext(Session session) throws OXException {
-        return session instanceof ServerSession ? ((ServerSession) session).getContext() : services.getService(ContextService.class).getContext(session.getContextId());
-    }
-
     private void deleteAttachmentSafe(Attachment attachmentToDelete, AttachmentStorage attachmentStorage, Session session) {
         try {
             attachmentStorage.deleteAttachment(attachmentToDelete.getId(), session);
         } catch (Exception e) {
             LoggerHolder.LOG.error("Failed to delete attachment with ID " + getUnformattedString(attachmentToDelete.getId()) + " from storage " + attachmentStorage.getClass().getName(), e);
         }
-    }
-
-    /**
-     * Filters given address array against given filter set. All addresses currently contained in filter set are removed from specified
-     * <code>addrs</code> and all addresses not contained in filter set are added to filter set for future invocations.
-     *
-     * @param filter The current address filter
-     * @param addrs The address list to filter
-     * @return The filtered set of addresses
-     */
-    private static Set<InternetAddress> filter(final Set<InternetAddress> filter, final InternetAddress[] addrs) {
-        if (addrs == null) {
-            return new HashSet<InternetAddress>(0);
-        }
-        final Set<InternetAddress> set = new LinkedHashSet<InternetAddress>(Arrays.asList(addrs));
-        /*
-         * Remove all addresses from set which are contained in filter
-         */
-        set.removeAll(filter);
-        /*
-         * Add new addresses to filter
-         */
-        filter.addAll(set);
-        return set;
     }
 
     @Override
@@ -2094,7 +1222,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             Attachment newAttachment = null;
             try {
                 attachmentDesc.setCompositionSpaceId(compositionSpaceId);
-                newAttachment = saveAttachment(data, attachmentDesc, session, attachmentStorage);
+                newAttachment = AttachmentStorages.saveAttachment(data, attachmentDesc, session, attachmentStorage);
 
                 boolean retry = true;
                 int retryCount = 0;
@@ -2176,19 +1304,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         try {
             if (uploadedAttachments.hasNext()) {
                 StreamedUploadFile uploadFile = uploadedAttachments.next();
-
-                AttachmentDescription attachment = new AttachmentDescription();
-                attachment.setCompositionSpaceId(compositionSpaceId);
-                attachment.setContentDisposition(com.openexchange.mail.compose.Attachment.ContentDisposition.dispositionFor(disposition));
-                ContentType contentType = new ContentType(uploadFile.getContentType());
-                attachment.setMimeType(contentType.toString());
-                if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
-                    // Set a Content-Id for inline image, too
-                    attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
-                }
-                attachment.setName(uploadFile.getPreparedFileName());
-                attachment.setOrigin(AttachmentOrigin.UPLOAD);
-                newAttachments.add(saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+                AttachmentDescription attachment = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
+                newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
             }
 
             if (newAttachments.isEmpty()) {
@@ -2270,19 +1387,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         try {
             while (uploadedAttachments.hasNext()) {
                 StreamedUploadFile uploadFile = uploadedAttachments.next();
-
-                AttachmentDescription attachment = new AttachmentDescription();
-                attachment.setCompositionSpaceId(compositionSpaceId);
-                attachment.setContentDisposition(com.openexchange.mail.compose.Attachment.ContentDisposition.dispositionFor(disposition));
-                ContentType contentType = new ContentType(uploadFile.getContentType());
-                attachment.setMimeType(contentType.toString());
-                if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
-                    // Set a Content-Id for inline image, too
-                    attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
-                }
-                attachment.setName(uploadFile.getPreparedFileName());
-                attachment.setOrigin(AttachmentOrigin.UPLOAD);
-                newAttachments.add(saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+                AttachmentDescription attachment = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
+                newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
             }
 
             boolean retry = true;
@@ -2345,17 +1451,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         Attachment vcardAttachment;
         {
             // Create VCard
-            VCardAndFileName userVCard = getUserVCard(session);
+            VCardAndFileName userVCard = CompositionSpaces.getUserVCard(session);
             byte[] vcard = userVCard.getVcard();
 
-            AttachmentDescription attachment = new AttachmentDescription();
-            attachment.setCompositionSpaceId(compositionSpaceId);
-            attachment.setContentDisposition(ATTACHMENT);
-            attachment.setMimeType(MimeTypes.MIME_TEXT_VCARD + "; charset=\"UTF-8\"");
-            attachment.setName(userVCard.getFileName());
-            attachment.setSize(vcard.length);
-            attachment.setOrigin(AttachmentOrigin.VCARD);
-            vcardAttachment = saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
+            AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, compositionSpaceId);
+            vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
         }
 
         try {
@@ -2404,17 +1504,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         Attachment vcardAttachment;
         {
             // Create VCard
-            VCardAndFileName contactVCard = CompositonSpaces.getContactVCard(contactId, folderId, session);
+            VCardAndFileName contactVCard = CompositionSpaces.getContactVCard(contactId, folderId, session);
             byte[] vcard = contactVCard.getVcard();
 
-            AttachmentDescription attachment = new AttachmentDescription();
-            attachment.setCompositionSpaceId(compositionSpaceId);
-            attachment.setContentDisposition(ATTACHMENT);
-            attachment.setMimeType(MimeTypes.MIME_TEXT_VCARD + "; charset=\"UTF-8\"");
-            attachment.setName(contactVCard.getFileName());
-            attachment.setSize(vcard.length);
+            AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(contactVCard, compositionSpaceId);
             attachment.setOrigin(AttachmentOrigin.CONTACT);
-            vcardAttachment = saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
+            vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
         }
 
         try {
@@ -2594,14 +1689,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             int i = 0;
             for (MailPart mailPart : nonInlineParts) {
                 // Compile & store attachment
-                AttachmentDescription attachment = new AttachmentDescription();
-                attachment.setCompositionSpaceId(compositionSpaceId);
-                attachment.setContentDisposition(ATTACHMENT);
-                attachment.setMimeType(mailPart.getContentType().toString(true));
-                String fileName = mailPart.getFileName();
-                attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(i + 1), mailPart.getContentType().getBaseType()) : fileName);
-                attachment.setOrigin(hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
-                Attachment partAttachment = saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
+                AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, compositionSpaceId, session);
+                Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
                 newAttachments.add(partAttachment);
                 i++;
             }
@@ -2798,61 +1887,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         attachmentStorage.deleteAttachment(attachmentId, session);
     }
 
-    /**
-     * Saves the specified attachment binary data and meta data using given storage instance.
-     *
-     * @param input The input stream providing binary data
-     * @param attachment The attachment providing meta data
-     * @param session The session providing user information
-     * @param attachmentStorage The storage instance to use
-     * @return The resulting attachment
-     * @throws OXException If saving attachment fails
-     */
-    private static Attachment saveAttachment(InputStream input, AttachmentDescription attachmentDesc, Session session, AttachmentStorage attachmentStorage) throws OXException {
-        Attachment savedAttachment = null;
-        InputStream in = input;
-        try {
-            // Optimistic save
-            savedAttachment = attachmentStorage.saveAttachment(in, attachmentDesc, null, session);
-            Streams.close(in);
-            in = null;
-
-            // Check if max. mail size might be exceeded
-            long maxMailSize = MailProperties.getInstance().getMaxMailSize(session.getUserId(), session.getContextId());
-            if (maxMailSize > 0) {
-                SizeReturner sizeReturner = attachmentStorage.getSizeOfAttachmentsByCompositionSpace(savedAttachment.getCompositionSpaceId(), session);
-                if (sizeReturner.getTotalSize() > maxMailSize) {
-                    throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(maxMailSize, 0, false, true));
-                }
-            }
-
-            // All fine. Return newly saved attachment
-            Attachment retval = savedAttachment;
-            savedAttachment = null; // Avoid premature deletion
-            return retval;
-        } finally {
-            Streams.close(in);
-            if (null != savedAttachment) {
-                attachmentStorage.deleteAttachment(savedAttachment.getId(), session);
-            }
-        }
-    }
-
-    /**
-     * Gets the session user's vCard.
-     *
-     * @param session The session
-     * @return The vCard as byte array
-     * @throws OXException
-     */
-    private VCardAndFileName getUserVCard(Session session) throws OXException {
-        return CompositonSpaces.getUserVCard(session);
-    }
-
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
-
     private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
-
     private static final String HDR_IN_REPLY_TO = MessageHeaders.HDR_IN_REPLY_TO;
 
     /**
@@ -2912,47 +1948,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     /**
-     * Converts given (internet) address to an {@link Address} instance
-     *
-     * @param addr The address to convert
-     * @return The resulting {@code Address} instance
-     */
-    private static Address toAddress(QuotedInternetAddress addr) {
-        return null == addr ? null : new Address(addr.getPersonal(), addr.getUnicodeAddress());
-    }
-
-    /**
-     * Converts given (internet) address to an {@link Address} instance
-     *
-     * @param addr The address to convert
-     * @return The resulting {@code Address} instance
-     */
-    private static Address toAddress(InternetAddress addr) {
-        return null == addr ? null : new Address(addr.getPersonal(), IDNA.toIDN(addr.getAddress()));
-    }
-
-    /**
-     * Converts given (internet) addresses to an {@link Address} instances
-     *
-     * @param addrs The addresses to convert
-     * @return The resulting {@code Address} instances
-     */
-    private static List<Address> toAddresses(InternetAddress[] addrs) {
-        if (null == addrs || 0 == addrs.length) {
-            return Collections.emptyList();
-        }
-
-        List<Address> addresses = new ArrayList<Address>(addrs.length);
-        for (InternetAddress addr : addrs) {
-            Address address = toAddress(addr);
-            if (null != address) {
-                addresses.add(address);
-            }
-        }
-        return addresses;
-    }
-
-    /**
      * Gets referenced mail
      *
      * @param mailPath The mail path for the mail
@@ -2966,127 +1961,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailPath.getMailID(), mailPath.getFolderArgument());
         }
         return mailMessage;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final Pattern PATTERN_SRC = MimeMessageUtility.PATTERN_SRC;
-
-    /**
-     * Replaces &lt;img&gt; tags providing an inline image through exchanging <code>"src"</code> value appropriately.
-     * <p>
-     * <code>&lt;img src="cid:123456"&gt;</code> is converted to<br>
-     * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code>
-     *
-     * @param htmlContent The HTML content to replace in
-     * @param contentId2InlineAttachments The detected inline images
-     * @param session The session providing user information
-     * @return The (possibly) processed HTML content
-     * @throws OXException If replacing &lt;img&gt; tags fails
-     */
-    private static String replaceCidInlineImages(String htmlContent, Map<String, Attachment> contentId2InlineAttachments, Session session) throws OXException {
-        Matcher matcher = PATTERN_SRC.matcher(htmlContent);
-        if (!matcher.find()) {
-            return htmlContent;
-        }
-
-        ImageDataSource imageDataSource = AttachmentImageDataSource.getInstance();
-        StringBuffer sb = new StringBuffer(htmlContent.length());
-        do {
-            String imageTag = matcher.group();
-            String srcValue = matcher.group(1);
-            if (srcValue.startsWith("cid:")) {
-                String contentId = MimeMessageUtility.trimContentId(srcValue.substring(4));
-                Attachment attachment = contentId2InlineAttachments.get(contentId);
-                if (null == attachment) {
-                    // No such inline image... Yield a blank "src" attribute for current <img> tag
-                    LoggerHolder.LOG.warn("No such inline image found for Content-Id {}", contentId);
-                    int st = matcher.start(1);
-                    int end = matcher.end(1);
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageTag.substring(end)));
-                } else {
-                    ImageLocation imageLocation = new ImageLocation.Builder(getUnformattedString(attachment.getId())).optImageHost(HtmlProcessing.imageHost()).build();
-                    String imageUrl = imageDataSource.generateUrl(imageLocation, session);
-                    int st = matcher.start(1) - matcher.start();
-                    int end = matcher.end(1) - matcher.start();
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageUrl + imageTag.substring(end)));
-                }
-            }
-        } while (matcher.find());
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    private static final Pattern PATTERN_IMAGE_ID = Pattern.compile("[?&]" + AJAXServlet.PARAMETER_UID + "=([^&]+)");
-
-    private static final String UTF_8 = "UTF-8";
-
-    /*
-     * Something like "/ajax/image/mail/compose/image..."
-     */
-    private static final Pattern PATTERN_IMAGE_SRC_START_BY_IMAGE = Pattern
-        .compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + ImageActionFactory.ALIAS_APPENDIX + AttachmentImageDataSource.getInstance().getAlias(), Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    /*
-     * Something like "/appsuite/api/mail/compose/5e9f9b6d15a94a31a8ba175489e5363a/attachments/8f119070e6af4143bd2f3c74bd8973a9..."
-     */
-    private static final Pattern PATTERN_IMAGE_SRC_START_BY_URL = Pattern.compile("[a-zA-Z_0-9&-.]+/(?:[a-zA-Z_0-9&-.]+/)*" + "mail/compose/" + "([a-fA-F0-9]+)" + "/attachments/" + "([a-fA-F0-9]+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    /**
-     * Replaces &lt;img&gt; tags providing an inline image through exchanging <code>"src"</code> value appropriately.
-     * <p>
-     * <code>&lt;img src="/ajax/image/mail/compose/image?uid=71ff23e06f424cc5bcb08a92e006838a"&gt;</code> is converted to<br>
-     * <code>&lt;img src="cid:123456"&gt;</code>
-     *
-     * @param htmlContent The HTML content to replace in
-     * @param attachmentId2inlineAttachments The detected inline images
-     * @param contentId2InlineAttachment The map to fill with actually used inline attachments
-     * @param fileAttachments The complete attachment mapping from which to remove actually used inline attachments
-     * @param session The session providing user information
-     * @return The (possibly) processed HTML content
-     * @throws OXException If replacing &lt;img&gt; tags fails
-     */
-    private static String replaceLinkedInlineImages(String htmlContent, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments, Session session) throws OXException {
-        Matcher matcher = PATTERN_SRC.matcher(htmlContent);
-        if (!matcher.find()) {
-            return htmlContent;
-        }
-
-        StringBuffer sb = new StringBuffer(htmlContent.length());
-        Matcher mailComposeUrlMatcher;
-        do {
-            String imageTag = matcher.group();
-            String srcValue = matcher.group(1);
-            if (PATTERN_IMAGE_SRC_START_BY_IMAGE.matcher(srcValue).find()) {
-                Matcher attachmentIdMatcher = PATTERN_IMAGE_ID.matcher(srcValue);
-                if (attachmentIdMatcher.find()) {
-                    String attachmentId = AJAXUtility.decodeUrl(attachmentIdMatcher.group(1), UTF_8);
-                    replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
-                }
-            } else if ((mailComposeUrlMatcher = PATTERN_IMAGE_SRC_START_BY_URL.matcher(srcValue)).find()) {
-                String attachmentId = AJAXUtility.decodeUrl(mailComposeUrlMatcher.group(2), UTF_8);
-                replaceLinkedInlineImage(attachmentId, imageTag, sb, matcher, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
-            }
-        } while (matcher.find());
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    private static void replaceLinkedInlineImage(String attachmentId, String imageTag, StringBuffer sb, Matcher matcher, Map<String, Attachment> attachmentId2inlineAttachments, Map<String, Attachment> contentId2InlineAttachment, Map<UUID, Attachment> fileAttachments) {
-        Attachment attachment = attachmentId2inlineAttachments.get(attachmentId);
-        if (null == attachment) {
-            // No such inline image... Yield a blank "src" attribute for current <img> tag
-            LoggerHolder.LOG.warn("No such inline image found for attachment identifier {}", attachmentId);
-            matcher.appendReplacement(sb, "");
-        } else {
-            String imageUrl = "cid:" + attachment.getContentId();
-            int st = matcher.start(1) - matcher.start();
-            int end = matcher.end(1) - matcher.start();
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageUrl + imageTag.substring(end)));
-
-            contentId2InlineAttachment.put(attachment.getContentId(), attachment);
-            fileAttachments.remove(attachment.getId());
-        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -3125,197 +1999,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             throw OXException.general("UTF-8 not available", e);
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final String HEADER_PW = "open-xchange";
-
-    private static String encodeHeaderValue(int used, String raw) {
-        if (null == raw) {
-            return null;
-        }
-
-        try {
-            return MimeMessageUtility.forceFold(used, MailPasswordUtil.encrypt(raw, HEADER_PW));
-        } catch (GeneralSecurityException x) {
-            LoggerHolder.LOG.debug("Failed to encode header value", x);
-            return MimeMessageUtility.forceFold(used, raw);
-        }
-    }
-
-    private static String decodeHeaderValue(String encoded) {
-        if (null == encoded) {
-            return null;
-        }
-
-        try {
-            return MailPasswordUtil.decrypt(MimeUtility.unfold(encoded), HEADER_PW);
-        } catch (GeneralSecurityException x) {
-            LoggerHolder.LOG.debug("Failed to decode header value", x);
-            return MimeUtility.unfold(encoded);
-        }
-    }
-
-    private static final String JSON_META_NEW = new JSONObject(4).putSafe("type", Type.NEW.getId()).toString();
-
-    private static String meta2HeaderValue(Meta meta) {
-        if (null == meta || MetaType.NEW == meta.getType()) {
-            return JSON_META_NEW;
-        }
-
-        JSONObject jMeta = new JSONObject(8).putSafe("type", meta.getType().getId());
-        {
-            Date date = meta.getDate();
-            if (null != date) {
-                jMeta.putSafe("date", Long.valueOf(meta.getDate().getTime()));
-            }
-        }
-        {
-            MailPath replyFor = meta.getReplyFor();
-            if (null != replyFor) {
-                jMeta.putSafe("replyFor", replyFor.toString());
-            }
-        }
-        {
-            MailPath editFor = meta.getEditFor();
-            if (null != editFor) {
-                jMeta.putSafe("editFor", editFor.toString());
-            }
-        }
-        {
-            List<MailPath> forwardsFor = meta.getForwardsFor();
-            if (null != forwardsFor) {
-                JSONArray jForwardsFor = new JSONArray(forwardsFor.size());
-                for (MailPath forwardFor : forwardsFor) {
-                    jForwardsFor.put(forwardFor.toString());
-                }
-                jMeta.putSafe("forwardsFor", jForwardsFor);
-            }
-        }
-
-        return jMeta.toString();
-    }
-
-    private static Meta headerValue2Meta(String headerValue) {
-        if (Strings.isEmpty(headerValue)) {
-            return Meta.META_NEW;
-        }
-
-        try {
-            JSONObject jMeta = new JSONObject(headerValue);
-
-            Meta.Builder meta = Meta.builder();
-            meta.withType(MetaType.typeFor(jMeta.optString("type", Type.NEW.getId())));
-            {
-                long lDate = jMeta.optLong("date", -1L);
-                meta.withDate(lDate < 0 ? null : new Date(lDate));
-            }
-            {
-                String path = jMeta.optString("replyFor", null);
-                meta.withReplyFor(Strings.isEmpty(path) ? null : new MailPath(path));
-            }
-            {
-                String path = jMeta.optString("editFor", null);
-                meta.withEditFor(Strings.isEmpty(path) ? null : new MailPath(path));
-            }
-            {
-                JSONArray jPaths = jMeta.optJSONArray("forwardsFor");
-                if (null != jPaths) {
-                    List<MailPath> paths = new ArrayList<MailPath>(jPaths.length());
-                    for (Object jPath : jPaths) {
-                        paths.add(new MailPath(jPath.toString()));
-                    }
-                    meta.withForwardsFor(paths);
-                }
-            }
-            return meta.build();
-        } catch (Exception e) {
-            LoggerHolder.LOG.warn("Header value cannot be parsed to meta information: {}", headerValue, e);
-            return Meta.META_NEW;
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final String JSON_SHARED_ATTACHMENTS_DISABLED = new JSONObject(4).putSafe("enabled", Boolean.FALSE).toString();
-
-    private static String sharedAttachments2HeaderValue(SharedAttachmentsInfo sharedAttachmentsInfo) {
-        if (null == sharedAttachmentsInfo || sharedAttachmentsInfo.isDisabled()) {
-            return JSON_SHARED_ATTACHMENTS_DISABLED;
-        }
-
-        return new JSONObject(8).putSafe("enabled", Boolean.valueOf(sharedAttachmentsInfo.isEnabled())).putSafe("language", sharedAttachmentsInfo.getLanguage() == null ? JSONObject.NULL : sharedAttachmentsInfo.getLanguage().toString())
-            .putSafe("autoDelete", Boolean.valueOf(sharedAttachmentsInfo.isAutoDelete())).putSafe("expiryDate", sharedAttachmentsInfo.getExpiryDate() == null ? JSONObject.NULL : Long.valueOf(sharedAttachmentsInfo.getExpiryDate().getTime()))
-            .putSafe("password", sharedAttachmentsInfo.getPassword() == null ? JSONObject.NULL : sharedAttachmentsInfo.getPassword()).toString();
-    }
-
-    private static SharedAttachmentsInfo headerValue2SharedAttachments(String headerValue) {
-        if (Strings.isEmpty(headerValue)) {
-            return SharedAttachmentsInfo.DISABLED;
-        }
-
-        try {
-            JSONObject jSharedAttachments = new JSONObject(headerValue);
-
-            SharedAttachmentsInfo.Builder sharedAttachments = SharedAttachmentsInfo.builder();
-            sharedAttachments.withEnabled(jSharedAttachments.optBoolean("enabled", false));
-            {
-                String language = jSharedAttachments.optString("language", null);
-                sharedAttachments.withLanguage(Strings.isEmpty(language) ? null : LocaleTools.getLocale(language));
-            }
-            sharedAttachments.withAutoDelete(jSharedAttachments.optBoolean("autoDelete", false));
-            {
-                long lDate = jSharedAttachments.optLong("expiryDate", -1L);
-                sharedAttachments.withExpiryDate(lDate < 0 ? null : new Date(lDate));
-            }
-            sharedAttachments.withPassword(jSharedAttachments.optString("password", null));
-            return sharedAttachments.build();
-        } catch (JSONException e) {
-            LoggerHolder.LOG.warn("Header value cannot be parsed to shared-attachments settings: {}", headerValue, e);
-            return SharedAttachmentsInfo.DISABLED;
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final String JSON_SECURITY_DISABLED = new JSONObject(4).putSafe("encrypt", Boolean.FALSE).putSafe("pgpInline", Boolean.FALSE).putSafe("sign", Boolean.FALSE).toString();
-
-    private static String security2HeaderValue(Security security) {
-        if (null == security || security.isDisabled()) {
-            return JSON_SECURITY_DISABLED;
-        }
-
-        return new JSONObject(4)
-            .putSafe("encrypt", Boolean.valueOf(security.isEncrypt()))
-            .putSafe("pgpInline", Boolean.valueOf(security.isPgpInline()))
-            .putSafe("sign", Boolean.valueOf(security.isSign()))
-            .putSafe("language", security.getLanguage())
-            .putSafe("message", security.getMessage())
-            .putSafe("pin", security.getPin())
-            .toString();
-    }
-
-    private static Security headerValue2Security(String headerValue) {
-        if (Strings.isEmpty(headerValue)) {
-            return Security.DISABLED;
-        }
-
-        try {
-            JSONObject jSecurity = new JSONObject(headerValue);
-            return Security.builder()
-                .withEncrypt(jSecurity.optBoolean("encrypt"))
-                .withPgpInline(jSecurity.optBoolean("pgpInline"))
-                .withSign(jSecurity.optBoolean("sign"))
-                .withLanguage(jSecurity.optString("language", null))
-                .withMessage(jSecurity.optString("message", null))
-                .withPin(jSecurity.optString("pin", null))
-                .withMsgRef(jSecurity.optString("msgRef", null))
-                .build();
-        } catch (JSONException e) {
-            LoggerHolder.LOG.warn("Header value cannot be parsed to security settings: {}", headerValue, e);
-            return Security.DISABLED;
         }
     }
 

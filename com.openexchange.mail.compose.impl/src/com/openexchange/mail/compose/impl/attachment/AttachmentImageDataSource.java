@@ -70,7 +70,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
-import com.openexchange.mail.compose.CompositonSpaces;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -117,7 +117,7 @@ public class AttachmentImageDataSource implements ImageDataSource {
     private AttachmentImageDataSource() {
         super();
         args = new String[] { "com.openexchange.mail.compose.id" };
-        alias = "/mail/compose/image";
+        alias = AttachmentStorage.IMAGE_DATA_SOURCE_ALIAS;
         registrationName = AttachmentStorage.IMAGE_REGISTRATION_NAME;
         ContentType ct = new ContentType();
         ct.setPrimaryType("image");
@@ -166,7 +166,7 @@ public class AttachmentImageDataSource implements ImageDataSource {
             throw ServiceExceptionCode.absentService(AttachmentStorage.class);
         }
 
-        UUID attachmentId = CompositonSpaces.parseAttachmentIdIfValid(sAttachmentId);
+        UUID attachmentId = CompositionSpaces.parseAttachmentIdIfValid(sAttachmentId);
         if (null == attachmentId) {
             LOG.warn("Requested a non-existing image attachment {} for user {} in context {}. Returning an empty image as fallback.", sAttachmentId, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             DataProperties properties = new DataProperties(4);
