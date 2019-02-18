@@ -339,6 +339,7 @@ public class PGPDecrypter {
             PGPPublicKey singatureVerifyKey = null;
             boolean signatureInitialized = false;
             boolean signatureVerificationKeyFound = false;
+            boolean signatureVerificationError = false;
             while (pgpObject != null) {
 
                 //Handling compressed data
@@ -383,9 +384,15 @@ public class PGPDecrypter {
                     onePassSignature = onePassSignatureList.get(0);
                     singatureVerifyKey = getPublicKey(onePassSignature);
                     if (singatureVerifyKey != null) {
-                        onePassSignature.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), singatureVerifyKey);
-                        signatureInitialized = true;
-                        signatureVerificationKeyFound = true;
+                        try {
+                            onePassSignature.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), singatureVerifyKey);
+                            signatureInitialized = true;
+                            signatureVerificationKeyFound = true;
+                        } catch (PGPException e) {
+                            signatureVerificationError = true;
+                            signatureVerificationResults.add(new PGPSignatureVerificationResult(e.getLocalizedMessage()));
+                        }
+
                     }
                     pgpObject = plainFact.nextObject();
                 }
@@ -400,7 +407,7 @@ public class PGPDecrypter {
                             //Verify signatures
                             signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
                         }
-                        else if (!signatureVerificationKeyFound) {
+                        else if (!signatureVerificationKeyFound && !signatureVerificationError) {
                             //Key not found for verifying the signature; KeyRetrievalStrategy is responsible for logging this;
                             signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, false, true));
                         }

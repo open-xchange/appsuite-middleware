@@ -503,6 +503,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 sig.put("verified", res.isVerified());
                 sig.put("missing", res.isMissing());
                 sig.put("date", res.getDate());
+                if (res.getError() != null) {
+                    sig.put("error", res.getError());
+                }
                 signatures.put(sig);
             }
             json.put("signatures", signatures);

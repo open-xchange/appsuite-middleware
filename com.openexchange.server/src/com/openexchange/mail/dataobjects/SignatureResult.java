@@ -61,6 +61,7 @@ public class SignatureResult {
     private boolean verified;  // Signature is verified
     private boolean missing;   // Missing key/info to verify
     private long date;         // Tick representation date
+    private String error;      // Error in verifying signature
 
     /**
      * Default constructor
@@ -70,6 +71,7 @@ public class SignatureResult {
         verified = false;
         missing = false;
         date = 0l;
+        error = null;
     }
 
     /**
@@ -121,5 +123,20 @@ public class SignatureResult {
         return date;
     }
 
+    /**
+     * Sets an error message
+     * @param error
+     */
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    /**
+     * Retrieves any error message
+     * @return error
+     */
+    public String getError() {
+        return error;
+    }
 }
 

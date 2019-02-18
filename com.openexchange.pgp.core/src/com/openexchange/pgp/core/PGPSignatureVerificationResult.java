@@ -65,6 +65,7 @@ public class PGPSignatureVerificationResult {
     private final boolean                   verified;
     private final boolean                   missing;
     private String                          userId;
+    private final String                    error;
     private PGPPublicKey                    publicKey;
     private PGPUserAttributeSubpacketVector userAttributes;
     private PGPPublicKey                    issuerKey;
@@ -80,6 +81,7 @@ public class PGPSignatureVerificationResult {
         this.signature = signature;
         this.verified = verified;
         this.missing = false;
+        this.error = null;
     }
 
     /**
@@ -93,13 +95,32 @@ public class PGPSignatureVerificationResult {
         this.signature = signature;
         this.verified = verified;
         this.missing = missing;
+        this.error = null;
     }
 
+    /**
+     * Initializes a new {@link PGPSignatureVerificationResult}
+     * @param mdcVerificationResult  Result of mdc Verification
+     *
+     */
     public PGPSignatureVerificationResult(MDCVerificationResult mdcVerificationResult) {
         this.signature = null;
         this.verified = false;
         this.missing = false;
         this.mdcVerificationResult = mdcVerificationResult;
+        this.error = null;
+    }
+
+    /**
+     * Initializes a new {@link PGPSignatureVerificationResult} that failed due to error
+     *
+     * @param error The error message
+     */
+    public PGPSignatureVerificationResult(String error) {
+        this.signature = null;
+        this.error = error;
+        this.verified = false;
+        this.missing = false;
     }
 
     /**
@@ -109,6 +130,15 @@ public class PGPSignatureVerificationResult {
      */
     public PGPSignature getSignature() {
         return signature;
+    }
+
+    /**
+     * Gets error if any
+     *
+     * @return  Error message if any
+     */
+    public String getError() {
+        return error;
     }
 
     /**
