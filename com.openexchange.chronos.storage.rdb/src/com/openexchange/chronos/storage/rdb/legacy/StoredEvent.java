@@ -66,6 +66,7 @@ import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -73,6 +74,8 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
@@ -177,13 +180,13 @@ public class StoredEvent extends DelegatingEvent {
                 recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(delegate.getSeriesId()), false);
                 // no recurrence data found for the events series, maybe already deleted?
                 if (null == recurrenceData) {
-                    throw new UnsupportedOperationException("Unable to get recurrence data for series " + delegate.getSeriesId());
+                    throw unsupportedDataError(EventField.RECURRENCE_ID, ProblemSeverity.CRITICAL, "Unable to get recurrence data for series " + delegate.getSeriesId(), null);
                 }
             }
             int recurrencePosition = Event2Appointment.getRecurrencePosition(services.getService(RecurrenceService.class), recurrenceData, recurrenceId);
             return new StoredRecurrenceId(recurrencePosition);
         } catch (OXException | SQLException e) {
-            throw new UnsupportedOperationException("Error deriving stored recurrence id", e);
+            throw unsupportedDataError(EventField.RECURRENCE_ID, ProblemSeverity.CRITICAL, "Error deriving stored recurrence id", e);
         }
     }
 
@@ -214,7 +217,7 @@ public class StoredEvent extends DelegatingEvent {
             long absoluteDuration = new Period(delegate).getTotalDays();
             return absoluteDuration + "~" + seriesPattern.getDatabasePattern();
         } catch (OXException | SQLException e) {
-            throw new UnsupportedOperationException("Error deriving stored recurrence rule", e);
+            throw unsupportedDataError(EventField.RECURRENCE_RULE, ProblemSeverity.CRITICAL, "Error deriving stored recurrence rule", e);
         }
     }
 
@@ -251,7 +254,7 @@ public class StoredEvent extends DelegatingEvent {
                 return startDate;
             }
         } catch (OXException e) {
-            throw new UnsupportedOperationException("Error deriving stored start date", e);
+            throw unsupportedDataError(EventField.START_DATE, ProblemSeverity.CRITICAL, "Error deriving stored start date", e);
         }
     }
 
@@ -317,8 +320,22 @@ public class StoredEvent extends DelegatingEvent {
             }
             return isAllDay(delegate) ? new DateTime(end.getTime()).toAllDay() : new DateTime(timeZone, end.getTime());
         } catch (OXException e) {
-            throw new UnsupportedOperationException("Error deriving stored start date", e);
+            throw unsupportedDataError(EventField.END_DATE, ProblemSeverity.CRITICAL, "Error deriving stored end date", e);
         }
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error, wrapped within an {@link UnsupportedOperationException}
+     * for this stored event.
+     *
+     * @param field The corresponding event field of the unsupported data
+     * @param severity The problem severity
+     * @param message The message providing details of the error
+     * @param cause The optional initial cause
+     * @return The initialized unsupported operation exception
+     */
+    private UnsupportedOperationException unsupportedDataError(EventField field, ProblemSeverity severity, String message, Throwable cause) {
+        return new UnsupportedOperationException(eventStorage.getUnsupportedDataError(getId(), field, severity, message, cause));
     }
 
     private static SortedSet<RecurrenceId> getRecurrenceIds(List<Date> dates) {

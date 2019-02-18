@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb.resilient;
 
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.rdb.CalendarStorageWarnings;
 import com.openexchange.exception.OXException;
@@ -107,7 +109,7 @@ public abstract class RdbResilientStorage extends CalendarStorageWarnings {
      * @param runnable The runnable to perform
      * @param failurePredicate The failure predicate to decide whether the operation should be retried or not
      */
-    protected static void runWithRetries(CheckedRunnable runnable, Predicate<? extends Throwable> failurePredicate) throws OXException {
+    protected static void runWith1Retries(CheckedRunnable runnable, Predicate<? extends Throwable> failurePredicate) throws OXException {
         try {
             Failsafe.with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(failurePredicate)).run(runnable);
         } catch (FailsafeException e) {
@@ -116,6 +118,49 @@ public abstract class RdbResilientStorage extends CalendarStorageWarnings {
             }
             throw e;
         }
+    }
+
+    /**
+     * Executes a runnable with a suitable retry policy and failure predicate to determine if the operation should be retried.
+     *
+     * @param runnable The runnable to perform
+     * @param failurePredicate The failure predicate to decide whether the operation should be retried or not
+     */
+    protected void runWithRetries(CheckedRunnable runnable, Predicate<? extends Throwable> failurePredicate) throws OXException {
+        try {
+            Failsafe.with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(failurePredicate)).run(runnable);
+        } catch (FailsafeException e) {
+            if (OXException.class.isInstance(e.getCause())) {
+                throw (OXException) e.getCause();
+            }
+        } catch (UnsupportedOperationException e) {
+            if (false == handleUnsupportedDataError(e)) {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Tries to handle an {@link UnsupportedOperationException} caused by an {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error. In case
+     * the error could be handled, an appropriate warning is tracked (up to the configured problem severity), otherwise, the error is
+     * raised.
+     * 
+     * @param e The unsupported operation exception to handle
+     * @return <code>true</code> if handled, <code>false</code>, otherwise
+     */
+    private boolean handleUnsupportedDataError(UnsupportedOperationException e) throws OXException {
+        if (OXException.class.isInstance(e.getCause())) {
+            OXException cause = (OXException) e.getCause();
+            if (CalendarExceptionCodes.UNSUPPORTED_DATA.equals(cause)) {
+                ProblemSeverity severity = (ProblemSeverity) cause.getArgument("severity");
+                String eventId = (String) cause.getArgument("eventId");
+                EventField field = (EventField) cause.getArgument("field");
+                String message = (String) cause.getArgument("message");
+                addUnsupportedDataError(eventId, field, severity, message, cause.getCause());
+                return true;
+            }
+        }
+        return false;
     }
 
 }
