@@ -559,7 +559,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
 
     @Override
     public MediaStatus getMediaStatusForClient(Session session) {
-        MediaStatus mediaStatus = this.mediaStatus;
+        MediaStatus mediaStatus = getMediaStatus();
         if (null != mediaStatus) {
             return mediaStatus;
         }
