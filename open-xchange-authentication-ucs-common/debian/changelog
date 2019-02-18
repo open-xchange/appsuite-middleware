@@ -1,3 +1,9 @@
+open-xchange-authentication-ucs-common (7.10.1-7) stable; urgency=medium
+
+  * Build for patch 2019-02-25 (5133)
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Mon, 18 Feb 2019 11:28:58 +0100
+
 open-xchange-authentication-ucs-common (7.10.1-6) stable; urgency=medium
 
   * Build for patch 2019-02-11 (5108)
