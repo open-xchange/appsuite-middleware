@@ -66,7 +66,7 @@ import com.openexchange.mail.compose.Meta;
 public class OpenState {
 
     // Invariants
-    public final UUID uuid;
+    public final UUID compositionSpaceId;
     public final MessageDescription message;
     public final Meta.Builder metaBuilder;
 
@@ -78,13 +78,13 @@ public class OpenState {
     /**
      * Initializes a new {@link OpenState}.
      *
-     * @param uuid The composition space identifier
+     * @param compositionSpaceId The composition space identifier
      * @param message The message to compose
      * @param metaBuilder The meta-data builder
      */
-    public OpenState(UUID uuid, MessageDescription message, Meta.Builder metaBuilder) {
+    public OpenState(UUID compositionSpaceId, MessageDescription message, Meta.Builder metaBuilder) {
         super();
-        this.uuid = uuid;
+        this.compositionSpaceId = compositionSpaceId;
         this.metaBuilder = metaBuilder;
         this.message = message;
     }

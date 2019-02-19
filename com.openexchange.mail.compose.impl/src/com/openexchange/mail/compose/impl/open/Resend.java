@@ -186,7 +186,7 @@ public class Resend extends AbstractOpener {
                     int i = 0;
                     for (MailPart mailPart : nonInlineParts) {
                         // Compile & store attachment
-                        AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.uuid, session);
+                        AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
                         Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
                         i++;
@@ -212,7 +212,7 @@ public class Resend extends AbstractOpener {
                     for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
                         MailPart mailPart = inlineEntry.getValue();
                         // Compile & store attachment
-                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.uuid);
+                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
                         Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
 

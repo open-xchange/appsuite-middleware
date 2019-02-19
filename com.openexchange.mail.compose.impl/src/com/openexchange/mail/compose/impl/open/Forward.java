@@ -193,7 +193,7 @@ public class Forward extends AbstractOpener {
                     forwardedMail.writeTo(sink.asOutputStream());
 
                     // Compile attachment
-                    AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(forwardedMail, i + 1, sink.getLength(), state.uuid);
+                    AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(forwardedMail, i + 1, sink.getLength(), state.compositionSpaceId);
                     Attachment emlAttachment = AttachmentStorages.saveAttachment(sink.getStream(), attachment, session, state.attachmentStorage);
                     state.attachments.add(emlAttachment);
                 } finally {
@@ -246,7 +246,7 @@ public class Forward extends AbstractOpener {
                         int i = 0;
                         for (MailPart mailPart : nonInlineParts) {
                             // Compile & store attachment
-                            AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.uuid, session);
+                            AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
                             Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
                             state.attachments.add(partAttachment);
                             i++;
@@ -272,7 +272,7 @@ public class Forward extends AbstractOpener {
                         for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
                             // Compile & store attachment
                             MailPart mailPart = inlineEntry.getValue();
-                            AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.uuid);
+                            AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
                             Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
                             state.attachments.add(partAttachment);
                             inlineAttachments.put(inlineEntry.getKey(), partAttachment);
