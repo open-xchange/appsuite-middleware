@@ -71,7 +71,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 
 /**
- * {@link HeaderUtility}
+ * {@link HeaderUtility} - Utility class to set/read headers used for composing a mail.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
