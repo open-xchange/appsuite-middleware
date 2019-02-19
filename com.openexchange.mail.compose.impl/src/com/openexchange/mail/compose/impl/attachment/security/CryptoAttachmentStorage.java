@@ -51,15 +51,14 @@ package com.openexchange.mail.compose.impl.attachment.security;
 
 import static com.openexchange.mail.compose.impl.CryptoUtility.encrypt;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorage;
@@ -119,7 +118,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
                 if (null == key) {
                     throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
                 }
-                attachment = new DecryptingAttachment(attachment, key);
+                attachment = new DecryptingAttachment(attachment, key, services.getService(CryptoService.class));
             }
         }
         return attachment;
@@ -141,9 +140,10 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
         }
 
+        CryptoService cryptoService = services.getService(CryptoService.class);
         List<Attachment> decryptedAttachments = new ArrayList<Attachment>(attachments.size());
         for (Attachment attachment : attachments) {
-            decryptedAttachments.add(new DecryptingAttachment(attachment, key));
+            decryptedAttachments.add(new DecryptingAttachment(attachment, key, cryptoService));
         }
         return decryptedAttachments;
     }
@@ -164,10 +164,11 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
         }
 
+        CryptoService cryptoService = services.getService(CryptoService.class);
         SizeReturner.Builder decryptingSizeReturner = SizeReturner.builder();
         decryptingSizeReturner.withSize(sizeReturner.getSize());
         for (DataProvider dataProvider : sizeReturner.getDataProviders()) {
-            decryptingSizeReturner.addDataProvider(new DecryptingDataProvider(dataProvider, key));
+            decryptingSizeReturner.addDataProvider(new DecryptingDataProvider(dataProvider, key, cryptoService));
         }
         return decryptingSizeReturner.build();
     }
@@ -182,6 +183,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
         Key key = getKeyFor(attachment.getCompositionSpaceId(), true, session);
 
         // Adjust input stream and size provider
+        CryptoService cryptoService = services.getService(CryptoService.class);
         InputStream inputToUse = input;
         SizeProvider sizeProviderToUse = sizeProvider;
         if (null == sizeProviderToUse) {
@@ -189,21 +191,17 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             inputToUse = countingStream;
             sizeProviderToUse = new CountingInputStreamSizeProvider(countingStream);
         }
-        inputToUse = CryptoUtility.encryptingStreamFor(inputToUse, key);
+        inputToUse = CryptoUtility.encryptingStreamFor(inputToUse, key, cryptoService);
 
         // Encrypt attachment's file name
         String name = attachment.getName();
         if (Strings.isNotEmpty(name)) {
-            try {
-                attachment.setName(encrypt(name, key));
-            } catch (GeneralSecurityException e) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
+            attachment.setName(encrypt(name, key, cryptoService));
         }
 
         // Save attachment & return decrypted view on it
         Attachment savedAttachment = attachmentStorage.saveAttachment(inputToUse, attachment, sizeProviderToUse, session);
-        return new DecryptingAttachment(savedAttachment, key);
+        return new DecryptingAttachment(savedAttachment, key, cryptoService);
     }
 
     @Override

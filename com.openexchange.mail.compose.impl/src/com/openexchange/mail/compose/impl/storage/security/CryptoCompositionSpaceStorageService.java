@@ -51,12 +51,12 @@ package com.openexchange.mail.compose.impl.storage.security;
 
 import static com.openexchange.mail.compose.impl.CryptoUtility.decrypt;
 import static com.openexchange.mail.compose.impl.CryptoUtility.encrypt;
-import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.slf4j.Logger;
+import com.openexchange.crypto.CryptoErrorMessage;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpace;
@@ -81,11 +81,6 @@ import com.openexchange.session.Session;
  */
 public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware implements CompositionSpaceStorageService {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CryptoCompositionSpaceStorageService.class);
-    }
-
     private final CompositionSpaceStorageService delegate;
 
     /**
@@ -104,43 +99,38 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
                 throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(id));
             }
 
-            String plainContent = decrypt(compositionSpace.getMessage().getContent(), key);
+            String plainContent = decrypt(compositionSpace.getMessage().getContent(), key, services.getService(CryptoService.class));
             Message msg = ImmutableMessage.builder()
                 .fromMessage(compositionSpace.getMessage())
                 .withContent(plainContent)
                 .build();
             return new ImmutableCompositionSpace(id, msg, compositionSpace.getLastModified());
-        } catch (GeneralSecurityException e) {
-            throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(id));
-        } catch (Exception e) {
-            // Do nothing
-            LoggerHolder.LOG.error("Failed to decrypt content", e);
+        } catch (OXException e) {
+            if (CryptoErrorMessage.BadPassword.equals(e)) {
+                throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(id));
+            }
+            throw e;
         }
-        return compositionSpace;
     }
 
     private void encryptCompositionSpaceDescription(CompositionSpaceDescription compositionSpaceDesc, boolean createKeyIfAbsent, Session session) throws OXException {
         UUID compositionSpaceId = compositionSpaceDesc.getUuid();
-        try {
-            Key key = getKeyFor(compositionSpaceId, createKeyIfAbsent, session);
-            if (!createKeyIfAbsent && key == null) {
-                throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
-            }
-
-            MessageDescription messageDesc = compositionSpaceDesc.getMessage();
-
-            if (messageDesc.containsContent()) {
-                String content = messageDesc.getContent();
-                if (null != content) {
-                    messageDesc.setContent(encrypt(content, key));
-                }
-            }
-
-            // Mark to have encrypted content
-            messageDesc.setContentEncrypted(true);
-        } catch (GeneralSecurityException e) {
-            throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(compositionSpaceId));
+        Key key = getKeyFor(compositionSpaceId, createKeyIfAbsent, session);
+        if (!createKeyIfAbsent && key == null) {
+            throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
         }
+
+        MessageDescription messageDesc = compositionSpaceDesc.getMessage();
+
+        if (messageDesc.containsContent()) {
+            String content = messageDesc.getContent();
+            if (null != content) {
+                messageDesc.setContent(encrypt(content, key, services.getService(CryptoService.class)));
+            }
+        }
+
+        // Mark to have encrypted content
+        messageDesc.setContentEncrypted(true);
     }
 
     @Override

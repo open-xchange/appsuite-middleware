@@ -52,19 +52,19 @@ package com.openexchange.crypto.internal;
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
 import static com.openexchange.crypto.CryptoErrorMessage.NoSalt;
 import static com.openexchange.crypto.CryptoErrorMessage.SecurityException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import de.rtner.security.auth.spi.PBKDF2Engine;
 import de.rtner.security.auth.spi.PBKDF2Parameters;
@@ -142,14 +142,6 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public String decrypt(final EncryptedData data, final String password, final boolean useSalt) throws OXException {
-        if (useSalt && data.getSalt() == null) {
-            throw NoSalt.create();
-        }
-        return useSalt ? decrypt(data.getData(), generateSecretKey(password, data.getSalt())) : decrypt(data.getData(), generateSecretKey(password, SALT));
-    }
-
-    @Override
     public EncryptedData encrypt(final String data, final String password, final boolean useSalt) throws OXException {
         if (data == null) {
             return null;
@@ -161,6 +153,14 @@ public class CryptoServiceImpl implements CryptoService {
         return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
     }
 
+    @Override
+    public String decrypt(final EncryptedData data, final String password, final boolean useSalt) throws OXException {
+        if (useSalt && data.getSalt() == null) {
+            throw NoSalt.create();
+        }
+        return useSalt ? decrypt(data.getData(), generateSecretKey(password, data.getSalt())) : decrypt(data.getData(), generateSecretKey(password, SALT));
+    }
+
     /**
      * Encrypts specified data with given key.
      *
@@ -169,7 +169,8 @@ public class CryptoServiceImpl implements CryptoService {
      * @return The encrypted data as Base64 encoded string
      * @throws OXException
      */
-    private String encrypt(final String data, final Key password) throws OXException {
+    @Override
+    public String encrypt(final String data, final Key password) throws OXException {
         String retval = null;
         try {
             final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
@@ -193,7 +194,7 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            retval = Charsets.toAsciiString(Base64.encodeBase64(outputBytes));
+            retval = java.util.Base64.getEncoder().encodeToString(outputBytes);
         } catch (final GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
@@ -209,7 +210,8 @@ public class CryptoServiceImpl implements CryptoService {
      * @return The decrypted data
      * @throws OXException
      */
-    private String decrypt(final String encryptedData, final Key key) throws OXException {
+    @Override
+    public String decrypt(final String encryptedData, final Key key) throws OXException {
         Cipher cipher;
         final byte encrypted[];
         try {
@@ -231,7 +233,7 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = Base64.decodeBase64(Charsets.toAsciiBytes(encryptedData));
+            encrypted = java.util.Base64.getDecoder().decode(encryptedData);
 
             cipher = Cipher.getInstance(CIPHER_TYPE);
             cipher.init(Cipher.DECRYPT_MODE, key, IV);
@@ -244,6 +246,36 @@ public class CryptoServiceImpl implements CryptoService {
             return new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
         } catch (final GeneralSecurityException e) {
             throw BadPassword.create(e);
+        }
+    }
+
+    @Override
+    public CipherInputStream encryptingStreamFor(InputStream in, Key key) throws OXException {
+        if (null == in) {
+            return null;
+        }
+
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
+            cipher.init(Cipher.ENCRYPT_MODE, key, IV);
+            return new CipherInputStream(in, cipher);
+        } catch (GeneralSecurityException e) {
+            throw SecurityException.create(e);
+        }
+    }
+
+    @Override
+    public CipherInputStream decryptingStreamFor(InputStream in, Key key) throws OXException {
+        if (null == in) {
+            return null;
+        }
+
+        try {
+            Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
+            cipher.init(Cipher.DECRYPT_MODE, key, IV);
+            return new CipherInputStream(in, cipher);
+        } catch (GeneralSecurityException e) {
+            throw SecurityException.create(e);
         }
     }
 

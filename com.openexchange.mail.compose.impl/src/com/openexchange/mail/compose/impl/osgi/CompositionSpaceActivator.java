@@ -69,6 +69,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
@@ -137,7 +138,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, CapabilityService.class, HtmlService.class,
             ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class, ObfuscatorService.class,
-            ConfigViewFactory.class };
+            ConfigViewFactory.class, CryptoService.class };
     }
 
     @Override

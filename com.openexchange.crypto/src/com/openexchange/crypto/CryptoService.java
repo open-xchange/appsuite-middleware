@@ -49,6 +49,8 @@
 
 package com.openexchange.crypto;
 
+import java.io.InputStream;
+import java.security.Key;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -69,7 +71,7 @@ public interface CryptoService {
      * @return The encrypted data as Base64 encoded string
      * @throws OXException If encryption fails
      */
-    public String encrypt(String data, String password) throws OXException;
+    String encrypt(String data, String password) throws OXException;
 
     /**
      * Decrypts specified encrypted data with given password.
@@ -79,7 +81,9 @@ public interface CryptoService {
      * @return The decrypted data
      * @throws OXException If decryption fails
      */
-    public String decrypt(String encryptedPayload, String password) throws OXException;
+    String decrypt(String encryptedPayload, String password) throws OXException;
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Encrypts specified data with given password.
@@ -91,7 +95,7 @@ public interface CryptoService {
      * @return EncryptedData object with the Base64 encoded and encrypted String and the used salt
      * @throws OXException If encryption fails
      */
-    public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException;
+    EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException;
 
     /**
      * Decrypts specified encryptedt data with the given password.
@@ -102,5 +106,50 @@ public interface CryptoService {
      * @return The decrypted data as String
      * @throws OXException If decryption fails
      */
-    public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException;
+    String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException;
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Encrypts specified data with given password.
+     *
+     * @param data The data to be encrypted
+     * @param key The key
+     * @param useSalt Uses generated salt for encryption and stores the salt in the return value, if true uses internal salt constant
+     *            otherwise.
+     * @return The encrypted data as Base64 encoded string
+     * @throws OXException If encryption fails
+     */
+    String encrypt(String data, Key key) throws OXException;
+
+    /**
+     * Decrypts specified encryptedt data with the given password.
+     *
+     * @param encryptedPayload The Base64 encoded encrypted data
+     * @param key The key
+     * @return The decrypted data as String
+     * @throws OXException If decryption fails
+     */
+    String decrypt(String encryptedPayload, Key key) throws OXException;
+
+    /**
+     * Gets the encrypting input stream for given stream using specified key.
+     *
+     * @param in The stream to encrypt
+     * @param key The key
+     * @return The encrypting input stream
+     * @throws OXException If encrypting input stream cannot be returned
+     */
+    InputStream encryptingStreamFor(InputStream in, Key key) throws OXException;
+
+    /**
+     * Gets the decrypting input stream for given stream using specified key.
+     *
+     * @param in The stream to decrypt
+     * @param key The key
+     * @return The decrypting input stream
+     * @throws OXException If decrypting input stream cannot be returned
+     */
+    InputStream decryptingStreamFor(InputStream in, Key key) throws OXException;
+
 }

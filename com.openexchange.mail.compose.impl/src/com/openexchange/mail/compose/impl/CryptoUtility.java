@@ -50,15 +50,11 @@
 package com.openexchange.mail.compose.impl;
 
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.util.Base64;
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.spec.IvParameterSpec;
+import com.openexchange.crypto.CryptoErrorMessage;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link CryptoUtility}
@@ -76,37 +72,20 @@ public class CryptoUtility {
     }
 
     /**
-     * The algorithm.
-     */
-    private static final String ALGORITHM = "AES";
-
-    /**
-     * The transformation following pattern <i>"algorithm/mode/padding"</i>.
-     */
-    private static final String CIPHER_TYPE = ALGORITHM + "/CBC/PKCS5Padding";
-
-    /**
-     * Parameters
-     */
-    private static final IvParameterSpec iv = new IvParameterSpec(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
-
-    /**
      * Encrypts specified string with given key.
      *
      * @param toEncrypt The string to encrypt
      * @param key The key
+     * @param cryptoService The crypto service to use
      * @return The encrypted string as Base64 encoded string
-     * @throws GeneralSecurityException If string encryption fails
+     * @throws OXException If string encryption fails
      */
-    public static String encrypt(String toEncrypt, Key key) throws GeneralSecurityException {
+    public static String encrypt(String toEncrypt, Key key, CryptoService cryptoService) throws OXException {
         if (Strings.isEmpty(toEncrypt)) {
             return toEncrypt;
         }
 
-        Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        byte[] outputBytes = cipher.doFinal(toEncrypt.getBytes(com.openexchange.java.Charsets.UTF_8));
-        return Base64.getEncoder().encodeToString(outputBytes);
+        return cryptoService.encrypt(toEncrypt, key);
     }
 
     /**
@@ -114,19 +93,17 @@ public class CryptoUtility {
      *
      * @param encryptedString The Base64 encoded encrypted string
      * @param key The key
+     * @param cryptoService The crypto service to use
      * @return The decrypted string
-     * @throws GeneralSecurityException If string decryption fails
+     * @throws OXException If string decryption fails
+     * @see CryptoErrorMessage#BadPassword
      */
-    public static String decrypt(String encryptedString, Key key) throws GeneralSecurityException {
+    public static String decrypt(String encryptedString, Key key, CryptoService cryptoService) throws OXException {
         if (Strings.isEmpty(encryptedString)) {
             return encryptedString;
         }
 
-        byte[] encrypted = Base64.getDecoder().decode(encryptedString);
-        Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        byte[] outputBytes = cipher.doFinal(encrypted);
-        return new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
+        return cryptoService.decrypt(encryptedString, key);
     }
 
     /**
@@ -137,18 +114,12 @@ public class CryptoUtility {
      * @return The encrypting input stream
      * @throws OXException If encrypting input stream cannot be returned
      */
-    public static CipherInputStream encryptingStreamFor(InputStream in, Key key) throws OXException {
+    public static InputStream encryptingStreamFor(InputStream in, Key key, CryptoService cryptoService) throws OXException {
         if (null == in) {
             return null;
         }
 
-        try {
-            Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-            return new CipherInputStream(in, cipher);
-        } catch (GeneralSecurityException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        return cryptoService.encryptingStreamFor(in, key);
     }
 
     /**
@@ -159,18 +130,12 @@ public class CryptoUtility {
      * @return The decrypting input stream
      * @throws OXException If decrypting input stream cannot be returned
      */
-    public static CipherInputStream decryptingStreamFor(InputStream in, Key key) throws OXException {
+    public static InputStream decryptingStreamFor(InputStream in, Key key, CryptoService cryptoService) throws OXException {
         if (null == in) {
             return null;
         }
 
-        try {
-            Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.DECRYPT_MODE, key, iv);
-            return new CipherInputStream(in, cipher);
-        } catch (GeneralSecurityException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        return cryptoService.decryptingStreamFor(in, key);
     }
 
 }

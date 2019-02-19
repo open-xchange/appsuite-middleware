@@ -50,9 +50,10 @@
 package com.openexchange.mail.compose.impl.attachment.security;
 
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.UUID;
+import com.openexchange.crypto.CryptoErrorMessage;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.Attachment;
@@ -72,20 +73,25 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
     private final Attachment attachment;
     private final Key key;
     private final String decryptedName;
+    private final CryptoService cryptoService;
 
     /**
      * Initializes a new {@link DecryptingAttachment}.
      *
      * @throws OXException If attachment's file name cannot be decrypted
      */
-    public DecryptingAttachment(Attachment attachment, Key key) throws OXException {
+    public DecryptingAttachment(Attachment attachment, Key key, CryptoService cryptoService) throws OXException {
         super();
+        this.cryptoService = cryptoService;
         try {
             this.attachment = attachment;
             this.key = key;
-            this.decryptedName = CryptoUtility.decrypt(attachment.getName(), key);
-        } catch (GeneralSecurityException e) {
-            throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
+            this.decryptedName = CryptoUtility.decrypt(attachment.getName(), key, cryptoService);
+        } catch (OXException e) {
+            if (CryptoErrorMessage.BadPassword.equals(e)) {
+                throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
+            }
+            throw e;
         }
     }
 
@@ -106,7 +112,7 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
 
     @Override
     public InputStream getData() throws OXException {
-        return CryptoUtility.decryptingStreamFor(attachment.getData(), key);
+        return CryptoUtility.decryptingStreamFor(attachment.getData(), key, cryptoService);
     }
 
     @Override

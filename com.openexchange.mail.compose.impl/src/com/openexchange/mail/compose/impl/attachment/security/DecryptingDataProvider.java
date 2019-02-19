@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.attachment.security;
 
 import java.io.InputStream;
 import java.security.Key;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.impl.CryptoUtility;
@@ -65,22 +66,24 @@ public class DecryptingDataProvider implements DataProvider {
 
     private final DataProvider dataProvider;
     private final Key key;
+    private final CryptoService cryptoService;
 
     /**
      * Initializes a new {@link DecryptingDataProvider}.
      *
      * @param dataProvider The delegate data provider
      */
-    public DecryptingDataProvider(DataProvider dataProvider, Key key) {
+    public DecryptingDataProvider(DataProvider dataProvider, Key key, CryptoService cryptoService) {
         super();
         this.dataProvider = dataProvider;
         this.key = key;
+        this.cryptoService = cryptoService;
     }
 
     @Override
     public InputStream getData() throws OXException {
         InputStream data = dataProvider.getData();
-        return CryptoUtility.decryptingStreamFor(data, key);
+        return CryptoUtility.decryptingStreamFor(data, key, cryptoService);
     }
 
 }
