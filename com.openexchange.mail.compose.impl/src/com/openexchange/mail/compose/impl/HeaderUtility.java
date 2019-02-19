@@ -83,9 +83,16 @@ public class HeaderUtility {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HeaderUtility.class);
     }
 
+    /** "X-OX-Shared-Attachments" */
     public static final String HEADER_X_OX_SHARED_ATTACHMENTS = MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS;
+
+    /** "X-OX-Security" */
     public static final String HEADER_X_OX_SECURITY = MessageHeaders.HDR_X_OX_SECURITY;
+
+    /** "X-OX-Meta" */
     public static final String HEADER_X_OX_META = MessageHeaders.HDR_X_OX_META;
+
+    /** "X-OX-Read-Receipt" */
     public static final String HEADER_X_OX_READ_RECEIPT = MessageHeaders.HDR_X_OX_READ_RECEIPT;
 
     /**
@@ -97,6 +104,13 @@ public class HeaderUtility {
 
     private static final String HEADER_PW = "open-xchange";
 
+    /**
+     * Encodes given header value
+     *
+     * @param used The number of already consumed characters in header line
+     * @param raw The raw header value
+     * @return The encoded header value
+     */
     public static String encodeHeaderValue(int used, String raw) {
         if (null == raw) {
             return null;
@@ -110,6 +124,12 @@ public class HeaderUtility {
         }
     }
 
+    /**
+     * Decodes given header value
+     *
+     * @param encoded The encoded header value
+     * @return The decoded header value
+     */
     public static String decodeHeaderValue(String encoded) {
         if (null == encoded) {
             return null;
@@ -125,6 +145,12 @@ public class HeaderUtility {
 
     private static final String JSON_META_NEW = new JSONObject(4).putSafe("type", Type.NEW.getId()).toString();
 
+    /**
+     * Generates the header value for given meta instance.
+     *
+     * @param meta The meta instance
+     * @return The resulting header value
+     */
     public static String meta2HeaderValue(Meta meta) {
         if (null == meta || MetaType.NEW == meta.getType()) {
             return JSON_META_NEW;
@@ -163,6 +189,12 @@ public class HeaderUtility {
         return jMeta.toString();
     }
 
+    /**
+     * Parses given header value to appropriate meta instance.
+     *
+     * @param headerValue The header value to parse
+     * @return The resulting meta instance
+     */
     public static Meta headerValue2Meta(String headerValue) {
         if (Strings.isEmpty(headerValue)) {
             return Meta.META_NEW;
@@ -206,6 +238,12 @@ public class HeaderUtility {
 
     private static final String JSON_SHARED_ATTACHMENTS_DISABLED = new JSONObject(4).putSafe("enabled", Boolean.FALSE).toString();
 
+    /**
+     * Generates the header value for given shared-attachment info instance.
+     *
+     * @param sharedAttachmentsInfo The shared-attachment info instance
+     * @return The resulting header value
+     */
     public static String sharedAttachments2HeaderValue(SharedAttachmentsInfo sharedAttachmentsInfo) {
         if (null == sharedAttachmentsInfo || sharedAttachmentsInfo.isDisabled()) {
             return JSON_SHARED_ATTACHMENTS_DISABLED;
@@ -216,6 +254,12 @@ public class HeaderUtility {
             .putSafe("password", sharedAttachmentsInfo.getPassword() == null ? JSONObject.NULL : sharedAttachmentsInfo.getPassword()).toString();
     }
 
+    /**
+     * Parses given header value to appropriate shared-attachment info instance.
+     *
+     * @param headerValue The header value to parse
+     * @return The resulting shared-attachment info instance
+     */
     public static SharedAttachmentsInfo headerValue2SharedAttachments(String headerValue) {
         if (Strings.isEmpty(headerValue)) {
             return SharedAttachmentsInfo.DISABLED;
@@ -247,6 +291,12 @@ public class HeaderUtility {
 
     private static final String JSON_SECURITY_DISABLED = new JSONObject(4).putSafe("encrypt", Boolean.FALSE).putSafe("pgpInline", Boolean.FALSE).putSafe("sign", Boolean.FALSE).toString();
 
+    /**
+     * Generates the header value for given security instance.
+     *
+     * @param security The security instance
+     * @return The resulting header value
+     */
     public static String security2HeaderValue(Security security) {
         if (null == security || security.isDisabled()) {
             return JSON_SECURITY_DISABLED;
@@ -259,9 +309,16 @@ public class HeaderUtility {
             .putSafe("language", security.getLanguage())
             .putSafe("message", security.getMessage())
             .putSafe("pin", security.getPin())
+            .putSafe("msgRef", security.getMessage())
             .toString();
     }
 
+    /**
+     * Parses given header value to appropriate security instance.
+     *
+     * @param headerValue The header value to parse
+     * @return The resulting security instance
+     */
     public static Security headerValue2Security(String headerValue) {
         if (Strings.isEmpty(headerValue)) {
             return Security.DISABLED;

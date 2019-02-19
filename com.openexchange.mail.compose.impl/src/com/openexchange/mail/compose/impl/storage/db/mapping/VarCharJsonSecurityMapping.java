@@ -92,7 +92,7 @@ public abstract class VarCharJsonSecurityMapping<O> extends AbstractVarCharJsonO
                 jsonSharedAttachmentsInfo.put("language", getNullable(value.getLanguage()));
                 jsonSharedAttachmentsInfo.put("message", getNullable(value.getMessage()));
                 jsonSharedAttachmentsInfo.put("pin", getNullable(value.getPin()));
-                jsonSharedAttachmentsInfo.put("msgRef", value.getMsgRef());
+                jsonSharedAttachmentsInfo.put("msgRef", getNullable(value.getMsgRef()));
             } catch (JSONException e) {
                 LOG.error("Unable to generate JSONObject.", e);
             }
