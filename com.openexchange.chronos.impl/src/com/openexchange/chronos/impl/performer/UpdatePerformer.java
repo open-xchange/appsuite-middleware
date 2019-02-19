@@ -111,7 +111,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     /** <i>Meta</i>-fields of events that are always skipped when applying updated event data */
     private static final EventField[] SKIPPED_FIELDS = {
-        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.SEQUENCE, EventField.FLAGS
+        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FLAGS
     };
 
     /**
