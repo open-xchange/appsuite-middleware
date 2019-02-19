@@ -64,9 +64,9 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
-import com.openexchange.mail.compose.CompositionSpaceStorageService;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.MessageField;
+import com.openexchange.mail.compose.impl.NonCryptoCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.ImmutableCompositionSpace;
 import com.openexchange.mail.compose.impl.storage.ImmutableMessage;
 import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class InMemoryCompositionSpaceStorageService implements CompositionSpaceStorageService, Runnable {
+public class InMemoryCompositionSpaceStorageService implements NonCryptoCompositionSpaceStorageService, Runnable {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
@@ -169,6 +169,16 @@ public class InMemoryCompositionSpaceStorageService implements CompositionSpaceS
                 LoggerHolder.LOG.error("", exc);
             }
         }
+    }
+
+    @Override
+    public boolean isContentEncrypted(Session session, UUID id) throws OXException {
+        InMemoryCompositionSpace compositionSpace = spacesById.get(id);
+        if (isInvalid(compositionSpace, session)) {
+            throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(UUIDs.getUnformattedString(id));
+        }
+
+        return compositionSpace.getMessage().isContentEncrypted();
     }
 
     @Override

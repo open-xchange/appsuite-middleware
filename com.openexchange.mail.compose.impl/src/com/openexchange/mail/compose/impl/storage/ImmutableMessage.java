@@ -94,6 +94,7 @@ public class ImmutableMessage implements Message {
         private Meta meta;
         private Security security;
         private Priority priority;
+        private boolean contentEncrypted;
 
         Builder() {
             super();
@@ -101,6 +102,12 @@ public class ImmutableMessage implements Message {
             sharedAttachmentsInfo = SharedAttachmentsInfo.DISABLED;
             security = Security.DISABLED;
             meta = Meta.META_NEW;
+            contentEncrypted = false;
+        }
+
+        public Builder withContentEncrypted(boolean contentEncrypted) {
+            this.contentEncrypted = contentEncrypted;
+            return this;
         }
 
         public Builder withFrom(Address from) {
@@ -189,6 +196,7 @@ public class ImmutableMessage implements Message {
                 meta = md.getMeta();
                 security = md.getSecurity();
                 priority = md.getPriority();
+                contentEncrypted = md.isContentEncrypted();
             }
             return this;
         }
@@ -209,12 +217,13 @@ public class ImmutableMessage implements Message {
                 meta = m.getMeta();
                 security = m.getSecurity();
                 priority = m.getPriority();
+                contentEncrypted = m.isContentEncrypted();
             }
             return this;
         }
 
         public ImmutableMessage build() {
-            return new ImmutableMessage(from, sender, to, cc, bcc, subject, content, contentType, requestReadReceipt, sharedAttachmentsInfo, attachments, meta, security, priority);
+            return new ImmutableMessage(from, sender, to, cc, bcc, subject, content, contentType, requestReadReceipt, sharedAttachmentsInfo, attachments, meta, security, priority, contentEncrypted);
         }
     }
 
@@ -234,8 +243,9 @@ public class ImmutableMessage implements Message {
     private final Meta meta;
     private final Security security;
     private final Priority priority;
+    private final boolean contentEncrypted;
 
-    ImmutableMessage(Address from, Address sender, List<Address> to, List<Address> cc, List<Address> bcc, String subject, String content, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, List<Attachment> attachments, Meta meta, Security security, Priority priority) {
+    ImmutableMessage(Address from, Address sender, List<Address> to, List<Address> cc, List<Address> bcc, String subject, String content, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, List<Attachment> attachments, Meta meta, Security security, Priority priority, boolean contentEncrypted) {
         super();
         this.from = from;
         this.sender = sender;
@@ -251,6 +261,7 @@ public class ImmutableMessage implements Message {
         this.meta = meta;
         this.security = security;
         this.priority = priority;
+        this.contentEncrypted = contentEncrypted;
     }
 
     private static <E> List<E> immutableListFor(List<E> list) {
@@ -325,6 +336,11 @@ public class ImmutableMessage implements Message {
     @Override
     public Priority getPriority() {
         return priority;
+    }
+
+    @Override
+    public boolean isContentEncrypted() {
+        return contentEncrypted;
     }
 
     @Override

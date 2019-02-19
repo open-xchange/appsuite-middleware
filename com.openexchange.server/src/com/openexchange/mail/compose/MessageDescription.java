@@ -75,6 +75,7 @@ public class MessageDescription {
     private Meta meta;
     private Security security;
     private Priority priority;
+    private boolean contentEncrypted;
 
     private boolean bFrom;
     private boolean bSender;
@@ -90,6 +91,7 @@ public class MessageDescription {
     private boolean bMeta;
     private boolean bSecurity;
     private boolean bPriority;
+    private boolean bContentEncrypted;
 
     /**
      * Initializes a new {@link MessageDescription}.
@@ -252,6 +254,25 @@ public class MessageDescription {
     public void removeContentType() {
         contentType = null;
         bContentType = false;
+    }
+
+    public boolean isContentEncrypted() {
+        return contentEncrypted;
+    }
+
+    public MessageDescription setContentEncrypted(boolean contentEncrypted) {
+        this.contentEncrypted = contentEncrypted;
+        bContentEncrypted = true;
+        return this;
+    }
+
+    public boolean containsContentEncrypted() {
+        return bContentEncrypted;
+    }
+
+    public void removeContentEncrypted() {
+        contentEncrypted = false;
+        bContentEncrypted = false;
     }
 
     public boolean isRequestReadReceipt() {

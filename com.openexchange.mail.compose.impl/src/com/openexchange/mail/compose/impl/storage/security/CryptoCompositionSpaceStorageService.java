@@ -99,7 +99,10 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
     private CompositionSpace decryptCompositionSpace(CompositionSpace compositionSpace, Session session) throws OXException {
         UUID id = compositionSpace.getId();
         try {
-            Key key = getKeyFor(id, session);
+            Key key = getKeyFor(id, false, session);
+            if (null == key) {
+                throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(id));
+            }
 
             String plainContent = decrypt(compositionSpace.getMessage().getContent(), key);
             Message msg = ImmutableMessage.builder()
@@ -108,9 +111,6 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
                 .build();
             return new ImmutableCompositionSpace(id, msg, compositionSpace.getLastModified());
         } catch (GeneralSecurityException e) {
-            if (autoDeleteIfKeyIsMissing(session)) {
-                delegate.closeCompositionSpace(session, id);
-            }
             throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(id));
         } catch (Exception e) {
             // Do nothing
@@ -119,9 +119,13 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
         return compositionSpace;
     }
 
-    private void encryptCompositionSpaceDescription(CompositionSpaceDescription compositionSpaceDesc, Session session) {
+    private void encryptCompositionSpaceDescription(CompositionSpaceDescription compositionSpaceDesc, boolean createKeyIfAbsent, Session session) throws OXException {
+        UUID compositionSpaceId = compositionSpaceDesc.getUuid();
         try {
-            Key key = getKeyFor(compositionSpaceDesc.getUuid(), session);
+            Key key = getKeyFor(compositionSpaceId, createKeyIfAbsent, session);
+            if (!createKeyIfAbsent && key == null) {
+                throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
+            }
 
             MessageDescription messageDesc = compositionSpaceDesc.getMessage();
 
@@ -131,40 +135,72 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
                     messageDesc.setContent(encrypt(content, key));
                 }
             }
-        } catch (Exception e) {
-            // Do nothing
-            LoggerHolder.LOG.debug("Failed to encrypt content", e);
+
+            // Mark to have encrypted content
+            messageDesc.setContentEncrypted(true);
+        } catch (GeneralSecurityException e) {
+            throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(compositionSpaceId));
         }
+    }
+
+    @Override
+    public boolean isContentEncrypted(Session session, UUID id) throws OXException {
+        return delegate.isContentEncrypted(session, id);
     }
 
     @Override
     public CompositionSpace getCompositionSpace(Session session, UUID id) throws OXException {
         CompositionSpace compositionSpace = delegate.getCompositionSpace(session, id);
-        if (null != compositionSpace && needsEncryption(session)) {
-            compositionSpace = decryptCompositionSpace(compositionSpace, session);
+        if (null != compositionSpace) {
+            if (needsEncryption(session) || hasEncryptedContent(compositionSpace)) {
+                compositionSpace = decryptCompositionSpace(compositionSpace, session);
+            }
         }
         return compositionSpace;
     }
 
     @Override
     public List<CompositionSpace> getCompositionSpaces(Session session, MessageField[] fields) throws OXException {
-        List<CompositionSpace> compositionSpaces = delegate.getCompositionSpaces(session, fields);
-        if (null != compositionSpaces) {
-            int size = compositionSpaces.size();
-            if (size > 0 && needsEncryption(session)) {
+        MessageField[] fieldsToUse = fields;
+        if (null != fieldsToUse) {
+            MessageField.addMessageFieldIfAbsent(fieldsToUse, MessageField.CONTENT_ENCRYPTED);
+        }
+
+        List<CompositionSpace> compositionSpaces = delegate.getCompositionSpaces(session, fieldsToUse);
+        int size;
+        if (null != compositionSpaces && (size = compositionSpaces.size()) > 0) {
+            if (needsEncryption(session)) {
                 List<CompositionSpace> spaces = new ArrayList<>(size);
                 for (CompositionSpace compositionSpace : compositionSpaces) {
-                    try {
+                    spaces.add(decryptCompositionSpace(compositionSpace, session));
+                }
+                compositionSpaces = spaces;
+            } else {
+                // Check individually if space holds encrypted content
+                List<CompositionSpace> spaces = null;
+                for (int i = 0; i < size; i++) {
+                    CompositionSpace compositionSpace = compositionSpaces.get(i);
+                    if (hasEncryptedContent(compositionSpace)) {
+                        // Encrypted content...
+                        if (null == spaces) {
+                            spaces = new ArrayList<>(size);
+                            if (i > 0) {
+                                spaces.addAll(compositionSpaces.subList(0, i));
+                            }
+                        }
                         spaces.add(decryptCompositionSpace(compositionSpace, session));
-                    } catch (OXException e) {
-                        if (!CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
-                            throw e;
+                    } else {
+                        if (null != spaces) {
+                            spaces.add(compositionSpace);
                         }
                     }
                 }
-                compositionSpaces = spaces;
+                if (null != spaces) {
+                    compositionSpaces = spaces;
+                }
             }
         }
+
         return compositionSpaces;
     }
 
@@ -174,20 +210,22 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
             return delegate.openCompositionSpace(session, compositionSpaceDesc);
         }
 
-        encryptCompositionSpaceDescription(compositionSpaceDesc, session);
+        encryptCompositionSpaceDescription(compositionSpaceDesc, true, session);
         CompositionSpace openedCompositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc);
         return decryptCompositionSpace(openedCompositionSpace, session);
     }
 
     @Override
     public CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
-        if (needsEncryption(session)) {
-            encryptCompositionSpaceDescription(compositionSpaceDesc, session);
-            CompositionSpace updatedCompositionSpace = delegate.updateCompositionSpace(session, compositionSpaceDesc);
-            return decryptCompositionSpace(updatedCompositionSpace, session);
+        if (!needsEncryption(session)) {
+            // Un-Mark to have encrypted content
+            compositionSpaceDesc.getMessage().setContentEncrypted(false);
+            return delegate.updateCompositionSpace(session, compositionSpaceDesc);
         }
 
-        return delegate.updateCompositionSpace(session, compositionSpaceDesc);
+        encryptCompositionSpaceDescription(compositionSpaceDesc, false, session);
+        CompositionSpace updatedCompositionSpace = delegate.updateCompositionSpace(session, compositionSpaceDesc);
+        return decryptCompositionSpace(updatedCompositionSpace, session);
     }
 
     @Override

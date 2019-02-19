@@ -87,11 +87,13 @@ import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.CompositionSpaceServiceImpl;
+import com.openexchange.mail.compose.impl.CryptoCompositionSpaceService;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.compose.impl.attachment.AttachmentStorageServiceImpl;
 import com.openexchange.mail.compose.impl.attachment.FileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.FileStrorageAttachmentFileLocationHandler;
 import com.openexchange.mail.compose.impl.attachment.RdbAttachmentStorage;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
@@ -248,12 +250,17 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             } else {
                 storageService = rdbStorage;
             }
+
+            // Set non-crypto composition space storage
+            attachmentStorageService.setCompositionSpaceStorageService(storageService);
+
             storageService = new CryptoCompositionSpaceStorageService(storageService, keyStorageService, this);
         }
         registerService(CompositionSpaceStorageService.class, storageService);
 
-        final CompositionSpaceServiceImpl serviceImpl = new CompositionSpaceServiceImpl(storageService, attachmentStorageService, this);
-        registerService(CompositionSpaceService.class, serviceImpl);
+        CompositionSpaceServiceImpl serviceImpl = new CompositionSpaceServiceImpl(storageService, attachmentStorageService, this);
+        final CryptoCompositionSpaceService cryptoServiceImpl = new CryptoCompositionSpaceService(serviceImpl, keyStorageService, this);
+        registerService(CompositionSpaceService.class, cryptoServiceImpl);
 
         {
             LoginHandlerService loginHandler = new LoginHandlerService() {
@@ -281,7 +288,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
                     if (null != session) {
                         long maxIdleTimeMillis = getMaxIdleTimeMillis(session);
                         if (maxIdleTimeMillis > 0) {
-                            serviceImpl.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
+                            cryptoServiceImpl.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
                         }
                     }
                 }
@@ -291,7 +298,10 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
 
         // Register Groupware stuff.
         registerService(CreateTableService.class, new CompositionSpaceCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CompositionSpaceCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
+            new CompositionSpaceCreateTableTask(),
+            new CompositionSpaceAddContentEncryptedFlag()
+        ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener());
     }
 

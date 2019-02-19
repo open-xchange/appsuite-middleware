@@ -96,21 +96,17 @@ public class CryptoUtility {
      * @param toEncrypt The string to encrypt
      * @param key The key
      * @return The encrypted string as Base64 encoded string
-     * @throws OXException If string encryption fails
+     * @throws GeneralSecurityException If string encryption fails
      */
-    public static String encrypt(String toEncrypt, Key key) throws OXException {
+    public static String encrypt(String toEncrypt, Key key) throws GeneralSecurityException {
         if (Strings.isEmpty(toEncrypt)) {
             return toEncrypt;
         }
 
-        try {
-            Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
-            cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-            byte[] outputBytes = cipher.doFinal(toEncrypt.getBytes(com.openexchange.java.Charsets.UTF_8));
-            return Base64.getEncoder().encodeToString(outputBytes);
-        } catch (GeneralSecurityException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
+        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        byte[] outputBytes = cipher.doFinal(toEncrypt.getBytes(com.openexchange.java.Charsets.UTF_8));
+        return Base64.getEncoder().encodeToString(outputBytes);
     }
 
     /**

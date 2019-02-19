@@ -100,6 +100,7 @@ public class InMemoryMessage implements Message {
     private volatile List<Attachment> attachments;
     private volatile Security security;
     private volatile Priority priority;
+    private volatile boolean contentEncrypted;
 
     /**
      * Initializes a new {@link InMemoryMessage}.
@@ -119,6 +120,7 @@ public class InMemoryMessage implements Message {
             priority = Priority.NORMAL;
             sharedAttachmentsInfo = SharedAttachmentsInfo.DISABLED;
             security = Security.DISABLED;
+            contentEncrypted = false;
         } else {
             from = initialMessageDesc.getFrom();
             sender = initialMessageDesc.getSender();
@@ -134,6 +136,7 @@ public class InMemoryMessage implements Message {
             meta = initialMessageDesc.getMeta();
             security = initialMessageDesc.getSecurity();
             priority = initialMessageDesc.getPriority();
+            contentEncrypted = initialMessageDesc.isContentEncrypted();
         }
     }
 
@@ -232,6 +235,32 @@ public class InMemoryMessage implements Message {
     @Override
     public Priority getPriority() {
         return priority;
+    }
+
+    @Override
+    public boolean isContentEncrypted() {
+        return contentEncrypted;
+    }
+
+    /**
+     * Sets the content-encrypted flag
+     *
+     * @param contentEncrypted The flag to set
+     */
+    public void setContentEncrypted(boolean contentEncrypted) {
+        lock.lock();
+        try {
+            this.contentEncrypted = contentEncrypted;
+            MessageDescription md = messageDescription;
+            if (null == md) {
+                md = new MessageDescription();
+                messageDescription = md;
+                bufferingQueue.offerIfAbsentElseReset(this);
+            }
+            md.setFrom(from);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

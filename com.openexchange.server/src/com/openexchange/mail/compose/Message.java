@@ -275,4 +275,11 @@ public interface Message {
      */
     Priority getPriority();
 
+    /**
+     * Checks if the content of this message is stored encrypted.
+     *
+     * @return <code>true</code> if encrypted; otherwise <code>false</code>
+     */
+    boolean isContentEncrypted();
+
 }

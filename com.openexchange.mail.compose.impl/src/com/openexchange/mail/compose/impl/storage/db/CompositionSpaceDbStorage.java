@@ -135,6 +135,17 @@ public class CompositionSpaceDbStorage {
         }
     }
 
+    public boolean isContentEncrypted(UUID compositionSpaceId) throws OXException {
+        Connection connection = dbProvider.getReadConnection(context);
+        try {
+            return isContentEncrypted(connection, compositionSpaceId);
+        } catch (SQLException e) {
+            throw handleException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     public CompositionSpaceContainer select(UUID compositionSpaceId) throws OXException {
         Connection connection = dbProvider.getReadConnection(context);
         try {
@@ -356,6 +367,22 @@ public class CompositionSpaceDbStorage {
             int rows = stmt.executeUpdate();
             if (rows <= 0) {
                 throw CompositionSpaceErrorCode.MAX_NUMBER_OF_COMPOSITION_SPACE_REACHED.create(Integer.valueOf(maxSpacesPerUser));
+            }
+        }
+    }
+
+    private boolean isContentEncrypted(Connection connection, UUID compositionSpaceId) throws SQLException, OXException {
+        String sql = "SELECT contentEncrypted FROM compositionSpace WHERE cid=? AND user=? AND uuid=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setBytes(3, UUIDs.toByteArray(compositionSpaceId));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    throw CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.create(UUIDs.getUnformattedString(compositionSpaceId));
+                }
+
+                return rs.getBoolean(1);
             }
         }
     }

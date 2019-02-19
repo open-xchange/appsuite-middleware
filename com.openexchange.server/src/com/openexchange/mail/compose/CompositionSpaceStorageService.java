@@ -66,9 +66,20 @@ import com.openexchange.session.Session;
 public interface CompositionSpaceStorageService {
 
     /**
-     * Gets the {@link CompositionSpace} space associated with given identifier.
+     * Checks if the content of specified composition space is stored encrypted
      *
-     * @param id The {@link CompositionSpace} space identifier
+     * @param session The session providing user data
+     * @param id The composition space identifier
+     * @return <code>true</code> if content is encrypted; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    boolean isContentEncrypted(Session session, UUID id) throws OXException;
+
+    /**
+     * Gets the composition space associated with given identifier.
+     *
+     * @param session The session providing user data
+     * @param id The composition space identifier
      * @return The composition space or <code>null</code> if no such composition space exists
      * @throws OXException If composition space cannot be returned
      */
@@ -85,16 +96,16 @@ public interface CompositionSpaceStorageService {
     List<CompositionSpace> getCompositionSpaces(Session session, MessageField[] fields) throws OXException;
 
     /**
-     * Creates a new {@link CompositionSpace} with just the identifier set.
+     * Creates a new composition space with just the identifier set.
      *
      * @param session The session providing user information
      * @param compositionSpaceDesc The composition space, which shall be opened
-     * @return The identifier for the newly created {@link CompositionSpace}
+     * @return The identifier for the newly created composition space
      */
     CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
 
     /**
-     * Updates a {@link CompositionSpace}.
+     * Updates a composition space.
      * <p>
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
      * In case given <code>CompositionSpaceDescription</code> argument specifies
@@ -103,13 +114,13 @@ public interface CompositionSpaceStorageService {
      * </div>
      *
      * @param session The session providing user information
-     * @param compositionSpaceDesc The {@link CompositionSpaceDescription} providing the changes to apply
+     * @param compositionSpaceDesc The description providing the changes to apply
      * @return The composition space after changes are applied
      */
     CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
 
     /**
-     * Closes a {@link CompositionSpace}, which effectively removes it from the Storage.
+     * Closes a composition space, which effectively removes it from the storage.
      *
      * @param session The session providing user information
      * @param id The id to remove

@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose.impl.attachment;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -57,6 +58,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.CompositionSpaceStorageService;
+import com.openexchange.mail.compose.impl.NonCryptoCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.attachment.security.CryptoAttachmentStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -75,6 +78,7 @@ public class AttachmentStorageServiceImpl extends RankingAwareNearRegistryServic
 
     private final ServiceLookup services;
     private final CompositionSpaceKeyStorageService keyStorageService;
+    private final AtomicReference<CompositionSpaceStorageService> compositionSpaceStorage;
 
     /**
      * Initializes a new {@link AttachmentStorageServiceImpl}.
@@ -83,6 +87,20 @@ public class AttachmentStorageServiceImpl extends RankingAwareNearRegistryServic
         super(context, AttachmentStorage.class);
         this.services = services;
         this.keyStorageService = keyStorageService;
+        compositionSpaceStorage = new AtomicReference<>();
+    }
+
+    /**
+     * Sets the composition space storage instance.
+     *
+     * @param compositionSpaceStorage The composition space storage instance
+     */
+    public void setCompositionSpaceStorageService(CompositionSpaceStorageService compositionSpaceStorage) {
+        if (!(compositionSpaceStorage instanceof NonCryptoCompositionSpaceStorageService)) {
+            throw new IllegalArgumentException("Composition space storage instance must not be crypto-aware");
+        }
+
+        this.compositionSpaceStorage.set(compositionSpaceStorage);
     }
 
     @Override
@@ -92,7 +110,7 @@ public class AttachmentStorageServiceImpl extends RankingAwareNearRegistryServic
             List<String> neededCapabilities = attachmentStorage.neededCapabilities();
             if (null == neededCapabilities) {
                 // No required capabilities
-                return new CryptoAttachmentStorage(attachmentStorage, keyStorageService, services);
+                return new CryptoAttachmentStorage(attachmentStorage, compositionSpaceStorage.get(), keyStorageService, services);
             }
 
             // Obtain user's capabilities (if not done yet) and check if required ones are covered
@@ -100,7 +118,7 @@ public class AttachmentStorageServiceImpl extends RankingAwareNearRegistryServic
                 capabilities = getCapabilitySet(session);
             }
             if (isApplicable(neededCapabilities, capabilities)) {
-                return new CryptoAttachmentStorage(attachmentStorage, keyStorageService, services);
+                return new CryptoAttachmentStorage(attachmentStorage, compositionSpaceStorage.get(), keyStorageService, services);
             }
         }
         throw CompositionSpaceErrorCode.NO_ATTACHMENT_STORAGE.create();

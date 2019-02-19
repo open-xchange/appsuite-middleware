@@ -60,6 +60,8 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -86,6 +88,21 @@ public abstract class AbstractCryptoAware {
         super();
         this.keyStorageService = keyStorageService;
         this.services = services;
+    }
+
+    /**
+     * Checks if given composition space appears to hold encrypted content.
+     *
+     * @param compositionSpace The composition space to check
+     * @return <code>true</code> if composition space holds encrypted content; otherwise <code>false</code>
+     */
+    protected boolean hasEncryptedContent(CompositionSpace compositionSpace) {
+        if (null == compositionSpace) {
+            return false;
+        }
+
+        Message message = compositionSpace.getMessage();
+        return null == message ? false : message.isContentEncrypted();
     }
 
     /**
@@ -148,13 +165,14 @@ public abstract class AbstractCryptoAware {
      * Gets the key for given composition space.
      *
      * @param compositionSpaceId The composition space identifier
+     * @param createIfAbsent <code>true</code> to create a key if there is none; otherwise <code>false</code>
      * @param session The session
      * @return The key
      * @throws OXException If key cannot be returned
      */
-    protected Key getKeyFor(UUID compositionSpaceId, Session session) throws OXException {
+    protected Key getKeyFor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
         CompositionSpaceKeyStorage keyStorage = keyStorageService.getKeyStorageFor(session);
-        return keyStorage.getKeyFor(compositionSpaceId, true, session);
+        return keyStorage.getKeyFor(compositionSpaceId, createIfAbsent, session);
     }
 
     /**

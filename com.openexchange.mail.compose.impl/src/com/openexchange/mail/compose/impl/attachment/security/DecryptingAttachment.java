@@ -50,12 +50,15 @@
 package com.openexchange.mail.compose.impl.attachment.security;
 
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorageReference;
+import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.impl.CryptoUtility;
 
 /**
@@ -68,14 +71,22 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
 
     private final Attachment attachment;
     private final Key key;
+    private final String decryptedName;
 
     /**
      * Initializes a new {@link DecryptingAttachment}.
+     *
+     * @throws OXException If attachment's file name cannot be decrypted
      */
-    public DecryptingAttachment(Attachment attachment, Key key) {
+    public DecryptingAttachment(Attachment attachment, Key key) throws OXException {
         super();
-        this.attachment = attachment;
-        this.key = key;
+        try {
+            this.attachment = attachment;
+            this.key = key;
+            this.decryptedName = CryptoUtility.decrypt(attachment.getName(), key);
+        } catch (GeneralSecurityException e) {
+            throw CompositionSpaceErrorCode.MISSING_KEY.create(e, UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
+        }
     }
 
     @Override
@@ -100,11 +111,7 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
 
     @Override
     public String getName() {
-        try {
-            return CryptoUtility.decrypt(attachment.getName(), key);
-        } catch (@SuppressWarnings("unused") Exception e) {
-            return attachment.getName();
-        }
+        return decryptedName;
     }
 
     @Override

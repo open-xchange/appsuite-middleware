@@ -94,6 +94,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "security TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "priority VARCHAR(16) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "attachments TEXT CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
+        + "contentEncrypted TINYINT(1) NOT NULL DEFAULT '0'"
         + "PRIMARY KEY (uuid),"
         + "KEY id (cid, user, uuid)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";

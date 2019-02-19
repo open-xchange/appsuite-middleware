@@ -113,6 +113,12 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     @Override
+    public boolean isContentEncrypted(Session session, UUID id) throws OXException {
+        CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
+        return dbStorage.isContentEncrypted(id);
+    }
+
+    @Override
     public CompositionSpace getCompositionSpace(Session session, UUID id) throws OXException {
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
 
@@ -129,7 +135,8 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
 
     @Override
     public List<CompositionSpace> getCompositionSpaces(Session session, MessageField[] fields) throws OXException {
-        List<CompositionSpaceContainer> containers = newDbStorageFor(session).selectAll(fields);
+        MessageField[] fieldsToQuery = null == fields ? MessageField.values() : fields;
+        List<CompositionSpaceContainer> containers = newDbStorageFor(session).selectAll(fieldsToQuery);
         int size;
         if (null == containers || (size = containers.size()) <= 0) {
             return Collections.emptyList();
@@ -138,7 +145,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         List<CompositionSpace> spaces = new ArrayList<>(size);
         for (CompositionSpaceContainer cs : containers) {
             MessageDescription m = cs.getMessage();
-            if (MessageField.isContained(fields, MessageField.ATTACHMENTS)) {
+            if (MessageField.isContained(fieldsToQuery, MessageField.ATTACHMENTS)) {
                 resolveAttachments(m, session);
             }
             Message message = ImmutableMessage.builder().fromMessageDescription(m).build();

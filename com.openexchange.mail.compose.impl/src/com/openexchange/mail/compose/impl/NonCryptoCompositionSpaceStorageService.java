@@ -47,52 +47,17 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.storage;
+package com.openexchange.mail.compose.impl;
 
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.impl.NonCryptoCompositionSpaceStorageService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.mail.compose.CompositionSpaceStorageService;
 
 /**
- * {@link AbstractCompositionSpaceStorageService}
+ * {@link NonCryptoCompositionSpaceStorageService} - Marker interface to signal that storage service is not crypto aware.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
-public abstract class AbstractCompositionSpaceStorageService implements NonCryptoCompositionSpaceStorageService {
+public interface NonCryptoCompositionSpaceStorageService extends CompositionSpaceStorageService {
 
-    /** The service look-up */
-    protected final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link AbstractCompositionSpaceStorageService}.
-     */
-    protected AbstractCompositionSpaceStorageService(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    /**
-     * Gets the max. number of allowed concurrent composition spaces.
-     *
-     * @param session The session
-     * @return The max. number of allowed composition spaces
-     * @throws OXException If number cannot be returned
-     */
-    protected int getMaxSpacesPerUser(Session session) throws OXException {
-        int defaultValue = 20;
-
-        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
-        if (null == viewFactory) {
-            return defaultValue;
-        }
-
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.maxSpacesPerUser", defaultValue, view);
-    }
-
+    // Marker interface
 }

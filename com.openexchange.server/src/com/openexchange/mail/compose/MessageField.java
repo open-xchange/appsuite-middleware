@@ -117,7 +117,11 @@ public enum MessageField {
     /**
      * The security information
      */
-    SECURITY("security");
+    SECURITY("security"),
+    /**
+     * Signals that content is stored encrypted.
+     */
+    CONTENT_ENCRYPTED("contentEncrypted");
 
     private final String identifier;
 

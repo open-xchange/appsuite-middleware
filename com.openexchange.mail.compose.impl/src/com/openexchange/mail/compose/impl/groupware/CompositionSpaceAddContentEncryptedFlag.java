@@ -47,52 +47,61 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.storage;
+package com.openexchange.mail.compose.impl.groupware;
 
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.impl.NonCryptoCompositionSpaceStorageService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AbstractCompositionSpaceStorageService}
+ * {@link CompositionSpaceAddContentEncryptedFlag}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
-public abstract class AbstractCompositionSpaceStorageService implements NonCryptoCompositionSpaceStorageService {
-
-    /** The service look-up */
-    protected final ServiceLookup services;
+public class CompositionSpaceAddContentEncryptedFlag extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link AbstractCompositionSpaceStorageService}.
+     * Initializes a new {@link CompositionSpaceAddContentEncryptedFlag}.
      */
-    protected AbstractCompositionSpaceStorageService(ServiceLookup services) {
+    public CompositionSpaceAddContentEncryptedFlag() {
         super();
-        this.services = services;
     }
 
-    /**
-     * Gets the max. number of allowed concurrent composition spaces.
-     *
-     * @param session The session
-     * @return The max. number of allowed composition spaces
-     * @throws OXException If number cannot be returned
-     */
-    protected int getMaxSpacesPerUser(Session session) throws OXException {
-        int defaultValue = 20;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        int rollback = 0;
+        try {
+            con.setAutoCommit(false);
+            rollback = 1;
 
-        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
-        if (null == viewFactory) {
-            return defaultValue;
+            Column col = new Column("contentEncrypted", "TINYINT(1) NOT NULL DEFAULT '0'");
+            Tools.checkAndAddColumns(con, "compositionSpace", col);
+
+            con.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
         }
+    }
 
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.maxSpacesPerUser", defaultValue, view);
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
     }
 
 }

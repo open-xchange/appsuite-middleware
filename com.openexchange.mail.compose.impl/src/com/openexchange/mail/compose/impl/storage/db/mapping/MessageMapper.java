@@ -377,6 +377,30 @@ public class MessageMapper extends DefaultDbMapper<MessageDescription, MessageFi
 
         });
 
+        mappings.put(MessageField.CONTENT_ENCRYPTED, new BooleanMapping<MessageDescription>("contentEncrypted", "Content encrypted") {
+
+            @Override
+            public boolean isSet(MessageDescription object) {
+                return object.containsContentEncrypted();
+            }
+
+            @Override
+            public void set(MessageDescription object, Boolean value) throws OXException {
+                object.setContentEncrypted(value.booleanValue());
+            }
+
+            @Override
+            public Boolean get(MessageDescription object) {
+                return Boolean.valueOf(object.isContentEncrypted());
+            }
+
+            @Override
+            public void remove(MessageDescription object) {
+                object.removeContentEncrypted();
+            }
+
+        });
+
         mappings.put(MessageField.SECURITY, new VarCharJsonSecurityMapping<MessageDescription>("security", "Security settings") {
 
             @Override
