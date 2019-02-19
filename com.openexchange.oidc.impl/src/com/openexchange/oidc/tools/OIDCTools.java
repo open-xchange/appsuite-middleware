@@ -127,7 +127,7 @@ public class OIDCTools {
 
     public static final String PARAM_DEEP_LINK = "hash";
 
-    public static final String PARAM_SHARD_NAME = "shardName";
+    public static final String PARAM_SHARD = "shard";
 
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {

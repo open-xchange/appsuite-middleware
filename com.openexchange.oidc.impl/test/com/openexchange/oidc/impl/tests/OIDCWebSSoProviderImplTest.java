@@ -143,9 +143,6 @@ public class OIDCWebSSoProviderImplTest {
     private SimHttpServletResponse mockedSimResponse;
 
     @Mock
-    private SessionReservationService mockedSessionReservation;
-
-    @Mock
     private SimSessionReservationService mockedSimSessionReservation;
 
     @Mock
@@ -217,7 +214,7 @@ public class OIDCWebSSoProviderImplTest {
         }
         assertNotNull(mockedSimResponse.getHeaderNames());
         assertNotNull(mockedSimResponse.getHeader("location"));
-        assertTrue("shardName parameter was modified and is not the default value", mockedSimResponse.getHeader("location").contains(OIDCTools.PARAM_SHARD_NAME+"="+"default"));
+        assertTrue("shard parameter was modified and is not the default value", mockedSimResponse.getHeader("location").contains(OIDCTools.PARAM_SHARD+"="+"default"));
     }
 
     @Test

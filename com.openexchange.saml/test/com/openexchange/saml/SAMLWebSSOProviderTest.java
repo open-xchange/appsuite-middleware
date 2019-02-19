@@ -784,7 +784,7 @@ public class SAMLWebSSOProviderTest {
         URI locationURI = new URIBuilder(location).build();
         Assert.assertEquals(requestHost, locationURI.getHost());
         Map<String, String> redirectParams = parseURIQuery(locationURI);
-        Assert.assertEquals("default", redirectParams.get(SAMLLoginTools.PARAM_SHARD_NAME));
+        Assert.assertEquals("default", redirectParams.get(SAMLLoginTools.PARAM_SHARD));
     }
 
      @Test

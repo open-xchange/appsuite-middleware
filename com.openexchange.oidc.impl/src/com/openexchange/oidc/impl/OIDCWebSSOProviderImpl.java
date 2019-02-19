@@ -354,7 +354,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setPath(OIDCTools.getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()))
-                .setParameter(OIDCTools.PARAM_SHARD_NAME, SessionUtility.getShardCookieValue());
+                .setParameter(OIDCTools.PARAM_SHARD, SessionUtility.getShardCookieValue());
             Tools.disableCaching(response);
 
             String deepLink = storedRequestInformation.getDeepLink();

@@ -279,7 +279,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN + getPathString(backend.getPath()))
                 .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken)
-                .setParameter(SAMLLoginTools.PARAM_SHARD_NAME, SessionUtility.getShardCookieValue());
+                .setParameter(SAMLLoginTools.PARAM_SHARD, SessionUtility.getShardCookieValue());
 
             String loginPath = requestInfo.getLoginPath();
             if (loginPath != null) {
@@ -718,7 +718,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             String encoded = Base64.encodeBase64String(responseXML.getBytes());
             TemplateService templateService = services.getService(TemplateService.class);
             OXTemplate template = templateService.loadTemplate(config.getLogoutResponseTemplate());
-            Map<String, String> vars = new HashMap<>(5);
+            Map<String, String> vars = new HashMap<String, String>(5);
             vars.put("action", config.getIdentityProviderLogoutURL());
             vars.put("SAMLResponse", encoded);
             String relayState = httpRequest.getParameter("RelayState");
