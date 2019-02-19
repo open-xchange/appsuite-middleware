@@ -150,7 +150,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
                         if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
                             resourceIds.add(I(attendee.getEntity()));
                         } else if (false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
-                            userIds.put(I(attendee.getEntity()), attendee);
+                            userIds.putIfAbsent(I(attendee.getEntity()), attendee);
                         }
                     } else {
                         String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
