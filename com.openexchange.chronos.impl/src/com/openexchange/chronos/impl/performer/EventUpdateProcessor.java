@@ -57,7 +57,6 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
-import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -89,6 +88,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -353,7 +353,7 @@ public class EventUpdateProcessor implements EventUpdate {
                 Check.geoLocationIsValid(updatedEvent);
                 break;
             case CLASSIFICATION:
-                if (isPublicClassification(originalEvent) == isPublicClassification(updatedEvent)) {
+                if (Classification.PUBLIC.matches(originalEvent.getClassification()) && Classification.PUBLIC.matches(updatedEvent.getClassification())) {
                     /*
                      * reset to original value if classification matches
                      */
