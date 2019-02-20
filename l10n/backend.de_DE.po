@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-02-05 13:53+0100\n"
+"PO-Revision-Date: 2019-02-20 14:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1036,6 +1036,23 @@ msgid ""
 msgstr ""
 "Sie haben eine E-Mail mit einer Antwort auf einen Termin erhalten, den Sie "
 "nicht organisiert haben. Ignorieren Sie sie am besten."
+
+#. *
+#. * The organizer of the appointment has changed. New organizer is: %1$s
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The organizer of the appointment has changed. New organizer is: %1$s"
+msgstr "Der Organisator des Termins hat sich geändert. Neuer Organisator: %1$s"
+
+#. *
+#. * The organizer of the appointment has changed. This operation is not allowed.
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+msgid ""
+"The organizer of the appointment has changed. This operation is not allowed."
+msgstr ""
+"Der Organisator des Termins hat sich geändert. Diese Aktion ist nicht "
+"erlaubt."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -9959,8 +9976,8 @@ msgid ""
 "Maximum number of composition spaces is reached. Please terminate existing "
 "open spaces in order to open new ones."
 msgstr ""
-"Die maximale Anzahl von neu verfassten E-Mails ist erreicht. Bitte beenden "
-"Sie geöffnete Fenster, um Platz für neue zu schaffen."
+"Die maximale Anzahl von neu verfassten E-Mails ist erreicht. Bitte schließen "
+"Sie geöffnete Fenster, um neue zu öffnen."
 
 #. Missing key which is required to decrypt the content of a composition space
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
@@ -9968,7 +9985,7 @@ msgstr ""
 msgid ""
 "Found no suitable key for composition space. Please re-compose your E-Mail."
 msgstr ""
-"Es wurde kein geeigneter Schlüssel für das Verfassen-Feld gefunden. Bitte "
+"Es wurde kein geeigneter Schlüssel für das Textfeld gefunden. Bitte "
 "verfassen Sie Ihre E-Mail neu."
 
 #. The default name for a file
