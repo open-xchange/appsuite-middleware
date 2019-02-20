@@ -342,13 +342,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         if (null == resourceNames || resourceNames.isEmpty()) {
             return Collections.emptyMap();
         }
-
-        for (String string : resourceNames) {
-            if (string.contains("2v6jpoiva08fgks9h9ttkiheo8")) {
-                System.out.println();
-            }
-        }
-
         CalendarFolder folder = getFolder(session, folderId);
         /*
          * construct search term to find events and overridden instances in folder by uid
