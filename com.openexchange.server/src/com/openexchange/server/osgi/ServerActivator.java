@@ -660,6 +660,7 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
+        registerService(UserServiceInterceptor.class, new com.openexchange.tools.oxfolder.userinterceptor.UserFolderNameInterceptor(this));
 
         UserService userService = new FilteringUserService(new UserServiceImpl(interceptorRegistry, getService(PasswordMechRegistry.class)), this);
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);

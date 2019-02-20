@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
@@ -227,32 +229,7 @@ public final class Check {
 			/*
 			 * check display name
 			 */
-			if (update.containsDisplayName()) {
-				if (Tools.isEmpty(update.getDisplayName())) {
-					throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
-				}
-				if (null == original || false == update.getDisplayName().equals(original.getDisplayName())) {
-    				/*
-    				 * check if display name is already in use
-    				 */
-    		    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
-    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-    				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, sanitizeDisplayName(update.getDisplayName())));
-    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-    				    ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
-    				SearchIterator<Contact> searchIterator = null;
-    				try {
-    					searchIterator = storage.search(
-    					    session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
-    					if (searchIterator.hasNext()) {
-    						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session.getContextId(), update.getObjectID());
-    					}
-    				} finally {
-    				    Tools.close(searchIterator);
-    				}
-				}
-			}
+			checkDisplayNameUniqueness(storage, session, folderID, update, original);
 	        /*
 	         * check primary mail address
 	         */
@@ -264,6 +241,57 @@ public final class Check {
 	        }
 		}
 	}
+
+    /**
+     * Ensures that the display name is unique. Skip the check if configuration allows same display names.
+     * 
+     * @param storage The {@link ContactStorage} to search for the display name in
+     * @param session The current {@link Session}
+     * @param folderID The folder identifier to search contacts in
+     * @param update The updated {@link Contact}
+     * @param original The original {@link Contact}. Can be <code>null</code>
+     * @throws OXException
+     *             <li> {@link ContactExceptionCodes#DISPLAY_NAME_MANDATORY} if the new display name is empty as per {@link Strings#isEmpty(String)} </li>
+     *             <li>{@link ContactExceptionCodes#DISPLAY_NAME_IN_USE} if display names must be unique and is already in use</li>
+     *             <li> {@link com.openexchange.server.ServiceExceptionCode#SERVICE_UNAVAILABLE} if {@link ConfigViewFactory} is not available </li>
+     */
+    private static void checkDisplayNameUniqueness(ContactStorage storage, Session session, String folderID, Contact update, Contact original) throws OXException {
+        if (false == update.containsDisplayName()) {
+            return;
+        }
+        if (Tools.isEmpty(update.getDisplayName())) {
+            throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
+        }
+        
+        ConfigViewFactory configViewFactory = ContactServiceLookup.getService(ConfigViewFactory.class, true);
+        ConfigView view = configViewFactory.getView(-1, session.getContextId());
+        if (null != view && false == view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+            // Do not enforce unique display names
+            return;
+        }
+
+        if (null != original && update.getDisplayName().equals(original.getDisplayName())) {
+            // Was set before and is unchanged
+            return;
+        }
+
+        /*
+         * check if display name is already in use
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.DISPLAY_NAME, SingleOperation.EQUALS, sanitizeDisplayName(update.getDisplayName())));
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.search(session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
+            if (searchIterator.hasNext()) {
+                throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(Integer.valueOf(session.getContextId()), Integer.valueOf(update.getObjectID()));
+            }
+        } finally {
+            Tools.close(searchIterator);
+        }
+    }
 
     private static final Pattern MULTIPLE_WILDCARD_PATTERN = Pattern.compile("\\*");
     

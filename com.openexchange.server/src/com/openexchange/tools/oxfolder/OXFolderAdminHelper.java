@@ -63,7 +63,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -72,21 +71,21 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
@@ -1320,72 +1319,6 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    /**
-     * Propagates modifications <b>already</b> performed on an existing user throughout folder module.
-     *
-     * @param userId The ID of the user who has been modified
-     * @param changedFields The changed fields of the user taken from constants defined in {@link Contact}; e.g.
-     *            {@link Contact#DISPLAY_NAME}
-     * @param lastModified The last modified timestamp that should be taken on folder modifications
-     * @param readCon A readable connection if a writable connection should not be used for read access to database
-     * @param writeCon A writable connection
-     * @param cid The context ID
-     * @throws OXException If user's modifications could not be successfully propagated
-     */
-    public static void propagateUserModification(final int userId, final int[] changedFields, final long lastModified, final Connection readCon, final Connection writeCon, final int cid) throws OXException {
-        Arrays.sort(changedFields);
-        final int adminID = getContextAdminID(cid, writeCon);
-        if (Arrays.binarySearch(changedFields, Contact.DISPLAY_NAME) > -1) {
-            propagateDisplayNameModification(userId, lastModified, adminID, readCon, writeCon, cid);
-        }
-    }
-
-    private static void propagateDisplayNameModification(final int userId, final long lastModified, final int contextAdminID, final Connection readCon, final Connection writeCon, final int cid) throws OXException {
-        final ContextImpl ctx = new ContextImpl(cid);
-        ctx.setMailadmin(contextAdminID);
-        /*
-         * Update shared folder's last modified timestamp
-         */
-        try {
-            OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, contextAdminID, writeCon, ctx);
-            /*
-             * Reload cache entry
-             */
-            if (FolderCacheManager.isInitialized()) {
-                /*
-                 * Distribute remove among remote caches
-                 */
-                FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
-            }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-        /*
-         * Update user's default infostore folder name
-         */
-        try {
-            final int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, readCon, ctx);
-            final String newDisplayName = getUserDisplayName(userId, cid, readCon == null ? writeCon : readCon);
-            if (newDisplayName == null) {
-                throw LdapExceptionCode.USER_NOT_FOUND.create(LdapExceptionCode.USER_NOT_FOUND,
-                    Integer.valueOf(userId),
-                    Integer.valueOf(cid)).setPrefix(EnumComponent.USER.getAbbreviation());
-            }
-            OXFolderSQL.updateName(defaultInfostoreFolderId, newDisplayName, lastModified, contextAdminID, writeCon, ctx);
-            /*
-             * Reload cache entry
-             */
-            if (FolderCacheManager.isInitialized()) {
-                /*
-                 * Distribute remove among remote caches
-                 */
-                FolderCacheManager.getInstance().removeFolderObject(defaultInfostoreFolderId, ctx);
-            }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
     private static final String SQL_SELECT_DISPLAY_NAME = "SELECT field01 FROM prg_contacts WHERE cid = ? AND userid = ?;";
 
     /**
@@ -1441,16 +1374,20 @@ public final class OXFolderAdminHelper {
      */
     public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid, final Connection writeCon, OXFolderDefaultMode folderDefaultMode) throws OXException {
         try {
-            final Context ctx = new ContextImpl(cid);
-            final StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
+            Context ctx = new ContextImpl(cid);
+            StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
             /*
              * Check infostore sibling
              */
             if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE, writeCon, ctx) != -1) {
-                throw OXFolderExceptionCode.NO_DEFAULT_INFOSTORE_CREATE.create(displayName,
-                    FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME,
-                    Integer.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID),
-                    Integer.valueOf(ctx.getContextId()));
+                /*
+                 * Check if folder uniqueness is enforced
+                 */
+                ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                ConfigView view = null;
+                if (null == configViewFactory || null == (view = configViewFactory.getView(-1, cid)) || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+                    throw OXFolderExceptionCode.NO_DEFAULT_INFOSTORE_CREATE.create(displayName, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME, Integer.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), Integer.valueOf(cid));
+                }
             }
             /*
              * Add user to global address book permissions if not present
@@ -1558,5 +1495,40 @@ public final class OXFolderAdminHelper {
     private static void setGABPermissions(final OCLPermission p) {
         p.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
     }
+    
+    
+    /**
+     * Get the unique folder name for a user's default folder
+     * 
+     * @param context The {@link Context}
+     * @param displayName The display name of the user to user as default folder name
+     * @param defaultInfostoreFolderId The identifier of the users default folder
+     * @param connection A read connection
+     * @return The folder name
+     * @throws OXException In case {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID} or subfolder can't be loaded
+     */
+    public static String determineUserstoreFolderName(Context context, String displayName, int defaultInfostoreFolderId, Connection connection) throws OXException {
+        try {
+            boolean isUnique = OXFolderSQL.isUniqueUserstoreFolderName(connection, context.getContextId(), displayName, defaultInfostoreFolderId);
+            if (isUnique) {
+                return displayName;
 
+            }
+            /*
+             * Enhance name until it is unique
+             */
+            NameBuilder builder = NameBuilder.nameBuilderFor(displayName);
+            do {
+                isUnique = OXFolderSQL.isUniqueUserstoreFolderName(connection, context.getContextId(), builder.advance().toString(), defaultInfostoreFolderId);
+            } while (false == isUnique);
+
+            /*
+             * Return enhanced name
+             */
+            return builder.toString();
+        } catch (SQLException e) {
+            LOG.debug("Unable to check the folder name for uniqueness.", e);
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
 }

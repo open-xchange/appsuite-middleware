@@ -49,7 +49,6 @@
 
 package com.openexchange.user.json.actions;
 
-import java.sql.Connection;
 import java.util.Date;
 import java.util.Locale;
 import org.json.JSONException;
@@ -62,15 +61,12 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.mapping.ContactMapper;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.guest.GuestService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -186,39 +182,6 @@ public final class UpdateAction extends AbstractUserAction {
                 if ((guestService != null) && (storageUser.isGuest())) {
                     User updatedUser = userService.getUser(id, session.getContextId());
                     guestService.updateGuestUser(updatedUser, session.getContextId());
-                }
-            }
-            /*
-             * Check what has been updated
-             */
-            if (parsedUserContact.containsDisplayName() && null != parsedUserContact.getDisplayName()) {
-                // Update folder name if display-name was changed
-                final DatabaseService service = services.getService(DatabaseService.class);
-                if (null != service) {
-                    final int contextId = session.getContextId();
-                    Connection con = null;
-                    int rollback = 0;
-                    try {
-                        con = service.getWritable(contextId);
-                        con.setAutoCommit(false);
-                        rollback = 1;
-                        final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
-                        OXFolderAdminHelper.propagateUserModification(id, changedfields, System.currentTimeMillis(), con, con, contextId);
-                        con.commit();
-                        rollback = 2;
-                    } catch (final Exception ignore) {
-                        // Ignore
-                    } finally {
-                        if (rollback > 0) {
-                            if (rollback == 1) {
-                                Databases.rollback(con);
-                            }
-                            Databases.autocommit(con);
-                        }
-                        if (null != con) {
-                            service.backWritable(contextId, con);
-                        }
-                    }
                 }
             }
             /*

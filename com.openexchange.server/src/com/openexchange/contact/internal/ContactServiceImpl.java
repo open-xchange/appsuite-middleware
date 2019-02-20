@@ -73,7 +73,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -349,11 +348,19 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * pass through to storage
          */
+        boolean isUserContact = updatedContact.getInternalUserId() > 0;
+        Context storageContext = isUserContact ? Tools.getContext(session) : null;
+        if (isUserContact) {
+            beforeUserUpdate(storageContext, updatedContact);
+        }
         storage.update(session, folderID, objectID, delta, lastRead);
         /*
          * merge back differences to supplied contact
          */
         ContactMapper.getInstance().mergeDifferences(contact, delta);
+        if (isUserContact) {
+            afterUserUpdate(storageContext, updatedContact);
+        }
         /*
          * broadcast event
          */
@@ -362,14 +369,14 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         new EventClient(session).modify(storedContact, updatedContact, folder);
     }
-
+    
     @Override
     protected void doUpdateUser(final Session session, final String folderID, final String objectID, final Contact contact,
         final Date lastRead) throws OXException {
         int userID = session.getUserId();
         int contextId = session.getContextId();
         ContactStorage storage = Tools.getStorage(session, folderID);
-        final Context storageContext = ContextStorage.getStorageContext(contextId);
+        final Context storageContext = Tools.getContext(session);
         /*
          * check supplied contact
          */
@@ -433,10 +440,9 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * pass through to storage
          */
-        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeUserUpdate(storageContext, storedContact, interceptors);
+        beforeUserUpdate(storageContext, storedContact);
         storage.update(session, folderID, objectID, delta, lastRead);
-        afterUserUpdate(storageContext, updatedContact, interceptors);
+        afterUserUpdate(storageContext, updatedContact);
         /*
          * merge back differences to supplied contact
          */
@@ -1117,14 +1123,14 @@ public class ContactServiceImpl extends DefaultContactService {
         }
     }
 
-    private void beforeUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
+    private void beforeUserUpdate(Context context, Contact userContact) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptorRegistry.getInterceptors()) {
             interceptor.beforeUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }
 
-    private void afterUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
+    private void afterUserUpdate(Context context, Contact userContact) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptorRegistry.getInterceptors()) {
             interceptor.afterUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }

@@ -695,7 +695,7 @@ public final class OXFolderSQL {
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    static void updateName(final int folderId, final String newName, final long lastModified, final int modifiedBy, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    public static void updateName(final int folderId, final String newName, final long lastModified, final int modifiedBy, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
@@ -3387,6 +3387,35 @@ public final class OXFolderSQL {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             DBPool.push(ctx, readCon);
+        }
+    }
+    
+    private static final String GET_UNIQUE_USER_FOLDERNAME_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND parent=10 AND fuid<>? AND fname=?";
+
+    /**
+     * Check if the given folder name is unique under {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID}
+     * 
+     * @param conection The (read) connection to use
+     * @param contextId The context to search in
+     * @param folderName The folder name to check uniqueness for
+     * @param userFolderId The id of the folder
+     * @return <code>true</code> if the given name was unique, <code>false</code> otherwise
+     * @throws OXException
+     * @throws SQLException
+     */
+    public static boolean isUniqueUserstoreFolderName(Connection conection, int contextId, String folderName, int folderId) throws OXException, SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int i = 0;
+        try {
+            stmt = conection.prepareStatement(GET_UNIQUE_USER_FOLDERNAME_SQL);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, folderId);
+            stmt.setString(3, folderName);
+            rs = stmt.executeQuery();
+            return false == rs.next();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
