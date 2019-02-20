@@ -256,7 +256,7 @@ public class FileMetadataWriter {
                     Object result = fieldHandler.handle(field, file);
                     if (result instanceof JsonFieldHandler.NamedValue) {
                         JsonFieldHandler.NamedValue<?> namedValue = (JsonFieldHandler.NamedValue) result;
-                        jsonObject.put(namedValue.getName(), namedValue.getValue());
+                        jsonObject.putIfAbsent(namedValue.getName(), namedValue.getValue());
                     } else {
                         jsonObject.put(field.getName(), result);
                     }

@@ -1213,6 +1213,32 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Put a key/value pair in the JSONObject if not yet contained. If the value is null, then the key will be removed from the JSONObject
+     * if it is present.
+     *
+     * @param key A key string.
+     * @param value An object which is the value. It should be of one of these types: Boolean, Double, Integer, JSONArray, JSONObject, Long,
+     *            String, or the JSONObject.NULL object.
+     * @return this.
+     * @throws IllegalArgumentException If the value is non-finite number or if the key is null.
+     */
+    public JSONObject putIfAbsent(final String key, final Object value) {
+        if (key == null) {
+            throw new IllegalArgumentException("Null key.");
+        }
+        if (value != null) {
+            final int max = MAX_SIZE.get();
+            if (max > 0 && this.myHashMap.size() >= max) {
+                throw new IllegalStateException("Max. size (" + max + ") for JSON object exceeded");
+            }
+            this.myHashMap.putIfAbsent(key, value);
+        } else {
+            remove(key);
+        }
+        return this;
+    }
+
+    /**
      * Put a key/value pair in the JSONObject. If the value is null, then the key will be removed from the JSONObject if it is present.
      *
      * @param key A key string.
