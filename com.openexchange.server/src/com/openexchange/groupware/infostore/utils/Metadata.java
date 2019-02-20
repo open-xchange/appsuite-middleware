@@ -95,15 +95,16 @@ public class Metadata {
     public static final int GEOLOCATION = 714;
     public static final int WIDTH = 715;
     public static final int HEIGHT = 716;
-    public static final int CAMERA_MODEL = 717;
-    public static final int CAMERA_ISO_SPEED = 718;
-    public static final int CAMERA_APERTURE = 719;
-    public static final int CAMERA_EXPOSURE_TIME = 720;
-    public static final int CAMERA_FOCAL_LENGTH = 721;
+    public static final int CAMERA_MAKE = 717;
+    public static final int CAMERA_MODEL = 718;
+    public static final int CAMERA_ISO_SPEED = 719;
+    public static final int CAMERA_APERTURE = 720;
+    public static final int CAMERA_EXPOSURE_TIME = 721;
+    public static final int CAMERA_FOCAL_LENGTH = 722;
 
-    public static final int MEDIA_META = 722;
-    public static final int MEDIA_STATUS = 723;
-    public static final int MEDIA_DATE = 724;
+    public static final int MEDIA_META = 723;
+    public static final int MEDIA_STATUS = 724;
+    public static final int MEDIA_DATE = 725;
 
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED, "last_modified");
@@ -138,6 +139,7 @@ public class Metadata {
     public static final Metadata GEOLOCATION_LITERAL = new Metadata(GEOLOCATION, "geolocation");
     public static final Metadata WIDTH_LITERAL = new Metadata(WIDTH, "width");
     public static final Metadata HEIGHT_LITERAL = new Metadata(HEIGHT, "height");
+    public static final Metadata CAMERA_MAKE_LITERAL = new Metadata(CAMERA_MAKE, "camera_make");
     public static final Metadata CAMERA_MODEL_LITERAL = new Metadata(CAMERA_MODEL, "camera_model");
     public static final Metadata CAMERA_ISO_SPEED_LITERAL = new Metadata(CAMERA_ISO_SPEED, "camera_iso_speed");
     public static final Metadata CAMERA_APERTURE_LITERAL = new Metadata(CAMERA_APERTURE, "camera_aperture");
@@ -180,6 +182,7 @@ public class Metadata {
         GEOLOCATION_LITERAL,
         WIDTH_LITERAL,
         HEIGHT_LITERAL,
+        CAMERA_MAKE_LITERAL,
         CAMERA_MODEL_LITERAL,
         CAMERA_ISO_SPEED_LITERAL,
         CAMERA_APERTURE_LITERAL,
@@ -220,6 +223,7 @@ public class Metadata {
         GEOLOCATION_LITERAL,
         WIDTH_LITERAL,
         HEIGHT_LITERAL,
+        CAMERA_MAKE_LITERAL,
         CAMERA_MODEL_LITERAL,
         CAMERA_ISO_SPEED_LITERAL,
         CAMERA_APERTURE_LITERAL,
@@ -234,6 +238,7 @@ public class Metadata {
         GEOLOCATION_LITERAL,
         WIDTH_LITERAL,
         HEIGHT_LITERAL,
+        CAMERA_MAKE_LITERAL,
         CAMERA_MODEL_LITERAL,
         CAMERA_ISO_SPEED_LITERAL,
         CAMERA_APERTURE_LITERAL,
@@ -318,6 +323,7 @@ public class Metadata {
         case GEOLOCATION: return GEOLOCATION_LITERAL;
         case WIDTH: return WIDTH_LITERAL;
         case HEIGHT: return HEIGHT_LITERAL;
+        case CAMERA_MAKE: return CAMERA_MAKE_LITERAL;
         case CAMERA_MODEL: return CAMERA_MODEL_LITERAL;
         case CAMERA_ISO_SPEED: return CAMERA_ISO_SPEED_LITERAL;
         case CAMERA_APERTURE: return CAMERA_APERTURE_LITERAL;
@@ -382,6 +388,7 @@ public class Metadata {
         case GEOLOCATION: return switcher.geolocation();
         case WIDTH: return switcher.width();
         case HEIGHT: return switcher.height();
+        case CAMERA_MAKE: return switcher.cameraMake();
         case CAMERA_MODEL: return switcher.cameraModel();
         case CAMERA_ISO_SPEED: return switcher.cameraIsoSpeed();
         case CAMERA_APERTURE: return switcher.cameraAperture();

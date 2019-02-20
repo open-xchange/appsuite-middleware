@@ -700,6 +700,9 @@ public class SearchEngineImpl extends DBService {
                 case Metadata.HEIGHT:
                     retval.add("infostore_document.height");
                     break Metadata2DBSwitch;
+                case Metadata.CAMERA_MAKE:
+                    retval.add("infostore_document.camera_make");
+                    break Metadata2DBSwitch;
                 case Metadata.CAMERA_MODEL:
                     retval.add("infostore_document.camera_model");
                     break Metadata2DBSwitch;
@@ -1011,6 +1014,12 @@ public class SearchEngineImpl extends DBService {
                         double d3 = result.getDouble(++columnIndex);
                         if (!result.wasNull()) {
                             retval.setCameraFocalLength(d3);
+                        }
+                        break;
+                    case Metadata.CAMERA_MAKE:
+                        String cameraMake = result.getString(++columnIndex);
+                        if (false == result.wasNull() && null != cameraMake) {
+                            retval.setCameraMake(cameraMake);
                         }
                         break;
                     case Metadata.CAMERA_MODEL:

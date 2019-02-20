@@ -60,22 +60,21 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AddMediaFieldsForInfostoreDocumentTableV2} - Extends infostore document tables by "meta" JSON BLOB.
+ * {@link AddMediaFieldsForInfostoreDocumentTableV3} - Extends infostore document tables by "meta" JSON BLOB.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AddMediaFieldsForInfostoreDocumentTableV2 extends UpdateTaskAdapter {
+public class AddMediaFieldsForInfostoreDocumentTableV3 extends UpdateTaskAdapter {
 
     private final AddMediaFieldsForInfostoreDocumentTable delegate;
 
     /**
-     * Initializes a new {@link AddMediaFieldsForInfostoreDocumentTableV2}.
+     * Initializes a new {@link AddMediaFieldsForInfostoreDocumentTableV3}.
      */
-    public AddMediaFieldsForInfostoreDocumentTableV2() {
+    public AddMediaFieldsForInfostoreDocumentTableV3() {
         super();
         delegate = new AddMediaFieldsForInfostoreDocumentTable();
     }
@@ -85,20 +84,17 @@ public class AddMediaFieldsForInfostoreDocumentTableV2 extends UpdateTaskAdapter
         Connection con = params.getConnection();
         int rollback = 0;
         try {
-            if (!Tools.columnExists(con, "infostore_document", "iso_speed")) {
+            if (Tools.columnExists(con, "infostore_document", "camera_make")) {
                 return;
             }
 
             startTransaction(con);
             rollback = 1;
 
-            // Drop "old" column
-            Tools.dropColumns(con, "infostore_document", new Column("iso_speed", "int8 UNSIGNED DEFAULT NULL"));
-
-            // Drop old contents, too
+            // Drop old contents
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("UPDATE infostore_document SET capture_date=NULL, geolocation=NULL, width=NULL, height=NULL, camera_model=null, media_meta=NULL, media_status=NULL");
+                stmt = con.prepareStatement("UPDATE infostore_document SET capture_date=NULL, geolocation=NULL, width=NULL, height=NULL, camera_model=NULL, camera_iso_speed=NULL, camera_aperture=NULL, camera_exposure_time=NULL, camera_focal_length=NULL, media_meta=NULL, media_status=NULL");
                 stmt.executeUpdate();
             } finally {
                 Databases.closeSQLStuff(stmt);
@@ -125,6 +121,6 @@ public class AddMediaFieldsForInfostoreDocumentTableV2 extends UpdateTaskAdapter
 
     @Override
     public String[] getDependencies() {
-        return new String[] { AddMediaFieldsForInfostoreDocumentTable.class.getName() };
+        return new String[] { AddMediaFieldsForInfostoreDocumentTableV2.class.getName() };
     }
 }

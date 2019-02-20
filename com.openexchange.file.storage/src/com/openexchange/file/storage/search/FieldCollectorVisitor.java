@@ -277,4 +277,9 @@ public class FieldCollectorVisitor implements SearchTermVisitor {
         handleTerm(term);
     }
 
+    @Override
+    public void visit(CameraMakeTerm term) throws OXException {
+        handleTerm(term);
+    }
+
 }

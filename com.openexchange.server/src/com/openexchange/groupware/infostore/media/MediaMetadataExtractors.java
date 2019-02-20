@@ -327,6 +327,7 @@ public class MediaMetadataExtractors {
         documentToPass.setCameraAperture(-1);
         documentToPass.setCameraExposureTime(-1);
         documentToPass.setCameraFocalLength(-1);
+        documentToPass.setCameraMake(null);
         documentToPass.setCameraModel(null);
         documentToPass.setMediaMeta(null);
         documentToPass.setSequenceNumber(document.getSequenceNumber());
@@ -385,6 +386,9 @@ public class MediaMetadataExtractors {
             }
             if (document.getCameraFocalLength() != null) {
                 modifiedColumns.add(Metadata.CAMERA_FOCAL_LENGTH_LITERAL);
+            }
+            if (document.getCameraMake() != null) {
+                modifiedColumns.add(Metadata.CAMERA_MAKE_LITERAL);
             }
             if (document.getCameraModel() != null) {
                 modifiedColumns.add(Metadata.CAMERA_MODEL_LITERAL);

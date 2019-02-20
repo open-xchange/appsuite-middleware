@@ -458,6 +458,16 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     }
 
     @Override
+    public String getCameraMake() {
+        return document.getCameraMake();
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        document.setCameraMake(cameraMake);
+    }
+
+    @Override
     public String getCameraModel() {
         return document.getCameraModel();
     }

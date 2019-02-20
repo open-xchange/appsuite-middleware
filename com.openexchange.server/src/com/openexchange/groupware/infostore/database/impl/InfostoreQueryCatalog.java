@@ -119,7 +119,7 @@ public class InfostoreQueryCatalog {
         Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_MD5SUM_LITERAL, Metadata.VERSION_COMMENT_LITERAL,
         Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.META_LITERAL,
         Metadata.CAPTURE_DATE_LITERAL, Metadata.GEOLOCATION_LITERAL, Metadata.WIDTH_LITERAL, Metadata.HEIGHT_LITERAL,
-        Metadata.CAMERA_MODEL_LITERAL, Metadata.CAMERA_ISO_SPEED_LITERAL, Metadata.CAMERA_APERTURE_LITERAL,
+        Metadata.CAMERA_MAKE_LITERAL, Metadata.CAMERA_MODEL_LITERAL, Metadata.CAMERA_ISO_SPEED_LITERAL, Metadata.CAMERA_APERTURE_LITERAL,
         Metadata.CAMERA_EXPOSURE_TIME_LITERAL, Metadata.CAMERA_FOCAL_LENGTH_LITERAL, Metadata.MEDIA_META_LITERAL,
         Metadata.MEDIA_STATUS_LITERAL };
 
@@ -1150,6 +1150,11 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
+        public Object cameraMake() {
+            return null;
+        }
+
+        @Override
         public Object cameraModel() {
             return null;
         }
@@ -1366,6 +1371,11 @@ public class InfostoreQueryCatalog {
 
         @Override
         public Object height() {
+            return null;
+        }
+
+        @Override
+        public Object cameraMake() {
             return null;
         }
 
@@ -1589,6 +1599,11 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
+        public Object cameraMake() {
+            return "camera_make";
+        }
+
+        @Override
         public Object cameraModel() {
             return "camera_model";
         }
@@ -1804,6 +1819,11 @@ public class InfostoreQueryCatalog {
 
         @Override
         public Object height() {
+            return null;
+        }
+
+        @Override
+        public Object cameraMake() {
             return null;
         }
 

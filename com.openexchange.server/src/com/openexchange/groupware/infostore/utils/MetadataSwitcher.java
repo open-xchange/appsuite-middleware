@@ -115,6 +115,8 @@ public interface MetadataSwitcher {
 
     Object height();
 
+    Object cameraMake();
+
     Object cameraModel();
 
     Object cameraIsoSpeed();

@@ -97,6 +97,7 @@ public class DefaultFile extends AbstractFile {
     private GeoLocation geoLocation;
     private Long width = null;
     private Long height = null;
+    private String cameraMake = null;
     private String cameraModel = null;
     private Long cameraIsoSpeed = null;
     private Double cameraAperture = null;
@@ -526,6 +527,16 @@ public class DefaultFile extends AbstractFile {
         } else {
             this.cameraFocalLength = Double.valueOf(focalLength);
         }
+    }
+
+    @Override
+    public String getCameraMake() {
+        return cameraMake;
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        this.cameraMake = cameraMake;
     }
 
     @Override

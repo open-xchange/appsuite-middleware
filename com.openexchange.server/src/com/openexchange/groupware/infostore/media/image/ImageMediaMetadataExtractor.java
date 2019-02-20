@@ -300,9 +300,6 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
 
                 Metadata metadata = ImageMetadataReader.readMetadata(bufferedStream, -1, detectedFileType);
 
-                String model = null;
-                String make = null;
-
                 Map<String, Object> mediaMeta = writeMediaMetadata ? new LinkedHashMap<String, Object>(4) : null;
 
                 Thread currentThread = Thread.currentThread();
@@ -384,16 +381,16 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                         document.setCameraFocalLength(focalLength.doubleValue());
                                     }
                                 }
-                                if (null == make) {
+                                if (document.getCameraMake() == null) {
                                     Object value = directory.getObject(ExifDirectoryBase.TAG_MAKE);
                                     if (null != value) {
-                                        make = value.toString();
+                                        document.setCameraMake(value.toString());
                                     }
                                 }
-                                if (null == model) {
+                                if (document.getCameraModel() == null) {
                                     Object value = directory.getObject(ExifDirectoryBase.TAG_MODEL);
                                     if (null != value) {
-                                        model = value.toString();
+                                        document.setCameraModel(value.toString());
                                     }
                                 }
                                 if (null == document.getCaptureDate()) {
@@ -571,17 +568,6 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                             LOGGER.warn("Failed to determine image height/width via {} for document {} with version {}", ImageMetadataService.class.getName(), I(document.getId()), I(document.getVersion()), e);
                         }
                     }
-                }
-
-                if (null != make || null != model) {
-                    String cameraModel;
-                    if (null == make) {
-                        cameraModel = null == model ? null : model.trim();
-                    } else {
-                        cameraModel = null == model ? make.trim() : new StringBuilder(make.trim()).append(' ').append(model.trim()).toString();
-                    }
-
-                    document.setCameraModel(cameraModel);
                 }
 
                 document.setMediaMeta(mediaMeta);

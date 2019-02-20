@@ -402,6 +402,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                                 documentToPass.setCameraAperture(-1);
                                 documentToPass.setCameraExposureTime(-1);
                                 documentToPass.setCameraFocalLength(-1);
+                                documentToPass.setCameraMake(null);
                                 documentToPass.setCameraModel(null);
                                 documentToPass.setMediaMeta(null);
                             }
@@ -418,6 +419,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                                 documentToPass.setCameraAperture(-1);
                                 documentToPass.setCameraExposureTime(-1);
                                 documentToPass.setCameraFocalLength(-1);
+                                documentToPass.setCameraMake(null);
                                 documentToPass.setCameraModel(null);
                                 documentToPass.setMediaMeta(null);
                             }
@@ -435,6 +437,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                     documentToPass.setCameraAperture(-1);
                     documentToPass.setCameraExposureTime(-1);
                     documentToPass.setCameraFocalLength(-1);
+                    documentToPass.setCameraMake(null);
                     documentToPass.setCameraModel(null);
                     documentToPass.setMediaMeta(null);
                 }

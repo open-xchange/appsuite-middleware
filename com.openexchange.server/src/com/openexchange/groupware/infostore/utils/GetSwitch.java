@@ -221,6 +221,11 @@ public class GetSwitch implements MetadataSwitcher {
     }
 
     @Override
+    public Object cameraMake() {
+        return metadata.getCameraMake();
+    }
+
+    @Override
     public Object cameraModel() {
         return metadata.getCameraModel();
     }

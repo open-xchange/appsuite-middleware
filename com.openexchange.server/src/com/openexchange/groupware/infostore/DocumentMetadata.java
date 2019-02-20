@@ -305,16 +305,30 @@ public interface DocumentMetadata extends Serializable {
     void setHeight(long height);
 
     /**
-     * Gets the name of the camera model associated with this file
+     * Gets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @return The camera make or <code>null</code> if unknown/not set
+     */
+    String getCameraMake();
+
+    /**
+     * Sets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @param cameraMake The model make
+     */
+    void setCameraMake(String cameraMake);
+
+    /**
+     * Gets the model name or model number of the equipment used to create the photo.
      *
      * @return The camera model or <code>null</code> if unknown/not set
      */
     String getCameraModel();
 
     /**
-     * Sets the name of the camera model associated with this file
+     * Sets the model name or model number of the equipment used to create the photo
      *
-     * @param cameraModel The duration
+     * @param cameraModel The model name
      */
     void setCameraModel(String cameraModel);
 

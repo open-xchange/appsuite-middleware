@@ -108,6 +108,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`geolocation` POINT DEFAULT NULL,"
       + "`width` int8 UNSIGNED DEFAULT NULL,"
       + "`height` int8 UNSIGNED DEFAULT NULL,"
+      + "`camera_make` VARCHAR(64) DEFAULT NULL,"
       + "`camera_model` VARCHAR(128) DEFAULT NULL,"
       + "`camera_iso_speed` int8 UNSIGNED DEFAULT NULL,"
       + "`camera_aperture` double DEFAULT NULL,"

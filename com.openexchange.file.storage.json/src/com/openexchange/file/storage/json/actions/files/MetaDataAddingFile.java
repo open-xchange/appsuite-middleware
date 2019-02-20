@@ -441,6 +441,16 @@ public class MetaDataAddingFile implements DelegatingFile {
     }
 
     @Override
+    public String getCameraMake() {
+        return file.getCameraMake();
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        file.setCameraMake(cameraMake);
+    }
+
+    @Override
     public String getCameraModel() {
         return file.getCameraModel();
     }

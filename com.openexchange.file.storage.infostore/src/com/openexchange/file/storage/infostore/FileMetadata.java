@@ -799,6 +799,16 @@ public class FileMetadata implements DocumentMetadata {
             }
 
             @Override
+            public String getCameraMake() {
+                return file.getCameraMake();
+            }
+
+            @Override
+            public void setCameraMake(String cameraMake) {
+                // nothing to do
+            }
+
+            @Override
             public String getCameraModel() {
                 return file.getCameraModel();
             }
@@ -963,6 +973,16 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public void setCameraFocalLength(double focalLength) {
         file.setCameraFocalLength(focalLength);
+    }
+
+    @Override
+    public String getCameraMake() {
+        return file.getCameraMake();
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        file.setCameraMake(cameraMake);
     }
 
     @Override

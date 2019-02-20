@@ -217,6 +217,11 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
     }
 
     @Override
+    public Object cameraMake(Object... args) {
+        return md(args).getCameraMake();
+    }
+
+    @Override
     public Object cameraModel(Object... args) {
         return md(args).getCameraModel();
     }

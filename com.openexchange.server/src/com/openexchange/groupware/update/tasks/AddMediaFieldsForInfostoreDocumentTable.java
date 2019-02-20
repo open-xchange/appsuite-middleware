@@ -53,9 +53,7 @@ import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -82,66 +80,113 @@ public class AddMediaFieldsForInfostoreDocumentTable extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
-            startTransaction(con);
-            rollback = 1;
-
-            // Drop "old" column
-            if (Tools.columnExists(con, "infostore_document", "iso_speed")) {
-                Tools.dropColumns(con, "infostore_document", new Column("iso_speed", "int8 UNSIGNED DEFAULT NULL"));
-
-                // Drop old contents, too
-                PreparedStatement stmt = null;
-                try {
-                    stmt = con.prepareStatement("UPDATE infostore_document SET capture_date=NULL, geolocation=NULL, width=NULL, height=NULL, camera_model=null, media_meta=NULL, media_status=NULL");
-                    stmt.executeUpdate();
-                } finally {
-                    Databases.closeSQLStuff(stmt);
-                }
-            }
-
-            // ----------------------------------------------------------------------------------------------------------------------
+            boolean startedTransaction = false;
 
             if (!Tools.columnExists(con, "infostore_document", "capture_date")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("capture_date", "int8 DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "geolocation")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("geolocation", "POINT DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "width")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("width", "int8 UNSIGNED DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "height")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("height", "int8 UNSIGNED DEFAULT NULL"));
             }
 
+            if (!Tools.columnExists(con, "infostore_document", "camera_make")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
+                Tools.addColumns(con, "infostore_document", new Column("camera_make", "VARCHAR(64) DEFAULT NULL"));
+            }
+
             if (!Tools.columnExists(con, "infostore_document", "camera_model")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("camera_model", "VARCHAR(128) DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_iso_speed")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("camera_iso_speed", "int8 UNSIGNED DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_aperture")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("camera_aperture", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_exposure_time")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("camera_exposure_time", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_focal_length")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("camera_focal_length", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "media_meta")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("media_meta", "MEDIUMBLOB DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "media_status")) {
+                if (!startedTransaction) {
+                    startTransaction(con);
+                    rollback = 1;
+                    startedTransaction = true;
+                }
                 Tools.addColumns(con, "infostore_document", new Column("media_status", "VARCHAR(16) DEFAULT NULL"));
             }
 

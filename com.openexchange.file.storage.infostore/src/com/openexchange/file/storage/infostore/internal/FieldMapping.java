@@ -102,6 +102,7 @@ public class FieldMapping {
         field2metadata.put(File.Field.CAPTURE_DATE, Metadata.CAPTURE_DATE_LITERAL);
         field2metadata.put(File.Field.WIDTH, Metadata.WIDTH_LITERAL);
         field2metadata.put(File.Field.HEIGHT, Metadata.HEIGHT_LITERAL);
+        field2metadata.put(File.Field.CAMERA_MAKE, Metadata.CAMERA_MAKE_LITERAL);
         field2metadata.put(File.Field.CAMERA_MODEL, Metadata.CAMERA_MODEL_LITERAL);
         field2metadata.put(File.Field.CAMERA_ISO_SPEED, Metadata.CAMERA_ISO_SPEED_LITERAL);
         field2metadata.put(File.Field.CAMERA_APERTURE, Metadata.CAMERA_APERTURE_LITERAL);

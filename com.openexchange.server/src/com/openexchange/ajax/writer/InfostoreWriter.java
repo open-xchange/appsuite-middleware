@@ -458,6 +458,11 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         }
 
         @Override
+        public Object cameraMake() {
+            return null;
+        }
+
+        @Override
         public Object cameraModel() {
             return null;
         }

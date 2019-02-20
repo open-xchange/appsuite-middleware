@@ -316,6 +316,11 @@ public class FileFieldHandling {
         }
 
         @Override
+        public Object cameraMake(Object... args) {
+            return handler.handle(Field.CAMERA_MAKE, args);
+        }
+
+        @Override
         public Object cameraModel(Object... args) {
             return handler.handle(Field.CAMERA_MODEL, args);
         }

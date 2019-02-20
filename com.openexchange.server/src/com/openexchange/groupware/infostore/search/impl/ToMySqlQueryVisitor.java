@@ -80,6 +80,7 @@ import com.openexchange.groupware.infostore.search.FileNameTerm;
 import com.openexchange.groupware.infostore.search.FileSizeTerm;
 import com.openexchange.groupware.infostore.search.HeightTerm;
 import com.openexchange.groupware.infostore.search.CameraIsoSpeedTerm;
+import com.openexchange.groupware.infostore.search.CameraMakeTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedUtcTerm;
 import com.openexchange.groupware.infostore.search.LockedUntilTerm;
@@ -333,6 +334,12 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     public void visit(CameraModelTerm cameraModelTerm) {
         String field = "camera_model";
         parseStringSearchTerm(cameraModelTerm, field);
+    }
+
+    @Override
+    public void visit(CameraMakeTerm cameraMakeTerm) {
+        String field = "camera_make";
+        parseStringSearchTerm(cameraMakeTerm, field);
     }
 
     @Override

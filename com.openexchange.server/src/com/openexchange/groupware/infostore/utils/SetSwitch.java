@@ -338,6 +338,14 @@ public class SetSwitch implements MetadataSwitcher {
     }
 
     @Override
+    public Object cameraMake() {
+        if (null != value) {
+            impl.setCameraMake((String) value);
+        }
+        return null;
+    }
+
+    @Override
     public Object cameraModel() {
         if (null != value) {
             impl.setCameraModel((String) value);

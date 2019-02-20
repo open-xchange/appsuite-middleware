@@ -72,7 +72,6 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.java.GeoLocation;
-import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
@@ -229,14 +228,14 @@ public final class GoogleDriveFile extends DefaultFile {
                             setHeight(imageMediaMetadata.getHeight().longValue());
                         }
                     }
+                    if (set.contains(Field.CAMERA_MAKE)) {
+                        if (null != imageMediaMetadata.getCameraMake()) {
+                            setCameraMake(imageMediaMetadata.getCameraMake());
+                        }
+                    }
                     if (set.contains(Field.CAMERA_MODEL)) {
                         if (null != imageMediaMetadata.getCameraModel()) {
-                            String make = imageMediaMetadata.getCameraMake();
-                            if (Strings.isEmpty(make)) {
-                                setCameraModel(imageMediaMetadata.getCameraModel());
-                            } else {
-                                setCameraModel(new StringBuffer(make).append(' ').append(imageMediaMetadata.getCameraModel()).toString());
-                            }
+                            setCameraModel(imageMediaMetadata.getCameraModel());
                         }
                     }
                     if (set.contains(Field.CAMERA_ISO_SPEED)) {

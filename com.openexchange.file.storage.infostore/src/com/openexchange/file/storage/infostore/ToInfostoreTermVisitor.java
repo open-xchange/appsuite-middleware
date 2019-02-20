@@ -74,6 +74,7 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
 import com.openexchange.file.storage.search.HeightTerm;
 import com.openexchange.file.storage.search.CameraIsoSpeedTerm;
+import com.openexchange.file.storage.search.CameraMakeTerm;
 import com.openexchange.file.storage.search.LastModifiedTerm;
 import com.openexchange.file.storage.search.LastModifiedUtcTerm;
 import com.openexchange.file.storage.search.LockedUntilTerm;
@@ -273,6 +274,11 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     @Override
     public void visit(CameraModelTerm term) throws OXException {
         infstoreTerm = new com.openexchange.groupware.infostore.search.CameraModelTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
+    }
+
+    @Override
+    public void visit(CameraMakeTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CameraMakeTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
     }
 
     @Override

@@ -331,4 +331,13 @@ public interface SearchTermVisitor {
     * @throws OXException If visit attempt fails
     */
    void visit(CameraModelTerm cameraModelTerm) throws OXException;
+
+   /**
+    * The visitation for camera make term.
+    *
+    * @param cameraMakeTerm The visited camera make term
+    * @throws OXException If visit attempt fails
+    */
+   void visit(CameraMakeTerm cameraMakeTerm) throws OXException;
+
 }

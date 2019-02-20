@@ -294,6 +294,20 @@ public interface File {
     void setHeight(long height);
 
     /**
+     * Gets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @return The camera make or <code>null</code> if unknown/not set
+     */
+    String getCameraMake();
+
+    /**
+     * Sets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @param cameraMake The model make
+     */
+    void setCameraMake(String cameraMake);
+
+    /**
      * Gets the name of the camera model associated with this file
      *
      * @return The camera model or <code>null</code> if unknown/not set
@@ -452,18 +466,19 @@ public interface File {
         GEOLOCATION("geolocation", 714),
         WIDTH("width", 715),
         HEIGHT("height", 716),
-        CAMERA_MODEL("camera_model", 717),
-        CAMERA_ISO_SPEED("camera_iso_speed", 718),
-        CAMERA_APERTURE("camera_aperture", 719),
-        CAMERA_EXPOSURE_TIME("camera_exposure_time", 720),
-        CAMERA_FOCAL_LENGTH("camera_focal_length", 721),
-        MEDIA_META("media_meta", 722),
-        MEDIA_STATUS("media_status", 723),
-        MEDIA_DATE("media_date", 724),
+        CAMERA_MAKE("camera_model", 717),
+        CAMERA_MODEL("camera_model", 718),
+        CAMERA_ISO_SPEED("camera_iso_speed", 719),
+        CAMERA_APERTURE("camera_aperture", 720),
+        CAMERA_EXPOSURE_TIME("camera_exposure_time", 721),
+        CAMERA_FOCAL_LENGTH("camera_focal_length", 722),
+        MEDIA_META("media_meta", 723),
+        MEDIA_STATUS("media_status", 724),
+        MEDIA_DATE("media_date", 725),
         ;
 
         /** The set containing all media-associated fields */
-        public static final Set<Field> MEDIA_FIELDS = EnumSet.of(CAPTURE_DATE, GEOLOCATION, WIDTH, HEIGHT, CAMERA_MODEL, CAMERA_APERTURE, CAMERA_EXPOSURE_TIME, CAMERA_FOCAL_LENGTH, CAMERA_ISO_SPEED, MEDIA_META, MEDIA_STATUS, MEDIA_DATE);
+        public static final Set<Field> MEDIA_FIELDS = EnumSet.of(CAPTURE_DATE, GEOLOCATION, WIDTH, HEIGHT, CAMERA_MAKE, CAMERA_MODEL, CAMERA_APERTURE, CAMERA_EXPOSURE_TIME, CAMERA_FOCAL_LENGTH, CAMERA_ISO_SPEED, MEDIA_META, MEDIA_STATUS, MEDIA_DATE);
 
         private final int number;
         private final String name;
@@ -562,6 +577,8 @@ public interface File {
                 return switcher.width(args);
             case HEIGHT:
                 return switcher.height(args);
+            case CAMERA_MAKE:
+                return switcher.cameraMake(args);
             case CAMERA_MODEL:
                 return switcher.cameraModel(args);
             case CAMERA_ISO_SPEED:

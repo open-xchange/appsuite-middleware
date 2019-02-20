@@ -104,6 +104,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected GeoLocation geoLocation;
     protected Long width = null;
     protected Long height = null;
+    private String cameraMake = null;
     private String cameraModel = null;
     private Long cameraIsoSpeed = null;
     private Double cameraAperture = null;
@@ -530,6 +531,16 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
         } else {
             this.cameraFocalLength = Double.valueOf(focalLength);
         }
+    }
+
+    @Override
+    public String getCameraMake() {
+        return cameraMake;
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        this.cameraMake = cameraMake;
     }
 
     @Override
