@@ -466,7 +466,7 @@ public interface File {
         GEOLOCATION("geolocation", 714),
         WIDTH("width", 715),
         HEIGHT("height", 716),
-        CAMERA_MAKE("camera_model", 717),
+        CAMERA_MAKE("camera_make", 717),
         CAMERA_MODEL("camera_model", 718),
         CAMERA_ISO_SPEED("camera_iso_speed", 719),
         CAMERA_APERTURE("camera_aperture", 720),
