@@ -226,6 +226,7 @@ import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.metadata.MetadataService;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
@@ -504,6 +505,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // CacheEventService
         track(CacheEventService.class, new RegistryCustomizer<CacheEventService>(context, CacheEventService.class));
+
+        // MetadataService
+        track(MetadataService.class, new RegistryCustomizer<MetadataService>(context, MetadataService.class));
 
         // ThreadControlService
         track(ThreadControlService.class, new RegistryCustomizer<ThreadControlService>(context, ThreadControlService.class));

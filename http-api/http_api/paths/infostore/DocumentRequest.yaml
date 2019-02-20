@@ -37,6 +37,13 @@
         description: |
           Flag to request an Anti-Virus scan for the specified document before downloading them. 
         required: false
+      - in: query
+        name: format
+        type: string
+        description: |
+          Allows to set "metadata" as value to retrieve an image's metadata information (EXIF directory, etc.) as a JSON structure. If there
+          are no metadata available (e.g. infoitem document is not an image) 404 Not Found is returned. 
+        required: false
       - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
       - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
       - $ref: "#/parameters/glbQueryParamsImageTransformationHeight"

@@ -55,11 +55,8 @@ import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -69,10 +66,11 @@ import com.drew.imaging.FileTypeDetector;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
 import com.drew.metadata.bmp.BmpHeaderDirectory;
 import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
+import com.drew.metadata.exif.makernotes.CasioType2MakernoteDirectory;
 import com.drew.metadata.gif.GifImageDirectory;
 import com.drew.metadata.heif.HeifDirectory;
 import com.drew.metadata.iptc.IptcDirectory;
@@ -86,6 +84,9 @@ import com.openexchange.groupware.infostore.media.ExtractorResult;
 import com.openexchange.groupware.infostore.media.InputStreamProvider;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractor;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractors;
+import com.openexchange.groupware.infostore.media.metadata.KnownDirectory;
+import com.openexchange.groupware.infostore.media.metadata.MetadataMapImpl;
+import com.openexchange.groupware.infostore.media.metadata.MetadataUtility;
 import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Streams;
@@ -133,43 +134,6 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
      */
     public static ImageMediaMetadataExtractor getInstance() {
         return INSTANCE;
-    }
-
-    private static enum KnownDirectory {
-        EXIF("exif", null), GPS("gps", GpsDirectory.class), IPTC("iptc", IptcDirectory.class);
-
-        final String id;
-        final Class<? extends Directory> optConcretetDirectoryType;
-
-        private KnownDirectory(String id, Class<? extends Directory> directoryType) {
-            this.id = id;
-            this.optConcretetDirectoryType = directoryType;
-        }
-
-        String getId() {
-            return id;
-        }
-
-        static KnownDirectory knownDirectoryFor(Directory directory) {
-            if (null != directory) {
-                String directoryName = Strings.asciiLowerCase(directory.getName());
-                for (KnownDirectory knownDirectory : KnownDirectory.values()) {
-                    Class<? extends Directory> concretetDirectoryType = knownDirectory.optConcretetDirectoryType;
-                    if (null != concretetDirectoryType) {
-                        // Check by type
-                        if (concretetDirectoryType.equals(directory.getClass())) {
-                            return knownDirectory;
-                        }
-                    } else {
-                        // Check by name
-                        if (directoryName.indexOf(knownDirectory.id) >= 0) {
-                            return knownDirectory;
-                        }
-                    }
-                }
-            }
-            return null;
-        }
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------
@@ -300,7 +264,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
 
                 Metadata metadata = ImageMetadataReader.readMetadata(bufferedStream, -1, detectedFileType);
 
-                Map<String, Object> mediaMeta = writeMediaMetadata ? new LinkedHashMap<String, Object>(4) : null;
+                MetadataMapImpl.Builder mediaMeta = writeMediaMetadata ? MetadataMapImpl.builder(4) : null;
 
                 Thread currentThread = Thread.currentThread();
                 for (Directory directory : metadata.getDirectories()) {
@@ -318,7 +282,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                     // Check if media meta-data are supposed to be written
                     if (writeMediaMetadata) {
                         // Get tag list & initialize appropriate map for current metadata directory
-                        boolean discardDirectory = putMediaMeta(null == knownDirectory ? directory.getName() : knownDirectory.name(), directory, mediaMeta);
+                        boolean discardDirectory = MetadataUtility.putMediaMeta(null == knownDirectory ? directory.getName() : knownDirectory.name(), directory, mediaMeta);
                         if (discardDirectory) {
                             // Nothing put into media metadata for current metadata directory
                             continue;
@@ -328,6 +292,13 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                     if (null != knownDirectory) {
                         switch (knownDirectory) {
                             case EXIF:
+                                if (directory instanceof ExifSubIFDDirectory) {
+                                    ExifSubIFDDirectory exifSubIFDDirectory = (ExifSubIFDDirectory) directory;
+                                    Date dateOriginal = exifSubIFDDirectory.getDateOriginal();
+                                    if (null != dateOriginal) {
+                                        document.setCaptureDate(dateOriginal);
+                                    }
+                                }
                                 if (document.getWidth() == null) {
                                     Object value = directory.getObject(ExifDirectoryBase.TAG_EXIF_IMAGE_WIDTH);
                                     Long longObject = MediaMetadataExtractors.getLongValue(value);
@@ -357,26 +328,27 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                     }
                                 }
                                 if (document.getCameraIsoSpeed() == null) {
-                                    Object value = directory.getObject(ExifDirectoryBase.TAG_ISO_EQUIVALENT);
+                                    Object value = directory.getObject(ExifDirectoryBase.TAG_ISO_SPEED);
                                     Long longObject = MediaMetadataExtractors.getLongValue(value);
                                     if (null != longObject) {
                                         document.setCameraIsoSpeed(longObject.longValue());
                                     }
                                 }
                                 if (document.getCameraAperture() == null) {
-                                    Double aperture = directory.getDoubleObject(ExifDirectoryBase.TAG_APERTURE);
+                                    //Double aperture = directory.getDoubleObject(ExifDirectoryBase.TAG_APERTURE);
+                                    Double aperture = directory.getDoubleObject(ExifDirectoryBase.TAG_FNUMBER);
                                     if (aperture != null) {
                                         document.setCameraAperture(aperture.doubleValue());
                                     }
                                 }
                                 if (document.getCameraExposureTime() == null) {
-                                    Double exposureTime = directory.getDoubleObject(ExifDirectoryBase.TAG_SHUTTER_SPEED);
+                                    Double exposureTime = directory.getDoubleObject(ExifDirectoryBase.TAG_EXPOSURE_TIME);
                                     if (exposureTime != null) {
                                         document.setCameraExposureTime(exposureTime.doubleValue());
                                     }
                                 }
                                 if (document.getCameraFocalLength() == null) {
-                                    Double focalLength = directory.getDoubleObject(ExifDirectoryBase.TAG_FOCAL_LENGTH);
+                                    Double focalLength = directory.getDoubleObject(ExifDirectoryBase.TAG_35MM_FILM_EQUIV_FOCAL_LENGTH);
                                     if (focalLength != null) {
                                         document.setCameraFocalLength(focalLength.doubleValue());
                                     }
@@ -384,19 +356,13 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                 if (document.getCameraMake() == null) {
                                     Object value = directory.getObject(ExifDirectoryBase.TAG_MAKE);
                                     if (null != value) {
-                                        document.setCameraMake(value.toString());
+                                        document.setCameraMake(value.toString().trim());
                                     }
                                 }
                                 if (document.getCameraModel() == null) {
                                     Object value = directory.getObject(ExifDirectoryBase.TAG_MODEL);
                                     if (null != value) {
-                                        document.setCameraModel(value.toString());
-                                    }
-                                }
-                                if (null == document.getCaptureDate()) {
-                                    Object value = directory.getObject(ExifDirectoryBase.TAG_DATETIME);
-                                    if (null != value) {
-                                        document.setCaptureDate(MediaMetadataExtractors.parseDateStringToDate(value.toString(), null));
+                                        document.setCameraModel(value.toString().trim());
                                     }
                                 }
                                 if (null == document.getCaptureDate()) {
@@ -479,6 +445,20 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                         Long longObject = jpegDirectory.getLongObject(JpegDirectory.TAG_IMAGE_HEIGHT);
                                         if (null != longObject) {
                                             document.setHeight(longObject.longValue());
+                                        }
+                                    }
+                                }
+                                if (directory instanceof CasioType2MakernoteDirectory) {
+                                    CasioType2MakernoteDirectory casioMakernoteDirectory = (CasioType2MakernoteDirectory) directory;
+
+                                    if (document.getCameraIsoSpeed() == null) {
+                                        String desc = casioMakernoteDirectory.getDescription(CasioType2MakernoteDirectory.TAG_ISO_SENSITIVITY);
+                                        if (null != desc) {
+                                            try {
+                                                document.setCameraIsoSpeed(Long.parseLong(desc));
+                                            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                                                // Ignore...
+                                            }
                                         }
                                     }
                                 }
@@ -570,7 +550,7 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                     }
                 }
 
-                document.setMediaMeta(mediaMeta);
+                document.setMediaMeta(null == mediaMeta ? null : mediaMeta.build().asMap());
 
                 if (debugEnabled) {
                     long durationMillis = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startNanos, TimeUnit.NANOSECONDS);
@@ -591,157 +571,6 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
         } finally {
             Streams.close(bufferedStream, in);
         }
-    }
-
-    /**
-     * Puts directory's tags into media metadata and signals if given directory can be discarded.
-     *
-     * @param mapIdentifier The map identifier to use
-     * @param directory The directory to extract from
-     * @param mediaMeta The media metadata to put the directory map to
-     * @return <code>true</code> if given directory can be discarded; otherwise <code>false</code>
-     */
-    private boolean putMediaMeta(String mapIdentifier, Directory directory, Map<String, Object> mediaMeta) {
-        Collection<Tag> tags = directory.getTags();
-
-        boolean mapAlreadyExists = true;
-        @SuppressWarnings("unchecked") Map<String, Map<String, Object>> directoryMap = (Map<String, Map<String, Object>>) mediaMeta.get(mapIdentifier);
-        if (null == directoryMap) {
-            // No such map, yet
-            directoryMap = new LinkedHashMap<>(tags.size());
-            mapAlreadyExists = false;
-            mediaMeta.put(mapIdentifier, directoryMap);
-        }
-
-        Iterator<Tag> tagsIterator = tags.iterator();
-        boolean somethingAdded = false;
-        while (!somethingAdded && tagsIterator.hasNext()) {
-            Tag tag = tagsIterator.next();
-            somethingAdded |= putTagIntoDirectoryMapIfAbsent(tag, directory, directoryMap, mapAlreadyExists);
-        }
-        if (somethingAdded) {
-            // Something put into media metadata for current directory
-            while (tagsIterator.hasNext()) {
-                Tag tag = tagsIterator.next();
-                somethingAdded |= putTagIntoDirectoryMapIfAbsent(tag, directory, directoryMap, mapAlreadyExists);
-            }
-            return false;
-        }
-
-        // Nothing put into media metadata for current directory
-        if (!mapAlreadyExists) {
-            // Directory map was newly added, thus remove it as it is empty
-            mediaMeta.remove(mapIdentifier);
-            return true;
-        }
-
-        // Do not discard it as such a map already exists in media metadata
-        return false;
-    }
-
-    private boolean putTagIntoDirectoryMapIfAbsent(Tag tag, Directory directory, Map<String, Map<String, Object>> directoryMap, boolean checkExistence) {
-        int tagType = tag.getTagType();
-        String name = tag.getTagName();
-
-        String key = name == null ? Integer.toString(tagType) : name;
-        if (key.startsWith("Unknown tag")) {
-            // Discard unknown tags
-            return false;
-        }
-
-        String description = tag.getDescription();
-        if (null != description && description.startsWith("[") && description.endsWith(" values]")) {
-            // Any non-categorized binary data; e.g. thumbnail or image areas
-            return false;
-        }
-
-        if (false == checkExistence || false == directoryMap.containsKey(key)) {
-            String value = getStringValue(tagType, directory);
-            if (Strings.isNotEmpty(value)) {
-                Map<String, Object> entry = new LinkedHashMap<>(4);
-
-                entry.put("id", Integer.valueOf(tagType));
-
-                if (null != name) {
-                    entry.put("name", name);
-                }
-
-                entry.put("value", value);
-
-                if (null != description) {
-                    entry.put("description", description.trim());
-                }
-
-                directoryMap.put(key, entry);
-                return true;
-            }
-        }
-
-        // Nothing put into directory map
-        return false;
-    }
-
-    private String getStringValue(int tagType, Directory directory) {
-        Object value = directory.getObject(tagType);
-        if (null == value) {
-            return null;
-        }
-        return isArray(value) ? array2String(value) : value.toString().trim();
-    }
-
-    private int getMaxAllowByteArraysLength() {
-        return 100;
-    }
-
-    private String array2String(Object array) {
-        int length = Array.getLength(array);
-        int iMax = length - 1;
-        if (iMax < 0) {
-            return "[]";
-        }
-
-        StringBuilder b = new StringBuilder(length << 2);
-        b.append('[');
-        for (int i = 0; ; i++) {
-            Object obj = Array.get(array, i);
-            if (isArray(obj)) {
-                String sArray = array2String(obj);
-                if (null != sArray) {
-                    b.append(sArray);
-                } else {
-                    if (i == iMax) {
-                        return b.append(']').toString();
-                    }
-                    continue;
-                }
-            } else {
-                if (length > getMaxAllowByteArraysLength() && (obj instanceof Byte)) {
-                    // Byte array is too big
-                    return null;
-                }
-                b.append(String.valueOf(obj));
-            }
-
-            if (i == iMax) {
-                return b.append(']').toString();
-            }
-            b.append(", ");
-        }
-    }
-
-    /**
-     * Checks if specified object is an array.
-     *
-     * @param object The object to check
-     * @return <code>true</code> if specified object is an array; otherwise <code>false</code>
-     */
-    private boolean isArray(final Object object) {
-        /*-
-         * getClass().isArray() is significantly slower on Sun Java 5 or 6 JRE than on IBM.
-         * So much that using clazz.getName().charAt(0) == '[' is faster on Sun JVM.
-         */
-        // return (null != object && object.getClass().isArray());
-        return (null != object && '[' == object.getClass().getName().charAt(0));
     }
 
 }

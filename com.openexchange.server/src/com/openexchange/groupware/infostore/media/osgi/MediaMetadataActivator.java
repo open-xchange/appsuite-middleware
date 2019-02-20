@@ -54,7 +54,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
 import com.openexchange.groupware.infostore.media.image.ImageMediaMetadataExtractor;
 import com.openexchange.groupware.infostore.media.impl.MediaMetadataExtractorRegistry;
+import com.openexchange.groupware.infostore.media.metadata.MetadataExtractorMetadataService;
 import com.openexchange.imagetransformation.ImageMetadataService;
+import com.openexchange.metadata.MetadataService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -112,6 +114,7 @@ public class MediaMetadataActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(MediaMetadataExtractorService.class, extractorRegistry);
+        registerService(MetadataService.class, new MetadataExtractorMetadataService());
     }
 
     @Override

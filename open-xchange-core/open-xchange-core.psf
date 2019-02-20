@@ -157,6 +157,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.message.timeline"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metadata"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metrics"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metrics.dropwizard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.json"/>
