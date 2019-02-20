@@ -659,6 +659,16 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     }
 
     @Override
+    public String getCameraMake() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getCameraModel() {
         throw new UnsupportedOperationException();
     }
