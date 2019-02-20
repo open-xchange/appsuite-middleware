@@ -87,6 +87,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -364,6 +365,29 @@ public class Check extends com.openexchange.chronos.common.Check {
             String existingId = new ResolvePerformer(session, storage).resolveByUid(uid);
             if (null != existingId) {
                 throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
+            }
+        }
+        return uid;
+    }
+
+    /**
+     * Checks that the supplied event's unique identifier (UID) is not already used for another event within the scope of a specific
+     * calendar user, i.e. the unique identifier is resolved to events residing in the user's <i>personal</i>, as well as <i>public</i>
+     * calendar folders.
+     * 
+     * @param session The calendar session
+     * @param storage A reference to the calendar storage
+     * @param event The event to check
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved in
+     * @return The passed event's unique identifier, after it was checked for uniqueness
+     * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
+     */
+    public static String uidIsUnique(CalendarSession session, CalendarStorage storage, Event event, int calendarUserId) throws OXException {
+        String uid = event.getUid();
+        if (Strings.isNotEmpty(uid)) {
+            EventID existingId = new ResolvePerformer(session, storage).resolveByUid(uid, calendarUserId);
+            if (null != existingId) {
+                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId.getObjectID());
             }
         }
         return uid;

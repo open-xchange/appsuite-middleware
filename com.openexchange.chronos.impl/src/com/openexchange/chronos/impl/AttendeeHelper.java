@@ -108,8 +108,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      */
     public static AttendeeHelper onNewEvent(CalendarSession session, CalendarFolder folder, Event event) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, null);
-        boolean resolveResourceIds = false == isGroupScheduled(event) || hasInternalOrganizer(session.getEntityResolver(), event);
-        attendeeHelper.processNewEvent(emptyForNull(event.getAttendees()), resolveResourceIds);
+        attendeeHelper.processNewEvent(emptyForNull(event.getAttendees()), getResolvableEntities(session, folder, event));
         return attendeeHelper;
     }
 
@@ -123,8 +122,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      */
     public static AttendeeHelper onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalEvent.getAttendees());
-        boolean resolveResourceIds = false == isGroupScheduled(originalEvent) || hasInternalOrganizer(session.getEntityResolver(), originalEvent);
-        attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()), resolveResourceIds);
+        attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()), getResolvableEntities(session, folder, originalEvent));
         return attendeeHelper;
     }
 
@@ -139,6 +137,24 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         attendeeHelper.processDeletedEvent();
         return attendeeHelper;
+    }
+
+    /**
+     * Gets the whitelist of identifiers of those entities that should be resolved automatically as used by the entity resolver.
+     * 
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param event The event being processed
+     * @return The identifiers of those entities that should be resolved automatically as used by the entity resolver
+     */
+    private static int[] getResolvableEntities(CalendarSession session, CalendarFolder folder, Event event) {
+        /*
+         * resolve calendar user only for externally organized group scheduled events, otherwise any entity
+         */
+        if (isGroupScheduled(event) || false == hasInternalOrganizer(session.getEntityResolver(), event)) {
+            return new int[] { folder.getCalendarUserId() };
+        }
+        return null;
     }
 
     /**
@@ -198,9 +214,9 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         return newAttendees;
     }
 
-    private void processNewEvent(List<Attendee> requestedAttendees, boolean resolveResourceIds) throws OXException {
+    private void processNewEvent(List<Attendee> requestedAttendees, int[] resolvableEntities) throws OXException {
         session.getEntityResolver().prefetch(requestedAttendees);
-        requestedAttendees = session.getEntityResolver().prepare(requestedAttendees, resolveResourceIds);
+        requestedAttendees = session.getEntityResolver().prepare(requestedAttendees, resolvableEntities);
         /*
          * always start with attendee for default calendar user in folder
          */
@@ -220,9 +236,9 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         handleDefaultAttendee(isEnforceDefaultAttendee(session));
     }
 
-    private void processUpdatedEvent(List<Attendee> updatedAttendees, boolean resolveResourceIds) throws OXException {
+    private void processUpdatedEvent(List<Attendee> updatedAttendees, int[] resolvableEntities) throws OXException {
         session.getEntityResolver().prefetch(updatedAttendees);
-        updatedAttendees = session.getEntityResolver().prepare(updatedAttendees, resolveResourceIds);
+        updatedAttendees = session.getEntityResolver().prepare(updatedAttendees, resolvableEntities);
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = getAttendeeUpdates(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
