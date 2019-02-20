@@ -307,8 +307,10 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         // Add default alarm
         List<Alarm> alarms = CalendarUtils.isAllDay(originalEvent) ? session.getConfig().getDefaultAlarmDate(organizerId) : session.getConfig().getDefaultAlarmDateTime(organizerId);
         if (null != alarms && false == alarms.isEmpty()) {
-            storage.getAlarmStorage().insertAlarms(originalEvent, organizerId, alarms);
-            storage.getAlarmTriggerStorage().insertTriggers(originalEvent, Collections.singletonMap(Integer.valueOf(organizerId), alarms));
+            // Reload event to insert alarms in the correct folder
+            Event event = loadEventData(originalEvent.getId());
+            List<Alarm> insertAlarms = insertAlarms(event, organizerId, alarms, true);
+            storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(Integer.valueOf(organizerId), insertAlarms));
         }
     }
 }
