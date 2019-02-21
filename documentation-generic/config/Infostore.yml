@@ -66,9 +66,8 @@ properties:
       description: |
         Specifies the default value to assume for how many days multiple versions of a Drive item/document
         are kept until they are automatically deleted. However, the current version is never deleted regardless
-        of its age. Cleanup is triggered whenever a new versions is about to be added to an existent Drive
-        item/document. A value equal to or less than <code>0</code> (zero) disables the auto-deletion by
-        retention days.
+        of its age. Cleanup is triggered during user login. A value equal to or less than <code>0</code> (zero)
+        disables the auto-deletion by retention days.
         
         Users may set that value on their own if property "com.openexchange.infostore.autodelete.editable" signals
         "true", in which case this default value is no more considered.
@@ -87,8 +86,9 @@ properties:
       description: |
         Specifies the default value to assume for how many multiple versions of a Drive item/document are allowed
         to be maintained. If the number of versions for a Drive item/document exceeds that threshold, oldest ones
-        are automatically deleted. Cleanup is triggered during user login. A value equal to or less than <code>0</code>
-        (zero) disables the auto-deletion by max. allowed number of versions.
+        are automatically deleted. Cleanup is triggered whenever a new versions is about to be added to an existent
+        Drive item/document. A value equal to or less than <code>0</code> (zero) disables the auto-deletion by max.
+        allowed number of versions.
         
         Users may set that value on their own if property "com.openexchange.infostore.autodelete.editable" signals
         "true", in which case this default value is no more considered.
