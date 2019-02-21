@@ -94,11 +94,12 @@ public class JavaImageMetadataService implements ImageMetadataService {
         BufferedInputStream bufferedInputStream = imageStream instanceof BufferedInputStream ? (BufferedInputStream) imageStream : new BufferedInputStream(imageStream, 65536);
         try {
             // Check for heif file
+            bufferedInputStream.mark(65536);
             Dimension result = getDimensionFromHeifFile(bufferedInputStream);
             if(result != null) {
                 return result;
             }
-            
+
             // Using ImageIO to read metadata
             ImageInputStream imageInputStream = null;
             ImageReader reader = null;
@@ -123,10 +124,10 @@ public class JavaImageMetadataService implements ImageMetadataService {
             Streams.close(bufferedInputStream);
         }
     }
-    
+
     /**
      * Checks whether the given image is a heif file and uses {@link ImageMetadataReader} to get the dimension
-     * 
+     *
      * @param bufferedInputStream The stream containing the image
      * @return The {@link Dimension} or null
      * @throws IOException
@@ -163,7 +164,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
 
                 return new Dimension(Math.toIntExact(width), Math.toIntExact(height));
             }
-            // Don't contain a heif directory -> fall back to normal handling
+            // Doesn't contain a heif directory -> fall back to normal handling
             bufferedInputStream.reset();
         }
         return null;
@@ -216,12 +217,12 @@ public class JavaImageMetadataService implements ImageMetadataService {
         }
 
     }
-    
+
     /**
      * Gets the image metadata from the given file, if it is a heif file.
-     * 
+     *
      * @param bufferedInputStream The stream containing the image
-     * @param imageMetadataOptions The options to consider when retrieving image's meta-data 
+     * @param imageMetadataOptions The options to consider when retrieving image's meta-data
      * @return The {@link ImageMetadata} if it is a heif file, null otherwise
      * @throws IOException
      */
@@ -241,5 +242,5 @@ public class JavaImageMetadataService implements ImageMetadataService {
         }
         return null;
     }
-    
+
 }
