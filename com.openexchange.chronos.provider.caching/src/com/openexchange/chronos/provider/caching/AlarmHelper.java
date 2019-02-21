@@ -449,7 +449,7 @@ public class AlarmHelper {
     public void updateAlarmTriggers(CalendarStorage storage, final Event event) throws OXException {
         List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
         storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
-        if (newAlarms.isEmpty()) {
+        if (null == newAlarms || newAlarms.isEmpty()) {
             return;
         }
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));

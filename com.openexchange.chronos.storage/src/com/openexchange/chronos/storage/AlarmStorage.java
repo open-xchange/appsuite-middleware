@@ -112,8 +112,7 @@ public interface AlarmStorage {
      *
      * @param event The event
      * @param userID The user id
-     * @return A list of alarms
-     * @throws OXException
+     * @return A list of alarms, or <code>null</code> if there are none
      */
     List<Alarm> loadAlarms(Event event, int userID) throws OXException;
 
