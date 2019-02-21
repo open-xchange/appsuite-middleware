@@ -47,28 +47,55 @@
  *
  */
 
-package com.openexchange.utils.osgi;
+package com.openexchange.serialization;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.utils.serialization.FilteringObjectStreamFactory;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link UtilsActivator}
+ * {@link FilteringObjectStreamFactory} is a factory for {@link FilteringObjectInputStream}s
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class UtilsActivator extends HousekeepingActivator {
+@SingletonService
+public class FilteringObjectStreamFactory implements ForcedReloadable {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    private static final String FILENAME = "serialkiller.xml";
+    private static final AtomicReference<SerializationFilteringConfig> REF = new AtomicReference<SerializationFilteringConfig>(null);
+
+    /**
+     * Creates an {@link FilteringObjectInputStream} from the given {@link InputStream} which denies deserialization of potentially harmful classes
+     *
+     * @param stream The input stream
+     * @return A {@link FilteringObjectInputStream}
+     * @throws IOException
+     */
+    public FilteringObjectInputStream createFilteringStream(InputStream stream) throws IOException {
+        if (REF.get() == null) {
+            synchronized (REF) {
+                if (REF.get() == null) {
+                    try {
+                        REF.set(new SerializationFilteringConfig(new File(System.getProperty("openexchange.propdir"), FILENAME)));
+                    } catch (ParserConfigurationException | SAXException | IOException e) {
+                        throw new IOException("Unable to create FilteredObjectStream: " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return new FilteringObjectInputStream(stream, REF.get());
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ForcedReloadable.class, new FilteringObjectStreamFactory());
+    public void reloadConfiguration(ConfigurationService configService) {
+        REF.set(null);
     }
 
 }

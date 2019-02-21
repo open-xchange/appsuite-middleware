@@ -47,47 +47,53 @@
  *
  */
 
-package com.openexchange.utils.serialization;
+package com.openexchange.serialization;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.SAXException;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ForcedReloadable;
-import com.openexchange.java.Reference;
-import com.openexchange.utils.serialization.FilteringObjectInputStream.Configuration;
+import java.io.InvalidClassException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link FilteringObjectStreamFactory}
+ * {@link FilteringObjectInputStream} prevents invalid deserialization by using a blacklist
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class FilteringObjectStreamFactory implements ForcedReloadable {
+public class FilteringObjectInputStream extends ObjectInputStream {
 
-    private static final String FILENAME = "serialkiller.xml";
-    private static final Reference<Configuration> REF = new Reference<FilteringObjectInputStream.Configuration>(null);
+    private static final Logger LOG = LoggerFactory.getLogger(FilteringObjectInputStream.class.getName());
+    private final SerializationFilteringConfig config;
 
-    public static FilteringObjectInputStream createFilteringStream(InputStream stream) throws IOException {
-        if (REF.getValue() == null) {
-            synchronized (REF) {
-                if (REF.getValue() == null) {
-                    try {
-                        REF.setValue(new Configuration(new File(System.getProperty("openexchange.propdir"), FILENAME)));
-                    } catch (ParserConfigurationException | SAXException | IOException e) {
-                        throw new IOException("Unable to create FilteredObjectStream: " + e.getMessage(), e);
-                    }
-                }
-            }
-        }
-        return new FilteringObjectInputStream(stream, REF.getValue());
+    /**
+     * Initializes a new {@link FilteringObjectInputStream}.
+     *
+     * @param in The {@link InputStream}
+     * @throws IOException
+     */
+    FilteringObjectInputStream(InputStream in, SerializationFilteringConfig config) throws IOException {
+        super(in);
+        this.config = config;
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        REF.setValue(null);
+    protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
+
+        for (Pattern blackPattern : config.blacklist()) {
+            Matcher blackMatcher = blackPattern.matcher(input.getName());
+
+            if (blackMatcher.find()) {
+                LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), input.getName());
+                throw new InvalidClassException(input.getName(), "Class blocked from deserialization (blacklist)");
+            }
+        }
+
+        return super.resolveClass(input);
     }
 
 }

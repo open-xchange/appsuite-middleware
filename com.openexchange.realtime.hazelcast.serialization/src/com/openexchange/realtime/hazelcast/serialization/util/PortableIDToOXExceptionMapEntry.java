@@ -59,10 +59,11 @@ import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.utils.serialization.FilteringObjectInputStream;
-import com.openexchange.utils.serialization.FilteringObjectStreamFactory;
+import com.openexchange.serialization.FilteringObjectInputStream;
+import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
  * {@link PortableIDToOXExceptionMapEntry} - Makes entries from IDMap portable by serializing them as pairs.
@@ -126,6 +127,8 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
             exception = getOXException(exceptionBytes);
         } catch (ClassNotFoundException cnfe) {
             throw new IOException(cnfe);
+        } catch (OXException e) {
+            throw new IOException(e);
         }
     }
 
@@ -169,11 +172,12 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
      * @return The deserialzed {@link OXException}
      * @throws IOException If reading the byte array fails
      * @throws ClassNotFoundException If the OSGI imports are too restrictive and not all classes that make up a {@link OXException}
-     *         subclass are accessible
+     *             subclass are accessible
+     * @throws OXException
      */
-    private static OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException {
+    private static OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
-        try (final FilteringObjectInputStream objectInputStream = FilteringObjectStreamFactory.createFilteringStream(byteArrayInputStream)) {
+        try (final FilteringObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
             return OXException.class.cast(objectInputStream.readObject());
         }
     }

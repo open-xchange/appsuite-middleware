@@ -47,72 +47,30 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.serialization.osgi;
+package com.openexchange.serialization.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link Activator}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public final class Services {
+public class Activator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[0];
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or null if absent
-     * @throws OXException
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(Class<? extends S> clazz) throws OXException {
-        ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException(
-                "Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.hazelcast.serialization\" not started?");
-        }
-        return serviceLookup.getServiceSafe(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        ServiceLookup serviceLookup = REF.get();
-        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    @Override
+    protected void startBundle() throws Exception {
+        FilteringObjectStreamFactory service = new FilteringObjectStreamFactory();
+        registerService(FilteringObjectStreamFactory.class, service);
+        registerService(ForcedReloadable.class, service);
     }
 
 }

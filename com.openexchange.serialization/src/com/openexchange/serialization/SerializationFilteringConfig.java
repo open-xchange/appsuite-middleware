@@ -47,19 +47,15 @@
  *
  */
 
-package com.openexchange.utils.serialization;
+package com.openexchange.serialization;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -72,71 +68,59 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * {@link FilteringObjectInputStream} prevents invalid deserialization by using a blacklist
+ * {@link SerializationFilteringConfig} is a configuration for a {@link FilteringObjectInputStream}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class FilteringObjectInputStream extends ObjectInputStream {
+public class SerializationFilteringConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FilteringObjectInputStream.class.getName());
-    private final Configuration config;
+    private static final Logger LOG = LoggerFactory.getLogger(SerializationFilteringConfig.class);
+
+    private final List<Pattern> blacklist;
 
     /**
-     * Initializes a new {@link FilteringObjectInputStream}.
-     * 
-     * @param in The {@link InputStream}
+     * Initializes a new {@link SerializationFilteringConfig}.
+     *
+     * @param configFile The configuration file
+     * @throws ParserConfigurationException
+     * @throws SAXException
      * @throws IOException
      */
-    FilteringObjectInputStream(InputStream in, Configuration config) throws IOException {
-        super(in);
-        this.config = config;
-    }
+    SerializationFilteringConfig(final File configFile) throws ParserConfigurationException, SAXException, IOException {
 
-    @Override
-    protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
-
-        for (Pattern blackPattern : config.blacklist()) {
-            Matcher blackMatcher = blackPattern.matcher(input.getName());
-
-            if (blackMatcher.find()) {
-                LOG.error(String.format("Blocked by blacklist '%s'. Match found for '%s'", new Object[] { blackPattern.pattern(), input.getName() }));
-                throw new InvalidClassException(input.getName(), "Class blocked from deserialization (blacklist)");
-            }
+        if (!configFile.exists()) {
+            throw new IOException("File not found");
         }
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(configFile);
+        doc.getDocumentElement().normalize();
 
-        return super.resolveClass(input);
-    }
-
-    static final class Configuration {
-
-        private List<Pattern> blacklist;
-
-        Configuration(final File configFile) throws ParserConfigurationException, SAXException, IOException {
-
-            if(!configFile.exists()) {
-                throw new IOException("File not found");
-            }
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(configFile);
-            doc.getDocumentElement().normalize();
-
-            // load blacklist
-            List<Pattern> patterns = new ArrayList<>();
-            NodeList regexList = ((Element) doc.getElementsByTagName("blacklist").item(0)).getElementsByTagName("regexp");
-            for (int x = 0; x < regexList.getLength(); x++) {
-                Node item = regexList.item(x);
+        // load blacklist
+        List<Pattern> patterns = new ArrayList<>();
+        NodeList regexList = ((Element) doc.getElementsByTagName("blacklist").item(0)).getElementsByTagName("regexp");
+        for (int x = 0; x < regexList.getLength(); x++) {
+            Node item = regexList.item(x);
+            try {
                 patterns.add(Pattern.compile(item.getTextContent()));
+            } catch (PatternSyntaxException e) {
+                LOG.error("Unable to parse java deserialization filter config. Please check serialkiller.xml for errors.");
+                blacklist = Collections.unmodifiableList(Collections.emptyList());
+                return;
             }
-
-            blacklist = Collections.unmodifiableList(patterns);
         }
 
-        Iterable<Pattern> blacklist() {
-            return blacklist;
-        }
+        blacklist = Collections.unmodifiableList(patterns);
+    }
 
+    /**
+     * Gets the blacklist
+     * 
+     * @return An {@link Iterable} of regex {@link Pattern}
+     */
+    Iterable<Pattern> blacklist() {
+        return blacklist;
     }
 
 }
