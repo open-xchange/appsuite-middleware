@@ -203,24 +203,22 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
          */
         List<OXException> warnings = new ArrayList<OXException>();
         int limit = getHardResultLimit();
-
-        IDBasedCalendarAccess calendarAccess = Services.requireService(IDBasedCalendarAccessFactory.class).createAccess(session);
-        calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-        calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, limit + 1);
-        if (null != searchRequest.getOptions().getTimeZone()) {
-            calendarAccess.set(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.getTimeZone(searchRequest.getOptions().getTimeZone()));
-        }
         List<String> folderIDs = Folders.getStringIDs(searchRequest, Module.CALENDAR, session);
         List<SearchFilter> filters = getFilters(session, searchRequest.getFilters());
-
-        DataHandler dataHandler = Services.requireService(ConversionService.class).getDataHandler(DataHandlers.STRING_ARRAY_TO_EVENT_FIELDS);
-        if (dataHandler != null) {
-            ConversionResult processData = dataHandler.processData(new SimpleData<Object>(searchRequest.getColumns().getStringColumns()), new DataArguments(), session);
-            if (processData != null) {
-                calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, processData.getData());
+        Map<String, EventsResult> eventsResults;
+        IDBasedCalendarAccess calendarAccess = initCalendarAccess(searchRequest, session, limit + 1);
+        boolean committed = false;
+        try {
+            calendarAccess.startTransaction();
+            eventsResults = calendarAccess.searchEvents(folderIDs, filters, searchRequest.getQueries());
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
             }
+            calendarAccess.finish();
         }
-        Map<String, EventsResult> eventsResults = calendarAccess.searchEvents(folderIDs, filters, searchRequest.getQueries());
         /*
          * select suitable occurrences for series events
          */
@@ -244,11 +242,15 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         /*
-         * check if limit has been exceeded
+         * check if limit has been exceeded & add calendar access warnings
          */
         if (0 < limit && limit < events.size()) {
             events.remove(events.size() - 1);
             warnings.add(FindExceptionCode.TOO_MANY_RESULTS.create());
+        }
+        List<OXException> accessWarnings = calendarAccess.getWarnings();
+        if (null != accessWarnings && 0 < accessWarnings.size()) {
+            warnings.addAll(accessWarnings);
         }
         /*
          * construct search result
@@ -257,6 +259,31 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             Collections.sort(events, new RankedEventComparator(CalendarUtils.optTimeZone(session.getUser().getTimeZone())));
         }
         return new SearchResult(events.size(), searchRequest.getStart(), getDocuments(events, searchRequest.getStart(), searchRequest.getSize()), searchRequest.getActiveFacets(), warnings);
+    }
+
+    /**
+     * Initializes & prepares a calendar access for handling a specific search request.
+     * 
+     * @param searchRequest The handled search request
+     * @param session The user's session
+     * @param limit The limit to apply for the search
+     * @return The initialized calendar access
+     */
+    private static IDBasedCalendarAccess initCalendarAccess(SearchRequest searchRequest, ServerSession session, int limit) throws OXException {
+        IDBasedCalendarAccess calendarAccess = Services.requireService(IDBasedCalendarAccessFactory.class).createAccess(session);
+        calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
+        calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, limit + 1);
+        if (null != searchRequest.getOptions().getTimeZone()) {
+            calendarAccess.set(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.getTimeZone(searchRequest.getOptions().getTimeZone()));
+        }
+        DataHandler dataHandler = Services.requireService(ConversionService.class).getDataHandler(DataHandlers.STRING_ARRAY_TO_EVENT_FIELDS);
+        if (dataHandler != null) {
+            ConversionResult processData = dataHandler.processData(new SimpleData<Object>(searchRequest.getColumns().getStringColumns()), new DataArguments(), session);
+            if (processData != null) {
+                calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, processData.getData());
+            }
+        }
+        return calendarAccess;
     }
 
     private static List<Document> getDocuments(List<Event> events, int start, int size) {
