@@ -253,6 +253,12 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     private ContextExtended triggerUpdate(ContextExtended context) {
+        // Don't trigger schema update if context is disabled
+        if (!context.isEnabled()) {
+            context.setUpdating(false);
+            return context;
+        }
+
         // TODO We should introduce a logic layer above this context storage
         // layer. That layer should then trigger the update tasks.
         // Nearly all accesses to the ContextStorage need then to be replaced
