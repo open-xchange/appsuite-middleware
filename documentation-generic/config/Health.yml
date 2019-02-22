@@ -10,7 +10,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.health.password
       file: health.properties
-      packageName: open-xchange-
+      packageName: open-xchange-core
       tags: ["Health", "Rest"]
     - key: com.openexchange.health.password
       description: |
@@ -22,7 +22,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.health.username
       file: health.properties
-      packageName: open-xchange-
+      packageName: open-xchange-core
       tags: ["Health", "Rest"]
     - key: com.openexchange.health.skip
       description: |
@@ -33,7 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: health.properties
-      packageName: open-xchange-
+      packageName: open-xchange-core
       tags: ["Health", "Rest"]
     - key: com.openexchange.health.ignore
       description: |
@@ -45,5 +45,5 @@ properties:
       configcascadeAware: false
       related: 
       file: health.properties
-      packageName: open-xchange-
+      packageName: open-xchange-core
       tags: ["Health", "Rest"]
