@@ -199,7 +199,7 @@ public class PermissionResolver {
     public GuestInfo getGuest(int guestID) {
         Integer key = I(guestID);
         GuestInfo guest = knownGuests.get(key);
-        if (null == guest) {
+        if (null == guest && 0 < guestID) {
             try {
                 guest = services.getService(ShareService.class).getGuestInfo(session, guestID);
                 if (guest != null) {
@@ -239,7 +239,7 @@ public class PermissionResolver {
     public Group getGroup(int groupID) {
         Integer key = I(groupID);
         Group group = knownGroups.get(key);
-        if (null == group) {
+        if (null == group && 0 <= groupID) {
             try {
                 group = services.getService(GroupService.class).getGroup(session.getContext(), groupID);
                 knownGroups.put(key, group);
@@ -259,7 +259,7 @@ public class PermissionResolver {
     public User getUser(int userID) {
         Integer key = I(userID);
         User user = knownUsers.get(key);
-        if (null == user) {
+        if (null == user && 0 < userID) {
             try {
                 user = services.getService(UserService.class).getUser(userID, session.getContext());
                 knownUsers.put(key, user);
@@ -283,7 +283,7 @@ public class PermissionResolver {
     public Contact getUserContact(int userID) {
         Integer key = I(userID);
         Contact userContact = knownUserContacts.get(key);
-        if (null == userContact) {
+        if (null == userContact && 0 < userID) {
             try {
                 userContact = services.getService(ContactService.class).getUser(session, userID, CONTACT_FIELDS);
                 knownUserContacts.put(key, userContact);
@@ -315,7 +315,9 @@ public class PermissionResolver {
                 continue;
             }
             for (FileStoragePermission permission : permissions) {
-                if (permission.isGroup()) {
+                if (0 > permission.getEntity()) {
+                    LOGGER.debug("Skipping invalid entity {} in permissions of folder {}.", I(permission.getEntity()), folder.getId());
+                } else if (permission.isGroup()) {
                     groupIDs.add(I(permission.getEntity()));
                 } else {
                     userIDs.add(I(permission.getEntity()));
@@ -342,7 +344,9 @@ public class PermissionResolver {
                 continue;
             }
             for (OCLPermission oclPermission : oclPermissions) {
-                if (oclPermission.isGroupPermission()) {
+                if (0 > oclPermission.getEntity()) {
+                    LOGGER.debug("Skipping invalid entity {} in permissions of folder {}.", I(oclPermission.getEntity()), I(folder.getObjectID()));
+                } else if (oclPermission.isGroupPermission()) {
                     groupIDs.add(I(oclPermission.getEntity()));
                 } else {
                     userIDs.add(I(oclPermission.getEntity()));
@@ -379,7 +383,9 @@ public class PermissionResolver {
                 continue;
             }
             for (FileStorageObjectPermission objectPermission : objectPermissions) {
-                if (objectPermission.isGroup()) {
+                if (0 > objectPermission.getEntity()) {
+                    LOGGER.debug("Skipping invalid entity {} in permissions of file {}.", I(objectPermission.getEntity()), file.getId());
+                } else if (objectPermission.isGroup()) {
                     groupIDs.add(I(objectPermission.getEntity()));
                 } else {
                     userIDs.add(I(objectPermission.getEntity()));
