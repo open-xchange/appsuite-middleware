@@ -190,6 +190,11 @@ public class AddMediaFieldsForInfostoreDocumentTable extends UpdateTaskAdapter {
                 Tools.addColumns(con, "infostore_document", new Column("media_status", "VARCHAR(16) DEFAULT NULL"));
             }
 
+            if (!startedTransaction) {
+                // No column added...
+                return;
+            }
+
             con.commit();
             rollback = 2;
         } catch (SQLException e) {
