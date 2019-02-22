@@ -938,20 +938,37 @@ public class Utils {
      * @return The folders, or an empty list if there are none
      */
     public static List<CalendarFolder> getVisibleFolders(CalendarSession session) throws OXException {
+        return getVisibleFolders(session, Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+    }
+
+    /**
+     * Gets all calendar folders accessible by the current sesssion's user, where a minimum set of permissions are set.
+     *
+     * @param session The underlying calendar session
+     * @param requiredFolderPermission The required folder permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @return The folders, or an empty list if there are none
+     */
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
         Connection connection = optConnection(session);
         List<FolderObject> folders = getEntityResolver(session).getVisibleFolders(session.getUserId(), connection);
         UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
         List<CalendarFolder> calendarFolders = new ArrayList<CalendarFolder>(folders.size());
         for (FolderObject folder : folders) {
-            EffectivePermission permission;
+            EffectivePermission ownPermission;
             try {
-                permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits, connection);
+                ownPermission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits, connection);
             } catch (SQLException e) {
                 LOG.warn("Error getting effective user permission for folder {}; skipping.", I(folder.getObjectID()), e);
                 continue;
             }
-            if (permission.isFolderVisible()) {
-                calendarFolders.add(new CalendarFolder(session.getSession(), folder, permission));
+            if (ownPermission.getFolderPermission() >= requiredFolderPermission && 
+                ownPermission.getReadPermission() >= requiredReadPermission &&
+                ownPermission.getWritePermission() >= requiredWritePermission &&
+                ownPermission.getDeletePermission() >= requiredDeletePermission) {
+                calendarFolders.add(new CalendarFolder(session.getSession(), folder, ownPermission));
             }
         }
         return calendarFolders;

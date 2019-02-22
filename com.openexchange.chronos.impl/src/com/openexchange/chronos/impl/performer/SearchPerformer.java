@@ -329,7 +329,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
     private List<CalendarFolder> getFolders(List<String> folderIds) throws OXException {
         List<CalendarFolder> folders;
         if (null == folderIds) {
-            folders = getVisibleFolders(session);
+            folders = getVisibleFolders(session, Permission.READ_OWN_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         } else {
             folders = new ArrayList<CalendarFolder>(folderIds.size());
             for (String folderId : folderIds) {
