@@ -46,6 +46,11 @@
         type: string
         description: The category id to filter for. Retrieves all conversations with at least one mail in the category.
         required: false
+      - in: query
+        name: max
+        type: string
+        description: The max. number of messages to consider.
+        required: false
     responses:
       200:
         description: |
