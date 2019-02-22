@@ -79,7 +79,8 @@ public abstract class AbstractCryptoAware {
     /** The service look-up */
     protected final ServiceLookup services;
 
-    private final CompositionSpaceKeyStorageService keyStorageService;
+    /** The key storage service */
+    protected final CompositionSpaceKeyStorageService keyStorageService;
 
     /**
      * Initializes a new {@link AbstractCryptoAware}.

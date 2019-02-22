@@ -101,7 +101,7 @@ public class CompositionSpaceAddContentEncryptedFlag extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { CompositionSpaceCreateTableTask.class.getName() };
     }
 
 }

@@ -381,7 +381,8 @@ public class MessageMapper extends DefaultDbMapper<MessageDescription, MessageFi
 
             @Override
             public boolean isSet(MessageDescription object) {
-                return object.containsContentEncrypted();
+                // Consider as always set
+                return true;
             }
 
             @Override
@@ -391,7 +392,7 @@ public class MessageMapper extends DefaultDbMapper<MessageDescription, MessageFi
 
             @Override
             public Boolean get(MessageDescription object) {
-                return Boolean.valueOf(object.isContentEncrypted());
+                return object.containsContentEncrypted() ? Boolean.valueOf(object.isContentEncrypted()) : Boolean.FALSE;
             }
 
             @Override

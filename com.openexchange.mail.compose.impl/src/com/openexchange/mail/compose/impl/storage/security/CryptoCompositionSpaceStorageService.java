@@ -55,6 +55,7 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -69,6 +70,7 @@ import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.impl.AbstractCryptoAware;
 import com.openexchange.mail.compose.impl.storage.ImmutableCompositionSpace;
 import com.openexchange.mail.compose.impl.storage.ImmutableMessage;
+import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -80,6 +82,11 @@ import com.openexchange.session.Session;
  * @since v7.10.2
  */
 public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware implements CompositionSpaceStorageService {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CryptoCompositionSpaceStorageService.class);
+    }
 
     private final CompositionSpaceStorageService delegate;
 
@@ -222,16 +229,29 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
     public boolean closeCompositionSpace(Session session, UUID id) throws OXException {
         boolean deleted = delegate.closeCompositionSpace(session, id);
         if (deleted) {
-            deleteKeyFor(id, session);
+            try {
+                deleteKeyFor(id, session);
+            } catch (Exception e) {
+                LoggerHolder.LOG.warn("Failed to delete key associated with composition space {}", UUIDs.getUnformattedString(id), e);
+            }
         }
         return deleted;
     }
 
     @Override
     public List<UUID> deleteExpiredCompositionSpaces(Session session, long maxIdleTimeMillis) throws OXException {
-        List<UUID> deletedCompositionSpaces = delegate.deleteExpiredCompositionSpaces(session, maxIdleTimeMillis);
-        deleteKeysFor(deletedCompositionSpaces, session);
-        return deletedCompositionSpaces;
+        List<UUID> deletedCompositionSpaceIds = delegate.deleteExpiredCompositionSpaces(session, maxIdleTimeMillis);
+        if (null != deletedCompositionSpaceIds && !deletedCompositionSpaceIds.isEmpty()) {
+            CompositionSpaceKeyStorage keyStorage = keyStorageService.getKeyStorageFor(session);
+            for (UUID compositionSpaceId : deletedCompositionSpaceIds) {
+                try {
+                    keyStorage.deleteKeyFor(compositionSpaceId, session);
+                } catch (Exception e) {
+                    LoggerHolder.LOG.warn("Failed to delete key associated with composition space {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+                }
+            }
+        }
+        return deletedCompositionSpaceIds;
     }
 
 }
