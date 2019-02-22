@@ -82,7 +82,7 @@ public class CompositionSpaceAddContentEncryptedFlag extends UpdateTaskAdapter {
             con.setAutoCommit(false);
             rollback = 1;
 
-            Column col = new Column("contentEncrypted", "TINYINT(1) NOT NULL DEFAULT '0'");
+            Column col = new Column("contentEncrypted", "TINYINT(1) NOT NULL DEFAULT 0");
             Tools.checkAndAddColumns(con, "compositionSpace", col);
 
             con.commit();
