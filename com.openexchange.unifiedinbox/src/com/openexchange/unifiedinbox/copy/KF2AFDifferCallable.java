@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -121,8 +122,9 @@ final class KF2AFDifferCallable implements Task<Object> {
                 }
                 // Append gathered messages
                 final String[] results = destMailAccess.getMessageStorage().appendMessages(destFullname, mails);
+                UnifiedInboxUID helper = new UnifiedInboxUID();
                 for (int j = 0; j < results.length; j++) {
-                    toFill[indexList.get(j)] = results[j];
+                    toFill[indexList.get(j)] = helper.setUID(destAccountId, destFullname, results[j]).toString();
                 }
                 // Delete on move
                 if (move) {
