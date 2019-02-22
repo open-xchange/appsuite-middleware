@@ -385,16 +385,15 @@ public class RdbContextStorage extends ContextStorage {
             boolean byContextId = optContextId > 0;
             int contextId = byContextId ? optContextId : result.getInt("cid");
 
-            // Check if context-associated server matches this node's one
+            // Determine context-associated server
             int serverId = result.getInt("server_id");
-            if (serverId != DBPool.getServerId()) {
-                throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
-            }
 
+            // Initialize & fill ContextImpl instance from result set
             ContextImpl context = new ContextImpl(contextId);
-            int pos = byContextId ? 1 : 2;;
+            int pos = byContextId ? 1 : 2;
             context.setName(result.getString(pos++));
-            context.setEnabled(result.getBoolean(pos++));
+            boolean enabled = result.getBoolean(pos++);
+            context.setEnabled(enabled);
             context.setFilestoreId(result.getInt(pos++));
             context.setFilestoreName(result.getString(pos++));
             final String[] auth = new String[2];
@@ -402,6 +401,17 @@ public class RdbContextStorage extends ContextStorage {
             auth[1] = result.getString(pos++);
             context.setFilestoreAuth(auth);
             context.setFileStorageQuota(result.getLong(pos++));
+
+            /*-
+             * If context is disabled, return ContextImpl instance to let outer logic throw an appropriate exception. Otherwise, the user
+             * might be redirected to another server although context is disabled. See redirect in 'c.o.login.internal.LoginPerformer.doLogin()'
+             *
+             * Otherwise check if context-associated server matches this node's one
+             */
+            if (enabled && serverId != DBPool.getServerId()) {
+                throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
+            }
+
             return context;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
