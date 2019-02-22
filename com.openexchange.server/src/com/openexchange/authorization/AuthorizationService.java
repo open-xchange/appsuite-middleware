@@ -61,12 +61,12 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface AuthorizationService {
 
     /**
-     * Authorize the given user/context pair
+     * Authorizes the given user/context pair
      *
      * @param ctx The context
      * @param user The user
      * @throws OXException If user/context pair cannot be authorized; e.g. user and/or context is deactivated
      */
-    void authorizeUser(final Context ctx, final User user) throws OXException;
+    void authorizeUser(Context ctx, User user) throws OXException;
 
 }
