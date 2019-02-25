@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
@@ -153,9 +155,12 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         /*
          * search for an event matching the UID & verify equality via String#equals
          */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
-        Event event = findEventByUid(events, uid);
-        return null != event ? event.getId() : null;
+        List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
+        if (1 < events.size()) {
+            String message = "UID \"" + uid + "\" resolves to multiple events [" + events.stream().map(Event::getId).collect(Collectors.joining(", ")) + ']';
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(new IllegalStateException(message), CalendarProviders.ID_CHRONOS);
+        }
+        return events.isEmpty() ? null : events.get(0).getId();
     }
 
     /**
@@ -384,6 +389,18 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             }
         }
         return null;
+    }
+
+    private static List<Event> findEventsByUid(Collection<Event> events, String uid) {
+        List<Event> matchingEvents = new ArrayList<Event>();
+        if (null != events) {
+            for (Event event : events) {
+                if (uid.equals(event.getUid())) {
+                    matchingEvents.add(event);
+                }
+            }
+        }
+        return matchingEvents;
     }
 
 }
