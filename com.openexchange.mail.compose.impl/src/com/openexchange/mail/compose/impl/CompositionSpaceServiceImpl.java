@@ -1154,13 +1154,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 } catch (MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 } finally {
+                    attachmentStorage = args.attachmentStorage;
+                    attachments = args.attachments;
                     if (null != args.mailInterface) {
                         args.mailInterface.close(true);
                     }
                 }
-
-                attachmentStorage = args.attachmentStorage;
-                attachments = args.attachments;
             }
 
             // Check if vCard of session-associated user is supposed to be attached
