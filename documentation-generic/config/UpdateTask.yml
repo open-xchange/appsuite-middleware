@@ -17,3 +17,16 @@ properties:
       file: updatetasks.properties
       packageName: open-xchange-core
       tags: ["Updatetasks"]
+    - key: com.openexchange.groupware.update.denyUpdateOnDisabledContext
+      description: |
+        Accepts a boolean value, which controls whether pending update tasks are triggered for context-associated database
+        schema when a context is loaded from database. If the loaded context is disabled and this property is set to "true"
+        no pending update tasks are scheduled for execution.
+      defaultValue: false
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: updatetasks.properties
+      packageName: open-xchange-core
+      tags: ["Updatetasks"]

@@ -257,7 +257,7 @@ public class CachingContextStorage extends ContextStorage {
         /*-
          * Don't trigger schema update if:
          * - Context is disabled and
-         * - Property "com.openexchange.context.denyUpdateIfDisabled" is set to "true"
+         * - Property "com.openexchange.groupware.update.denyUpdateOnDisabledContext" is set to "true"
          */
         if (!context.isEnabled() && denyUpdateIfDisabled()) {
             context.setUpdating(false);
@@ -292,7 +292,7 @@ public class CachingContextStorage extends ContextStorage {
             return defaultValue;
         }
 
-        return configService.getBoolProperty("com.openexchange.context.denyUpdateIfDisabled", defaultValue);
+        return configService.getBoolProperty("com.openexchange.groupware.update.denyUpdateOnDisabledContext", defaultValue);
     }
 
 }
