@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -253,8 +254,12 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     private ContextExtended triggerUpdate(ContextExtended context) {
-        // Don't trigger schema update if context is disabled
-        if (!context.isEnabled()) {
+        /*-
+         * Don't trigger schema update if:
+         * - Context is disabled and
+         * - Property "com.openexchange.context.denyUpdateIfDisabled" is set to "true"
+         */
+        if (!context.isEnabled() && denyUpdateIfDisabled()) {
             context.setUpdating(false);
             return context;
         }
@@ -277,6 +282,17 @@ public class CachingContextStorage extends ContextStorage {
             }
         }
         return context;
+    }
+
+    private boolean denyUpdateIfDisabled() {
+        boolean defaultValue = false;
+
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configService) {
+            return defaultValue;
+        }
+
+        return configService.getBoolProperty("com.openexchange.context.denyUpdateIfDisabled", defaultValue);
     }
 
 }
