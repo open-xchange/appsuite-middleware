@@ -6257,6 +6257,11 @@ msgstr ""
 msgid "Invalid number of properties for distribution list."
 msgstr ""
 
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:145
+msgid ""
+"This operation is not allowed in folder %1$s because it has a subscription."
+msgstr ""
+
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr ""
