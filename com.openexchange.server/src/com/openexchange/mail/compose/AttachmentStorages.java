@@ -97,7 +97,7 @@ public class AttachmentStorages {
         AttachmentDescription attachment = new AttachmentDescription();
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(ATTACHMENT);
-        attachment.setMimeType(mailPart.getContentType().toString(true));
+        attachment.setMimeType(mailPart.getContentType().getBaseType());
         String fileName = mailPart.getFileName();
         attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(partNumber), mailPart.getContentType().getBaseType()) : fileName);
         attachment.setOrigin(CompositionSpaces.hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
@@ -139,7 +139,7 @@ public class AttachmentStorages {
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(INLINE);
         attachment.setContentId(contentId);
-        attachment.setMimeType(mailPart.getContentType().toString(true));
+        attachment.setMimeType(mailPart.getContentType().getBaseType());
         String fileName = mailPart.getFileName();
         attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(partNumber), mailPart.getContentType().getBaseType()) : fileName);
         attachment.setOrigin(AttachmentOrigin.MAIL);
@@ -181,7 +181,7 @@ public class AttachmentStorages {
         attachment.setCompositionSpaceId(compositionSpaceId);
         attachment.setContentDisposition(com.openexchange.mail.compose.Attachment.ContentDisposition.dispositionFor(disposition));
         ContentType contentType = new ContentType(uploadFile.getContentType());
-        attachment.setMimeType(contentType.toString());
+        attachment.setMimeType(contentType.getBaseType());
         if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
             // Set a Content-Id for inline image, too
             attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");

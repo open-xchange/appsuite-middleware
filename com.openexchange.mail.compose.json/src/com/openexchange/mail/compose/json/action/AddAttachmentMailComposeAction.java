@@ -199,7 +199,7 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
             if (null != document) {
                 try {
                     ContentType contentType = new ContentType(document.getMimeType());
-                    attachment.setMimeType(contentType.toString());
+                    attachment.setMimeType(contentType.getBaseType());
                     if (Attachment.ContentDisposition.INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
                         // Set a Content-Id for inline image, too
                         attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
@@ -219,7 +219,7 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
 
         File metadata = fileAccess.getFileMetadata(id, version);
         ContentType contentType = new ContentType(metadata.getFileMIMEType());
-        attachment.setMimeType(contentType.toString());
+        attachment.setMimeType(contentType.getBaseType());
         if (Attachment.ContentDisposition.INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
             // Set a Content-Id for inline image, too
             attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");

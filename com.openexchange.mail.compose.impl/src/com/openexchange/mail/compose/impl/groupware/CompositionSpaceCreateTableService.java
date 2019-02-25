@@ -112,7 +112,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "refId VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,"
         + "name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "size BIGINT(64) unsigned NOT NULL,"
-        + "mimeType VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+        + "mimeType VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "contentId VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "disposition VARCHAR(16) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "origin VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
