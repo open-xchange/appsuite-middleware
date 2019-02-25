@@ -809,35 +809,32 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT uuid, refType, refId FROM compositionSpaceAttachmentMeta LEFT JOIN compositionSpace ON compositionSpaceAttachmentMeta.csid=compositionSpace.uuid WHERE compositionSpaceAttachmentMeta.cid=? AND compositionSpaceAttachmentMeta.user=? AND compositionSpace.uuid IS NULL");
+                stmt = con.prepareStatement("SELECT compositionSpaceAttachmentMeta.uuid, refType, refId FROM compositionSpaceAttachmentMeta LEFT JOIN compositionSpace ON compositionSpaceAttachmentMeta.csid=compositionSpace.uuid WHERE compositionSpaceAttachmentMeta.cid=? AND compositionSpaceAttachmentMeta.user=? AND compositionSpace.uuid IS NULL");
                 stmt.setInt(1, session.getContextId());
                 stmt.setInt(2, session.getUserId());
                 rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    // Nothing to do
-                    return;
-                }
+                if (rs.next()) {
+                    List<UUID> ids2Delete = new LinkedList<>();
+                    do {
+                        if (getStorageType().getType() == rs.getInt(2)) {
+                            UUID attachmentId = UUIDs.toUUID(rs.getBytes(1));
+                            ids2Delete.add(attachmentId);
+                            String storageIdentifier = rs.getString(3);
+                            storageIdentifiers.add(storageIdentifier);
+                        }
+                    } while (rs.next());
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
 
-                List<UUID> ids2Delete = new LinkedList<>();
-                do {
-                    if (getStorageType().getType() == rs.getInt(2)) {
-                        UUID attachmentId = UUIDs.toUUID(rs.getBytes(1));
-                        ids2Delete.add(attachmentId);
-                        String storageIdentifier = rs.getString(3);
-                        storageIdentifiers.add(storageIdentifier);
+                    if (!ids2Delete.isEmpty()) {
+                        stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
+                        for (UUID id : ids2Delete) {
+                            stmt.setBytes(1, UUIDs.toByteArray(id));
+                            stmt.addBatch();
+                        }
+                        stmt.executeBatch();
                     }
-                } while (rs.next());
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-
-                if (!ids2Delete.isEmpty()) {
-                    stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
-                    for (UUID id : ids2Delete) {
-                        stmt.setBytes(1, UUIDs.toByteArray(id));
-                        stmt.addBatch();
-                    }
-                    stmt.executeBatch();
                 }
             } catch (SQLException e) {
                 throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
