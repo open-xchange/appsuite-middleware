@@ -159,4 +159,12 @@ public interface AttachmentStorage {
      */
     void deleteAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException;
 
+    /**
+     * Deletes all user-associated attachments, which are not referenced by an existent composition space.
+     *
+     * @param session The session providing user information
+     * @throws OXException If attachments cannot be deleted
+     */
+    void deleteUnreferencedAttachments(Session session) throws OXException;
+
 }

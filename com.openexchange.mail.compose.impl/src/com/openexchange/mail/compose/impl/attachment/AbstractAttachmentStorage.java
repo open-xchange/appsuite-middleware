@@ -759,6 +759,99 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         }
     }
 
+    @Override
+    public void deleteUnreferencedAttachments(Session session) throws OXException {
+        DatabaseService databaseService = requireDatabaseService();
+        Connection con = databaseService.getWritable(session.getContextId());
+        int rollback = 0;
+        try {
+            Databases.startTransaction(con);
+            rollback = 1;
+
+            List<String> storageIdentifiers = new ArrayList<>();
+            deleteUnreferencedAttachments(session, storageIdentifiers, con);
+
+            con.commit();
+            rollback = 2;
+
+            for (String storageIdentifier : storageIdentifiers) {
+                deleteSafely(storageIdentifier, session);
+            }
+        } catch (SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
+            databaseService.backWritable(session.getContextId(), con);
+        }
+    }
+
+    /**
+     * Deletes all user-associated attachments, which are not referenced by an existent composition space.
+     *
+     * @param session The session providing user data
+     * @param storageIdentifiers The listing of storage identifier
+     * @param con The connection to use
+     * @throws OXException If operation fails
+     */
+    public void deleteUnreferencedAttachments(Session session, List<String> storageIdentifiers, Connection con) throws OXException {
+        if (null == con) {
+            deleteUnreferencedAttachments(session);
+            return;
+        }
+
+        boolean error = true; // pessimistic
+        try {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT uuid, refType, refId FROM compositionSpaceAttachmentMeta LEFT JOIN compositionSpace ON compositionSpaceAttachmentMeta.csid=compositionSpace.uuid WHERE compositionSpaceAttachmentMeta.cid=? AND compositionSpaceAttachmentMeta.user=? AND compositionSpace.uuid IS NULL");
+                stmt.setInt(1, session.getContextId());
+                stmt.setInt(2, session.getUserId());
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    // Nothing to do
+                    return;
+                }
+
+                List<UUID> ids2Delete = new LinkedList<>();
+                do {
+                    if (getStorageType().getType() == rs.getInt(2)) {
+                        UUID attachmentId = UUIDs.toUUID(rs.getBytes(1));
+                        ids2Delete.add(attachmentId);
+                        String storageIdentifier = rs.getString(3);
+                        storageIdentifiers.add(storageIdentifier);
+                    }
+                } while (rs.next());
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
+                for (UUID id : ids2Delete) {
+                    stmt.setBytes(1, UUIDs.toByteArray(id));
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            } catch (SQLException e) {
+                throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+
+            error = false; // All went fine
+        } finally {
+            if (error) {
+                // Prevent from prematurely deleting storage resources
+                storageIdentifiers.clear();
+            }
+        }
+    }
+
     private static class StorageIdentifierAndSize {
 
         final String storageIdentifier;

@@ -297,6 +297,26 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             registerService(LoginHandlerService.class, loginHandler);
         }
 
+        {
+            LoginHandlerService loginHandler = new LoginHandlerService() {
+
+                @Override
+                public void handleLogout(LoginResult logout) throws OXException {
+                    // Ignore
+                }
+
+                @Override
+                public void handleLogin(LoginResult login) throws OXException {
+                    Session session = login.getSession();
+                    if (null != session) {
+                        AttachmentStorage attachmentStorage = attachmentStorageService.getAttachmentStorageFor(session);
+                        attachmentStorage.deleteUnreferencedAttachments(session);
+                    }
+                }
+            };
+            registerService(LoginHandlerService.class, loginHandler);
+        }
+
         // Register Groupware stuff.
         registerService(CreateTableService.class, new CompositionSpaceCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(

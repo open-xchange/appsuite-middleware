@@ -219,6 +219,11 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
         attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
     }
 
+    @Override
+    public void deleteUnreferencedAttachments(Session session) throws OXException {
+        attachmentStorage.deleteUnreferencedAttachments(session);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static class CountingInputStreamSizeProvider implements SizeProvider {
