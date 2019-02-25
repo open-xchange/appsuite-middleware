@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics.jmx.beans;
 
+import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.metrics.MetricDescriptor;
@@ -69,5 +70,24 @@ public abstract class AbstractMetricMBean extends AnnotatedStandardMBean impleme
      */
     public AbstractMetricMBean(Class<?> mbeanInterface, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
         super(metricDescriptor.getDescription(), mbeanInterface);
+    }
+
+    /**
+     * Calculates the rate factor for the specified {@link TimeUnit}
+     * 
+     * @param rate The time unit for which to calculate the rate factor
+     * @return The rate factor
+     */
+    protected double calculateRateFactor(TimeUnit rate) {
+        switch (rate) {
+            case MILLISECONDS:
+                return 1.0 / TimeUnit.SECONDS.toMillis(1);
+            case MICROSECONDS:
+                return 1.0 / TimeUnit.SECONDS.toMicros(1);
+            case NANOSECONDS:
+                return 1.0 / TimeUnit.SECONDS.toNanos(1);
+            default:
+                return rate.toSeconds(1);
+        }
     }
 }
