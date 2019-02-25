@@ -79,7 +79,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     public MeterMBeanImpl(DropwizardMeter meter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
         super(MeterMBean.class, metricDescriptor);
         this.meter = meter;
-        this.rateFactor = metricDescriptor.getRate().toSeconds(1);
+        this.rateFactor = calculateRateFactor(metricDescriptor.getRate());
         this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
     }
 
