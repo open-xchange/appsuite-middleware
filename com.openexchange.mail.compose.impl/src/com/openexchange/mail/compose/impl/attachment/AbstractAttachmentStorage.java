@@ -831,12 +831,14 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 rs = null;
                 stmt = null;
 
-                stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
-                for (UUID id : ids2Delete) {
-                    stmt.setBytes(1, UUIDs.toByteArray(id));
-                    stmt.addBatch();
+                if (!ids2Delete.isEmpty()) {
+                    stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
+                    for (UUID id : ids2Delete) {
+                        stmt.setBytes(1, UUIDs.toByteArray(id));
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
                 }
-                stmt.executeBatch();
             } catch (SQLException e) {
                 throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
