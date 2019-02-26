@@ -760,6 +760,10 @@ public class OXFolderAccess {
      * @return <code>true</code> if the folder has a subscription, <code>false</code> otherwise
      */
     public boolean isSubscriptionFolder(String folderId, int contextId) throws OXException {
+        if (null != readCon) {
+            return OXFolderDependentUtil.hasSubscription(readCon, contextId, folderId);
+        }
+
         Connection con = DBPool.pickup(ctx);
         try {
             return OXFolderDependentUtil.hasSubscription(con, contextId, folderId);
