@@ -667,7 +667,7 @@ public class Strings {
         }
 
         if (prev > 0) {
-            sb.append(s.substring(prev, s.length()));
+            sb.append(s.substring(prev));
         }
         return null == sb ? s : sb.toString();
     }
@@ -703,7 +703,7 @@ public class Strings {
         }
 
         if (prev > 0) {
-            sb.append(s.substring(prev, s.length()));
+            sb.append(s.substring(prev));
         }
         return null == sb ? s : sb.toString();
     }
@@ -958,7 +958,7 @@ public class Strings {
      * starting from <code>beginIndex</code> and going until the <code>endIndex</code> inclusively.
      * If the <code>endIndex</code> lies outside the <code>array</code> length, then the array's length
      * will be used as an <code>endIndex</code>.
-     * 
+     *
      * @param array The elements of the array to join
      * @param connector The connector string
      * @param beginIndex The begin index
@@ -1816,7 +1816,7 @@ public class Strings {
 
     /**
      * Converts the specified byte count to its counterpart human readable format.
-     * 
+     *
      * @param bytes The amount of bytes to convert
      * @param si Whether the SI notation will be used.
      * @return The human readable format
