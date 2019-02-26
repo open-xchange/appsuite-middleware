@@ -52,6 +52,7 @@ package com.openexchange.realtime.hazelcast.serialization.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
@@ -62,7 +63,6 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.serialization.FilteringObjectInputStream;
 import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
@@ -177,7 +177,7 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
      */
     private static OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
-        try (final FilteringObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
+        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
             return OXException.class.cast(objectInputStream.readObject());
         }
     }

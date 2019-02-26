@@ -47,80 +47,56 @@
  *
  */
 
-package com.openexchange.serialization;
+package com.openexchange.serialization.impl;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
- * {@link SerializationFilteringConfig} is a configuration for a {@link FilteringObjectInputStream}
+ * {@link FilteringObjectInputStream} prevents invalid deserialization by using a blacklist
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class SerializationFilteringConfig {
+public class FilteringObjectInputStream extends ObjectInputStream {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SerializationFilteringConfig.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FilteringObjectInputStream.class);
+    }
 
-    private final List<Pattern> blacklist;
+    private final SerializationFilteringConfig config;
 
     /**
-     * Initializes a new {@link SerializationFilteringConfig}.
+     * Initializes a new {@link FilteringObjectInputStream}.
      *
-     * @param configFile The configuration file
-     * @throws ParserConfigurationException
-     * @throws SAXException
+     * @param in The {@link InputStream}
      * @throws IOException
      */
-    SerializationFilteringConfig(final File configFile) throws ParserConfigurationException, SAXException, IOException {
+    FilteringObjectInputStream(InputStream in, SerializationFilteringConfig config) throws IOException {
+        super(in);
+        this.config = config;
+    }
 
-        if (!configFile.exists()) {
-            throw new IOException("File not found");
-        }
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(configFile);
-        doc.getDocumentElement().normalize();
+    @Override
+    protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
 
-        // load blacklist
-        List<Pattern> patterns = new ArrayList<>();
-        NodeList regexList = ((Element) doc.getElementsByTagName("blacklist").item(0)).getElementsByTagName("regexp");
-        for (int x = 0; x < regexList.getLength(); x++) {
-            Node item = regexList.item(x);
-            try {
-                patterns.add(Pattern.compile(item.getTextContent()));
-            } catch (PatternSyntaxException e) {
-                LOG.error("Unable to parse java deserialization filter config. Please check serialkiller.xml for errors.");
-                blacklist = Collections.unmodifiableList(Collections.emptyList());
-                return;
+        for (Pattern blackPattern : config.blacklist()) {
+            Matcher blackMatcher = blackPattern.matcher(input.getName());
+
+            if (blackMatcher.find()) {
+                LoggerHolder.LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), input.getName());
+                throw new InvalidClassException(input.getName(), "Class blocked from deserialization (blacklist)");
             }
         }
 
-        blacklist = Collections.unmodifiableList(patterns);
-    }
-
-    /**
-     * Gets the blacklist
-     * 
-     * @return An {@link Iterable} of regex {@link Pattern}
-     */
-    Iterable<Pattern> blacklist() {
-        return blacklist;
+        return super.resolveClass(input);
     }
 
 }

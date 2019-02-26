@@ -52,6 +52,7 @@ package com.openexchange.realtime.hazelcast.serialization.channel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,7 +76,6 @@ import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExce
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.serialization.FilteringObjectInputStream;
 import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
@@ -226,7 +226,7 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
      */
     private static Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
-        try (FilteringObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
+        try (ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
             return Stanza.class.cast(objectInputStream.readObject());
         }
     }
