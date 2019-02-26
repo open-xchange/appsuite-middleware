@@ -81,7 +81,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
@@ -172,8 +171,8 @@ public final class SessionHandler {
                                                     config.getMaxSessions(), 
                                                     config.getRandomTokenTimeout(), 
                                                     config.getNumberOfLongTermSessionContainers(), 
-                                                    config.isAutoLogin(), 
-                                                    new MetricHandler(Services.getServiceLookup().getServiceSafe(MetricService.class)));
+                                                    config.isAutoLogin() 
+                                                    );
         // @formatter:on
         SESSION_DATA_REF.set(sessionData);
         noLimit = (config.getMaxSessions() == 0);
@@ -1694,6 +1693,57 @@ public final class SessionHandler {
         SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? 0 : sessionData.countSessions();
     }
+    
+    /**
+     * Gets the total number of sessions
+     * 
+     * @return The total number of sessions
+     */
+    public static int getMetricTotalSessions() {
+        return getNumberOfActiveSessions();
+    }
+    
+    /**
+     * Gets the number of active sessions (Sessions within the first two short-term container.
+     *  
+     * @return The number of active sessions
+     */
+    public static int getMetricActiveSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if(sessionData == null) {
+            return 0;
+        }
+        int[] shortTermSessionsPerContainer = sessionData.getShortTermSessionsPerContainer();
+        return shortTermSessionsPerContainer.length < 2 ? 0 : shortTermSessionsPerContainer[0]+shortTermSessionsPerContainer[1];
+    }
+    
+    /**
+     * Gets the number of sessions in the short-term container
+     * 
+     * @return The number of sessions in the short-term container
+     */
+    public static int getMetricShortSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if(sessionData == null) {
+            return 0;
+        }
+        return sessionData.getNumShortTerm();
+    }
+    
+    /**
+     * Gets the number of sessions in the long-term container
+     * 
+     * @return the number of sessions in the long-term container
+     */
+    public static int getMetricLongSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if(sessionData == null) {
+            return 0;
+        }
+        return sessionData.getNumLongTerm();
+    }
+    
+    
 
     public static int[] getNumberOfLongTermSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();

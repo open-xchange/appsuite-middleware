@@ -74,7 +74,7 @@ public class Bug16158Test {
 
     @Before
     public void setUp() throws Exception {
-        sessionData = new SessionData(100, 1, 60000, 167, false, null);
+        sessionData = new SessionData(100, 1, 60000, 167, false);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         final SessionIdGenerator idGenerator = UUIDSessionIdGenerator.getInstance();
