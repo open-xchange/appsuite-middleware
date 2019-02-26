@@ -254,28 +254,23 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     private ContextExtended triggerUpdate(ContextExtended context) {
-        /*-
-         * Don't trigger schema update if:
-         * - Context is disabled and
-         * - Property "com.openexchange.groupware.update.denyUpdateOnDisabledContext" is set to "true"
-         */
-        if (!context.isEnabled() && denyUpdateIfDisabled()) {
-            context.setUpdating(false);
-            return context;
-        }
-
         // TODO We should introduce a logic layer above this context storage
         // layer. That layer should then trigger the update tasks.
         // Nearly all accesses to the ContextStorage need then to be replaced
         // with an access to the ContextService.
-        final Updater updater = Updater.getInstance();
+        Updater updater = Updater.getInstance();
         try {
-            final UpdateStatus status = updater.getStatus(context);
-            context.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
+            UpdateStatus status = updater.getStatus(context.getContextId());
+            context.setUpdating(status.blockingUpdatesRunning());
             if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                updater.startUpdate(context);
+                if (denyImplicitUpdateOnContextLoad()) {
+                    context.setUpdateNeeded(true);
+                } else {
+                    context.setUpdating(true);
+                    updater.startUpdate(context);
+                }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
                 LOG.warn("Switching to read only mode for context {} because master database is down.", I(context.getContextId()), e);
                 context.setReadOnly(true);
@@ -284,7 +279,7 @@ public class CachingContextStorage extends ContextStorage {
         return context;
     }
 
-    private boolean denyUpdateIfDisabled() {
+    private boolean denyImplicitUpdateOnContextLoad() {
         boolean defaultValue = false;
 
         ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -292,7 +287,7 @@ public class CachingContextStorage extends ContextStorage {
             return defaultValue;
         }
 
-        return configService.getBoolProperty("com.openexchange.groupware.update.denyUpdateOnDisabledContext", defaultValue);
+        return configService.getBoolProperty("com.openexchange.groupware.update.denyImplicitUpdateOnContextLoad", defaultValue);
     }
 
 }
