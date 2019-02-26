@@ -55,13 +55,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,18 +66,13 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.factory.ICalFacotry;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.manager.EventManager;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.UpdateBody;
-import com.openexchange.testing.httpclient.models.UserData;
-import com.openexchange.testing.httpclient.models.UserResponse;
 
 /**
  * {@link AttendeePrivilegesTest}
@@ -92,23 +81,7 @@ import com.openexchange.testing.httpclient.models.UserResponse;
  * @since v7.10.2
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class AttendeePrivilegesTest extends AbstractChronosTest {
-
-    private CalendarUser calendarUser1;
-
-    private Attendee organizerAttendee;
-
-    private Attendee actingAttendee;
-
-    private EventData event;
-
-    private ApiClient apiClient2;
-
-    private UserApi userApi2;
-
-    private EventManager eventManager2;
-
-    private String folderId2;
+public class AttendeePrivilegesTest extends AbstractOrganizerTest {
 
     public enum Privileges {
         DEFAULT,
@@ -120,33 +93,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        event = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), "AttendeePrivilegesTest");
-
         setAttendeePrivileges(event);
-
-        // The internal attendees
-        organizerAttendee = createAttendee(getClient().getValues().getUserId());
-        actingAttendee = createAttendee(getClient2().getValues().getUserId());
-
-        LinkedList<Attendee> attendees = new LinkedList<>();
-        attendees.add(organizerAttendee);
-        attendees.add(actingAttendee);
-        event.setAttendees(attendees);
-
-        // The original organizer
-        calendarUser1 = AttendeeFactory.createOrganizerFrom(organizerAttendee);
-        event.setOrganizer(calendarUser1);
-        event.setCalendarUser(calendarUser1);
-
-        // Setup view of attendee
-        apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
-        EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
-        rememberClient(enhancedClient);
-        userApi2 = new UserApi(apiClient2, enhancedClient, testUser2, true);
-
-        folderId2 = getDefaultFolder(userApi2.getSession(), apiClient2);
-        eventManager2 = new EventManager(userApi2, folderId2);
     }
 
     @Override
@@ -154,6 +101,11 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
     public void tearDown() throws Exception {
         eventManager2.cleanUp();
         super.tearDown();
+    }
+
+    @Override
+    String getEventName() {
+        return "AttendeePrivilegesTest";
     }
 
     @Test
@@ -177,7 +129,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
         event = eventManager.createEvent(event);
 
         addExternalAttendee(event, false);
-        
+
         // Re-check as organizer
         EventData data = eventManager.getEvent(event.getFolder(), event.getId());
         assertThat("Attendee were not added", Integer.valueOf(data.getAttendees().size()), is(Integer.valueOf(3)));
@@ -250,7 +202,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
         // Create event
         event = eventManager.createEvent(event);
 
-        EventData occurrence = getOccurrence();
+        EventData occurrence = getSecondOccurrence();
 
         EventData exception = prepareException(occurrence);
         EventData master = eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
@@ -280,7 +232,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
         // Create event
         event = eventManager.createEvent(event);
 
-        EventData occurrence = getOccurrence();
+        EventData occurrence = getSecondOccurrence();
 
         EventData exception = prepareException(occurrence);
         EventData master = eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
@@ -301,7 +253,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
         // Create event
         event = eventManager.createEvent(event);
 
-        EventData occurrence = getOccurrence(eventManager2);
+        EventData occurrence = getSecondOccurrence(eventManager2);
         occurrence = eventManager2.getEvent(null, occurrence.getId(), occurrence.getRecurrenceId(), false);
 
         // Update as attendee
@@ -385,7 +337,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
         // Create event
         event = eventManager.createEvent(event);
 
-        EventData occurrence = getOccurrence(eventManager);
+        EventData occurrence = getSecondOccurrence(eventManager);
         occurrence = eventManager.getEvent(null, occurrence.getId(), occurrence.getRecurrenceId(), false);
 
         // Update as attendee
@@ -402,7 +354,7 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
         body.setEvent(masterUpdate);
         ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), defaultFolderId, masterUpdate.getId(), body, masterUpdate.getLastModified(), null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE);
         assertThat(Integer.valueOf(updateResponse.getData().getUpdated().size()), is(Integer.valueOf(2)));
-        
+
         master = updateResponse.getData().getUpdated().stream().filter(e -> e.getId().equals(e.getSeriesId())).findAny().orElse(null);
         assertThat("\"Modify\" privilege should have been set", master.getAttendeePrivileges(), is(Privileges.MODIFY.name()));
 
@@ -411,54 +363,6 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
     }
 
     // ----------------------------- HELPER -----------------------------
-
-    protected Attendee createAttendee(int userId) throws ApiException {
-        Attendee attendee = AttendeeFactory.createAttendee(userId, CuTypeEnum.INDIVIDUAL);
-
-        UserData userData = getUserInformation(userId);
-
-        attendee.cn(userData.getDisplayName());
-        attendee.email(userData.getEmail1());
-        attendee.setUri("mailto:" + userData.getEmail1());
-        attendee.entity(Integer.valueOf(userData.getId()));
-        return attendee;
-    }
-
-    private UserData getUserInformation(int userId) throws ApiException {
-        com.openexchange.testing.httpclient.modules.UserApi api = new com.openexchange.testing.httpclient.modules.UserApi(getApiClient());
-        UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
-        return userResponse.getData();
-    }
-
-    private EventData getOccurrence() throws ApiException {
-        return getOccurrence(eventManager);
-    }
-
-    private EventData getOccurrence(EventManager manager) throws ApiException {
-        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
-        Date from = CalendarUtils.truncateTime(new Date(), timeZone);
-        Date until = CalendarUtils.add(from, Calendar.DATE, 7, timeZone);
-        List<EventData> occurrences = manager.getAllEvents(null, from, until, true);
-        occurrences = occurrences.stream().filter(x -> x.getId().equals(event.getId())).collect(Collectors.toList());
-
-        return occurrences.get(2);
-    }
-
-    private EventData getOccurrence(EventManager manager, String recurrecneId, String seriesId) throws ApiException {
-        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
-        Date from = CalendarUtils.truncateTime(new Date(), timeZone);
-        Date until = CalendarUtils.add(from, Calendar.DATE, 7, timeZone);
-        List<EventData> occurrences = manager.getAllEvents(null, from, until, true);
-        return occurrences.stream().filter(x -> seriesId.equals(x.getSeriesId()) && recurrecneId.equals(x.getRecurrenceId())).findFirst().orElse(null);
-    }
-
-    private EventData prepareException(EventData occurrence) {
-        EventData exception = prepareEventUpdate(occurrence);
-        exception.setSummary("AttendeePrivilegesTest: Changed summary");
-        exception.setRecurrenceId(occurrence.getRecurrenceId());
-        exception.setAttendees(occurrence.getAttendees());
-        return exception;
-    }
 
     private void addExternalAttendee(EventData eventData, boolean expectException) throws ApiException, ChronosApiException {
         ArrayList<Attendee> attendees = new ArrayList<>(eventData.getAttendees());
@@ -475,13 +379,6 @@ public class AttendeePrivilegesTest extends AbstractChronosTest {
 
     private void setAttendeePrivileges(EventData data) {
         data.setAttendeePrivileges(Privileges.MODIFY.name());
-    }
-
-    private EventData prepareEventUpdate(EventData data) {
-        EventData eventUpdate = new EventData();
-        eventUpdate.setId(data.getId());
-        eventUpdate.setLastModified(Long.valueOf(System.currentTimeMillis()));
-        return eventUpdate;
     }
 
 }
