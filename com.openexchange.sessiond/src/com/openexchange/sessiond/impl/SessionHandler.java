@@ -1704,7 +1704,7 @@ public final class SessionHandler {
     }
     
     /**
-     * Gets the number of active sessions (Sessions within the first two short-term container.
+     * Gets the number of active sessions (Sessions within the first two short-term containers).
      *  
      * @return The number of active sessions
      */

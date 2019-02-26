@@ -70,13 +70,13 @@ final class SessionMetricHandler {
     private static final String COUNT_TOTAL_DESC = "The number of total sessions";
 
     private static final String COUNT_LONG = "LongTermCount.Total";
-    private static final String COUNT_LONG_DESC = "The number of sessions in the long term container";
+    private static final String COUNT_LONG_DESC = "The number of sessions in the long term containers";
 
     private static final String COUNT_SHORT = "ShortTermCount.Total";
-    private static final String COUNT_SHORT_DESC = "The number of sessions in the short term container";
+    private static final String COUNT_SHORT_DESC = "The number of sessions in the short term containers";
     
     private static final String COUNT_ACTIVE = "ActiveCount.Total";
-    private static final String COUNT_ACTIVE_DESC = "The number of active sessions";
+    private static final String COUNT_ACTIVE_DESC = "The number of active sessions or in other words the number of sessions within the first two short term containers.";
     
     private static final MetricDescriptor DESC_TOTAL;
     private static final MetricDescriptor DESC_LONG;
