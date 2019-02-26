@@ -197,7 +197,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @param optCalendarUtilities optional {@link CalendarUtilities}. This is required for implementations which also implement {@link PersonalAlarmAware}.
      * @throws OXException
      */
-    protected BasicCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, CalendarUtilities optCalendarUtilities) throws OXException {
+    protected BasicCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, CalendarUtilities optCalendarUtilities) {
         this.session = session;
         this.account = account;
         this.parameters = parameters;

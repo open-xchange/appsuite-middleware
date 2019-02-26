@@ -101,8 +101,6 @@ import com.openexchange.session.Session;
  */
 public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
-    private static final String DEFAULT_CALENDAR_NAME = "Google Calendar";
-
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
 
     private final GoogleOAuthAccess oauthAccess;
