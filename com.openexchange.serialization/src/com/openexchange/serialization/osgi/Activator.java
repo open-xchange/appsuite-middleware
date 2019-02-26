@@ -62,9 +62,16 @@ import com.openexchange.serialization.impl.FilteringObjectStreamFactoryImpl;
  */
 public class Activator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[0];
+        return EMPTY_CLASSES;
     }
 
     @Override
