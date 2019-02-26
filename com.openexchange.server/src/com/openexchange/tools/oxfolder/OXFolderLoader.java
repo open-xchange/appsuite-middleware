@@ -357,10 +357,14 @@ public final class OXFolderLoader {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
-            final ArrayList<Integer> retval = new ArrayList<Integer>();
-            while (rs.next()) {
-                retval.add(Integer.valueOf(rs.getInt(1)));
+            if (!rs.next()) {
+                return new ArrayList<Integer>(0);
             }
+
+            ArrayList<Integer> retval = new ArrayList<Integer>();
+            do {
+                retval.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
             return retval;
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
