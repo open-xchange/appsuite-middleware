@@ -52,6 +52,7 @@ package com.openexchange.mail.parser.handlers;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
+import static com.openexchange.mail.parser.MailMessageParser.getFileName;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
@@ -264,6 +265,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private int currentNestingLevel = 0;
     private final int maxNestedMessageLevels;
     private String initialiserSequenceId;
+    private boolean handleNestedMessageAsAttachment;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -350,6 +352,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.maxContentSize = maxContentSize;
         this.jsonObject = new JSONObject(32);
         this.maxNestedMessageLevels = 1; //maxNestedMessageLevels <= 0 ? DEFAULT_MAX_NESTED_MESSAGES_LEVELS : maxNestedMessageLevels;
+        this.handleNestedMessageAsAttachment = false;
         try {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
@@ -465,6 +468,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
      */
     public JsonMessageHandler setSizePolicy(final SizePolicy sizePolicy) {
         this.sizePolicy = sizePolicy;
+        return this;
+    }
+
+    /**
+     * Sets to handle nested messages as attachments
+     *
+     * @return This {@link JsonMessageHandler} with new behavior applied
+     */
+    public JsonMessageHandler setHandleNestedMessageAsAttachment() {
+        this.handleNestedMessageAsAttachment = true;
         return this;
     }
 
@@ -1373,8 +1386,17 @@ public final class JsonMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    private static final String PRIMARY_RFC822 = "message/rfc822";
+
     @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
+        if (handleNestedMessageAsAttachment) {
+            final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
+            boolean inline = Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (mailPart.getFileName() == null));
+            ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : ContentType.APPLICATION_OCTETSTREAM_CONTENT_TYPE;
+            String fileName = getFileName(mailPart.getFileName(), contentType, id, PRIMARY_RFC822);
+            return handleAttachment(mailPart, inline, PRIMARY_RFC822, fileName, id);
+        }
 
         String nestedMessageFullId = "";
         try {

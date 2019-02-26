@@ -98,6 +98,7 @@ public class MessageWriterParams {
         private int maxContentSize;
         private int maxNestedMessageLevels;
         private boolean includePlainText;
+        private boolean handleNestedMessageAsAttachment;
 
         Builder(int accountId, MailMessage mail, Session session) {
             super();
@@ -106,6 +107,17 @@ public class MessageWriterParams {
             this.session = session;
             asMarkup = true;
             sizePolicy = SizePolicy.NONE;
+            handleNestedMessageAsAttachment = false;
+        }
+
+        /**
+         * Sets to handle nested messages as regular attachments.
+         * @param handleNestedMessageAsAttachment The flag to set
+         * @return This builder
+         */
+        public Builder setHandleNestedMessageAsAttachment(boolean handleNestedMessageAsAttachment) {
+            this.handleNestedMessageAsAttachment = handleNestedMessageAsAttachment;
+            return this;
         }
 
         /**
@@ -244,7 +256,7 @@ public class MessageWriterParams {
          * @return The <code>MessageWriterParams</code> instance
          */
         public MessageWriterParams build() {
-            return new MessageWriterParams(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, sizePolicy, maxContentSize, maxNestedMessageLevels, includePlainText);
+            return new MessageWriterParams(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, sizePolicy, maxContentSize, maxNestedMessageLevels, includePlainText, handleNestedMessageAsAttachment);
         }
     }
 
@@ -266,11 +278,12 @@ public class MessageWriterParams {
     private final int maxContentSize;
     private final int maxNestedMessageLevels;
     private final boolean includePlaintext;
+    private final boolean handleNestedMessageAsAttachment;
 
     /**
      * Initializes a new {@link MessageWriterParams}.
      */
-    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
+    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext, boolean handleNestedMessageAsAttachment) {
         super();
         this.accountId = accountId;
         this.mail = mail;
@@ -288,6 +301,16 @@ public class MessageWriterParams {
         this.maxContentSize = maxContentSize;
         this.maxNestedMessageLevels = maxNestedMessageLevels;
         this.includePlaintext = includePlaintext;
+        this.handleNestedMessageAsAttachment = handleNestedMessageAsAttachment;
+    }
+
+    /**
+     * Checks whether nested messages are handled as regular attachments.
+     *
+     * @return <code>true</code> to handle as attachments; otherwise <code>false</code>
+     */
+    public boolean isHandleNestedMessageAsAttachment() {
+        return handleNestedMessageAsAttachment;
     }
 
     /**
