@@ -244,7 +244,6 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.principalusecount.PrincipalUseCountService;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -335,7 +334,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class, GroupService.class, GroupStorage.class, PrincipalUseCountService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class, GroupService.class, GroupStorage.class, PrincipalUseCountService.class };
 
     private static volatile BundleContext CONTEXT;
 
