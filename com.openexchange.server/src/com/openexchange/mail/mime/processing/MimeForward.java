@@ -77,6 +77,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.FromAddressProvider;
@@ -589,7 +590,7 @@ public final class MimeForward extends AbstractMimeProcessing {
             textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             textPart.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,
-                MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                Strings.replaceSequenceWith(MimeTypes.MIME_TEXT_PLAIN_TEMPL, "#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
             multipart.addBodyPart(textPart);
             MessageUtility.setContent(multipart, forwardMsg);
             // forwardMsg.setContent(multipart);

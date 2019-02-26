@@ -1110,7 +1110,7 @@ public class MimeMessageFiller {
                 } else {
                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                     if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(Strings.replaceSequenceWith(htmlService.getConformHTML(HTML_SPACE, charset), HTML_SPACE, ""), contentType)));
                     } else {
                         mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
                     }
@@ -1744,12 +1744,10 @@ public class MimeMessageFiller {
             final MimeBodyPart html = new MimeBodyPart();
             if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
                 html.setDataHandler(new DataHandler(new MessageDataSource(
-                    htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""),
+                    Strings.replaceSequenceWith(htmlService.getConformHTML(HTML_SPACE, charset), HTML_SPACE, ""),
                     contentType)));
-                // html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
             } else {
                 html.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
-                // html.setContent(wellFormedHTMLContent, contentType);
             }
             html.setHeader(HDR_MIME_VERSION, VERSION_1_0);
             html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);

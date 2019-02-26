@@ -535,7 +535,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                     textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                     textPart.setHeader(
                         MessageHeaders.HDR_CONTENT_TYPE,
-                        MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                        Strings.replaceSequenceWith(MimeTypes.MIME_TEXT_PLAIN_TEMPL, "#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
                     multipart.addBodyPart(textPart);
                     MessageUtility.setContent(multipart, replyMsg);
                     // forwardMsg.setContent(multipart);

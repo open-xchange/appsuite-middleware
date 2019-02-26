@@ -61,6 +61,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarExtendDNColumnTaskV2}
@@ -152,7 +153,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         // ALTER TABLE...
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_MODIFY, "#TABLE#", tableName));
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw wrapSQLException(e);

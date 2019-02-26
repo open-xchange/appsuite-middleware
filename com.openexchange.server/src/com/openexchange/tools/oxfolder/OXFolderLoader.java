@@ -58,7 +58,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -67,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import gnu.trove.list.TIntList;
@@ -82,8 +82,6 @@ public final class OXFolderLoader {
     private static final String TABLE_OT = "oxfolder_tree";
 
     private static final String TABLE_OP = "oxfolder_permissions";
-
-    private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
 
     /**
      * Initializes a new {@link OXFolderLoader}.
@@ -142,7 +140,7 @@ public final class OXFolderLoader {
                     readCon = DBPool.pickup(ctx);
                     closeCon = true;
                 }
-                stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_F).replaceFirst(table));
+                stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_LOAD_F, "#TABLE#", table));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
@@ -239,7 +237,7 @@ public final class OXFolderLoader {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_P).replaceFirst(table));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_LOAD_P, "#TABLE#", table));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
@@ -302,7 +300,7 @@ public final class OXFolderLoader {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_SEL2.replaceFirst("#TABLE#", table));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL2, "#TABLE#", table));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
@@ -353,7 +351,7 @@ public final class OXFolderLoader {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_SEL.replaceFirst("#TABLE#", table));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL, "#TABLE#", table));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
@@ -406,7 +404,7 @@ public final class OXFolderLoader {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_SEL.replaceFirst("#TABLE#", table));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL, "#TABLE#", table));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();

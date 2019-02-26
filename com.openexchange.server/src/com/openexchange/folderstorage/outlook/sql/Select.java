@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Select} - SQL to load a virtual folder or its subfolder identifiers.
@@ -637,7 +638,12 @@ public final class Select {
         stmt = null;
         // Set subscribed subfolder if and only if table contains virtually added subscribed subfolders
         try {
-            final String sql = working ? SQL_TEMPL_SUBSR_SUBF.replaceFirst("#T#", "virtualTree").replaceFirst("#S#", "virtualSubscription") : SQL_TEMPL_SUBSR_SUBF.replaceFirst("#T#", "virtualBackupTree").replaceFirst("#S#", "virtualBackupSubscription");
+            String sql;
+            if (working) {
+                sql = Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_TEMPL_SUBSR_SUBF, "#T#", "virtualTree"), "#S#", "virtualSubscription");
+            } else {
+                sql = Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_TEMPL_SUBSR_SUBF, "#T#", "virtualBackupTree"), "#S#", "virtualBackupSubscription");
+            }
             stmt = con.prepareStatement(sql);
             int pos = 1;
             stmt.setInt(pos++, cid);

@@ -89,6 +89,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -1197,7 +1198,7 @@ public final class OXFolderAdminHelper {
                 Iterator<String> iter = oxfolderTables.iterator();
                 for (int i = 0; i < size; i++) {
                     final String tblName = iter.next();
-                    stmt = writeCon.prepareStatement(SQL_DELETE_TABLE.replaceFirst(tableReplaceLabel, tblName));
+                    stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, tblName));
                     stmt.setInt(1, cid);
                     stmt.executeUpdate();
                     stmt.close();
@@ -1207,18 +1208,18 @@ public final class OXFolderAdminHelper {
                 iter = delOxfolderTables.iterator();
                 for (int i = 0; i < size; i++) {
                     final String tblName = iter.next();
-                    stmt = writeCon.prepareStatement(SQL_DELETE_TABLE.replaceFirst(tableReplaceLabel, tblName));
+                    stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, tblName));
                     stmt.setInt(1, cid);
                     stmt.executeUpdate();
                     stmt.close();
                     stmt = null;
                 }
-                stmt = writeCon.prepareStatement(SQL_DELETE_TABLE.replaceFirst(tableReplaceLabel, rootTable));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, rootTable));
                 stmt.setInt(1, cid);
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
-                stmt = writeCon.prepareStatement(SQL_DELETE_TABLE.replaceFirst(tableReplaceLabel, delRootTable));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_TABLE, tableReplaceLabel, delRootTable));
                 stmt.setInt(1, cid);
                 stmt.executeUpdate();
                 stmt.close();
@@ -1279,9 +1280,7 @@ public final class OXFolderAdminHelper {
              * Touch all folder timestamps in whose permissions the group's entity identifier occurs
              */
             stmt =
-                readCon.prepareStatement(SQL_SELECT_FOLDER_IN_PERMISSIONS.replaceFirst("#FT#", STR_OXFOLDERTREE).replaceFirst(
-                    "#PT#",
-                    STR_OXFOLDERPERMS));
+                readCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_SELECT_FOLDER_IN_PERMISSIONS, "#FT#", STR_OXFOLDERTREE), "#PT#", STR_OXFOLDERPERMS));
             stmt.setInt(1, cid);
             stmt.setInt(2, cid);
             stmt.setInt(3, group);
@@ -1294,7 +1293,7 @@ public final class OXFolderAdminHelper {
             rs = null;
             stmt = null;
             if (!list.isEmpty()) {
-                stmt = writeCon.prepareStatement(SQL_UPDATE_FOLDER_TIMESTAMP.replaceFirst("#FT#", STR_OXFOLDERTREE));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_UPDATE_FOLDER_TIMESTAMP, "#FT#", STR_OXFOLDERTREE));
                 do {
                     final int fuid = list.removeAt(0);
                     stmt.setLong(1, lastModified);

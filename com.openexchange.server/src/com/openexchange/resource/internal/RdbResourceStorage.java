@@ -167,7 +167,7 @@ public class RdbResourceStorage extends ResourceStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_GROUP2.replaceFirst("#IDS#", ids.toString()));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_SELECT_GROUP2, "#IDS#", ids.toString()));
             stmt.setLong(1, context.getContextId());
             result = stmt.executeQuery();
             while (result.next()) {
@@ -265,7 +265,7 @@ public class RdbResourceStorage extends ResourceStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_RESOURCE3.replaceFirst("#IDS#", ids.toString()));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_SELECT_RESOURCE3, "#IDS#", ids.toString()));
             stmt.setLong(1, context.getContextId()); // cid
             result = stmt.executeQuery();
             while (result.next()) {
@@ -464,9 +464,7 @@ public class RdbResourceStorage extends ResourceStorage {
     public void insertResource(final Context ctx, final Connection con, final Resource resource, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_INSERT_RESOURCE.replaceFirst(
-                RPL_TABLE,
-                StorageType.ACTIVE.equals(type) ? TABLE_ACTIVE : TABLE_DELETED));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_INSERT_RESOURCE, RPL_TABLE, StorageType.ACTIVE.equals(type) ? TABLE_ACTIVE : TABLE_DELETED));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId()); // cid
             stmt.setInt(pos++, resource.getIdentifier()); // id

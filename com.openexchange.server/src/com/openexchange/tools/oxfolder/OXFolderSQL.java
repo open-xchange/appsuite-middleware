@@ -1549,7 +1549,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_NUMSUB.replaceFirst("#IDS#", StringCollection.getSqlInString(userId, groups)));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_NUMSUB, "#IDS#", StringCollection.getSqlInString(userId, groups)));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
@@ -2143,13 +2143,13 @@ public final class OXFolderSQL {
                 /*
                  * Clean backup tables
                  */
-                stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERPERMS));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
-                stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERTREE));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 executeUpdate(stmt);
@@ -2185,7 +2185,7 @@ public final class OXFolderSQL {
             /*
              * Delete from permission table
              */
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", permTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2194,7 +2194,7 @@ public final class OXFolderSQL {
             /*
              * Delete from folder table
              */
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", folderTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2252,13 +2252,13 @@ public final class OXFolderSQL {
             lock(folderId, ctx.getContextId(), true, writeCon);
 
             // Clean backup tables
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
             stmt.close();
             stmt = null;
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERTREE));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2348,13 +2348,13 @@ public final class OXFolderSQL {
             /*
              * Clean backup tables
              */
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
             stmt.close();
             stmt = null;
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERTREE));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2470,7 +2470,7 @@ public final class OXFolderSQL {
                 writeCon = DBPool.pickupWriteable(ctx);
                 createReadCon = true;
             }
-            stmt = writeCon.prepareStatement(SQL_DROP_SYS_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DROP_SYS_PERMS, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             executeUpdate(stmt);
@@ -2542,9 +2542,7 @@ public final class OXFolderSQL {
             } else {
                 permissionsIDs = new StringBuilder().append('(').append(entity).append(')').toString();
             }
-            stmt = readCon.prepareStatement(SQL_SEL_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable).replaceFirst(
-                TMPL_FOLDER_TABLE,
-                folderTable).replaceFirst(TMPL_IDS, permissionsIDs));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_SEL_PERMS, TMPL_PERM_TABLE, permTable), TMPL_FOLDER_TABLE, folderTable), TMPL_IDS, permissionsIDs));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = executeQuery(stmt);
@@ -2663,7 +2661,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWrite = true;
             }
-            stmt = wc.prepareStatement(SQL_DELETE_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_PERMS, TMPL_PERM_TABLE, permTable));
             for (int i = size; i-- > 0;) {
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, iter.next());
@@ -2736,7 +2734,7 @@ public final class OXFolderSQL {
                         continue Next;
                     }
                 } else {
-                    stmt = wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+                    stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_PERMS, TMPL_PERM_TABLE, permTable));
                     stmt.setInt(1, destUser);
                     stmt.setInt(2, ctx.getContextId());
                     stmt.setInt(3, fuid);
@@ -2751,7 +2749,7 @@ public final class OXFolderSQL {
                     }
                 }
             }
-            stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_TIMESTAMP.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_UPDATE_TIMESTAMP, TMPL_FOLDER_TABLE, folderTable));
             iter = reassignPerms.iterator();
             for (int i = size; i-- > 0;) {
                 stmt.setInt(1, destUser);
@@ -2780,7 +2778,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 close = true;
             }
-            stmt = wc.prepareStatement(SQL_REASSIGN_DEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_DEL_PERM, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             stmt.setInt(3, fuid);
@@ -2801,7 +2799,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 close = true;
             }
-            stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_UPDATE_PERM, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, mergedPerm.getFolderPermission());
             stmt.setInt(2, mergedPerm.getReadPermission());
             stmt.setInt(3, mergedPerm.getWritePermission());
@@ -2829,7 +2827,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeRead = true;
             }
-            innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            innerStmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_SEL_PERM, TMPL_PERM_TABLE, permTable));
             innerStmt.setInt(1, ctx.getContextId());
             innerStmt.setInt(2, destUser);
             innerStmt.setInt(3, fuid);
@@ -2840,7 +2838,7 @@ public final class OXFolderSQL {
                  */
                 innerRs.close();
                 innerStmt.close();
-                innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+                innerStmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_SEL_PERM, TMPL_PERM_TABLE, permTable));
                 innerStmt.setInt(1, ctx.getContextId());
                 innerStmt.setInt(2, entity);
                 innerStmt.setInt(3, fuid);
@@ -2863,7 +2861,7 @@ public final class OXFolderSQL {
             destUserPerm.setGroupPermission(false);
             innerRs.close();
             innerStmt.close();
-            innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            innerStmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_SEL_PERM, TMPL_PERM_TABLE, permTable));
             innerStmt.setInt(1, ctx.getContextId());
             innerStmt.setInt(2, entity);
             innerStmt.setInt(3, fuid);
@@ -2918,7 +2916,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_SEL_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_FOLDERS, TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
@@ -2973,7 +2971,7 @@ public final class OXFolderSQL {
             /*
              * Check column "changed_from"
              */
-            stmt = readCon.prepareStatement(SQL_SEL_FOLDERS2.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_FOLDERS2, TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
@@ -3068,7 +3066,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWrite = true;
             }
-            stmt = wc.prepareStatement(SQL_DELETE_FOLDER.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_FOLDER, TMPL_FOLDER_TABLE, folderTable));
             iter = deleteFolders.iterator();
             for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
@@ -3113,7 +3111,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWrite = true;
             }
-            stmt = wc.prepareStatement(SQL_DELETE_FOLDER_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_FOLDER_PERMS, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, fuid);
             executeUpdate(stmt);
@@ -3148,7 +3146,7 @@ public final class OXFolderSQL {
                             iter.remove();
                             size--;
 
-                            stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+                            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_FOLDERS_WITH_NAME, TMPL_FOLDER_TABLE, folderTable));
                             stmt.setInt(1, destUser);
                             stmt.setInt(2, destUser);
                             stmt.setLong(3, lastModified);
@@ -3168,7 +3166,7 @@ public final class OXFolderSQL {
 
             // Iterate others
             TIntIterator iter = reassignFolders.iterator();
-            stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_FOLDERS, TMPL_FOLDER_TABLE, folderTable));
             for (int i = size; i-- > 0;) {
                 stmt.setInt(1, destUser);
                 stmt.setInt(2, destUser);
@@ -3189,7 +3187,7 @@ public final class OXFolderSQL {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_DEFAULT_INFOSTORE.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_DEFAULT_INFOSTORE, TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, FolderObject.INFOSTORE);
             stmt.setInt(3, entity);
