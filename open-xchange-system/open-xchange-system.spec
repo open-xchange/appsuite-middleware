@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: coreutils
 Version:       @OXVERSION@
-%define        ox_release 25
+%define        ox_release 26
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,6 +66,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/sbin/*
 
 %changelog
+* Mon Feb 18 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-02-25 (5132)
 * Thu Feb 07 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-02-11 (5107)
 * Fri Jan 18 2019 Marcus Klein <marcus.klein@open-xchange.com>

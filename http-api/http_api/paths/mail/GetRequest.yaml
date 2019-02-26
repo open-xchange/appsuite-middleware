@@ -73,6 +73,11 @@
         type: boolean
         description: If set to "true" the "size" field for mail attachments is adjusted by applying an estimation based on attachment's Content-Transfer-Encoding header
         required: false
+      - in: query
+        name: no_nested_message
+        type: boolean
+        description: If set to "true" nested messages are handled as regular attachments
+        required: false
       - $ref: "#/parameters/gblQueryParamsDecrypt"
       - $ref: "#/parameters/glbQueryParamsCryptoAuth"
     responses:

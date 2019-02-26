@@ -261,12 +261,22 @@ public class ContentType extends ParameterizedHeader {
      */
     public static final ContentType DEFAULT_CONTENT_TYPE;
 
+    /**
+     * The (unmodifiable) default content type: <code>application/octet-stream</code>
+     */
+    public static final ContentType APPLICATION_OCTETSTREAM_CONTENT_TYPE;
+
     static {
-        final ContentType tmp = new ContentType();
+        ContentType tmp = new ContentType();
         tmp.setPrimaryType("text");
         tmp.setSubType("plain");
         tmp.setCharsetParameter("us-ascii");
         DEFAULT_CONTENT_TYPE = new UnmodifiableContentType(tmp);
+
+        tmp = new ContentType();
+        tmp.setPrimaryType("application");
+        tmp.setSubType("octet-stream");
+        APPLICATION_OCTETSTREAM_CONTENT_TYPE = new UnmodifiableContentType(tmp);
     }
 
     /**
