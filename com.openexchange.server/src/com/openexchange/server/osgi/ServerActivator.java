@@ -334,7 +334,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class, GroupService.class, GroupStorage.class, PrincipalUseCountService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class, GroupStorage.class, PrincipalUseCountService.class };
 
     private static volatile BundleContext CONTEXT;
 
