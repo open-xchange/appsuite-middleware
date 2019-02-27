@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -62,7 +63,10 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
  */
 public class PreferencesCustomizer implements ServiceTrackerCustomizer<PreferencesItemService,PreferencesItemService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreferencesCustomizer.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PreferencesCustomizer.class);
+    }
 
     private final BundleContext context;
 
@@ -95,7 +99,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
                     return sb.toString();
                 }
             };
-            LOG.error("Can't add service for preferences item. Path: {}", arg, e);
+            LoggerHolder.LOG.error("Can't add service for preferences item. Path: {}", arg, e);
         }
         return item;
     }
