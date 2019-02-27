@@ -77,15 +77,25 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
         try {
             ConfigTree.getInstance().addPreferencesItem(item);
         } catch (final OXException e) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Can't add service for preferences item. Path: ");
-            final String[] path = item.getPath();
-            for (int i = 0; i < path.length; i++) {
-                sb.append(path[i]);
-                sb.append('/');
-            }
-            sb.setLength(sb.length() - 1);
-            LOG.error(sb.toString(), e);
+            Object arg = new Object() {
+                @Override
+                public String toString() {
+                    String[] path = item.getPath();
+                    int length = path.length;
+                    if (length <= 0) {
+                        return "";
+                    }
+
+                    StringBuilder sb = new StringBuilder(length << 2);
+                    sb.append(path[0]);
+                    for (int i = 1; i < length; i++) {
+                        sb.append('/');
+                        sb.append(path[i]);
+                    }
+                    return sb.toString();
+                }
+            };
+            LOG.error("Can't add service for preferences item. Path: {}", arg, e);
         }
         return item;
     }
