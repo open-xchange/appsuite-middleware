@@ -136,6 +136,7 @@ public class ListSet<E> extends ArrayList<E> {
         ensureCapacity(size() + c.size());
 
         boolean modified = false;
+        int idx = index;
         Iterator<? extends E> i = c.iterator();
         while (i.hasNext()) {
             E e = i.next();
@@ -143,7 +144,7 @@ public class ListSet<E> extends ArrayList<E> {
                 continue;
             }
 
-            add(index++, e);
+            add(idx++, e);
             itemSet.add(e);
             modified = true;
         }
