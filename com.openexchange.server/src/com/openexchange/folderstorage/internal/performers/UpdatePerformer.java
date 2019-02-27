@@ -450,10 +450,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
 
             PrincipalUseCountService principalUseCountService = FolderStorageServices.getService(PrincipalUseCountService.class);
-            List<Permission> groupPermissions = comparedPermissions.getAddedGroupPermissions();
-            if (null != principalUseCountService && groupPermissions != null && !groupPermissions.isEmpty()) {
-                for (Permission perm : groupPermissions) {
-                    principalUseCountService.increment(session, perm.getEntity());
+            if (null != principalUseCountService) {
+                List<Permission> groupPermissions = comparedPermissions.getAddedGroupPermissions();
+                if (groupPermissions != null && !groupPermissions.isEmpty()) {
+                    for (Permission perm : groupPermissions) {
+                        principalUseCountService.increment(session, perm.getEntity());
+                    }
                 }
             }
         }

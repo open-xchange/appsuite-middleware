@@ -334,7 +334,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class, ResourceService.class, ResourceStorage.class, GroupStorage.class, PrincipalUseCountService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -419,17 +419,17 @@ public final class ServerActivator extends HousekeepingActivator {
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // (Re-)Initialize server service registry with available services
         {
-            final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
             registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
+            for (Class<?> clazz : getNeededServices()) {
+                Object service = getService(clazz);
                 if (null != service) {
-                    registry.addService(classes[i], service);
+                    registry.addService(clazz, service);
+                    if (DatabaseService.class == clazz) {
+                        Database.setDatabaseService((DatabaseService) service);
+                    }
                 }
             }
-
-            Database.setDatabaseService(getService(DatabaseService.class));
         }
         LOG.info("starting bundle: com.openexchange.server");
         /*
@@ -473,6 +473,15 @@ public final class ServerActivator extends HousekeepingActivator {
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
         track(MailAuthenticityHandlerRegistry.class, new RegistryCustomizer<MailAuthenticityHandlerRegistry>(context, MailAuthenticityHandlerRegistry.class));
+
+        // Segmented updates
+        track(SegmentedUpdateService.class, new RegistryCustomizer<SegmentedUpdateService>(context, SegmentedUpdateService.class));
+
+        // Principal use count stuff
+        track(ResourceService.class, new RegistryCustomizer<ResourceService>(context, ResourceService.class));
+        track(ResourceStorage.class, new RegistryCustomizer<ResourceStorage>(context, ResourceStorage.class));
+        track(GroupStorage.class, new RegistryCustomizer<GroupStorage>(context, GroupStorage.class));
+        track(PrincipalUseCountService.class, new RegistryCustomizer<PrincipalUseCountService>(context, PrincipalUseCountService.class));
 
         // IP checker
         track(IPCheckService.class, new RegistryCustomizer<IPCheckService>(context, IPCheckService.class));
