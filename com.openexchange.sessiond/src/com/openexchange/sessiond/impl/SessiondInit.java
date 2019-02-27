@@ -52,7 +52,6 @@ package com.openexchange.sessiond.impl;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.server.Initialization;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
 import com.openexchange.sessiond.osgi.Services;
@@ -91,7 +90,6 @@ public class SessiondInit implements Initialization {
             SessiondConfigInterface config = new SessiondConfigImpl(conf);
             UserTypeSessiondConfigRegistry registry = new UserTypeSessiondConfigRegistry(conf);
             SessionHandler.init(config, registry);
-            SessionMetricHandler.registerMetrics(Services.getServiceLookup().getServiceSafe(MetricService.class));
             started.set(true);
         }
     }
@@ -102,7 +100,6 @@ public class SessiondInit implements Initialization {
             LOG.error("{} has not been started", SessiondInit.class.getName());
             return;
         }
-        SessionMetricHandler.unregisterMetrics(Services.getServiceLookup().getServiceSafe(MetricService.class));
         SessionHandler.close();
         started.set(false);
     }

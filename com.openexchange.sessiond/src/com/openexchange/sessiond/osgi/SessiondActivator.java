@@ -79,6 +79,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
@@ -88,6 +89,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionMetricHandler;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondRMIServiceImpl;
@@ -275,7 +277,12 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class, MetricService.class,  };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { MetricService.class };
     }
 
     @Override
@@ -285,6 +292,18 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             Services.setServiceLookup(this);
             final BundleContext context = this.context;
             SessiondInit.getInstance().start();
+            track(MetricService.class, new SimpleRegistryListener<MetricService>() {
+
+                @Override
+                public void added(ServiceReference<MetricService> ref, MetricService service) {
+                    SessionMetricHandler.registerMetrics(service);
+                }
+
+                @Override
+                public void removed(ServiceReference<MetricService> ref, MetricService service) {
+                    SessionMetricHandler.unregisterMetrics(service);
+                }
+            });
 
             // Create & register portable factories
             registerService(CustomPortableFactory.class, new PortableContextSessionsCleanerFactory());
@@ -380,6 +399,10 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             SessiondService.SERVICE_REFERENCE.set(null);
             TokenSessionContainer.getInstance().setNotActiveExceptionHandler(null);
             // Stop sessiond
+            MetricService metricService = getOptionalService(MetricService.class);
+            if (metricService != null) {
+                SessionMetricHandler.unregisterMetrics(metricService);
+            }
             SessiondInit.getInstance().stop();
             // Clear service registry
             Services.setServiceLookup(null);

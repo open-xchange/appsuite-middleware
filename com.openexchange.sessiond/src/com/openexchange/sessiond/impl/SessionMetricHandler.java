@@ -55,13 +55,13 @@ import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
 
 /**
- * 
+ *
  * {@link SessionMetricHandler}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-final class SessionMetricHandler {
+public final class SessionMetricHandler {
 
     private static final String SESSIONS = "sessions";
     private static final String GROUP = "sessiond";
@@ -74,10 +74,10 @@ final class SessionMetricHandler {
 
     private static final String COUNT_SHORT = "ShortTermCount.Total";
     private static final String COUNT_SHORT_DESC = "The number of sessions in the short term containers";
-    
+
     private static final String COUNT_ACTIVE = "ActiveCount.Total";
     private static final String COUNT_ACTIVE_DESC = "The number of active sessions or in other words the number of sessions within the first two short term containers.";
-    
+
     private static final MetricDescriptor DESC_TOTAL;
     private static final MetricDescriptor DESC_LONG;
     private static final MetricDescriptor DESC_SHORT;
@@ -88,23 +88,23 @@ final class SessionMetricHandler {
         DESC_TOTAL = MetricDescriptor.newBuilder(GROUP, COUNT_TOTAL, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_TOTAL_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricTotalSessions();
         }).build();
-        
+
         DESC_LONG = MetricDescriptor.newBuilder(GROUP, COUNT_LONG, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_LONG_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricLongSessions();
         }).build();
-        
+
         DESC_SHORT = MetricDescriptor.newBuilder(GROUP, COUNT_SHORT, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_SHORT_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricShortSessions();
         }).build();
-        
+
         DESC_ACTIVE = MetricDescriptor.newBuilder(GROUP, COUNT_ACTIVE, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_ACTIVE_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricActiveSessions();
         }).build();
     }
-    
+
     /**
      * Initializes a new {@link SessionMetricHandler}.
-     * 
+     *
      * @throws OXException
      */
     private SessionMetricHandler() {
@@ -113,7 +113,7 @@ final class SessionMetricHandler {
 
     /**
      * Registers metrics for the SessionHandler
-     *  
+     *
      * @param metricService The {@link MetricService}
      */
     public static void registerMetrics(MetricService metricService){
@@ -125,7 +125,7 @@ final class SessionMetricHandler {
 
     /**
      * Unregisters metrics for the SessionHandler
-     * 
+     *
      * @param metricService The {@link MetricService}
      */
     public static void unregisterMetrics(MetricService metricService) {
