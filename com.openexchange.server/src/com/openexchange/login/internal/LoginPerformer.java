@@ -320,7 +320,7 @@ public final class LoginPerformer {
             // Redirect
             if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
                 SegmentedUpdateService segmentedUpdateService = ServerServiceRegistry.getInstance().getService(SegmentedUpdateService.class);
-                String migrationRedirectURL = segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
+                String migrationRedirectURL = segmentedUpdateService == null ? null : segmentedUpdateService.getMigrationRedirectURL(request.getServerName());
                 if (Strings.isEmpty(migrationRedirectURL)) {
                     LOG.error("Cannot redirect. The property '{}' is not set.", ServerProperty.migrationRedirectURL.getFQPropertyName());
                 } else {
