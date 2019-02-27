@@ -77,14 +77,15 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
 
     @Override
     public PreferencesItemService addingService(final ServiceReference<PreferencesItemService> reference) {
-        final PreferencesItemService item = context.getService(reference);
+        final PreferencesItemService preferencesItem = context.getService(reference);
         try {
-            ConfigTree.getInstance().addPreferencesItem(item);
-        } catch (final OXException e) {
+            ConfigTree.getInstance().addPreferencesItem(preferencesItem);
+            return preferencesItem;
+        } catch (OXException e) {
             Object arg = new Object() {
                 @Override
                 public String toString() {
-                    String[] path = item.getPath();
+                    String[] path = preferencesItem.getPath();
                     int length = path.length;
                     if (length <= 0) {
                         return "";
@@ -93,26 +94,24 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
                     StringBuilder sb = new StringBuilder(length << 2);
                     sb.append(path[0]);
                     for (int i = 1; i < length; i++) {
-                        sb.append('/');
-                        sb.append(path[i]);
+                        sb.append('/').append(path[i]);
                     }
                     return sb.toString();
                 }
             };
             LoggerHolder.LOG.error("Can't add service for preferences item. Path: {}", arg, e);
         }
-        return item;
+        return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
+    public void modifiedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService preferencesItem) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
-        final PreferencesItemService item = service;
-        ConfigTree.getInstance().removePreferencesItem(item);
+    public void removedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService preferencesItem) {
+        ConfigTree.getInstance().removePreferencesItem(preferencesItem);
         context.ungetService(reference);
     }
 }
