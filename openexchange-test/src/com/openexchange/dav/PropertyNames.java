@@ -156,6 +156,11 @@ public final class PropertyNames {
     public static final DavPropertyName SUPPORTED_REPORT_SET = DavPropertyName.create("supported-report-set", NS_DAV);
 
     /**
+     * getlastmodified xmlns="DAV:"
+     */
+    public static final DavPropertyName GETLASTMODIFIED = DavPropertyName.create("getlastmodified", NS_DAV);
+
+    /**
      * resourcetype xmlns="DAV:"
      */
     public static final DavPropertyName RESOURCETYPE = DavPropertyName.create("resourcetype", NS_DAV);
