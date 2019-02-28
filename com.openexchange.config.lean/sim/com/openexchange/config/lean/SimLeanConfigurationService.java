@@ -219,9 +219,4 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
         return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
     }
 
-    @Override
-    public boolean isDefinedAndNotEmpty(int userId, int contextId, Property property) {
-        return false;
-    }
-
 }

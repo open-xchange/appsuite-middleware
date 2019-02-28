@@ -244,11 +244,6 @@ public abstract class AbstractTestMailAuthenticity {
             public boolean getBooleanProperty(Property property) {
                 return false;
             }
-
-            @Override
-            public boolean isDefinedAndNotEmpty(int userId, int contextId, Property property) {
-                return false;
-            }
         };
 
         handler = new MailAuthenticityHandlerImpl(doNothingService, services, new CustomRuleChecker(doNothingLeanService));

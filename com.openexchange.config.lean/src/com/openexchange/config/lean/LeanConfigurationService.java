@@ -292,13 +292,4 @@ public interface LeanConfigurationService {
      */
     long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 
-    /**
-     * Checks if property is set and not empty
-     *
-     * @param userId The user id
-     * @param contextId The context id
-     * @param property The {@link Property}} to check
-     * @return <code>true</code> if propery is set and not empty, <code>false</code> otherwise
-     */
-    boolean isDefinedAndNotEmpty(int userId, int contextId, Property property);
 }
