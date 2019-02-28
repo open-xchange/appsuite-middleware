@@ -110,18 +110,18 @@ public class InvalidDataException extends Exception {
     }
 
     /**
-     * Set the fieldname which are not correct in the object
+     * Gets the field names, which are not correct in the object
      *
-     * @return
+     * @return The incorrect field names or <code>null</code>
      */
     public final ArrayList<String> getFieldnames() {
         return fieldnames;
     }
 
     /**
-     * Get the fieldnames of the object which aren't correct (maybe null if no fieldnames can be specified)
+     * Sets the field names of the object which aren't correct (maybe null if no field names can be specified)
      *
-     * @param fieldnames
+     * @param fieldnames The field names to set
      */
     public final void setFieldnames(ArrayList<String> fieldnames) {
         this.fieldnames = fieldnames;
