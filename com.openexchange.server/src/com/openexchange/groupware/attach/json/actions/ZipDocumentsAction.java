@@ -72,6 +72,8 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -116,16 +118,21 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
     }
 
     private List<AttachmentInfo> parseAttachmentInfos(AJAXRequestData requestData) throws OXException {
-        JSONValue jBody = requestData.getData(JSONValue.class);
-        if (null == jBody) {
-            int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
-            int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
-            int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
-            int id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
-            return Collections.singletonList(new AttachmentInfo(folderId, attachedId, moduleId, id));
-        }
-
         try {
+            JSONValue jBody = requestData.getData(JSONValue.class);
+            if (null == jBody) {
+                String value = requestData.getParameter("body");
+                if (Strings.isEmpty(value)) {
+                    int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+                    int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+                    int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
+                    int id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
+                    return Collections.singletonList(new AttachmentInfo(folderId, attachedId, moduleId, id));
+                }
+
+                jBody = JSONObject.parse(new UnsynchronizedStringReader(value));
+            }
+
             {
                 JSONObject jAttachment = jBody.toObject();
                 if (null != jAttachment) {

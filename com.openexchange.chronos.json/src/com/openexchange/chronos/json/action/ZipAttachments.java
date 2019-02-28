@@ -72,6 +72,8 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -105,14 +107,19 @@ public class ZipAttachments extends ChronosAction {
     }
 
     private List<AttachmentId> getAttachmentIds(AJAXRequestData requestData) throws OXException {
-        JSONValue jBody = requestData.getData(JSONValue.class);
-        if (null == jBody) {
-            EventID eventId = parseIdParameter(requestData);
-            int managedId = parseAttachmentId(requestData);
-            return Collections.singletonList(new AttachmentId(managedId, eventId));
-        }
-
         try {
+            JSONValue jBody = requestData.getData(JSONValue.class);
+            if (null == jBody) {
+                String value = requestData.getParameter("body");
+                if (Strings.isEmpty(value)) {
+                    EventID eventId = parseIdParameter(requestData);
+                    int managedId = parseAttachmentId(requestData);
+                    return Collections.singletonList(new AttachmentId(managedId, eventId));
+                }
+
+                jBody = JSONObject.parse(new UnsynchronizedStringReader(value));
+            }
+
             if (jBody.isObject()) {
                 return Collections.singletonList(parseAttachmentId(jBody.toObject()));
             }
