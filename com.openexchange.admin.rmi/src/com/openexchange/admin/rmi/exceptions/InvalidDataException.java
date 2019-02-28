@@ -128,18 +128,18 @@ public class InvalidDataException extends Exception {
     }
 
     /**
-     * Get the Name of the object which is affected by this exception
+     * Get the name of the object which is affected by this exception
      *
-     * @return
+     * @return The object name or <code>null</code>
      */
     public final String getObjectname() {
         return objectname;
     }
 
     /**
+     * Set the name of the object which is affected by this exception
      *
-     *
-     * @param objectname
+     * @param objectname The name to set
      */
     public final void setObjectname(String objectname) {
         this.objectname = objectname;
