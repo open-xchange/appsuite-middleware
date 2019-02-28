@@ -54,6 +54,8 @@ import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -80,120 +82,99 @@ public class AddMediaFieldsForInfostoreDocumentTable extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
-            boolean startedTransaction = false;
+            List<Column> columnsToAdd = null;
 
             if (!Tools.columnExists(con, "infostore_document", "capture_date")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
-                }
-                Tools.addColumns(con, "infostore_document", new Column("capture_date", "int8 DEFAULT NULL"));
+                columnsToAdd = new ArrayList<Column>(12);
+                columnsToAdd.add(new Column("capture_date", "int8 DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "geolocation")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(11);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("geolocation", "POINT DEFAULT NULL"));
+                columnsToAdd.add(new Column("geolocation", "POINT DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "width")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(10);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("width", "int8 UNSIGNED DEFAULT NULL"));
+                columnsToAdd.add(new Column("width", "int8 UNSIGNED DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "height")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(9);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("height", "int8 UNSIGNED DEFAULT NULL"));
+                columnsToAdd.add(new Column("height", "int8 UNSIGNED DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_make")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(8);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("camera_make", "VARCHAR(64) DEFAULT NULL"));
+                columnsToAdd.add(new Column("camera_make", "VARCHAR(64) DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_model")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(7);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("camera_model", "VARCHAR(128) DEFAULT NULL"));
+                columnsToAdd.add(new Column("camera_model", "VARCHAR(128) DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_iso_speed")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(6);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("camera_iso_speed", "int8 UNSIGNED DEFAULT NULL"));
+                columnsToAdd.add(new Column("camera_iso_speed", "int8 UNSIGNED DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_aperture")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(5);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("camera_aperture", "double DEFAULT NULL"));
+                columnsToAdd.add(new Column("camera_aperture", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_exposure_time")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(4);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("camera_exposure_time", "double DEFAULT NULL"));
+                columnsToAdd.add(new Column("camera_exposure_time", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "camera_focal_length")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(3);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("camera_focal_length", "double DEFAULT NULL"));
+                columnsToAdd.add(new Column("camera_focal_length", "double DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "media_meta")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(2);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("media_meta", "MEDIUMBLOB DEFAULT NULL"));
+                columnsToAdd.add(new Column("media_meta", "MEDIUMBLOB DEFAULT NULL"));
             }
 
             if (!Tools.columnExists(con, "infostore_document", "media_status")) {
-                if (!startedTransaction) {
-                    startTransaction(con);
-                    rollback = 1;
-                    startedTransaction = true;
+                if (null == columnsToAdd) {
+                    columnsToAdd = new ArrayList<Column>(1);
                 }
-                Tools.addColumns(con, "infostore_document", new Column("media_status", "VARCHAR(16) DEFAULT NULL"));
+                columnsToAdd.add(new Column("media_status", "VARCHAR(16) DEFAULT NULL"));
             }
 
-            if (!startedTransaction) {
-                // No column added...
+            if (null == columnsToAdd) {
+                // No column to add...
                 return;
             }
+
+            startTransaction(con);
+            rollback = 1;
+
+            Tools.addColumns(con, "infostore_document", columnsToAdd.toArray(new Column[columnsToAdd.size()]));
 
             con.commit();
             rollback = 2;
