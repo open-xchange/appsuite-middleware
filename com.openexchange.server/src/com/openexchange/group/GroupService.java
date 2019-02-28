@@ -127,11 +127,35 @@ public interface GroupService {
      */
     Group[] search(Context context, String pattern, boolean loadMembers) throws OXException;
 
+    /**
+     * Lists all groups in the given context
+     * 
+     * @param context The context
+     * @param loadMembers Whether to load member or not
+     * @return The groups in the given context
+     * @throws OXException
+     */
     Group[] listAllGroups(Context context, boolean loadMembers) throws OXException;
 
+    /**
+     * Gets all groups within the context which has been modified since the given date
+     * 
+     * @param context The context
+     * @param modifiedSince The boundary date
+     * @return An array of groups which has been modified since the given date
+     * @throws OXException
+     */
     Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException;
 
-    Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException;
+    /**
+     * Gets all groups within the context which has been deleted since the given date
+     * 
+     * @param context The context
+     * @param deletedSince The boundary date
+     * @return An array of groups which has been deleted since the given date
+     * @throws OXException
+     */
+    Group[] listDeletedGroups(Context context, Date deletedSince) throws OXException;
 
     /**
      * Updates a group.

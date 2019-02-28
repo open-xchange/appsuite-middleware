@@ -144,8 +144,8 @@ public class FilteringGroupService implements GroupService {
     }
 
     @Override
-    public Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException {
-        Group[] groups = delegate.listDeletedGroups(context, modifiedSince);
+    public Group[] listDeletedGroups(Context context, Date deletedSince) throws OXException {
+        Group[] groups = delegate.listDeletedGroups(context, deletedSince);
         return removeAdminFromGroups(context, groups);
     }
 
