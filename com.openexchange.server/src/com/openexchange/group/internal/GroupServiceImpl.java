@@ -61,7 +61,6 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.principalusecount.PrincipalUseCountService;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -70,9 +69,16 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupServiceImpl implements GroupService {
+    
+    private final GroupStorage storage;
+    private final PrincipalUseCountService usecountService;
 
-    public GroupServiceImpl() {
-        super();
+    /**
+     * Initializes a new {@link GroupServiceImpl}.
+     */
+    public GroupServiceImpl(GroupStorage storage, PrincipalUseCountService usecountService) {
+        this.storage = storage;
+        this.usecountService = usecountService;
     }
 
     @Override
@@ -89,38 +95,38 @@ public final class GroupServiceImpl implements GroupService {
 
     @Override
     public Group getGroup(Context ctx, int groupId) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroup(groupId, ctx);
+        return storage.getGroup(groupId, ctx);
     }
 
     @Override
     public Group[] search(Context ctx, String pattern, boolean loadMembers) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).searchGroups(pattern, loadMembers, ctx);
+        return storage.searchGroups(pattern, loadMembers, ctx);
     }
 
     @Override
     public Group[] getGroups(Context ctx, boolean loadMembers) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroups(loadMembers, ctx);
+        return storage.getGroups(loadMembers, ctx);
     }
 
     @Override
     public Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).listModifiedGroups(modifiedSince, context);
+        return storage.listModifiedGroups(modifiedSince, context);
     }
 
     @Override
     public Group[] listDeletedGroups(Context context, Date deletedSince) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).listDeletedGroups(deletedSince, context);
+        return storage.listDeletedGroups(deletedSince, context);
     }
 
     @Override
     public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException {
-        Group[] groups = ServerServiceRegistry.getServize(GroupStorage.class, true).searchGroups(pattern, loadMembers, ServerSessionAdapter.valueOf(session).getContext());
+        Group[] groups = storage.searchGroups(pattern, loadMembers, ServerSessionAdapter.valueOf(session).getContext());
         return sortGroupsByUseCount(session, groups);
     }
 
     @Override
     public Group[] getGroups(Session session, boolean loadMembers) throws OXException {
-        Group[] groups = ServerServiceRegistry.getServize(GroupStorage.class, true).getGroups(loadMembers, ServerSessionAdapter.valueOf(session).getContext());
+        Group[] groups = storage.getGroups(loadMembers, ServerSessionAdapter.valueOf(session).getContext());
         return sortGroupsByUseCount(session, groups);
     }
 
@@ -131,7 +137,7 @@ public final class GroupServiceImpl implements GroupService {
             principalIds[x++] = group.getIdentifier();
         }
 
-        Map<Integer, Integer> useCounts = ServerServiceRegistry.getServize(PrincipalUseCountService.class, true).get(session, principalIds);
+        Map<Integer, Integer> useCounts = usecountService.get(session, principalIds);
         List<GroupAndUseCount> listToSort = new ArrayList<>(useCounts.size());
         x = 0;
         for (Group group : groups) {
@@ -193,11 +199,11 @@ public final class GroupServiceImpl implements GroupService {
 
     @Override
     public Group[] listAllGroups(Context context, boolean loadMembers) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroups(loadMembers, context);
+        return storage.getGroups(loadMembers, context);
     }
 
     @Override
     public Group[] listGroups(Context ctx, int[] ids) throws OXException {
-        return ServerServiceRegistry.getServize(GroupStorage.class, true).getGroup(ids, ctx);
+        return storage.getGroup(ids, ctx);
     }
 }

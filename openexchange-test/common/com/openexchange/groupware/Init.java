@@ -124,7 +124,6 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
-import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.configuration.ParticipantConfig;
@@ -897,9 +896,10 @@ public final class Init {
 
     private static void startAndInjectGroupService() {
         if (null == TestServiceRegistry.getInstance().getService(GroupService.class)) {
-            final GroupService us = new GroupServiceImpl();
-            services.put(GroupService.class, us);
-            TestServiceRegistry.getInstance().addService(GroupService.class, us);
+            // TODO properly inject group service
+//            final GroupService us = new GroupServiceImpl();
+//            services.put(GroupService.class, us);
+//            TestServiceRegistry.getInstance().addService(GroupService.class, us);
         }
     }
 

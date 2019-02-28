@@ -146,8 +146,6 @@ import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.group.internal.FilteringGroupService;
-import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
@@ -627,6 +625,10 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track QuotaAwareSnippetService
          */
         track(QuotaAwareSnippetService.class, new RankingAwareRegistryCustomizer<QuotaAwareSnippetService>(context, QuotaAwareSnippetService.class));
+        /*
+         * Track GroupService
+         */
+        track(GroupService.class, new RegistryCustomizer<>(context, GroupService.class));
 
         /*
          * User Alias Service
@@ -681,9 +683,6 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         registerService(FileBackedJSONStringProvider.class, new FileBackedJSONStringProviderImpl());
-        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(), this);
-        registerService(GroupService.class, groupService);
-        ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 

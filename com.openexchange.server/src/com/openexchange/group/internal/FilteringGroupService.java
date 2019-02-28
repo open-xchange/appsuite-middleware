@@ -80,7 +80,7 @@ public class FilteringGroupService implements GroupService {
     }
 
     private Group[] removeAdminFromGroups(Context context, Group[] groups) throws OXException {
-        HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
         if (hideAdminService == null) {
             return groups;
         }
@@ -111,7 +111,7 @@ public class FilteringGroupService implements GroupService {
     @Override
     public Group[] listGroups(Context context, int[] groupIds) throws OXException {
         Group[] groups = delegate.listGroups(context, groupIds);
-        HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
         if (hideAdminService == null) {
             return groups;
         }
@@ -151,7 +151,7 @@ public class FilteringGroupService implements GroupService {
 
     @Override
     public void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException {
-        HideAdminService hideAdminService = this.services.getOptionalService(HideAdminService.class);
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
         if (hideAdminService == null) {
             delegate.update(context, user, group, lastRead, checkI18nNames);
             return;

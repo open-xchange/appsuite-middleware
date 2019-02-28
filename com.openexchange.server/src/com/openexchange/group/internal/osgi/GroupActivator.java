@@ -49,12 +49,15 @@
 
 package com.openexchange.group.internal.osgi;
 
+import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.group.internal.FilteringGroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.group.internal.RdbGroupStorage;
 import com.openexchange.group.internal.VirtualGroupStorage;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 
 /**
  * {@link GroupActivator}
@@ -66,15 +69,20 @@ public class GroupActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class[] { PrincipalUseCountService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { HideAdminService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        GroupServiceImpl service = new GroupServiceImpl();
-        registerService(GroupService.class, service);
-        registerService(GroupStorage.class, new VirtualGroupStorage(new RdbGroupStorage()));
-
+        VirtualGroupStorage storage = new VirtualGroupStorage(new RdbGroupStorage());
+        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(storage, getServiceSafe(PrincipalUseCountService.class)), this);
+        registerService(GroupService.class, groupService);
+        registerService(GroupStorage.class, storage);
     }
 
 }
