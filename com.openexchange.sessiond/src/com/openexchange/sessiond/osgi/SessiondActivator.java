@@ -281,11 +281,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { MetricService.class };
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: com.openexchange.sessiond");
