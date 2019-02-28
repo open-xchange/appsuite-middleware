@@ -55,20 +55,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
-import java.util.Map;
 import javax.mail.internet.InternetAddress;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.CustomRuleChecker;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
-import com.openexchange.mail.authenticity.impl.trusted.Icon;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -96,6 +92,8 @@ public abstract class AbstractTestMailAuthenticity {
     private Session session;
     protected LeanConfigurationService leanConfig;
     private MailAuthenticityMetricLogger metricsLogger;
+    private TrustedMailService trustedMailService;
+    private LeanConfigurationService leanConfigService;
 
     /**
      * Initialises a new {@link AbstractTestMailAuthenticity}.
@@ -117,6 +115,8 @@ public abstract class AbstractTestMailAuthenticity {
         when(session.getUserId()).thenReturn(1);
         when(session.getContextId()).thenReturn(1);
 
+        trustedMailService = mock(TrustedMailService.class);
+        leanConfigService = mock(LeanConfigurationService.class);
         metricsLogger = mock(MailAuthenticityMetricLogger.class);
         leanConfig = mock(LeanConfigurationService.class);
         ServiceLookup services = mock(ServiceLookup.class);
@@ -130,123 +130,49 @@ public abstract class AbstractTestMailAuthenticity {
         fromAddresses = new InternetAddress[1];
         when(mailMessage.getFrom()).thenReturn(fromAddresses);
 
-        TrustedMailService doNothingService = new TrustedMailService() {
+        handler = new MailAuthenticityHandlerImpl(trustedMailService, services, new CustomRuleChecker(leanConfigService));
+    }
 
-            @Override
-            public void handle(Session session, MailMessage mailMessage) {
-                // Nothing
-            }
+    /**
+     * Asserts the results
+     * 
+     * @param expectedAmountOfMechanisms The expected amount of mechanisms in the result
+     * @param expectedOverallResult The expected overall {@link MailAuthenticityStatus}
+     * @param expectedDomaimMismatch Whether a domain mismatch is expected
+     * @param expectedDomain The expected domain name
+     * @param expectedAuthenticityMechanismResults The (optional) expected authenticity mechanism results
+     */
+    protected void assertResults(int expectedAmountOfMechanisms, MailAuthenticityStatus expectedOverallResult, Boolean expectedDomaimMismatch, String expectedDomain, AuthenticityMechanismResult... expectedAuthenticityMechanismResults) {
+        assertNotNull("The authenticity result is 'null'.", result);
+        assertStatus(expectedOverallResult, result.getStatus());
+        assertDomainMismatch(expectedDomaimMismatch, expectedDomain, result);
+        assertAmount(expectedAmountOfMechanisms);
+        if (expectedAmountOfMechanisms > 0) {
+            assertNotNull("The expected authenticity mechanism results is 'null'.", expectedAuthenticityMechanismResults);
+        }
+        assertEquals("The expected amoount of authenticity mechanism results differs.", expectedAmountOfMechanisms, expectedAuthenticityMechanismResults.length);
+        int index = 0;
+        for (AuthenticityMechanismResult expectedResult : expectedAuthenticityMechanismResults) {
+            assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(index++), expectedDomain, expectedResult);
+        }
+    }
 
-            @Override
-            public Icon getIcon(Session session, String uid) throws OXException {
-                return null;
-            }
-        };
-
-        LeanConfigurationService doNothingLeanService = new LeanConfigurationService() {
-
-            @Override
-            public String getProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
-                return null;
-            }
-
-            @Override
-            public String getProperty(Property property, Map<String, String> optionals) {
-                return null;
-            }
-
-            @Override
-            public String getProperty(int userId, int contextId, Property property) {
-                return null;
-            }
-
-            @Override
-            public String getProperty(Property property) {
-                return null;
-            }
-
-            @Override
-            public long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
-                return 0;
-            }
-
-            @Override
-            public long getLongProperty(Property property, Map<String, String> optionals) {
-                return 0;
-            }
-
-            @Override
-            public long getLongProperty(int userId, int contextId, Property property) {
-                return 0;
-            }
-
-            @Override
-            public long getLongProperty(Property property) {
-                return 0;
-            }
-
-            @Override
-            public int getIntProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
-                return 0;
-            }
-
-            @Override
-            public int getIntProperty(Property property, Map<String, String> optionals) {
-                return 0;
-            }
-
-            @Override
-            public int getIntProperty(int userId, int contextId, Property property) {
-                return 0;
-            }
-
-            @Override
-            public int getIntProperty(Property property) {
-                return 0;
-            }
-
-            @Override
-            public float getFloatProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
-                return 0;
-            }
-
-            @Override
-            public float getFloatProperty(Property property, Map<String, String> optionals) {
-                return 0;
-            }
-
-            @Override
-            public float getFloatProperty(int userId, int contextId, Property property) {
-                return 0;
-            }
-
-            @Override
-            public float getFloatProperty(Property property) {
-                return 0;
-            }
-
-            @Override
-            public boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
-                return false;
-            }
-
-            @Override
-            public boolean getBooleanProperty(Property property, Map<String, String> optionals) {
-                return false;
-            }
-
-            @Override
-            public boolean getBooleanProperty(int userId, int contextId, Property property) {
-                return false;
-            }
-
-            @Override
-            public boolean getBooleanProperty(Property property) {
-                return false;
-            }
-        };
-
-        handler = new MailAuthenticityHandlerImpl(doNothingService, services, new CustomRuleChecker(doNothingLeanService));
+    /**
+     * Asserts whether there is a(n) (optional) domain mismatch expected.
+     * 
+     * @param expectedDomaimMismatch Whether a domain match is expected. <code>null</code> if it is not part of the result
+     * @param expectedDomain The expected domain
+     * @param result The mail authenticity result
+     */
+    private void assertDomainMismatch(Boolean expectedDomaimMismatch, String expectedDomain, MailAuthenticityResult result) {
+        if (expectedDomaimMismatch == null) {
+            return;
+        }
+        assertNotNull("The domain mismatch attribute is missing from the result.", result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH));
+        assertEquals("The domain mismatch attribute differs.", expectedDomaimMismatch, result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH));
+        if (expectedDomaimMismatch) {
+            assertEquals("The domain does not match.", expectedDomain, result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        }
     }
 
     /**
@@ -317,7 +243,7 @@ public abstract class AbstractTestMailAuthenticity {
     /**
      * Performs the mail authenticity handling with no header
      */
-    void perform() {
+    protected void perform() {
         perform(new String[] {});
     }
 

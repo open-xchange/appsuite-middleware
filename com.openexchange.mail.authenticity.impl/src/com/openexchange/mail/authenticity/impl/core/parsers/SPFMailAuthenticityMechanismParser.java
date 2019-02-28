@@ -56,6 +56,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.spf.SPFProperty;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResultHeader;
 
@@ -96,10 +97,10 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
         result.setDomainMatch(domainMatch);
-        result.addProperty("mail_from", result.getDomain());
+        result.addProperty(SPFProperty.MAIL_FROM, result.getDomain());
         String reason;
         if (Strings.isNotEmpty(result.getClientIP())) {
-            result.addProperty("client_ip", result.getClientIP());
+            result.addProperty(SPFProperty.CLIENT_IP, result.getClientIP());
             reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_IP, result.getClientIP());
         } else {
             reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_DOMAIN, result.getDomain());

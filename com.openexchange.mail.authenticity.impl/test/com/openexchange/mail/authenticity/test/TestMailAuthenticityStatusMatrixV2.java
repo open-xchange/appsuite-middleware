@@ -47,57 +47,52 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.test;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlobEntry;
-import com.openexchange.jslob.JSlobKeys;
-import com.openexchange.session.Session;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixA;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixB;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixC;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixD1;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixD2;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixD3;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixE1;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixE2;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixE3;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixF1;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixF2;
+import com.openexchange.mail.authenticity.test.matrix_v2.TestMailAuthenticityStatusMatrixF3;
 
 /**
- * {@link TempDisableFail}
+ * {@link TestMailAuthenticityStatusMatrixV2}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-// FIXME: Delete after changing fail evaluation
-public class TempDisableFail implements JSlobEntry {
+@RunWith(Suite.class)
+//@formatter:off
+@Suite.SuiteClasses({
+    TestMailAuthenticityStatusMatrixA.class,
+    TestMailAuthenticityStatusMatrixB.class,
+    TestMailAuthenticityStatusMatrixC.class,
+    TestMailAuthenticityStatusMatrixD1.class,
+    TestMailAuthenticityStatusMatrixD2.class,
+    TestMailAuthenticityStatusMatrixD3.class,
+    TestMailAuthenticityStatusMatrixE1.class,
+    TestMailAuthenticityStatusMatrixE2.class,
+    TestMailAuthenticityStatusMatrixE3.class,
+    TestMailAuthenticityStatusMatrixF1.class,
+    TestMailAuthenticityStatusMatrixF2.class,
+    TestMailAuthenticityStatusMatrixF3.class,
+})
+//@formatter:on
+public class TestMailAuthenticityStatusMatrixV2 {
 
-    private static final String NAME = "authenticity/level";
-
-    public TempDisableFail() {
+    /**
+     * Initialises a new {@link TestMailAuthenticityStatusMatrixV2}.
+     */
+    public TestMailAuthenticityStatusMatrixV2() {
         super();
-    }
-
-    @Override
-    public String getKey() {
-        return JSlobKeys.MAIL;
-    }
-
-    @Override
-    public String getPath() {
-        return NAME;
-    }
-
-    @Override
-    public Object getValue(Session session) throws OXException {
-        return "pass_trusted";
-    }
-
-    @Override
-    public boolean isWritable(Session session) throws OXException {
-        return false;
-    }
-
-    @Override
-    public Map<String, Object> metadata(Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public void setValue(Object value, Session session) throws OXException {
-        // not writable
     }
 
 }

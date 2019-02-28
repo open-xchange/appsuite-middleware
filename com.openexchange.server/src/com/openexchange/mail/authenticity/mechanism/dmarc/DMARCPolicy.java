@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.mail.authenticity.test;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixA;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixB;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixC;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixD1;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixD2;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixD3;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixE1;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixE2;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixE3;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixF1;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixF2;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixF3;
+package com.openexchange.mail.authenticity.mechanism.dmarc;
 
 /**
- * {@link TestMailAuthenticityStatusMatrix}
+ * {@link DMARCPolicy} - Defines the requested Mail Receiver policy
+ * (plain-text; REQUIRED for policy records). Indicates the policy
+ * to be enacted by the Receiver at the request of the Domain Owner.
+ * Policy applies to the domain queried and to subdomains, unless
+ * subdomain policy is explicitly described using the "sp" tag.
+ * This tag is mandatory for policy records only, but not for
+ * third-party reporting records
  *
+ * @see <a href="https://tools.ietf.org/html/rfc7489#section-6.3">RFC-7489, Section 6.3</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
-@RunWith(Suite.class)
-//@formatter:off
-@Suite.SuiteClasses({
-    TestMailAuthenticityStatusMatrixA.class,
-    TestMailAuthenticityStatusMatrixB.class,
-    TestMailAuthenticityStatusMatrixC.class,
-    TestMailAuthenticityStatusMatrixD1.class,
-    TestMailAuthenticityStatusMatrixD2.class,
-    TestMailAuthenticityStatusMatrixD3.class,
-    TestMailAuthenticityStatusMatrixE1.class,
-    TestMailAuthenticityStatusMatrixE2.class,
-    TestMailAuthenticityStatusMatrixE3.class,
-    TestMailAuthenticityStatusMatrixF1.class,
-    TestMailAuthenticityStatusMatrixF2.class,
-    TestMailAuthenticityStatusMatrixF3.class,
-})
-//@formatter:on
-public class TestMailAuthenticityStatusMatrix {
+public enum DMARCPolicy {
 
     /**
-     * Initialises a new {@link TestMailAuthenticityStatusMatrix}.
+     * The Domain Owner requests no specific action be taken
+     * regarding delivery of messages.
      */
-    public TestMailAuthenticityStatusMatrix() {
-        super();
-    }
-
+    none,
+    /**
+     * The Domain Owner wishes to have email that fails the
+     * DMARC mechanism check be treated by Mail Receivers as
+     * suspicious. Depending on the capabilities of the Mail
+     * Receiver, this can mean "place into spam folder", "scrutinize
+     * with additional intensity", and/or "flag as suspicious".
+     */
+    quarantine,
+    /**
+     * The Domain Owner wishes for Mail Receivers to reject
+     * email that fails the DMARC mechanism check. Rejection SHOULD
+     * occur during the SMTP transaction. See
+     * <a href="https://tools.ietf.org/html/rfc7489#section-10.3">RFC-7489, Section 10.3</a>
+     * for some discussion of SMTP rejection methods and their implications.
+     */
+    reject
 }

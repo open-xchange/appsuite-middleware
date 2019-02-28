@@ -65,7 +65,6 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
-import com.openexchange.mail.authenticity.impl.TempDisableFail;
 import com.openexchange.mail.authenticity.impl.core.CustomRuleChecker;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
@@ -132,9 +131,6 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         registerService(MailFetchListener.class, fetchListener);
 
         registerService(JSlobEntry.class, new MailAuthenticityJSlobEntry(this));
-
-        // FIXME: Delete after changing fail evaluation
-        registerService(JSlobEntry.class, new TempDisableFail());
 
         {
             // Register image data source

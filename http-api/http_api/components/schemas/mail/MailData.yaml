@@ -104,4 +104,5 @@ properties:
           - pass
           - neutral
           - fail
+          - suspicious
           - not-analyzed

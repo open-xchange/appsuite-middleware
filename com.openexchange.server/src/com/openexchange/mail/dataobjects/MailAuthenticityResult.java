@@ -63,7 +63,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 public final class MailAuthenticityResult {
 
     /** The 'none' result */
-    public static final MailAuthenticityResult NONE_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NONE, Collections.emptyMap());
+    //public static final MailAuthenticityResult NONE_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NONE, Collections.emptyMap());
 
     /** The default neutral result */
     public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL, Collections.emptyMap());

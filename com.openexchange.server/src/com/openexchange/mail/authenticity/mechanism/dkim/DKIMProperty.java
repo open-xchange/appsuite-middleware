@@ -47,52 +47,18 @@
  *
  */
 
-package com.openexchange.mail.authenticity.test;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixA;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixB;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixC;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixD1;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixD2;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixD3;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixE1;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixE2;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixE3;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixF1;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixF2;
-import com.openexchange.mail.authenticity.test.matrix.TestMailAuthenticityStatusMatrixF3;
+package com.openexchange.mail.authenticity.mechanism.dkim;
 
 /**
- * {@link TestMailAuthenticityStatusMatrix}
+ * {@link DKIMProperty} - Defines the properties that can be set via {@link DKIMAuthMechResult#addProperty(String, String)}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.2
  */
-@RunWith(Suite.class)
-//@formatter:off
-@Suite.SuiteClasses({
-    TestMailAuthenticityStatusMatrixA.class,
-    TestMailAuthenticityStatusMatrixB.class,
-    TestMailAuthenticityStatusMatrixC.class,
-    TestMailAuthenticityStatusMatrixD1.class,
-    TestMailAuthenticityStatusMatrixD2.class,
-    TestMailAuthenticityStatusMatrixD3.class,
-    TestMailAuthenticityStatusMatrixE1.class,
-    TestMailAuthenticityStatusMatrixE2.class,
-    TestMailAuthenticityStatusMatrixE3.class,
-    TestMailAuthenticityStatusMatrixF1.class,
-    TestMailAuthenticityStatusMatrixF2.class,
-    TestMailAuthenticityStatusMatrixF3.class,
-})
-//@formatter:on
-public class TestMailAuthenticityStatusMatrix {
+public final class DKIMProperty {
 
     /**
-     * Initialises a new {@link TestMailAuthenticityStatusMatrix}.
+     * The 'signin_domain' attribute
      */
-    public TestMailAuthenticityStatusMatrix() {
-        super();
-    }
-
+    public static final String SIGNING_DOMAIN = "signing_domain";
 }

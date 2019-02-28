@@ -92,7 +92,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
     public void testNoHeaderPresent() {
         perform();
 
-        assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", null, result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertTrue("The mail authenticity mechansism results should be null", result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class) == null);
     }
@@ -106,7 +106,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.org>");
         perform("ox.io 1; none");
 
-        assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertTrue("The mail authenticity mechansism results should be empty", result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).isEmpty());
     }
@@ -120,7 +120,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(1);
 
@@ -136,7 +136,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; sender-id=pass header.from=example.net", "ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(1);
 
@@ -168,7 +168,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.com; spf=fail smtp.mailfrom=example.com", "ox.io; sender-id=fail header.from=example.com; dkim=pass (good signature) header.d=example.com");
 
-        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("example.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(2);
 
@@ -199,7 +199,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@newyork.example.com>");
         perform("ox.io; dkim=pass (good signature) header.i=@newyork.example.com header.d=@example.com", "ox.io; dkim=pass reason=\"good signature\" header.i=@mail-router.example.net; dkim=fail reason=\"bad signature\" header.i=@newyork.example.com");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", "newyork.example.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
         assertUnconsideredAmount(0);
@@ -218,8 +218,8 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <bob@aliceland.com>");
         perform("ox.io; dkim=temperror (no key for signature) header.i=@aliceland.com header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
 
-        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertStatus(MailAuthenticityStatus.SUSPICIOUS, result.getStatus());
+        //assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
@@ -254,7 +254,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <alice@ice.bobland.com>");
         perform("ox.io; dkim=temperror (no key for signature) header.i=@ice.bobland.com header.s=e header.b=Sw4o2uM4; spf=pass (ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=alice@ice.bobland.com");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("ice.bobland.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(2);
 
@@ -272,7 +272,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@ox.io>");
         perform("ox.io; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("ox.io", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(1);
 
@@ -321,7 +321,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("some-auth-servId; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
-        assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
 
         assertTrue("The from domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN) == null);
         assertTrue("The mail authentication mechanism results do not match", result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).isEmpty());
@@ -337,7 +337,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
-        assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
 
         assertTrue("The from domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN) == null);
         assertTrue("The mail authentication mechanism results do not match", result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).isEmpty());
@@ -353,7 +353,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dkim=none header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; dmarc=none (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(3);
 
@@ -369,11 +369,10 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
      */
     @Test
     public void testDMARCWithMismatchingFromHeader() throws AddressException {
-        // TODO: is this even possible? If so, don't we need to rather consider the subdomain policy then and make this a pass?
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@some.foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
-        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
 
@@ -391,7 +390,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@some.foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=some.foobar.com");
 
-        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
         assertUnconsideredAmount(0);
@@ -426,7 +425,11 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
     @Test
     public void testDuplicateAllMechanisms() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
-        perform("ox.io; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=foobar.com; spf=fail smtp.mailfrom=foobar.com; " + "dmarc=pass (p=NONE sp=NONE dis=REJECT) header.from=foobar.com; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; " + "dkim=fail header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; ");
+        //@formatter:off
+        perform("ox.io; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=foobar.com; spf=fail smtp.mailfrom=foobar.com; " + 
+            "dmarc=pass (p=NONE sp=NONE dis=REJECT) header.from=foobar.com; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; " + 
+            "dkim=fail header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; ");
+        //@formatter:on
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
         assertDomain("foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
@@ -459,5 +462,35 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertAuthenticityMechanismResult(results.get(0), "fooBAR.com", DMARCResult.NONE);
         assertAuthenticityMechanismResult(results.get(1), "some.thirdparty.com", DKIMResult.FAIL);
         assertAuthenticityMechanismResult(results.get(2), "FoObAr.cOM", SPFResult.PASS);
+    }
+    
+    /**
+     * Tests the DMARC 'reject' policy
+     */
+    @Test
+    public void testDMARCRejectPolicy() throws Exception {
+        fromAddresses[0] = new InternetAddress("John Doe <jOhN.d0e@foo.com>");
+        perform("ox.io; dmarc=fail (p=reJecT sp=NONE dis=NONE) header.from=foo.com; spf=fail smtp.mailfrom=foo.com; dkim=pass header.i=@foo.com header.s=201705 header.b=VvWVD9kg");
+        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+    }
+    
+    /**
+     * Tests the DMARC 'quarantine' policy
+     */
+    @Test
+    public void testDMARCQuarantinePolicy() throws Exception {
+        fromAddresses[0] = new InternetAddress("John Doe <jOhN.d0e@foo.com>");
+        perform("ox.io; dmarc=fail (p=QuaRANTine sp=NONE dis=NONE) header.from=foo.com; spf=fail smtp.mailfrom=foo.com; dkim=pass header.i=@foo.com header.s=201705 header.b=VvWVD9kg");
+        assertStatus(MailAuthenticityStatus.SUSPICIOUS, result.getStatus());
+    }
+    
+    /**
+     * Tests the DMARC 'none' policy
+     */
+    @Test
+    public void testDMARCNonePolicy() throws Exception {
+        fromAddresses[0] = new InternetAddress("John Doe <jOhN.d0e@foo.com>");
+        perform("ox.io; dmarc=fail (p=NOne sp=NONE dis=NONE) header.from=foo.com; spf=fail smtp.mailfrom=foo.com; dkim=pass header.i=@foo.com header.s=201705 header.b=VvWVD9kg");
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
     }
 }

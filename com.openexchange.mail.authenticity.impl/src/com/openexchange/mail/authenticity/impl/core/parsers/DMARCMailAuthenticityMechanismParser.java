@@ -57,6 +57,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCProperty;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResultHeader;
 
@@ -98,8 +99,8 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
         DMARCAuthMechResult result = new DMARCAuthMechResult(domain, (DMARCResult) mechResult);
         result.setReason(mechResult.getDisplayName());
         result.setDomainMatch(domainMatch);
-        result.addProperty("from_domain", result.getDomain());
-        result.addProperty("policy", extractPolicy(mechanismName));
+        result.addProperty(DMARCProperty.FROM_DOMAIN, result.getDomain());
+        result.addProperty(DMARCProperty.POLICY, extractPolicy(mechanismName));
         return result;
     }
 
@@ -124,7 +125,7 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
                 continue;
             }
             if (split[0].equalsIgnoreCase("p")) {
-                return split[1];
+                return split[1].toLowerCase();
             }
         }
         return "";

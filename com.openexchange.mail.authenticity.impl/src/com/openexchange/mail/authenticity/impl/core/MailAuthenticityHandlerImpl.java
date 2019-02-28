@@ -98,7 +98,7 @@ import com.openexchange.session.UserAndContext;
  */
 public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailAuthenticityHandlerImpl.class);
+    private static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailAuthenticityHandlerImpl.class);
 
     private final int ranking;
     private final ServiceLookup services;
@@ -113,7 +113,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @param services The service look-up
      */
-    public MailAuthenticityHandlerImpl(final TrustedMailService trustedMailService, final ServiceLookup services, CustomRuleChecker checker) {
+    public MailAuthenticityHandlerImpl(TrustedMailService trustedMailService, ServiceLookup services, CustomRuleChecker checker) {
         this(0, trustedMailService, services, checker);
     }
 
@@ -123,14 +123,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param ranking The ranking of this handler; a higher value means higher priority
      * @param services The service look-up
      */
-    public MailAuthenticityHandlerImpl(final int ranking, final TrustedMailService trustedMailService, final ServiceLookup services, CustomRuleChecker checker) {
+    public MailAuthenticityHandlerImpl(int ranking, TrustedMailService trustedMailService, ServiceLookup services, CustomRuleChecker checker) {
         super();
         this.services = services;
         this.trustedMailService = trustedMailService;
         this.ranking = ranking;
-        authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
-        requiredMailFields = ImmutableList.of(MailField.FROM);
-        validator = new StandardAuthenticationResultsValidator();
+        this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+        this.requiredMailFields = ImmutableList.of(MailField.FROM);
+        this.validator = new StandardAuthenticationResultsValidator();
         this.checker = checker;
     }
 
@@ -151,22 +151,22 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     @Override
-    public void handle(final Session session, final MailMessage mailMessage) {
+    public void handle(Session session, MailMessage mailMessage) {
         if (mailMessage.containsAuthenticityResult()) {
             // Appears that authenticity results has already been set for specified MailMessage instance
             return;
         }
 
-        final HeaderCollection headerCollection = mailMessage.getHeaders();
-        final String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
+        HeaderCollection headerCollection = mailMessage.getHeaders();
+        String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
         if (authHeaders == null || authHeaders.length == 0) {
-            // No 'Authentication-Results header' - set overall status to 'none'
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NONE_RESULT);
+            // No 'Authentication-Results header' - set overall status to 'neutral'
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             logMetrics(mailMessage.getMessageId(), Collections.emptyList(), mailMessage.getAuthenticityResult());
             return;
         }
 
-        final InternetAddress[] from = mailMessage.getFrom();
+        InternetAddress[] from = mailMessage.getFrom();
         if (from == null || from.length == 0) {
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             logMetrics(mailMessage.getMessageId(), Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
@@ -219,7 +219,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#isEnabled(com.openexchange.session.Session)
      */
     @Override
-    public boolean isEnabled(final Session session) {
+    public boolean isEnabled(Session session) {
         // MailAuthenticityProperty.enabled is already checked in MailAuthenticityHandlerRegistryImpl
         // No further individual conditions to check
         return true;
@@ -244,11 +244,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return The allowed authserv-ids
      * @throws OXException If authserv-ids are missing
      */
-    private List<AllowedAuthServId> getAllowedAuthServIds(final Session session) throws OXException {
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-        final UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        final List<AllowedAuthServId> authServIds = authServIdsCache.getIfPresent(key);
+    private List<AllowedAuthServId> getAllowedAuthServIds(Session session) throws OXException {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        List<AllowedAuthServId> authServIds = authServIdsCache.getIfPresent(key);
         return authServIds == null ? getAllowedAuthServIds(userId, contextId, key) : authServIds;
     }
 
@@ -262,20 +262,20 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return The allowed authserv-ids
      * @throws OXException If authserv-ids are missing
      */
-    private List<AllowedAuthServId> getAllowedAuthServIds(final int userId, final int contextId, final UserAndContext key) throws OXException {
+    private List<AllowedAuthServId> getAllowedAuthServIds(int userId, int contextId, UserAndContext key) throws OXException {
         // This is not thread-safe, but does not need to
-        final LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
-        final String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.AUTHSERV_ID);
+        LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
+        String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.AUTHSERV_ID);
         if (Strings.isEmpty(sAuthServIds)) {
             throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
 
-        final List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
+        List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
         if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
             throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
 
-        final List<AllowedAuthServId> authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
+        List<AllowedAuthServId> authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
         if (authServIds == null || authServIds.isEmpty()) {
             throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
@@ -290,7 +290,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders the raw headers
      * @param overallResult the overall result
      */
-    private void logMetrics(String mailId, final List<String> authHeaders, MailAuthenticityResult overallResult) {
+    private void logMetrics(String mailId, List<String> authHeaders, MailAuthenticityResult overallResult) {
         MailAuthenticityMetricLogger metricLogger = services.getService(MailAuthenticityMetricLogger.class);
         if (metricLogger == null) {
             return;

@@ -55,6 +55,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMProperty;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResultHeader;
 
@@ -95,7 +96,7 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);
         result.setDomainMatch(domainMatch);
-        result.addProperty("signing_domain", result.getDomain());
+        result.addProperty(DKIMProperty.SIGNING_DOMAIN, result.getDomain());
         result.setReason(compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_DOMAIN, result.getDomain()));
         return result;
     }

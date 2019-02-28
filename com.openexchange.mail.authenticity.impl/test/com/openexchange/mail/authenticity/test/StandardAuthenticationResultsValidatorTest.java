@@ -75,6 +75,9 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         super();
     }
 
+    /**
+     * (SPF: none, DKIM: pass, DMARC: none) -> Overall Result: pass)
+     */
     @Test
     public void testCorrectOverallResult() throws Exception {
         AuthenticationResultsValidator validator = handler.getValidator();
@@ -91,9 +94,12 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         InternetAddress from = new QuotedInternetAddress("Super Hosting <rootserver@hosting.foreigner.com>");
 
         MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
     }
 
+    /**
+     * (SPF: none, DMARC: none) -> Overall Result: none)
+     */
     @Test
     public void testCorrectOverallResult2() throws Exception {
         AuthenticationResultsValidator validator = handler.getValidator();
@@ -108,9 +114,13 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         InternetAddress from = new QuotedInternetAddress("Alice <alice@foo.de>");
 
         MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
-        assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
+        //assertStatus(MailAuthenticityStatus.NONE, result.getStatus()); // Should be 'NONE' with original
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus()); // Should be 'NEUTRAL' with V2
     }
 
+    /**
+     * (SPF: pass, DKIM: pass, DMARC: none) -> Overall Result: pass)
+     */
     @Test
     public void testCorrectOverallResult3() throws Exception {
         AuthenticationResultsValidator validator = handler.getValidator();
@@ -127,9 +137,12 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         InternetAddress from = new QuotedInternetAddress("\"Aha! (Steffen Templin)\" <ce3453825a6c1f0be41c5dc0@mailer.aha.io>");
 
         MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
     }
 
+    /**
+     * (SPF: pass, DKIM: fail, DMARC: none) -> Overall Result: neutral)
+     */
     @Test
     public void testCorrectOverallResult4() throws OXException, AddressException {
         AuthenticationResultsValidator validator = handler.getValidator();

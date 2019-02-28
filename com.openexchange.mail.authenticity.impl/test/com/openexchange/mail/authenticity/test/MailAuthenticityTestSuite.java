@@ -63,7 +63,8 @@ import com.openexchange.mail.authenticity.test.bugs.BugsTestSuite;
     TestMailAuthenticityHandler.class,
     TestMailAuthenticityStatusMatrix.class,
     StandardAuthenticationResultsValidatorTest.class,
-    BugsTestSuite.class
+    TestMailAuthenticityStatusMatrixV2.class,
+    BugsTestSuite.class,
 })
 public class MailAuthenticityTestSuite {
 
