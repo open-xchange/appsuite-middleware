@@ -333,7 +333,7 @@ public final class Tools {
     /**
      * Drops the key with the specified name. Beware, this method is vulnerable to SQL injection because table and key name can
      * not be set through a {@link PreparedStatement}.
-     * 
+     *
      * @param con writable database connection.
      * @param table table name that index should be dropped.
      * @param key name of the key to drop.
@@ -363,7 +363,7 @@ public final class Tools {
     public static final void createPrimaryKey(final Connection con, final String table, final String[] columns, final int[] lengths) throws SQLException {
         createKey(con, table, columns, lengths, true, null);
     }
-    
+
     /**
      * This method creates a new (primary) key on a table. Beware, this method is vulnerable to SQL injection because table and column names
      * can not be set through a {@link PreparedStatement}.
@@ -373,7 +373,7 @@ public final class Tools {
      * @param columns names of the columns the key should cover.
      * @param lengths The column lengths; <code>-1</code> for full column
      * @param primary <code>true</code> if a <code>PRIMARY KEY</code> is to be created; <code>false</code> for a <code>KEY</code>
-     * @param name The name of the <code>KEY</code>. In case of a <code>PRIMARY KEY</code> the name will simply be ignored. 
+     * @param name The name of the <code>KEY</code>. In case of a <code>PRIMARY KEY</code> the name will simply be ignored.
      * @throws SQLException if some SQL problem occurs.
      */
     public static final void createKey(final Connection con, final String table, final String[] columns, final int[] lengths, boolean primary, String name) throws SQLException {
@@ -752,13 +752,17 @@ public final class Tools {
     public static List<Integer> getContextIDs(final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final Set<Integer> contextIds = new LinkedHashSet<>();
         try {
             stmt = con.prepareStatement("SELECT cid FROM user");
             rs = stmt.executeQuery();
-            while (rs.next()) {
-                contextIds.add(I(rs.getInt(1)));
+            if (!rs.next()) {
+                return Collections.emptyList();
             }
+
+            Set<Integer> contextIds = new LinkedHashSet<>();
+            do {
+                contextIds.add(I(rs.getInt(1)));
+            } while (rs.next());
             return new ArrayList<>(contextIds);
         } finally {
             closeSQLStuff(rs, stmt);
@@ -791,7 +795,8 @@ public final class Tools {
             return false;
         }
 
-        final StringBuffer sql = new StringBuffer("DROP TABLE ").append(tableName);
+        StringBuffer sql = new StringBuffer("DROP TABLE ").append(tableName);
+
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -803,21 +808,17 @@ public final class Tools {
     }
 
     public static void addColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
-        sql.append(tableName);
-        for (final Column column : cols) {
-            sql.append(" ADD ");
-            sql.append(column.getName());
-            sql.append(' ');
-            sql.append(column.getDefinition());
-            sql.append(',');
-        }
-        if (sql.charAt(sql.length() - 1) == ',') {
-            sql.setLength(sql.length() - 1);
-        }
-        if (sql.length() == 12 + tableName.length()) {
+        if (cols == null || cols.length <= 0) {
             return;
         }
+
+        StringBuffer sql = new StringBuffer(cols.length << 5);
+        sql.append("ALTER TABLE ").append(tableName);
+        sql.append(" ADD ").append(cols[0].getName()).append(' ').append(cols[0].getDefinition());
+        for (int i = 1; i < cols.length; i++) {
+            sql.append(", ADD ").append(cols[i].getName()).append(' ').append(cols[i].getDefinition());
+        }
+
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -840,14 +841,13 @@ public final class Tools {
             return;
         }
 
-        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
-        sql.append(tableName);
-        sql.append(" DROP ");
-        sql.append(cols[0].getName());
+        StringBuffer sql = new StringBuffer(cols.length << 4);
+        sql.append("ALTER TABLE ").append(tableName);
+        sql.append(" DROP ").append(cols[0].getName());
         for (int i = 1; i < cols.length; i++) {
-            sql.append(", DROP ");
-            sql.append(cols[i].getName());
+            sql.append(", DROP ").append(cols[i].getName());
         }
+
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -918,7 +918,7 @@ public final class Tools {
      *
      * @param con The connection to use
      * @param tableName The table name
-     * @param ignore adds the keyword IGNORE to the SQL statement to ignore e.g. data truncation.
+     * @param ignore Whether to add the <code>"IGNORE"</code> keyword to the SQL statement; e.g. to ignore data truncation.
      * @param cols The new column definitions to change to
      * @throws SQLException If operation fails
      */
@@ -926,23 +926,14 @@ public final class Tools {
         if (null == cols || cols.length == 0) {
             return;
         }
-        final StringBuilder sql = new StringBuilder();
-        if (ignore) {
-            sql.append("ALTER IGNORE TABLE ");
-        } else {
-            sql.append("ALTER TABLE ");
-        }
-        sql.append(tableName);
-        sql.append(" MODIFY COLUMN ");
-        sql.append(cols[0].getName());
-        sql.append(' ');
-        sql.append(cols[0].getDefinition());
+
+        StringBuilder sql = new StringBuilder(cols.length << 5);
+        sql.append(ignore ? "ALTER IGNORE TABLE " : "ALTER TABLE ").append(tableName);
+        sql.append(" MODIFY COLUMN ").append(cols[0].getName()).append(' ').append(cols[0].getDefinition());
         for (int i = 1; i < cols.length; i++) {
-            sql.append(", MODIFY COLUMN ");
-            sql.append(cols[i].getName());
-            sql.append(' ');
-            sql.append(cols[i].getDefinition());
+            sql.append(", MODIFY COLUMN ").append(cols[i].getName()).append(' ').append(cols[i].getDefinition());
         }
+
         Statement stmt = null;
         try {
             stmt = con.createStatement();
