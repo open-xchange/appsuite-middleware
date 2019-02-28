@@ -2522,18 +2522,18 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
-     * Returns the telephone number for ip telephony of this user object
+     * Returns the telephone number for IP telephony of this user object
      *
-     * @return A {@code String} containing the telephone number for ip telephony
+     * @return A {@code String} containing the telephone number for IP telephony
      */
     final public String getTelephone_ip() {
         return telephone_ip;
     }
 
     /**
-     * Sets the telephone number for ip telephony for this user object
+     * Sets the telephone number for IP telephony for this user object
      *
-     * @param telephone_ip A {@code String} containing the telephone number for ip telephony
+     * @param telephone_ip A {@code String} containing the telephone number for IP telephony
      */
     final public void setTelephone_ip(final String telephone_ip) {
         if (null == telephone_ip) {
@@ -2543,18 +2543,18 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
-     * Returns the telephone number for isdn telephony of this user object
+     * Returns the telephone number for ISDN telephony of this user object
      *
-     * @return A {@code String} containing the telephone number for isdn telephony
+     * @return A {@code String} containing the telephone number for ISDN telephony
      */
     final public String getTelephone_isdn() {
         return telephone_isdn;
     }
 
     /**
-     * Sets the telephone number for isdn telephony for this user object
+     * Sets the telephone number for ISDN telephony for this user object
      *
-     * @param telephone_isdn A {@code String} containing the telephone number for isdn telephony
+     * @param telephone_isdn A {@code String} containing the telephone number for ISDN telephony
      */
     final public void setTelephone_isdn(final String telephone_isdn) {
         if (null == telephone_isdn) {
