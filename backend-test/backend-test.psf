@@ -12,6 +12,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.itip"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.birthdays"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.recurrence"/>
