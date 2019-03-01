@@ -1,0 +1,39 @@
+/login?action=samlLogin:
+  post:
+    operationId: samlLogin
+    tags:
+      - Login
+    summary: Login via saml
+    description: |
+      The login module is used to obtain a session via saml.
+    parameters:
+      - in: formData
+        name: client
+        type: string
+        description: Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.
+        required: false
+      - in: formData
+        name: clientUserAgent
+        type: string
+        description: Value of the User-Agent header of the client host for that the session is created. If this parameter is not specified the User-Agent of the current HTTP client doing this request is used.
+        required: false
+      - in: formData
+        name: token
+        type: string
+        description: The saml token
+        required: true
+      - in: formData
+        name: loginPath
+        type: string
+        description: The login path to use for the redirection call
+        required: false      
+    responses:
+      200:
+        description: A html error page
+      302:
+        description: In case of a succes the middleware answers with a redirect to the requested location.
+      400:
+        description: In case the token is missing
+      403:
+        description: In case the login is not allowed
+
