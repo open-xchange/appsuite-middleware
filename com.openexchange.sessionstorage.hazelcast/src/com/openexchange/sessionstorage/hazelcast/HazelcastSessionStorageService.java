@@ -200,7 +200,12 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 acquiredLatch.result.set(session);
                 return session;
             } catch (OXException e) {
-                acquiredLatch.result.set(e);
+                if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
+                    // Thread was interrupted
+                    acquiredLatch.result.set(SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e.getCause(), sessionId));
+                } else {
+                    acquiredLatch.result.set(e);
+                }
                 throw e;
             } catch (RuntimeException e) {
                 acquiredLatch.result.set(new OXException(e));
@@ -213,7 +218,18 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
         try {
             // Need to await 'til fetched from Hazelcast by concurrent thread
-            latch.await();
+            if (timeoutMillis <= 0) {
+                latch.await();
+            } else {
+                // Wait timeout is 1.5 times timeout
+                long waitTimeoutMillis = timeoutMillis + (timeoutMillis >> 1);
+                boolean waitExceeded = false == latch.await(waitTimeoutMillis, TimeUnit.MILLISECONDS);
+                if (waitExceeded) {
+                    // Waiting time elapsed before the count reached zero
+                    interruptOwnerSafe(acquiredLatch);
+                    throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+                }
+            }
 
             // Check if already locally available...
             Object result = acquiredLatch.result.get();
@@ -224,6 +240,14 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw ((result instanceof OXException) ? (OXException) result : SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId));
         } catch (InterruptedException e) {
             throw SessionStorageExceptionCodes.INTERRUPTED.create(e, new Object[0]);
+        }
+    }
+
+    private void interruptOwnerSafe(AcquiredLatch acquiredLatch) {
+        try {
+            acquiredLatch.owner.interrupt();
+        } catch (SecurityException e) {
+            // Ignore
         }
     }
 
