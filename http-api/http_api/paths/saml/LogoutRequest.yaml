@@ -1,0 +1,30 @@
+/login?action=samlLogout:
+  get:
+    operationId: samlLogout
+    tags:
+      - Login
+      - SAML
+    summary: Terminates an App Suite session after SAML logout flow
+    description: |
+      This API call is typically the result of a redirect created by the server. It does not
+      need to be explicitly implemented by clients!
+
+      After a successful SAML logout flow, the client (web browser) is redirected
+      to this endpoint, where the actual App Suite session gets terminated. As a result,
+      the user gets usually redirected to an environment-specific location, for example
+      a portal page. The redirect response removes all App Suite session cookies.
+    parameters:
+      - in: query
+        name: session
+        type: string
+        description: App Suite session ID
+        required: true
+    responses:
+      200:
+        description: A html result page
+      302:
+        description: A redirect to an exit page
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            type: string

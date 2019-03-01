@@ -10,4 +10,3 @@ requests:
   - ChangeIPRequest.yaml
   - RedeemTokenRequest.yaml
   - AutoLoginRequest.yaml
-  - SamlLoginRequest.yaml

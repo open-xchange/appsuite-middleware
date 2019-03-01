@@ -1,0 +1,26 @@
+'/saml/{tenant}/metadata':
+  parameters:
+    - in: path
+      name: tenant
+      type: string
+      description: |
+        In a multi-tenant environment, where different tenants might
+        connect to different identity providers, this parameter denotes
+        the tenant to start a SAML flow for. In single-tenant environments
+        this parameter is superfluous.
+  get:
+    operationId: metadata
+    produces:
+      - application/xml
+      - text/html
+    tags:
+      - SAML
+    summary: Metadata Service
+    description: |
+      SAML 2.0 Metadata Service. Provides an `<EntityDescriptor>` XML document
+      describing the built-in service provider configuration.
+    responses:
+      200:
+        description: The metadata response
+      500:
+        description: HTML error page

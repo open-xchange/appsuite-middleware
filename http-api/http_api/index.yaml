@@ -162,6 +162,8 @@ tags:
   - name: OpenId
     description: This module supports the Single Sign On mechanism known as OpenId and therefore a few 
       requests are needed to initiate an authentication and trigger the end of the session.
+  - name: SAML
+    description: Endpoints of the built-in SAML 2.0 service provider. See https://documentation.open-xchange.com/latest/middleware/login/02_saml.html.
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

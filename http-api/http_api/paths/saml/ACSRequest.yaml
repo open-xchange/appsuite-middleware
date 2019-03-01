@@ -1,0 +1,38 @@
+'/saml/{tenant}/acs':
+  parameters:
+    - in: path
+      name: tenant
+      type: string
+      description: |
+        In a multi-tenant environment, where different tenants might
+        connect to different identity providers, this parameter denotes
+        the tenant to start a SAML flow for. In single-tenant environments
+        this parameter is superfluous.
+  post:
+    operationId: acs
+    consumes: application/xml
+    tags:
+      - SAML
+    summary: Assertion Consumer Service
+    description: |
+      SAML 2.0 Assertion Consumer Service. Accepts `<Response>` messages of the
+      Web Browser SSO Profile per `HTTP-POST` binding.
+    parameters:
+      - in: formData
+        name: SAMLResponse
+        type: string
+        description: Base64 encoded SAML 2.0 `<Response>` message.
+        required: true
+      - in: formData
+        name: RelayState
+        type: string
+        description: Message exchange relay state. Optional on unsolicited responses.
+    responses:
+      302:
+        description: Redirect to `/login?action=samlLogin`
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            type: string
+      default:
+        description: Environment specific exit path (HTML page or redirect) on any error

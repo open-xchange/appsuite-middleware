@@ -1,0 +1,85 @@
+'/saml/{tenant}/sls':
+  parameters:
+    - in: path
+      name: tenant
+      type: string
+      description: |
+        In a multi-tenant environment, where different tenants might
+        connect to different identity providers, this parameter denotes
+        the tenant to start a SAML flow for. In single-tenant environments
+        this parameter is superfluous.
+  get:
+    operationId: sls-req
+    tags:
+      - SAML
+    summary: Single Logout Service for Logout Requests
+    description: |
+      SAML 2.0 Single Logout Service. Accepts `<LogoutRequest>` messages from the IdP
+      per `HTTP-Redirect` binding.
+    parameters:
+      - in: query
+        name: SAMLRequest
+        type: string
+        description: Base64 encoded SAML 2.0 `<LogoutRequest>` message.
+        required: true
+      - in: query
+        name: SigAlg
+        type: string
+        description: Message signature algorithm ID
+      - in: query
+        name: Signature
+        type: string
+        description: Message signature
+      - in: query
+        name: RelayState
+        type: string
+        description: Message exchange relay state
+    produces:
+       - application/xml
+       - text/html
+    responses:
+      200:
+        description: |
+          HTML response with a self-submitting from that POSTs the `<LoginResponse>`
+          back to the IdP.
+      302:
+        description: |
+          Redirect URI that submits the `<LoginResponse>` back to the IdP per
+          `HTTP-Redirect` binding.
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            type: string
+      400:
+        description: In case of a missing `SAMLRequest` parameter
+      500:
+        description: In case of internal server errors
+  post:
+    operationId: sls-resp
+    consumes: application/xml
+    tags:
+      - SAML
+    summary: Single Logout Service for Logout Responses
+    description: |
+      SAML 2.0 Single Logout Service. Accepts `<LogoutResponse>` messages of the
+      Single Logout Profile per `HTTP-POST` binding.
+    parameters:
+      - in: formData
+        name: SAMLResponse
+        type: string
+        description: Base64 encoded SAML 2.0 `<LogoutResponse>` message.
+        required: true
+      - in: formData
+        name: RelayState
+        type: string
+        description: Message exchange relay state
+        required: true
+    responses:
+      302:
+        description: Redirect to `/login?action=samlLogout`
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            type: string
+      default:
+        description: Environment specific exit path (HTML page or redirect) on any error

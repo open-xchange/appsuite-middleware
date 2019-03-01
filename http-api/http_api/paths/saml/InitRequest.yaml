@@ -1,0 +1,60 @@
+'/saml/{tenant}/init':
+  parameters:
+    - in: path
+      name: tenant
+      type: string
+      description: |
+        In a multi-tenant environment, where different tenants might
+        connect to different identity providers, this parameter denotes
+        the tenant to start a SAML flow for. In single-tenant environments
+        this parameter is superfluous.
+  get:
+    operationId: init
+    tags:
+      - SAML
+      - Login
+    summary: Initiate SAML 2.0 HTTP binding flows
+    description: |
+      Initiates any supported SAML 2.0 login and logout flow as described
+      in https://documentation.open-xchange.com/latest/middleware/login/02_saml.html.
+    parameters:
+      - in: query
+        name: flow
+        type: string
+        description: |
+          One of `login`, `relogin` or `logout` to start the respective flow.
+      - in: query
+        name: session
+        type: string
+        description: Required for flow `logout`. A session ID to determine the correct session.
+      - in: query
+        name: redirect
+        type: string
+        default: false
+        description: |
+          Responds with `302 Found` and sets the response header `Location`
+          to the actual redirect URI.
+    produces: application/json
+    responses:
+      200:
+        description: |
+          Request was successful. Response JSON contains a redirect URI that
+          the client must follow to continue.
+        schema:
+          type: object
+          required:
+            - redirect_uri
+          properties:
+            redirect_uri:
+              type: string
+              description: A redirect URI that the client must follow to continue
+      302:
+        description: In case a redirect was requested
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            type: string
+      400:
+        description: In case of missing or invalid query parameters
+      500:
+        description: In case of an internal server error
