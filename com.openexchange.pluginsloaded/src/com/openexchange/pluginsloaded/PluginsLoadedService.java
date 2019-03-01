@@ -49,7 +49,6 @@
 
 package com.openexchange.pluginsloaded;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -66,6 +65,6 @@ public interface PluginsLoadedService {
      *
      * @return <code>true</code> if all plug-ins are loaded; otherwise <code>false</code>
      */
-    boolean allPluginsloaded() throws OXException;
+    boolean allPluginsloaded();
 
 }
