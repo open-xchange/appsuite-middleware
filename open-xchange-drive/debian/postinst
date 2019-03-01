@@ -20,32 +20,29 @@ set -e
 . /opt/open-xchange/lib/oxfunctions.sh
 
 postFix() {
-    local version=${1%-*}
-    version=${version//[-.]/}
+  local version=${1%-*}
+  version=${version//[-.]/}
 
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
+  # prevent bash from expanding, see bug 13316
+  GLOBIGNORE='*'
 
-    PFILE=/opt/open-xchange/etc/drive.properties
+  p_drive=/opt/open-xchange/etc/drive.properties
+  p_drive_backup=${p_drive}.dpkg-backup
+  if [ -e ${p_drive_backup} ]
+  then
+    # preinst upgrade detected modifications that we want to keep
+    # but as lean config now, like as if he user created the file
+    cp -a ${p_drive_backup} ${p_drive}
+  fi
+  dpkg-maintscript-helper rm_conffile ${p_drive} 7.10.2~ -- "$@"
 
-    # SoftwareChange_Request-2850
-    ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
-    ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
-    ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
-    ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
-
-    # SoftwareChange_Request-3244
-    ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
-    ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
-
-    ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
 }
 
 case "$1" in
     configure)
         test -n "$2" && {
             # we are in update mode, run postFix to apply fixes
-            postFix "$2"
+            postFix "$@"
         }
     ;;
 

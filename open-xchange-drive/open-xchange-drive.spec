@@ -50,26 +50,25 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 # prevent bash from expanding, see bug 13316
 GLOBIGNORE='*'
 
-PFILE=/opt/open-xchange/etc/drive.properties
+%posttrans
+. /opt/open-xchange/lib/oxfunctions.sh
 
-# SoftwareChange_Request-2850
-ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
-ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
-ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
-ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
-
-# SoftwareChange_Request-3244
-ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
-ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
-
-ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
+SCR=SCR-392
+ox_scr_todo ${SCR} && {
+  orig_pfile=/opt/open-xchange/etc/drive.properties
+  save_pfile=${orig_pfile}.rpmsave
+  if [ -e ${save_pfile} ]
+  then
+    mv ${save_pfile} ${orig_pfile}
+  fi
+  ox_scr_done ${SCR}
+}
 
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/drive.properties
 %config(noreplace) /opt/open-xchange/etc/contextSets/drive.yml
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
