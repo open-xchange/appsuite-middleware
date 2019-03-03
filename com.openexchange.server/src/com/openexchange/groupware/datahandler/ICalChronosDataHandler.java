@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -166,7 +167,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         try {
             ICalService iCalService = services.getServiceSafe(ICalService.class);
             stream = inputStreamCopy.getInputStream();
-            ImportedCalendar calendar = iCalService.importICal(stream, null);
+            ImportedCalendar calendar = iCalService.importICal(stream, initializeParameters(iCalService));
             events = calendar.getEvents();
             if (events.isEmpty()) {
                 return;
@@ -198,6 +199,12 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
+    }
+
+    private ICalParameters initializeParameters(ICalService iCalService) {
+        ICalParameters iCalParameters = iCalService.initParameters();
+        iCalParameters.set(ICalParameters.SANITIZE_INPUT, Boolean.TRUE);
+        return iCalParameters;
     }
 
     private void handleTasks(final Session session, int taskFolder, InputStreamCopy inputStreamCopy, final JSONArray folderAndIdArray, ConversionResult result) throws OXException, IOException, ConversionError {
