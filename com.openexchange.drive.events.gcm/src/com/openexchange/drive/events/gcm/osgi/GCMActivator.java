@@ -93,7 +93,7 @@ public class GCMActivator extends HousekeepingActivator {
         LOG.info("starting bundle: com.openexchange.drive.events.gcm");
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-            private GCMKeyProvider provider;
+            private volatile GCMKeyProvider provider;
             
             @Override
             public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
@@ -112,8 +112,9 @@ public class GCMActivator extends HousekeepingActivator {
                 if(provider != null) {
                     unregisterService(provider);
                 }
-            }});
-        
+            }
+        });
+        openTrackers();
         /*
          * register publisher
          */

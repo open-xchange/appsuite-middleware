@@ -102,8 +102,8 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
         
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-            private IOSAPNCertificateProvider iosProvider;
-            private IOSAPNCertificateProvider macosProvider;
+            private volatile IOSAPNCertificateProvider iosProvider;
+            private volatile IOSAPNCertificateProvider macosProvider;
             
             @Override
             public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
@@ -131,8 +131,9 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 if(macosProvider != null) {
                     unregisterService(macosProvider);
                 }
-            }});
-        
+            }
+        });
+        openTrackers();
         /*
          * register publishers
          */

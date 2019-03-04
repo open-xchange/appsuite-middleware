@@ -102,10 +102,9 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn2");
-        
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-            private ApnsHttp2OptionsProvider provider;
+            private volatile ApnsHttp2OptionsProvider provider;
             
             @Override
             public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
@@ -124,8 +123,9 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                 if(provider != null) {
                     unregisterService(provider);
                 }
-            }});
-        
+            }
+        });
+        openTrackers();
         /*
          * register publisher
          */
