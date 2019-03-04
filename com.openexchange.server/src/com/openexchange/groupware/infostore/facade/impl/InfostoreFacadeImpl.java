@@ -1286,7 +1286,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                     }
                 } catch (Exception e) {
-                    LoggerHolder.LOG.error("Failed to extract media metadata from document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
+                    LoggerHolder.LOG.debug("Failed to extract media metadata from document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
                     document.setMediaStatus(MediaStatus.error());
                     if (null != updatedColumns) {
                         Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
