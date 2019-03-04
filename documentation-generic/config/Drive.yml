@@ -258,55 +258,63 @@ properties:
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Host"]
-    - key: com.openexchange.drive.events.apn.ios.enabled
+    - key: com.openexchange.drive.events.apn.[os].enabled
       description: |
         Enables or disables push event notifications to clients using the Apple Push
-        Notification service (APNS) for iOS devices. This requires a valid
+        Notification service (APNS). This requires a valid
         configuration for the APNS certificate and keys,
-        or install the restricted components packages for drive.  
+        or install the restricted components packages for drive.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
       defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
-      related: ["com.openexchange.drive.events.apn.ios.keystore", "com.openexchange.drive.events.apn.ios.password"]
+      related: ["com.openexchange.drive.events.apn.[os].keystore", "com.openexchange.drive.events.apn.[os].password"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.ios.keystore
+    - key: com.openexchange.drive.events.apn.[os].keystore
       description: |
         Specifies the path to the local keystore file (PKCS #12) containing the APNS
-        certificate and keys for the iOS application, e.g.
+        certificate and keys for the application, e.g.
         "/opt/open-xchange/etc/drive-apns.p12". Required if
-        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
+        [[com.openexchange.drive.events.apn.[os].enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.drive.events.apn.ios.enabled
+      related: com.openexchange.drive.events.apn.[os].enabled
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.ios.password
+    - key: com.openexchange.drive.events.apn.[os].password
       description: |
         Specifies the password used when creating the referenced keystore containing
-        the certificate of the iOS application. Note that blank or null passwords
+        the certificate of the application. Note that blank or null passwords
         are in violation of the PKCS #12 specifications. Required if
-        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
+        [[com.openexchange.drive.events.apn.[os].enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.drive.events.apn.ios.enabled
+      related: com.openexchange.drive.events.apn.[os].enabled
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple", "Credential"]
-    - key: com.openexchange.drive.events.apn.ios.production
+    - key: com.openexchange.drive.events.apn.[os].production
       description: |
-        Indicates which APNS service is used when sending push notifications to iOS
-        devices. A value of <code>true</code> will use the production service, a value of
+        Indicates which APNS service is used when sending push notifications. 
+        A value of <code>true</code> will use the production service, a value of
         <code>false</code> the sandbox service.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
       defaultValue: true
       version:
       reloadable: true
@@ -315,14 +323,16 @@ properties:
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.ios.feedbackQueryInterval
+    - key: com.openexchange.drive.events.apn.[os].feedbackQueryInterval
       description: |
         Configures the interval between queries to the APN feedback service for the
-        subscribed iOS devices. The value can be defined using units of measurement:
+        subscribed devices. The value can be defined using units of measurement:
         "D" (=days), "W" (=weeks) and "H" (=hours).
         Leaving this parameter empty disables the feedback queries on this node.
         Since each received feedback is processed cluster-wide, only one node in the
         cluster should be enabled here.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
       defaultValue: 1D
       version:
       reloadable: false
@@ -330,80 +340,7 @@ properties:
       related: 
       file: drive.properties
       packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.macos.enabled
-      description: |
-        Enables or disables push event notifications to clients using the Apple Push
-        Notification service (APNS) for Mac OS devices. This requires a valid
-        configuration for the APNS certificate and keys,
-        or install the restricted components packages for drive.
-      defaultValue: false
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: ["com.openexchange.drive.events.apn.macos.keystore","com.openexchange.drive.events.apn.macos.password"]
-      file: drive.properties
-      packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.macos.keystore
-      description: |
-        Specifies the path to the local keystore file (PKCS #12) containing the APNS
-        certificate and keys for the Mac OS application, e.g.
-        "/opt/open-xchange/etc/drive-apns.p12". Required if
-        [[com.openexchange.drive.events.apn.macos.enabled]] is <code>true</code> and the package
-        containing the restricted drive components is not installed.
-      defaultValue:
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: com.openexchange.drive.events.apn.macos.enabled
-      file: drive.properties
-      packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.macos.password
-      description: |
-        Specifies the password used when creating the referenced keystore containing
-        the certificate of the Mac OS application. Note that blank or null passwords
-        are in violation of the PKCS #12 specifications. Required if
-        [[com.openexchange.drive.events.apn.macos.enabled]] is <code>true</code> and the package
-        containing the restricted drive components is not installed.
-      defaultValue:
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: com.openexchange.drive.events.apn.macos.enabled
-      file: drive.properties
-      packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple", "Credential"]
-    - key: com.openexchange.drive.events.apn.macos.production
-      description: |
-        Indicates which APNS service is used when sending push notifications to Mac
-        OS devices. A value of <code>true</code> will use the production service, a value of
-        <code>false</code> the sandbox service.
-      defaultValue: true
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: com.openexchange.drive.events.apn.macos.enabled
-      file: drive.properties
-      packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.macos.feedbackQueryInterval
-      description: |
-        Configures the interval between queries to the APN feedback service for the
-        subscribed Mac OS devices. The value can be defined using units of
-        measurement: "D" (=days), "W" (=weeks) and "H" (=hours). 
-        Leaving this parameter empty disables the feedback queries on
-        this node. Since each received feedback is processed cluster-wide, only one
-        node in the cluster should be enabled here.
-      defaultValue: 1D
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: com.openexchange.drive.events.apn.macos.enabled
-      file: drive.properties
-      packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
+      tags: ["Drive", "Push", "Apple"]   
     - key: com.openexchange.drive.events.gcm.enabled
       description: |
         Enables or disables push event notifications to clients using the Google

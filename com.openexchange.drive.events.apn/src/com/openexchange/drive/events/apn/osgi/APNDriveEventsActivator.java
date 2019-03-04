@@ -49,13 +49,25 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.drive.events.DriveEventService;
+import com.openexchange.drive.events.apn.APNAccess;
 import com.openexchange.drive.events.apn.IOSAPNCertificateProvider;
 import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
 import com.openexchange.drive.events.apn.internal.APNDriveEventPublisher;
+import com.openexchange.drive.events.apn.internal.DriveEventsAPNProperty;
+import com.openexchange.drive.events.apn.internal.OperationSystemType;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.exception.OXException;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -87,12 +99,92 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn");
+        
+        track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
+
+            private IOSAPNCertificateProvider iosProvider;
+            private IOSAPNCertificateProvider macosProvider;
+            
+            @Override
+            public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
+                if(properties != null) {
+                    APNAccess access = createAccess(properties, OperationSystemType.IOS);
+                    if(access != null) {
+                        iosProvider = () -> access;
+                        registerService(IOSAPNCertificateProvider.class, iosProvider);
+                    }
+                    
+                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS);
+                    if(macAccess != null) {
+                        macosProvider = () -> macAccess;
+                        registerService(IOSAPNCertificateProvider.class, macosProvider);
+                    }
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if(iosProvider != null) {
+                    unregisterService(iosProvider);
+                }
+                if(macosProvider != null) {
+                    unregisterService(macosProvider);
+                }
+            }});
+        
         /*
          * register publishers
          */
         DriveEventService eventService = getServiceSafe(DriveEventService.class);
-        eventService.registerPublisher(new APNDriveEventPublisher(this, "apn", "ios", IOSAPNCertificateProvider.class));
-        eventService.registerPublisher(new APNDriveEventPublisher(this, "apn.macos", "macos", MacOSAPNCertificateProvider.class));
+        eventService.registerPublisher(new APNDriveEventPublisher(this, "apn", OperationSystemType.IOS, IOSAPNCertificateProvider.class));
+        eventService.registerPublisher(new APNDriveEventPublisher(this, "apn.macos", OperationSystemType.MACOS, MacOSAPNCertificateProvider.class));
+    }
+
+    /**
+     * Creates an {@link APNAccess} from the given {@link Properties} object
+     * @param properties The {@link Properties} object
+     * @param The OS identifier
+     * @return The {@link APNAccess} or null
+     */
+    protected APNAccess createAccess(Properties properties, OperationSystemType type) {
+        Map<String, String> optionals = new HashMap<>(1);
+        optionals.put(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
+        String keystore;
+        try {
+            keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
+
+            if (Strings.isNotEmpty(keystore)) {
+                String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
+                boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPNProperty.production, optionals));
+                if (Strings.isUTF8Bytes(keystore.getBytes())) {
+                    return new APNAccess(keystore, password, production);
+                }
+                return new APNAccess(keystore.getBytes(), password, production);
+            }
+        } catch (OXException e) {
+            // nothing to do
+        }
+        return null;
+    }
+
+    /**
+     * Get the given property from the {@link Properties} object
+     * 
+     * @param properties The {@link Properties} object
+     * @param prop The {@link Property} to return
+     * @param optional The optional
+     * @return The string value of the property
+     * @throws OXException In case the property is missing
+     */
+    private String getProperty(Properties properties, Property prop, Map<String, String> optional) throws OXException {
+        String result = properties.getProperty(prop.getFQPropertyName(optional));
+        if(result == null) {
+            // This should never happen as long as the shipped fragment contains a proper properties file
+            LOG.error("Missing required property from fragment: "+ prop.getFQPropertyName());
+            throw OXException.general("Missing property: "+ prop.getFQPropertyName());
+        }
+        return result;
     }
 
     @Override

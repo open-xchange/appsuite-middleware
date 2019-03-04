@@ -55,5 +55,5 @@ package com.openexchange.drive.events.apn;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface MacOSAPNCertificateProvider extends APNCertificateProvider {
-
+    // empty marker interface
 }

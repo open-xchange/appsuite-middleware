@@ -51,14 +51,13 @@ package com.openexchange.drive.events.apn.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn.APNAccess;
@@ -101,28 +100,25 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
     private final ServiceLookup services;
     private final String serviceId;
     private final Class<? extends APNCertificateProvider> certifcateProviderClass;
-    private final String propertyInfix;
+    private final Map<String, String> optionals;
 
     /**
      * Initializes a new {@link APNDriveEventPublisher}.
      * 
      * @param services The service lookup reference
      * @param serviceId The service identifier used for push subscriptions, i.e. <code>apn</code> or <code>apn.macos</code>
-     * @param propertyInfix The infix as used in the property names to configure the APN push options, i.e. <code>ios</code> or <code>macos</code>
+     * @param type The operation system type, this publisher is responsible for. 
      * @param certifcateProviderClass The class under which the fallback APN certificate provider gets registered.
      */
-    public APNDriveEventPublisher(ServiceLookup services, String serviceId, String propertyInfix, Class<? extends APNCertificateProvider> certifcateProviderClass) {
+    public APNDriveEventPublisher(ServiceLookup services, String serviceId, OperationSystemType type, Class<? extends APNCertificateProvider> certifcateProviderClass) {
         super();
         this.services = services;
         this.serviceId = serviceId;
         this.certifcateProviderClass = certifcateProviderClass;
-        this.propertyInfix = propertyInfix;
+        HashMap<String, String> map = new HashMap<>(1);
+        map.put(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
+        optionals = Collections.unmodifiableMap(map);
         this.initializedFeedbackQueries = new HashMap<APNAccess, Boolean>();
-    }
-
-    private Property property(String name, Object defaultValue) {
-        String fqName = "com.openexchange.drive.events.apn." + propertyInfix + '.' + name;
-        return DefaultProperty.valueOf(fqName, defaultValue);
     }
 
     private APNAccess getAccess(int contextId, int userId) {
@@ -134,17 +130,17 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         /*
          * check if push via APN is enabled
          */
-        if (false == configService.getBooleanProperty(userId, contextId, property("enabled", Boolean.FALSE))) {
+        if (false == configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.enabled, optionals)) {
             LOG.trace("Push via {} is disabled for user {} in context {}.", serviceId, I(userId), I(contextId));
             return null;
         }
         /*
          * get APN options via config cascade if configured
          */
-        String keystore = configService.getProperty(userId, contextId, property("keystore", null));
+        String keystore = configService.getProperty(userId, contextId, DriveEventsAPNProperty.keystore, optionals);
         if (Strings.isNotEmpty(keystore)) {
-            String password = configService.getProperty(userId, contextId, property("password", null));
-            boolean production = configService.getBooleanProperty(userId, contextId, property("production", Boolean.TRUE));
+            String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
+            boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
             if (Strings.isUTF8Bytes(keystore.getBytes())) {
                 LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, userId, contextId);
                 return new APNAccess(keystore, password, production);
@@ -237,7 +233,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
 
     private void setupFeedbackQueries(APNAccess access) throws OXException {
         LeanConfigurationService configService = requireService(LeanConfigurationService.class, services);
-        String feedbackQueryInterval = configService.getProperty(property("feedbackQueryInterval", "1D"));
+        String feedbackQueryInterval = configService.getProperty(DriveEventsAPNProperty.feedbackQueryInterval, optionals);
         if (Strings.isNotEmpty(feedbackQueryInterval)) {
             long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval).longValue();
             if (60 * 1000 <= interval) {

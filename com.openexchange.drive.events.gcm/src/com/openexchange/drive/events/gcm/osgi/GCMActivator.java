@@ -49,12 +49,18 @@
 
 package com.openexchange.drive.events.gcm.osgi;
 
+import java.util.Properties;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.gcm.GCMKeyProvider;
+import com.openexchange.drive.events.gcm.internal.DriveEventsGCMProperty;
 import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link GCMActivator}
@@ -74,7 +80,7 @@ public class GCMActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class};
     }
 
     @Override
@@ -85,6 +91,29 @@ public class GCMActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.gcm");
+        track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
+
+            private GCMKeyProvider provider;
+            
+            @Override
+            public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                Properties properties = service.load(DriveEventsGCMProperty.FRAGMENT_FILE_NAME);
+                if(properties != null) {
+                    String key = properties.getProperty(DriveEventsGCMProperty.KEY.getFQPropertyName());
+                    if(Strings.isNotEmpty(key)) {
+                        provider = () -> key;
+                        registerService(GCMKeyProvider.class, provider);
+                    }
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if(provider != null) {
+                    unregisterService(provider);
+                }
+            }});
+        
         /*
          * register publisher
          */

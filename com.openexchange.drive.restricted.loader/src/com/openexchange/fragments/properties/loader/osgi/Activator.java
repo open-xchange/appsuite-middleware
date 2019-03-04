@@ -47,26 +47,39 @@
  *
  */
 
-package com.openexchange.drive.restricted.loader.internal;
+package com.openexchange.fragments.properties.loader.osgi;
 
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.drive.restricted.loader.StringsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.fragments.properties.loader.internal.PropertiesLoader;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ResourceLoader} - Load resources from 'restricted'-fragments/bundles
+ * 
+ * {@link Activator}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public interface ResourceLoader {
+public class Activator extends HousekeepingActivator {
 
-    /**
-     * Load resources from fragment bundle into config cascade.
-     */
-    void load(ConfigView view, StringsProvider strings);
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    /**
-     * Remove resources from config cascade.
-     */
-    void unload(ConfigView view, StringsProvider provider);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle \"com.openexchange.fragments.properties.loader\".");
+        registerService(FragmentPropertiesLoader.class, new PropertiesLoader());
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle \"com.openexchange.fragments.properties.loader\".");
+        super.stopBundle();
+    }
 }

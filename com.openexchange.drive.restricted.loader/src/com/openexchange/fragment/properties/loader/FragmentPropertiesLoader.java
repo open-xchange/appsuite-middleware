@@ -47,74 +47,24 @@
  *
  */
 
-package com.openexchange.drive.events.internal;
+package com.openexchange.fragment.properties.loader;
 
-import com.openexchange.drive.restricted.loader.StringsProvider;
+import java.util.Properties;
 
 /**
- * {@link DriveStringsProvider} provides the necessary property and file names for loading Drive GCM secrets and APN certificates.
+ * {@link FragmentPropertiesLoader}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class DriveStringsProvider implements StringsProvider {
+public interface FragmentPropertiesLoader {
 
-    public DriveStringsProvider() {
-        super();
-    }
+    /**
+     * Loads the properties from a file with the given name which was provided by a fragment.
+     * 
+     * @param name The name of the file to load. E.g. <code>drive.properties</code>
+     * @return The {@link Properties} of the file or null if it couldn't be loaded
+     */
+    Properties load(String name);
 
-    @Override
-    public String getPropertiesFilename() {
-        return "drive.properties";
-    }
-
-    @Override
-    public String getGCMSecretPropertyName() {
-        return "com.openexchange.drive.events.gcm.key";
-    }
-
-    @Override
-    public String getGCMSecretEnabledPropertyName() {
-        return "com.openexchange.drive.events.gcm.enabled";
-    }
-
-    @Override
-    public String getAPNiOSEnabledPropertyName() {
-        return "com.openexchange.drive.events.apn.ios.enabled";
-    }
-
-    @Override
-    public String getAPNiOSKeystorePropertyName() {
-        return "com.openexchange.drive.events.apn.ios.keystore";
-    }
-
-    @Override
-    public String getAPNiOSPasswordPropertyName() {
-        return "com.openexchange.drive.events.apn.ios.password";
-    }
-
-    @Override
-    public String getAPNiOSProductionPropertyName() {
-        return "com.openexchange.drive.events.apn.ios.production";
-    }
-
-    @Override
-    public String getAPNmacOSEnabledPropertyName() {
-        return "com.openexchange.drive.events.apn.macos.enabled";
-    }
-
-    @Override
-    public String getAPNmacOSKeystorePropertyName() {
-        return "com.openexchange.drive.events.apn.macos.keystore";
-    }
-
-    @Override
-    public String getAPNmacOSPasswordPropertyName() {
-        return "com.openexchange.drive.events.apn.macos.password";
-    }
-
-    @Override
-    public String getAPNmacOSProductionPropertyName() {
-        return "com.openexchange.drive.events.apn.macos.production";
-    }
 }

@@ -47,96 +47,64 @@
  *
  */
 
-package com.openexchange.drive.events.apn2.internal;
+package com.openexchange.drive.events.apn.internal;
 
 import com.openexchange.config.lean.Property;
 
 
 /**
- * {@link DriveEventsAPN2IOSProperty}
+ * 
+ * {@link DriveEventsAPNProperty}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public enum DriveEventsAPN2IOSProperty implements Property {
+public enum DriveEventsAPNProperty implements Property {
 
     /**
-     * Enables or disables push event notifications to clients using the HTTP/2 based version
-     * of the Apple Push Notification service (APNS HTTP/2) for iOS devices. This requires a
-     * valid configuration for the APNS certificate and keys.
+     * Enables or disables push event notifications to clients using the Apple Push Notification service (APNS). 
+     * This requires a valid configuration for the APNS certificate and keys, or install the restricted components packages for drive.
      * Default: false
      */
     enabled(false),
 
     /**
-     * Configures the apps's topic, which is typically the bundle ID of the app.
-     * Default: no default
-     */
-    topic(null),
-
-    /**
-     * Indicates which APNS service is used when sending push notifications to iOS devices.
+     * Indicates which APNS service is used when sending push notifications to devices.
      * A value of "true" will use the production service, a value of "false" the sandbox service.
      * Default: true
      */
     production(true),
 
     /**
-     * Specifies the authentication type to use for the APNS HTTP/2 push.
-     * Allows the values "certificate" and "jwt".
-     * - "certificates" signals to connect to APNs using provider certificates while
-     * - "jwt" signals to connect to APNs using provider authentication JSON Web Token (JWT)
-     * Default: "certificate"
-     */
-    authtype("certificate"),
-
-    /**
-     * Specifies the path to the local keystore file (PKCS #12) containing the APNS HTTP/2 certificate and keys for the iOS application.
-     * Required if "com.openexchange.drive.events.apn2.enabled" is "true" and "com.openexchange.drive.events.apn2.ios.authtype"
-     * is "certificate".
+     * Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys for the application, e.g. "/opt/open-xchange/etc/drive-apns.p12". 
+     * Required if com.openexchange.drive.events.apn.[os].enabled is "true" and the package containing the restricted drive components is not installed.
      * Default: no default
      */
     keystore(null),
 
     /**
-     * Specifies the password used when creating the referenced keystore containing the certificate of the iOS application.
-     * Note that blank or null passwords are in violation of the PKCS #12 specifications. Required if "com.openexchange.drive.events.apn2.enabled"
-     * is "true" and "com.openexchange.drive.events.apn2.ios.authtype" is "certificate".
+     * Note that blank or null passwords are in violation of the PKCS #12 specifications. Required if "com.openexchange.drive.events.apn.[os].enabled"
+     * is "true" .
      * Default: no default
      */
     password(null),
-
+    
     /**
-     * Specifies the private key file used to connect to APNs using provider authentication JSON Web Token (JWT).
-     * Required if "com.openexchange.drive.events.apn2.enabled" is "true" and "com.openexchange.drive.events.apn2.ios.authtype"
-     * is "jwt".
-     * Default: no default
+     * Configures the interval between queries to the APN feedback service for the subscribed devices. 
+     * The value can be defined using units of measurement: "D" (=days), "W" (=weeks) and "H" (=hours). 
+     * Leaving this parameter empty disables the feedback queries on this node. Since each received feedback is processed cluster-wide, only one node in the cluster should be enabled here.
      */
-    privatekey(null),
+    feedbackQueryInterval("1D")
 
-    /**
-     * Specifies the key identifier used to connect to APNs using provider authentication JSON Web Token (JWT).
-     * Required if "com.openexchange.drive.events.apn2.enabled" is "true" and "com.openexchange.drive.events.apn2.ios.authtype"
-     * is "jwt".
-     * Default: no default
-     */
-    keyid(null),
-
-    /**
-     * Specifies the team identifier used to connect to APNs using provider authentication JSON Web Token (JWT).
-     * Required if "com.openexchange.drive.events.apn2.enabled" is "true" and "com.openexchange.drive.events.apn2.ios.authtype"
-     * is "jwt".
-     * Default: no default
-     */
-    teamid(null)
     ;
 
     public static final String FRAGMENT_FILE_NAME = "drive.properties";
-    private static final String PREFIX = "com.openexchange.drive.events.apn2.ios.";
+    public static final String OPTIONAL_FIELD = "os";
+    private static final String PREFIX = "com.openexchange.drive.events.apn.[os].";
 
     private final Object defaultValue;
 
-    private DriveEventsAPN2IOSProperty(Object defaultValue) {
+    private DriveEventsAPNProperty(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
 

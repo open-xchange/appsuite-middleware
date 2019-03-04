@@ -47,47 +47,37 @@
  *
  */
 
-package com.openexchange.drive.restricted.loader.osgi;
+package com.openexchange.drive.events.apn.internal;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.drive.restricted.loader.StringsProvider;
-import com.openexchange.osgi.Tools;
 
 /**
- * {@link RestrictedActivator}
+ * {@link OperationSystemType}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class RestrictedActivator implements BundleActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RestrictedActivator.class);
-
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
-
-    public RestrictedActivator() {
-        super();
+public enum OperationSystemType {
+    MACOS("macos"),
+    IOS("ios");
+    
+    private String name;
+    
+    /**
+     * Initializes a new {@link OperationSystemType}.
+     * 
+     * @param name The name of the operation system
+     */
+    private OperationSystemType(String name) {
+        this.name = name;
     }
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        LOG.info("Starting bundle \"com.openexchange.restricted\".");
-        Filter filter = Tools.generateServiceFilter(context, ConfigViewFactory.class, StringsProvider.class);
-        StringsProviderCustomizer customizer = new StringsProviderCustomizer(context);
-        trackers.push(new ServiceTracker<>(context, filter, customizer));
-        Tools.open(trackers);
+    
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
     }
-
-    @Override
-    public void stop(BundleContext context) {
-        LOG.info("Stopping bundle \"com.openexchange.restricted\".");
-        Tools.close(trackers);
-    }
+    
 }

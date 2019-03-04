@@ -1,18 +1,17 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange restricted bundle
-Bundle-SymbolicName: com.openexchange.drive.restricted.loader
+Bundle-Name: Open-Xchange fragment properties loader
+Bundle-SymbolicName: com.openexchange.fragment.properties.loader
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
-Automatic-Module-Name: com.openexchange.restricted
+Automatic-Module-Name: com.openexchange.fragment.properties.loader
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.config.cascade,
- com.openexchange.exception,
+Import-Package: com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
  org.apache.commons.io,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.drive.restricted.loader.osgi.RestrictedActivator
-Export-Package: com.openexchange.drive.restricted.loader
+Bundle-Activator: com.openexchange.fragments.properties.loader.osgi.Activator
+Export-Package: com.openexchange.fragment.properties.loader

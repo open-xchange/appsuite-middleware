@@ -6,6 +6,7 @@ Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.drive.events.osgi.DriveEventsActivator
+Automatic-Module-Name: com.openexchange.drive.events
 Bundle-ClassPath: .
 Import-Package: com.hazelcast.nio,
  com.hazelcast.nio.serialization,
@@ -13,7 +14,6 @@ Import-Package: com.hazelcast.nio,
  com.openexchange.config,
  com.openexchange.config.lean,
  com.openexchange.drive,
- com.openexchange.drive.restricted.loader,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
@@ -45,6 +45,6 @@ Import-Package: com.hazelcast.nio,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker;version="1.5.1",
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.drive.events

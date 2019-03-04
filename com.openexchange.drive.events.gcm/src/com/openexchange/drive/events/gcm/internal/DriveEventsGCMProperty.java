@@ -75,6 +75,7 @@ public enum DriveEventsGCMProperty implements Property {
     KEY("key", null)
     ;
 
+    public static final String FRAGMENT_FILE_NAME = "drive.properties";
     private static final String PREFIX = "com.openexchange.drive.events.gcm.";
 
     private final Object defaultValue;

@@ -47,78 +47,51 @@
  *
  */
 
-package com.openexchange.drive.restricted.loader.internal;
+package com.openexchange.fragments.properties.loader.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import org.slf4j.Logger;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.drive.restricted.loader.StringsProvider;
-import com.openexchange.exception.OXException;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
 import com.openexchange.java.Streams;
 
 /**
- * {@link GCMResourceLoader}
+ * 
+ * {@link PropertiesLoader}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class GCMResourceLoader implements ResourceLoader {
+public class PropertiesLoader implements FragmentPropertiesLoader {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMResourceLoader.class);
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertiesLoader.class);
     }
 
-    public GCMResourceLoader() {
+    public PropertiesLoader() {
         super();
     }
 
     @Override
-    public void load(ConfigView view, StringsProvider strings) {
+    public Properties load(String name) {
         InputStream is = null;
         try {
-            is = getClass().getClassLoader().getResourceAsStream(strings.getPropertiesFilename());
+            is = getClass().getClassLoader().getResourceAsStream(name);
             if (null == is) {
-                LoggerHolder.LOG.error("Could not load resource {} from com.openexchange.restricted fragment.", strings.getPropertiesFilename());
+                LoggerHolder.LOG.error("Could not load property file {} from fragment.", name);
             } else {
                 Properties props = new Properties();
                 props.load(is);
-                Streams.close(is);
-                is = null;
-
-                String propertyName = strings.getGCMSecretPropertyName();
-                if (null == propertyName) {
-                    return;
-                }
-                String gcmKey = props.getProperty(propertyName);
-                if (null == gcmKey) {
-                    throw new IOException("Unable to fetch GCM secret key from " + strings.getPropertiesFilename() + ".");
-                }
-                // This loader runs always within system startup. No matter what config cascade scope is used, these keys are installed
-                // server side and are always enabled for that specific scope.
-                String scope = strings.getConfigCascadeScope();
-                view.set(scope, strings.getGCMSecretEnabledPropertyName(), Boolean.TRUE);
-                view.set(scope, strings.getGCMSecretPropertyName(), gcmKey);
+                return props;
             }
         } catch (IOException e) {
-            LoggerHolder.LOG.error("", e);
-        } catch (OXException e) {
             LoggerHolder.LOG.error("", e);
         } finally {
             Streams.close(is);
         }
+        return null;
     }
 
-    @Override
-    public void unload(ConfigView view, StringsProvider strings) {
-        try {
-            String scope = strings.getConfigCascadeScope();
-            view.set(scope, strings.getGCMSecretEnabledPropertyName(), null);
-            view.set(scope, strings.getGCMSecretPropertyName(), null);
-        } catch (OXException e) {
-            LoggerHolder.LOG.error(e.getMessage());
-        }
-    }
 }
