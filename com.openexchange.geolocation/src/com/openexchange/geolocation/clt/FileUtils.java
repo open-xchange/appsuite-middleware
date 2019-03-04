@@ -63,6 +63,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.openexchange.cli.ProgressMonitor;
@@ -231,6 +232,11 @@ public final class FileUtils {
     }
 
     /**
+     * Allow characters for a filename
+     */
+    private static final Pattern FILENAME = Pattern.compile("^[a-zA-Z0-9-_.]+\\.[a-zA-Z0-9]+");
+
+    /**
      * Extracts the 'filename' from the specified content disposition header
      *
      * @param contentDisposition The content disposition header
@@ -244,7 +250,11 @@ public final class FileUtils {
         if (index < 0) {
             return defaultName;
         }
-        return contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
+        String candidate = contentDisposition.substring(index + "filename=".length()).replaceAll("\"", "");
+        if (!FILENAME.matcher(candidate).matches()) {
+            throw new IllegalArgumentException("Invalid filename was specified '" + candidate + "'.");
+        }
+        return Strings.sanitizeString(candidate);
     }
 
     /**
