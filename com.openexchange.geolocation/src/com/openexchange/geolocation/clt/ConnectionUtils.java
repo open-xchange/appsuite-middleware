@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
 /**
@@ -91,7 +92,7 @@ public final class ConnectionUtils {
      * @throws IOException if an I/O error is occurred
      */
     public static String readTextResponse(URLConnection connection) throws IOException {
-        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (InputStream inputStream = connection.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charsets.UTF_8))) {
             StringBuilder builder = new StringBuilder(128);
             String line;
             while ((line = reader.readLine()) != null) {
