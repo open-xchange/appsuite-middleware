@@ -61,6 +61,7 @@ import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.cli.ConsoleSpinner;
 import com.openexchange.geolocation.GeoLocationRMIService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
 /**
@@ -388,7 +389,7 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
      * @throws IOException if an I/O error is occurred
      */
     private void printErrors(InputStream inputStream) throws IOException {
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(inputStream, Charsets.UTF_8))) {
             String line;
             while ((line = r.readLine()) != null) {
                 System.out.println(line);
