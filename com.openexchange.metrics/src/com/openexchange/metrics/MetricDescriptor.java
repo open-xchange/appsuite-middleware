@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -68,6 +70,7 @@ public class MetricDescriptor {
     private Supplier<?> metricSupplier;
     private String fullName;
     private String description;
+    private Map<String, String> dimensions;
 
     /**
      * Initialises a new {@link MetricDescriptor}.
@@ -301,6 +304,26 @@ public class MetricDescriptor {
     public void setDescription(final String description) {
         this.description = description;
     }
+    
+    
+    /**
+     * Sets the dimensions
+     *
+     * @param dimensions The dimensions to set
+     */
+    public void setDimensions(Map<String, String> dimensions) {
+        this.dimensions = dimensions;
+    }
+    
+    
+    /**
+     * Gets the dimensions
+     *
+     * @return The dimensions
+     */
+    public Map<String, String> getDimensions() {
+        return dimensions;
+    }
 
     /**
      * Initialises a new {@link MetricBuilder}
@@ -330,6 +353,7 @@ public class MetricDescriptor {
         private String unit = "events";
         private Supplier<?> supplier;
         private String description;
+        private Map<String, String> dimensions;
 
         /**
          * Initialises a new {@link AbstractBuilder}.
@@ -388,6 +412,24 @@ public class MetricDescriptor {
             this.description = description;
             return this;
         }
+        
+        /**
+         * Adds an additional dimension to this descriptor
+         * 
+         * @param key The key of the dimension. Must not be 'type' or 'name'
+         * @param value The value of the dimension
+         * @return the {@link MetricBuilder} for chained calls
+         */
+        public MetricBuilder addDimension(String key, String value) {
+            if("type".equals(key) || "name".equals(key)) {
+                throw new IllegalArgumentException("The key is not allowed");
+            }
+            if(dimensions == null) {
+                dimensions = new ConcurrentHashMap<>();
+            }
+            dimensions.put(key, value);
+            return this;
+        }
 
         /**
          * Builds and returns the {@link MetricDescriptor}
@@ -434,6 +476,9 @@ public class MetricDescriptor {
             descriptor.setMetricType(metricType);
             descriptor.setFQN(group + "." + name);
             descriptor.setDescription(description);
+            if(dimensions != null) {
+                descriptor.setDimensions(dimensions);
+            }
         }
 
         /**

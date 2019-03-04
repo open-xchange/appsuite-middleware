@@ -64,6 +64,6 @@ public interface GaugeMBean extends MetricMBean {
      * 
      * @return the value of the {@link Gauge}
      */
-    @MBeanMethodAnnotation(description = "Returns the value of the gague", parameterDescriptions = { "" }, parameters = { "" })
+    @MBeanMethodAnnotation(description = "Returns the value of the gauge", parameterDescriptions = { "" }, parameters = { "" })
     Object getValue();
 }

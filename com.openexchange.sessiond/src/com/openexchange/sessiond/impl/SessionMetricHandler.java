@@ -66,40 +66,43 @@ public final class SessionMetricHandler {
     private static final String SESSIONS = "sessions";
     private static final String GROUP = "sessiond";
 
-    private static final String COUNT_TOTAL = "Count.Total";
+    private static final String COUNT_TOTAL = "TotalCount";
     private static final String COUNT_TOTAL_DESC = "The number of total sessions";
 
-    private static final String COUNT_LONG = "LongTermCount.Total";
+    private static final String COUNT_LONG = "LongTermCount";
     private static final String COUNT_LONG_DESC = "The number of sessions in the long term containers";
 
-    private static final String COUNT_SHORT = "ShortTermCount.Total";
+    private static final String COUNT_SHORT = "ShortTermCount";
     private static final String COUNT_SHORT_DESC = "The number of sessions in the short term containers";
 
-    private static final String COUNT_ACTIVE = "ActiveCount.Total";
+    private static final String COUNT_ACTIVE = "ActiveCount";
     private static final String COUNT_ACTIVE_DESC = "The number of active sessions or in other words the number of sessions within the first two short term containers.";
 
     private static final MetricDescriptor DESC_TOTAL;
     private static final MetricDescriptor DESC_LONG;
     private static final MetricDescriptor DESC_SHORT;
     private static final MetricDescriptor DESC_ACTIVE;
+    
+    private static final String CLIENT_DIMENSION_KEY = "client";
+    private static final String CLIENT_DIMENSION_VALUE = "all";
 
 
     static {
         DESC_TOTAL = MetricDescriptor.newBuilder(GROUP, COUNT_TOTAL, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_TOTAL_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricTotalSessions();
-        }).build();
+        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
 
         DESC_LONG = MetricDescriptor.newBuilder(GROUP, COUNT_LONG, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_LONG_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricLongSessions();
-        }).build();
+        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
 
         DESC_SHORT = MetricDescriptor.newBuilder(GROUP, COUNT_SHORT, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_SHORT_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricShortSessions();
-        }).build();
+        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
 
         DESC_ACTIVE = MetricDescriptor.newBuilder(GROUP, COUNT_ACTIVE, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_ACTIVE_DESC).withMetricSupplier(() -> {
             return SessionHandler.getMetricActiveSessions();
-        }).build();
+        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
     }
 
     /**
