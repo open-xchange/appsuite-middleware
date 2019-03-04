@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.openexchange.cli.ProgressMonitor;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Numbers;
 import com.openexchange.java.Strings;
 
@@ -314,6 +315,6 @@ public final class FileUtils {
 
         byte[] b = new byte[(int) (length - currentPosition)];
         randomAccessFile.read(b);
-        return new String(b).trim();
+        return new String(b, Charsets.UTF_8).trim();
     }
 }
