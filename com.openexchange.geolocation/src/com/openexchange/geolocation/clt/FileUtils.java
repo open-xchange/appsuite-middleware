@@ -201,6 +201,11 @@ public final class FileUtils {
         }
         return extractedFiles;
     }
+    
+    public static void main(String[] args) {
+        File f = new File("asd");
+        System.out.println(f.getParent());
+    }
 
     /**
      * Extracts the ZIP entries from the specified {@link ZipInputStream}
@@ -219,7 +224,15 @@ public final class FileUtils {
         extractedFiles.add(newFile);
         System.out.print("Extracting to '" + newFile.getAbsolutePath() + "'...");
 
-        new File(newFile.getParent()).mkdirs();
+        String parent = newFile.getParent();
+        if (parent == null) {
+            parent = File.separator + "tmp";
+        }
+        File parentFile = new File(parent);
+        if (false == keep) {
+            parentFile.deleteOnExit();
+        }
+        parentFile.mkdirs();
         try (FileOutputStream fos = new FileOutputStream(newFile)) {
             int len;
             while ((len = zipInputStream.read(buffer)) > 0) {

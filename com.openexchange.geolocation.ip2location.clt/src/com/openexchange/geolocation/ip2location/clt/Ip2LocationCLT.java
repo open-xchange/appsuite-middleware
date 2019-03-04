@@ -188,7 +188,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         }
         if (importMode) {
             if (FileUtils.isZipArchive(downloadFilePath)) {
-                extractDatase();
+                extractDatabase();
             } else {
                 // Seems that the provided file is not an archive,
                 // so use that as the source for the CSV database.
@@ -199,7 +199,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
         }
         checkLicense();
         downloadDatabase();
-        extractDatase();
+        extractDatabase();
         importDatabase(optRmiHostName);
         return null;
     }
@@ -259,7 +259,7 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
      *
      * @throws IOException if an I/O error is occurred
      */
-    private void extractDatase() throws IOException {
+    private void extractDatabase() throws IOException {
         List<File> extractedFiles = FileUtils.extractArchive(downloadFilePath, getExtractDirectory(), isKeep());
         for (File f : extractedFiles) {
             // It is always expected to be one and only one CSV file in the archive.

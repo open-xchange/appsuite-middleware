@@ -134,13 +134,13 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         }
         if (importMode) {
             if (FileUtils.isZipArchive(downloadFilePath)) {
-                extractDatase();
+                extractDatabase();
             }
             importDatabase(optRmiHostName);
             return null;
         }
         downloadDatabase();
-        extractDatase();
+        extractDatabase();
         importDatabase(optRmiHostName);
         return null;
     }
@@ -197,7 +197,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
      *
      * @throws IOException if an I/O error is occurred
      */
-    private void extractDatase() throws IOException {
+    private void extractDatabase() throws IOException {
         List<File> extractedFiles = FileUtils.extractArchive(downloadFilePath, getExtractDirectory(), isKeep());
         for (File f : extractedFiles) {
             String path = f.getAbsolutePath().toLowerCase();
