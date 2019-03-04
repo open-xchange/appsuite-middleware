@@ -182,12 +182,15 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
     }
 
     private void addAdminPermission(DocumentMetadata document, Context context) throws OXException {
-        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
-        if (hideAdminService != null && document.getId() != InfostoreFacade.NEW) {
-            DocumentMetadata origDocumentMetadata = getOriginalDocumentMetadata(document.getId(), document.getVersion(), context);
-            List<ObjectPermission> newPermissions = hideAdminService.addAdminToObjectPermissions(context.getContextId(), origDocumentMetadata.getObjectPermissions(), document.getObjectPermissions());
-            document.setObjectPermissions(newPermissions);
+        if (null == document.getObjectPermissions() || InfostoreFacade.NEW == document.getId()) {
+            return; // not needed without 'set' object permissions or for newly created documents
         }
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
+        if (null == hideAdminService || false == hideAdminService.showAdmin(context.getContextId())) {
+            return; // currently not available or not applicable in this context
+        }
+        List<ObjectPermission> originalObjectPermissions = delegate.objectPermissionLoader.load(document.getId(), context);
+        document.setObjectPermissions(hideAdminService.addAdminToObjectPermissions(context.getContextId(), originalObjectPermissions, document.getObjectPermissions()));
     }
 
     @Override
