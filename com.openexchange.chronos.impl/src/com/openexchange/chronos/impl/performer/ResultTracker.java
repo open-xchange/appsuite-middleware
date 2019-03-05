@@ -475,7 +475,7 @@ public class ResultTracker {
      * @see Utils#applyExceptionDates
      * @see Utils#anonymizeIfNeeded
      */
-    private Event userize(Event event, int forUser) throws OXException {
+    Event userize(Event event, int forUser) throws OXException {
         return userize(event, forUser, false);
     }
 

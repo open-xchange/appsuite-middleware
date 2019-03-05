@@ -52,8 +52,6 @@ package com.openexchange.chronos.impl.osgi.event;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
@@ -71,9 +69,6 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class EventCalendarHandler implements CalendarHandler {
-
-    /** The {@link Logger} of this class */
-    private final static Logger LOGGER = LoggerFactory.getLogger(EventCalendarHandler.class);
 
     /** The create event topic */
     private final static String CREATED = "com/openexchange/groupware/event/insert";
@@ -102,29 +97,25 @@ public class EventCalendarHandler implements CalendarHandler {
         if (event == null || event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
             return;
         }
-        try {
-            // Check for new events
-            if (false == event.getCreations().isEmpty()) {
-                for (CreateResult result : event.getCreations()) {
-                    triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.INSERT, result.getCreatedEvent()), CREATED);
-                }
+        // Check for new events
+        if (false == event.getCreations().isEmpty()) {
+            for (CreateResult result : event.getCreations()) {
+                triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.INSERT, result.getCreatedEvent()), CREATED);
             }
+        }
 
-            // Check for updated events
-            if (false == event.getUpdates().isEmpty()) {
-                for (UpdateResult result : event.getUpdates()) {
-                    triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.UPDATE, result.getUpdate(), result.getOriginal()), UPDATED);
-                }
+        // Check for updated events
+        if (false == event.getUpdates().isEmpty()) {
+            for (UpdateResult result : event.getUpdates()) {
+                triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.UPDATE, result.getUpdate(), result.getOriginal()), UPDATED);
             }
+        }
 
-            // Check for deleted events
-            if (false == event.getDeletions().isEmpty()) {
-                for (DeleteResult result : event.getDeletions()) {
-                    triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.DELETE, result.getOriginal()), DELETED);
-                }
+        // Check for deleted events
+        if (false == event.getDeletions().isEmpty()) {
+            for (DeleteResult result : event.getDeletions()) {
+                triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.DELETE, result.getOriginal()), DELETED);
             }
-        } catch (OXException e) {
-            LOGGER.error("Could not propagte OSGi event for a changed calendar event!", e);
         }
     }
 
@@ -135,7 +126,7 @@ public class EventCalendarHandler implements CalendarHandler {
      * @param topic The topic of the event
      * @throws OXException In case of missing {@link EventAdmin} service
      */
-    private void triggerEvent(CommonEvent chronosEvent, String topic) throws OXException {
+    private void triggerEvent(CommonEvent chronosEvent, String topic) {
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
         ht.put(CommonEvent.EVENT_KEY, chronosEvent);
 

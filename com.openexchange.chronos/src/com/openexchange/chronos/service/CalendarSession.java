@@ -146,26 +146,4 @@ public interface CalendarSession extends CalendarParameters {
      */
     List<OXException> getWarnings();
 
-    /**
-     * Logs a debug message with an associated identifier of this particular CalendarSession.
-     *
-     * @param message The message to be logged
-     */
-    void debug(String message);
-
-    /**
-     * Logs a debug message with an associated identifier of this particular CalendarSession.
-     *
-     * @param message The message to be logged
-     * @param e Exception to be logged
-     */
-    void debug(String message, Exception e);
-
-    /**
-     * Determines if debug is enabled.
-     *
-     * @return True if debug is enabled, false otherwise
-     */
-    boolean isDebugEnabled();
-
 }

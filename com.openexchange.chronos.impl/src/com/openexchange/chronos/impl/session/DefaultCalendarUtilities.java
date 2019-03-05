@@ -202,17 +202,15 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
                     return 0;
                 }
                 int comparison = 0;
-                if (null != sortOrders && 0 < sortOrders.length) {
-                    for (SortOrder sortOrder : sortOrders) {
-                        Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(sortOrder.getBy());
-                        if (null == mapping) {
-                            org.slf4j.LoggerFactory.getLogger(DefaultCalendarUtilities.class).warn("Can't compare by {} due to missing mapping", sortOrder.getBy());
-                            continue;
-                        }
-                        comparison = mapping.compare(event1, event2);
-                        if (0 != comparison) {
-                            return sortOrder.isDescending() ? -1 * comparison : comparison;
-                        }
+                for (SortOrder sortOrder : sortOrders) {
+                    Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(sortOrder.getBy());
+                    if (null == mapping) {
+                        org.slf4j.LoggerFactory.getLogger(DefaultCalendarUtilities.class).warn("Can't compare by {} due to missing mapping", sortOrder.getBy());
+                        continue;
+                    }
+                    comparison = mapping.compare(event1, event2);
+                    if (0 != comparison) {
+                        return sortOrder.isDescending() ? -1 * comparison : comparison;
                     }
                 }
                 return comparison;

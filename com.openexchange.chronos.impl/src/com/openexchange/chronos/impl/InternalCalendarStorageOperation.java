@@ -81,7 +81,7 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
      *
      * @param session The calendar session
      */
-    public InternalCalendarStorageOperation(CalendarSession session) throws OXException {
+    public InternalCalendarStorageOperation(CalendarSession session) {
         super(Services.getService(DatabaseService.class), session.getSession().getContextId(), DEFAULT_RETRIES, optConnection(session));
         this.session = session;
     }

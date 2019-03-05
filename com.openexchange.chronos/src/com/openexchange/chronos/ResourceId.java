@@ -72,7 +72,7 @@ public class ResourceId {
     private static final int TYPE_UNKNOWN = -1;
 
     /** Static number encoded into resource identifiers */
-    private static final Long MAGIC = 4240498974L << 24;
+    private static final long MAGIC = 4240498974L << 24;
 
     /**
      * Gets the resource ID value.

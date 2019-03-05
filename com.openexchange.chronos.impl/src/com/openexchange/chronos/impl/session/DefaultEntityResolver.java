@@ -505,7 +505,7 @@ public class DefaultEntityResolver implements EntityResolver {
         Integer iD = I(id);
         FolderObject folder = knownFolders.get(iD);
         if (null == folder) {
-            folder = loadFolder(iD, optConnection);
+            folder = loadFolder(id, optConnection);
             knownFolders.put(iD, folder);
         }
         return folder;

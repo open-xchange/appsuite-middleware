@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.availability.performer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ public class GetPerformer extends AbstractGetPerformer {
         // Create a reverse lookup index
         Map<Integer, Attendee> reverseLookup = new HashMap<>();
         for (Attendee a : attendees) {
-            reverseLookup.put(a.getEntity(), a);
+            reverseLookup.put(I(a.getEntity()), a);
         }
         return loadAvailability(reverseLookup, from, until);
     }
@@ -134,8 +135,8 @@ public class GetPerformer extends AbstractGetPerformer {
         List<Integer> filtered = new ArrayList<>();
         for (CalendarUser u : users) {
             if (CalendarUtils.isInternal(u, CalendarUserType.INDIVIDUAL)) {
-                reverseLookup.put(u.getEntity(), u);
-                filtered.add(u.getEntity());
+                reverseLookup.put(I(u.getEntity()), u);
+                filtered.add(I(u.getEntity()));
             }
         }
 

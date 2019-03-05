@@ -256,13 +256,13 @@ public class SearchPerformer extends AbstractQueryPerformer {
         SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
             .addSearchTerm(eventFolderTerm)
             .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(entityID)))
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, entityID))
                 .addSearchTerm(attendeeFolderTerm))
         ;
         if (onlyOwn) {
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(searchTerm)
-                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, userID));
+                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, I(userID)));
         }
         return searchTerm;
     }

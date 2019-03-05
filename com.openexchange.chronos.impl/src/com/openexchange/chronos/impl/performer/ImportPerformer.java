@@ -84,8 +84,6 @@ import com.openexchange.exception.OXException;
  */
 public class ImportPerformer extends AbstractUpdatePerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImportPerformer.class);
-
     /**
      * Initializes a new {@link ImportPerformer}.
      *

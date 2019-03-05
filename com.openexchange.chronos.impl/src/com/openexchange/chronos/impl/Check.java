@@ -422,7 +422,7 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (null != events) {
             for (Event e : events) {
                 if (false == CalendarUtils.matches(organizer, e.getOrganizer())) {
-                    String id = null != event ? event.getId() : null != events && 0 < events.length ? events[0].getId() : null;
+                    String id = null != event ? event.getId() : 0 < events.length ? events[0].getId() : null;
                     throw CalendarExceptionCodes.DIFFERENT_ORGANIZER.create(id, organizer, e.getOrganizer());
                 }
             }

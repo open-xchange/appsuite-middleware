@@ -203,7 +203,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @return A delta {@link Event}
      * @throws OXException If resolving fails
      */
-    private Event prepareChanges(Event originalEvent, Organizer organizer) throws OXException {
+    private Event prepareChanges(Event originalEvent, Organizer organizer) {
         Event updatedEvent = new Event();
         updatedEvent.setId(originalEvent.getId());
 

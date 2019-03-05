@@ -56,8 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
@@ -84,8 +82,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class DefaultCalendarSession implements CalendarSession {
 
-    private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
-
     private final CalendarService calendarService;
     private final Map<String, Object> parameters;
     private final ServerSession session;
@@ -110,9 +106,6 @@ public class DefaultCalendarSession implements CalendarSession {
         this.hostData = null != requestContext ? requestContext.getHostData() : null;
         this.warnings = new ArrayList<OXException>();
         this.config = new CalendarConfigImpl(this, Services.getServiceLookup());
-        if (isDebugEnabled()) {
-            debug("New DefaultCalendarSession created. User: " + session.getUserId() + ", Context: " + session.getContextId());
-        }
     }
 
     @Override
@@ -205,25 +198,6 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public String toString() {
         return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
-    }
-
-    @Override
-    public void debug(String message) {
-        if (SESSION_LOGGER.isDebugEnabled()) {
-            SESSION_LOGGER.debug("{}@{}: {}", this.getClass().getSimpleName(), System.identityHashCode(this), message);
-        }
-    }
-
-    @Override
-    public void debug(String message, Exception e) {
-        if (SESSION_LOGGER.isDebugEnabled()) {
-            SESSION_LOGGER.debug("{}@{}: {}", this.getClass().getSimpleName(), System.identityHashCode(this), message, e);
-        }
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        return SESSION_LOGGER.isDebugEnabled();
     }
 
 }

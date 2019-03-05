@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -107,14 +108,14 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
         // Search for the attachment with the specified managed id
         List<Attachment> attachments = event.getAttachments();
         if (attachments == null) {
-            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(managedId, eventId, folder.getId());
+            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), eventId, folder.getId());
         }
         for (Attachment attachment : attachments) {
             if (attachment.getManagedId() == managedId) {
                 return new FileHolder(storage.getAttachmentStorage().loadAttachmentData(managedId), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
             }
         }
-        throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(managedId, eventId, folder.getId());
+        throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), eventId, folder.getId());
     }
 
 }

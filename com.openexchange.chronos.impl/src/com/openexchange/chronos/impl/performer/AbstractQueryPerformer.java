@@ -184,7 +184,7 @@ public abstract class AbstractQueryPerformer {
      * 
      * @return The event post processor
      */
-    protected EventPostProcessor postProcessor() throws OXException {
+    protected EventPostProcessor postProcessor() {
         return new EventPostProcessor(session, storage, getSelfProtection());
     }
 
