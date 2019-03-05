@@ -101,38 +101,32 @@ public class FilteringContactService implements ContactService {
 
     @Override
     public SearchIterator<Contact> getAllContacts(Session session, String folderId) throws OXException {
-        SearchIterator<Contact> contacts = delegate.getAllContacts(session, folderId);
-        return removeAdmin(session.getContextId(), contacts);
+        return removeAdmin(session.getContextId(), delegate.getAllContacts(session, folderId));
     }
 
     @Override
     public SearchIterator<Contact> getAllContacts(Session session, String folderId, SortOptions sortOptions) throws OXException {
-        SearchIterator<Contact> contacts = delegate.getAllContacts(session, folderId, sortOptions);
-        return removeAdmin(session.getContextId(), contacts);
+        return removeAdmin(session.getContextId(), delegate.getAllContacts(session, folderId, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields) throws OXException {
-        SearchIterator<Contact> contacts = delegate.getAllContacts(session, folderId, fields);
-        return removeAdmin(session.getContextId(), contacts);
+        return removeAdmin(session.getContextId(), delegate.getAllContacts(session, folderId, fields));
     }
 
     @Override
     public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        SearchIterator<Contact> contacts = delegate.getAllContacts(session, folderId, fields, sortOptions);
-        return removeAdmin(session.getContextId(), contacts);
+        return removeAdmin(session.getContextId(), delegate.getAllContacts(session, folderId, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> getAllContacts(Session session, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        SearchIterator<Contact> contacts = delegate.getAllContacts(session, folderIDs, fields, sortOptions);
-        return removeAdmin(session.getContextId(), contacts);
+        return removeAdmin(session.getContextId(), delegate.getAllContacts(session, folderIDs, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        SearchIterator<Contact> contacts = delegate.getAllContacts(session, fields, sortOptions);
-        return removeAdmin(session.getContextId(), contacts);
+        return removeAdmin(session.getContextId(), delegate.getAllContacts(session, fields, sortOptions));
     }
 
     @Override
