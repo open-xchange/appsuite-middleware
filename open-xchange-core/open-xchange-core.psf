@@ -98,6 +98,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.find.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.find.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.folder.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.fragment.properties.loader"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.geolocation"/>
