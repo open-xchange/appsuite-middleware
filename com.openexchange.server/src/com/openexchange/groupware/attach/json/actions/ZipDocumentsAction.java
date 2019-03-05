@@ -99,6 +99,9 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         List<AttachmentInfo> attachmentInfos = parseAttachmentInfos(requestData);
+        if (attachmentInfos.isEmpty()) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
+        }
         return createZipArchive("attachments.zip", attachmentInfos, requestData, session);
     }
 

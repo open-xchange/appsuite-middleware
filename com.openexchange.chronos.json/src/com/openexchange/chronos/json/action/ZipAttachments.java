@@ -67,6 +67,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.zip.Buffer;
 import com.openexchange.ajax.zip.ZipEntryAdder;
 import com.openexchange.ajax.zip.ZipUtility;
+import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -98,6 +99,9 @@ public class ZipAttachments extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         // Gather the parameters
         List<AttachmentId> attachmentIds = getAttachmentIds(requestData);
+        if (attachmentIds.isEmpty()) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(ChronosJsonFields.Attachment.MANAGED_ID);
+        }
         return createZipArchive("attachments.zip", attachmentIds, calendarAccess, requestData);
     }
 
@@ -126,6 +130,9 @@ public class ZipAttachments extends ChronosAction {
 
             JSONArray jAttachments = jBody.toArray();
             int length = jAttachments.length();
+            if (length <= 0) {
+                return Collections.emptyList();
+            }
             List<AttachmentId> attachmentIds = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
                 JSONObject jAttachment = jAttachments.optJSONObject(i);
