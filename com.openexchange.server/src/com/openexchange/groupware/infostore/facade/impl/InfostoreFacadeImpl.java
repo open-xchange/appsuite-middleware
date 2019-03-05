@@ -136,8 +136,8 @@ import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateObjectPermissionAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
-import com.openexchange.groupware.infostore.media.ExtractorResult;
 import com.openexchange.groupware.infostore.media.EstimationResult;
+import com.openexchange.groupware.infostore.media.ExtractorResult;
 import com.openexchange.groupware.infostore.media.FileStorageInputStreamProvider;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractor;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
@@ -1269,7 +1269,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 if (save) {
                                     DocumentMetadataImpl documentToPass = new DocumentMetadataImpl(document);
                                     documentToPass.setSequenceNumber(document.getSequenceNumber());
-                                    MediaMetadataExtractors.saveMediaMetaDataFromDocument(documentToPass, session);
+                                MediaMetadataExtractors.saveMediaMetaDataFromDocument(documentToPass, document, session);
                                 }
                                 return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
                             }

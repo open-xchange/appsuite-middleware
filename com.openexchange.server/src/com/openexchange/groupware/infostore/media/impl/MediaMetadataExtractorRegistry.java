@@ -443,7 +443,7 @@ public class MediaMetadataExtractorRegistry implements MediaMetadataExtractorSer
                 }
 
                 documentToPass.setSequenceNumber(document.getSequenceNumber());
-                MediaMetadataExtractors.saveMediaMetaDataFromDocument(documentToPass, session);
+                MediaMetadataExtractors.saveMediaMetaDataFromDocument(documentToPass, document, session);
             } catch (Exception e) {
                 LOGGER.error("Failed to apply media metadata to document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
             }

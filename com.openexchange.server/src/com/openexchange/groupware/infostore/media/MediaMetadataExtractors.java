@@ -62,13 +62,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.MediaStatus;
-import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
+import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -316,7 +316,7 @@ public class MediaMetadataExtractors {
      * @return The ID tupe of saved document
      * @throws OXException If save operation fails
      */
-    public static IDTuple saveMediaStatusForDocument(MediaStatus mediaStatus, DocumentMetadata document, Session session) throws OXException {
+    public static void saveMediaStatusForDocument(MediaStatus mediaStatus, DocumentMetadata document, Session session) throws OXException {
         DocumentMetadataImpl documentToPass = new DocumentMetadataImpl(document);
         documentToPass.setMediaStatus(mediaStatus);
         documentToPass.setCaptureDate(null);
@@ -331,31 +331,18 @@ public class MediaMetadataExtractors {
         documentToPass.setCameraModel(null);
         documentToPass.setMediaMeta(null);
         documentToPass.setSequenceNumber(document.getSequenceNumber());
-        return saveMediaMetaDataFromDocument(documentToPass, new InfostoreFacadeImpl(new DBPoolProvider()), session);
+        saveMediaMetaDataFromDocument(documentToPass, document, session);
     }
 
     /**
      * Saves the media meta-data from given document.
      *
-     * @param document The document providing media meta-data
+     * @param version The updated document version providing media meta-data
+     * @param oldVersion The original document version being updated
      * @param session The session providing user information
-     * @return The ID tupe of saved document
      * @throws OXException If save operation fails
      */
-    public static IDTuple saveMediaMetaDataFromDocument(DocumentMetadata document, Session session) throws OXException {
-        return saveMediaMetaDataFromDocument(document, new InfostoreFacadeImpl(new DBPoolProvider()), session);
-    }
-
-    /**
-     * Saves the media meta-data from given document.
-     *
-     * @param document The document providing media meta-data
-     * @param infostore The infostore instance to use
-     * @param session The session providing user information
-     * @return The ID tupe of saved document
-     * @throws OXException If save operation fails
-     */
-    public static IDTuple saveMediaMetaDataFromDocument(DocumentMetadata document, InfostoreFacade infostore, Session session) throws OXException {
+    public static void saveMediaMetaDataFromDocument(DocumentMetadata version, DocumentMetadata oldVersion, Session session) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
 
         // Examine
@@ -363,58 +350,82 @@ public class MediaMetadataExtractors {
         {
             List<Metadata> modifiedColumns = new ArrayList<>(8);
             modifiedColumns.add(Metadata.MEDIA_STATUS_LITERAL);
-            if (document.getCaptureDate() != null) {
+            if (version.getCaptureDate() != null) {
                 modifiedColumns.add(Metadata.CAPTURE_DATE_LITERAL);
             }
-            if (document.getGeoLocation() != null) {
+            if (version.getGeoLocation() != null) {
                 modifiedColumns.add(Metadata.GEOLOCATION_LITERAL);
             }
-            if (document.getWidth() != null) {
+            if (version.getWidth() != null) {
                 modifiedColumns.add(Metadata.WIDTH_LITERAL);
             }
-            if (document.getHeight() != null) {
+            if (version.getHeight() != null) {
                 modifiedColumns.add(Metadata.HEIGHT_LITERAL);
             }
-            if (document.getCameraIsoSpeed() != null) {
+            if (version.getCameraIsoSpeed() != null) {
                 modifiedColumns.add(Metadata.CAMERA_ISO_SPEED_LITERAL);
             }
-            if (document.getCameraAperture() != null) {
+            if (version.getCameraAperture() != null) {
                 modifiedColumns.add(Metadata.CAMERA_APERTURE_LITERAL);
             }
-            if (document.getCameraExposureTime() != null) {
+            if (version.getCameraExposureTime() != null) {
                 modifiedColumns.add(Metadata.CAMERA_EXPOSURE_TIME_LITERAL);
             }
-            if (document.getCameraFocalLength() != null) {
+            if (version.getCameraFocalLength() != null) {
                 modifiedColumns.add(Metadata.CAMERA_FOCAL_LENGTH_LITERAL);
             }
-            if (document.getCameraMake() != null) {
+            if (version.getCameraMake() != null) {
                 modifiedColumns.add(Metadata.CAMERA_MAKE_LITERAL);
             }
-            if (document.getCameraModel() != null) {
+            if (version.getCameraModel() != null) {
                 modifiedColumns.add(Metadata.CAMERA_MODEL_LITERAL);
             }
-            if (document.getMediaMeta() != null) {
+            if (version.getMediaMeta() != null) {
                 modifiedColumns.add(Metadata.MEDIA_META_LITERAL);
             }
             mediaColumnsToModify = modifiedColumns.toArray(new Metadata[modifiedColumns.size()]);
         }
 
+        // perform update
+        MediaMetadataUpdater metadataUpdater = new MediaMetadataUpdater();
         boolean rollback = false;
         try {
-            infostore.startTransaction();
+            metadataUpdater.startTransaction();
             rollback = true;
 
-            IDTuple idTuple = infostore.saveDocument(document, null, document.getSequenceNumber(), mediaColumnsToModify, true, serverSession);
+            metadataUpdater.updateMetadata(serverSession, version, oldVersion, mediaColumnsToModify);
 
-            infostore.commit();
+            metadataUpdater.commit();
             rollback = false;
-
-            return idTuple;
         } finally {
             if (rollback) {
-                infostore.rollback();
+                metadataUpdater.rollback();
             }
-            infostore.finish();
+            metadataUpdater.finish();
         }
     }
+
+    private static final class MediaMetadataUpdater extends DBService {
+
+        /**
+         * Initializes a new {@link MediaMetadataUpdater}.
+         */
+        private MediaMetadataUpdater() {
+            super(new DBPoolProvider());
+        }
+
+        /**
+         * Saves the media meta-data from given document.
+         *
+         * @param session The server sesssion
+         * @param version The document providing media meta-data
+         * @param oldVersion The original version being updated
+         * @throws OXException If save operation fails
+         */
+        void updateMetadata(ServerSession session, DocumentMetadata version, DocumentMetadata oldVersion, Metadata[] mediaColumnsToModify) throws OXException {
+            perform(new UpdateVersionAction(getProvider(), InfostoreQueryCatalog.getInstance(), session.getContext(), version, oldVersion, mediaColumnsToModify, version.getSequenceNumber(), session), true);
+        }
+
+    }
+
 }
