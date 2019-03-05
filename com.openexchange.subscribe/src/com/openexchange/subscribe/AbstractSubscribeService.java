@@ -209,7 +209,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     @Override
     public boolean knows(final Context ctx, final int subscriptionId) throws OXException {
         final Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
-        if (subscription == null) {
+        if (subscription == null || subscription.getSource() == null) {
             return false;
         }
         if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
