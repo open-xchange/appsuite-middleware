@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.zip;
 
+import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_JAVASCRIPT;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -90,18 +91,28 @@ public class ZipUtility {
     public static AJAXRequestResult createZipArchive(ZipEntryAdder adder, String zipFileName, int optCompressionLevel, AJAXRequestData requestData) throws OXException {
         // Check if it is possible to directly write to output stream
         if (setHttpResponseHeaders(zipFileName, requestData)) {
+            boolean error = true; // Pessimistic
             try {
                 // Create ZIP archive
-                long bytesWritten = writeZipArchive(adder, requestData.optOutputStream(), optCompressionLevel);
+                long bytesWritten = writeZipArchive(adder, new AJAXRequestDataZipArchiveOutputStreamProvider(requestData, optCompressionLevel));
 
                 // Streamed
                 AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
                 if (bytesWritten != 0) {
                     result.setResponseProperty("X-Content-Size", Long.valueOf(bytesWritten));
                 }
+                error = false;
                 return result;
-            } catch (final IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                if (error) {
+                    // Try to restore headers
+                    try {
+                        requestData.setResponseHeader("Content-Type", CONTENTTYPE_JAVASCRIPT);
+                        requestData.setResponseHeader("Content-Disposition", "inline");
+                    } catch (@SuppressWarnings("unused") Exception e) {
+                        // Ignore
+                    }
+                }
             }
         }
 
@@ -166,16 +177,11 @@ public class ZipUtility {
      * @throws OXException If writing the ZIP archive fails
      */
     public static long writeZipArchive(ZipEntryAdder adder, OutputStream out, int optCompressionLevel) throws OXException {
-        ZipArchiveOutputStream zipOutput = null;
-        try {
-            // Initialize ZIP output stream
-            zipOutput = new ZipArchiveOutputStream(out);
-            zipOutput.setEncoding("UTF-8");
-            zipOutput.setUseLanguageEncodingFlag(true);
-            if (optCompressionLevel > 0) {
-                zipOutput.setLevel(optCompressionLevel);
-            }
+        return writeZipArchive(adder, new DefaultZipArchiveOutputStreamProvider(out, optCompressionLevel));
+    }
 
+    private static long writeZipArchive(ZipEntryAdder adder, ZipArchiveOutputStreamProvider zipOutProvider) throws OXException {
+        try {
             // The buffer to use
             Buffer buffer = new Buffer();
 
@@ -183,14 +189,89 @@ public class ZipUtility {
             Map<String, Integer> fileNamesInArchive = new HashMap<String, Integer>();
 
             // Add ZIP entries
-            adder.addZipEntries(zipOutput, buffer, fileNamesInArchive);
+            adder.addZipEntries(zipOutProvider, buffer, fileNamesInArchive);
 
             // Return number of written bytes
-            return zipOutput.getBytesWritten();
+            return zipOutProvider.getZipArchiveOutputStream().getBytesWritten();
         } finally {
             // Complete the ZIP file
-            Streams.close(zipOutput);
+            Streams.close(zipOutProvider.optZipArchiveOutputStream());
         }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class DefaultZipArchiveOutputStreamProvider implements ZipArchiveOutputStreamProvider {
+
+        private ZipArchiveOutputStream zipOutput;
+        private final OutputStream out;
+        private final int optCompressionLevel;
+
+        DefaultZipArchiveOutputStreamProvider(OutputStream out, int optCompressionLevel) {
+            super();
+            this.out = out;
+            this.optCompressionLevel = optCompressionLevel;
+        }
+
+        @Override
+        public ZipArchiveOutputStream getZipArchiveOutputStream() throws OXException {
+            ZipArchiveOutputStream zipOutput = this.zipOutput;
+            if (null == zipOutput) {
+                // Initialize ZIP output stream
+                zipOutput = createZipArchiveOutputStream(out, optCompressionLevel);
+                this.zipOutput = zipOutput;
+            }
+            return zipOutput;
+        }
+
+        @Override
+        public ZipArchiveOutputStream optZipArchiveOutputStream() {
+            return zipOutput;
+        }
+    }
+
+    private static class AJAXRequestDataZipArchiveOutputStreamProvider implements ZipArchiveOutputStreamProvider {
+
+        private ZipArchiveOutputStream zipOutput;
+        private final AJAXRequestData requestData;
+        private final int optCompressionLevel;
+
+        AJAXRequestDataZipArchiveOutputStreamProvider(AJAXRequestData requestData, int optCompressionLevel) {
+            super();
+            this.requestData = requestData;
+            this.optCompressionLevel = optCompressionLevel;
+        }
+
+        @Override
+        public ZipArchiveOutputStream getZipArchiveOutputStream() throws OXException {
+            ZipArchiveOutputStream zipOutput = this.zipOutput;
+            if (null == zipOutput) {
+                // Initialize ZIP output stream
+                try {
+                    zipOutput = createZipArchiveOutputStream(requestData.optOutputStream(), optCompressionLevel);
+                    this.zipOutput = zipOutput;
+                } catch (IOException e) {
+                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+            return zipOutput;
+        }
+
+        @Override
+        public ZipArchiveOutputStream optZipArchiveOutputStream() {
+            return zipOutput;
+        }
+    }
+
+    static ZipArchiveOutputStream createZipArchiveOutputStream(OutputStream out, int optCompressionLevel) {
+        ZipArchiveOutputStream zipOutput;
+        zipOutput = new ZipArchiveOutputStream(out);
+        zipOutput.setEncoding("UTF-8");
+        zipOutput.setUseLanguageEncodingFlag(true);
+        if (optCompressionLevel > 0) {
+            zipOutput.setLevel(optCompressionLevel);
+        }
+        return zipOutput;
     }
 
 }

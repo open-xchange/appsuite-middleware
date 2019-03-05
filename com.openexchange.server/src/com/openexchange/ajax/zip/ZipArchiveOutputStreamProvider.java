@@ -49,43 +49,29 @@
 
 package com.openexchange.ajax.zip;
 
-import java.io.IOException;
-import java.util.Map;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.IOs;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ZipEntryAdder} - Responsible for adding appropriate ZIP entries to ZIP archive's output stream
+ * {@link ZipArchiveOutputStreamProvider} - Provides the adequate instance of <code>ZipArchiveOutputStream</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-@FunctionalInterface
-public interface ZipEntryAdder {
+public interface ZipArchiveOutputStreamProvider {
 
     /**
-     * Adds ZIP entries to ZIP archive's output stream
+     * Gets the ZIP archive's output stream to add ZIP entries to.
      *
-     * @param zipOutputProvider The provider for the ZIP archive's output stream
-     * @param buffer The buffer to use
-     * @param fileNamesInArchive A map for managing already used file names
-     * @throws OXException If adding ZIP entries fails
+     * @return The ZIP archive's output stream
+     * @throws OXException If ZIP archive's output stream cannot be returned
      */
-    void addZipEntries(ZipArchiveOutputStreamProvider zipOutputProvider, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException;
+    ZipArchiveOutputStream getZipArchiveOutputStream() throws OXException;
 
     /**
-     * Handles given {@code IOException} instance and returns an appropriate {@code OXException} for it.
+     * Gets the raw reference to the ZIP archive's output stream.
      *
-     * @param ioe The I/O exception to handle
-     * @return The resulting {@code OXException} instance
+     * @return The ZIP archive's output stream or <code>null</code>
      */
-    default OXException handleIOException(IOException ioe) {
-        OXException oxe = AjaxExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
-        if (IOs.isConnectionReset(ioe)) {
-            oxe.markLightWeight();
-        }
-        return oxe;
-    }
-
+    ZipArchiveOutputStream optZipArchiveOutputStream();
 }

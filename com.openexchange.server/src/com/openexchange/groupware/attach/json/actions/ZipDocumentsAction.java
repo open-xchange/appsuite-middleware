@@ -65,6 +65,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.zip.Buffer;
+import com.openexchange.ajax.zip.ZipArchiveOutputStreamProvider;
 import com.openexchange.ajax.zip.ZipEntryAdder;
 import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
@@ -194,13 +195,13 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
         }
 
         @Override
-        public void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
+        public void addZipEntries(ZipArchiveOutputStreamProvider zipOutputProvider, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
             for (AttachmentInfo attachmentInfo : attachmentInfos) {
-                addAttachmentToArchive(attachmentInfo, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive, session);
+                addAttachmentToArchive(attachmentInfo, zipOutputProvider, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive, session);
             }
         }
 
-        private void addAttachmentToArchive(AttachmentInfo attachmentInfo, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, ServerSession session) throws OXException {
+        private void addAttachmentToArchive(AttachmentInfo attachmentInfo, ZipArchiveOutputStreamProvider zipOutputProvider, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, ServerSession session) throws OXException {
             AttachmentMetadata attachment = attachmentBase.getAttachment(session, attachmentInfo.folderId, attachmentInfo.attachedId, attachmentInfo.moduleId, attachmentInfo.id, session.getContext(), session.getUser(), session.getUserConfiguration());
             InputStream in = attachmentBase.getAttachedFile(session, attachmentInfo.folderId, attachmentInfo.attachedId, attachmentInfo.moduleId, attachmentInfo.id, session.getContext(), session.getUser(), session.getUserConfiguration());
             try {
@@ -220,6 +221,7 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
                 }
                 ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
                 entry.setTime(attachment.getCreationDate().getTime());
+                ZipArchiveOutputStream zipOutput = zipOutputProvider.getZipArchiveOutputStream();
                 zipOutput.putArchiveEntry(entry);
                 /*
                  * Transfer bytes from the file to the ZIP file

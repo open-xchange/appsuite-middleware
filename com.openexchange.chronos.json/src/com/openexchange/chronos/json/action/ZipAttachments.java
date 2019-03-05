@@ -65,6 +65,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.zip.Buffer;
+import com.openexchange.ajax.zip.ZipArchiveOutputStreamProvider;
 import com.openexchange.ajax.zip.ZipEntryAdder;
 import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
@@ -176,13 +177,13 @@ public class ZipAttachments extends ChronosAction {
         }
 
         @Override
-        public void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
+        public void addZipEntries(ZipArchiveOutputStreamProvider zipOutputProvider, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
             for (AttachmentId attachmentId : attachmentIds) {
-                addAttachmentToArchive(attachmentId, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive, calendarAccess);
+                addAttachmentToArchive(attachmentId, zipOutputProvider, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive, calendarAccess);
             }
         }
 
-        private void addAttachmentToArchive(AttachmentId attachmentId, ZipArchiveOutputStream zipOutput, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, IDBasedCalendarAccess calendarAccess) throws OXException {
+        private void addAttachmentToArchive(AttachmentId attachmentId, ZipArchiveOutputStreamProvider zipOutputProvider, int buflen, byte[] buf, Map<String, Integer> fileNamesInArchive, IDBasedCalendarAccess calendarAccess) throws OXException {
             // Get the attachment and prepare the response
             IFileHolder attachment = null;
             try {
@@ -208,6 +209,7 @@ public class ZipAttachments extends ChronosAction {
                 }
                 ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
                 // TODO: entry.setTime(attachment.getCreationDate().getTime());
+                ZipArchiveOutputStream zipOutput = zipOutputProvider.getZipArchiveOutputStream();
                 zipOutput.putArchiveEntry(entry);
 
                 // Transfer bytes from the attachment to the ZIP file

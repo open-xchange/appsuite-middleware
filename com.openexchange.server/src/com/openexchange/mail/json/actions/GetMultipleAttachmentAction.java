@@ -67,6 +67,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.zip.Buffer;
+import com.openexchange.ajax.zip.ZipArchiveOutputStreamProvider;
 import com.openexchange.ajax.zip.ZipEntryAdder;
 import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
@@ -232,15 +233,15 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         }
 
         @Override
-        public void addZipEntries(ZipArchiveOutputStream zipOutput, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
+        public void addZipEntries(ZipArchiveOutputStreamProvider zipOutputProvider, Buffer buffer, Map<String, Integer> fileNamesInArchive) throws OXException {
             if (null == optSequenceIds) {
                 for (MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
-                    addPart2Archive(mailPart, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive);
+                    addPart2Archive(mailPart, zipOutputProvider.getZipArchiveOutputStream(), buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive);
                 }
             } else {
                 for (String sequenceId : optSequenceIds) {
                     MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-                    addPart2Archive(mailPart, zipOutput, buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive);
+                    addPart2Archive(mailPart, zipOutputProvider.getZipArchiveOutputStream(), buffer.getBuflen(), buffer.getBuf(), fileNamesInArchive);
                 }
             }
         }
