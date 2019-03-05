@@ -56,7 +56,6 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -237,7 +236,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             }
             final int[] groups = toDoPermission.getGroups();
             for (final int group : groups) {
-                LOG.debug("Auto-Delete system-folder-read permission for group {} from folder {}", ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, group).getDisplayName(), fid);
+                LOG.debug("Auto-Delete system-folder-read permission for group with id {} from folder {}", group, fid);
 
                 deleteSystemFolderReadPermission(fid, group);
             }
