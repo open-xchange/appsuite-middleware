@@ -1379,10 +1379,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     }
                 }
 
-                int size = accounts.size();
-                List<SortableId> list = new ArrayList<>(size);
-                for (int j = 0; j < size; j++) {
-                    list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                List<SortableId> list = new ArrayList<>(accounts.size());
+                int j = 0;
+                for (MailAccount account : accounts) {
+                    list.add(new MailId(prepareFullname(account.getId(), MailFolder.DEFAULT_FOLDER_ID), j++).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -1480,11 +1480,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Generate sorted IDs preserving order
                      */
-                    final int size = folderInfos.size();
-                    final List<SortableId> list = new ArrayList<>(size);
-                    for (int j = 0; j < size; j++) {
-                        final MailFolderInfo tmp = folderInfos.get(j);
-                        list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(translate ? tmp.getDisplayName() : tmp.getName()));
+                    final List<SortableId> list = new ArrayList<>(folderInfos.size());
+                    int j = 0;
+                    for (MailFolderInfo tmp : folderInfos) {
+                        list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j++).setName(translate ? tmp.getDisplayName() : tmp.getName()));
                     }
                     return list.toArray(new SortableId[list.size()]);
                 }
@@ -1608,11 +1607,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             /*
              * Generate sorted IDs preserving order
              */
-            final int size = children.size();
-            final List<SortableId> list = new ArrayList<>(size);
-            for (int j = 0; j < size; j++) {
-                final MailFolder tmp = children.get(j);
-                list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(tmp.getName()));
+            List<SortableId> list = new ArrayList<>(children.size());
+            int j = 0;
+            for (MailFolder tmp : children) {
+                list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j++).setName(tmp.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
         } finally {
