@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-04 12:33+0100\n"
+"PO-Revision-Date: 2019-03-05 13:44+0100\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=0;\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.1.1\n"
 "Plural-Forms: nplurals=2; plural=0;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -250,6 +250,10 @@ msgid ""
 "processed."
 msgstr ""
 "指定されたiCalendarのソースには有効な内容が含まれないため、処理できません。"
+
+#: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
+msgid "The given iCal file contains too many entities."
+msgstr ""
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1007,6 +1011,21 @@ msgstr ""
 "してください。"
 
 #. *
+#. * The organizer of the appointment has changed. New organizer is: %1$s
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The organizer of the appointment has changed. New organizer is: %1$s"
+msgstr ""
+
+#. *
+#. * The organizer of the appointment has changed. This operation is not allowed.
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+msgid ""
+"The organizer of the appointment has changed. This operation is not allowed."
+msgstr ""
+
+#. *
 #. * The event %s couldn't be deleted: %s
 #.
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
@@ -1202,6 +1221,43 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "内部カレンダー"
 
+#. The requested page does not denote to a calendar.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
+msgid "The requested page does not denote to a calendar."
+msgstr ""
+
+#. You have no access to this calendar.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
+msgid "You have no access to this calendar."
+msgstr ""
+
+#. The requested page was not found.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:66
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:63
+msgid "The requested page was not found."
+msgstr ""
+
+#. The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:68
+msgid ""
+"The remote SchedJoules service is unavailable at the moment. There is "
+"nothing we can do about it. Please try again later."
+msgstr ""
+
+#. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
+msgid ""
+"An internal server error occurred on SchedJoules side. There is nothing we "
+"can do about it."
+msgstr ""
+
+#. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
+msgid ""
+"A remote server error occurred on SchedJoules side. There is nothing we can "
+"do about it."
+msgstr ""
+
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:63
@@ -1318,10 +1374,14 @@ msgid "Organizer must also be an attendee."
 msgstr "開催者は参加者でもなければなりません。"
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+msgid "All appointments of a series must contain the same organizer."
+msgstr ""
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "機能が見つからないため、操作は完了できませんでした。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1329,7 +1389,7 @@ msgstr ""
 "指定されたフォルダーはサポートされていません。有効なフォルダーを選択して、も"
 "う一度やり直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1337,7 +1397,13 @@ msgstr ""
 "同時に変更が行われたため、操作が完了できませんでした。データを再読み込みし"
 "て、もう一度やり直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+msgid ""
+"The changes could not be applied because a newer version of the appointment "
+"already exists."
+msgstr ""
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
@@ -1345,18 +1411,18 @@ msgstr ""
 "同じ特有の識別子を持つ別の競合する予定があるため、予定が作成できませんでし"
 "た。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid "The appointment conflicts with one or more other appointments."
 msgstr "予定が複数の他の予定と競合します。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
 "フィールド\"%1$s\"は必須です。有効な値を入力して、もう一度やり直してくださ"
 "い。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
@@ -1364,7 +1430,7 @@ msgstr ""
 "終了日が開始日より前にあります。予定時間を修正して、もう一度やり直してくださ"
 "い。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
@@ -1372,11 +1438,11 @@ msgstr ""
 "個人用フォルダー以外のフォルダーの予定を「プライベート」または「秘密」と分類"
 "できません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr "リソース付きの予定は「秘密」に分類できません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
@@ -1384,11 +1450,11 @@ msgstr ""
 "「プライベート」または「秘密」と分類された予定は、このタイプのフォルダーには"
 "移動できません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "繰り返しの発生は別に分類できません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
@@ -1396,14 +1462,14 @@ msgstr ""
 "指定された繰り返しルールは無効です。ルールを修正して、もう一度やり直してくだ"
 "さい。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 "指定されたアラームは無効です。アラームを修正して、もう一度やり直してくださ"
 "い。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
@@ -1411,7 +1477,7 @@ msgstr ""
 "指定されたタイムゾーンは無効です。有効なタイムゾーンを選択して、もう一度やり"
 "直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
@@ -1419,7 +1485,7 @@ msgstr ""
 "指定された地理的な位置は無効です。有効な座標を選択して、もう一度やり直してく"
 "ださい。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
@@ -1427,7 +1493,7 @@ msgstr ""
 "指定された開始日と終了日のタイプが合いません。予定時間を修正して、もう一度や"
 "り直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
@@ -1435,7 +1501,7 @@ msgstr ""
 "指定された繰り返しルールはサポートされていません。ルールを調整して、もう一度"
 "やり直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
@@ -1443,7 +1509,7 @@ msgstr ""
 "対象の発生は繰り返しの一部ではありません。有効な繰り返し識別子を選択して、も"
 "う一度やり直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
@@ -1451,28 +1517,28 @@ msgstr ""
 "繰り返しを分割することができません。有効な分割ポイントを選択して、もう一度や"
 "り直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "繰り返しの別のフォルダーへの移動はサポートされていません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr "繰り返し発生の別のフォルダーへの移動はサポートされていません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "カレンダーのユーザー\"%1$s\"は無効です。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr "指定された構成は無効です。構成を修正して、もう一度やり直してください。"
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1482,7 +1548,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "検索を実行するには %1$d 以上の文字数が必要です。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1492,7 +1558,7 @@ msgstr ""
 "フィールド\"%2$s\" の文字 \"%1$s\" が保存できません。問題のある文字を削除し"
 "て、もう一度やり直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
@@ -1500,49 +1566,53 @@ msgstr ""
 "入力したいくつかのデータは、フィールドの制限を超えています。\"%1$s\" (文字数"
 "制限: %2$d、現在の文字数: %3$d) の値を短くして、もう一度やり直してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "カレンダー登録の最大数を超えました。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "値\"%2$s\"は無効で、使用できませんでした。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+msgid "The value for \"%1$s\" is invalid and cannot be applied."
+msgstr ""
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr "値\"%2$s\"はサポートされていなくて、使用できませんでした。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "'%1$s'は内部ユーザーではないか、あるいは存在しません。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "Authentication failed."
 msgstr "認証に失敗しました。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr "アカウントを作成できません。入力した認証に問題があります。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "コンテキスト'%2$s'のアカウント'%1$s'の割当量が制限を超えました。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The requested attachment was not found."
 msgstr "要求された添付ファイルが見つかりませんでした。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr "検索の予定が多すぎます。短いタイムフレームを選択してください。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
 msgid "The appointment contains too many participants."
 msgstr "予定に参加者が多すぎます。"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "The appointment contains too many reminders."
 msgstr "予定にアラームが多すぎます。"
 
@@ -1642,10 +1712,13 @@ msgstr "メールを送信しました"
 msgid "SMS successfully sent"
 msgstr "SMS を送信しました"
 
+#. *
+#. * To set up your device, click following link:
+#.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:69
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:71
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:74
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:79
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:84
 msgid "To set up your device, click following link: "
 msgstr "デバイスを設定するには、次のリンクをクリックします。 "
 
@@ -2078,9 +2151,6 @@ msgstr "メール 3"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:130
 #: com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
 msgid "URL"
 msgstr "URL"
 
@@ -2680,13 +2750,15 @@ msgstr "\"%2$s\"に\"%1$s\" の名前のファイルは既に存在します。"
 msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
 msgstr "\"%2$s\"に\"%1$s\" の名前のディレクトリは既に存在します。"
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
+msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
+msgstr ""
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
-#: com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 #: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "既存のアカウントを選択"
@@ -4528,23 +4600,23 @@ msgid "The E-Mail address %1$s is invalid."
 msgstr "メールアドレス %1$s は無効です。"
 
 #. Reorganizing of mails failed. Please try again later.
-#: com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
+#: com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:68
 msgid "Reorganizing of mails failed. Please try again later."
 msgstr "メールの整理に失敗しました。後でもう一度やり直してください。"
 
 #. The user category %1$s does not exist.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:68
 msgid "The user category %1$s does not exist."
 msgstr "ユーザー カテゴリー %1$s は存在しません。"
 
 #. Invalid configuration: %1$s
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:71
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:74
 msgid "Invalid configuration: %1$s"
 msgstr "次の構成は無効です: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4552,12 +4624,12 @@ msgstr ""
 "い。"
 
 #. You are not allowed to change the name of the category %1$s.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:80
 msgid "You are not allowed to change the name of the category %1$s."
 msgstr "カテゴリ名 %1$s の変更は許可されていません。"
 
 #. You are not allowed to enable or disable the category %1$s.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:83
 msgid "You are not allowed to enable or disable the category %1$s."
 msgstr "カテゴリ %1$s を有効または無効にすることは許可されていません。"
 
@@ -4682,6 +4754,50 @@ msgstr "メッセージ %1$s がフォルダー %2$s に見つかりません。
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
 msgstr "指定された OAuth アカウントが無効です。."
+
+#. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
+msgid ""
+"An error has occurred on the remote Microsoft end-point. There is nothing we "
+"can do about it. Try again later."
+msgstr ""
+
+#. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
+msgid ""
+"Unable to retrieve the contact photo for contact with id '%1$s'. There is "
+"nothing we can do about it. Try again later."
+msgstr ""
+
+#. The copying of file %1$s failed. There is nothing we can do about it. Try again later
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
+msgid ""
+"The copying of file %1$s failed. There is nothing we can do about it. Try "
+"again later."
+msgstr ""
+
+#. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
+msgid ""
+"Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
+"do about it. Try again later."
+msgstr ""
+
+#. The folder does not exist.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
+msgid "The folder does not exist."
+msgstr ""
+
+#. A folder named '%1$s' already exists under the folder with name '%2$s
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:65
+msgid "A folder named '%1$s' already exists under the folder with name '%2$s"
+msgstr ""
+"フォルダー名 \"%1$s\" の複製が親フォルダー \"%2$s\" の配下に既に存在します。"
+
+#. You are not allowed to delete the root folder.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
+msgid "You are not allowed to delete the root folder."
+msgstr ""
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5012,6 +5128,11 @@ msgstr ""
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
 msgid "'%1$s' OAuth service is not enabled for you."
 msgstr "'%1$s' OAuth サービスはあなたを有効にしていません。"
+
+#: com.openexchange.password.mechanism/src/com/openexchange/password/mechanism/exceptions/PasswordMechMessages.java:63
+msgid ""
+"No password mechanism available for identifier '%s'. Cannot handle password."
+msgstr ""
 
 #. *
 #. * New password too short.
@@ -5536,85 +5657,6 @@ msgstr ""
 msgid "Could not load data via proxy."
 msgstr "プロキシ経由でデータを読み込めませんでした。"
 
-#. The operation is forbidden
-#: com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONErrorDisplayMessage.java:71
-msgid "The operation is forbidden"
-msgstr "操作は禁止されています。"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
-msgid "Site"
-msgstr "サイト"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
-msgid "Apply a template (optional)"
-msgstr "テンプレートを適用 (オプション)"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
-msgid "Add cipher code"
-msgstr "暗号コードを追加"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:69
-msgid "Shared contacts"
-msgstr "共有連絡先"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:71
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
-msgid "Shared files"
-msgstr "共有ファイル"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
-msgid ""
-"Privacy:\n"
-"The data and any references contained in this webpage are shared with you "
-"under the assumption that the owner of the data was entitled to make them "
-"available to you. Neither %s, nor any of its subsidiaries or affiliates "
-"shall be liable for its publication or re-publication.\n"
-"Any unauthorized use or dissemination of this data is prohibited. If you "
-"intend to store, process, or pass on this data, please make sure that you "
-"have the right to do so.\n"
-"If you are one of the people listed or responsible for a resource listed on "
-"this page and you don't agree with the publication, please send an email "
-"containing the URL (the link) to this webpage to %s and the publisher of the "
-"data:\n"
-"Data published by %s on %s\n"
-msgstr ""
-"プライバシー：\n"
-"この Web ページに含まれるデータや参考資料の共有は、データの所有者がそのデータ"
-"を公開する権利を有していることが前提となります。%s とそのいずれの子会社および"
-"提携先も公開もしくは再公開の責任を負いません。\n"
-"このデータの無断での使用や公開は禁止されています。このデータを保存、処理もし"
-"くは譲渡する場合には、それらを行う権利があることを確認してください。\n"
-"あなたがこのページに記載されている中の一人か、このページに記載されたリソース"
-"の責任者であり、公開に同意しない場合は、この Web ページへの URL (リンク) を記"
-"載したメールを %s とデータの公開者に送信してください。\n"
-"データは %s によって %s に公開されました\n"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
-msgid "the hoster"
-msgstr "ホスティング事業者"
-
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
-msgid "Publish Infostore document"
-msgstr "インフォストアドキュメントを公開"
-
-#. Cannot find the requested publication site.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
-msgid "Cannot find the requested publication site."
-msgstr "要求された公開サイトが見つかりません。"
-
-#. You do not have the appropriate permissions to perform the chosen action.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:66
-msgid ""
-"You do not have the appropriate permissions to perform the chosen action."
-msgstr "選択された操作を実行するために必要な権限がありません。"
-
-#. The published document has been deleted in the meantime and therefore is no longer available.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:69
-msgid ""
-"The published document has been deleted in the meantime and therefore is no "
-"longer available."
-msgstr "公開されたドキュメントは既に削除されているため、利用できません。"
-
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
 msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
@@ -5769,6 +5811,27 @@ msgstr "予期しないエラーが発生しました: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "ID が無効です。リソースの識別子が見つかりません。"
 
+#. The remote '%1$s' service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:65
+msgid ""
+"The remote '%2$s' service is unavailable at the moment. There is nothing we "
+"can do about it. Please try again later."
+msgstr ""
+
+#. An internal server error occurred on '%1$s' side. There is nothing we can do about it.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:67
+msgid ""
+"An internal server error occurred on '%2$s' side. There is nothing we can do "
+"about it."
+msgstr ""
+
+#. A remote server error occurred on '%1$s' side. There is nothing we can do about it.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:69
+msgid ""
+"A remote server error occurred on '%2$s' side. There is nothing we can do "
+"about it."
+msgstr ""
+
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -5883,6 +5946,11 @@ msgid ""
 msgstr ""
 "ポリシーの形式が無効です。ポリシーは \"条件:動作\" のように記述する必要があり"
 "ます。"
+
+#. The policy '%s' you have specified is unknonw/unsupported.
+#: com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:65
+msgid "The policy '%s' you have specified is unknonw/unsupported."
+msgstr ""
 
 #. Unable to convert task status "%1$s".
 #: com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:69
@@ -6628,6 +6696,11 @@ msgstr "パターン \"%1$s\" は検索中に無視されました。"
 msgid "Invalid number of properties for distribution list."
 msgstr "連絡先グループのプロパティ数が無効です。"
 
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:145
+msgid ""
+"This operation is not allowed in this folder because it has a subscription."
+msgstr ""
+
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr "アカウント %1$d が見つかりませんでした。"
@@ -6726,6 +6799,10 @@ msgstr "マイ ファイル"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
 msgstr "ドライブ"
+
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
+msgid "Shared files"
+msgstr "共有ファイル"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -8893,8 +8970,7 @@ msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
 "of %2$s."
 msgstr ""
-"送信しようとしたメールのサイズ: %1$s。メールの送信可能な最大サイズ %2$s を超"
-"えるためメールを送信できません。"
+"送信しようとしたメールサイズ：%1$s。%2$s を超えるメールは送信できません。"
 
 #. Missing parameter %1$s
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85
@@ -9490,6 +9566,36 @@ msgid ""
 msgstr ""
 "認証に問題があるため、メールトランスポート%2$sは無効になりました。アカウン"
 "ト%5$sを再認証し、有効にしてください。"
+
+#. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
+#. which is only applicable in case a reply is generated, but in-compose message is not a reply
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
+msgid ""
+"The operation cannot be performed because composed message is not a reply"
+msgstr ""
+
+#. Found no such attachment %1$s in composition space %2$s
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:75
+msgid "No such attachment"
+msgstr ""
+
+#. Attachments must not be shared
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:78
+msgid "Attachments must not be shared"
+msgstr ""
+
+#. A user must not create any new composition spaces
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:81
+msgid ""
+"Maximum number of composition spaces is reached. Please terminate existing "
+"open spaces in order to open new ones."
+msgstr ""
+
+#. Missing key which is required to decrypt the content of a composition space
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
+msgid ""
+"Found no suitable key for composition space. Please re-compose your E-Mail."
+msgstr ""
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -11452,47 +11558,6 @@ msgstr "要求された登録は存在しません。"
 #: com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
 msgid "The operation is forbidden."
 msgstr "操作は禁止されています。"
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
-msgid "OXMF Contacts"
-msgstr "OXMF 連絡先"
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
-msgid "OXMF Infostore"
-msgstr "OXMF インフォストア"
-
-#. A parsing error occurred: %1$s.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
-msgid "A parsing error occurred: %1$s."
-msgstr "次の解析エラーが発生しました: %1$s"
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
-msgid "Provide well-formed HTML."
-msgstr "正しい形式の HTML を入力してください。"
-
-#. Can only post to external subscription sources.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "You can only post to external subscription sources."
-msgstr "外部の登録元のみに投稿できます。"
-
-#. Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:69
-msgid ""
-"Could not fetch site at %1$s. Please check the spelling or whether you can "
-"reach the site in your browser."
-msgstr ""
-"サイト %1$s を取得できませんでした。URLを確認しブラウザでこのサイトに到達でき"
-"るか確認してください。"
-
-#. The string cannot be parsed to a valid URL.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
-msgid "You provided an invalid URL."
-msgstr "入力された URL は無効です。"
-
-#. No URL was provided.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-msgid "You provided no URL."
-msgstr "入力したURLは無効です。"
 
 #: com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
@@ -13997,6 +14062,93 @@ msgstr "UTC (協定世界時)"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "The operation is forbidden"
+#~ msgstr "操作は禁止されています。"
+
+#~ msgid "Site"
+#~ msgstr "サイト"
+
+#~ msgid "Apply a template (optional)"
+#~ msgstr "テンプレートを適用 (オプション)"
+
+#~ msgid "Add cipher code"
+#~ msgstr "暗号コードを追加"
+
+#~ msgid "Shared contacts"
+#~ msgstr "共有連絡先"
+
+#~ msgid ""
+#~ "Privacy:\n"
+#~ "The data and any references contained in this webpage are shared with you "
+#~ "under the assumption that the owner of the data was entitled to make them "
+#~ "available to you. Neither %s, nor any of its subsidiaries or affiliates "
+#~ "shall be liable for its publication or re-publication.\n"
+#~ "Any unauthorized use or dissemination of this data is prohibited. If you "
+#~ "intend to store, process, or pass on this data, please make sure that you "
+#~ "have the right to do so.\n"
+#~ "If you are one of the people listed or responsible for a resource listed "
+#~ "on this page and you don't agree with the publication, please send an "
+#~ "email containing the URL (the link) to this webpage to %s and the "
+#~ "publisher of the data:\n"
+#~ "Data published by %s on %s\n"
+#~ msgstr ""
+#~ "プライバシー：\n"
+#~ "この Web ページに含まれるデータや参考資料の共有は、データの所有者がその"
+#~ "データを公開する権利を有していることが前提となります。%s とそのいずれの子"
+#~ "会社および提携先も公開もしくは再公開の責任を負いません。\n"
+#~ "このデータの無断での使用や公開は禁止されています。このデータを保存、処理も"
+#~ "しくは譲渡する場合には、それらを行う権利があることを確認してください。\n"
+#~ "あなたがこのページに記載されている中の一人か、このページに記載されたリソー"
+#~ "スの責任者であり、公開に同意しない場合は、この Web ページへの URL (リン"
+#~ "ク) を記載したメールを %s とデータの公開者に送信してください。\n"
+#~ "データは %s によって %s に公開されました\n"
+
+#~ msgid "the hoster"
+#~ msgstr "ホスティング事業者"
+
+#~ msgid "Publish Infostore document"
+#~ msgstr "インフォストアドキュメントを公開"
+
+#~ msgid "Cannot find the requested publication site."
+#~ msgstr "要求された公開サイトが見つかりません。"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to perform the chosen action."
+#~ msgstr "選択された操作を実行するために必要な権限がありません。"
+
+#~ msgid ""
+#~ "The published document has been deleted in the meantime and therefore is "
+#~ "no longer available."
+#~ msgstr "公開されたドキュメントは既に削除されているため、利用できません。"
+
+#~ msgid "OXMF Contacts"
+#~ msgstr "OXMF 連絡先"
+
+#~ msgid "OXMF Infostore"
+#~ msgstr "OXMF インフォストア"
+
+#~ msgid "A parsing error occurred: %1$s."
+#~ msgstr "次の解析エラーが発生しました: %1$s"
+
+#~ msgid "Provide well-formed HTML."
+#~ msgstr "正しい形式の HTML を入力してください。"
+
+#~ msgid "You can only post to external subscription sources."
+#~ msgstr "外部の登録元のみに投稿できます。"
+
+#~ msgid ""
+#~ "Could not fetch site at %1$s. Please check the spelling or whether you "
+#~ "can reach the site in your browser."
+#~ msgstr ""
+#~ "サイト %1$s を取得できませんでした。URLを確認しブラウザでこのサイトに到達"
+#~ "できるか確認してください。"
+
+#~ msgid "You provided an invalid URL."
+#~ msgstr "入力された URL は無効です。"
+
+#~ msgid "You provided no URL."
+#~ msgstr "入力したURLは無効です。"
 
 #~ msgid "The DoveAdm resource does not exist"
 #~ msgstr "DoveAdm リソースが存在しません"
