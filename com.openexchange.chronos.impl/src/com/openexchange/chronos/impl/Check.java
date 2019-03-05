@@ -203,7 +203,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static Event requireInSequence(Event originalEvent, Event eventUpdate) throws OXException {
         if (eventUpdate.containsSequence() && eventUpdate.getSequence() < originalEvent.getSequence()) {
-            throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(eventUpdate.getSequence()));
+            throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(originalEvent.getSequence()));
         }
         return eventUpdate;
     }
