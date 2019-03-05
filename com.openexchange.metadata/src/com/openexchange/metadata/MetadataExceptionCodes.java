@@ -84,9 +84,9 @@ public enum MetadataExceptionCodes implements DisplayableOXExceptionCode {
      */
     MISSING_FILE_TYPE("Missing file type", null, Category.CATEGORY_ERROR, 5),
     /**
-     * Missing input stream
+     * Missing or empty input stream
      */
-    MISSING_INPUT_STREAM("Missing input stream", null, Category.CATEGORY_ERROR, 6),
+    MISSING_INPUT_STREAM("Missing or empty input stream", null, Category.CATEGORY_ERROR, 6),
     /**
      * Unknown file type: %1$s
      */

@@ -66,10 +66,10 @@ public interface MetadataService {
      * Gets the metadata map extracted from given input stream.
      *
      * @param in The input stream to extract from
-     * @param fileType The file type; e.g. <code>"JPEG"</code>
+     * @param optFileType The optional file type (e.g. <code>"JPEG"</code>) or <code>null</code> for auto-detection
      * @return The metadata map
      * @throws OXException If metadata map cannot be created
      */
-    MetadataMap getMetadata(InputStream in, String fileType) throws OXException;
+    MetadataMap getMetadata(InputStream in, String optFileType) throws OXException;
 
 }

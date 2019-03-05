@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import com.drew.imaging.FileType;
+import com.drew.imaging.FileTypeDetector;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
@@ -62,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.metadata.MetadataExceptionCodes;
+import com.openexchange.metadata.MetadataMap;
 import com.openexchange.metadata.MetadataService;
 
 /**
@@ -90,28 +92,54 @@ public class MetadataExtractorMetadataService implements MetadataService {
     }
 
     @Override
-    public com.openexchange.metadata.MetadataMap getMetadata(InputStream in, String sFileType) throws OXException {
+    public MetadataMap getMetadata(InputStream in, String optFileType) throws OXException {
         if (null == in) {
             throw MetadataExceptionCodes.MISSING_INPUT_STREAM.create();
-        }
-        if (Strings.isEmpty(sFileType)) {
-            throw MetadataExceptionCodes.MISSING_FILE_TYPE.create();
         }
 
         BufferedInputStream bufferedStream = null;
         try {
-            FileType detectedFileType = id2FileType.get(Strings.toUpperCase(sFileType));
-            if (null == detectedFileType) {
-                // Unknown file type
-                throw MetadataExceptionCodes.UNKNOWN_FILE_TYPE.create(sFileType);
-            }
+            FileType detectedFileType;
+            if (Strings.isEmpty(optFileType)) {
+                // Ensure stream is not empty
+                bufferedStream = in instanceof BufferedInputStream ? (BufferedInputStream) in : new BufferedInputStream(in, 65536);
+                bufferedStream.mark(65536);
+                {
+                    int read = bufferedStream.read();
+                    if (read < 0) {
+                        throw MetadataExceptionCodes.MISSING_INPUT_STREAM.create();
+                    }
+                    bufferedStream.reset();
+                }
 
-            bufferedStream = in instanceof BufferedInputStream ? (BufferedInputStream) in : new BufferedInputStream(in, 65536);
+                // Auto-detect & check file type
+                try {
+                    bufferedStream.mark(65536);
+                    detectedFileType = FileTypeDetector.detectFileType(bufferedStream);
+                } catch (@SuppressWarnings("unused") AssertionError e) {
+                    detectedFileType = FileType.Unknown;
+                }
+                if (FileType.Unknown == detectedFileType) {
+                    return MetadataMap.EMPTY;
+                }
+
+                // Reset stream for re-use
+                bufferedStream.reset();
+            } else {
+                // Assume proper file type already given. Look-up bxy identifier
+                detectedFileType = id2FileType.get(Strings.toUpperCase(optFileType));
+                if (null == detectedFileType) {
+                    // Unknown file type
+                    throw MetadataExceptionCodes.UNKNOWN_FILE_TYPE.create(optFileType);
+                }
+
+                // Initialize BufferedInputStream
+                bufferedStream = in instanceof BufferedInputStream ? (BufferedInputStream) in : new BufferedInputStream(in, 65536);
+            }
 
             Metadata metadata = ImageMetadataReader.readMetadata(bufferedStream, -1, detectedFileType);
 
             MetadataMapImpl.Builder mediaMeta = MetadataMapImpl.builder(4);
-
             for (Directory directory : metadata.getDirectories()) {
                 if (directory.isEmpty()) {
                     continue;
@@ -123,7 +151,6 @@ public class MetadataExtractorMetadataService implements MetadataService {
                 // Get tag list & initialize appropriate map for current metadata directory
                 MetadataUtility.putMediaMeta(null == knownDirectory ? directory.getName() : knownDirectory.name(), directory, mediaMeta);
             }
-
             return mediaMeta.build();
         } catch (com.drew.imaging.ImageProcessingException e) {
             throw MetadataExceptionCodes.METADATA_FAILED.create(e);
