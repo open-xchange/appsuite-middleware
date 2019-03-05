@@ -145,6 +145,9 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
 
             JSONArray jAttachments = jBody.toArray();
             int length = jAttachments.length();
+            if (length <= 0) {
+                return Collections.emptyList();
+            }
             List<AttachmentInfo> attachmentInfos = new ArrayList<ZipDocumentsAction.AttachmentInfo>(length);
             for (int i = 0; i < length; i++) {
                 JSONObject jAttachment = jAttachments.optJSONObject(i);
