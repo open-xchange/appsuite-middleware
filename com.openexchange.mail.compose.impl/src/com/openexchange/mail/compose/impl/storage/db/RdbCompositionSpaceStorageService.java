@@ -62,6 +62,7 @@ import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.DefaultAttachment;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.MessageField;
@@ -101,6 +102,14 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         return new CompositionSpaceDbStorage(dbProvider, /*txPolicy, */session, services);
     }
 
+    private void updateSafe(CompositionSpaceContainer ucs, CompositionSpaceDbStorage dbStorage) {
+        try {
+            dbStorage.updateCompositionSpace(ucs, false);
+        } catch (Exception e) {
+            // Ignore...
+        }
+    }
+
     /**
      * Creates the appropriate database storage for given user/context pair
      *
@@ -128,29 +137,58 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         }
 
         MessageDescription m = cs.getMessage();
-        resolveAttachments(m, session);
+        List<Attachment> attachmentsToUpdate = resolveAttachments(m, session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
-        return new ImmutableCompositionSpace(id, message, cs.getLastModified().getTime());
+        ImmutableCompositionSpace ics = new ImmutableCompositionSpace(id, message, cs.getLastModified().getTime());
+
+        if (!attachmentsToUpdate.isEmpty()) {
+            CompositionSpaceContainer ucs = new CompositionSpaceContainer();
+            ucs.setUuid(id);
+            ucs.setMessage(new MessageDescription().setAttachments(attachmentsToUpdate));
+            updateSafe(ucs, dbStorage);
+        }
+
+        return ics;
     }
 
     @Override
     public List<CompositionSpace> getCompositionSpaces(Session session, MessageField[] fields) throws OXException {
+        CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
+
         MessageField[] fieldsToQuery = null == fields ? MessageField.values() : fields;
-        List<CompositionSpaceContainer> containers = newDbStorageFor(session).selectAll(fieldsToQuery);
+        List<CompositionSpaceContainer> containers = dbStorage.selectAll(fieldsToQuery);
         int size;
         if (null == containers || (size = containers.size()) <= 0) {
             return Collections.emptyList();
         }
 
         List<CompositionSpace> spaces = new ArrayList<>(size);
+        boolean attachmentsQueried = MessageField.isContained(fieldsToQuery, MessageField.ATTACHMENTS);
+        List<CompositionSpaceContainer> toUpdate = null;
         for (CompositionSpaceContainer cs : containers) {
             MessageDescription m = cs.getMessage();
-            if (MessageField.isContained(fieldsToQuery, MessageField.ATTACHMENTS)) {
-                resolveAttachments(m, session);
+            if (attachmentsQueried) {
+                List<Attachment> attachmentsToUpdate = resolveAttachments(m, session);
+                if (!attachmentsToUpdate.isEmpty()) {
+                    if (toUpdate == null) {
+                        toUpdate = new ArrayList<>(size);
+                    }
+                    CompositionSpaceContainer ucs = new CompositionSpaceContainer();
+                    ucs.setUuid(cs.getUuid());
+                    ucs.setMessage(new MessageDescription().setAttachments(attachmentsToUpdate));
+                    toUpdate.add(ucs);
+                }
             }
             Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
             spaces.add(new ImmutableCompositionSpace(cs.getUuid(), message, cs.getLastModified().getTime()));
         }
+
+        if (toUpdate != null) {
+            for (CompositionSpaceContainer ucs : toUpdate) {
+                updateSafe(ucs, dbStorage);
+            }
+        }
+
         return spaces;
     }
 
@@ -188,12 +226,21 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         }
 
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
-        CompositionSpaceContainer cs = dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc));
+        CompositionSpaceContainer cs = dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc), true);
 
         MessageDescription m = cs.getMessage();
-        resolveAttachments(m, session);
+        List<Attachment> attachmentsToUpdate = resolveAttachments(m, session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
-        return new ImmutableCompositionSpace(compositionSpaceDesc.getUuid(), message, cs.getLastModified().getTime());
+        ImmutableCompositionSpace ics = new ImmutableCompositionSpace(compositionSpaceDesc.getUuid(), message, cs.getLastModified().getTime());
+
+        if (!attachmentsToUpdate.isEmpty()) {
+            CompositionSpaceContainer ucs = new CompositionSpaceContainer();
+            ucs.setUuid(compositionSpaceDesc.getUuid());
+            ucs.setMessage(new MessageDescription().setAttachments(attachmentsToUpdate));
+            updateSafe(ucs, dbStorage);
+        }
+
+        return ics;
     }
 
     @Override
@@ -237,30 +284,48 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     /**
      * (Re-)loads all attachments in a Message by the the real data from the AttachmentStorage. Might be necessary if only the attachment id is set.
      *
-     * @param messageDescription
-     * @param session
-     * @throws OXException
+     * @param messageDescription The message description
+     * @param session The session
+     * @return The attachments to update
+     * @throws OXException If attachments cannot be resolved
      */
-    private void resolveAttachments(MessageDescription messageDescription, Session session) throws OXException {
+    private List<Attachment> resolveAttachments(MessageDescription messageDescription, Session session) throws OXException {
         if (null == messageDescription) {
-            return;
+            return Collections.emptyList();
         }
 
         List<Attachment> availableAttachments = messageDescription.getAttachments();
         if (availableAttachments == null) {
-            return;
+            return Collections.emptyList();
         }
+
         int size = availableAttachments.size();
         if (size <= 0) {
-            return;
+            return Collections.emptyList();
         }
 
         AttachmentStorage attachmentStorage = attachmentStorageService.getAttachmentStorageFor(session);
         List<Attachment> attachmentsToSet = new ArrayList<>(size);
+        boolean modified = false;
         for (Attachment a : availableAttachments) {
-            attachmentsToSet.add(attachmentStorage.getAttachment(a.getId(), session));
+            Attachment attachment = attachmentStorage.getAttachment(a.getId(), session);
+            if (null == attachment) {
+                modified = true;
+            } else {
+                attachmentsToSet.add(attachment);
+            }
         }
         messageDescription.setAttachments(attachmentsToSet);
+
+        if (!modified) {
+            return Collections.emptyList();
+        }
+
+        List<Attachment> attachmentsToUpdate = new ArrayList<>(attachmentsToSet.size());
+        for (Attachment attachment : attachmentsToSet) {
+            attachmentsToUpdate.add(DefaultAttachment.createWithId(attachment.getId(), null));
+        }
+        return attachmentsToUpdate;
     }
 
 }

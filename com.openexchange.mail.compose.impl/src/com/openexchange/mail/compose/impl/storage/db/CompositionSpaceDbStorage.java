@@ -181,11 +181,11 @@ public class CompositionSpaceDbStorage {
      * @return The updated composition space
      * @throws OXException If update fails
      */
-    public CompositionSpaceContainer updateCompositionSpace(CompositionSpaceContainer compositionSpace) throws OXException {
+    public CompositionSpaceContainer updateCompositionSpace(CompositionSpaceContainer compositionSpace, boolean updateLastModified) throws OXException {
         Connection connection = dbProvider.getWriteConnection(context);
         try {
             // Update the composition space and acquire new last-modified time-stamp
-            long newLastModified = update(connection, compositionSpace, compositionSpace.getLastModified());
+            long newLastModified = update(connection, compositionSpace, compositionSpace.getLastModified(), updateLastModified);
 
             // Load the updated composition space
             CompositionSpaceContainer cs = select(connection, compositionSpace.getUuid());
@@ -450,12 +450,26 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    private long update(Connection connection, CompositionSpaceContainer compositionSpace, Date optLastModified) throws SQLException, OXException {
+    private long update(Connection connection, CompositionSpaceContainer compositionSpace, Date optLastModified, boolean updateLastModified) throws SQLException, OXException {
         MessageField[] assignedfields = MAPPER.getAssignedFields(compositionSpace.getMessage());
         if (assignedfields.length == 0) {
             return 0;
         }
-        String sql = new StringBuilder().append("UPDATE compositionSpace SET lastModified=?,").append(MAPPER.getAssignments(assignedfields)).append(" WHERE cid=? AND user=? AND uuid=?").append(null == optLastModified ? "" : " AND lastModified=?").toString();
+
+        String sql;
+        {
+            StringBuilder sb = new StringBuilder("UPDATE compositionSpace SET ");
+            if (updateLastModified) {
+                sb.append("lastModified=?,");
+            }
+            sb.append(MAPPER.getAssignments(assignedfields));
+            sb.append(" WHERE cid=? AND user=? AND uuid=?");
+            if (null != optLastModified) {
+                sb.append(" AND lastModified=?");
+            }
+            sql = sb.toString();
+        }
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             long newLastModified = System.currentTimeMillis();

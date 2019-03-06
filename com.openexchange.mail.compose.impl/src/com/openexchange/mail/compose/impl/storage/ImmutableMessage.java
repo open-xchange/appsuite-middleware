@@ -265,7 +265,17 @@ public class ImmutableMessage implements Message {
     }
 
     private static <E> List<E> immutableListFor(List<E> list) {
-        return null == list || list.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(list);
+        if (null == list || list.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        ImmutableList.Builder<E> il = ImmutableList.builderWithExpectedSize(list.size());
+        for (E element : list) {
+            if (null != element) {
+                il.add(element);
+            }
+        }
+        return il.build();
     }
 
     @Override
