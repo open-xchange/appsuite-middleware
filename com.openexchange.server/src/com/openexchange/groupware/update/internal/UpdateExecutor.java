@@ -298,10 +298,8 @@ public final class UpdateExecutor {
                     // Unlocking the schema might be successfully executed then...
                 }
 
-                // Remove contexts from cache if they are cached during update process.
-                if (doRemoveContexts) {
-                    removeContexts();
-                }
+                // Remove contexts from cache
+                removeContexts();
             } else {
                 unlockSchema(blocking, state);
             }
