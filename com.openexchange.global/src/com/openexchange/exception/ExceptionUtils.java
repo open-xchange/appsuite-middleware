@@ -297,6 +297,26 @@ public class ExceptionUtils {
         return null == next ? false : isEitherOf(next, classes);
     }
 
+    /**
+     * Extracts the first occurrence of given exception class from exception chain of given {@link Throwable} instance.
+     *
+     * @param e The {@link Throwable} instance whose exception chain is supposed to be traversed
+     * @param clazz The exception class to look-up
+     * @return The first occurrence or <code>null</code>
+     */
+    public static <E extends Exception> E extractFrom(Throwable e, Class<E> clazz) {
+        if (null == e || null == clazz) {
+            return null;
+        }
+
+        if (clazz.isInstance(e)) {
+            return (E) e;
+        }
+
+        Throwable next = e.getCause();
+        return null == next ? null : extractFrom(next, clazz);
+    }
+
     private static final AtomicReference<Date> LAST_OOME_REFERENCE = new AtomicReference<>();
 
     /**
