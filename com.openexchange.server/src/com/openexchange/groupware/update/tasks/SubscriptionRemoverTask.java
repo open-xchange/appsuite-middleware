@@ -53,6 +53,8 @@ import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -70,7 +72,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
-    private final String subscriptionSourceId;
+    private final List<String> subscriptionSourceIds;
 
     /**
      * Initializes a new {@link SubscriptionRemoverTask}.
@@ -78,8 +80,18 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
      * @param subscriptionSourceId The identifier
      */
     public SubscriptionRemoverTask(final String subscriptionSourceId) {
-        this.subscriptionSourceId = subscriptionSourceId;
+        this.subscriptionSourceIds = Collections.singletonList(subscriptionSourceId);
     }
+    
+    /**
+     * Initializes a new {@link SubscriptionRemoverTask}.
+     *
+     * @param subscriptionSourceIds A list of identifier
+     */
+    public SubscriptionRemoverTask(final List<String> subscriptionSourceIds) {
+        this.subscriptionSourceIds = subscriptionSourceIds;
+    }
+    
 
     @Override
     public TaskAttributes getAttributes() {
@@ -104,10 +116,12 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
             con.setAutoCommit(false);
             rollback = 1;
 
-            stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
-            stmt.setString(1, subscriptionSourceId);
+            for (String id : subscriptionSourceIds) {
+                stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
+                stmt.setString(1, id);
+                stmt.addBatch();
+            }
             stmt.executeUpdate();
-
             con.commit();
             rollback = 2;
         } catch (SQLException e) {

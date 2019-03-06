@@ -103,6 +103,7 @@ import com.openexchange.groupware.update.tasks.Release781UpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
 import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
+import com.openexchange.groupware.update.tasks.UnsupportedSubscriptionsRemoverTask;
 import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
@@ -724,12 +725,16 @@ public final class InternalList {
         
         list.add(new com.openexchange.groupware.update.tasks.ChronosAddAttendeePrivilegesTask());
 
+        // Add principal table update task
+        list.add(new CreatePrincipalUseCountTableTask());
+        
+        list.add(new UnsupportedSubscriptionsRemoverTask());
+
         // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
         // TODO Enable UpdateTask with 7.10.3, see MW-1108
         // list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
         // list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
-        // Add principal table update task
-        list.add(new CreatePrincipalUseCountTableTask());
+
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
