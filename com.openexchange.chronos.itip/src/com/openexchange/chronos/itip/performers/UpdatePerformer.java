@@ -162,8 +162,10 @@ public class UpdatePerformer extends AbstractActionPerformer {
             }
 
             event = util.loadEvent(event, session);
-            writeMail(action, original, event, session, owner);
-            result.add(event);
+            if (event != null) {
+                writeMail(action, original, event, session, owner);
+                result.add(event);
+            }
         }
 
         return result;
