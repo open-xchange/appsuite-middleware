@@ -397,8 +397,16 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                 break;
                             case IPTC:
                                 if (null == document.getCaptureDate()) {
-                                    String dateString = (String) directory.getObject(IptcDirectory.TAG_DATE_CREATED);
-                                    String timeString = (String) directory.getObject(IptcDirectory.TAG_TIME_CREATED);
+                                    String dateString;
+                                    {
+                                        Object object = directory.getObject(IptcDirectory.TAG_DATE_CREATED);
+                                        dateString = null == object ? null : object.toString();
+                                    }
+                                    String timeString;
+                                    {
+                                        Object object = directory.getObject(IptcDirectory.TAG_TIME_CREATED);
+                                        timeString = null == object ? null : object.toString();
+                                    }
                                     document.setCaptureDate(MediaMetadataExtractors.parseDateStringToDate(dateString, timeString));
                                 }
                                 break;
