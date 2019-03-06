@@ -483,7 +483,7 @@ As one exception, the calendar client from Thunderbird/Lightning does not synchr
 
 ## External Calendar Account Caching
 
-The default calendar providers implemented by Open-Xchange (like ICal, SchedJoules, ...) use a generic caching approach to avoid expensive calls to external resources as much as possible. This means that events (and all related information like attendees and alarms) from the external resource gets persisted like events from the internal calendar after their first retrieval. All upcoming requests will be answered by the cache until a defined refresh interval is exceeded.
+The default calendar providers implemented by Open-Xchange (like ICal, SchedJoules, ...) use a generic caching approach to avoid expensive calls to external resources as much as possible. This means that events (and all related information like attendees and description) from the external resource gets persisted like events from the internal calendar after their first retrieval. All upcoming requests will be answered by the cache until a defined refresh interval is exceeded. Please be aware that alarms and attachments are not synched.
 
 The caching layer itself is able to handle information on a per-folder base. Cached folders that have been deleted on the remote site will be removed immediately from the cache while new folders on remote will be cached instantly. 
 

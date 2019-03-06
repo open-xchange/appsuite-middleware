@@ -608,7 +608,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @throws OXException
      */
     protected void update(CalendarStorage calendarStorage, EventUpdate eventUpdate) throws OXException {
-        Event delta = update(calendarStorage, eventUpdate, true);
+        Event delta = update(calendarStorage, eventUpdate, false);
         if (!Collections.disjoint(eventUpdate.getUpdatedFields(), ALARM_CHANGE)) {
             setDefaultFolder(Collections.singleton(delta));
             getAlarmHelper().updateAlarmTriggers(calendarStorage, delta);
@@ -1194,6 +1194,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         tmp.add(EventField.RECURRENCE_DATES);
         tmp.add(EventField.CHANGE_EXCEPTION_DATES);
         tmp.add(EventField.DELETE_EXCEPTION_DATES);
+        tmp.add(EventField.ALARMS);
         ALARM_CHANGE = Collections.unmodifiableSet(tmp);
     }
 
