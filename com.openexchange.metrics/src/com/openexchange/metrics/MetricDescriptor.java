@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import javax.management.ObjectName;
 
 /**
  * 
@@ -414,7 +415,10 @@ public class MetricDescriptor {
         }
         
         /**
-         * Adds an additional dimension to this descriptor
+         * Adds an additional dimension to this descriptor.
+         * 
+         * This dimensions are used to create the {@link ObjectName} for the mbean.
+         * So please see {@link ObjectName} descriptions for limitations.
          * 
          * @param key The key of the dimension. Must not be 'type' or 'name'
          * @param value The value of the dimension
