@@ -106,15 +106,14 @@ public class CometListener extends DefaultLongPollingListener {
                 AJAXRequestResult noResultYet = new AJAXRequestResult();
                 noResultYet.setType(ResultType.DIRECT);
                 return noResultYet;
-            } else {
-                /*
-                 * consume available event directly
-                 */
-                LOG.debug("Stored event available for {}, no need to wait.", driveSession);
-                AJAXRequestResult result = createResult(this.event);
-                this.event = null;
-                return result;
             }
+            /*
+             * consume available event directly
+             */
+            LOG.debug("Stored event available for {}, no need to wait.", driveSession);
+            AJAXRequestResult result = createResult(this.event);
+            this.event = null;
+            return result;
         } finally {
             lock.unlock();
         }
