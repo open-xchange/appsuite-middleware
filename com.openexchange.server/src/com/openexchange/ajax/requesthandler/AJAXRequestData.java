@@ -553,6 +553,18 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks if the underlying HTTP response has been committed.
+     * <p>
+     * A committed response has already had its status  code and headers written.
+     *
+     * @return <code>true</code> if committed; otherwise <code>false</code>
+     */
+    public boolean isResponseCommitted() {
+        HttpServletResponse resp = this.httpServletResponse;
+        return resp == null ? false : resp.isCommitted();
+    }
+
+    /**
      * Gets the decorator identifiers
      *
      * @return The decorator identifiers
