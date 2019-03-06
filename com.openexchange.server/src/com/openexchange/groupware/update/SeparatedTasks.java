@@ -52,14 +52,24 @@ package com.openexchange.groupware.update;
 import java.util.List;
 
 /**
- * Interface to transport blocking and background update tasks.
+ * Provides blocking and background update tasks.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface SeparatedTasks {
 
+    /**
+     * Gets an immutable listing of blocking update tasks.
+     *
+     * @return The blocking update tasks
+     */
     List<UpdateTaskV2> getBlocking();
 
+    /**
+     * Gets an immutable listing of background update tasks.
+     *
+     * @return The background update tasks
+     */
     List<UpdateTaskV2> getBackground();
 
 }

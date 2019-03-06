@@ -122,34 +122,32 @@ class UpdateTaskCollection {
      * @return The {@link SeparatedTasks}
      */
     SeparatedTasks separateTasks(List<UpdateTaskV2> tasks) {
-        final List<UpdateTaskV2> blocking = new ArrayList<UpdateTaskV2>();
-        final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
+        ImmutableList.Builder<UpdateTaskV2> blocking = null;
+        ImmutableList.Builder<UpdateTaskV2> background = null;
         for (UpdateTaskV2 toExecute : tasks) {
             switch (toExecute.getAttributes().getConcurrency()) {
                 case BLOCKING:
+                    if (blocking == null) {
+                        blocking = ImmutableList.builder();
+                    }
                     blocking.add(toExecute);
                     break;
                 case BACKGROUND:
+                    if (background == null) {
+                        background = ImmutableList.builder();
+                    }
                     background.add(toExecute);
                     break;
                 default:
                     OXException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecute.getClass().getName());
                     LOG.error("", e);
+                    if (blocking == null) {
+                        blocking = ImmutableList.builder();
+                    }
                     blocking.add(toExecute);
             }
         }
-        return new SeparatedTasks() {
-
-            @Override
-            public List<UpdateTaskV2> getBlocking() {
-                return blocking;
-            }
-
-            @Override
-            public List<UpdateTaskV2> getBackground() {
-                return background;
-            }
-        };
+        return new SeparatedTasksImpl(blocking == null ? Collections.emptyList() : blocking.build(), background == null ? Collections.emptyList() : background.build());
     }
 
     /**
@@ -289,6 +287,27 @@ class UpdateTaskCollection {
             }
         }
         return null == filtered ? Collections.emptyList() : filtered;
+    }
+
+    private static class SeparatedTasksImpl implements SeparatedTasks {
+
+        private final List<UpdateTaskV2> blocking;
+        private final List<UpdateTaskV2> background;
+
+        SeparatedTasksImpl(List<UpdateTaskV2> blocking, List<UpdateTaskV2> background) {
+            this.blocking = blocking;
+            this.background = background;
+        }
+
+        @Override
+        public List<UpdateTaskV2> getBlocking() {
+            return blocking;
+        }
+
+        @Override
+        public List<UpdateTaskV2> getBackground() {
+            return background;
+        }
     }
 
 }
