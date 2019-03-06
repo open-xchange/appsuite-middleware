@@ -150,17 +150,21 @@ public class ZipDocumentsAction extends AbstractAttachmentAction {
                 return Collections.emptyList();
             }
             List<AttachmentInfo> attachmentInfos = new ArrayList<ZipDocumentsAction.AttachmentInfo>(length);
+            AttachmentInfo helper = null;
             for (int i = 0; i < length; i++) {
                 JSONObject jAttachment = jAttachments.optJSONObject(i);
                 if (null != jAttachment) {
                     attachmentInfos.add(fromJson(jAttachment));
                 } else {
                     // Expect folder, object and module as URL parameter and attachment identifier from array element
-                    int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
-                    int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
-                    int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
+                    if (helper == null) {
+                        int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+                        int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+                        int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
+                        helper = new AttachmentInfo(folderId, attachedId, moduleId, -1);
+                    }
                     int id = jAttachments.getInt(i);
-                    attachmentInfos.add(new AttachmentInfo(folderId, attachedId, moduleId, id));
+                    attachmentInfos.add(new AttachmentInfo(helper.folderId, helper.attachedId, helper.moduleId, id));
                 }
             }
             return attachmentInfos;

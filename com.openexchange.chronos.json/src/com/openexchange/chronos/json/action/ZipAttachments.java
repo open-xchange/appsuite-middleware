@@ -135,12 +135,15 @@ public class ZipAttachments extends ChronosAction {
                 return Collections.emptyList();
             }
             List<AttachmentId> attachmentIds = new ArrayList<>(length);
+            EventID eventId = null;
             for (int i = 0; i < length; i++) {
                 JSONObject jAttachment = jAttachments.optJSONObject(i);
                 if (null != jAttachment) {
                     attachmentIds.add(parseAttachmentId(jAttachment));
                 } else {
-                    EventID eventId = parseIdParameter(requestData);
+                    if (null == eventId) {
+                        eventId = parseIdParameter(requestData);
+                    }
                     String managedId = jAttachments.getString(i);
                     int mid = Integer.parseInt(managedId);
                     attachmentIds.add(new AttachmentId(mid, eventId));
