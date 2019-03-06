@@ -49,22 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
-import static com.openexchange.database.Databases.startTransaction;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.WorkingLevel;
 
 /**
@@ -73,7 +62,7 @@ import com.openexchange.groupware.update.WorkingLevel;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
  */
-public class DeleteOXMFSubscriptionTask implements UpdateTaskV2 {
+public class DeleteOXMFSubscriptionTask extends SubscriptionRemoverTask  {
 
     /**
      * The MF contacts source id from MicroformatSubscribeService
@@ -84,60 +73,17 @@ public class DeleteOXMFSubscriptionTask implements UpdateTaskV2 {
      * The infostore a.k.a. files a.k.a. drive source id from MicroformatSubscribeService
      */
     private static final String INFOSTORE_SOURCE_ID = "com.openexchange.subscribe.microformats.infostore.http";
-
-    private static final String DELETE_STATEMENT = "DELETE FROM subscriptions WHERE source_id=?";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteOXMFSubscriptionTask.class);
+    
+    private static final List<String> SOURCE_IDS = Arrays.asList(CONTACTS_SOURCE_ID, INFOSTORE_SOURCE_ID);
 
     /**
      * Initializes a new {@link DeleteOXMFSubscriptionTask}.
      * 
      */
     public DeleteOXMFSubscriptionTask() {
-        super();
+        super(SOURCE_IDS);
     }
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-
-        LOGGER.info("Start deleting OXMF subscriptions from \"subscriptions\" table.");
-        try {
-            startTransaction(con);
-            rollback = true;
-
-            deleteSource(con, CONTACTS_SOURCE_ID);
-            deleteSource(con, INFOSTORE_SOURCE_ID);
-
-            con.commit();
-            rollback = false;
-            LOGGER.info("{} has been finished successful. OXMF related data has been dropped from \"subscriptions\" table.", this.getClass().getName());
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                rollback(con);
-            }
-            autocommit(con);
-        }
-
-    }
-
-    private void deleteSource(Connection con, String sourceId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(DELETE_STATEMENT);
-            stmt.setString(1, sourceId);
-
-            int i = stmt.executeUpdate();
-            LOGGER.info("{} rows has been removed for the source {} from \"subscriptions\" table.", Integer.valueOf(i), sourceId);
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
 
     @Override
     public String[] getDependencies() {
