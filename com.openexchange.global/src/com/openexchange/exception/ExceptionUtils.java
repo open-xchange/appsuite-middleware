@@ -79,7 +79,6 @@ public class ExceptionUtils {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
 
     private static final String MARKER = " ---=== /!\\ ===--- ";
-    private static AtomicReference<Date> lastOOM = new AtomicReference<>();
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be re-thrown and swallows all others.
@@ -112,7 +111,7 @@ public class ExceptionUtils {
      * @param oom The OutOfMemoryError instance
      */
     public static void handleOOM(final OutOfMemoryError oom) {
-        lastOOM.set(new Date());
+        LAST_OOME_REFERENCE.set(new Date());
         String message = oom.getMessage();
         if ("unable to create new native thread".equalsIgnoreCase(message)) {
             if (null == System.getProperties().put("__thread_dump_created", Boolean.TRUE)) {
@@ -298,10 +297,14 @@ public class ExceptionUtils {
         return null == next ? false : isEitherOf(next, classes);
     }
 
+    private static final AtomicReference<Date> LAST_OOME_REFERENCE = new AtomicReference<>();
+
+    /**
+     * Gets the date when the last <code>OutOfMemoryError</code> occurred.
+     *
+     * @return The date of last OOME occurrence or <code>null</code>
+     */
     public static Date getLastOOM() {
-        if (null == lastOOM) {
-            return null;
-        }
-        return lastOOM.get();
+        return LAST_OOME_REFERENCE.get();
     }
 }
