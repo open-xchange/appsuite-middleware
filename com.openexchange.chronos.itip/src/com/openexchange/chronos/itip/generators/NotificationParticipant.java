@@ -177,13 +177,11 @@ public class NotificationParticipant implements Cloneable {
     public boolean matches(Attendee attendee) {
         if (CalendarUtils.isInternal(attendee)) {
             return attendee.getEntity() == identifier;
-        } else {
-            if (attendee.getEMail() == null) {
-                return false;
-            } else {
-                return attendee.getEMail().equals(email);
-            }
         }
+        if (attendee.getEMail() == null) {
+            return false;
+        }
+        return attendee.getEMail().equals(email);
     }
 
     public int getIdentifier() {

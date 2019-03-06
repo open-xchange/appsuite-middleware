@@ -166,7 +166,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
         CalendarUser organizer = determineOrganizer(original, update, ctx, session.getUserId());
         String organizerMail = CalendarUtils.extractEMailAddress(organizer.getEMail());
-        if (organizerMail.toLowerCase().startsWith("mailto:")) {
+        if (Strings.isNotEmpty(organizerMail) && organizerMail.toLowerCase().startsWith("mailto:")) {
             organizerMail = organizerMail.substring(7);
         }
 
@@ -383,9 +383,9 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             retval.add(participant);
         }
 
-        if (!foundOrganizer) {
+        if (!foundOrganizer && Strings.isNotEmpty(organizerMail)) {
             /*
-             * Organizer does not attend the event. Nevertheless notify the organizer.
+             * Organizer does not attend the event. Nevertheless notify the organizer (if email address is available).
              */
             boolean isInternal = CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL);
             final NotificationParticipant notificationOrganizer = new NotificationParticipant(ITipRole.ORGANIZER, !isInternal, organizerMail, isInternal ? organizer.getEntity() : 0);
