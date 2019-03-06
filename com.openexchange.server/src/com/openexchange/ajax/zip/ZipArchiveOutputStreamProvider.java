@@ -68,10 +68,4 @@ public interface ZipArchiveOutputStreamProvider {
      */
     ZipArchiveOutputStream getZipArchiveOutputStream() throws OXException;
 
-    /**
-     * Gets the raw reference to the ZIP archive's output stream.
-     *
-     * @return The ZIP archive's output stream or <code>null</code>
-     */
-    ZipArchiveOutputStream optZipArchiveOutputStream();
 }

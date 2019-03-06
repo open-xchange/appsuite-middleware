@@ -187,7 +187,7 @@ public class ZipUtility {
         return writeZipArchive(adder, new DefaultZipArchiveOutputStreamProvider(out, optCompressionLevel));
     }
 
-    private static long writeZipArchive(ZipEntryAdder adder, ZipArchiveOutputStreamProvider zipOutProvider) throws OXException {
+    private static long writeZipArchive(ZipEntryAdder adder, InternalZipArchiveOutputStreamProvider zipOutProvider) throws OXException {
         try {
             // The buffer to use
             Buffer buffer = new Buffer();
@@ -199,7 +199,8 @@ public class ZipUtility {
             adder.addZipEntries(zipOutProvider, buffer, fileNamesInArchive);
 
             // Return number of written bytes
-            return zipOutProvider.getZipArchiveOutputStream().getBytesWritten();
+            ZipArchiveOutputStream zipOutput = zipOutProvider.optZipArchiveOutputStream();
+            return zipOutput == null ? 0L : zipOutput.getBytesWritten();
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutProvider.optZipArchiveOutputStream());
@@ -208,16 +209,31 @@ public class ZipUtility {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static class DefaultZipArchiveOutputStreamProvider implements ZipArchiveOutputStreamProvider {
+    private static abstract class InternalZipArchiveOutputStreamProvider implements ZipArchiveOutputStreamProvider {
 
-        private ZipArchiveOutputStream zipOutput;
+        protected ZipArchiveOutputStream zipOutput;
+        protected final int optCompressionLevel;
+
+        protected InternalZipArchiveOutputStreamProvider(int optCompressionLevel) {
+            super();
+            this.optCompressionLevel = optCompressionLevel;
+        }
+
+        /**
+         * Gets the raw reference to the ZIP archive's output stream.
+         *
+         * @return The ZIP archive's output stream or <code>null</code>
+         */
+        abstract ZipArchiveOutputStream optZipArchiveOutputStream();
+    }
+
+    private static class DefaultZipArchiveOutputStreamProvider extends InternalZipArchiveOutputStreamProvider {
+
         private final OutputStream out;
-        private final int optCompressionLevel;
 
         DefaultZipArchiveOutputStreamProvider(OutputStream out, int optCompressionLevel) {
-            super();
+            super(optCompressionLevel);
             this.out = out;
-            this.optCompressionLevel = optCompressionLevel;
         }
 
         @Override
@@ -232,21 +248,18 @@ public class ZipUtility {
         }
 
         @Override
-        public ZipArchiveOutputStream optZipArchiveOutputStream() {
+        ZipArchiveOutputStream optZipArchiveOutputStream() {
             return zipOutput;
         }
     }
 
-    private static class AJAXRequestDataZipArchiveOutputStreamProvider implements ZipArchiveOutputStreamProvider {
+    private static class AJAXRequestDataZipArchiveOutputStreamProvider extends InternalZipArchiveOutputStreamProvider {
 
-        private ZipArchiveOutputStream zipOutput;
         private final AJAXRequestData requestData;
-        private final int optCompressionLevel;
 
         AJAXRequestDataZipArchiveOutputStreamProvider(AJAXRequestData requestData, int optCompressionLevel) {
-            super();
+            super(optCompressionLevel);
             this.requestData = requestData;
-            this.optCompressionLevel = optCompressionLevel;
         }
 
         @Override
@@ -265,7 +278,7 @@ public class ZipUtility {
         }
 
         @Override
-        public ZipArchiveOutputStream optZipArchiveOutputStream() {
+        ZipArchiveOutputStream optZipArchiveOutputStream() {
             return zipOutput;
         }
     }
