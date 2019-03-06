@@ -57,6 +57,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.model.Event.Creator;
 import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
@@ -91,6 +93,7 @@ import com.openexchange.exception.OXException;
 public class GoogleEventConverter {
 
     private static final GoogleEventConverter INSTANCE = new GoogleEventConverter();
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleEventConverter.class);
 
     private Map<EventField, GoogleMapping> mappings = null;
 
@@ -437,8 +440,12 @@ public class GoogleEventConverter {
                      * E.g.: 4qebqgd7o0nrqdlnqhberc4d3l_20171025T173000Z
                      */
                     String dateTimeStr = from.getId().substring(from.getId().indexOf("_") + 1);
-                    RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
-                    to.setRecurrenceId(recId);
+                    try {
+                        RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
+                        to.setRecurrenceId(recId);
+                    } catch (IllegalArgumentException e) {
+                        LOG.debug("Enexpected id format: '{}'. Unable to parse recurrence id.", dateTimeStr);
+                    }
                 }
             }
         });
