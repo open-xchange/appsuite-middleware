@@ -171,6 +171,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             UpdateTaskToolkit.forceUpdateTask(taskName, schemaName);
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -209,6 +213,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return executedTasks;
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -263,6 +271,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return aux.values().parallelStream().collect(Collectors.toList());
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
