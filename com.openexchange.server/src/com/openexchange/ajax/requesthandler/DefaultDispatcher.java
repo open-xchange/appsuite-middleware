@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -723,15 +722,20 @@ public class DefaultDispatcher implements Dispatcher {
                 StringBuilder sb = new StringBuilder(256);
                 sb.append('"');
                 boolean first = true;
-                for (final Entry<String, String> entry : parameters.entrySet()) {
+                for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                    String name = entry.getKey();
+                    if (name.equalsIgnoreCase("json")) {
+                        // Artificially added form field from a multipart/form-data POST request. Ignore...
+                        continue;
+                    }
                     if (first) {
                         sb.append('?');
                         first = false;
                     } else {
                         sb.append('&');
                     }
-                    String value = LogProperties.getSanitizedValue(entry.getKey(), entry.getValue());
-                    sb.append(entry.getKey()).append('=').append(value);
+                    String value = LogProperties.getSanitizedValue(name, entry.getValue());
+                    sb.append(name).append('=').append(value);
                 }
                 sb.append('"');
                 LogProperties.putProperty(LogProperties.Name.SERVLET_QUERY_STRING, sb.toString());
