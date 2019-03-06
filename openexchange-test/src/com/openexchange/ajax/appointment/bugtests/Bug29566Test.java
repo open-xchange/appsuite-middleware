@@ -174,7 +174,12 @@ public class Bug29566Test extends AbstractAJAXSession {
         catm2.update(clone);
         AbstractAJAXResponse updateResponse = catm2.getLastResponse();
         assertTrue("Should fail.", updateResponse.hasError());
-        assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
+        String errorCode = updateResponse.getException().getErrorCode();
+        if (shared) {
+            assertTrue("Wrong error.", "APP-0062".equals(errorCode) || "CAL-4006".equals(errorCode));
+        } else {
+            assertTrue("Wrong error.", "APP-0059".equals(errorCode) || "CAL-4006".equals(errorCode));
+        }
     }
 
     @Test
@@ -210,7 +215,12 @@ public class Bug29566Test extends AbstractAJAXSession {
         catm2.update(clone);
         AbstractAJAXResponse updateResponse = catm2.getLastResponse();
         assertTrue("Should fail.", updateResponse.hasError());
-        assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
+        String errorCode = updateResponse.getException().getErrorCode();
+        if (shared) {
+            assertTrue("Wrong error.", "APP-0062".equals(errorCode) || "CAL-4006".equals(errorCode));
+        } else {
+            assertTrue("Wrong error.", "APP-0059".equals(errorCode) || "CAL-4006".equals(errorCode));
+        }
     }
 
     @Test
@@ -246,7 +256,12 @@ public class Bug29566Test extends AbstractAJAXSession {
         catm2.update(clone);
         AbstractAJAXResponse updateResponse = catm2.getLastResponse();
         assertTrue("Should fail.", updateResponse.hasError());
-        assertEquals("Wrong error.", shared ? OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber() : OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber(), updateResponse.getException().getCode());
+        String errorCode = updateResponse.getException().getErrorCode();
+        if (shared) {
+            assertTrue("Wrong error.", "APP-0062".equals(errorCode) || "CAL-4006".equals(errorCode));
+        } else {
+            assertTrue("Wrong error.", "APP-0059".equals(errorCode) || "CAL-4006".equals(errorCode));
+        }
     }
 
     private String generateUid() {
