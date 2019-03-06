@@ -59,6 +59,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -91,7 +92,6 @@ public class ZipUtility {
     public static AJAXRequestResult createZipArchive(ZipEntryAdder adder, String zipFileName, int optCompressionLevel, AJAXRequestData requestData) throws OXException {
         // Check if it is possible to directly write to output stream
         if (setHttpResponseHeaders(zipFileName, requestData)) {
-            boolean error = true; // Pessimistic
             try {
                 // Create ZIP archive
                 long bytesWritten = writeZipArchive(adder, new AJAXRequestDataZipArchiveOutputStreamProvider(requestData, optCompressionLevel));
@@ -101,18 +101,9 @@ public class ZipUtility {
                 if (bytesWritten != 0) {
                     result.setResponseProperty("X-Content-Size", Long.valueOf(bytesWritten));
                 }
-                error = false;
                 return result;
-            } finally {
-                if (error) {
-                    // Try to restore headers
-                    try {
-                        requestData.setResponseHeader("Content-Type", CONTENTTYPE_JAVASCRIPT);
-                        requestData.setResponseHeader("Content-Disposition", "inline");
-                    } catch (@SuppressWarnings("unused") Exception e) {
-                        // Ignore
-                    }
-                }
+            } catch (Exception e) {
+                return rethrowOrsignalIOError(e, requestData);
             }
         }
 
@@ -128,6 +119,22 @@ public class ZipUtility {
         } finally {
             Streams.close(fileHolder);
         }
+    }
+
+    private static AJAXRequestResult rethrowOrsignalIOError(Exception e, AJAXRequestData requestData) throws OXException {
+        if (!requestData.isResponseCommitted()) {
+            // Exception can be safely thrown to be orderly managed in dispatcher framework since HTTP response is not yet committed
+            requestData.setResponseHeader("Content-Type", CONTENTTYPE_JAVASCRIPT);
+            requestData.setResponseHeader("Content-Disposition", "inline");
+            throw e instanceof OXException ? (OXException) e : OXException.general("Unexpected error while writing ZIP archive", e);
+        }
+
+        // HTTP response already committed. Artificially advertise I/O error to signal error to client.
+        IOException ioe = ExceptionUtils.extractFrom(e, IOException.class);
+        if (null == ioe) {
+            ioe = new IOException(e.getMessage(), e);
+        }
+        return new AJAXRequestResult(ioe, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
     }
 
     /**

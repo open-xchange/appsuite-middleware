@@ -77,6 +77,7 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -630,7 +631,13 @@ public class DispatcherServlet extends SessionServlet {
                 return false;
             }
             case DIRECT: {
-                // No further processing
+                // No further processing.
+                Object resultObject = result.getResultObject();
+                if (Exception.class.isInstance(resultObject)) {
+                    Exception e = (Exception) resultObject;
+                    IOException ioe = ExceptionUtils.extractFrom(e, IOException.class);
+                    throw null != ioe ? ioe : new IOException(e.getMessage(), e);
+                }
                 return false;
             }
             default:
