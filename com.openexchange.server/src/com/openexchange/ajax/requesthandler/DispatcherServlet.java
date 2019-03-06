@@ -633,7 +633,7 @@ public class DispatcherServlet extends SessionServlet {
             case DIRECT: {
                 // No further processing.
                 Object resultObject = result.getResultObject();
-                if (Exception.class.isInstance(resultObject)) {
+                if (resultObject instanceof Exception) {
                     Exception e = (Exception) resultObject;
                     IOException ioe = ExceptionUtils.extractFrom(e, IOException.class);
                     throw null != ioe ? ioe : new IOException(e.getMessage(), e);
