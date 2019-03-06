@@ -72,4 +72,17 @@ public interface SeparatedTasks {
      */
     List<UpdateTaskV2> getBackground();
 
+    /**
+     * Checks if this instance holds blocking update tasks.
+     *
+     * @return <code>true</code> if blocking update tasks are available; otherwise <code>false</code>
+     */
+    boolean hasBlocking();
+
+    /**
+     * Checks if this instance holds background update tasks.
+     *
+     * @return <code>true</code> if background update tasks are available; otherwise <code>false</code>
+     */
+    boolean hasBackground();
 }

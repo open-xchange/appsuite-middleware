@@ -101,36 +101,7 @@ public class UpdaterImpl extends Updater {
 
     private UpdateStatus getStatus(final SchemaUpdateState schema) {
         final SeparatedTasks tasks = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(schema);
-        return new UpdateStatus() {
-            @Override
-            public boolean needsBlockingUpdates() {
-                return tasks.getBlocking().size() > 0;
-            }
-            @Override
-            public boolean needsBackgroundUpdates() {
-                return tasks.getBackground().size() > 0;
-            }
-            @Override
-            public boolean blockingUpdatesRunning() {
-                return schema.isLocked();
-            }
-            @Override
-            public boolean backgroundUpdatesRunning() {
-                return schema.backgroundUpdatesRunning();
-            }
-            @Override
-            public Date blockingUpdatesRunningSince() {
-                return schema.blockingUpdatesRunningSince();
-            }
-            @Override
-            public Date backgroundUpdatesRunningSince() {
-                return schema.backgroundUpdatesRunningSince();
-            }
-            @Override
-            public boolean isExecutedSuccessfully(String taskName) {
-                return schema.isExecutedSuccessfully(taskName);
-            }
-        };
+        return new UpdateStatusImpl(tasks, schema);
     }
 
     @Override
@@ -162,6 +133,55 @@ public class UpdaterImpl extends Updater {
     @Override
     public Collection<String> getLocallyScheduledTasks() {
         return LocalUpdateTaskMonitor.getInstance().getScheduledStates();
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
+    private static class UpdateStatusImpl implements UpdateStatus {
+
+        private final SeparatedTasks tasks;
+        private final SchemaUpdateState schema;
+
+        UpdateStatusImpl(SeparatedTasks tasks, SchemaUpdateState schema) {
+            super();
+            this.tasks = tasks;
+            this.schema = schema;
+        }
+
+        @Override
+        public boolean needsBlockingUpdates() {
+            return tasks.hasBlocking();
+        }
+
+        @Override
+        public boolean needsBackgroundUpdates() {
+            return tasks.hasBackground();
+        }
+
+        @Override
+        public boolean blockingUpdatesRunning() {
+            return schema.isLocked();
+        }
+
+        @Override
+        public boolean backgroundUpdatesRunning() {
+            return schema.backgroundUpdatesRunning();
+        }
+
+        @Override
+        public Date blockingUpdatesRunningSince() {
+            return schema.blockingUpdatesRunningSince();
+        }
+
+        @Override
+        public Date backgroundUpdatesRunningSince() {
+            return schema.backgroundUpdatesRunningSince();
+        }
+
+        @Override
+        public boolean isExecutedSuccessfully(String taskName) {
+            return schema.isExecutedSuccessfully(taskName);
+        }
     }
 
 }

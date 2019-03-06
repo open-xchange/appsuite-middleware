@@ -165,7 +165,7 @@ class UpdateTaskCollection {
         if (blocking) {
             retval.addAll(tasks.getBlocking());
         } else {
-            if (tasks.getBlocking().size() > 0) {
+            if (tasks.hasBlocking()) {
                 throw UpdateExceptionCodes.BLOCKING_FIRST.create(Strings.join(tasks.getBlocking(), ","), Strings.join(tasks.getBackground(), ","));
             }
             retval.addAll(tasks.getBackground());
@@ -292,11 +292,16 @@ class UpdateTaskCollection {
     private static class SeparatedTasksImpl implements SeparatedTasks {
 
         private final List<UpdateTaskV2> blocking;
+        private final boolean hasBlocking;
         private final List<UpdateTaskV2> background;
+        private final boolean hasBackground;
 
         SeparatedTasksImpl(List<UpdateTaskV2> blocking, List<UpdateTaskV2> background) {
+            super();
             this.blocking = blocking;
+            hasBlocking = !blocking.isEmpty();
             this.background = background;
+            hasBackground = !background.isEmpty();
         }
 
         @Override
@@ -307,6 +312,16 @@ class UpdateTaskCollection {
         @Override
         public List<UpdateTaskV2> getBackground() {
             return background;
+        }
+
+        @Override
+        public boolean hasBlocking() {
+            return hasBlocking;
+        }
+
+        @Override
+        public boolean hasBackground() {
+            return hasBackground;
         }
     }
 

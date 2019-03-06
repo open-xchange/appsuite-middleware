@@ -145,18 +145,18 @@ public final class UpdateExecutor {
         SeparatedTasks separatedTasks = null;
         if (null == tasks) {
             final SeparatedTasks forCheck = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(state);
-            if (forCheck.getBlocking().size() > 0) {
+            if (forCheck.hasBlocking()) {
                 runUpdates(true, failures, throwExceptionOnFailure, separatedTasks);
             }
-            if (forCheck.getBackground().size() > 0) {
+            if (forCheck.hasBackground()) {
                 runUpdates(false, failures, throwExceptionOnFailure, separatedTasks);
             }
         } else {
             separatedTasks = UpdateTaskCollection.getInstance().separateTasks(tasks);
-            if (separatedTasks.getBlocking().size() > 0) {
+            if (separatedTasks.hasBlocking()) {
                 runUpdates(true, failures, throwExceptionOnFailure, separatedTasks);
             }
-            if (separatedTasks.getBackground().size() > 0) {
+            if (separatedTasks.hasBackground()) {
                 runUpdates(false, failures, throwExceptionOnFailure, separatedTasks);
             }
         }
