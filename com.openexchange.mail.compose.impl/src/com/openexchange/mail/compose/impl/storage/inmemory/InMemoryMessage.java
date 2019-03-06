@@ -613,7 +613,7 @@ public class InMemoryMessage implements Message {
             CompositionSpaceDbStorage dbStorage = persistentStorage.newDbStorageFor(userId, contextId);
 
             CompositionSpaceDescription compositionSpaceDesc = new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md);
-            dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc));
+            dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc), true);
         } finally {
             lock.unlock();
         }
