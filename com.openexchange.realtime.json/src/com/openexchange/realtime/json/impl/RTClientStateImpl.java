@@ -76,7 +76,7 @@ import com.openexchange.realtime.util.OwnerAwareReentrantLock;
  */
 public class RTClientStateImpl implements RTClientState {
 
-    private static final long MAX_IDLE_TIME_IN_MIN = 15;
+    private static final long MAX_IDLE_TIME_IN_MIN = 30;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendAction.class);
 
     private final ID id;
