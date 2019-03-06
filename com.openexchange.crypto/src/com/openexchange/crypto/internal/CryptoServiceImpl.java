@@ -158,6 +158,9 @@ public class CryptoServiceImpl implements CryptoService {
         if (useSalt && data.getSalt() == null) {
             throw NoSalt.create();
         }
+        if (Strings.isEmpty(data.getData())) {
+            return data.getData();
+        }
         return useSalt ? decrypt(data.getData(), generateSecretKey(password, data.getSalt())) : decrypt(data.getData(), generateSecretKey(password, SALT));
     }
 
