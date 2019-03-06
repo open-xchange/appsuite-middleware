@@ -192,7 +192,7 @@ public interface Session {
 
     /**
      * The parameter to indicate whether the session is allowed to delete/update/create objects in subscribed folders.
-     * 
+     *
      * @type <code>java.lang.Boolean</code>
      */
     public static final String PARAM_SUBSCRIPTION_ADMIN = "__session.subscription.administrative";
@@ -219,7 +219,7 @@ public interface Session {
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
 
     /**
-     * The parameter that holds when the Oauth token expires.
+     * The parameter that holds when the OAuth token expires.
      *
      * @type <code>java.lang.String</code>
      */
