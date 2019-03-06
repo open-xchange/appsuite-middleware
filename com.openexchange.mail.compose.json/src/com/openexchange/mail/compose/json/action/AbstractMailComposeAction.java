@@ -485,6 +485,9 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        if (!session.getUserPermissionBits().hasWebMail()) {
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
+        }
         try {
             return doPerform(requestData, session);
         } catch (JSONException e) {

@@ -104,6 +104,12 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
         }
 
         UserSettingMail usm = session.getUserSettingMail();
+        if (null == usm) {
+            if (session.getUser().isGuest() && !session.getUserPermissionBits().hasWebMail()) {
+                throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
+            }
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Failed to load user mail settings");
+        }
         usm.setNoSave(true);
 
         // Build parameters
