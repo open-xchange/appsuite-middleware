@@ -75,6 +75,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -490,8 +491,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     private static class TriggerMediaMetaDataExtractionResult {
 
+        @NonNull
         static final TriggerMediaMetaDataExtractionResult NEITHER_NOR = new TriggerMediaMetaDataExtractionResult(null, false);
 
+        @NonNull
         static final TriggerMediaMetaDataExtractionResult CALLER_RAN = new TriggerMediaMetaDataExtractionResult(null, true);
 
         // ---------------------------------------------------------------------------------------------------------------------------------
@@ -1171,6 +1174,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param session The session
      * @return The result
      */
+    @NonNull
     TriggerMediaMetaDataExtractionResult triggerMediaDataExtraction(final DocumentMetadata document, Collection<Metadata> updatedColumns, boolean save, boolean forceBackground, final QuotaFileStorage fileStorage, final ServerSession session) {
         InputStream documentData = null;
         try {
@@ -1331,7 +1335,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 LoggerHolder.LOG.warn("Failed setting '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
             }
         }
-        return null;
+        return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
     }
 
     private long getUsedQuota(final Context context) throws OXException {
