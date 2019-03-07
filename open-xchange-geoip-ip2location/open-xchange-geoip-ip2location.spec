@@ -45,9 +45,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
-%post
-. /opt/open-xchange/lib/oxfunctions.sh
-
 # prevent bash from expanding, see bug 13316
 GLOBIGNORE='*'
 
