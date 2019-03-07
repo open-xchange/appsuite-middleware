@@ -71,7 +71,7 @@ import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ImageMessageHandler}
@@ -111,7 +111,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
 
     private static final String IMAGE = "image/";
     private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
-    private static final String SUFFIX = "@" + Version.NAME;
+    private static final String SUFFIX = "@" + VersionService.NAME;
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {

@@ -72,7 +72,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.Streams;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link GeneralControl} - Provides several methods to manage OSGi application.
@@ -88,15 +88,19 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
     private final BundleContext bundleContext;
     private MBeanServer server;
 
+    private VersionService versionService;
+
     /**
      * Initializes a new {@link GeneralControl}.
      *
      * @param bundleContext The associated bundle context
+     * @param versionService 
      * @throws NotCompliantMBeanException
      */
-    public GeneralControl(final BundleContext bundleContext) throws NotCompliantMBeanException {
+    public GeneralControl(final BundleContext bundleContext, VersionService versionService) throws NotCompliantMBeanException {
         super(GeneralControlMBean.class);
         this.bundleContext = bundleContext;
+        this.versionService = versionService;
     }
 
     private Bundle getBundleByName(final String name, final Bundle[] bundle) {
@@ -353,7 +357,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
 
     @Override
     public String version() {
-        return Version.getInstance().getVersionString();
+        return versionService.getVersionString();
     }
 
     @Override

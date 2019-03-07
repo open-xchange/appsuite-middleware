@@ -184,7 +184,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -1221,7 +1221,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static final String SUFFIX = "@" + Version.NAME;
+    private static final String SUFFIX = "@" + VersionService.NAME;
 
     private Part examinePart(final Part part, final String contentId) throws OXException {
         try {

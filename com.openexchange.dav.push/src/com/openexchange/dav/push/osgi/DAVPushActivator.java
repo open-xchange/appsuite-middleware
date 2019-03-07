@@ -86,6 +86,7 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+import com.openexchange.version.VersionService;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -103,12 +104,13 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class, VersionService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
         try {
+            Services.setServiceLookup(this);
             getLogger(DAVPushActivator.class).info("starting bundle {}", context.getBundle());
             /*
              * register push subscribe servlet

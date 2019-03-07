@@ -50,17 +50,17 @@
 package com.openexchange.version.osgi;
 
 import java.util.Dictionary;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.openexchange.version.Version;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 import com.openexchange.version.internal.Numbers;
+import com.openexchange.version.internal.VersionServiceImpl;
 
 /**
  * Reads version and build number from the bundle manifest.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class VersionActivator implements BundleActivator {
+public class VersionActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VersionActivator.class);
 
@@ -69,7 +69,12 @@ public class VersionActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         LOG.info("Starting bundle com.openexchange.version");
         Dictionary<String, String> headers = context.getBundle().getHeaders();
         String version = headers.get("OXVersion");
@@ -84,16 +89,16 @@ public class VersionActivator implements BundleActivator {
         if (null == date) {
             throw new Exception("Can not read build date from bundle manifest.");
         }
-        Version instance = Version.getInstance();
-        instance.setNumbers(new Numbers(version, buildNumber));
-        instance.setBuildDate(date);
-        LOG.info(Version.NAME + ' ' + instance.getVersionString());
+        VersionService versionService = new VersionServiceImpl(date, new Numbers(version, buildNumber));
+        registerService(VersionService.class, versionService);
+        LOG.info(VersionServiceImpl.NAME + ' ' + versionService.getVersionString());
         LOG.info("(c) OX Software GmbH , Open-Xchange GmbH");
+        
     }
-
+    
     @Override
-    public void stop(BundleContext context) {
+    protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle com.openexchange.version");
-        Version.getInstance().setNumbers(null);
+        super.stopBundle();
     }
 }

@@ -66,7 +66,9 @@ import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
+import com.openexchange.chronos.ical.ical4j.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.version.VersionService;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
@@ -312,11 +314,14 @@ public class CalendarExportImpl implements CalendarExport {
     private static VCalendar initCalendar() {
         VCalendar vCalendar = new VCalendar();
         vCalendar.getProperties().add(Version.VERSION_2_0);
-        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
-        if (null == versionString) {
+        VersionService versionService = Services.getService(VersionService.class);
+        String versionString = null; 
+        if (null == versionService) {
             versionString = "<unknown version>";
+        } else {
+            versionString = versionService.getVersionString();
         }
-        vCalendar.getProperties().add(new ProdId("-//" + com.openexchange.version.Version.NAME + "//" + versionString + "//EN"));
+        vCalendar.getProperties().add(new ProdId("-//" + VersionService.NAME + "//" + versionString + "//EN"));
         return vCalendar;
     }
 

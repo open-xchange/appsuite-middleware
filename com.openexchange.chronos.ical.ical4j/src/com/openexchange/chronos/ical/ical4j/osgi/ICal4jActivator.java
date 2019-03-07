@@ -66,6 +66,7 @@ import com.openexchange.chronos.ical.impl.ICalServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ICal4jActivator}
@@ -87,6 +88,11 @@ public class ICal4jActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class };
+    }
+    
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { VersionService.class };
     }
 
     @Override

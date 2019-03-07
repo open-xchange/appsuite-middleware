@@ -57,8 +57,9 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * Adds the configuration setting tree entry for the server version.
@@ -89,7 +90,7 @@ public final class ServerVersion implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Version.getInstance().getVersionString());
+                setting.setSingleValue(ServerServiceRegistry.getServize(VersionService.class, true).getVersionString());
             }
         };
     }

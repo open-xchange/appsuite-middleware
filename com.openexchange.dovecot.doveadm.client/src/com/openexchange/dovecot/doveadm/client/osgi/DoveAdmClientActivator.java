@@ -59,6 +59,7 @@ import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManag
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DoveAdmClientActivator}
@@ -79,7 +80,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EndpointManagerFactory.class, ConfigViewFactory.class };
+        return new Class<?>[] { ConfigurationService.class, EndpointManagerFactory.class, ConfigViewFactory.class, VersionService.class };
     }
 
     @Override
@@ -90,6 +91,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(DoveAdmClientActivator.class);
+        Services.setServiceLookup(this);
 
         // Check if enabled
         ConfigurationService configurationService = getService(ConfigurationService.class);

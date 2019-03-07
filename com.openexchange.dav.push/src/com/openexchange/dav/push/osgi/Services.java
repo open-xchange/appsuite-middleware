@@ -47,30 +47,73 @@
  *
  */
 
-package com.openexchange.health.rest.osgi;
+package com.openexchange.dav.push.osgi;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.health.MWHealthCheckService;
-import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.version.VersionService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MWHealthCheckRestActivator}
+ * 
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public class MWHealthCheckRestActivator extends HousekeepingActivator {
+public final class Services {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class, VersionService.class };
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MWHealthCheckRestEndpoint.class, new MWHealthCheckRestEndpoint(this));
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException 
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.dav.push\" not started?");
+        }
+        return serviceLookup.getServiceSafe(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 
 }

@@ -110,7 +110,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 public class AdminActivator extends HousekeepingActivator {
 
@@ -125,7 +125,7 @@ public class AdminActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class, VersionService.class };
     }
 
     @Override
@@ -231,7 +231,7 @@ public class AdminActivator extends HousekeepingActivator {
             log.info("Version: {}", headers.get("Bundle-Version"));
             log.info("Name: {}", headers.get("Bundle-SymbolicName"));
         }
-        log.info("Build: {}", Version.getInstance().getVersionString());
+        log.info("Build: {}", getServiceSafe(VersionService.class).getVersionString());
         log.info("Admindaemon successfully started.");
 
         // The listener which is called if a new plugin is registered

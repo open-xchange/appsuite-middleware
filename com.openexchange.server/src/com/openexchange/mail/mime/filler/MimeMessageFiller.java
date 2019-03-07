@@ -154,7 +154,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.QPDecoderStream;
 
@@ -351,7 +351,7 @@ public class MimeMessageFiller {
      */
     public static String getMailerInfo() {
         if (MailProperties.getInstance().isAppendVersionToMailerHeader()) {
-            return new StringBuilder("Open-Xchange Mailer v").append(Version.getInstance().getVersionString()).toString();
+            return new StringBuilder("Open-Xchange Mailer v").append(ServerServiceRegistry.getServize(VersionService.class).getVersionString()).toString();
         }
         return "Open-Xchange Mailer";
     }
@@ -1800,7 +1800,7 @@ public class MimeMessageFiller {
         return MimeMessageUtility.blankSrc(imageTag);
     }
 
-    private static final String VERSION_NAME = Version.NAME;
+    private static final String VERSION_NAME = VersionService.NAME;
 
     private static final Pattern PATTERN_SRC_ATTR = Pattern.compile("(?i)src=\"[^\"]*\"");
 
@@ -2034,7 +2034,7 @@ public class MimeMessageFiller {
             if (imageProvider.isLocalFile()) {
                 tmp.setLength(0);
                 tmp.append(PATTERN_DASHES.matcher(id).replaceAll(""));
-                tmp.append('@').append(Version.NAME);
+                tmp.append('@').append(VersionService.NAME);
                 cid = tmp.toString();
             } else {
                 cid = id;

@@ -278,6 +278,7 @@ import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
+import com.openexchange.version.VersionService;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 import net.htmlparser.jericho.Config;
@@ -333,7 +334,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, VersionService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -439,6 +440,9 @@ public final class ServerActivator extends HousekeepingActivator {
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
 
+        // Properly register VersionService
+        ServerServiceRegistry.getInstance().addService(VersionService.class, getServiceSafe(VersionService.class));
+        
         // I18n service load
         track(I18nService.class, new I18nServiceListener(context));
 

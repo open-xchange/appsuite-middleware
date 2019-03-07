@@ -47,30 +47,53 @@
  *
  */
 
-package com.openexchange.health.rest.osgi;
-
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.health.MWHealthCheckService;
-import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.version.VersionService;
+package com.openexchange.version;
 
 /**
- * {@link MWHealthCheckRestActivator}
+ * 
+ * {@link VersionService} provides the version of the Middleware
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public class MWHealthCheckRestActivator extends HousekeepingActivator {
+public interface VersionService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class, VersionService.class };
-    }
+    public static final String CODENAME = "Hyperion";
+    public static final String NAME = "Open-Xchange";
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MWHealthCheckRestEndpoint.class, new MWHealthCheckRestEndpoint(this));
-    }
+    /**
+     * Gets the build date.
+     *
+     * @return The build date
+     */
+    public String getBuildDate();
+
+    /**
+     * Gets the major number.
+     *
+     * @return The major number
+     */
+    public int getMajor();
+
+    /**
+     * Gets the minor number.
+     *
+     * @return The minor number
+     */
+    public int getMinor();
+
+    /**
+     * Gets the patch number.
+     *
+     * @return The patch number
+     */
+    public int getPatch();
+
+    /**
+     * Gets the version string; e.g. <code>"7.8.3-Rev2"</code>.
+     *
+     * @return The version string
+     */
+    public String getVersionString();
 
 }

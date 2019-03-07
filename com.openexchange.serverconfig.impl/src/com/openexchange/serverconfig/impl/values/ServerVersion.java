@@ -52,7 +52,7 @@ package com.openexchange.serverconfig.impl.values;
 import java.util.Map;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.session.Session;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ServerVersion}
@@ -62,15 +62,25 @@ import com.openexchange.version.Version;
  */
 public class ServerVersion implements ComputedServerConfigValueService {
 
+    private VersionService versionService;
+
+    /**
+     * Initializes a new {@link ServerVersion}.
+     */
+    public ServerVersion(VersionService versionService) {
+        super();
+        this.versionService = versionService;
+    }
+    
 	@Override
 	public void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) {
 
 		if (!serverConfig.containsKey("serverVersion")) {
-			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
+			serverConfig.put("serverVersion", versionService.getVersionString());
 		}
 		
 		if (!serverConfig.containsKey("buildDate")) {
-		    serverConfig.put("buildDate", Version.getInstance().getBuildDate());
+		    serverConfig.put("buildDate", versionService.getBuildDate());
 		}
 
 	}

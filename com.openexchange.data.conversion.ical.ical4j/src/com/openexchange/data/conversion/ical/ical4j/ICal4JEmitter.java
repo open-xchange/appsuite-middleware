@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Strings;
+import com.openexchange.version.VersionService;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
@@ -224,7 +225,7 @@ public class ICal4JEmitter implements ICalEmitter {
     protected void initCalendar(Calendar calendar, String method) {
         PropertyList properties = calendar.getProperties();
         ProdId prodId = new ProdId();
-        prodId.setValue(com.openexchange.version.Version.NAME);
+        prodId.setValue(VersionService.NAME);
         properties.add(prodId);
         properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);

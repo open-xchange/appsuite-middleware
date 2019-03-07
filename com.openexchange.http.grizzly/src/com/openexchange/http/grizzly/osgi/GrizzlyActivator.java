@@ -92,6 +92,7 @@ import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link GrizzlyActivator}
@@ -112,7 +113,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class, TimerService.class };
+        return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class, TimerService.class, VersionService.class };
     }
 
     @Override

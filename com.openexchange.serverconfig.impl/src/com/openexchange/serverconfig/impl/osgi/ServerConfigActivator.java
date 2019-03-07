@@ -70,6 +70,7 @@ import com.openexchange.serverconfig.impl.values.Languages;
 import com.openexchange.serverconfig.impl.values.Prefix;
 import com.openexchange.serverconfig.impl.values.ServerVersion;
 import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ServerConfigActivator}
@@ -90,7 +91,7 @@ public class ServerConfigActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class[] { ConfigurationService.class, ConfigViewFactory.class, CapabilityService.class, VersionService.class };
     }
 
     @Override
@@ -137,7 +138,7 @@ public class ServerConfigActivator extends HousekeepingActivator {
         registerService(ComputedServerConfigValueService.class, new ForcedHttpsValue(this));
         registerService(ComputedServerConfigValueService.class, new Hosts());
         registerService(ComputedServerConfigValueService.class, new Languages(this));
-        registerService(ComputedServerConfigValueService.class, new ServerVersion());
+        registerService(ComputedServerConfigValueService.class, new ServerVersion(getServiceSafe(VersionService.class)));
         registerService(ComputedServerConfigValueService.class, new Capabilities(this));
         registerService(ComputedServerConfigValueService.class, new Prefix(this));
 

@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.version;
+package com.openexchange.version.internal;
 
-import com.openexchange.version.internal.Numbers;
+import java.util.Objects;
+import com.openexchange.version.VersionService;
 
 /**
  * Stores the version of the Middleware.
@@ -57,119 +58,40 @@ import com.openexchange.version.internal.Numbers;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class Version {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Version.class);
-
-    public static final String CODENAME = "Hyperion";
-    public static final String NAME = "Open-Xchange";
-
-    public static final Version SINGLETON = new Version();
-
-    /**
-     * Gets the version instance
-     *
-     * @return The version instance
-     */
-    public static final Version getInstance() {
-        return SINGLETON;
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
+public class VersionServiceImpl implements VersionService {
 
     private volatile Numbers numbers = null;
     private volatile String buildDate = null;
     private volatile String versionString = null;
 
-    protected Version() {
-        super();
-    }
-
-    /**
-     * Sets the numbers for this version instance.
-     *
-     * @param numbers The number to set
-     */
-    public void setNumbers(Numbers numbers) {
+    public VersionServiceImpl(String buildDate, Numbers numbers) {
+        Objects.requireNonNull(buildDate, "The buildDate must not be null");
+        Objects.requireNonNull(numbers, "The numbers must not be null");
         this.numbers = numbers;
-        versionString = null;
-    }
-
-    /**
-     * Sets the build date for this version instance.
-     *
-     * @param buildDate The build date to set
-     */
-    public void setBuildDate(String buildDate) {
         this.buildDate = buildDate;
     }
 
-    /**
-     * Gets the build date.
-     *
-     * @return The build date
-     * @throws IllegalStateException if version instance is not yet initialized
-     */
+    @Override
     public String getBuildDate() {
-        if (null == buildDate) {
-            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error("", e);
-            throw e;
-        }
         return buildDate;
     }
 
-    /**
-     * Gets the major number.
-     *
-     * @return The major number
-     * @throws IllegalStateException if version instance is not yet initialized
-     */
+    @Override
     public int getMajor() {
-        if (null == numbers) {
-            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error("", e);
-            throw e;
-        }
         return numbers.getMajor();
     }
 
-    /**
-     * Gets the minor number.
-     *
-     * @return The minor number
-     * @throws IllegalStateException if version instance is not yet initialized
-     */
+    @Override
     public int getMinor() {
-        if (null == numbers) {
-            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error("", e);
-            throw e;
-        }
         return numbers.getMinor();
     }
 
-    /**
-     * Gets the patch number.
-     *
-     * @return The patch number
-     * @throws IllegalStateException if version instance is not yet initialized
-     */
+    @Override
     public int getPatch() {
-        if (null == numbers) {
-            IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error("", e);
-            throw e;
-        }
         return numbers.getPatch();
     }
 
-    /**
-     * Gets the version string; e.g. <code>"7.8.3-Rev2"</code>.
-     *
-     * @return The version string
-     * @throws IllegalStateException if version instance is not yet initialized
-     */
+    @Override
     public String getVersionString() {
         String tmp = this.versionString;
         if (null == tmp) {
@@ -179,26 +101,12 @@ public class Version {
                 tmp = this.versionString;
                 if (null == tmp) {
                     // Initialize version string
-                    if (null == numbers) {
-                        IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-                        LOG.error("", e);
-                        throw e;
-                    }
                     tmp = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
                     this.versionString = tmp;
                 }
             }
         }
         return tmp;
-    }
-
-    /**
-     * Optionally gets the version string.
-     *
-     * @return The version string, or <code>null</code> if it is not yet initialized
-     */
-    public String optVersionString() {
-        return versionString;
     }
 
 }

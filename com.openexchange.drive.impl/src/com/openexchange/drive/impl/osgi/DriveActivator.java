@@ -98,6 +98,7 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DriveActivator}
@@ -121,7 +122,8 @@ public class DriveActivator extends HousekeepingActivator {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class, CapabilityService.class,
             IDBasedFolderAccessFactory.class, EventAdmin.class, ThreadPoolService.class, TimerService.class, ConfigurationService.class,
             UserService.class, GroupService.class, ModuleSupport.class, ShareService.class, ContextService.class, ShareNotificationService.class,
-            ContactService.class, ContactUserStorage.class, FolderService.class, DispatcherPrefixService.class, LeanConfigurationService.class
+            ContactService.class, ContactUserStorage.class, FolderService.class, DispatcherPrefixService.class, LeanConfigurationService.class,
+            VersionService.class
         };
     }
 

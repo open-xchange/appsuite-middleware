@@ -91,7 +91,7 @@ import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.utils.internal.Services;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link SnippetProcessor}
@@ -381,7 +381,7 @@ public class SnippetProcessor {
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
     private static final Pattern PATTERN_SRC_ATTRIBUTE = Pattern.compile("(?i)src=\"[^\"]*\"");
-    private static final Pattern PATTERN_ID_ATTRIBUTE = Pattern.compile("(?i)id=\"[^\"]*@" + Version.NAME + "\"");
+    private static final Pattern PATTERN_ID_ATTRIBUTE = Pattern.compile("(?i)id=\"[^\"]*@" + VersionService.NAME + "\"");
 
     /**
      * Process the images in the snippet, extracts them and convert them to attachments.

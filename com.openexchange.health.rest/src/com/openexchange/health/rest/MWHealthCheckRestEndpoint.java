@@ -84,7 +84,7 @@ import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link MWHealthCheckRestEndpoint}
@@ -166,7 +166,7 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
             jsonResponse.put("service", getServerInfo());
         } catch (JSONException e) {
             // will not happen
-        } catch (RuntimeException e) {
+        } catch (OXException | RuntimeException e) {
             return Response.status(Status.SERVICE_UNAVAILABLE).entity(SIMPLE_DOWN_RESPONSE).type(MediaType.APPLICATION_JSON).build();
         }
         if (MWHealthState.UP.equals(result.getStatus())) {
@@ -175,10 +175,10 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
         return Response.status(Status.SERVICE_UNAVAILABLE).entity(jsonResponse).type(MediaType.APPLICATION_JSON).build();
     }
 
-    private JSONObject getServerInfo() throws JSONException {
+    private JSONObject getServerInfo() throws JSONException, OXException {
         JSONObject serverInfo = new JSONObject(7);
         serverInfo.put("name", "appsuite-middleware");
-        Version version = Version.getInstance();
+        VersionService version = services.getServiceSafe(VersionService.class);
         serverInfo.put("version", version.getVersionString());
         serverInfo.put("buildDate", version.getBuildDate());
         serverInfo.put("date", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss,SSSZ").format(new Date()));

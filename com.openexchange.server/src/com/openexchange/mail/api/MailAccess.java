@@ -99,7 +99,7 @@ import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link MailAccess} - Handles connecting to the mailing system while using an internal cache for connected access objects (see
@@ -155,7 +155,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             synchronized (MailAccess.class) {
                 tmp = version;
                 if (null == tmp) {
-                    Version v = Version.getInstance();
+                    VersionService v = ServerServiceRegistry.getServize(VersionService.class);
                     tmp = new StringBuilder(10).append(v.getMajor()).append('.').append(v.getMinor()).append('.').append(v.getPatch()).toString();
                     version = tmp;
                 }

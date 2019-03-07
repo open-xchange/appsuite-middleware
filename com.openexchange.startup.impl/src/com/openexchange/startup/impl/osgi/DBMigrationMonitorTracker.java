@@ -61,7 +61,7 @@ import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.java.Strings;
 import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.StaticSignalStartedService;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  *
@@ -78,16 +78,19 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
     private final BundleContext context;
     private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;
 
+    private VersionService versionService;
+
     /**
      * Initializes a new {@link DBMigrationMonitorTracker}.
      * @param signalStartedRegistrationRef
-     *
      * @param context The bundle context
+     * @param versionService The version service
      */
-    public DBMigrationMonitorTracker(AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef, BundleContext context) {
+    public DBMigrationMonitorTracker(AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef, BundleContext context, VersionService versionService) {
         super();
         this.context = context;
         this.signalStartedRegistrationRef = signalStartedRegistrationRef;
+        this.versionService = versionService;
     }
 
     @Override
@@ -126,7 +129,7 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
 
                     String sep = Strings.getLineSeparator();
                     if (StaticSignalStartedService.State.OK == singleton.getState()) {
-                        LOG.info("{}{}\tOpen-Xchange Server v{} initialized. The server should be up and running...{}", sep, sep, Version.getInstance().getVersionString(), sep);
+                        LOG.info("{}{}\tOpen-Xchange Server v{} initialized. The server should be up and running...{}", sep, sep, versionService.getVersionString(), sep);
                     } else {
                         String message = singleton.getStateInfo(StaticSignalStartedService.INFO_MESSAGE);
                         if (null == message) {

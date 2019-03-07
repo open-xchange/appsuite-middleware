@@ -57,7 +57,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 
 /**
@@ -108,7 +108,8 @@ public class JMXReport {
             jsonData.put("uuid", uuid);
             jsonData.put("reportType", type);
             jsonData.put("timestamps", new JSONObject().put("start", startTime).put("stop", stopTime));
-            jsonData.put("version", new JSONObject().put("version", Version.getInstance().getVersionString()).put("buildDate", Version.getInstance().getBuildDate()));
+            VersionService versionService = Services.getService(VersionService.class);
+            jsonData.put("version", new JSONObject().put("version", versionService.getVersionString()).put("buildDate", versionService.getBuildDate()));
             jsonData.put("needsComposition", isNeedsComposition);
             jsonData.put("storageFolderPath", storageFolderPath);
 

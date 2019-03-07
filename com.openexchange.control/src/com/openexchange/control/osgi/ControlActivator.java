@@ -56,6 +56,7 @@ import com.openexchange.control.internal.GeneralControlMBean;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ControlActivator}
@@ -77,8 +78,7 @@ public final class ControlActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class[] { VersionService.class };
     }
 
     @Override
@@ -88,7 +88,7 @@ public final class ControlActivator extends HousekeepingActivator {
             /*
              * Create & open service tracker
              */
-            track(ManagementService.class, new HousekeepingManagementTracker(context, GeneralControlMBean.MBEAN_NAME, GeneralControlMBean.DOMAIN, new GeneralControl(context)));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, GeneralControlMBean.MBEAN_NAME, GeneralControlMBean.DOMAIN, new GeneralControl(context, getServiceSafe(VersionService.class))));
             openTrackers();
             /*
              * Add shutdown hook

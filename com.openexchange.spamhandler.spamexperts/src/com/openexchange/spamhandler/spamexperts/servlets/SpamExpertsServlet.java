@@ -51,7 +51,6 @@ package com.openexchange.spamhandler.spamexperts.servlets;
  */
 
 import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -66,7 +65,7 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  *
@@ -93,14 +92,11 @@ public final class SpamExpertsServlet extends DataServlet {
      *
      * @param config The configuration to use
      */
-    public SpamExpertsServlet(SpamExpertsConfig config) {
+    public SpamExpertsServlet(SpamExpertsConfig config, VersionService versionService) {
         super();
         this.config = config;
 
-        String versionString = Version.getInstance().optVersionString();
-        if (null == versionString) {
-            versionString = "<unknown version>";
-        }
+        String versionString = versionService.getVersionString();
         httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
             .setUserAgent("OX Spam Experts Client v" + versionString)
             .setMaxTotalConnections(32)
@@ -116,7 +112,7 @@ public final class SpamExpertsServlet extends DataServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Session session = getSessionObject(req);
 
         Response response = new Response();

@@ -70,11 +70,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.IPRange;
 import com.openexchange.net.IPTools;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -126,7 +127,7 @@ public class WrappingFilter implements Filter {
      */
     public WrappingFilter(GrizzlyConfig config) {
         super();
-        version = Version.getInstance().getVersionString();
+        version = Services.getService(VersionService.class).getVersionString();
         serverId = Math.abs(OXException.getServerId());
         counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();

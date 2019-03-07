@@ -73,6 +73,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.dav.push.osgi.Services;
 import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -84,6 +85,7 @@ import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DavPushGateway}
@@ -443,9 +445,12 @@ public class DavPushGateway implements PushNotificationTransport {
     }
 
     private static CloseableHttpClient initClient() {
-        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
-        if (null == versionString) {
+        VersionService optService = Services.optService(VersionService.class);
+        String versionString = null;
+        if (null == optService) {
             versionString = "<unknown version>";
+        } else {
+            versionString = optService.getVersionString();
         }
         return HttpClients.getHttpClient(ClientConfig.newInstance()
             .setUserAgent("OX DAV-Push Gateway Client v" + versionString)

@@ -120,6 +120,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DriveServiceImpl}
@@ -461,7 +462,7 @@ public class DriveServiceImpl implements DriveService {
         LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
         settings.setQuota(new DriveQuotaImpl(quota, syncSession.getLinkGenerator().getQuotaLink()));
         settings.setHelpLink(syncSession.getLinkGenerator().getHelpLink());
-        settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
+        settings.setServerVersion(DriveServiceLookup.getService(VersionService.class, true).getVersionString());
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion(serverSession.getContextId(), serverSession.getUserId())));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));

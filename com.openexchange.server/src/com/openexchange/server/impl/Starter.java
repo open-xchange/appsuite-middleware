@@ -57,8 +57,9 @@ import java.util.Stack;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.exceptions.ExceptionUtils;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link Starter} - Starter for <a href="www.open-xchange.com">Open-Xchange</a> server.
@@ -156,7 +157,7 @@ public class Starter implements Initialization {
     }
 
     @Override
-    public void start() {
+    public void start() throws OXException {
 
         dumpServerInfos();
 
@@ -179,8 +180,9 @@ public class Starter implements Initialization {
 
     /**
      * Dump server information.
+     * @throws OXException 
      */
-    private static final void dumpServerInfos() {
+    private static final void dumpServerInfos() throws OXException {
         StringBuilder message = new StringBuilder(64);
         List<Object> args = new ArrayList<>();
         String sep = Strings.getLineSeparator();
@@ -220,8 +222,8 @@ public class Starter implements Initialization {
         }
 
         message.append("System version   : {} Server [{}] initializing ...{}");
-        args.add(Version.NAME);
-        args.add(Version.getInstance().getVersionString());
+        args.add(VersionService.NAME);
+        args.add(ServerServiceRegistry.getServize(VersionService.class, true).getVersionString());
         args.add(sep);
 
         message.append("Server Footprint : {}{}");
