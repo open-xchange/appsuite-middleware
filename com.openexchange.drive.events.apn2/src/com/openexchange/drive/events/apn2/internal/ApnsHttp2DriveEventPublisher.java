@@ -162,6 +162,10 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
                 ApnsHttp2Options options;
                 try {
                     options = getOptions(subscription.getContextID(), subscription.getUserID());
+                    if (options == null) {
+                        LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID());
+                        return;
+                    }
                 } catch (OXException e) {
                     LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID(), e);
                     return;
