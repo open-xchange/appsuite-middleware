@@ -501,6 +501,7 @@ specific field data of single or multiple objects.
 |723 | media_meta | JSON | The meta information for the media resource. Since 7.10.2. |
 |724 | media_status | String | The status of parsing/analyzing media meta-data from the media resource. Since 7.10.2. |
 |725 | media_date | Time | The media date represents the capture date, which falls-back to last-modified date if there is capture date. Useful for sorting. Since 7.10.2. |
+|751 | sequence_number | Number | Sequence number of the infoitem. |
 |7010 | com.openexchange.share.extendedObjectPermissions | Array | Each element is an object described in [Extended object permission object](#extended-object-permission-object). Read Only, Since 7.8.0.|
 |7020 | com.openexchange.realtime.resourceID | String | The resource identifier for the infoitem for usage within the realtime component. Read Only, Since 7.8.0. |
 |7030 | com.openexchange.file.storage.mail.mailMetadata | Object | Additional metadata for items in the mail file storage. Read Only. |

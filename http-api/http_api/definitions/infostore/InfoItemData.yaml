@@ -51,6 +51,10 @@ properties:
     type: integer
     description: 'The number of all versions of the item. Note: This is not writeable.'
     readOnly: true
+  sequence_number:
+    type: integer
+    format: int64
+    description: Sequence number of the infoitem.
   capture_date:
     type: integer
     format: int64
