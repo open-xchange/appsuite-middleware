@@ -600,8 +600,7 @@ Export-Package: org.apache.tika;version="1.0.0";
    org.apache.tika.config,
    org.apache.tika.exception,
    org.apache.tika.parser,
-   org.xml.sax",
- org.ccil.cowan.tagsoup
+   org.xml.sax"
 Import-Package: com.coremedia.iso;resolution:=optional,
  com.coremedia.iso.boxes;resolution:=optional,
  com.coremedia.iso.boxes.apple;resolution:=optional,
