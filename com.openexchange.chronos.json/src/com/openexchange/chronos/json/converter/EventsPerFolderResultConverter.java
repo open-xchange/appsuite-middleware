@@ -63,7 +63,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -120,7 +119,7 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private JSONValue convertEventsResults(Map<String, EventsResult> eventsResults, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    private JSONValue convertEventsResults(Map<String, EventsResult> eventsResults, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == eventsResults) {
             return null;
         }
@@ -131,7 +130,7 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
         return jsonArray;
     }
 
-    private JSONObject convertEventsResult(String folderId, EventsResult eventsResult, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    private JSONObject convertEventsResult(String folderId, EventsResult eventsResult, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == eventsResult) {
             return null;
         }
