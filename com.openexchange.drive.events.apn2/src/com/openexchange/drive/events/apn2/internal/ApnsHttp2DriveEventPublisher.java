@@ -120,13 +120,15 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
      * Gets the APNS HTTP/2 client for specified options.
      *
      * @param options The APNS HTTP/2 options
-     * @return The appropriate client
+     * @return The appropriate client, or <code>null</code> if no client is available for the supplied options
      */
     private ApnsClient getClient(ApnsHttp2Options options) {
-        try {
-            return ApnsHttp2Utility.getApnsClient(options);
-        } catch (OXException e) {
-            LoggerHolder.LOG.error("Unable to create APNS HTTP/2 client for service {}", getServiceID(), e);
+        if (null != options) {
+            try {
+                return ApnsHttp2Utility.getApnsClient(options);
+            } catch (OXException e) {
+                LoggerHolder.LOG.error("Unable to create APNS HTTP/2 client for service {}", getServiceID(), e);
+            }
         }
         return null;
     }
@@ -162,10 +164,6 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
                 ApnsHttp2Options options;
                 try {
                     options = getOptions(subscription.getContextID(), subscription.getUserID());
-                    if (options == null) {
-                        LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID());
-                        return;
-                    }
                 } catch (OXException e) {
                     LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID(), e);
                     return;
