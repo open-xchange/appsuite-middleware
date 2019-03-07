@@ -116,7 +116,12 @@ public class OnboardingConfig {
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
             if (!map.isEmpty()) {
-                scenarios = parseScenarios(map);
+                try {
+                    scenarios = parseScenarios(map);
+                } catch (ClassCastException e) {
+                    logger.warn("Invalid on-boarding scenarios configuration specified in \"{}\".", CONFIGFILE_SCENARIOS, e);
+                    return Collections.emptyMap();
+                }
             }
         }
 
