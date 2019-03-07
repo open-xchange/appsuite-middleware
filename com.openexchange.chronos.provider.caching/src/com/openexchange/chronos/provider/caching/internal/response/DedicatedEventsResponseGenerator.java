@@ -96,9 +96,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
         return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
-                List<Event> readEvents = readEvents(storage);
-                EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
-                return storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), readEvents, fields);
+                return readEvents(storage);
             }
         }.executeQuery();
     }
@@ -108,7 +106,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
         for (EventID eventID : eventIDs) {
             objectIDs.add(eventID.getObjectID());
         }
-        List<Event> events = readEvents(calendarStorage, objectIDs.toArray(new String[objectIDs.size()]));
+        List<Event> events = readEventsById(calendarStorage, objectIDs.toArray(new String[objectIDs.size()]));
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
             Event event = CalendarUtils.find(events, eventID.getObjectID());
@@ -139,7 +137,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
         return orderedEvents;
     }
 
-    protected List<Event> readEvents(CalendarStorage calendarStorage, String[] objectIDs) throws OXException {
+    protected List<Event> readEventsById(CalendarStorage calendarStorage, String[] objectIDs) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         if (null != objectIDs) {
             if (0 == objectIDs.length) {
@@ -157,7 +155,6 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
         EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
         SearchOptions searchOptions = new SearchOptions(this.cachedCalendarAccess.getParameters());
         List<Event> events = calendarStorage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
-        events = calendarStorage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
-        return events;
+        return calendarStorage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
     }
 }
