@@ -631,11 +631,17 @@ exclude_secret_entries() {
         fi
     done
     IFS=${IFS_BA}
-    find "${_config_copy}" -type f | \
-        sed 's|[[:blank:]]|\\ |g' | \
-        xargs egrep -iHrIv "${_whitelist}" | \
-        sed -r 's/(:)/@SEPARATOR@/' | \
-        egrep -i "${_blacklist}" > ${_tmp_exclude_status}
+    # This method is sometimes called given a single file as first parameter. This file may have been deleted 4 lines above if it does not
+    # contain any useful information any more. This happens e.g. with /etc/security/limits.conf containing just comments.
+    if [ -e "${_config_copy}" ]; then
+        find "${_config_copy}" -type f | \
+            sed 's|[[:blank:]]|\\ |g' | \
+            xargs egrep -iHrIv "${_whitelist}" | \
+            sed -r 's/(:)/@SEPARATOR@/' | \
+            egrep -i "${_blacklist}" > ${_tmp_exclude_status}
+    else
+        echo -n "" > ${_tmp_exclude_status}
+    fi
 
     # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties:com.openexchange.oauth.msn.apiSecret=secret
     while read line; do
