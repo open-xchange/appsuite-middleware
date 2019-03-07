@@ -638,6 +638,23 @@ EOF
       ox_scr_done ${SCR}
     }
 
+    SCR=SCR-422
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="image/heic heic"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      type="image/heif heif"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
