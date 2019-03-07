@@ -50,28 +50,26 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
- * 
+ *
  * {@link UnsupportedSubscriptionsRemoverTask} removes all subscriptions which are not supported anymore.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
 public class UnsupportedSubscriptionsRemoverTask extends SubscriptionRemoverTask {
-    
-    private static final List<String> UNSUPPORTED_SOURCE_IDS = Arrays.asList(   "com.openexchange.subscribe.crawler.facebook",
-                                                                                "com.openexchange.subscribe.socialplugin.facebook",
-                                                                                "com.openexchange.subscribe.crawler.googlemail",
-                                                                                "com.openexchange.subscribe.crawler.gmx",
-                                                                                "com.openexchange.subscribe.crawler.gmx.de",
-                                                                                "com.openexchange.subscribe.crawler.google.calendar",
-                                                                                "com.openexchange.subscribe.google.contact",
-                                                                                "com.openexchange.subscribe.socialplugin.linkedin");
 
     public UnsupportedSubscriptionsRemoverTask() {
-        super(UNSUPPORTED_SOURCE_IDS);
+        super(Arrays.asList("com.openexchange.subscribe.crawler.facebook",
+                            "com.openexchange.subscribe.socialplugin.facebook",
+                            "com.openexchange.subscribe.crawler.googlemail",
+                            "com.openexchange.subscribe.crawler.gmx",
+                            "com.openexchange.subscribe.crawler.gmx.de",
+                            "com.openexchange.subscribe.crawler.google.calendar",
+                            "com.openexchange.subscribe.google.contact",
+                            "com.openexchange.subscribe.socialplugin.linkedin"
+                            ));
     }
 
 }
