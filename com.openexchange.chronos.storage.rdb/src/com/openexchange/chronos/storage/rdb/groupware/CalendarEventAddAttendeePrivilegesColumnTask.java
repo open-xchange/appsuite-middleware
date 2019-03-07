@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,43 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.chronos.storage.rdb.groupware;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.groupware.update.WorkingLevel;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ChronosAddAttendeePrivilegesTask}
+ * {@link CalendarEventAddRDateColumnTask2}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2
  */
-public class ChronosAddAttendeePrivilegesTask implements UpdateTaskV2 {
+public class CalendarEventAddAttendeePrivilegesColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link ChronosAddAttendeePrivilegesTask}.
-     */
-    public ChronosAddAttendeePrivilegesTask() {
-        super();
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
+        };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
+        Connection connection = params.getConnection();
         int rollback = 0;
-
-        String tableName = "calendar_event";
-        String tableNameTombstone = "calendar_event_tombstone";
-        String columnName = "attendeePrivileges";
         try {
-            con.setAutoCommit(false);
+            connection.setAutoCommit(false);
             rollback = 1;
-
-            createColumn(con, tableName, columnName);
-            createColumn(con, tableNameTombstone, columnName);
-
-            con.commit();
+            Tools.checkAndAddColumns(connection, "calendar_event", new Column("attendeePrivileges", "INT4 UNSIGNED DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "calendar_event_tombstone", new Column("attendeePrivileges", "INT4 UNSIGNED DEFAULT NULL"));
+            connection.commit();
             rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -102,30 +91,12 @@ public class ChronosAddAttendeePrivilegesTask implements UpdateTaskV2 {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
-                if (rollback == 1) {
-                    Databases.rollback(con);
+                if (1 == rollback) {
+                    rollback(connection);
                 }
-                Databases.autocommit(con);
+                autocommit(connection);
             }
         }
-
-        LoggerFactory.getLogger(ChronosAddAttendeePrivilegesTask.class).info("Successfully added \"{}\" column to \"{}\" and \"{}\" table", columnName, tableName, tableNameTombstone);
-    }
-
-    private void createColumn(Connection con, String tableName, String columnName) throws SQLException {
-        if (false == Tools.columnExists(con, tableName, columnName)) {
-            Tools.addColumns(con, tableName, new Column(columnName, "INT4 UNSIGNED DEFAULT NULL"));
-        }
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] {"com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"};
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.SCHEMA);
     }
 
 }

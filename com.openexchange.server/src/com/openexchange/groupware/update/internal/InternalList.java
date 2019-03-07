@@ -723,8 +723,6 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV2());
         list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV3());
         
-        list.add(new com.openexchange.groupware.update.tasks.ChronosAddAttendeePrivilegesTask());
-
         // Add principal table update task
         list.add(new CreatePrincipalUseCountTableTask());
         
