@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.fragments.properties.loader.osgi;
+package com.openexchange.fragment.properties.loader.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
-import com.openexchange.fragments.properties.loader.internal.PropertiesLoader;
+import com.openexchange.fragment.properties.loader.internal.PropertiesLoader;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

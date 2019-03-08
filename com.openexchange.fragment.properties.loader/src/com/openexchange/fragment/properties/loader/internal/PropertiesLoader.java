@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.fragments.properties.loader.internal;
+package com.openexchange.fragment.properties.loader.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
