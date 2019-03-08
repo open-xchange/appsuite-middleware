@@ -102,7 +102,7 @@ public final class ListAction extends AppointmentAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
-            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
+            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         }
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
         List<Event> events = session.getCalendarService().getEvents(session, requestedIDs);
