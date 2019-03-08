@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupServiceImpl implements GroupService {
-    
+
     private final GroupStorage storage;
     private final PrincipalUseCountService usecountService;
 
@@ -153,7 +153,7 @@ public final class GroupServiceImpl implements GroupService {
         return result;
     }
 
-    private class GroupAndUseCount implements Comparable<GroupAndUseCount> {
+    private static class GroupAndUseCount implements Comparable<GroupAndUseCount> {
 
         private final Group group;
         private final Integer usecount;
