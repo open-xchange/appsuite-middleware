@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -159,10 +158,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
                 boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
-                if (Strings.isUTF8Bytes(keystore.getBytes(StandardCharsets.UTF_8))) {
-                    return new APNAccess(keystore, password, production);
-                }
-                return new APNAccess(keystore.getBytes(StandardCharsets.ISO_8859_1), password, production);
+                return new APNAccess(keystore, password, production);
             }
         } catch (OXException e) {
             // nothing to do

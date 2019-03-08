@@ -113,10 +113,7 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
             String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
             String password = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.password);
             boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
-            if (Strings.isUTF8Bytes(keystoreName.getBytes())) {
-                return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
-            } 
-            return new ApnsHttp2Options(keystoreName.getBytes(), password, production, topic);
+            return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
         } 
         if (AuthType.JWT.equals(authType)) {
             /*
@@ -132,15 +129,12 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
             String teamId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.teamid);
             String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
             boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
-            if (Strings.isUTF8Bytes(privateKeyFile.getBytes())) {
-                try {
-                    return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
-                } catch (IOException e) {
-                    LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
-                    return null;
-                }
-            } 
-            return new ApnsHttp2Options(privateKeyFile.getBytes(), keyId, teamId, production, topic);
+            try {
+                return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
+            } catch (IOException e) {
+                LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
+                return null;
+            }
         } 
         /*
          * get options via registered options provider as fallback, otherwise

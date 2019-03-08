@@ -141,12 +141,8 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         if (Strings.isNotEmpty(keystore)) {
             String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
             boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
-            if (Strings.isUTF8Bytes(keystore.getBytes())) {
-                LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, userId, contextId);
-                return new APNAccess(keystore, password, production);
-            }
-            LOG.trace("Using configured binary keystore, {} service for push via {} for user {} in context {}.", production ? "production" : "sandbox", serviceId, userId, contextId);
-            return new APNAccess(keystore.getBytes(), password, production);
+            LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, userId, contextId);
+            return new APNAccess(keystore, password, production);
         }
         /*
          * check for a registered APN options provider as fallback, otherwise

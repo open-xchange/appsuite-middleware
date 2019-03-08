@@ -51,7 +51,6 @@ package com.openexchange.drive.events.apn2.osgi;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Properties;
 import org.osgi.framework.ServiceReference;
@@ -155,10 +154,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                 String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
                 String password = getProperty(properties, DriveEventsAPN2IOSProperty.password);
                 boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPN2IOSProperty.production));
-                if (Strings.isUTF8Bytes(keystoreName.getBytes(StandardCharsets.UTF_8))) {
-                    return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
-                }
-                return new ApnsHttp2Options(keystoreName.getBytes(StandardCharsets.ISO_8859_1), password, production, topic);
+                return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
             }
             if (AuthType.JWT.equals(authType)) {
                 /*
@@ -172,15 +168,12 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                 String teamId = getProperty(properties, DriveEventsAPN2IOSProperty.teamid);
                 String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
                 boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPN2IOSProperty.production));
-                if (Strings.isUTF8Bytes(privateKeyFile.getBytes())) {
-                    try {
-                        return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
-                    } catch (IOException e) {
-                        LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
-                        return null;
-                    }
+                try {
+                    return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
+                } catch (IOException e) {
+                    LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
+                    return null;
                 }
-                return new ApnsHttp2Options(privateKeyFile.getBytes(), keyId, teamId, production, topic);
             }
         } catch (OXException e1) {
             // nothing to do
