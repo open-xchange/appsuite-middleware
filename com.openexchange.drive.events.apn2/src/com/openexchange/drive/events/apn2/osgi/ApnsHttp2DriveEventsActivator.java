@@ -51,6 +51,7 @@ package com.openexchange.drive.events.apn2.osgi;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Properties;
 import org.osgi.framework.ServiceReference;
@@ -105,7 +106,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
             private volatile ApnsHttp2OptionsProvider provider;
-            
+
             @Override
             public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPN2IOSProperty.FRAGMENT_FILE_NAME);
@@ -131,15 +132,15 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
          */
         getServiceSafe(DriveEventService.class).registerPublisher(new IOSApnsHttp2DriveEventPublisher(this));
     }
-    
+
     /**
      * Creates a {@link ApnsHttp2Options} from the given {@link Properties} object
-     * 
+     *
      * @param properties The {@link Properties} object containing all required properties
      * @return the {@link ApnsHttp2Options} or null if some properties are missing
      */
     private ApnsHttp2Options createOption(Properties properties) {
-        
+
         AuthType authType;
         try {
             authType = AuthType.authTypeFor(getProperty(properties, DriveEventsAPN2IOSProperty.authtype));
@@ -154,10 +155,10 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                 String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
                 String password = getProperty(properties, DriveEventsAPN2IOSProperty.password);
                 boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPN2IOSProperty.production));
-                if (Strings.isUTF8Bytes(keystoreName.getBytes())) {
+                if (Strings.isUTF8Bytes(keystoreName.getBytes(StandardCharsets.UTF_8))) {
                     return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
                 }
-                return new ApnsHttp2Options(keystoreName.getBytes(), password, production, topic);
+                return new ApnsHttp2Options(keystoreName.getBytes(StandardCharsets.ISO_8859_1), password, production, topic);
             }
             if (AuthType.JWT.equals(authType)) {
                 /*
@@ -186,10 +187,10 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         }
         return null;
     }
-    
+
     /**
      * Get the given property from the {@link Properties} object
-     * 
+     *
      * @param properties The {@link Properties} object
      * @param prop The {@link Property} to return
      * @return The string value of the property
