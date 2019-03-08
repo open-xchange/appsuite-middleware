@@ -176,121 +176,87 @@ public class FilteringContactService implements ContactService {
 
     @Override
     public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.getModifiedContacts(session, folderId, since)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.getModifiedContacts(session, folderId, since));
     }
 
     @Override
     public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.getModifiedContacts(session, folderId, since, fields)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.getModifiedContacts(session, folderId, since, fields));
     }
 
     @Override
     public SearchIterator<Contact> getModifiedContacts(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.getModifiedContacts(session, folderId, since, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.getModifiedContacts(session, folderId, since, fields, sortOptions));
     }
 
     @Override
     public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, term)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, term));
     }
 
     @Override
     public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, term, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, term, sortOptions));
     }
 
     @Override
     public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, term, fields)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, term, fields));
     }
 
     @Override
     public <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, term, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, term, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, contactSearch)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, contactSearch));
     }
 
     @Override
     public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, contactSearch, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, contactSearch, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, contactSearch, fields)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, contactSearch, fields));
     }
 
     @Override
     public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContacts(session, contactSearch, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, contactSearch, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContactsWithBirthday(session, from, until, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContactsWithBirthday(session, from, until, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContactsWithBirthday(session, folderIDs, from, until, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContactsWithBirthday(session, folderIDs, from, until, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchContactsWithAnniversary(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContactsWithAnniversary(session, from, until, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContactsWithAnniversary(session, from, until, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.searchContactsWithAnniversary(session, folderIDs, from, until, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchContactsWithAnniversary(session, folderIDs, from, until, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.autocompleteContacts(session, folderIDs, query, parameters, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.autocompleteContacts(session, folderIDs, query, parameters, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> autocompleteContacts(Session session, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> contacts = delegate.autocompleteContacts(session, query, parameters, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), contacts);
-        }
+        return removeAdmin(session.getContextId(), delegate.autocompleteContacts(session, query, parameters, fields, sortOptions));
     }
 
     @Override
@@ -345,9 +311,7 @@ public class FilteringContactService implements ContactService {
 
     @Override
     public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> users = delegate.getAllUsers(session, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), users);
-        }
+        return removeAdmin(session.getContextId(), delegate.getAllUsers(session, fields, sortOptions));
     }
 
     @Override
@@ -357,16 +321,12 @@ public class FilteringContactService implements ContactService {
 
     @Override
     public <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> users = delegate.searchUsers(session, term, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), users);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchUsers(session, term, fields, sortOptions));
     }
 
     @Override
     public SearchIterator<Contact> searchUsers(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        try (SearchIterator<Contact> users = delegate.searchUsers(session, contactSearch, fields, sortOptions)) {
-            return removeAdmin(session.getContextId(), users);
-        }
+        return removeAdmin(session.getContextId(), delegate.searchUsers(session, contactSearch, fields, sortOptions));
     }
 
     @Override

@@ -64,7 +64,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.SearchTerm;
-import com.openexchange.groupware.infostore.utils.FileDelta;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -141,16 +140,6 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
     public DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException {
         DocumentMetadata documentMetadata = delegate.getDocumentMetadata(id, version, session);
         return removeAdminFromObjectPermissions(session.getContextId(), documentMetadata);
-    }
-
-    private DocumentMetadata removeAdminFromObjectPermissions(int contextId, DocumentMetadata documentMetadata) throws OXException {
-        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
-        if (hideAdminService == null) {
-            return documentMetadata;
-        }
-        List<ObjectPermission> newPermissions = hideAdminService.removeAdminFromObjectPermissions(contextId, documentMetadata.getObjectPermissions());
-        documentMetadata.setObjectPermissions(newPermissions);
-        return documentMetadata;
     }
 
     @Override
@@ -274,95 +263,63 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getDocuments(folderId, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
-    }
-
-    private TimedResult<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, TimedResult<DocumentMetadata> documents) throws OXException {
-        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
-        if (hideAdminService == null) {
-            return documents;
-        }
-        return hideAdminService.removeAdminFromObjectPermissions(contextId, documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDocuments(folderId, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getDocuments(folderId, columns, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDocuments(folderId, columns, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getDocuments(folderId, columns, sort, order, start, end, context, user, permissionBits);
-        return removeAdminFromObjectPermissions(context.getContextId(), documents);
+        return removeAdminFromObjectPermissions(context.getContextId(), delegate.getDocuments(folderId, columns, sort, order, start, end, context, user, permissionBits));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getDocuments(folderId, columns, sort, order, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDocuments(folderId, columns, sort, order, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getDocuments(folderId, columns, sort, order, start, end, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDocuments(folderId, columns, sort, order, start, end, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getUserSharedDocuments(columns, sort, order, start, end, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getUserSharedDocuments(columns, sort, order, start, end, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getVersions(id, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(id, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getVersions(id, columns, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(id, columns, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getVersions(id, columns, sort, order, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(id, columns, sort, order, session));
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException {
-        TimedResult<DocumentMetadata> documents = delegate.getDocuments(ids, columns, session);
-        return removeAdminFromObjectPermissions(session.getContextId(), documents);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDocuments(ids, columns, session));
     }
 
     @Override
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, ServerSession session) throws OXException {
-        Delta<DocumentMetadata> delta = delegate.getDelta(folderId, updateSince, columns, ignoreDeleted, session);
-
-        try (SearchIterator<DocumentMetadata> deletedOnes = removeAdminFromObjectPermissions(session.getContextId(), delta.getDeleted()); 
-            SearchIterator<DocumentMetadata> modifiedOnes = removeAdminFromObjectPermissions(session.getContextId(), delta.getModified()); 
-            SearchIterator<DocumentMetadata> newOnes = removeAdminFromObjectPermissions(session.getContextId(), delta.getNew())
-                ) {
-            return new FileDelta(newOnes, modifiedOnes, deletedOnes, delta.sequenceNumber());
-        }
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDelta(folderId, updateSince, columns, ignoreDeleted, session));
     }
 
     @Override
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, ServerSession session) throws OXException {
-        Delta<DocumentMetadata> delta = delegate.getDelta(folderId, updateSince, columns, sort, order, ignoreDeleted, session);
-
-        try (SearchIterator<DocumentMetadata> deletedOnes = removeAdminFromObjectPermissions(session.getContextId(), delta.getDeleted()); 
-            SearchIterator<DocumentMetadata> modifiedOnes = removeAdminFromObjectPermissions(session.getContextId(), delta.getModified()); 
-            SearchIterator<DocumentMetadata> newOnes = removeAdminFromObjectPermissions(session.getContextId(), delta.getNew())
-                ) {
-            return new FileDelta(newOnes, modifiedOnes, deletedOnes, delta.sequenceNumber());
-        }
-}
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getDelta(folderId, updateSince, columns, sort, order, ignoreDeleted, session));
+    }
 
     @Override
     public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, ServerSession session) throws OXException {
@@ -462,30 +419,32 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
 
     @Override
     public SearchIterator<DocumentMetadata> search(ServerSession session, String query, int folderId, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        try (SearchIterator<DocumentMetadata> searchIterator = delegate.search(session, query, folderId, cols, sortedBy, dir, start, end)) {
-            return removeAdminFromObjectPermissions(session.getContextId(), searchIterator);
-        }
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.search(session, query, folderId, cols, sortedBy, dir, start, end));
     }
 
     @Override
     public SearchIterator<DocumentMetadata> search(ServerSession session, String query, int folderId, boolean includeSubfolders, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        try (SearchIterator<DocumentMetadata> searchIterator = delegate.search(session, query, folderId, includeSubfolders, cols, sortedBy, dir, start, end)) {
-            return removeAdminFromObjectPermissions(session.getContextId(), searchIterator);
-        }
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.search(session, query, folderId, includeSubfolders, cols, sortedBy, dir, start, end));
     }
 
     @Override
     public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, int[] folderIds, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        try (SearchIterator<DocumentMetadata> searchIterator = delegate.search(session, searchTerm, folderIds, cols, sortedBy, dir, start, end)) {
-            return removeAdminFromObjectPermissions(session.getContextId(), searchIterator);
-        }
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.search(session, searchTerm, folderIds, cols, sortedBy, dir, start, end));
     }
 
     @Override
     public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, int folderId, boolean includeSubfolders, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        try (SearchIterator<DocumentMetadata> searchIterator = delegate.search(session, searchTerm, folderId, includeSubfolders, cols, sortedBy, dir, start, end)) {
-            return removeAdminFromObjectPermissions(session.getContextId(), searchIterator);
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.search(session, searchTerm, folderId, includeSubfolders, cols, sortedBy, dir, start, end));
+    }
+
+    private DocumentMetadata removeAdminFromObjectPermissions(int contextId, DocumentMetadata documentMetadata) throws OXException {
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
+        if (hideAdminService == null) {
+            return documentMetadata;
         }
+        List<ObjectPermission> newPermissions = hideAdminService.removeAdminFromObjectPermissions(contextId, documentMetadata.getObjectPermissions());
+        documentMetadata.setObjectPermissions(newPermissions);
+        return documentMetadata;
     }
 
     private SearchIterator<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, SearchIterator<DocumentMetadata> searchIterator) throws OXException {
@@ -495,4 +454,21 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
         }
         return hideAdminService.removeAdminFromObjectPermissions(contextId, searchIterator);
     }
+
+    private TimedResult<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, TimedResult<DocumentMetadata> documents) throws OXException {
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
+        if (hideAdminService == null) {
+            return documents;
+        }
+        return hideAdminService.removeAdminFromObjectPermissions(contextId, documents);
+    }
+
+    private Delta<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, Delta<DocumentMetadata> delta) throws OXException {
+        HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);
+        if (hideAdminService == null) {
+            return delta;
+        }
+        return hideAdminService.removeAdminFromObjectPermissions(contextId, delta);
+    }
+
 }
