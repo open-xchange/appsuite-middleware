@@ -49,6 +49,7 @@
 
 package com.openexchange.fragment.properties.loader;
 
+import com.openexchange.osgi.annotation.SingletonService;
 import java.util.Properties;
 
 /**
@@ -57,6 +58,7 @@ import java.util.Properties;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
+@SingletonService
 public interface FragmentPropertiesLoader {
 
     /**

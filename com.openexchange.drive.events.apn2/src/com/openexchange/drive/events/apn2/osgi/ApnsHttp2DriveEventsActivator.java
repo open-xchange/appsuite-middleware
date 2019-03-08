@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Properties;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -65,7 +66,9 @@ import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublish
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.BundleResourceLoader;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -90,8 +93,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class,
-            ThreadPoolService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -102,16 +104,17 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn2");
+        final Bundle bundle = this.context.getBundle();
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-            private volatile ApnsHttp2OptionsProvider provider;
+            private ApnsHttp2OptionsProvider provider;
 
             @Override
-            public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+            public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPN2IOSProperty.FRAGMENT_FILE_NAME);
-                if(properties != null) {
-                    ApnsHttp2Options option = createOption(properties);
-                    if(option != null) {
+                if (properties != null) {
+                    ApnsHttp2Options option = createOption(properties, bundle);
+                    if (option != null) {
                         provider = () -> option;
                         registerService(ApnsHttp2OptionsProvider.class, provider);
                     }
@@ -119,8 +122,8 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
-                if(provider != null) {
+            public synchronized void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if (provider != null) {
                     unregisterService(provider);
                 }
             }
@@ -132,13 +135,24 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         getServiceSafe(DriveEventService.class).registerPublisher(new IOSApnsHttp2DriveEventPublisher(this));
     }
 
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
+    }
+
     /**
      * Creates a {@link ApnsHttp2Options} from the given {@link Properties} object
      *
      * @param properties The {@link Properties} object containing all required properties
+     * @param bundle The OSGi bundle
      * @return the {@link ApnsHttp2Options} or null if some properties are missing
      */
-    private ApnsHttp2Options createOption(Properties properties) {
+    protected ApnsHttp2Options createOption(Properties properties, Bundle bundle) {
 
         AuthType authType;
         try {
@@ -151,27 +165,53 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                 if (Strings.isEmpty(keystoreName)) {
                     return null;
                 }
+
                 String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
                 String password = getProperty(properties, DriveEventsAPN2IOSProperty.password);
-                boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPN2IOSProperty.production));
-                return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
+                boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPN2IOSProperty.production));
+
+                // Check file path validity
+                File keystoreFile = new File(keystoreName);
+                if (keystoreFile.exists()) {
+                    return new ApnsHttp2Options(keystoreFile, password, production, topic);
+                }
+
+                // Assume keystore file is given as resource identifier
+                try {
+                    BundleResourceLoader loader = new BundleResourceLoader(bundle);
+                    byte[] keystoreBytes = Streams.stream2bytes(loader.getResourceAsStream(keystoreName));
+                    return new ApnsHttp2Options(keystoreBytes, password, production, topic);
+                } catch (IOException e) {
+                    LOG.warn("Failed to load keystore from resource {}", keystoreName, e);
+                }
             }
             if (AuthType.JWT.equals(authType)) {
                 /*
                  * get jwt options
                  */
-                String privateKeyFile = getProperty(properties, DriveEventsAPN2IOSProperty.privatekey);
-                if (Strings.isEmpty(privateKeyFile)) {
+                String privateKeyFileName = getProperty(properties, DriveEventsAPN2IOSProperty.privatekey);
+                if (Strings.isEmpty(privateKeyFileName)) {
                     return null;
                 }
-                String keyId = getProperty(properties, DriveEventsAPN2IOSProperty.keyid);
-                String teamId = getProperty(properties, DriveEventsAPN2IOSProperty.teamid);
-                String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
-                boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPN2IOSProperty.production));
+
                 try {
-                    return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
+                    byte[] privateKey;
+                    File privateKeyFile = new File(privateKeyFileName);
+                    if (privateKeyFile.exists()) {
+                        privateKey = Files.readAllBytes(privateKeyFile.toPath());
+                    } else {
+                        // Assume private key file is given as resource identifier
+                        BundleResourceLoader loader = new BundleResourceLoader(bundle);
+                        privateKey = Streams.stream2bytes(loader.getResourceAsStream(privateKeyFileName));
+                    }
+
+                    String keyId = getProperty(properties, DriveEventsAPN2IOSProperty.keyid);
+                    String teamId = getProperty(properties, DriveEventsAPN2IOSProperty.teamid);
+                    String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
+                    boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPN2IOSProperty.production));
+                    return new ApnsHttp2Options(privateKey, keyId, teamId, production, topic);
                 } catch (IOException e) {
-                    LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
+                    LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFileName, e);
                     return null;
                 }
             }
@@ -191,10 +231,10 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
      */
     private String getProperty(Properties properties, Property prop) throws OXException {
         String result = properties.getProperty(prop.getFQPropertyName());
-        if(result == null) {
+        if (result == null) {
             // This should never happen as long as the shipped fragment contains a proper properties file
-            LOG.error("Missing required property from fragment: "+ prop.getFQPropertyName());
-            throw OXException.general("Missing property: "+ prop.getFQPropertyName());
+            LOG.error("Missing required property from fragment: " + prop.getFQPropertyName());
+            throw OXException.general("Missing property: " + prop.getFQPropertyName());
         }
         return result;
     }

@@ -49,9 +49,12 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -65,7 +68,9 @@ import com.openexchange.drive.events.apn.internal.OperationSystemType;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.BundleResourceLoader;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.timer.TimerService;
@@ -100,23 +105,24 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn");
 
+        final Bundle bundle = this.context.getBundle();
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-            private volatile IOSAPNCertificateProvider iosProvider;
-            private volatile IOSAPNCertificateProvider macosProvider;
+            private IOSAPNCertificateProvider iosProvider;
+            private IOSAPNCertificateProvider macosProvider;
 
             @Override
-            public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+            public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
-                if(properties != null) {
-                    APNAccess access = createAccess(properties, OperationSystemType.IOS);
-                    if(access != null) {
+                if (properties != null) {
+                    APNAccess access = createAccess(properties, OperationSystemType.IOS, bundle);
+                    if (access != null) {
                         iosProvider = () -> access;
                         registerService(IOSAPNCertificateProvider.class, iosProvider);
                     }
 
-                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS);
-                    if(macAccess != null) {
+                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, bundle);
+                    if (macAccess != null) {
                         macosProvider = () -> macAccess;
                         registerService(IOSAPNCertificateProvider.class, macosProvider);
                     }
@@ -124,11 +130,11 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
-                if(iosProvider != null) {
+            public synchronized void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if (iosProvider != null) {
                     unregisterService(iosProvider);
                 }
-                if(macosProvider != null) {
+                if (macosProvider != null) {
                     unregisterService(macosProvider);
                 }
             }
@@ -142,13 +148,25 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
         eventService.registerPublisher(new APNDriveEventPublisher(this, "apn.macos", OperationSystemType.MACOS, MacOSAPNCertificateProvider.class));
     }
 
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
+    }
+
     /**
      * Creates an {@link APNAccess} from the given {@link Properties} object
+     *
      * @param properties The {@link Properties} object
      * @param The OS identifier
+     * @param The OSGi bundle
      * @return The {@link APNAccess} or null
      */
-    protected APNAccess createAccess(Properties properties, OperationSystemType type) {
+    protected APNAccess createAccess(Properties properties, OperationSystemType type, Bundle bundle) {
         try {
             Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
             String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
@@ -156,7 +174,20 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
                 boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
-                return new APNAccess(keystore, password, production);
+
+                // Check file path validity
+                if (new File(keystore).exists()) {
+                    return new APNAccess(keystore, password, production);
+                }
+
+                // Assume file is given as resource identifier
+                try {
+                    BundleResourceLoader loader = new BundleResourceLoader(bundle);
+                    byte[] keystoreBytes = Streams.stream2bytes(loader.getResourceAsStream(keystore));
+                    return new APNAccess(keystoreBytes, password, production);
+                } catch (IOException e) {
+                    LOG.warn("Error instantiating APNS options from resource {}", keystore, e);
+                }
             }
         } catch (OXException e) {
             // nothing to do
@@ -175,10 +206,10 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
      */
     private String getProperty(Properties properties, Property prop, Map<String, String> optional) throws OXException {
         String result = properties.getProperty(prop.getFQPropertyName(optional));
-        if(result == null) {
+        if (result == null) {
             // This should never happen as long as the shipped fragment contains a proper properties file
-            LOG.error("Missing required property from fragment: "+ prop.getFQPropertyName());
-            throw OXException.general("Missing property: "+ prop.getFQPropertyName());
+            LOG.error("Missing required property from fragment: " + prop.getFQPropertyName());
+            throw OXException.general("Missing property: " + prop.getFQPropertyName());
         }
         return result;
     }

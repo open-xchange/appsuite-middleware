@@ -80,7 +80,7 @@ public class GCMActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class};
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
     }
 
     @Override
@@ -93,14 +93,14 @@ public class GCMActivator extends HousekeepingActivator {
         LOG.info("starting bundle: com.openexchange.drive.events.gcm");
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-            private volatile GCMKeyProvider provider;
-            
+            private GCMKeyProvider provider;
+
             @Override
-            public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+            public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsGCMProperty.FRAGMENT_FILE_NAME);
-                if(properties != null) {
+                if (properties != null) {
                     String key = properties.getProperty(DriveEventsGCMProperty.KEY.getFQPropertyName());
-                    if(Strings.isNotEmpty(key)) {
+                    if (Strings.isNotEmpty(key)) {
                         provider = () -> key;
                         registerService(GCMKeyProvider.class, provider);
                     }
@@ -108,8 +108,8 @@ public class GCMActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
-                if(provider != null) {
+            public synchronized void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if (provider != null) {
                     unregisterService(provider);
                 }
             }
@@ -119,6 +119,16 @@ public class GCMActivator extends HousekeepingActivator {
          * register publisher
          */
         getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
     }
 
     @Override
