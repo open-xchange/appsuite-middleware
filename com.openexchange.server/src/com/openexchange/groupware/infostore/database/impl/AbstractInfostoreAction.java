@@ -208,7 +208,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
             } else if (Metadata.WIDTH == id || Metadata.HEIGHT == id || Metadata.CAMERA_ISO_SPEED == id) {
                 setIfNotNullAndPositive(index++, stmt, (Long) m.doSwitch(get));
             } else if (Metadata.CAMERA_APERTURE == id || Metadata.CAMERA_EXPOSURE_TIME == id || Metadata.CAMERA_FOCAL_LENGTH == id) {
-                setIfNotNullAndPositive(index++, stmt, (Double) m.doSwitch(get));
+                setMediaFieldIfNotNullAndPositive(index++, stmt, (Double) m.doSwitch(get));
             } else {
                 stmt.setObject(index++, process(m, m.doSwitch(get)));
             }
@@ -243,11 +243,20 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
         }
     }
 
-    private final void setIfNotNullAndPositive(int parameterIndex, PreparedStatement stmt, Double value) throws SQLException {
+    private final void setMediaFieldIfNotNullAndPositive(int parameterIndex, PreparedStatement stmt, Double value) throws SQLException {
         if (null == value || value.longValue() < 0) {
             stmt.setNull(parameterIndex, java.sql.Types.DOUBLE);
         } else {
-            stmt.setObject(parameterIndex, value);
+            double x = value.doubleValue();
+            if (x == Double.POSITIVE_INFINITY) {
+                // Store a negative value to signal infinity
+                stmt.setObject(parameterIndex, Double.valueOf(-1));
+            } else if (x == Double.NEGATIVE_INFINITY || Double.isNaN(x)) {
+                // Such a value cannot be stored
+                stmt.setNull(parameterIndex, java.sql.Types.DOUBLE);
+            } else {
+                stmt.setObject(parameterIndex, value);
+            }
         }
     }
 

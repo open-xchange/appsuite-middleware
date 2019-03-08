@@ -332,6 +332,12 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
                                     Long longObject = MediaMetadataExtractors.getLongValue(value);
                                     if (null != longObject) {
                                         document.setCameraIsoSpeed(longObject.longValue());
+                                    } else {
+                                        value = directory.getObject(ExifDirectoryBase.TAG_ISO_EQUIVALENT);
+                                        longObject = MediaMetadataExtractors.getLongValue(value);
+                                        if (null != longObject) {
+                                            document.setCameraIsoSpeed(longObject.longValue());
+                                        }
                                     }
                                 }
                                 if (document.getCameraAperture() == null) {

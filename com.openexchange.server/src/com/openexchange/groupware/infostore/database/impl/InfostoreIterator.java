@@ -393,6 +393,19 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                                 set.setValue(null);
                             }
                             break;
+                        case Metadata.CAMERA_APERTURE:
+                            //$FALL-THROUGH$
+                        case Metadata.CAMERA_EXPOSURE_TIME:
+                            //$FALL-THROUGH$
+                        case Metadata.CAMERA_FOCAL_LENGTH:
+                            double dbl = rs.getDouble(column);
+                            if (!rs.wasNull()) {
+                                // A negative value signals infinity
+                                set.setValue(Double.valueOf(dbl < 0 ? Double.POSITIVE_INFINITY : dbl));
+                            } else {
+                                set.setValue(null);
+                            }
+                            break;
                         default:
                             set.setValue(process(m, rs.getObject(column)));
                             break;
