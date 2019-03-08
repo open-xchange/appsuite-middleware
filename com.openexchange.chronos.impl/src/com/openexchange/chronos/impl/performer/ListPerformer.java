@@ -50,10 +50,14 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
+import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +74,9 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link ListPerformer}
@@ -121,17 +128,27 @@ public class ListPerformer extends AbstractQueryPerformer {
                 objectIDs.add(eventID.getObjectID());
             }
         }
-        List<Event> events = readEventsInFolder(folder, objectIDs.toArray(new String[objectIDs.size()]), false, null);
+        EventField[] fields = getFields(session, EventField.ATTENDEES, EventField.ORGANIZER);
+        List<Event> events = loadEventsInFolder(folder, objectIDs.toArray(new String[objectIDs.size()]), fields);
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
+            /*
+             * lookup loaded event data, check permissions & userize event
+             */
             Event event = find(events, eventID.getObjectID());
             if (null == event) {
-                continue;
+                continue; // skip
             }
             Check.eventIsVisible(folder, event);
+            Check.eventIsInFolder(event, folder);
+            event = postProcessor().process(event, folder).getFirstEvent();
+            if (null == event) {
+                continue; // skip
+            }
+            /*
+             * retrieve targeted event occurrence if specified
+             */
             RecurrenceId recurrenceId = eventID.getRecurrenceID();
-            event.setFolderId(folder.getId());
-            event = anonymizeIfNeeded(session, event);
             if (null != recurrenceId) {
                 if (isSeriesMaster(event)) {
                     if (null != storage.getEventStorage().loadException(event.getId(), recurrenceId, new EventField[] { EventField.ID })) {
@@ -153,6 +170,31 @@ public class ListPerformer extends AbstractQueryPerformer {
             }
         }
         return orderedEvents;
+    }
+
+    private List<Event> loadEventsInFolder(CalendarFolder folder, String[] objectIDs, EventField[] fields) throws OXException {
+        /*
+         * construct search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder));
+        if (null != objectIDs) {
+            if (0 == objectIDs.length) {
+                return Collections.emptyList();
+            } else if (1 == objectIDs.length) {
+                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectIDs[0]));
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (String objectID : objectIDs) {
+                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectID));
+                }
+                searchTerm.addSearchTerm(orTerm);
+            }
+        }
+        /*
+         * perform search & load necessary event data
+         */
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        return storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
     }
 
     private Map<CalendarFolder, List<EventID>> getIdsPerFolder(List<EventID> eventIDs) throws OXException {

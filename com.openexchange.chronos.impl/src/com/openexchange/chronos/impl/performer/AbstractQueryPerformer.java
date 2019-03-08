@@ -49,25 +49,14 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
-import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
@@ -76,9 +65,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.Quota;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link AbstractQueryPerformer}
@@ -123,41 +109,6 @@ public abstract class AbstractQueryPerformer {
     protected boolean hasReadPermission(Event event) {
         int userId = session.getUserId();
         return matches(event.getCalendarUser(), userId) || matches(event.getCreatedBy(), userId) || isAttendee(event, userId) || isOrganizer(event, userId);
-    }
-
-    protected List<Event> readEventsInFolder(CalendarFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
-        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder));
-        if (null != objectIDs) {
-            if (0 == objectIDs.length) {
-                return Collections.emptyList();
-            } else if (1 == objectIDs.length) {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectIDs[0]));
-            } else {
-                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                for (String objectID : objectIDs) {
-                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectID));
-                }
-                searchTerm.addSearchTerm(orTerm);
-            }
-        }
-        if (null != updatedSince) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, updatedSince));
-        }
-        /*
-         * perform search & userize the results
-         */
-        EventField[] fields = getFields(session);
-        if (tombstones) {
-            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
-            return storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-        } else {
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-            return storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        }
     }
 
     /**
