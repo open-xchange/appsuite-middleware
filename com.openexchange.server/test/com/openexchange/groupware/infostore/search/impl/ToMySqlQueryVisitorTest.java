@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -89,131 +90,155 @@ public class ToMySqlQueryVisitorTest {
         super();
         this.session = new SimServerSession(1, 1);
     }
-
-         @Test
-     public void testSqlPattern() {
-
+    
+    @Test
+    public void testSqlPattern() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", true, true);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query: " + result, result.endsWith("UPPER(infostore_document.description) LIKE UPPER('%bluber blah_foo%')"));
-
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("UPPER(infostore_document.description) LIKE UPPER(?)"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
+        
         dtz = new DescriptionTerm("bluber blah?foo", false, true);
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber blah_foo%'"));
-
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
+        
         dtz = new DescriptionTerm("*bluber %blah?foo*", false, false);
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber \\%blah_foo%'"));
-
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber \\%blah_foo%", visitor.previewParameters().get(0));
+        
         dtz = new DescriptionTerm("bluber_blah", false, false);
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = 'bluber_blah'"));
-
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "bluber_blah", visitor.previewParameters().get(0));
+        
         dtz = new DescriptionTerm("bluber_blah", false, true);
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber\\_blah%'"));
-
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber\\_blah%", visitor.previewParameters().get(0));
+        
         dtz = new DescriptionTerm("bluber\\blah", false, false);
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = 'bluber\\\\blah'"));
-
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "bluber\\blah", visitor.previewParameters().get(0));
     }
 
-         @Test
-     public void testFolders() {
+    @Test
+    public void testFolders() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
     }
 
-         @Test
-     public void testWithoutAllFolders() {
+    @Test
+    public void testWithoutAllFolders() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, null, new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
 
         visitor = new ToMySqlQueryVisitor(session, new int[0], new int[] {120}, "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
     }
 
-         @Test
-     public void testWithoutOwnFolders() {
+    @Test
+    public void testWithoutOwnFolders() {
         DescriptionTerm dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, null, "SELECT field01");
         visitor.visit(dtz);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
 
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[0], "SELECT field01");
         visitor.visit(dtz);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND infostore_document.description LIKE ?"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%bluber blah_foo%", visitor.previewParameters().get(0));
     }
 
-         @Test
-     public void testWithLimit() {
+    @Test
+    public void testWithLimit() {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", null, InfostoreSearchEngine.NOT_SET, 0, 5);
         visitor.visit(term);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER('%test123%') LIMIT 0,5"));
+        assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER(?) LIMIT 0,5"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%test123%", visitor.previewParameters().get(0));
     }
 
-         @Test
-     public void testWithLimitAndOrder() {
+    @Test
+    public void testWithLimitAndOrder() {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5);
         visitor.visit(term);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER('%test123%') ORDER BY last_modified ASC LIMIT 0,5"));
+        assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER(?) ORDER BY last_modified ASC LIMIT 0,5"));
+        assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
+        assertEquals("Unexpected constant operator", "%test123%", visitor.previewParameters().get(0));
     }
 
     // see bug 32874
-         @Test
-     public void testUnsupportedTerms() throws OXException {
+    @Test
+    public void testUnsupportedTerms() throws OXException {
         ContentTerm term1 = new ContentTerm("test123", false, false);
         FileSizeTerm term2 = new FileSizeTerm(new ComparablePattern<Number>() {
 
             @Override
             public Number getPattern() {
-                return 1024 * 1024 * 10;
+                return Integer.valueOf(1024 * 1024 * 10);
             }
 
             @Override
@@ -229,13 +254,13 @@ public class ToMySqlQueryVisitorTest {
 
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5);
         visitor.visit(andTerm);
-        String result = visitor.getMySqlQuery();
+        String result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
 
         visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5);
         visitor.visit(orTerm);
-        result = visitor.getMySqlQuery();
+        result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
     }

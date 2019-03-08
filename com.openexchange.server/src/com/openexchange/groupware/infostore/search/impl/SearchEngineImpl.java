@@ -143,23 +143,22 @@ public class SearchEngineImpl extends DBService {
     public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, List<Integer> all, List<Integer> own, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, all, own, getResultFieldsSelect(cols), sortedBy, dir, start, end);
         searchTerm.visit(visitor);
-        String sqlQuery = visitor.getMySqlQuery();
         boolean successful = false;
         PreparedStatement stmt = null;
         Connection con = null;
         InfostoreSearchIterator iter = null;
         try {
             con = getReadConnection(session.getContext());
-            stmt = con.prepareStatement(sqlQuery);
+            stmt = visitor.prepareStatement(con, false);
             try {
-                if (sqlQuery.indexOf("LIMIT ", 0) > 0) {
+                if (start >= 0 && end >= 0 && start < end) {
                     iter = InfostoreSearchIterator.createIteratorWithErrorOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
                 } else {
                     iter = InfostoreSearchIterator.createIteratorWithIgnoreOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
                 }
             } catch (RepeatWithDistinctException e) {
                 Databases.closeSQLStuff(stmt);
-                stmt = con.prepareStatement(injectDistinctInQuery(sqlQuery));
+                stmt = visitor.prepareStatement(con, true);
                 iter = InfostoreSearchIterator.createIteratorWithNoopOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
             }
             // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
@@ -171,10 +170,10 @@ public class SearchEngineImpl extends DBService {
         } catch (SQLException e) {
             if (e.getCause() instanceof java.net.SocketTimeoutException) {
                 // Communications link failure
-                throw InfostoreExceptionCodes.SEARCH_TOOK_TOO_LONG.create(e, session.getUserId(), session.getContextId(), sqlQuery);
+                throw InfostoreExceptionCodes.SEARCH_TOOK_TOO_LONG.create(e, session.getUserId(), session.getContextId(), String.valueOf(stmt));
             }
             LOG.error("", e);
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, String.valueOf(stmt));
         } catch (OXException e) {
             LOG.error("", e);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
@@ -333,13 +332,16 @@ public class SearchEngineImpl extends DBService {
      * @param filter An optional filter expression that is supposed to be appended to WHERE clause
      * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
      * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
+     * @return The number of times the passed <i>filter</i> query was actually appended
      */
-    protected static void appendFoldersAsUnion(ServerSession session, StringBuilder sqlQuery, String filter, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+    protected static int appendFoldersAsUnion(ServerSession session, StringBuilder sqlQuery, String filter, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+        int filterCount = 0;
         if (readAllFolders.isEmpty() && readOwnFolders.isEmpty()) {
             if (null != filter) {
                 sqlQuery.append(" WHERE ").append(filter);
+                filterCount++;
             }
-            return;
+            return filterCount;
         }
         int contextID = session.getContextId();
         int userID = session.getUserId();
@@ -368,6 +370,7 @@ public class SearchEngineImpl extends DBService {
                 sqlQuery.append("))");
                 if (null != filter) {
                     sqlQuery.append(" AND ").append(filter);
+                    filterCount++;
                 }
                 appendUnion = true;
             }
@@ -386,6 +389,7 @@ public class SearchEngineImpl extends DBService {
                 sqlQuery.append(" WHERE infostore.cid = ").append(contextID);
                 if (null != filter) {
                     sqlQuery.append(" AND ").append(filter);
+                    filterCount++;
                 }
                 appendUnion = true;
             }
@@ -406,8 +410,10 @@ public class SearchEngineImpl extends DBService {
             sqlQuery.append(" AND infostore.created_by=").append(userID);
             if (null != filter) {
                 sqlQuery.append(" AND ").append(filter);
+                filterCount++;
             }
         }
+        return filterCount;
     }
 
     /**
