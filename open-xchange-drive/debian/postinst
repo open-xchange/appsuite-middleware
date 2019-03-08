@@ -26,16 +26,25 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
-  p_drive=/opt/open-xchange/etc/drive.properties
-  p_drive_backup=${p_drive}.dpkg-backup
-  if [ -e ${p_drive_backup} ]
+  # SCR-392
+  # don't wrap in ox_scr_todo as it might have to reexecute after downgrade or
+  # configs will be lost
+  orig_pfile=/opt/open-xchange/etc/drive.properties
+  save_pfile=${orig_pfile}.dpkg-backup
+  rm_pfile=${orig_pfile}.dpkg-remove
+  if [ -e ${save_pfile} ] && [ ! -e ${orig_pfile} ]
   then
     # preinst upgrade detected modifications that we want to keep
-    # but as lean config now, like as if he user created the file
-    cp -a ${p_drive_backup} ${p_drive}
+    # but as lean config now, like as if the user created the file
+    echo "Keeping ${save_pfile} as ${orig_pfile} due to modifications"
+    mv ${save_pfile} ${orig_pfile}
   fi
-  dpkg-maintscript-helper rm_conffile ${p_drive} 7.10.2~ -- "$@"
-
+  if [ -e ${rm_pfile} ] && [ ! -e ${orig_pfile} ]
+  then
+    # preinst upgrade detected no modifications remove old file
+    echo "Removing ${rm_pfile} as ${orig_pfile} had no modifications"
+    rm -f ${rm_pfile}
+  fi
 }
 
 case "$1" in

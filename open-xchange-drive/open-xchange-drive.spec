@@ -53,16 +53,16 @@ GLOBIGNORE='*'
 %posttrans
 . /opt/open-xchange/lib/oxfunctions.sh
 
-SCR=SCR-392
-ox_scr_todo ${SCR} && {
-  orig_pfile=/opt/open-xchange/etc/drive.properties
-  save_pfile=${orig_pfile}.rpmsave
-  if [ -e ${save_pfile} ]
-  then
-    mv ${save_pfile} ${orig_pfile}
-  fi
-  ox_scr_done ${SCR}
-}
+# SCR-392
+# don't wrap in ox_scr_todo as it might have to reexecute after downgrade or
+# configs will be lost
+orig_pfile=/opt/open-xchange/etc/drive.properties
+save_pfile=${orig_pfile}.rpmsave
+if [ -e ${save_pfile} ] && [ ! -e ${orig_pfile} ]
+then
+  echo "Keeping ${save_pfile} as ${orig_pfile} due to modifications"
+  mv ${save_pfile} ${orig_pfile}
+fi
 
 %files
 %defattr(-,root,root)
