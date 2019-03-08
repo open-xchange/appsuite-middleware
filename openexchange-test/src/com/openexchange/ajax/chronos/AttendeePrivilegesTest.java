@@ -352,7 +352,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
 
         UpdateBody body = new UpdateBody();
         body.setEvent(masterUpdate);
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), defaultFolderId, masterUpdate.getId(), body, masterUpdate.getLastModified(), null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), defaultFolderId, masterUpdate.getId(), body, masterUpdate.getLastModified(), null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertThat(Integer.valueOf(updateResponse.getData().getUpdated().size()), is(Integer.valueOf(2)));
 
         master = updateResponse.getData().getUpdated().stream().filter(e -> e.getId().equals(e.getSeriesId())).findAny().orElse(null);

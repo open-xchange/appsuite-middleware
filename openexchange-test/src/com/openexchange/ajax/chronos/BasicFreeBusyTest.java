@@ -159,7 +159,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
             }
         }
         // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), false, false, false, null, null, null, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), false, false, false, null, null, null, false, null);
         assertNull(createEvent.getErrorDesc(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);

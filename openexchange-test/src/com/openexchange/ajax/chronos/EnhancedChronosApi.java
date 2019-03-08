@@ -161,7 +161,7 @@ public class EnhancedChronosApi extends ChronosApi {
      * HTML response.
      */
     @Override
-    public String createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications, Boolean extendedEntities) throws ApiException {
+    public String createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications, Boolean extendedEntities, String usedGroups) throws ApiException {
         return createEventWithAttachments(session, folder, json0, Collections.singletonList(file0), ignoreConflicts, sendInternalNotifications);
     }
 
@@ -171,7 +171,7 @@ public class EnhancedChronosApi extends ChronosApi {
      * HTML response.
      */
     @Override
-    public String updateEventWithAttachments(String session, String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean ignoreConflicts, Boolean sendInternalNotifications, Boolean extendedEntities) throws ApiException {
+    public String updateEventWithAttachments(String session, String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean ignoreConflicts, Boolean sendInternalNotifications, Boolean extendedEntities, String usedGroups) throws ApiException {
         Object localVarPostBody = null;
 
         // verify the required parameter 'session' is set

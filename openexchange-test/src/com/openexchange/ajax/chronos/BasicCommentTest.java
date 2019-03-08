@@ -129,7 +129,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         body.setEvent(eventData);
         body.setComment(UPDATE);
         eventData.setDescription("Description got updated.");
-        ChronosCalendarResultResponse response = chronosApi.updateEvent(apiClient.getSession(), getFolderId(), eventData.getId(), body, Long.valueOf(System.currentTimeMillis()), null, null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, null, null, Boolean.FALSE);
+        ChronosCalendarResultResponse response = chronosApi.updateEvent(apiClient.getSession(), getFolderId(), eventData.getId(), body, Long.valueOf(System.currentTimeMillis()), null, null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         Assert.assertThat(response.getErrorDesc(), response.getError(), nullValue());
 
         validateMailInSecondUsersInbox("Appointment changed: " + summary, UPDATE);
