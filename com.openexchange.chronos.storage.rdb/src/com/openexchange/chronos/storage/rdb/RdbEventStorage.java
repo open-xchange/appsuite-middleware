@@ -826,7 +826,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
                 rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue().getTimestamp() + eventDuration);
             } catch (OXException e) {
-                addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.NORMAL, "Unable to determine effective range for series master event", e);
+                addInvalidDataWarning(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.NORMAL, "Unable to determine effective range for series master event", e);
             }
         } else if (isSeriesException(event) && null != event.getRecurrenceId() && 0 < compare(event.getRecurrenceId().getValue(), rangeUntil, TimeZones.UTC)) {
             /*

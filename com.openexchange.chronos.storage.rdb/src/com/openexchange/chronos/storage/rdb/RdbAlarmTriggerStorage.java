@@ -619,7 +619,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             try {
                 trigger.setTimezone(resolver.getTimeZone(userId));
             } catch (OXException e) {
-                addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine timezone for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+                addInvalidDataWarning(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine timezone for user \"" + userId + "\", skipping insertion of alarm triggers", e);
                 return null;
             }
         }
@@ -653,7 +653,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         try {
             trigger.setFolder(getFolderId(event, userId));
         } catch (OXException e) {
-            addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+            addInvalidDataWarning(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
             return null;
         }
 

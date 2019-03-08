@@ -143,7 +143,7 @@ public abstract class CalendarStorageWarnings {
      * @param cause The optional initial cause
      * @return The added warning
      */
-    public OXException addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
+    public OXException addInvalidDataWarning(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
         OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
         Mapping<? extends Object, Event> mapping = com.openexchange.chronos.common.mapping.EventMapper.getInstance().opt(field);
         if (null != mapping) {
@@ -190,7 +190,7 @@ public abstract class CalendarStorageWarnings {
         if (null == unsupportedDataThreshold || 0 > unsupportedDataThreshold.compareTo(severity)) {
             throw error;
         }
-        addInvalidDataWaring(eventId, field, severity, message, error);
+        addInvalidDataWarning(eventId, field, severity, message, error);
     }
 
     /**

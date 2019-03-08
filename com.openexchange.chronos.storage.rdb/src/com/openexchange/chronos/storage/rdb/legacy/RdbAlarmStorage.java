@@ -339,7 +339,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             return getAlarms(event, userID, reminderData);
         } catch (OXException e) {
-            addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Ignoring invalid legacy " + reminderData + " for user " + userID, e);
+            addInvalidDataWarning(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Ignoring invalid legacy " + reminderData + " for user " + userID, e);
             return null;
         }
     }

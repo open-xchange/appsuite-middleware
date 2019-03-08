@@ -569,11 +569,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 } catch (OXException e2) {
                     fallback = fallBackNotFound(e2, eventId, attendee);
                     if (fallback == null) {
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + attendee, e);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + attendee, e);
+                        return null;
                     }
                 }
                 String message = "Invalid stored calendar user address \"" + attendee.getUri() + "\" for entity " + attendee.getEntity() + ", falling back to default address \"" + fallback.getUri() + "\"";
-                addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, message, e);
+                addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, message, e);
                 return fallback;
             }
             throw e;
@@ -588,7 +589,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             Attendee externalAttendee = CalendarUtils.asExternal(attendee, AttendeeMapper.getInstance().getMappedFields());
             if (externalAttendee != null) {
                 String message = "Falling back to external attendee representation for non-existent user " + attendee;
-                addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
+                addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
                 return (entityProcessor.getEntityResolver().applyEntityData(externalAttendee));
             }
         }

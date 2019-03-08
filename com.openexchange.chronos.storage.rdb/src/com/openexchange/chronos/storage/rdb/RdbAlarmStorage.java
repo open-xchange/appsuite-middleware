@@ -773,7 +773,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             try {
                 attendee = entityProcessor.adjustAfterLoad(attendee);
             } catch (OXException e) {
-                addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
+                addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
             }
             attendees.add(attendee);
         }
@@ -804,7 +804,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 try {
                     attachment.setSize(Long.parseLong(sizeParameter.getValue()));
                 } catch (NumberFormatException e) {
-                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
+                    addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
                 }
             }
             ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
@@ -814,7 +814,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                     fileHolder.write(BaseEncoding.base64().decode((String) attachmentProperty.getValue()));
                     attachment.setData(fileHolder);
                 } catch (IllegalArgumentException | OXException e) {
-                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                    addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                     Streams.close(fileHolder);
                 }
             } else {
@@ -849,7 +849,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                         parameters.add(new ExtendedPropertyParameter("ENCODING", "BASE64"));
                         parameters.add(new ExtendedPropertyParameter("VALUE", "BINARY"));
                     } catch (IOException | OXException e) {
-                        addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                        addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                         value = null;
                     }
                 } else {
