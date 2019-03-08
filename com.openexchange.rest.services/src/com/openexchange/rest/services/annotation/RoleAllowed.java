@@ -59,7 +59,14 @@ import java.lang.annotation.Target;
 /**
  * Specifies the {@link Role role} permitted to access certain REST end-points.
  * <p>
- * This annotation may be used in favour of {@link javax.annotation.security.RolesAllowed} annotation to work with enum-based constants.
+ * This annotation may be used in favor of {@link javax.annotation.security.RolesAllowed} annotation to work with enum-based constants.
+ * <p>
+ * The value of the RoleAllowed annotation is a {@link Role security role}. This annotation can be specified on a class or on method(s).
+ * <ul>
+ * <li>Specifying it at a class level means that it applies to all the methods in the class.</li>
+ * <li>Specifying it on a method means that it is applicable to that method only.</li>
+ * <li>If applied at both - the class and methods level, the method value overrides the class value if the two conflict.</li>
+ * </ul>
  * <p>
  * Example:
  * <pre>
