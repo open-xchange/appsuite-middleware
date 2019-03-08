@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -99,12 +100,12 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn");
-        
+
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
             private volatile IOSAPNCertificateProvider iosProvider;
             private volatile IOSAPNCertificateProvider macosProvider;
-            
+
             @Override
             public void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
@@ -114,7 +115,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                         iosProvider = () -> access;
                         registerService(IOSAPNCertificateProvider.class, iosProvider);
                     }
-                    
+
                     APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS);
                     if(macAccess != null) {
                         macosProvider = () -> macAccess;
@@ -157,11 +158,11 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
-                boolean production = Boolean.valueOf(getProperty(properties, DriveEventsAPNProperty.production, optionals));
-                if (Strings.isUTF8Bytes(keystore.getBytes())) {
+                boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
+                if (Strings.isUTF8Bytes(keystore.getBytes(StandardCharsets.UTF_8))) {
                     return new APNAccess(keystore, password, production);
                 }
-                return new APNAccess(keystore.getBytes(), password, production);
+                return new APNAccess(keystore.getBytes(StandardCharsets.ISO_8859_1), password, production);
             }
         } catch (OXException e) {
             // nothing to do
@@ -171,7 +172,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     /**
      * Get the given property from the {@link Properties} object
-     * 
+     *
      * @param properties The {@link Properties} object
      * @param prop The {@link Property} to return
      * @param optional The optional
