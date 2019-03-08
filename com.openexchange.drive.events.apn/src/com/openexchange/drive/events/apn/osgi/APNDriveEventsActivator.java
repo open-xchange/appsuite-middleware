@@ -49,7 +49,7 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import org.osgi.framework.ServiceReference;
@@ -149,11 +149,9 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
      * @return The {@link APNAccess} or null
      */
     protected APNAccess createAccess(Properties properties, OperationSystemType type) {
-        Map<String, String> optionals = new HashMap<>(1);
-        optionals.put(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
-        String keystore;
         try {
-            keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
+            Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
+            String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
 
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
