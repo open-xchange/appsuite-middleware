@@ -111,7 +111,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
         }
         uid = false;
         length = seqNums.length;
-        args = length == messageCount ? (1 == length ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + LENGTH_BODYSTRUCTURE);
+        args = length == messageCount ? (1 == length ? ARGS_FIRST : ARGS_ALL) : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + LENGTH_BODYSTRUCTURE);
         if (0 == length) {
             returnDefaultValue = true;
         }
