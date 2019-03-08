@@ -55,6 +55,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -72,6 +74,7 @@ import com.openexchange.admin.tools.AdminCache;
 public class UserNameUserAttributeChangers extends AbstractAttributeChangers {
 
     private final AdminCache adminCache;
+    private static final Logger LOG = LoggerFactory.getLogger(UserNameUserAttributeChangers.class);
 
     /**
      * Initialises a new {@link UserNameUserAttributeChangers}.
@@ -97,6 +100,7 @@ public class UserNameUserAttributeChangers extends AbstractAttributeChangers {
             try {
                 OXToolStorageInterface.getInstance().validateUserName(userData.getName());
             } catch (InvalidDataException e) {
+                LOG.error("Error", e);
                 throw new StorageException(e);
             }
         }
@@ -110,6 +114,7 @@ public class UserNameUserAttributeChangers extends AbstractAttributeChangers {
             stmt.setInt(3, userId);
             return stmt.executeUpdate() == 1 ? Collections.singleton("username") : EMPTY_SET;
         } catch (SQLException e) {
+            LOG.error("SQL Error", e);
             throw new StorageException(e);
         }
     }
