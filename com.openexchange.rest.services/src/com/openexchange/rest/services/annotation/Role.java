@@ -50,7 +50,8 @@
 package com.openexchange.rest.services.annotation;
 
 /**
- * {@link Role}
+ * {@link Role} - An enumeration for known security roles for REST end-points. A security role specifies how access to a certain REST
+ * end-point is granted.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -74,11 +75,10 @@ public enum Role {
      * </div>
      */
     INDIVIDUAL_BASIC_AUTHENTICATED("Individual-Basic-Authenticated"),
-
     /**
      * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively signalling to perform basic-auth
-     * with the OX master administrator credentials.
+     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth
+     * against the Open-Xchange Server's master administrator credentials (the ones specified in <code>"mpasswd"</code> file).
      */
     MASTER_ADMIN_AUTHENTICATED("Master-Admin-Basic-Authenticated"),
 

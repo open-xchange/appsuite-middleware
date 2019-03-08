@@ -118,17 +118,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Initialises a new {@link AuthenticationFilter}.
-     * 
+     *
      * @param configurationService The {@link ConfigurationService} instance
      */
     public AuthenticationFilter(ConfigurationService configurationService) {
+        super();
         defaultAuthenticator = initialiseDefaultAuthenticator(configurationService);
         masterAdminAuthenticator = initialiseMasterAdminAuthenticator(configurationService);
     }
 
     /**
      * Initialises the master admin authenticator
-     * 
+     *
      * @param configurationService The {@link ConfigurationService}
      * @return The master admin {@link EndpointAuthenticator}
      */
@@ -164,7 +165,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Initialises the default {@link EndpointAuthenticator}
-     * 
+     *
      * @param configurationService The {@link ConfigurationService}
      * @return The default {@link EndpointAuthenticator}
      */
@@ -179,7 +180,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Gets the {@link Annotation} from the specified class
-     * 
+     *
      * @param annotationClass The class containing the annotation
      * @return The {@link Annotation} {@link A}
      */
@@ -197,7 +198,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Acquires the {@link EndpointAuthenticator} from the {@link ResourceContext}
-     * 
+     *
      * @return The {@link EndpointAuthenticator}
      */
     private EndpointAuthenticator acquireAuthenticator() {
@@ -211,7 +212,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.ws.rs.container.ContainerRequestFilter#filter(javax.ws.rs.container.ContainerRequestContext)
      */
     @Override
@@ -314,7 +315,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Performs basic authentication with the default OX REST credentials
-     * 
+     *
      * @param requestContext The {@link RequestContext}
      */
     private void basicAuth(ContainerRequestContext requestContext) {
@@ -328,8 +329,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Performs the authentication with the specified {@link EndpointAuthenticator}
-     * 
-     * @param authenticator The {@link EndpointAuthenticator} to perform the authenticationw ith
+     *
+     * @param authenticator The {@link EndpointAuthenticator} to perform the authentication with
      * @param requestContext The {@link RequestContext}
      * @param invokedMethod The invoked REST method
      */
@@ -353,7 +354,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Performs basic authentication with the OX master admin credentials
-     * 
+     *
      * @param requestContext The {@link RequestContext}
      * @param invokedMethod The invoked REST method
      */
@@ -368,7 +369,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Reflects the authentication status to the specified {@link RequestContext}
-     * 
+     *
      * @param authenticated whether the authentication was successful
      * @param realm The realm of the authentication
      * @param requestContext The {@link RequestContext}
@@ -386,7 +387,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Denies the request due to failed or missing authentication
-     * 
+     *
      * @param requestContext The {@link RequestContext}
      */
     private void deny(ContainerRequestContext requestContext) {
@@ -395,7 +396,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Checks whether the specified {@link Role} is enlisted in the specified array of roles
-     * 
+     *
      * @param roleToCheck The role to check
      * @param roles The array of roles
      * @return <code>true</code> if the role is enlisted; <code>false</code> otherwise
@@ -414,7 +415,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Extracts the credentials from the Authorization header
-     * 
+     *
      * @param authHeader The authorization header
      * @return The {@link Credentials}
      */
