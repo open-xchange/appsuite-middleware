@@ -1,13 +1,4 @@
-'/saml/{tenant}/sls':
-  parameters:
-    - in: path
-      name: tenant
-      type: string
-      description: |
-        In a multi-tenant environment, where different tenants might
-        connect to different identity providers, this parameter denotes
-        the tenant to start a SAML flow for. In single-tenant environments
-        this parameter is superfluous.
+/saml/{tenant}/sls:
   get:
     operationId: sls-req
     tags:
@@ -17,6 +8,15 @@
       SAML 2.0 Single Logout Service. Accepts `<LogoutRequest>` messages from the IdP
       per `HTTP-Redirect` binding.
     parameters:
+      - in: path
+        name: tenant
+        type: string
+        required: true
+        description: |
+          In a multi-tenant environment, where different tenants might
+          connect to different identity providers, this parameter denotes
+          the tenant to start a SAML flow for. In single-tenant environments
+          this parameter is superfluous.
       - in: query
         name: SAMLRequest
         type: string
@@ -56,7 +56,8 @@
         description: In case of internal server errors
   post:
     operationId: sls-resp
-    consumes: application/xml
+    consumes: 
+      - application/xml
     tags:
       - SAML
     summary: Single Logout Service for Logout Responses
@@ -64,6 +65,15 @@
       SAML 2.0 Single Logout Service. Accepts `<LogoutResponse>` messages of the
       Single Logout Profile per `HTTP-POST` binding.
     parameters:
+      - in: path
+        name: tenant
+        type: string
+        required: true
+        description: |
+          In a multi-tenant environment, where different tenants might
+          connect to different identity providers, this parameter denotes
+          the tenant to start a SAML flow for. In single-tenant environments
+          this parameter is superfluous.
       - in: formData
         name: SAMLResponse
         type: string

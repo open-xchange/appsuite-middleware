@@ -1,13 +1,4 @@
-'/saml/{tenant}/init':
-  parameters:
-    - in: path
-      name: tenant
-      type: string
-      description: |
-        In a multi-tenant environment, where different tenants might
-        connect to different identity providers, this parameter denotes
-        the tenant to start a SAML flow for. In single-tenant environments
-        this parameter is superfluous.
+/saml/{tenant}/init:
   get:
     operationId: init
     tags:
@@ -18,6 +9,15 @@
       Initiates any supported SAML 2.0 login and logout flow as described
       in https://documentation.open-xchange.com/latest/middleware/login/02_saml.html.
     parameters:
+      - in: path
+        name: tenant
+        type: string
+        required: true
+        description: |
+          In a multi-tenant environment, where different tenants might
+          connect to different identity providers, this parameter denotes
+          the tenant to start a SAML flow for. In single-tenant environments
+          this parameter is superfluous.
       - in: query
         name: flow
         type: string
@@ -34,7 +34,8 @@
         description: |
           Responds with `302 Found` and sets the response header `Location`
           to the actual redirect URI.
-    produces: application/json
+    produces: 
+      - application/json
     responses:
       200:
         description: |

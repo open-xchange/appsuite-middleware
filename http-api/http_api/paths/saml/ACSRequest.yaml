@@ -1,16 +1,8 @@
-'/saml/{tenant}/acs':
-  parameters:
-    - in: path
-      name: tenant
-      type: string
-      description: |
-        In a multi-tenant environment, where different tenants might
-        connect to different identity providers, this parameter denotes
-        the tenant to start a SAML flow for. In single-tenant environments
-        this parameter is superfluous.
+/saml/{tenant}/acs:
   post:
     operationId: acs
-    consumes: application/xml
+    consumes: 
+      - application/xml
     tags:
       - SAML
     summary: Assertion Consumer Service
@@ -18,6 +10,15 @@
       SAML 2.0 Assertion Consumer Service. Accepts `<Response>` messages of the
       Web Browser SSO Profile per `HTTP-POST` binding.
     parameters:
+      - in: path
+        name: tenant
+        type: string
+        required: true
+        description: |
+          In a multi-tenant environment, where different tenants might
+          connect to different identity providers, this parameter denotes
+          the tenant to start a SAML flow for. In single-tenant environments
+          this parameter is superfluous.
       - in: formData
         name: SAMLResponse
         type: string
