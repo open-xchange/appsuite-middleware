@@ -677,11 +677,12 @@ public final class HttpClients {
 
         private volatile IdleConnectionCloser idleConnectionCloser;
         private final int keepAliveMonitorInterval;
-        private AtomicBoolean shuttingDown = new AtomicBoolean(false);
+        private final AtomicBoolean shuttingDown;
 
         ClientConnectionManager(Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
             super(socketFactoryRegistry);
             this.keepAliveMonitorInterval = keepAliveMonitorInterval;
+            shuttingDown = new AtomicBoolean(false);
         }
 
         /**
