@@ -49,18 +49,16 @@
 
 package com.openexchange.ipcheck.countrycode.osgi;
 
-import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.ipcheck.spi.IPChecker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.MultipleServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
@@ -73,7 +71,6 @@ import com.openexchange.timer.TimerService;
 public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(CountryCodeIpCheckerActivator.class);
-    private IPCheckMBeanImpl metricsMBean;
 
     /**
      * Initializes a new {@link CountryCodeIpCheckerActivator}.
@@ -89,38 +86,34 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class, MetricService.class, SessiondService.class };
+        return new Class<?>[] { TimerService.class, SessiondService.class, ConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { GeoLocationService.class, ManagementService.class, MetricService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        CountryCodeIpChecker service = new CountryCodeIpChecker(this, new IPCheckMetricCollector(getServiceSafe(MetricService.class)));
-        registerService(IPChecker.class, service);
-
-        ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
-
-        metricsMBean = new IPCheckMBeanImpl(this, service);
-        ManagementService managementService = getServiceSafe(ManagementService.class);
-        managementService.registerMBean(objectName, metricsMBean);
-        LOG.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterService(IPChecker.class);
-
-        if (metricsMBean != null) {
-            metricsMBean.stop();
+        ConfigurationService configService = getService(ConfigurationService.class);
+        boolean ipCheck = Boolean.parseBoolean(configService.getProperty(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        if (ipCheck) {
+            LOG.info("IPCheck is enabled. No need to register the 'CountryCodeIpChecker'.");
+            return;
         }
-        ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
-        ManagementService managementService = getServiceSafe(ManagementService.class);
-        managementService.unregisterMBean(objectName);
-        super.stopBundle();
-        LOG.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
+        String ipCheckMode = configService.getProperty("com.openexchange.ipcheck.mode");
+        if (Strings.isEmpty(ipCheckMode)) {
+            LOG.warn("The '{}' is disabled and no other mode has been enabled! Check the 'com.openexchange.ipcheck.mode' property!", ServerConfig.Property.IP_CHECK.getPropertyName());
+            return;
+        }
+
+        if (false == ipCheckMode.equals("countrycode")) {
+            LOG.info("The '{}' is disabled mode '{}' has been enabled. No need to register the 'CountryCodeIpChecker'.", ServerConfig.Property.IP_CHECK.getPropertyName(), ipCheckMode);
+            return;
+        }
+        MultipleServiceTracker tracker = new GeoLocationServiceTracker(this, context);
+        rememberTracker(tracker.createTracker());
+        openTrackers();
     }
 }
