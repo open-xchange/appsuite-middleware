@@ -59,9 +59,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.icap.conf.ICAPClientProperty;
-import com.openexchange.icap.exceptions.ICAPClientExceptionCodes;
 import com.openexchange.icap.impl.cache.GenericICAPCacheKey;
 import com.openexchange.icap.impl.cache.ICAPOptionsCacheLoader;
 import com.openexchange.icap.impl.request.handler.ICAPRequestHandler;
@@ -124,9 +122,9 @@ public class ICAPClient {
      * @param port The ICAP server's listening port
      * @param service The service for which to request the OPTIONS
      * @return The {@link ICAPOptions}
-     * @throws OXException if an error is occurred
+     * @throws ExecutionException if an error is occurred
      */
-    public ICAPOptions getOptions(String server, int port, String service) throws OXException {
+    public ICAPOptions getOptions(String server, int port, String service) throws ExecutionException {
         return getOptions(server, port, service, false);
     }
 
@@ -145,17 +143,13 @@ public class ICAPClient {
      * 
      * @param refresh Whether to refresh the cached copy
      * @return The {@link ICAPOptions}
-     * @throws OXException if an error is occurred
+     * @throws ExecutionException if an error is occurred
      */
-    public ICAPOptions getOptions(String server, int port, String service, boolean refresh) throws OXException {
-        try {
-            if (refresh) {
-                optionsCache.invalidate(new GenericICAPCacheKey(server, port, service));
-            }
-            return optionsCache.get(new GenericICAPCacheKey(server, port, service));
-        } catch (ExecutionException e) {
-            throw ICAPClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    public ICAPOptions getOptions(String server, int port, String service, boolean refresh) throws ExecutionException {
+        if (refresh) {
+            optionsCache.invalidate(new GenericICAPCacheKey(server, port, service));
         }
+        return optionsCache.get(new GenericICAPCacheKey(server, port, service));
     }
 
     /**
@@ -163,9 +157,11 @@ public class ICAPClient {
      * 
      * @param request the request to execute
      * @return The response
-     * @throws OXException if an error is occurred
+     * @throws UnknownHostException if the IP address of the host of the ICAP server
+     *             could not be determined
+     * @throws IOException if an I/O error is occurred
      */
-    public ICAPResponse execute(ICAPRequest request) throws OXException {
+    public ICAPResponse execute(ICAPRequest request) throws IOException {
         ICAPRequestHandler requestHandler = requestHandlers.get(request.getMethod());
         if (requestHandler == null) {
             throw new IllegalArgumentException("No handler found for handling the '" + request.getMethod() + "' method.");
@@ -173,8 +169,6 @@ public class ICAPClient {
         Socket socket = createSocket(request.getServer(), request.getPort());
         try {
             return requestHandler.handle(request, socket);
-        } catch (IOException e) {
-            throw ICAPClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (request.getOperationMode().equals(OperationMode.DOUBLE_FETCH)) {
                 // - Note that we close the socket right after execution only 
@@ -196,18 +190,14 @@ public class ICAPClient {
      * @param hostname The hostname
      * @param port the port
      * @return The newly created {@link Socket}
-     * @throws OXException if the hostname is unknown or an I/O error is occurred
+     * @throws UnknownHostException if the IP address of the host of the ICAP server
+     *             could not be determined
+     * @throws IOException if an I/O error is occurred
      */
-    private Socket createSocket(String hostname, int port) throws OXException {
-        try {
-            Socket socket = new Socket(hostname, port);
-            socket.setSoTimeout(getSocketTimeout());
-            return socket;
-        } catch (UnknownHostException e) {
-            throw ICAPClientExceptionCodes.UNKNOWN_HOST.create(e, hostname);
-        } catch (IOException e) {
-            throw ICAPClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+    private Socket createSocket(String hostname, int port) throws IOException {
+        Socket socket = new Socket(hostname, port);
+        socket.setSoTimeout(getSocketTimeout());
+        return socket;
     }
 
     /**
