@@ -49,8 +49,6 @@
 
 package com.openexchange.find.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.find.SearchService;
@@ -74,8 +72,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class FindActivator extends HousekeepingActivator {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
-
     /**
      * Initializes a new {@link FindActivator}.
      */
@@ -90,7 +86,8 @@ public class FindActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.find");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
+        logger.info("Starting bundle: com.openexchange.find");
         Services.setServiceLookup(this);
         try {
             final SearchDriverManager driverManager = new SearchDriverManager(context, getService(ConfigViewFactory.class));
@@ -112,16 +109,17 @@ public class FindActivator extends HousekeepingActivator {
             registerService(PreferencesItemService.class, availableModules);
             registerService(ConfigTreeEquivalent.class, availableModules);
 
-            LOG.info("Bundle successfully started: com.openexchange.find");
+            logger.info("Bundle successfully started: com.openexchange.find");
         } catch (final Exception e) {
-            LOG.error("Error while starting bundle: com.openexchange.find", e);
+            logger.error("Error while starting bundle: com.openexchange.find", e);
             throw e;
         }
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.find");
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(FindActivator.class).info("Stopping bundle: com.openexchange.find");
+        stopBundle();
     }
 
 }
