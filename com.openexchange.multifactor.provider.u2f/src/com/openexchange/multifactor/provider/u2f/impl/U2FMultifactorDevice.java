@@ -57,6 +57,7 @@ import java.util.Optional;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.multifactor.AbstractMultifactorDevice;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
@@ -177,7 +178,7 @@ public class U2FMultifactorDevice extends AbstractMultifactorDevice {
      */
     public void setAttestationCertificate(X509Certificate cert) throws CertificateEncodingException {
         Objects.requireNonNull(cert, "attestationCertificate must not be null");
-        setAttestationCertificate(new String(Base64.getEncoder().encode(cert.getEncoded())));
+        setAttestationCertificate(Charsets.toAsciiString(Base64.getEncoder().encode(cert.getEncoded()))); // base64 should yield us-ascci bytes
     }
 
     /**
