@@ -57,11 +57,7 @@ package com.openexchange.multifactor;
  */
 public class RegistrationResult {
 
-    private final RegistrationResultValue value;
-    private MultifactorDevice device;
-    private Object resultParameters;
-
-    public enum RegistrationResultValue {
+    public static enum RegistrationResultValue {
 
         /**
          * Registration started
@@ -94,13 +90,19 @@ public class RegistrationResult {
         REGISTRATION_NOT_FOUND
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final RegistrationResultValue value;
+    private final MultifactorDevice device;
+    //private final Object resultParameters;
+
     /**
      * Initializes a new {@link RegistrationResult}.
      *
      * @param value The {@link RegistrationResultValue} describing whether the registration process was successful or not
      */
     public RegistrationResult(RegistrationResultValue value) {
-        this.value = value;
+        this(null, value);
     }
 
     /**
@@ -112,6 +114,7 @@ public class RegistrationResult {
     public RegistrationResult(MultifactorDevice device, RegistrationResultValue value) {
         this.device = device;
         this.value = value;
+        //resultParameters = null;
     }
 
     /**
@@ -132,12 +135,12 @@ public class RegistrationResult {
         return this.device;
     }
 
-    /**
-     * Gets the resultParameters
-     *
-     * @return The resultParameters
-     */
-    public Object getResultParameters() {
-        return resultParameters;
-    }
+//    /**
+//     * Gets the result parameters
+//     *
+//     * @return The result parameters
+//     */
+//    public Object getResultParameters() {
+//        return resultParameters;
+//    }
 }
