@@ -264,8 +264,20 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
         return enhancements;
     }
 
+    /**
+     * Adds given <code>SessionEnhancement</code> instance to these parameters.
+     *
+     * @param enhancement The enhancement to add
+     */
     public void addEnhancement(SessionEnhancement enhancement) {
-        this.enhancements.add(enhancement);
+        if (null != enhancement) {
+            ArrayList<SessionEnhancement> enhancements = this.enhancements;
+            if (null == enhancements) {
+                enhancements = new ArrayList<>(4);
+                this.enhancements = enhancements;
+            }
+            enhancements.add(enhancement);
+        }
     }
 
     @Override
