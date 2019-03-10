@@ -81,6 +81,7 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
      */
     public DefaultAddSessionParameter() {
         super();
+        enhancements = null;
     }
 
     @Override
