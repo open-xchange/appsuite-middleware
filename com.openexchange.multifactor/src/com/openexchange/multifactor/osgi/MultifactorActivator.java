@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -197,8 +196,8 @@ public class MultifactorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 }
