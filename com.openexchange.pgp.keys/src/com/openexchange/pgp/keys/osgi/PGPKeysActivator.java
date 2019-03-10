@@ -1,38 +1,43 @@
+
 package com.openexchange.pgp.keys.osgi;
 
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pgp.keys.parsing.PGPKeyRingParser;
 import com.openexchange.pgp.keys.parsing.impl.AsciiArmoredKeyParser;
 import com.openexchange.pgp.keys.parsing.impl.PGPKeyParserImpl;
 
+/**
+ * Activator for PGP keys bundle.
+ *
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.0
+ */
 public class PGPKeysActivator extends HousekeepingActivator {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPKeysActivator.class);
-
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    /**
+     * Initializes a new {@link PGPKeysActivator}.
      */
+    public PGPKeysActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PGPKeysActivator.class);
         logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
         registerService(PGPKeyRingParser.class, new PGPKeyParserImpl(new AsciiArmoredKeyParser()));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PGPKeysActivator.class);
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 }
