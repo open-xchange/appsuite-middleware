@@ -55,7 +55,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.oauth.KnownApi;
@@ -71,8 +70,6 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public abstract class AbstractCloudStorageActivator extends HousekeepingActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractCloudStorageActivator.class);
-
     /**
      * Initialises a new {@link AbstractCloudStorageActivator}.
      */
@@ -80,11 +77,6 @@ public abstract class AbstractCloudStorageActivator extends HousekeepingActivato
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         try {
@@ -97,32 +89,22 @@ public abstract class AbstractCloudStorageActivator extends HousekeepingActivato
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, getAPI()), serviceProperties);
         } catch (final Exception e) {
-            LOG.error("", e);
+            LoggerFactory.getLogger(AbstractCloudStorageActivator.class).error("", e);
             throw e;
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        super.stop(context);
     }
 
     /**
      * Returns the {@link ServiceTrackerCustomizer} for the {@link OAuthServiceMetaData} relevant for the
      * specific cloud storage
-     * 
+     *
      * @return the {@link ServiceTrackerCustomizer} for the {@link OAuthServiceMetaData} relevant for the
      */
     protected abstract ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context);
 
     /**
      * Returns the {@link KnownApi} for the cloud storage
-     * 
+     *
      * @return the {@link KnownApi} for the cloud storage
      */
     protected abstract KnownApi getAPI();

@@ -68,17 +68,11 @@ public class BackupStringProviderActivator extends HousekeepingActivator {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BackupStringProviderActivator.class);
 
-    /*
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { LeanConfigurationService.class, BackupStringMultifactorDeviceStorage.class, MultifactorLoginService.class };
     }
 
-    /*
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = super.context;
@@ -90,12 +84,9 @@ public class BackupStringProviderActivator extends HousekeepingActivator {
         registerService(MultifactorProvider.class, backupProvider);
     }
 
-    /*
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 }

@@ -76,7 +76,7 @@ import com.yubico.u2f.data.messages.SignRequestData;
  */
 public class U2FProviderActivator extends HousekeepingActivator {
 
-    static Logger logger = org.slf4j.LoggerFactory.getLogger(U2FProviderActivator.class);
+    static final Logger logger = org.slf4j.LoggerFactory.getLogger(U2FProviderActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -135,8 +135,8 @@ public class U2FProviderActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 }

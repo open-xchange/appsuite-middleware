@@ -49,7 +49,6 @@
 
 package com.openexchange.login.osgi;
 
-import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -94,13 +93,10 @@ public class LoginRampUpActivator extends HousekeepingActivator {
         });
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         closeTrackers();
-        super.stop(context);
+        super.stopBundle();
     }
 
 }

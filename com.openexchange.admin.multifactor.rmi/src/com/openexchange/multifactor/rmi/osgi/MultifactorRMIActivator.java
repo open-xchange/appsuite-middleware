@@ -55,7 +55,6 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.multifactor.MultifactorProviderRegistry;
 import com.openexchange.multifactor.rmi.MultifactorManagementRemoteService;
@@ -70,8 +69,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class MultifactorRMIActivator extends HousekeepingActivator {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(MultifactorRMIActivator.class);
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {Authenticator.class};
@@ -80,7 +77,7 @@ public class MultifactorRMIActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
-        logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
+        org.slf4j.LoggerFactory.getLogger(MultifactorRMIActivator.class).info("Starting bundle {}", context.getBundle().getSymbolicName());
         Dictionary<String, Object> props = new Hashtable<>(2);
         props.put("RMIName", MultifactorManagementRemoteService.RMI_NAME);
         MultifactorManagementRemoteServiceImpl multifactorRMIService = new MultifactorManagementRemoteServiceImpl();
@@ -112,8 +109,8 @@ public class MultifactorRMIActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(MultifactorRMIActivator.class).info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 }

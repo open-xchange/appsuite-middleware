@@ -49,7 +49,6 @@
 
 package com.openexchange.multifactor.json.osgi;
 
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -75,7 +74,7 @@ import com.openexchange.user.UserService;
  */
 public class MultifactorJsonActivator extends AJAXModuleActivator {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(MultifactorJsonActivator.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MultifactorJsonActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -98,8 +97,8 @@ public class MultifactorJsonActivator extends AJAXModuleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 }

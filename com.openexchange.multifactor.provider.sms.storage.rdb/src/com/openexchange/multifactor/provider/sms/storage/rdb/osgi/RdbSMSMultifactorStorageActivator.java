@@ -49,7 +49,6 @@
 
 package com.openexchange.multifactor.provider.sms.storage.rdb.osgi;
 
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -69,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class RdbSMSMultifactorStorageActivator extends HousekeepingActivator {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSMSMultifactorStorageActivator.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSMSMultifactorStorageActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -85,9 +84,9 @@ public class RdbSMSMultifactorStorageActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 
 }

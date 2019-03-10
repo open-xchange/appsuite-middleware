@@ -69,17 +69,11 @@ public class SoapMultifactorActivator extends HousekeepingActivator {
 
     private static final Logger  logger = org.slf4j.LoggerFactory.getLogger(SoapMultifactorActivator.class);
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
@@ -119,13 +113,9 @@ public class SoapMultifactorActivator extends HousekeepingActivator {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        unregisterService(OXMultifactorServicePortType.class);
-        super.stop(context);
+        super.stopBundle();
     }
 }

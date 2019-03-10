@@ -80,7 +80,7 @@ import com.openexchange.sms.SMSServiceSPI;
  */
 public class SMSProviderActivator extends HousekeepingActivator {
 
-    static Logger logger = org.slf4j.LoggerFactory.getLogger(SMSProviderActivator.class);
+    static final Logger logger = org.slf4j.LoggerFactory.getLogger(SMSProviderActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -152,8 +152,8 @@ public class SMSProviderActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 }

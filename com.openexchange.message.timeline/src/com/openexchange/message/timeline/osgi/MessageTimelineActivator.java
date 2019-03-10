@@ -51,7 +51,6 @@ package com.openexchange.message.timeline.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.ajax.requesthandler.BodyParser;
@@ -98,9 +97,9 @@ public final class MessageTimelineActivator extends AJAXModuleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         Services.setServiceLookup(null);
-        super.stop(context);
+        super.stopBundle();
     }
 
 }

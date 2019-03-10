@@ -67,7 +67,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class TotpProviderActivator extends HousekeepingActivator {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(TotpProviderActivator.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(TotpProviderActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -87,8 +87,8 @@ public class TotpProviderActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 }

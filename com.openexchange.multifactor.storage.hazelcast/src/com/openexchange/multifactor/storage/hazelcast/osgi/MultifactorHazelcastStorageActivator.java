@@ -49,7 +49,6 @@
 
 package com.openexchange.multifactor.storage.hazelcast.osgi;
 
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
@@ -66,17 +65,11 @@ public class MultifactorHazelcastStorageActivator  extends HousekeepingActivator
 
     private static final Logger LOG = LoggerFactory.getLogger(MultifactorHazelcastStorageActivator.class);
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
@@ -84,13 +77,10 @@ public class MultifactorHazelcastStorageActivator  extends HousekeepingActivator
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
-        super.stop(context);
+        super.stopBundle();
     }
 
 }
