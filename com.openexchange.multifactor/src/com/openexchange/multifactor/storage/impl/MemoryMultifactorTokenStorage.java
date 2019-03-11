@@ -117,7 +117,10 @@ public class MemoryMultifactorTokenStorage<T extends MultifactorToken<?>> implem
         Map<String, T> tokensForSession = storage.get(multifactorRequest);
         if(tokensForSession == null) {
             tokensForSession = Collections.synchronizedMap(new HashMap<String,T>());
-            storage.putIfAbsent(multifactorRequest, tokensForSession);
+            Map<String, T> old = storage.putIfAbsent(multifactorRequest, tokensForSession);
+            if(old != null) {
+                tokensForSession = old;
+            }
         }
         tokensForSession.put(key, token);
     }
