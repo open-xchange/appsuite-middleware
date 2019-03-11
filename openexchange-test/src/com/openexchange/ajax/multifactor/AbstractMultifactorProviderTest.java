@@ -56,15 +56,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import java.rmi.Naming;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.multifactor.rmi.MultifactorManagementRemoteService;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -213,9 +206,9 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     }
 
     protected void clearAllMultifactorDevices() throws Exception {
-        MultifactorManagementRemoteService stub = (MultifactorManagementRemoteService) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + MultifactorManagementRemoteService.RMI_NAME);
-        TestUser admin = TestContextPool.getOxAdminMaster();
-        stub.removeAllDevices(contextId, userId, new Credentials(admin.getUser(), admin.getPassword()));;
+//        MultifactorManagementRemoteService stub = (MultifactorManagementRemoteService) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + MultifactorManagementRemoteService.RMI_NAME);
+//        TestUser admin = TestContextPool.getOxAdminMaster();
+//        stub.removeAllDevices(contextId, userId, new Credentials(admin.getUser(), admin.getPassword()));;
     }
 
     protected void clearAllMultifactorDevicesByUser() throws Exception {
