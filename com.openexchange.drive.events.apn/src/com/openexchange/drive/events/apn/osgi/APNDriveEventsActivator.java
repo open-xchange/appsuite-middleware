@@ -105,7 +105,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
             private IOSAPNCertificateProvider iosProvider;
-            private IOSAPNCertificateProvider macosProvider;
+            private MacOSAPNCertificateProvider macosProvider;
 
             @Override
             public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
@@ -120,7 +120,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                     APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service);
                     if (macAccess != null) {
                         macosProvider = () -> macAccess;
-                        registerService(IOSAPNCertificateProvider.class, macosProvider);
+                        registerService(MacOSAPNCertificateProvider.class, macosProvider);
                     }
                 }
             }
