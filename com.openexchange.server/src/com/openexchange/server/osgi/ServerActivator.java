@@ -442,9 +442,6 @@ public final class ServerActivator extends HousekeepingActivator {
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
 
-        // Properly register VersionService
-        ServerServiceRegistry.getInstance().addService(VersionService.class, getServiceSafe(VersionService.class));
-        
         // I18n service load
         track(I18nService.class, new I18nServiceListener(context));
 
