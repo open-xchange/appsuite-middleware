@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.multifactor"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.multifactor.rmi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.soap.multifactor"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.storage.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.json"/>
