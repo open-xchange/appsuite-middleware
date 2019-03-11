@@ -2302,31 +2302,30 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     private boolean cannotConnect(Session session, int accountId) throws OXException {
+        return !canConnect(session, accountId);
+    }
+    
+    private boolean canConnect(Session session, int accountId) throws OXException {
         if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-            return false;
+            return true;
         }
         
         // Check presence of OAuth token in case OAuth-wise mail access is configured
         if (AuthType.isOAuthType(MailConfig.getConfiguredAuthType(true, session))) {
             // OAuth is supposed to be used
             Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
-            if (obj != null) {
-                return false;
-            }
-
-            // Missing OAuth token and OAuth is supposed to be used. Unable to connect.
-            return true;
+            return obj == null ? false : true;
         }
 
         // Check master password in case master access is configured
         PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
         if (PasswordSource.GLOBAL.equals(passwordSource)) {
             String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
-            return masterPw == null ? true : false;
+            return masterPw == null ? false : true;
         }
 
         // Check presence of session password as common user/password login is assumed
-        return session.getPassword() == null ? true : false;
+        return session.getPassword() == null ? false : true;
     }
 
     private static void postEvent(int accountId, String fullname, boolean contentRelated, StorageParameters params) {
