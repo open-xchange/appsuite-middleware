@@ -1,3 +1,9 @@
+open-xchange-push-imapidle (7.6.3-45) stable; urgency=medium
+
+  * Build for patch 2019-03-12 (5165)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 11 Mar 2019 19:37:43 +0100
+
 open-xchange-push-imapidle (7.6.3-44) stable; urgency=medium
 
   * Build for patch 2019-02-11 (5104)

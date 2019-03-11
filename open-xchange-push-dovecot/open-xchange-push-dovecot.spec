@@ -9,7 +9,7 @@ BuildRequires: open-xchange-imap
 BuildRequires: open-xchange-rest
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 46
+%define        ox_release 47
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Mon Mar 11 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2019-03-12 (5165)
 * Fri Feb 01 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-02-11 (5104)
 * Mon Nov 12 2018 Thorben Betten <thorben.betten@open-xchange.com>

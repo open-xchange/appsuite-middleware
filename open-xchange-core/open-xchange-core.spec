@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 44
+%define        ox_release 45
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1318,6 +1318,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Mar 11 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-03-12 (5165)
 * Fri Feb 01 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-02-11 (5104)
 * Mon Nov 12 2018 Marcus Klein <marcus.klein@open-xchange.com>
