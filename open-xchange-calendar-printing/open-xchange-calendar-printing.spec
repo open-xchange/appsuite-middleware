@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 9
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,8 +56,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 
 %changelog
-* Mon Mar 04 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-03-11 (5149)
 * Thu Feb 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-02-25 (5133)
 * Thu Feb 07 2019 Marcus Klein <marcus.klein@open-xchange.com>
