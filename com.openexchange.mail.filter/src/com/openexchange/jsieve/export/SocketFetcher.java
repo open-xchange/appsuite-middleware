@@ -182,8 +182,7 @@ public final class SocketFetcher {
     private static void configureSSLSocket(final Socket socket) {
         if (socket instanceof SSLSocket) {
             final SSLSocket sslsocket = (SSLSocket) socket;
-            sslsocket.setEnabledProtocols(new String[] { "SSLv3", "TLSv1" });
-            // sslsocket.setEnabledProtocols(new String[] { "TLSv1" });
+            sslsocket.setEnabledProtocols(new String[] { "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2" });
         }
     }
 
