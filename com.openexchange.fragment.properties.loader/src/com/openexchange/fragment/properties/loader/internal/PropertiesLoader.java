@@ -80,7 +80,7 @@ public class PropertiesLoader implements FragmentPropertiesLoader {
         try {
             is = getClass().getClassLoader().getResourceAsStream(name);
             if (null == is) {
-                LoggerHolder.LOG.error("Could not load property file {} from fragment.", name);
+                LoggerHolder.LOG.debug("Could not load property file {} from fragment.", name);
             } else {
                 Properties props = new Properties();
                 props.load(is);
