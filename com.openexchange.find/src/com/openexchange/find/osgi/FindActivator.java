@@ -119,7 +119,7 @@ public class FindActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(FindActivator.class).info("Stopping bundle: com.openexchange.find");
-        stopBundle();
+        super.stopBundle();
     }
 
 }
