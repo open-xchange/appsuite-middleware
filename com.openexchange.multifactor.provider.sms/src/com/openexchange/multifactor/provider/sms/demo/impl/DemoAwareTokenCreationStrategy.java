@@ -70,7 +70,7 @@ import com.openexchange.multifactor.TokenCreationStrategy;
  */
 public class DemoAwareTokenCreationStrategy implements TokenCreationStrategy, Reloadable {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(DemoAwareTokenCreationStrategy.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DemoAwareTokenCreationStrategy.class);
 
     private final TokenCreationStrategy delegate;
     private final TokenCreationStrategy demoStrategy;
