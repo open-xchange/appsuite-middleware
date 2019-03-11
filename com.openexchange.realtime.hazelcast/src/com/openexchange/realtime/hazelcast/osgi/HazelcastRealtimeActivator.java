@@ -88,7 +88,7 @@ import com.openexchange.timer.TimerService;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
     private final AtomicBoolean isStopped = new AtomicBoolean(true);
     private volatile HazelcastResourceDirectory directory;

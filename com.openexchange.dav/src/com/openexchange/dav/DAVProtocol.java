@@ -86,7 +86,7 @@ public abstract class DAVProtocol extends Protocol {
     /** HTTP/1.1 507 Insufficient Storage */
     public static final int SC_INSUFFICIENT_STORAGE = 507;
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVProtocol.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVProtocol.class);
 
     @Override
     public WebdavAction getReportAction(String namespace, String name) {

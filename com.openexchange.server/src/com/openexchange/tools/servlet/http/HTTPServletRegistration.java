@@ -65,7 +65,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTTPServletRegistration.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTTPServletRegistration.class);
 
     private final Servlet servlet;
 

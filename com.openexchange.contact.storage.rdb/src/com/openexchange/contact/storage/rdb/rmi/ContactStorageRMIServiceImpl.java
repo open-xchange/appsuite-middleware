@@ -65,7 +65,10 @@ import com.openexchange.java.Autoboxing;
  */
 public class ContactStorageRMIServiceImpl implements ContactStorageRMIService {
 
-    private static Logger LOG = LoggerFactory.getLogger(ContactStorageRMIServiceImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactStorageRMIServiceImpl.class);
+    }
 
     /**
      * Initialises a new {@link ContactStorageRMIServiceImpl}.
@@ -85,7 +88,7 @@ public class ContactStorageRMIServiceImpl implements ContactStorageRMIService {
         try {
             objectIDs = Deduplicator.deduplicateContacts(contextID, folderID, limit, dryRun);
         } catch (OXException e) {
-            LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}", folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
+            LoggerHolder.LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}", folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
         }
         return null != objectIDs ? Autoboxing.I2i(objectIDs) : null;
     }

@@ -111,6 +111,8 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public class EventPatches {
+    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
 
     /**
      * Initializes a new {@link Incoming}.
@@ -129,8 +131,6 @@ public class EventPatches {
     public static Outgoing Outgoing(GroupwareCaldavFactory factory) {
         return new Outgoing(factory);
     }
-
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
 
     /** The external representation of the prefix used for private comments denoting a new time proposal */
     private static final String COMMENT_PROPOSAL_PREFIX_EXTERNAL = "\u200B\uD83D\uDDD3\u200B ";

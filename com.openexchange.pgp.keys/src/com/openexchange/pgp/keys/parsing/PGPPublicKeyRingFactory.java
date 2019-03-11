@@ -17,7 +17,10 @@ import org.slf4j.Logger;
  */
 public class PGPPublicKeyRingFactory {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPPublicKeyRingFactory.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PGPPublicKeyRingFactory.class);
+    }
 
     /**
      * Creates a collection for PGPPublicKeyRing objects from the given data
@@ -36,7 +39,7 @@ public class PGPPublicKeyRingFactory {
             if (object instanceof PGPPublicKeyRing) {
                 ret.add((PGPPublicKeyRing) object);
             } else {
-                logger.error("Input data does not contain a PGP Public Key");
+                LoggerHolder.LOG.error("Input data does not contain a PGP Public Key");
             }
         }
         return ret;

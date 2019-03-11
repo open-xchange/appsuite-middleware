@@ -70,7 +70,10 @@ import com.openexchange.multifactor.TokenCreationStrategy;
  */
 public class DemoAwareTokenCreationStrategy implements TokenCreationStrategy, Reloadable {
 
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DemoAwareTokenCreationStrategy.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DemoAwareTokenCreationStrategy.class);
+    }
 
     private final TokenCreationStrategy delegate;
     private final TokenCreationStrategy demoStrategy;
@@ -110,7 +113,7 @@ public class DemoAwareTokenCreationStrategy implements TokenCreationStrategy, Re
 
     private TokenCreationStrategy getStrategy() {
         if (demoMode) {
-            logger.warn(
+            LoggerHolder.LOG.warn(
                 "SECURITY WARNING: Current {} is {}, which will produce demo tokens for multifactor authentication! Please disable {} if this is not intended.",
                 TokenCreationStrategy.class.getSimpleName(),
                 DemoTokenCreationStrategy.class.getSimpleName(),

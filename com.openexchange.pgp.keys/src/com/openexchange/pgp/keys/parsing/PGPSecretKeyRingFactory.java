@@ -68,7 +68,10 @@ import org.slf4j.Logger;
  */
 public class PGPSecretKeyRingFactory {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPSecretKeyRingFactory.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PGPSecretKeyRingFactory.class);
+    }
 
     public static PGPSecretKeyRing create(String keyData) throws  IOException {
         return create(new ByteArrayInputStream(keyData.getBytes("UTF-8")));
@@ -88,10 +91,9 @@ public class PGPSecretKeyRingFactory {
         if (o instanceof PGPSecretKeyRing) {
             return (PGPSecretKeyRing) o;
         }
-        else {
-            logger.error("Input text does not contain a PGP Secret Key");
-            return null;
-        }
+        
+        LoggerHolder.LOG.error("Input text does not contain a PGP Secret Key");
+        return null;
     }
 
     /**

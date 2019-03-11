@@ -99,7 +99,7 @@ public class SieveHandler {
     /**
      * The logger.
      */
-    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SieveHandler.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SieveHandler.class);
 
     /**
      * The constant for CRLF (carriage-return line-feed).

@@ -61,6 +61,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import org.slf4j.Logger;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -76,7 +77,10 @@ import com.openexchange.exception.OXException;
  */
 public class AssignmentFactoryImpl implements AssignmentFactory {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AssignmentFactoryImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AssignmentFactoryImpl.class);
+    }
 
     private final DatabaseServiceImpl databaseService;
     private final ConcurrentMap<String, Future<List<Assignment>>> assignmentsPerSchema;
@@ -110,7 +114,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         try {
             return databaseService.getAssignment(contextId);
         } catch (OXException e) {
-            LOG.warn("Found no assignment for context {}", contextId, e);
+            LoggerHolder.LOG.warn("Found no assignment for context {}", contextId, e);
             return null;
         }
     }
@@ -204,11 +208,11 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         try {
             List<Assignment> assignments = f.get();
             if (null == assignments || assignments.isEmpty()) {
-                LOG.warn("Found no assignment for schema name {}", schemaName);
+                LoggerHolder.LOG.warn("Found no assignment for schema name {}", schemaName);
                 return null;
             }
             if (assignments.size() > 1) {
-                LOG.warn("Found duplicate assignments for schema name {}", schemaName, new Throwable("Found duplicate assignments"));
+                LoggerHolder.LOG.warn("Found duplicate assignments for schema name {}", schemaName, new Throwable("Found duplicate assignments"));
             }
             return assignments.get(0);
         } catch (InterruptedException e) {
@@ -217,7 +221,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             throw new IllegalStateException(e);
         } catch (ExecutionException e) {
             Throwable t = e.getCause();
-            LOG.warn("Found no assignment for schema name {}", schemaName, t);
+            LoggerHolder.LOG.warn("Found no assignment for schema name {}", schemaName, t);
             return null;
         }
     }

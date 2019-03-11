@@ -81,7 +81,7 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public final class ContactDeleteListener implements DeleteListener {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDeleteListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDeleteListener.class);
 
     /**
      * Initializes a new {@link ContactDeleteListener}

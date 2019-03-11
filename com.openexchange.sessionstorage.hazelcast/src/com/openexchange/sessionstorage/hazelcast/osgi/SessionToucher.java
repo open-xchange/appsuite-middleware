@@ -64,7 +64,7 @@ import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
  */
 public class SessionToucher implements Runnable {
     
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionToucher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionToucher.class);
     
     private final HazelcastSessionStorageService sessionStorage;
 

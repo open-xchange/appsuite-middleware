@@ -30,7 +30,7 @@ import org.slf4j.Logger;
  */
 public final class ScriptCoordinate {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptCoordinate.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptCoordinate.class);
 
     private final int startLineNumber;
     private final int startColumnNumber;

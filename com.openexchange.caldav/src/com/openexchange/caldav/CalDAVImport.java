@@ -75,7 +75,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class CalDAVImport {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAVImport.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAVImport.class);
 
     private static final String[] EXTRA_PROPERTIES = {
         "X-CALENDARSERVER-ATTENDEE-COMMENT", "X-CALENDARSERVER-PRIVATE-COMMENT", "X-CALENDARSERVER-ACCESS",

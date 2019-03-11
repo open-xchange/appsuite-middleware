@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
  */
 public class RdbFileAccessStorage {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbFileAccessStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbFileAccessStorage.class);
 
     /** SQL statement to insert a new file access */
     protected static final String INSERT_FILE_ACCESS = "INSERT INTO fileAccess (cid, userid, size, accessed) VALUES (?, ?, ?, ?)";
