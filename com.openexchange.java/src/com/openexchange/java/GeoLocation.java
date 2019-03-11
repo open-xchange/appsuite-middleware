@@ -265,7 +265,7 @@ public class GeoLocation {
         return Double.valueOf(decimal);
     }
 
-    private static final Pattern geoPattern = Pattern.compile("[-]?(\\d*)\u00b0 (\\d*)' (\\d*(?:\\,\\d*)?)\"");
+    private static final Pattern geoPattern = Pattern.compile("[-]?(\\d*)\u00b0 (\\d*)' (\\d*(?:[,.]\\d*)?)\"");
 
     /**
      * Parses the DMS (degrees-minutes-seconds) representation of a spherical coordinate to a double.
