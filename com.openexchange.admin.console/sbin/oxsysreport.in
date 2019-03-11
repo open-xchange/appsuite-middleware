@@ -684,8 +684,18 @@ exclude_secret_entries() {
             # set this marker also if no value was set
             local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
         fi
-        sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
-        sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
+
+        if [ -n "$(echo ${_file} | grep "^${TMP}/*${LOGDIR}")" ]; then
+            sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
+        else
+            die "${0}: Internal Error, tried to modify original data: ${_file}"
+        fi
+
+        if [ -n "$(echo ${_tmp_exclude_status} | grep "^${TMP}/*${LOGDIR}")" ]; then
+            sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
+        else
+            die "${0}: Internal Error, tried to modify original data: ${_tmp_exclude_status}"
+        fi
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"
     cat ${_tmp_exclude_status} >> ${_exclude_status}
