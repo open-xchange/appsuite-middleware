@@ -352,7 +352,7 @@ public enum DriveProperty implements Property {
     EXCLUDED_FILES_PATTERN("excludedFilesPattern", "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r|\\.msngr_hstr_data_.*\\.log"),
 
     /**
-     * REGEX-pattern to filter d names to exclude from sync
+     * REGEX-pattern to filter directory names to exclude from sync
      * Default: TODO: find a way to put default value here...
      */
     EXCLUDED_DIRECTORIES_PATTERN("excludedDirectoriesPattern", "^/\\.drive$|^.*/\\.msngr_hstr_data$|^.*/\\.drive-meta(?:$|/.*)"),

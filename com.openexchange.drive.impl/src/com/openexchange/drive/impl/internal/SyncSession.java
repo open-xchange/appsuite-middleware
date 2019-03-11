@@ -413,9 +413,8 @@ public class SyncSession {
         ServerSession serverSession = session.getServerSession();
         if (null != session.getClientType() && session.getClientType().isDesktop()) {
             return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop(serverSession.getContextId(), serverSession.getUserId());
-        } else {
-            return DriveConfig.getInstance().getOptimisticSaveThresholdMobile(serverSession.getContextId(), serverSession.getUserId());
-        }
+        } 
+        return DriveConfig.getInstance().getOptimisticSaveThresholdMobile(serverSession.getContextId(), serverSession.getUserId());
     }
 
     @Override
