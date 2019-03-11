@@ -259,12 +259,12 @@ public abstract class DataParser {
             return null;
         }
 
-        final int offset = timeZone.getOffset(d.getTime());
+        final int offset = getOffSet(timeZone, d);
         d.setTime(d.getTime() - offset);
         return d;
     }
 
-    private int getOffSet(final TimeZone timeZone, final Date d) {
+    private static int getOffSet(final TimeZone timeZone, final Date d) {
         int offset = timeZone.getOffset(d.getTime());
         final Date test = new Date(d.getTime() - offset);
         final int clientOffset = timeZone.getOffset(test.getTime());
