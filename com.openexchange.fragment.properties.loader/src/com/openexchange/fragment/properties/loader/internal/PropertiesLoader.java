@@ -94,4 +94,9 @@ public class PropertiesLoader implements FragmentPropertiesLoader {
         return null;
     }
 
+    @Override
+    public InputStream loadResource(String name) {
+        return getClass().getClassLoader().getResourceAsStream(name);
+    }
+
 }

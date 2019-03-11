@@ -49,8 +49,9 @@
 
 package com.openexchange.fragment.properties.loader;
 
-import com.openexchange.osgi.annotation.SingletonService;
+import java.io.InputStream;
 import java.util.Properties;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link FragmentPropertiesLoader}
@@ -68,5 +69,13 @@ public interface FragmentPropertiesLoader {
      * @return The {@link Properties} of the file or null if it couldn't be loaded
      */
     Properties load(String name);
+    
+    /**
+     * Loads a resource which was provided by a fragment
+     * 
+     * @param name The name of the resource
+     * @return An {@link InputStream} containing the resource or null
+     */
+    InputStream loadResource(String name);
 
 }

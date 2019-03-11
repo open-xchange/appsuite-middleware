@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -70,7 +69,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.osgi.BundleResourceLoader;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.timer.TimerService;
@@ -104,8 +102,6 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn");
-
-        final Bundle bundle = this.context.getBundle();
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
             private IOSAPNCertificateProvider iosProvider;
@@ -115,13 +111,13 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
                 if (properties != null) {
-                    APNAccess access = createAccess(properties, OperationSystemType.IOS, bundle);
+                    APNAccess access = createAccess(properties, OperationSystemType.IOS, service);
                     if (access != null) {
                         iosProvider = () -> access;
                         registerService(IOSAPNCertificateProvider.class, iosProvider);
                     }
 
-                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, bundle);
+                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service);
                     if (macAccess != null) {
                         macosProvider = () -> macAccess;
                         registerService(IOSAPNCertificateProvider.class, macosProvider);
@@ -163,10 +159,10 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
      *
      * @param properties The {@link Properties} object
      * @param The OS identifier
-     * @param The OSGi bundle
+     * @param The {@link FragmentPropertiesLoader}
      * @return The {@link APNAccess} or null
      */
-    protected APNAccess createAccess(Properties properties, OperationSystemType type, Bundle bundle) {
+    protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader) {
         try {
             Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
             String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
@@ -179,11 +175,13 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 if (new File(keystore).exists()) {
                     return new APNAccess(keystore, password, production);
                 }
-
+                
                 // Assume file is given as resource identifier
                 try {
-                    BundleResourceLoader loader = new BundleResourceLoader(bundle);
-                    byte[] keystoreBytes = Streams.stream2bytes(loader.getResourceAsStream(keystore));
+                    byte[] keystoreBytes = Streams.stream2bytes(loader.loadResource(keystore));
+                    if(keystoreBytes.length == 0) {
+                        return null;
+                    }
                     return new APNAccess(keystoreBytes, password, production);
                 } catch (IOException e) {
                     LOG.warn("Error instantiating APNS options from resource {}", keystore, e);
