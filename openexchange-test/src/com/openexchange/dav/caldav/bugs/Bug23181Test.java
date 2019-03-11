@@ -329,7 +329,7 @@ public class Bug23181Test extends CalDAVTest {
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
         ; // @formatter:on
-        assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, super.putICal(uid, iCal));
     }
 
 }
