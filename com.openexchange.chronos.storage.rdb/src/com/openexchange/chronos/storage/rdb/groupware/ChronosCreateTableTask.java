@@ -108,13 +108,13 @@ public class ChronosCreateTableTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void createTable(Connection connection, String tableName, String createStatement) throws OXException, SQLException {
+    private static void createTable(Connection connection, String tableName, String createStatement) throws SQLException {
+        if (tableExists(connection, tableName)) {
+            LoggerFactory.getLogger(ChronosCreateTableTask.class).debug("Table {} already exists, skipping.", tableName);
+            return;
+        }
         PreparedStatement stmt = null;
         try {
-            if (tableExists(connection, tableName)) {
-                LoggerFactory.getLogger(ChronosCreateTableTask.class).debug("Table {} already exists, skipping.", tableName);
-                return;
-            }
             stmt = connection.prepareStatement(createStatement);
             stmt.executeUpdate();
         } finally {

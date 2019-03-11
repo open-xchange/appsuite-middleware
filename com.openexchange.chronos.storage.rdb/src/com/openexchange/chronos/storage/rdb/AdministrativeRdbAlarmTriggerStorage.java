@@ -51,6 +51,8 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,7 +99,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
         return getAndLockTriggers(con, until.getTime(), overdueTime.getTime(), lock, actions);
     }
 
-    private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Long until, Long overdueTime, boolean lock, AlarmAction... actions) throws OXException {
+    private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, long until, long overdueTime, boolean lock, AlarmAction... actions) throws OXException {
         if(actions == null || actions.length == 0) {
             return Collections.emptyMap();
         }
@@ -126,7 +128,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {
-                        Pair<Integer, Integer> pair = new Pair<Integer, Integer>(resultSet.getInt(1), resultSet.getInt(2));
+                        Pair<Integer, Integer> pair = new Pair<Integer, Integer>(I(resultSet.getInt(1)), I(resultSet.getInt(2)));
                         List<AlarmTrigger> list = result.get(pair);
                         if (list == null) {
                             list = new ArrayList<>();
@@ -158,7 +160,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
     @Override
     public void setProcessingStatus(Connection con, Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggers, Long time) throws OXException {
-        if (time < 0) {
+        if (null != time && l(time) < 0) {
             time = null;
         }
         StringBuilder stringBuilder = new StringBuilder().append("UPDATE calendar_alarm_trigger SET processed=?");
@@ -166,14 +168,14 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
         try {
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : triggers.entrySet()) {
-                    int cid = entry.getKey().getFirst();
-                    int account = entry.getKey().getSecond();
+                    int cid = i(entry.getKey().getFirst());
+                    int account = i(entry.getKey().getSecond());
                     for (AlarmTrigger trigger : entry.getValue()) {
                         int param = 1;
-                        stmt.setLong(param++, time == null ? 0 : time);
+                        stmt.setLong(param++, time == null ? 0 : l(time));
                         stmt.setInt(param++, cid);
                         stmt.setInt(param++, account);
-                        stmt.setInt(param++, trigger.getAlarm());
+                        stmt.setInt(param++, i(trigger.getAlarm()));
                         stmt.addBatch();
                     }
                 }
@@ -224,7 +226,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
                 stmt.setString(parameterIndex++, eventId);
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {
-                        Pair<Integer, Integer> pair = new Pair<Integer, Integer>(resultSet.getInt(1), resultSet.getInt(2));
+                        Pair<Integer, Integer> pair = new Pair<Integer, Integer>(I(resultSet.getInt(1)), I(resultSet.getInt(2)));
                         List<AlarmTrigger> list = result.get(pair);
                         if(list == null) {
                             list = new ArrayList<>();

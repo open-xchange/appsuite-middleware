@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.io.InputStream;
@@ -431,7 +432,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 try (ResultSet rs = stmt.executeQuery()) {
                     Map<String, Long> retval = new HashMap<>();
                     while (rs.next()) {
-                        retval.put(rs.getString("event"), rs.getLong("MAX(timestamp)"));
+                        retval.put(rs.getString("event"), L(rs.getLong("MAX(timestamp)")));
                     }
                     return retval;
                 }

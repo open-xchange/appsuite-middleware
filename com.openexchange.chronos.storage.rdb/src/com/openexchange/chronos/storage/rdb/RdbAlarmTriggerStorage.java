@@ -49,6 +49,10 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,6 +85,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+
 
 /**
  * {@link RdbAlarmTriggerStorage} is an implementation of the {@link AlarmTriggerStorage}
@@ -191,7 +196,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 stmt.setInt(parameterIndex++, user);
 
                 if (until != null) {
-                    stmt.setLong(parameterIndex++, until);
+                    stmt.setLong(parameterIndex++, l(until));
                 }
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
@@ -250,7 +255,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     private void addRelatedDate(Alarm alarm, Event event, AlarmTrigger trigger) {
         if (alarm.getTrigger().getDateTime() == null) {
-            trigger.setRelatedTime(AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), event).getTimestamp());
+            trigger.setRelatedTime(L(AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), event).getTimestamp()));
         }
     }
 
@@ -419,7 +424,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             for (Integer id : alarmIds) {
-                stmt.setInt(parameterIndex++, id);
+                stmt.setInt(parameterIndex++, i(id));
             }
             return logExecuteUpdate(stmt);
         }
@@ -457,7 +462,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(userId, until == null ? null : until.getTime(), con);
+            return getAlarmTriggers(userId, until == null ? null : L(until.getTime()), con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
@@ -486,7 +491,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         } finally {
             release(writeCon, updated);
         }
-        return updated;
+        return I(updated);
 
     }
 
@@ -521,16 +526,16 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 int index = 1;
                 TimeZone oldTimeZone = trigger.getTimezone();
                 TimeZone newTimeZone = resolver.getTimeZone(userId);
-                long relatedTime = trigger.getRelatedTime() == null ? trigger.getTime() : trigger.getRelatedTime();
+                long relatedTime = l(trigger.getRelatedTime() == null ? trigger.getTime() : trigger.getRelatedTime());
                 int offsetOld = oldTimeZone.getOffset(relatedTime);
                 int offsetNew = newTimeZone.getOffset(relatedTime);
                 int dif = offsetOld - offsetNew;
-                long newTriggerTime = trigger.getTime() + dif;
+                long newTriggerTime = l(trigger.getTime()) + dif;
                 stmt.setLong(index++, newTriggerTime);
                 stmt.setString(index++, newTimeZone.getID());
                 stmt.setInt(index++, context.getContextId());
                 stmt.setInt(index++, accountId);
-                stmt.setInt(index++, trigger.getAlarm());
+                stmt.setInt(index++, i(trigger.getAlarm()));
                 stmt.addBatch();
             }
 
@@ -611,13 +616,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         AlarmTrigger trigger = new AlarmTrigger();
         trigger.setUserId(userId);
         trigger.setAction(alarm.getAction().getValue());
-        trigger.setPushed(false);
-        trigger.setAlarm(alarm.getId());
+        trigger.setPushed(Boolean.FALSE);
+        trigger.setAlarm(I(alarm.getId()));
         trigger.setEventId(event.getId());
 
         if (CalendarUtils.isFloating(event) && alarm.getTrigger().getDateTime()==null) {
             try {
-                trigger.setTimezone(resolver.getTimeZone(userId));
+                trigger.setTimezone(resolver.getTimeZone(i(userId)));
             } catch (OXException e) {
                 addInvalidDataWarning(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine timezone for user \"" + userId + "\", skipping insertion of alarm triggers", e);
                 return null;
@@ -631,18 +636,18 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
             Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, new Date(), tz, recurrenceService);
             Date triggerTime = nextTriggerEvent == null ? null : AlarmUtils.getTriggerTime(alarm.getTrigger(), nextTriggerEvent, tz);
-            if (triggerTime == null || triggerTime.before(new Date())) {
+            if (nextTriggerEvent == null || triggerTime == null || triggerTime.before(new Date())) {
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
             trigger.setRecurrenceId(nextTriggerEvent.getRecurrenceId());
-            trigger.setTime(triggerTime.getTime());
+            trigger.setTime(L(triggerTime.getTime()));
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
             if (triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
                 return null;
             }
-            trigger.setTime(triggerTime.getTime());
+            trigger.setTime(L(triggerTime.getTime()));
             if (event.getRecurrenceId() != null) {
                 trigger.setRecurrenceId(event.getRecurrenceId());
             }
@@ -651,13 +656,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
         // Set proper folder id
         try {
-            trigger.setFolder(getFolderId(event, userId));
+            trigger.setFolder(getFolderId(event, i(userId)));
         } catch (OXException e) {
             addInvalidDataWarning(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
             return null;
         }
 
-        trigger.setProcessed(0l);
+        trigger.setProcessed(L(0L));
 
         return trigger;
     }

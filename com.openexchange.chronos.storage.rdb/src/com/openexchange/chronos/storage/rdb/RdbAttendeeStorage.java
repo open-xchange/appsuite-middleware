@@ -490,7 +490,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return attendeesByEventId;
     }
 
-    private Map<String, Integer> selectAttendeeCounts(Connection connection, String[] eventIds, Boolean internal, boolean tombstones) throws SQLException, OXException {
+    private Map<String, Integer> selectAttendeeCounts(Connection connection, String[] eventIds, Boolean internal, boolean tombstones) throws SQLException {
         if (null == eventIds || 0 == eventIds.length) {
             return java.util.Collections.emptyMap();
         }

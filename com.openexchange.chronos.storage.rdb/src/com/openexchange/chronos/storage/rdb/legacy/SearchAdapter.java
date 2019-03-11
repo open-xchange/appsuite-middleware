@@ -119,7 +119,7 @@ public class SearchAdapter {
      * @param prefixInternalAttendees The prefix to use when inserting column operands for internal attendee fields
      * @param prefixExternalAttendees The prefix to use when inserting column operands for external attendee fields
      */
-    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixInternalAttendees, String prefixExternalAttendees) throws OXException {
+    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixInternalAttendees, String prefixExternalAttendees) {
         super();
         this.contextID = contextID;
         this.charset = charset;
@@ -250,7 +250,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendAttachments(List<String> queries) throws OXException {
+    private void appendAttachments(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_attachment WHERE prg_attachment.cid = ");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
@@ -260,7 +260,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendUsers(List<String> queries) throws OXException {
+    private void appendUsers(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_dates_members WHERE prg_dates_members.cid = ");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
@@ -286,7 +286,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendRangeFilter(List<String> queries) throws OXException {
+    private void appendRangeFilter(List<String> queries) {
         Calendar calendar = initCalendar(TimeZones.UTC, (Date) null);
         for (String query : queries) {
             switch (query) {
@@ -326,7 +326,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendRecurringType(List<String> queries) throws OXException {
+    private void appendRecurringType(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND ");
             switch (query) {
@@ -370,7 +370,7 @@ public class SearchAdapter {
         stringBuilder.append(") ");
     }
 
-    private void appendFieldFilter(EventField field, List<String> queries) throws OXException {
+    private void appendFieldFilter(EventField field, List<String> queries) {
         if (null != queries && 0 < queries.size()) {
             for (String query : queries) {
                 stringBuilder.append(" AND ");
@@ -442,8 +442,8 @@ public class SearchAdapter {
                             stringBuilder.append(" OR ");
                         }
 
-                        appendOperation(operation, new ColumnOperand(lable), mapping.getSqlType(), prefix, true, false);
-                        appendOperation(operation, operand, mapping.getSqlType(), prefix, false, true);
+                        appendOperation(operation, new ColumnOperand(lable), mapping.getSqlType(), true, false);
+                        appendOperation(operation, operand, mapping.getSqlType(), false, true);
                     }
                     // Skip value
                     i++;
@@ -451,13 +451,13 @@ public class SearchAdapter {
                 }
                 
             }
-            appendOperation(operation, operands[i], mapping.getSqlType(), prefix, i != operands.length - 1, true);
+            appendOperation(operation, operands[i], mapping.getSqlType(), i != operands.length - 1, true);
         }
         stringBuilder.append(')');
 
     }
 
-    private void appendOperation(Operation operation, Operand<?> operand, int sqlType, String prefix, boolean isNotLast, boolean useMapping) throws IllegalArgumentException {
+    private void appendOperation(Operation operation, Operand<?> operand, int sqlType, boolean isNotLast, boolean useMapping) throws IllegalArgumentException {
         if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
             stringBuilder.append(operation.getSqlRepresentation());
         }

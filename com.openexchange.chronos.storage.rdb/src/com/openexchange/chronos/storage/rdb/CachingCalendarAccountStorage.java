@@ -301,7 +301,7 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         return null != cachedAccount && CalendarAccount.class.isInstance(cachedAccount) ? clone((CalendarAccount) cachedAccount) : null;
     }
 
-    private static int[] optClonedAccountIds(Object cachedAccountIds) throws OXException {
+    private static int[] optClonedAccountIds(Object cachedAccountIds) {
         return null != cachedAccountIds && int[].class.isInstance(cachedAccountIds) ? clone((int[]) cachedAccountIds) : null;
     }
 
@@ -315,7 +315,7 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         }
     }
 
-    private static int[] clone(int[] accountIds) throws OXException {
+    private static int[] clone(int[] accountIds) {
         return accountIds.clone();
     }
 

@@ -71,8 +71,6 @@ import com.openexchange.server.ServiceLookup;
  */
 public class RdbEventStorage extends RdbResilientStorage implements EventStorage {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbEventStorage.class);
-
     private final EventStorage delegate;
 
     /**

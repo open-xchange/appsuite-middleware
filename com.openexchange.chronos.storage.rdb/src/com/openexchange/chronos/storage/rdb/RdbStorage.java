@@ -87,9 +87,6 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class RdbStorage extends CalendarStorageWarnings {
 
-    /** A named logger instance */
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbStorage.class);
-
     protected final Context context;
     protected final DBProvider dbProvider;
     protected final DBTransactionPolicy txPolicy;

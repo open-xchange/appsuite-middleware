@@ -110,7 +110,7 @@ public class SearchAdapter {
      * @param prefixAttendees The prefix to use when inserting column operands for internal attendee fields
      * @param prefixExternalAttendees The prefix to use when inserting column operands for external attendee fields
      */
-    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixAttendees) throws OXException {
+    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixAttendees) {
         super();
         this.contextID = contextID;
         this.charset = charset;
@@ -243,7 +243,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendAttachments(List<String> queries) throws OXException {
+    private void appendAttachments(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_attachment WHERE prg_attachment.cid=");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
@@ -253,7 +253,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendUsers(List<String> queries) throws OXException {
+    private void appendUsers(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM calendar_attendee WHERE calendar_attendee.cid=");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
@@ -263,7 +263,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendExternalParticipants(List<String> queries) throws OXException {
+    private void appendExternalParticipants(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM calendar_attendee WHERE calendar_attendee.cid=");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
@@ -273,7 +273,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendRangeFilter(List<String> queries) throws OXException {
+    private void appendRangeFilter(List<String> queries) {
         Date now = new Date();
         for (String query : queries) {
             Date from;
@@ -301,7 +301,7 @@ public class SearchAdapter {
         }
     }
 
-    private void appendRecurringType(List<String> queries) throws OXException {
+    private void appendRecurringType(List<String> queries) {
         for (String query : queries) {
             stringBuilder.append(" AND ");
             switch (query) {
@@ -345,7 +345,7 @@ public class SearchAdapter {
         stringBuilder.append(") ");
     }
 
-    private void appendFieldFilter(EventField field, List<String> queries) throws OXException {
+    private void appendFieldFilter(EventField field, List<String> queries) {
         if (null != queries && 0 < queries.size()) {
             for (String query : queries) {
                 stringBuilder.append(" AND ");
@@ -354,7 +354,7 @@ public class SearchAdapter {
         }
     }
 
-    private void append(SingleSearchTerm term) throws OXException {
+    private void append(SingleSearchTerm term) {
         /*
          * get relevant mapping for term
          */
@@ -370,20 +370,20 @@ public class SearchAdapter {
         Iterator<Entry<String, DbMapping<? extends Object, ?>>> iterator = mappings.entrySet().iterator();
         Entry<String, DbMapping<? extends Object, ?>> firstMapping = iterator.next();
         if (false == iterator.hasNext()) {
-            appendOperation(operation, operands, firstMapping.getValue(), firstMapping.getKey());
+            appendOperation(operation, operands, firstMapping.getValue());
         } else {
             stringBuilder.append("(");
-            appendOperation(operation, operands, firstMapping.getValue(), firstMapping.getKey());
+            appendOperation(operation, operands, firstMapping.getValue());
             do {
                 stringBuilder.append(" OR ");
                 Entry<String, DbMapping<? extends Object, ?>> mapping = iterator.next();
-                appendOperation(operation, operands, mapping.getValue(), mapping.getKey());
+                appendOperation(operation, operands, mapping.getValue());
             } while (iterator.hasNext());
             stringBuilder.append(")");
         }
     }
 
-    private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping, String prefix) throws OXException {
+    private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping) {
         stringBuilder.append('(');
         for (int i = 0; i < operands.length; i++) {
             if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
@@ -435,7 +435,7 @@ public class SearchAdapter {
      * @param compositeTerm The composite term
      * @return <code>true</code>, if the term was appended as 'IN' clause, <code>false</code>, otherwise
      */
-    private boolean appendAsInClause(CompositeSearchTerm compositeTerm) throws OXException {
+    private boolean appendAsInClause(CompositeSearchTerm compositeTerm) {
         /*
          * check if operation & operands are applicable
          */
@@ -498,7 +498,7 @@ public class SearchAdapter {
         return true;
     }
 
-    private void appendAsInClause(DbMapping<? extends Object, ?> mapping, String prefix, List<Object> constantValues) throws OXException {
+    private void appendAsInClause(DbMapping<? extends Object, ?> mapping, String prefix, List<Object> constantValues) {
         appendColumnOperand(mapping, prefix);
         stringBuilder.append(" IN (");
         appendConstantOperand(constantValues.get(0), mapping.getSqlType());
@@ -509,7 +509,7 @@ public class SearchAdapter {
         stringBuilder.append(") ");
     }
 
-    private void appendConstantOperand(Object value, int sqlType) throws OXException {
+    private void appendConstantOperand(Object value, int sqlType) {
         if (String.class.isInstance(value)) {
             appendConstantOperand((String) value, sqlType);
             return;
@@ -533,7 +533,7 @@ public class SearchAdapter {
         stringBuilder.append('?');
     }
 
-    private void appendConstantOperand(String value, int sqlType) throws OXException {
+    private void appendConstantOperand(String value, int sqlType) {
         if (Types.INTEGER == sqlType) {
             if ("true".equalsIgnoreCase(value)) {
                 // special handling for "true" string
@@ -559,7 +559,7 @@ public class SearchAdapter {
         stringBuilder.append('?');
     }
 
-    private void appendColumnOperand(DbMapping<? extends Object, ?> mapping, String prefix) throws OXException {
+    private void appendColumnOperand(DbMapping<? extends Object, ?> mapping, String prefix) {
         String columnLabel = null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
         if (null != charset && Types.VARCHAR == mapping.getSqlType()) {
             stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(charset).append(')');
@@ -568,7 +568,7 @@ public class SearchAdapter {
         }
     }
 
-    private Map<String, DbMapping<? extends Object, ?>> getFirstColumnMappings(SingleSearchTerm term) throws OXException {
+    private Map<String, DbMapping<? extends Object, ?>> getFirstColumnMappings(SingleSearchTerm term) {
         for (Operand<?> operand : term.getOperands()) {
             if (Operand.Type.COLUMN.equals(operand.getType())) {
                 return getMappings(operand.getValue());
@@ -577,7 +577,7 @@ public class SearchAdapter {
         return null;
     }
 
-    private Map<String, DbMapping<? extends Object, ?>> getMappings(Object value) throws OXException {
+    private Map<String, DbMapping<? extends Object, ?>> getMappings(Object value) {
         if (EventField.class.isInstance(value)) {
             DbMapping<? extends Object, ?> mapping = EventMapper.getInstance().opt((EventField) value);
             if (null == mapping) {
@@ -597,7 +597,7 @@ public class SearchAdapter {
         throw new IllegalArgumentException("No mapping available for: " + value);
     }
 
-    private Map.Entry<String, DbMapping<? extends Object, ?>> getMapping(Object value) throws OXException {
+    private Map.Entry<String, DbMapping<? extends Object, ?>> getMapping(Object value) {
         Set<Entry<String, DbMapping<? extends Object, ?>>> entries = getMappings(value).entrySet();
         if (1 < entries.size()) {
             throw new IllegalArgumentException("Found multiple mappings for: " + value);
