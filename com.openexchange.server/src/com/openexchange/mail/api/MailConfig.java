@@ -777,6 +777,14 @@ public abstract class MailConfig {
         CACHE_AUTH_TYPE.invalidateAll();
     }
 
+    /**
+     * Gets the configured authentication type for session-associated user's primary mail/transport account.
+     *
+     * @param forMailAccess <code>true</code> to check for primary mail account; otherwise <code>false</code> for primary transport one
+     * @param session The session providing user data
+     * @return The authentication type
+     * @throws OXException If authentication type cannot be returned
+     */
     public static AuthType getConfiguredAuthType(boolean forMailAccess, Session session) throws OXException {
         AuthTypeKey key = new AuthTypeKey(forMailAccess, session.getUserId(), session.getContextId());
         ImmutableReference<AuthType> authType = CACHE_AUTH_TYPE.getIfPresent(key);
