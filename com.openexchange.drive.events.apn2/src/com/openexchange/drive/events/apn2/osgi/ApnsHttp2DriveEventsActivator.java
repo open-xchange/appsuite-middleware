@@ -156,7 +156,12 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
         AuthType authType;
         try {
-            authType = AuthType.authTypeFor(getProperty(properties, DriveEventsAPN2IOSProperty.authtype));
+            String authTypeString = optProperty(properties, DriveEventsAPN2IOSProperty.authtype);
+            if (Strings.isEmpty(authTypeString)) {
+                LOG.debug("Apn2 is not configured in the given properties object. Fallback to null.");
+                return null;
+            }
+            authType = AuthType.authTypeFor(authTypeString);
             if (AuthType.CERTIFICATE.equals(authType)) {
                 /*
                  * get certificate options
@@ -230,13 +235,24 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
      * @throws OXException In case the property is missing
      */
     private String getProperty(Properties properties, Property prop) throws OXException {
-        String result = properties.getProperty(prop.getFQPropertyName());
+        String result = optProperty(properties, prop);
         if (result == null) {
             // This should never happen as long as the shipped fragment contains a proper properties file
             LOG.error("Missing required property from fragment: " + prop.getFQPropertyName());
             throw OXException.general("Missing property: " + prop.getFQPropertyName());
         }
         return result;
+    }
+    
+    /**
+     * Optionally gets the given property from the {@link Properties} object.
+     *  
+     * @param properties The {@link Properties} object
+     * @param prop The {@link Property} to return
+     * @return The string value of the property or null
+     */
+    private String optProperty(Properties properties, Property prop) {
+        return properties.getProperty(prop.getFQPropertyName());
     }
 
 }
