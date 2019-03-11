@@ -116,6 +116,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
@@ -124,6 +125,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -2300,19 +2302,12 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     private boolean cannotConnect(Session session, int accountId) throws OXException {
-        if (accountId != MailAccount.DEFAULT_ID) {
+        if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             return false;
         }
-
-        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
-        if (passwordSource != PasswordSource.SESSION || session.getPassword() != null || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-            return false;
-        }
-
-        // Missing password in non-guest user
-        MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-        if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
+        
+        // Check presence of OAuth token in case OAuth-wise mail access is configured
+        if (AuthType.isOAuthType(MailConfig.getConfiguredAuthType(true, session))) {
             // OAuth is supposed to be used
             Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
             if (obj != null) {
@@ -2323,8 +2318,15 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             return true;
         }
 
-        // Missing password and no OAuth is supposed to be used. Unable to connect.
-        return true;
+        // Check master password in case master access is configured
+        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
+        if (PasswordSource.GLOBAL.equals(passwordSource)) {
+            String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
+            return masterPw == null ? true : false;
+        }
+
+        // Check presence of session password as common user/password login is assumed
+        return session.getPassword() == null ? true : false;
     }
 
     private static void postEvent(int accountId, String fullname, boolean contentRelated, StorageParameters params) {
