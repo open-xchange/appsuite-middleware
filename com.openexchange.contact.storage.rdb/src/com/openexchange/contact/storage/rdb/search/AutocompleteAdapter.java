@@ -373,7 +373,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
                 try {
                     contacFields.add(ContactField.valueOf(field));
                 } catch (IllegalArgumentException ex) {
-                    LOG.warn("\"" + field + "\" is not a valid column and will be skipped!");
+                    LOG.warn("\"{}\" is not a valid column and will be skipped!", field);
                 }
             }
         } catch (OXException ex) {

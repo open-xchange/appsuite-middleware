@@ -110,7 +110,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     @Override
     public Event resolveUid(final String uid, final CalendarSession session) throws OXException {
-        String id = session.getCalendarService().getUtilities().resolveByUID(session, uid);
+        String id = session.getCalendarService().getUtilities().resolveByUID(session, uid, session.getUserId());
         if (id == null) {
             return null;
         }

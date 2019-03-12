@@ -105,7 +105,7 @@ public class CustomTrustManager extends AbstractTrustManager {
     private static TrustManagerAndParameters initCustomTrustManager() {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (null == sslConfigService) {
-            LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming custom truststore is NOT supposed to be used.");
+            LOG.warn("Absent service {}. Assuming custom truststore is NOT supposed to be used.", SSLConfigurationService.class.getName());
             return null;
         }
 
@@ -123,13 +123,13 @@ public class CustomTrustManager extends AbstractTrustManager {
 
         String password = sslConfigService.getCustomTruststorePassword();
         if (null == password) {
-            LOG.error("Cannot load custom truststore file with empty password from location \"" + trustStoreFile + "\"");
+            LOG.error("Cannot load custom truststore file with empty password from location \"{}\"", trustStoreFile);
             return null;
         }
 
         File file = new File(trustStoreFile);
         if (!file.exists()) {
-            LOG.error("Cannot load custom truststore from location \"" + trustStoreFile + "\". The file does not exist.");
+            LOG.error("Cannot load custom truststore from location \"{}\". The file does not exist.", trustStoreFile);
             return null;
         }
 
@@ -146,10 +146,10 @@ public class CustomTrustManager extends AbstractTrustManager {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
+            LOG.error("Unable to read custom truststore file from {}", file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-            LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
+            LOG.error("Unable to initialize custom truststore file from {}", file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
         }
 

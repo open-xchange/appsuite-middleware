@@ -173,14 +173,14 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                     inserted = true;
                     calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
                 } catch (JSONException e) {
-                    LOG.error("Error during migration of google subscriptions. Subscription with id " + sub.getId() + " in context " + ctxId + " could not be migrated to a calendar account because of: " + e.getMessage());
+                    LOG.error("Error during migration of google subscriptions. Subscription with id {} in context {} could not be migrated to a calendar account because of: {}", sub.getId(), ctxId, e.getMessage());
                     // remove the subscription so it does not get deleted
                     iterator.remove();
                 } catch (OXException e) {
                     if (inserted) {
-                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id " + sub.getUserId());
+                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id {}", sub.getUserId());
                     } else {
-                        LOG.error("Error during migration of google subscriptions. Subscription with id " + sub.getId() + " in context " + ctxId + " could not be migrated to a calendar account because of: " + e.getMessage());
+                        LOG.error("Error during migration of google subscriptions. Subscription with id {} in context {} could not be migrated to a calendar account because of: {}", sub.getId(), ctxId, e.getMessage());
                         // remove the subscription so it does not get deleted
                         iterator.remove();
                     }

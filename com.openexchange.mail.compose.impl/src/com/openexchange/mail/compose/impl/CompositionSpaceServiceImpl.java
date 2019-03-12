@@ -1208,7 +1208,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         try {
             attachmentStorage.deleteAttachment(attachmentToDelete.getId(), session);
         } catch (Exception e) {
-            LoggerHolder.LOG.error("Failed to delete attachment with ID " + getUnformattedString(attachmentToDelete.getId()) + " from storage " + attachmentStorage.getClass().getName(), e);
+            LoggerHolder.LOG.error("Failed to delete attachment with ID {} from storage {}", getUnformattedString(attachmentToDelete.getId()), attachmentStorage.getClass().getName(), e);
         }
     }
 

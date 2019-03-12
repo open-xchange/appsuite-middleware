@@ -67,6 +67,7 @@ import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -131,6 +132,18 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
             @Override
             protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ResolvePerformer(session, storage).resolveByUid(uid);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public String resolveByUID(CalendarSession session, String uid, int calendarUserId) throws OXException {
+        return new InternalCalendarStorageOperation<String>(session) {
+
+            @Override
+            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                EventID eventID = new ResolvePerformer(session, storage).resolveByUid(uid, calendarUserId);
+                return null == eventID ? null : eventID.getObjectID();
             }
         }.executeQuery();
     }

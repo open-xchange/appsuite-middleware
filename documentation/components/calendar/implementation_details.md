@@ -572,12 +572,22 @@ While not necessarily needed, for now events are still stored using the calendar
 
 Eventually, once no backwards compatibility is needed anymore, this quirk will be removed, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
 
+## Organizer and Attendee Copies
+
+Group-scheduled meetings appear in the calendars of all attendees and the organizer. So, figuratively speaking, this means that multiple copies of the event are stored individually in the corresponding folders of the participants. The copies are updated based on certain scheduling rules that model the message flow between organizer and attendees - the iCalendar Transport-Independent Interoperability Protocol (iTIP). The concrete handling of organizer and attendee copies depends on if the *organizer copy* resides on the server, i.e. the event has been organized by an internal calendar user, or if an internal calendar user received a meeting request from an external calendar user. 
+
+In the first case, where an internal calendar user is the organizer, a single event instance - the *master* copy - is used and shared with all other internal attendees. Updates performed on this master copy are directly applied and visible for all other internal calendar users. If configured, notification messages about the changes are also sent to internal users. Externally invited attendees receive the updates via iTIP, usually via email (iMIP). 
+
+Group-scheduled meetings with an external organizer usually arrive via iMIP at the inbox of an internal recipient. When replying, the event data is taken over into their personal calendar folder, representing the so-called *attendee copy* of the event - the organizer's master copy resides on a foreign calendaring system in this scenario. In contrast to an internally organized event where the server has control over the master copy, the attendee copy is stored for each invited user individually in that case. So, even if multiple internal users from the same context attend in an externally organized event, each of them will have an own attendee copy, whose lifecycle is completely decoupled from other attendee copies of the same event. This is necessary, as meeting requests from external scheduling systems may be different for different recipients, so that a single copy cannot be maintained. For example, the organizer's calendar system might hide the attendees in the guest list from each other, or, when attendees are removed, the cancel message may only be sent to the deleted attendees, while no updated meeting request is forwarded to the other ones. 
+
 ***
 
 **_References / further reading:_**
 
 - https://bugs.horde.org/ticket/10697
 - com.openexchange.chronos.impl.Utils#isEnforceDefaultAttendee
+- https://tools.ietf.org/html/rfc5546
+- https://tools.ietf.org/html/rfc6047
 
 ***
 

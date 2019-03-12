@@ -429,7 +429,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Scans the specified IFileHolder and sends a 403 error to the client if the enclosed stream is infected.
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      * @param fileHolder The {@link IFileHolder}
      * @param uniqueId the unique identifier
@@ -458,7 +458,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Retrieves a unique id for the attachment
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      * @param eventId The {@link EventID}
      * @param managedId The managed ID
@@ -473,7 +473,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Increments the use-count for used groups
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      */
     private void incrementGroupUseCount(AJAXRequestData requestData) {
@@ -486,7 +486,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
         String[] groups = Strings.splitByCommaNotInQuotes(groupsString);
         PrincipalUseCountService principalUseCountService = services.getOptionalService(PrincipalUseCountService.class);
         if(principalUseCountService == null) {
-            LOG.debug("Missing " + PrincipalUseCountService.class.getName() + " service.");
+            LOG.debug("Missing {} service.", PrincipalUseCountService.class.getName());
             return;
         }
 
@@ -503,7 +503,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Increments the use-count for the given groups
-     * 
+     *
      * @param session The user session
      * @param principalUseCountService The {@link PrincipalUseCountService} to use
      * @param groups The groups to increase
@@ -513,7 +513,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             try {
                 principalUseCountService.increment(session, Integer.valueOf(group));
             } catch (NumberFormatException e) {
-                LOG.warn("Unable to parse group id: " + e.getMessage());
+                LOG.warn("Unable to parse group id: {}", e.getMessage());
                 continue;
             } catch (OXException e) {
                 // Nothing to do here

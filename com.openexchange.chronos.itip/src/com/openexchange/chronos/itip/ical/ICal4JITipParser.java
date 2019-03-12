@@ -122,7 +122,7 @@ public class ICal4JITipParser {
         if (event.getAttendees() == null || event.getAttendees().isEmpty()) {
             return;
         }
-        session.getEntityResolver().prepare(event.getAttendees());
+        session.getEntityResolver().prepare(event.getAttendees(), new int[] { session.getUserId() });
         if (ITipMethod.REPLY.equals(methodValue) && event.containsAttendees() && null != event.getAttendees() && event.getAttendees().size() == 1 && event.containsExtendedProperties() && null != event.getExtendedProperties()) {
             // Set attendee comment that is stored in the extended properties
             ExtendedProperties extendedProperties = event.getExtendedProperties();

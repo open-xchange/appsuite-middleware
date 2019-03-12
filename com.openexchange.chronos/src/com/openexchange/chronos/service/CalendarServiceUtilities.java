@@ -67,14 +67,29 @@ public interface CalendarServiceUtilities {
 
     /**
      * Resolves an UID to the identifier of an existing event. The lookup is performed case-sensitive and context-wise, independently of
-     * the current session user's access rights. If an event series with change exceptions is matched, the identifier of the recurring
-     * <i>master</i> event is returned.
+     * the current session user's access rights.
+     * <p/>
+     * If an event series with change exceptions is matched, the identifier of the recurring <i>master</i> event is returned.
      *
      * @param session The calendar session
      * @param uid The UID to resolve
      * @return The identifier of the resolved event, or <code>null</code> if not found
      */
     String resolveByUID(CalendarSession session, String uid) throws OXException;
+
+    /**
+     * Resolves an UID to the identifier of an existing event. The lookup is performed case-sensitive and context-wise, independently of
+     * the current session user's access rights, within the scope of a specific calendar user. I.e., the unique identifier is resolved to
+     * events residing in the user's <i>personal</i>, as well as <i>public</i> calendar folders.
+     * <p/>
+     * If an event series with change exceptions is matched, the identifier of the recurring <i>master</i> event is returned.
+     *
+     * @param session The calendar session
+     * @param uid The UID to resolve
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The identifier of the resolved event, or <code>null</code> if not found
+     */
+    String resolveByUID(CalendarSession session, String uid, int calendarUserId) throws OXException;
 
     /**
      * Resolves a resource filename to the identifier of an existing event. The lookup is performed context-wise, independently of the

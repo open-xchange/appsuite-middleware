@@ -117,6 +117,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
                     MetricDescriptor metricDescriptor = metricDescriptorCache.getMetricDescriptor(MetricType.TIMER, "RequestTimes." + request.getHttpMethod().name(), "The execution time of %s requests measured in events/sec", "events");
                     Timer timer = metricService.getTimer(metricDescriptor);
                     timer.update(longValue, TimeUnit.MILLISECONDS);
+                    break;
                 default:
                     break;
             }

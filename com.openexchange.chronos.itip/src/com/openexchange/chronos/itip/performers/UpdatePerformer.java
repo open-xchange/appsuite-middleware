@@ -260,7 +260,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             List<Attendee> attendees = new LinkedList<>(event.getAttendees());
 
             // Get attendee to add
-            Attendee attendee = CalendarUtils.find(attendees, owner);
+            Attendee attendee = CalendarUtils.find(attendees, session.getEntityResolver().prepareUserAttendee(owner));
             if (null == attendee) {
                 attendee = loadAttendee(session, owner);
             } else {

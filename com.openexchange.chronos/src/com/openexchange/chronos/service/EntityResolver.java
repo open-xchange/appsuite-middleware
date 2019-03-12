@@ -110,6 +110,23 @@ public interface EntityResolver {
     List<Attendee> prepare(List<Attendee> attendees, boolean resolveResourceIds) throws OXException;
 
     /**
+     * Prepares a list of client-supplied attendees. This includes:
+     * <ul>
+     * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value,
+     * and it is listed as <i>resolvable</i></li>
+     * <li>Verifying the existence of internal calendar user entities</li>
+     * <li>Applying further static properties of internal calendar users, which typically includes the calendar user's common name and the
+     * actual calendar user address</li>
+     * </ul>
+     *
+     * @param attendees The attendees to prepare
+     * @param resolvableEntities A whitelist of identifiers of those entities that should be resolved by their URI value, or
+     *            <code>null</code> to resolve all resolvable entities
+     * @return The passed attendee list, with each entry being possibly enriched by the resolved static entity data if a matching internal attendee was found
+     */
+    List<Attendee> prepare(List<Attendee> attendees, int[] resolvableEntities) throws OXException;
+
+    /**
      * Gets the user identifiers of the members of a specific internal group.
      *
      * @param groupID The identifier of the group to get the members for

@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
@@ -70,6 +72,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -80,9 +84,12 @@ import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -161,6 +168,57 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(new IllegalStateException(message), CalendarProviders.ID_CHRONOS);
         }
         return events.isEmpty() ? null : events.get(0).getId();
+    }
+
+    /**
+     * Resolves an unique identifier within the scope of a specific calendar user, i.e. the unique identifier is resolved to events
+     * residing in the user's <i>personal</i>, as well as <i>public</i> calendar folders.
+     *
+     * @param uid The unique identifier to resolve
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The identifier of the resolved event, or <code>null</code> if not found
+     */
+    public EventID resolveByUid(String uid, int calendarUserId) throws OXException {
+        /*
+         * construct search term & lookup matching events in storage
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+            )
+        ;
+        EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.UID, EventField.CALENDAR_USER };
+        List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, fields), uid);
+        /*
+         * load calendar user's attendee data for found events and resolve to first matching event for this folder's calendar user
+         */
+        Map<String, Attendee> attendeePerEvent = storage.getAttendeeStorage().loadAttendee(
+            getObjectIDs(events), session.getEntityResolver().prepareUserAttendee(calendarUserId), (AttendeeField[]) null);
+        for (Event event : events) {
+            if (null != event.getFolderId()) {
+                /*
+                 * common folder identifier is assigned, consider 'resolved' in public in private folder
+                 */
+                CalendarFolder folder = Utils.getFolder(session, event.getFolderId(), false);
+                if (false == SharedType.getInstance().equals(folder.getType())) {
+                    return getEventID(event);
+                }
+            } else {
+                /*
+                 * group scheduled event with no common folder identifier assigned, consider 'resolved' if calendar user attends
+                 */
+                Attendee attendee = attendeePerEvent.get(event.getId());
+                if (null != attendee && Strings.isNotEmpty(attendee.getFolderId())) {
+                    return new EventID(attendee.getFolderId(), event.getId(), event.getRecurrenceId());
+                }
+            }
+        }
+        /*
+         * not found, otherwise
+         */
+        return null;
     }
 
     /**

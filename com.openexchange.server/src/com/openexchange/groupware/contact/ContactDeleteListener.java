@@ -307,8 +307,7 @@ public final class ContactDeleteListener implements DeleteListener {
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toDelete.add(contact);
             } else if (null == folder) {
-                LOG.warn("Contact with no valid parent folder will be moved to user's address book. " +
-                    "[Context={} Folder={} User={} Contact={}]",
+                LOG.warn("Contact with no valid parent folder will be moved to user's address book. [Context={} Folder={} User={} Contact={}]",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toUsersFolder.add(contact);
             } else if (FolderObject.CONTACT != folder.getModule()) {
@@ -319,8 +318,7 @@ public final class ContactDeleteListener implements DeleteListener {
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toDelete.add(contact);
             } else {
-                LOG.debug("Contact in non-'private' folder will be transferred to user " +
-                    "[Context={} Folder={} User={} Contact={}].",
+                LOG.debug("Contact in non-'private' folder will be transferred to user [Context={} Folder={} User={} Contact={}].",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toUser.add(contact);
             }

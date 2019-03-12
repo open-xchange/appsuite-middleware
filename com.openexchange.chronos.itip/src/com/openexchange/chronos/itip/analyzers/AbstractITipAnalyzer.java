@@ -405,8 +405,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return false;
     }
 
-    protected void ensureParticipant(final Event original, final Event event, final CalendarSession session, int owner) {
-        if (null == CalendarUtils.find(event.getAttendees(), owner)) {
+    protected void ensureParticipant(final Event original, final Event event, final CalendarSession session, int owner) throws OXException {
+        if (null == CalendarUtils.find(event.getAttendees(), session.getEntityResolver().prepareUserAttendee(owner))) {
             // Owner is a party crasher..
             Attendee attendee = new Attendee();
             attendee.setEntity(owner);

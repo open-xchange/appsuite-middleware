@@ -137,7 +137,7 @@ public class OXExceptionInterceptorRegistration {
         }
 
         if (isResponsibleInterceptorRegistered(interceptor)) {
-            LOG.error("Interceptor for the given ranking " + interceptor.getRanking() + " and desired module/action combination already registered! Discard the new one from type: " + interceptor.getClass());
+            LOG.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", interceptor.getRanking(), interceptor.getClass());
             return false;
         }
         this.interceptors.add(interceptor);

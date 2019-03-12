@@ -114,6 +114,13 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
     public String[] getDependencies() {
         return new String[0];
     }
+    
+    /* @formatter:off */
+    private static final String SQL = "DELETE sub, conf_string, conf_bool FROM subscriptions AS sub "
+                                    + "LEFT JOIN genconf_attributes_strings AS conf_string ON sub.configuration_id = conf_string.id AND sub.cid = conf_string.cid "
+                                    + "LEFT JOIN genconf_attributes_bools as conf_bool ON sub.configuration_id = conf_bool.id AND sub.cid = conf_bool.cid "
+                                    + "WHERE sub.source_id = ?;";
+    /* @formatter:on */
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
@@ -128,7 +135,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
             con.setAutoCommit(false);
             rollback = 1;
 
-            stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
+            stmt = con.prepareStatement(SQL);
             for (String id : subscriptionSourceIds) {
                 stmt.setString(1, id);
                 stmt.addBatch();
