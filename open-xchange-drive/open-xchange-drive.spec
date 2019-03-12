@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 26
+%define         ox_release 27
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -75,6 +75,8 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Mar 12 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2019-03-11 (5148)
 * Mon Feb 18 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2019-02-25 (5132)
 * Thu Feb 07 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
