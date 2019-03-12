@@ -355,6 +355,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Gets the classes of the optional services.
      * <p>
      * They appear when available in activator's service collection.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @return The array of {@link Class} instances of optional services
      */
