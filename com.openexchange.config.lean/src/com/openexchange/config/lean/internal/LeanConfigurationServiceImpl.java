@@ -253,7 +253,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             return p.isDefined() ? p.get() : property.getDefaultValue(coerceTo);
         } catch (Exception e) {
             T defaultValue = property.getDefaultValue(coerceTo);
-            LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, I(userId), I(contextId), defaultValue, e);
+            LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property.getFQPropertyName(), I(userId), I(contextId), defaultValue, e);
             return defaultValue;
         }
     }
