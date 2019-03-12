@@ -151,7 +151,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         /*
          * resolve calendar user only for externally organized group scheduled events, otherwise any entity
          */
-        if (isGroupScheduled(event) || false == hasInternalOrganizer(session.getEntityResolver(), event)) {
+        if (isGroupScheduled(event) && false == hasInternalOrganizer(session.getEntityResolver(), event)) {
             return new int[] { folder.getCalendarUserId() };
         }
         return null;
