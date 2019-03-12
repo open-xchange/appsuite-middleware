@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
@@ -89,19 +90,19 @@ public final class SessionMetricHandler {
 
     static {
         DESC_TOTAL = MetricDescriptor.newBuilder(GROUP, COUNT_TOTAL, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_TOTAL_DESC).withMetricSupplier(() -> {
-            return SessionHandler.getMetricTotalSessions();
+            return I(SessionHandler.getMetricTotalSessions());
         }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
 
         DESC_LONG = MetricDescriptor.newBuilder(GROUP, COUNT_LONG, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_LONG_DESC).withMetricSupplier(() -> {
-            return SessionHandler.getMetricLongSessions();
+            return I(SessionHandler.getMetricLongSessions());
         }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
 
         DESC_SHORT = MetricDescriptor.newBuilder(GROUP, COUNT_SHORT, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_SHORT_DESC).withMetricSupplier(() -> {
-            return SessionHandler.getMetricShortSessions();
+            return I(SessionHandler.getMetricShortSessions());
         }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
 
         DESC_ACTIVE = MetricDescriptor.newBuilder(GROUP, COUNT_ACTIVE, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_ACTIVE_DESC).withMetricSupplier(() -> {
-            return SessionHandler.getMetricActiveSessions();
+            return I(SessionHandler.getMetricActiveSessions());
         }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
     }
 
