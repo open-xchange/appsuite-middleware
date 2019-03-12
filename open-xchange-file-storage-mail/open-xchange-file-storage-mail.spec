@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 54
+%define         ox_release 53
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -77,8 +77,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Mon Mar 11 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-03-01 (5147)
 * Wed Feb 27 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-03-01 (5142)
 * Mon Feb 18 2019 Thorben Betten <thorben.betten@open-xchange.com>
