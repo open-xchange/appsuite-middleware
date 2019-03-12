@@ -436,51 +436,8 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         /*
          * edit reminder in client
          */
-        Date initialAcknowledged = TimeTools.D("next sunday at 15:44");
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "DTSTART:19810329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
-            "TZNAME:MESZ\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "DTSTART:19961027T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
-            "TZNAME:MEZ\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "SEQUENCE:0\r\n" +
-            "SUMMARY:Dem\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "UID:" + uid + "\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "ACKNOWLEDGED:" + formatAsUTC(initialAcknowledged) + "\r\n" +
-            "DESCRIPTION:Erinnerung\r\n" +
-            "TRIGGER:-PT20M\r\n" +
-            "UID:71926843-FB96-440E-B84F-0185F967096D\r\n" +
-            "X-WR-ALARMUID:71926843-FB96-440E-B84F-0185F967096D\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().getVAlarm().setProperty("TRIGGER", "-PT20M");
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -953,7 +910,7 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
             "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "RRULE:FREQ=DAILY\r\n" +
-            "SEQUENCE:0\r\n" +
+                "SEQUENCE:2\r\n" +
             "SUMMARY:Serie\r\n" +
             "TRANSP:OPAQUE\r\n" +
             "UID:" + uid + "\r\n" +
@@ -975,7 +932,7 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
             "DTSTART;TZID=Europe/Berlin:" + format(exceptionStart, "Europe/Berlin") + "\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "RECURRENCE-ID;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "SEQUENCE:0\r\n" +
+                "SEQUENCE:2\r\n" +
             "SUMMARY:SerieEdit\r\n" +
             "TRANSP:OPAQUE\r\n" +
             "UID:" + uid + "\r\n" +
