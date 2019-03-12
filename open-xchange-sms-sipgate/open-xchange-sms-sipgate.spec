@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 53
+%define        ox_release 54
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -64,6 +64,8 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
+* Tue Mar 12 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2019-03-01 (5147)
 * Wed Feb 27 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2019-03-01 (5142)
 * Mon Feb 18 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
