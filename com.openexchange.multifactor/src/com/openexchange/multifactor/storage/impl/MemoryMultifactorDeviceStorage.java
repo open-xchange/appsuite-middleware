@@ -78,6 +78,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
     public static final long DEFAULT_REGISTRATION_LIFETIME = TimeUnit.MINUTES.toMillis(5); // 5min in ms
 
     private final ConcurrentHashMap<String, RegistrationContainer> registrations = new ConcurrentHashMap<>();
+    private final Object lock = new Object();
     final long registrationLifeTime;
 
     /**
@@ -170,7 +171,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * Internal method to remove expired pending device registrations
      */
     private void cleanup() {
-        synchronized (registrations) {
+        synchronized (lock) {
             final Iterator<Entry<String, RegistrationContainer>> iterator = registrations.entrySet().iterator();
             while (iterator.hasNext()) {
                 final RegistrationContainer next = iterator.next().getValue();
@@ -193,7 +194,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
     public void registerDevice(int contextId, int userId, T device) {
         device = Objects.requireNonNull(device, "device  must not be null");
         cleanup();
-        synchronized (registrations) {
+        synchronized (lock) {
             RegistrationContainer existingContainer =
                 registrations.putIfAbsent(getKey(contextId, userId), new RegistrationContainer().addDevices(device));
             if(existingContainer != null) {
@@ -225,7 +226,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * @return <code>true</code> if the device was unregistered, <code>false</code> if the device was not found
      */
     public boolean unregisterDevice(int contextId, int userId, String deviceId) {
-        synchronized (registrations) {
+        synchronized (lock) {
             final String key = getKey(contextId, userId);
             RegistrationContainer registrationsForSession = registrations.get(key);
             boolean removed = registrationsForSession.removeDevice(deviceId);
