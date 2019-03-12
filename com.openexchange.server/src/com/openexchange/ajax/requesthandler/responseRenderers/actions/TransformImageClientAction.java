@@ -174,8 +174,7 @@ public class TransformImageClientAction extends TransformImageAction {
                     }
                 } catch (ImageConverterException e) {
                     // OK, we just didn't get a result
-                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource from the Image Server: " +
-                        Throwables.getRootCause(e).getMessage());
+                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource from the Image Server {}", Throwables.getRootCause(e).getMessage());
                 }
             } else {
                 ret = super.getCachedResource(session, cacheKey, xformParams);

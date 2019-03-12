@@ -242,7 +242,7 @@ public final class RateLimiter {
                 if (null == tmp) {
                     ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == configService) {
-                        LOG.info(RateLimiter.class.getSimpleName() + " not yet fully initialized; awaiting " + ConfigurationService.class.getSimpleName());
+                        LOG.info("{} not yet fully initialized; awaiting {}", RateLimiter.class.getSimpleName(), ConfigurationService.class.getSimpleName());
                         return null;
                     }
                     /*

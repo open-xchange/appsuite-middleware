@@ -98,7 +98,7 @@ public class RdbFileAccessStorage {
 
     /**
      * Adds a new file access
-     * 
+     *
      * @param contextId The id of the users context
      * @param userId The id of the user in given context
      * @param size The used size in bytes
@@ -121,7 +121,8 @@ public class RdbFileAccessStorage {
             long affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for adding a new file access but there should only be 1. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} changes for adding a new file access but there should only be 1. Executed SQL: {}", affectedRows, sql);
             }
         } catch (final SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -132,7 +133,7 @@ public class RdbFileAccessStorage {
 
     /**
      * Removes file accesses for given user that are older than defined by provided timestamp.
-     * 
+     *
      * @param contextId The id of the users context
      * @param userId The id of the user in given context
      * @param timestamp The timestamp older entries will be removed
@@ -162,7 +163,7 @@ public class RdbFileAccessStorage {
 
     /**
      * Returns the usage from given start timestamp to now.
-     * 
+     *
      * @param contextId The id of the users context
      * @param userId The id of the user in given context
      * @param start The start timestamp to start search
@@ -177,7 +178,7 @@ public class RdbFileAccessStorage {
 
     /**
      * Returns the usage from given start timestamp to given end timestamp.
-     * 
+     *
      * @param contextId The id of the users context
      * @param userId The id of the user in given context
      * @param start The start timestamp for the search

@@ -228,7 +228,7 @@ public class SproxydClient {
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
         if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
-            LOG.warn("Sproxyd endpoint is unavailable: " + endpoint);
+            LOG.warn("Sproxyd endpoint is unavailable: {}", endpoint);
             endpoints.blacklist(endpoint.getBaseUrl());
         }
 

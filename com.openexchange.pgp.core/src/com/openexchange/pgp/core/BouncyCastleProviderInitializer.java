@@ -77,7 +77,7 @@ public class BouncyCastleProviderInitializer {
             Security.addProvider(new BouncyCastleProvider());
             LOG.debug("Bouncy Castle JCE Provider registered successfull.");
         } catch (Exception e) {
-            LOG.error("Error while registering Bouncy Castle JCE Provider: " + e.getMessage());
+            LOG.error("Error while registering Bouncy Castle JCE Provider", e);
             throw e;
         }
 

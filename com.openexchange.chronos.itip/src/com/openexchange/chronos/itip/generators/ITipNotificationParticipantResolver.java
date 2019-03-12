@@ -111,7 +111,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         this.util = util;
     }
 
-    
+
     // TODO: Principal
     @Override
     public List<NotificationParticipant> resolveAllRecipients(Event original, Event update, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
@@ -355,8 +355,9 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         if (confirmations != null) {
             for (Attendee p : confirmations) {
                 String mail = CalendarUtils.extractEMailAddress(p.getUri());
-                if (null != mail && CalendarUtils.isExternalUser(p))
+                if (null != mail && CalendarUtils.isExternalUser(p)) {
                     statusMap.put(mail, p);
+                }
             }
         }
 
@@ -429,7 +430,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             return update.getCreatedBy();
         }
         // Use current user as fall back
-        LOG.debug("Unable to resolve organizer for appointment: " + update.getId() + " in context " + ctx.getContextId() + ". Using current user as organizer");
+        LOG.debug("Unable to resolve organizer for appointment: {} in context {}. Using current user as organizer", update.getId(), ctx.getContextId());
         User defaultOrganizer = userService.getUser(userId, ctx);
         CalendarUser cu = new CalendarUser();
         cu.setCn(defaultOrganizer.getDisplayName());

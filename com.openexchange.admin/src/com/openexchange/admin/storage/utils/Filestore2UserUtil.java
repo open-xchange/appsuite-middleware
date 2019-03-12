@@ -871,11 +871,11 @@ public class Filestore2UserUtil {
                             }
 
                             if (doThrow) {
-                                LOG.error("Failed to determine user-associated file storages for schema \"" + schema.getSchema() + "\" in database " + schema.getPoolId(), e);
+                                LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database {}", schema.getSchema(), schema.getPoolId(), e);
                                 throw new StorageException(e);
                             }
                         } catch (SQLException e) {
-                            LOG.error("Failed to determine user-associated file storages for schema \"" + schema.getSchema() + "\" in database " + schema.getPoolId(), e);
+                            LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database 1}", schema.getSchema(), schema.getPoolId(), e);
                             throw new StorageException(e);
                         } finally {
                             Databases.closeSQLStuff(result, stmt);

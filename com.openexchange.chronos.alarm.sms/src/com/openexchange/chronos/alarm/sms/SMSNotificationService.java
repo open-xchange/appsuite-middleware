@@ -129,7 +129,7 @@ public class SMSNotificationService implements AlarmNotificationService {
                 PhoneNumber phoneNumber = phoneUtil.parse(uri, locale.getCountry());
                 return phoneUtil.format(phoneNumber, PhoneNumberFormat.E164);
             } catch (NumberParseException e) {
-                LOG.debug("Unable to parse phone number: " + e.getMessage());
+                LOG.debug("Unable to parse phone number: {}", e.getMessage());
                 return null;
             }
         }
@@ -143,12 +143,12 @@ public class SMSNotificationService implements AlarmNotificationService {
         }
         Translator translator = translatorFactory.translatorFor(locale);
         DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
-        
+
         String timezone = null;
         if (!TimeZone.getTimeZone(user.getTimeZone()).equals(event.getStartDate().getTimeZone())) {
             timezone = event.getStartDate().getTimeZone().getDisplayName(true, TimeZone.SHORT);
         }
-        
+
         Calendar instance = Calendar.getInstance(event.getStartDate().getTimeZone());
         instance.setTimeInMillis(event.getStartDate().getTimestamp());
         String formattedStartDate = df.format(instance.getTime());

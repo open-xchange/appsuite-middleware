@@ -115,7 +115,7 @@ public final class MsCacheEventHandler implements CacheListener {
             try {
                 getTopic(i).removeMessageListener(listeners.get(i));
             } catch (RuntimeException e) {
-                LOG.warn("Error removing message listener " + i, e);
+                LOG.warn("Error removing message listener {}", i, e);
             }
         }
     }

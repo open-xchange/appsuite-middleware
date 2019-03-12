@@ -694,7 +694,7 @@ public final class SieveTextFilter {
             try {
                 addPlainTextToRule(wholeText, commentedText, ruleComment, rightRule);
             } catch (Exception e) {
-                LOG.warn("Unable to add add rule because of: " + e.getMessage());
+                LOG.warn("Unable to add add rule", e);
                 // continue in case an error occurs
             }
             printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errorMsg));

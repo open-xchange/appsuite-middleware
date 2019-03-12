@@ -1134,7 +1134,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {
-            LOG.error("Unable to resize contact image due to " + ex.getMessage(), ex);
+            LOG.error("Unable to resize contact image due to {}", ex.getMessage(), ex);
         }
     }
 

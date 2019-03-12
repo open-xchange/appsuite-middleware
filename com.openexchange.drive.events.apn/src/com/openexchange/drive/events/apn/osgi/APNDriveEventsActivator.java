@@ -175,7 +175,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 if (new File(keystore).exists()) {
                     return new APNAccess(keystore, password, production);
                 }
-                
+
                 // Assume file is given as resource identifier
                 try {
                     byte[] keystoreBytes = Streams.stream2bytes(loader.loadResource(keystore));
@@ -206,7 +206,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
         String result = properties.getProperty(prop.getFQPropertyName(optional));
         if (result == null) {
             // This should never happen as long as the shipped fragment contains a proper properties file
-            LOG.error("Missing required property from fragment: " + prop.getFQPropertyName());
+            LOG.error("Missing required property from fragment: {}", prop.getFQPropertyName());
             throw OXException.general("Missing property: " + prop.getFQPropertyName());
         }
         return result;

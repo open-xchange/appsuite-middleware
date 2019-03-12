@@ -287,7 +287,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        LOGGER.debug(ctx + " - " + capasToAdd.toString() + " | " + capasToRemove.toString());
+        LOGGER.debug("{} - {} | {}", ctx, capasToAdd.toString(), capasToRemove.toString());
 
         try {
             if (!tool.existsContext(ctx)) {

@@ -954,7 +954,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("Now revoking entries in configdb (cs2dbpool) for context {}", ctx.getId());
                 updateContextServer2DbPool(dbHandleBackup, configdb_write_con, i(ctx.getId()));
             } catch (PoolException e) {
-                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", e);
+                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), e);
             }
             throw new StorageException(tde);
         } catch (final SQLException sql) {
@@ -3807,7 +3807,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Inserts existing schemas to 'contexts_per_dbschema' (if not contained).
-     * 
+     *
      * @param database The {@link Database}
      * @param schemata The schemata to insert
      * @param db2ContainedSchemata A map with the already contained database schemata

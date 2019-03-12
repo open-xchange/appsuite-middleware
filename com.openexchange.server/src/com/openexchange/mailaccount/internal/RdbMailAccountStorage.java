@@ -3350,7 +3350,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     blacklisted = false == MailAccountUtils.isAllowed(port);
                 }
             } catch (final Exception e) {
-                LOG.warn("Could not check host name \"" + host + "\" against IP range black-list", e);
+                LOG.warn("Could not check host name \"{}\" against IP range black-list", host, e);
             }
             if (blacklisted) {
                 throw MailAccountExceptionCodes.BLACKLISTED_SERVER.create(host);

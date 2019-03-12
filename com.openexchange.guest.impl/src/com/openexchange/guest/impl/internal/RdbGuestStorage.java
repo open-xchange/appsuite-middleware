@@ -302,7 +302,8 @@ public class RdbGuestStorage extends GuestStorage {
             long affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for removing a guest assignment but there should only be 1. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} changes for removing a guest assignment but there should only be 1. Executed SQL: {}", affectedRows, sql);
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -328,7 +329,8 @@ public class RdbGuestStorage extends GuestStorage {
             long affectedRows = statement.executeUpdate();
 
             if (affectedRows > 1) {
-                LOG.error("There have been " + affectedRows + " guests removed but there should max be 1. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} guests removed but there should max be 1. Executed SQL: {}", affectedRows, sql);
                 throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Long.toString(affectedRows), statement.toString());
             }
         } catch (final SQLException e) {
@@ -606,7 +608,8 @@ public class RdbGuestStorage extends GuestStorage {
             final int affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} changes for updating the guest user. Executed SQL: {}", affectedRows, sql);
                 throw GuestExceptionCodes.SQL_ERROR.create("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
             }
         } catch (final SQLException e) {

@@ -320,7 +320,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      */
     private void basicAuth(ContainerRequestContext requestContext) {
         if (defaultAuthenticator == null) {
-            LOG.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " + "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " + "'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
+            LOG.error("Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " + "Please set properties 'com.openexchange.rest.services.basic-auth.login' and 'com.openexchange.rest.services.basic-auth.password' appropriately.", new Throwable("Denied request to REST interface"));
             deny(requestContext);
         } else {
             authenticatorAuth(defaultAuthenticator, requestContext, null);

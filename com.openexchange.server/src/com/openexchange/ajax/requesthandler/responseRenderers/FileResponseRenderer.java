@@ -332,7 +332,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             if (!tmpDir.mkdirs()) {
                 throw new IllegalArgumentException("Directory " + path + " does not exist and cannot be created.");
             }
-            LOG.info("Directory " + path + " did not exist, but could be created.");
+            LOG.info("Directory {} did not exist, but could be created.", path);
         }
         if (!tmpDir.isDirectory()) {
             throw new IllegalArgumentException(path + " is not a directory.");

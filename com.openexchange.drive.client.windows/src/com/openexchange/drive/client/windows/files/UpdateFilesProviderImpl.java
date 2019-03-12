@@ -247,7 +247,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
             }
 
         } catch (PatternSyntaxException e) {
-            LOG.error("Regex '" + regex + "' is invalid!");
+            LOG.error("Regex ''{}'' is invalid!", regex);
             throw UpdaterExceptionCodes.NO_FILES_AVAILABLE.create(e);
         }
         return null;

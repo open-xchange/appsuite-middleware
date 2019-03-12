@@ -627,7 +627,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             if (!tmpDir.mkdirs()) {
                 throw new IllegalArgumentException("Directory " + path + " does not exist and can not be created.");
             }
-            LOG.info("Directory " + path + " did not exist, but could be created.");
+            LOG.info("Directory {} did not exist, but could be created.", path);
         }
         if (!tmpDir.isDirectory()) {
             throw new IllegalArgumentException(path + " is not a directory.");

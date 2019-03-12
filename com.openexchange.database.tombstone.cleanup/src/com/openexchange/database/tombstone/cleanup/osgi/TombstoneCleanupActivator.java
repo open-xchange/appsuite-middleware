@@ -71,7 +71,7 @@ import com.openexchange.osgi.Tools;
 import com.openexchange.timer.ScheduledTimerTask;
 
 /**
- * 
+ *
  * {@link TombstoneCleanupActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -82,7 +82,7 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TombstoneCleanupActivator.class);
     private static final String CLUSTER_ID = "com.openexchange.database.tombstone.cleanup";
     private ScheduledTimerTask cleanupTask;
-    private AtomicBoolean REGISTERED = new AtomicBoolean(false);
+    private final AtomicBoolean REGISTERED = new AtomicBoolean(false);
     private TombstoneCleanerWorker tombstoneCleanerWorker;
 
     @Override
@@ -153,8 +153,8 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
             }
 
             initCleanupTimerTask(leanConfig);
-        } catch (OXException e) {
-            LOGGER.error("Encountered an error while restarting database cleanup task: " + e.getMessage(), e);
+        } catch (Exception e) {
+            LOGGER.error("Encountered an error while restarting database cleanup task", e);
         }
     }
 

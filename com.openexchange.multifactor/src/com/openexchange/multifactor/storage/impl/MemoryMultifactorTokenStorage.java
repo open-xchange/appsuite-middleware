@@ -85,12 +85,12 @@ public class MemoryMultifactorTokenStorage<T extends MultifactorToken<?>> implem
             (entry) -> {
                 Map<String,T> innerMap = entry.getValue();
                 innerMap.entrySet().removeIf(e -> e.getValue().isExpired());
-                LOG.debug("inner storage size: " + innerMap.size());
+                LOG.debug("inner storage size: {}", innerMap.size());
             }
         );
 
         storage.entrySet().removeIf(innerMap -> innerMap.getValue().isEmpty());
-        LOG.debug("storage size: " + storage.mappingCount());
+        LOG.debug("storage size: {}", storage.mappingCount());
     }
 
     private Map<String, T> getTokensFor(MultifactorRequest multifactorRequest) {

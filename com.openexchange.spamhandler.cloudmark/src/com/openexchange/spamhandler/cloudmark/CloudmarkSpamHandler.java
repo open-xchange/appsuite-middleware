@@ -346,7 +346,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         try {
             return new QuotedInternetAddress(sendAddr, true);
         } catch (AddressException e) {
-            LOG.error("Unable to parse provided email address " + sendAddr, e);
+            LOG.error("Unable to parse provided email address {}", sendAddr, e);
             return null;
         }
     }
