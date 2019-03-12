@@ -220,8 +220,16 @@ public abstract class HousekeepingActivator extends DeferredActivator {
             }
         });
 
+        // Check for possible optional services
+        Class<?>[] optionalServices = getOptionalServices();
+        if (null != optionalServices) {
+            for (final Class<?> clazz : optionalServices) {
+                trackService(clazz);
+            }
+        }
+
         // Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
-        if (!serviceTrackers.isEmpty() || (getOptionalServices() != null && getOptionalServices().length > 0)) {
+        if (!serviceTrackers.isEmpty()) {
             openTrackers();
         }
     }
@@ -481,13 +489,6 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Opens all trackers.
      */
     protected void openTrackers() {
-        final Class<?>[] optionalServices = getOptionalServices();
-        if (null != optionalServices) {
-            for (final Class<?> clazz : optionalServices) {
-                trackService(clazz);
-            }
-        }
-
         for (final ServiceTracker<?, ?> tracker : serviceTrackers) {
             tracker.open();
         }
