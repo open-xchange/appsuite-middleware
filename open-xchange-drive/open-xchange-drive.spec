@@ -15,7 +15,7 @@ BuildRequires:  java7-devel
 BuildRequires:  java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 55
+%define         ox_release 54
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -79,8 +79,6 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Mon Mar 11 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2019-03-12 (5166)
 * Tue Feb 26 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2019-02-28 (5141)
 * Mon Feb 04 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
