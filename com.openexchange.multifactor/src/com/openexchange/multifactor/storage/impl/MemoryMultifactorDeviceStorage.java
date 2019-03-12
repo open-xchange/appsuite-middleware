@@ -180,7 +180,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
                     iterator.remove();
                 }
             }
-            LOG.debug("storage size: " + registrations.size());
+            LOG.debug("storage size: {}", registrations.size());
         }
     }
 
@@ -200,7 +200,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
             if(existingContainer != null) {
                existingContainer.addDevices(device);
             }
-            LOG.debug("storage size: " + registrations.size());
+            LOG.debug("storage size: {}", registrations.size());
         }
     }
 
@@ -233,7 +233,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
             if(removed && registrationsForSession.getSize() == 0) {
                 registrations.remove(key);
             }
-            LOG.debug("storage size: " + registrations.size());
+            LOG.debug("storage size: {}", registrations.size());
             return removed;
         }
     }
