@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 45
+%define        ox_release 44
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -181,8 +181,6 @@ fi
 %doc docs/
 
 %changelog
-* Mon Mar 11 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-03-12 (5165)
 * Fri Feb 01 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-02-11 (5104)
 * Mon Nov 12 2018 Marcus Klein <marcus.klein@open-xchange.com>
