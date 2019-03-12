@@ -692,12 +692,7 @@ exclude_secret_entries() {
         else
             die "${0}: Internal Error, tried to modify original data: ${_file}"
         fi
-
-        if [ -n "$(echo ${_tmp_exclude_status} | grep "^${TMP}/*${LOGDIR}")" ]; then
-            sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
-        else
-            die "${0}: Internal Error, tried to modify original data: ${_tmp_exclude_status}"
-        fi
+        sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"
     cat ${_tmp_exclude_status} >> ${_exclude_status}
