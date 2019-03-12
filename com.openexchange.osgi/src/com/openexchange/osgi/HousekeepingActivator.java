@@ -221,7 +221,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         });
 
         // Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
-        if (!serviceTrackers.isEmpty()) {
+        if (!serviceTrackers.isEmpty() || (getOptionalServices() != null && getOptionalServices().length > 0)) {
             openTrackers();
         }
     }
