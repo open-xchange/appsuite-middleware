@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attachment;
@@ -872,30 +873,14 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         }
 
         protected boolean hasBeenRemoved(final NotificationParticipant participant) {
-            if (diff == null) {
-                return false;
-            }
-            if (diff.containsAnyChangeOf(new EventField[] { EventField.ATTENDEES })) {
-                CollectionUpdate<Attendee, AttendeeField> update = diff.getAttendeeUpdates();
-                if (update == null || update.isEmpty()) {
-                    return false;
-                }
-
-                List<Attendee> removed = update.getRemovedItems();
-                if (removed == null || removed.isEmpty()) {
-                    return false;
-                }
-
-                for (Attendee attendee : removed) {
-                    if (participant.matches(attendee)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return hasBeenModified(participant, () -> diff.getAttendeeUpdates().getRemovedItems());
         }
 
         protected boolean hasBeenAdded(final NotificationParticipant participant) {
+            return hasBeenModified(participant, () -> diff.getAttendeeUpdates().getAddedItems());
+        }
+
+        private boolean hasBeenModified(NotificationParticipant participant, Supplier<List<Attendee>> attendeeSupplier) {
             if (diff == null) {
                 return false;
             }
@@ -905,15 +890,13 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                     return false;
                 }
 
-                List<Attendee> added = update.getAddedItems();
-                if (added == null || added.isEmpty()) {
+                List<Attendee> attendees = attendeeSupplier.get();
+                if (attendees == null || attendees.isEmpty()) {
                     return false;
                 }
 
-                for (Attendee attendee : added) {
-                    if (participant.matches(attendee)) {
-                        return true;
-                    }
+                if (exists(attendees, participant)) {
+                    return true;
                 }
             }
             return false;
