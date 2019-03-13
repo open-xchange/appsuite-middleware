@@ -860,12 +860,12 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         }
 
         protected boolean existsInOriginal(NotificationParticipant participant) {
-           return exists(original.getAttendees(), participant);
+            return exists(original.getAttendees(), participant);
         }
 
         protected boolean exists(List<Attendee> attendees, NotificationParticipant participant) {
             for (Attendee attendee : attendees) {
-                if(participant.matches(attendee)) {
+                if (participant.matches(attendee)) {
                     return true;
                 }
             }
@@ -1089,7 +1089,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             }
             event.setAttendees(purged);
         }
-        
+
         private final EventField[] ORGANIZER_CHANGE = new EventField[] { EventField.ORGANIZER };
 
         @Override
