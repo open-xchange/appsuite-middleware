@@ -58,7 +58,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
-import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipChange.Type;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
@@ -81,8 +80,8 @@ import com.openexchange.java.Strings;
  */
 public abstract class AbstractActionPerformer implements ITipActionPerformer {
 
-    protected ITipIntegrationUtility       util;
-    private final MailSenderService        sender;
+    protected ITipIntegrationUtility util;
+    private final MailSenderService sender;
     private final ITipMailGeneratorFactory mailGenerators;
 
     public AbstractActionPerformer(final ITipIntegrationUtility util, final MailSenderService mailSender, final ITipMailGeneratorFactory mailGenerators) {
@@ -96,7 +95,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
      * Get the original event
      * 
      * @param change The {@link ITipChange} to get the original event for
-     * @param processed The proccessed events
+     * @param processed The processed events
      * @param session The {@link CalendarSession}
      * @return The original {@link Event} or <code>null</code> if no original exists
      * @throws OXException In case original can't be loaded
@@ -130,15 +129,12 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
     }
 
     protected void writeMail(final ITipAction action, Event original, final Event update, final CalendarSession session, int owner) throws OXException {
-        CalendarUser principal = ITipUtils.getPrincipal(session);
-        switch (action) {
-            case COUNTER:
-                return;
-            default: //Continue normally
+        if (ITipAction.COUNTER.equals(action)) {
+            return;
         }
-        original = constructOriginalForMail(action, original, update, session, owner);
-
-        final ITipMailGenerator generator = mailGenerators.create(original, update, session, owner, principal);
+        
+        CalendarUser principal = ITipUtils.getPrincipal(session);
+        final ITipMailGenerator generator = mailGenerators.create(constructOriginalForMail(action, original, update, session, owner), update, session, owner, principal);
         switch (action) {
             case CREATE:
                 if (!generator.userIsTheOrganizer()) {
@@ -226,14 +222,6 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
             }
         }
         return copy;
-    }
-
-    protected int getOwner(CalendarSession session, ITipAnalysis analysis, Event event) {
-        int owner = session.getUserId();
-        if (analysis.getMessage().getOwner() > 0) {
-            owner = analysis.getMessage().getOwner();
-        }
-        return owner;
     }
 
 }
