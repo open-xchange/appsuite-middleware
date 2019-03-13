@@ -305,7 +305,23 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
         if (eventData.containsAlarms()) {
-            updateAlarms(eventUpdate.getUpdate(), calendarUserId, storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId), eventData.getAlarms());
+            List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
+            if(originalChangeExceptions != null) {
+
+                List<Event> copies = originalChangeExceptions.stream().collect(ArrayList::new, (list, event) -> {
+                    try {
+                        list.add(EventMapper.getInstance().copy(event, null, EventMapper.getInstance().getAssignedFields(event)));
+                    } catch (OXException e) {
+                        // Should never happen
+                    }
+                }, ArrayList::addAll);
+                List<Event> exceptionsWithAlarms = storage.getUtilities().loadAdditionalEventData(calendarUserId, copies, null);
+                Map<Event, List<Alarm>> alarmsToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, eventData.getAlarms(), exceptionsWithAlarms);
+                for (Entry<Event, List<Alarm>> toUpdate : alarmsToUpdate.entrySet()) {
+                    updateAlarms(toUpdate.getKey(), calendarUserId, toUpdate.getKey().getAlarms(), toUpdate.getValue());
+                }
+            }
+            updateAlarms(eventUpdate.getUpdate(), calendarUserId, originalAlarms, eventData.getAlarms());
         }
         for (int userId : getUserIDs(eventUpdate.getAttendeeUpdates().getAddedItems())) {
             List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
@@ -361,7 +377,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *      <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
     private boolean assumeExternalOrganizerUpdate(Event originalEvent, Event updatedEvent) {
-        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && 
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
             originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
             return true;
         }
@@ -545,7 +561,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     /**
      * Selects the recurrence rule to use for the event update after a split has been performed on a recurring event series. This may be
      * necessary when the rule's <code>COUNT</code> attribute was modified during the split operation.
-     * 
+     *
      * @param originalSeriesMaster The original series master event (before the split)
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @param clientUpdate The updated event data as passed by the client
