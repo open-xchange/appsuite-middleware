@@ -88,6 +88,7 @@ import com.openexchange.config.ConfigTools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -3743,18 +3744,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         int def = 5;
         ConfigView view = viewFactory.getView(userId, contextId);
-        ComposedConfigProperty<Integer> property = view.property("com.openexchange.mailaccount.failedAuth.limit", int.class);
-
-        if (false == property.isDefined()) {
-            return def;
-        }
-
-        Integer limit = property.get();
-        if (null == limit) {
-            return def;
-        }
-
-        return limit.intValue();
+        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mailaccount.failedAuth.limit", def, view);
     }
 
     private static long getFailedAuthTimeSpan(int userId, int contextId) throws OXException {
