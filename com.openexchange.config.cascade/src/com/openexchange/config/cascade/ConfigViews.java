@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade;
 
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -59,6 +60,11 @@ import com.openexchange.java.Strings;
  * @since v7.8.4
  */
 public class ConfigViews {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigViews.class);
+    }
 
     /**
      * Initializes a new {@link ConfigViews}.
@@ -82,11 +88,7 @@ public class ConfigViews {
         }
 
         String str = property.get();
-        if (Strings.isEmpty(str)) {
-            return null;
-        }
-
-        return str;
+        return Strings.isEmpty(str) ? null : str;
     }
 
     /**
@@ -113,8 +115,17 @@ public class ConfigViews {
      * @throws OXException If defined property cannot be returned
      */
     public static boolean getDefinedBoolPropertyFrom(String propertyName, boolean def, ConfigView view) throws OXException {
-        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
-        return property.isDefined() ? property.get().booleanValue() : def;
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (!property.isDefined()) {
+            return def;
+        }
+
+        String prop = property.get();
+        if (Strings.isNotEmpty(prop)) {
+            prop = Strings.asciiLowerCase(prop.trim());
+            return "true".equals(prop) ? true : ("false".equals(prop) ? false : def);
+        }
+        return def;
     }
 
     /**
@@ -127,8 +138,20 @@ public class ConfigViews {
      * @throws OXException If defined property cannot be returned
      */
     public static int getDefinedIntPropertyFrom(String propertyName, int def, ConfigView view) throws OXException {
-        ComposedConfigProperty<Integer> property = view.property(propertyName, int.class);
-        return property.isDefined() ? property.get().intValue() : def;
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (!property.isDefined()) {
+            return def;
+        }
+
+        String prop = property.get();
+        if (Strings.isNotEmpty(prop)) {
+            try {
+                return Integer.parseInt(prop.trim());
+            } catch (final NumberFormatException e) {
+                LoggerHolder.LOG.trace("", e);
+            }
+        }
+        return def;
     }
 
     /**
@@ -141,8 +164,20 @@ public class ConfigViews {
      * @throws OXException If defined property cannot be returned
      */
     public static long getDefinedLongPropertyFrom(String propertyName, long def, ConfigView view) throws OXException {
-        ComposedConfigProperty<Long> property = view.property(propertyName, long.class);
-        return property.isDefined() ? property.get().longValue() : def;
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (!property.isDefined()) {
+            return def;
+        }
+
+        String prop = property.get();
+        if (Strings.isNotEmpty(prop)) {
+            try {
+                return Long.parseLong(prop.trim());
+            } catch (final NumberFormatException e) {
+                LoggerHolder.LOG.trace("", e);
+            }
+        }
+        return def;
     }
 
     /**
