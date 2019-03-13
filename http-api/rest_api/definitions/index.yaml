@@ -8,3 +8,7 @@ ServiceData:
   $ref: ./health/ServiceData.yaml
 CloseSessionsData:
   $ref: ./admin/CloseSessionsData.yaml
+MultifactorDevicesData:
+  $ref: ./multifactor/MultifactorDevicesData.yaml
+MultifactorDeviceData:
+  $ref: ./multifactor/MultifactorDeviceData.yaml

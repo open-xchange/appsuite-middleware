@@ -243,19 +243,13 @@ public class MultifactorTotpProvider implements MultifactorProvider {
     }
 
     @Override
-    public void deleteRegistrations(int contextId, int userId) throws OXException {
-        if(deviceStorage.deleteAllForUser(userId, contextId)) {
-           return;
-        }
-        throw MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.create();
+    public boolean deleteRegistrations(int contextId, int userId) throws OXException {
+        return deviceStorage.deleteAllForUser(userId, contextId);
     }
 
     @Override
-    public void deleteRegistrations(int contextId) throws OXException {
-        if(deviceStorage.deleteAllForContext(contextId)) {
-           return;
-        }
-        throw MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.create();
+    public boolean deleteRegistrations(int contextId) throws OXException {
+        return deviceStorage.deleteAllForContext(contextId);
     }
 
     @Override

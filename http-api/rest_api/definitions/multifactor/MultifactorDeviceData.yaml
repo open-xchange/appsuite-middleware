@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the device
+  name:
+    type: string
+    description: The name of the device
+  providerName:
+    type: string
+    description: The name of the device's provider
+  enabled:
+    type: boolean
+    description: true, if the device is enabled, false if disabled
+  backup:
+    type: boolean
+    description: true, if the device is a backup device, false otherwise

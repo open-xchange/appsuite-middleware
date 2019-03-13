@@ -1,0 +1,68 @@
+'/admin/v1/contexts/{context-id}/users/{user-id}/multifactor/devices':
+  get:
+    operationId: multifactor-get-devices
+    tags:
+      - Admin
+    parameters:
+      - description: The context the user is in
+        format: int32
+        in: path
+        name: context-id
+        required: true
+        type: integer
+      - description: The ID representing the user
+        format: int32
+        in: path
+        name: user-id
+        required: true
+        type: integer
+    produces:
+      - application/json
+    responses:
+      '200':
+        description: An array of password change entries.
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/MultifactorDevicesData'
+      '401':
+        description: Not authorized
+      '404':
+        description: Not found. If path is wrong. Response contains error message.
+      '500':
+        description: 'Internal server error that might have multiple reasons. Response contains error message.'
+    security:
+      - contextAdminAuth: []
+    summary: Lists all multifactor authentication devices for a user.
+  delete:
+    operationId: multifactor-delete-devices
+    tags:
+      - Admin
+    parameters:
+      - description: The context the user is in
+        format: int32
+        in: path
+        name: context-id
+        required: true
+        type: integer
+      - description: The ID representing the user
+        format: int32
+        in: path
+        name: user-id
+        required: true
+        type: integer
+    produces:
+      - application/json
+    responses:
+      '200':
+        description: All devices deleted
+      '401':
+        description: Not authorized
+      '404':
+        description: Not found. If path is wrong. Response contains error message.
+      '500':
+        description: 'Internal server error that might have multiple reasons. Response contains error message.'
+    security:
+      - contextAdminAuth: []
+    summary: Deletes all multifactor authentication devices for a user.
+

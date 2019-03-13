@@ -2,7 +2,7 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.storage.hazelcast"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.lockoutService"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.provider.backupString"/>
@@ -13,5 +13,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.provider.totp.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.provider.u2f"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.provider.u2f.storage.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.rest"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.multifactor.storage.hazelcast"/>
 </provider>
 </psf>
