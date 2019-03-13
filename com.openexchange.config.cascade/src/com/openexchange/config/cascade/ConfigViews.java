@@ -123,7 +123,15 @@ public class ConfigViews {
         String prop = property.get();
         if (Strings.isNotEmpty(prop)) {
             prop = Strings.asciiLowerCase(prop.trim());
-            return "true".equals(prop) ? true : ("false".equals(prop) ? false : def);
+            if ("true".equals(prop)) {
+                return true;
+            }
+            if ("false".equals(prop)) {
+                return false;
+            }
+
+            LoggerHolder.LOG.trace("Failed to parse value of property {} to a boolean: {}", propertyName, prop);
+            return def;
         }
         return def;
     }
@@ -148,7 +156,7 @@ public class ConfigViews {
             try {
                 return Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
-                LoggerHolder.LOG.trace("", e);
+                LoggerHolder.LOG.trace("Failed to parse value of property {} to an integer: {}", propertyName, prop, e);
             }
         }
         return def;
@@ -174,7 +182,7 @@ public class ConfigViews {
             try {
                 return Long.parseLong(prop.trim());
             } catch (final NumberFormatException e) {
-                LoggerHolder.LOG.trace("", e);
+                LoggerHolder.LOG.trace("Failed to parse value of property {} to a long: {}", propertyName, prop, e);
             }
         }
         return def;
