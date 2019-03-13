@@ -392,6 +392,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
         Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+        Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
         Check.quotaNotExceeded(storage, session);
         storage.getEventStorage().insertEvent(newExceptionEvent);
         List<Attendee> attendees = new ArrayList<Attendee>(originalSeriesMaster.getAttendees());
@@ -403,9 +404,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         attendees.add(updatedAttendee);
         storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), attendees);
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-        for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
+        for (Entry<Integer, List<Alarm>> entry : newExceptionAlarms.entrySet()) {
             if (originalAttendee.getEntity() != i(entry.getKey())) {
-                insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
+                insertAlarms(newExceptionEvent, i(entry.getKey()), entry.getValue(), true);
             }
         }
         /*
@@ -424,6 +425,36 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+    }
+
+    /**
+     * Prepares a map of copied alarms per user based on the original alarms associated with the series master event, prior inserting them
+     * for a newly created overridden instance.
+     * <p/>
+     * Only alarms with <i>relative</i> triggers are considered, and certain alarm properties are not copied.
+     *
+     * @param masterAlarmsPerUser The original map of alarms per user id of the series master event
+     * @return The copy of alarms per user id to use for a new change exception event, or an empty map if there are none
+     */
+    protected static Map<Integer, List<Alarm>> prepareExceptionAlarms(Map<Integer, List<Alarm>> masterAlarmsPerUser) throws OXException {
+        if (null == masterAlarmsPerUser) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<Alarm>> copiedAlarmsPerUser = new HashMap<Integer, List<Alarm>>(masterAlarmsPerUser.size());
+        for (Entry<Integer, List<Alarm>> entry : masterAlarmsPerUser.entrySet()) {
+            List<Alarm> masterAlarms = filterRelativeTriggers(entry.getValue());
+            if (null == masterAlarms || masterAlarms.isEmpty()) {
+                continue;
+            }
+            AlarmField[] copiedFields = com.openexchange.tools.arrays.Arrays.remove(
+                AlarmField.values(), AlarmField.ID, AlarmField.UID, AlarmField.RELATED_TO, AlarmField.ACKNOWLEDGED);
+            List<Alarm> copiedAlarms = new ArrayList<Alarm>(masterAlarms.size());
+            for (Alarm alarm : masterAlarms) {
+                copiedAlarms.add(AlarmMapper.getInstance().copy(alarm, null, copiedFields));
+            }
+            copiedAlarmsPerUser.put(entry.getKey(), copiedAlarms);
+        }
+        return copiedAlarmsPerUser;
     }
 
     /**
