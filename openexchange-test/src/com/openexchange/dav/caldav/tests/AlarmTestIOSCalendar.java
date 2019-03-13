@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -287,60 +288,17 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         Date acknowledgedDate = calendar.getTime();
         calendar.add(Calendar.MINUTE, 5);
         Date nextTrigger = calendar.getTime();
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "DTSTART:19810329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
-            "TZNAME:MESZ\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "DTSTART:19961027T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
-            "TZNAME:MEZ\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "SEQUENCE:0\r\n" +
-            "SUMMARY:Dem\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "UID:" + uid + "\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Erinnerung\r\n" +
-            "RELATED-TO:429D8792-FA4F-4D60-837F-FF673662ADF3\r\n" +
-            "TRIGGER:-PT7M28S\r\n" +
-            "UID:48DA570F-2E00-46BD-9CCA-A92D44E07AD8\r\n" +
-            "X-WR-ALARMUID:48DA570F-2E00-46BD-9CCA-A92D44E07AD8\r\n" +
-            "END:VALARM\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "TRIGGER:-PT15M\r\n" +
-            "UID:429D8792-FA4F-4D60-837F-FF673662ADF3\r\n" +
-            "X-WR-ALARMUID:429D8792-FA4F-4D60-837F-FF673662ADF3\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        String relatedUID = iCalResource.getVEvent().getVAlarm().getPropertyValue("UID");
+        iCalResource.getVEvent().getVAlarm().setProperty("ACKNOWLEDGED", formatAsUTC(acknowledgedDate));
+        Component snoozeAlarm = new Component("VALARM");
+        snoozeAlarm.setProperty("UID", randomUID());
+        snoozeAlarm.setProperty("X-WR-ALARMUID", randomUID());
+        snoozeAlarm.setProperty("ACTION", "DISPLAY");
+        snoozeAlarm.setProperty("DESCRIPTION", "Alarm");
+        snoozeAlarm.setProperty("TRIGGER", formatAsUTC(nextTrigger), Collections.singletonMap("VALUE", "DATE-TIME"));
+        snoozeAlarm.setProperty("RELATED-TO", relatedUID);
+        iCalResource.getVEvent().getComponents().add(snoozeAlarm);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -1099,82 +1057,17 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         Date exceptionAcknowledged = calendar.getTime();
         calendar.add(Calendar.MINUTE, 9);
         Date nextTrigger = calendar.getTime();
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "CALSCALE:GREGORIAN\r\n" +
-            "PRODID:-//Apple Inc.//iOS 9.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "DTSTART:19810329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
-            "TZNAME:MESZ\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "DTSTART:19961027T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
-            "TZNAME:MEZ\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "RRULE:FREQ=DAILY\r\n" +
-            "SEQUENCE:0\r\n" +
-            "SUMMARY:Serie\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "UID:" + uid + "\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(seriesAcknowledged) + "\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACKNOWLEDGED:" + formatAsUTC(seriesAcknowledged) + "\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "TRIGGER:-PT15M\r\n" +
-            "UID:AD79E8D2-9D87-4281-BADB-D14C069C463F\r\n" +
-            "X-WR-ALARMUID:AD79E8D2-9D87-4281-BADB-D14C069C463F\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(exceptionEnd, "Europe/Berlin") + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(exceptionStart, "Europe/Berlin") + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "RECURRENCE-ID;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "SEQUENCE:0\r\n" +
-            "SUMMARY:SerieEdit\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "UID:" + uid + "\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACKNOWLEDGED:" + formatAsUTC(exceptionAcknowledged) + "\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "TRIGGER:-PT15M\r\n" +
-            "UID:AFB070AC-B007-488C-8AAA-0A5F9EE48CBC\r\n" +
-            "X-WR-ALARMUID:AFB070AC-B007-488C-8AAA-0A5F9EE48CBC\r\n" +
-            "END:VALARM\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Erinnerung\r\n" +
-            "RELATED-TO:AFB070AC-B007-488C-8AAA-0A5F9EE48CBC\r\n" +
-            "TRIGGER:-PT4M08S\r\n" +
-            "UID:48DA570F-2E00-46BD-9CCA-A92D44E07AD8\r\n" +
-            "X-WR-ALARMUID:48DA570F-2E00-46BD-9CCA-A92D44E07AD8\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        String relatedUID = iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("UID");
+        iCalResource.getVEvents().get(1).getVAlarm().setProperty("ACKNOWLEDGED", formatAsUTC(exceptionAcknowledged));
+        Component snoozeAlarm = new Component("VALARM");
+        snoozeAlarm.setProperty("UID", randomUID());
+        snoozeAlarm.setProperty("X-WR-ALARMUID", randomUID());
+        snoozeAlarm.setProperty("ACTION", "DISPLAY");
+        snoozeAlarm.setProperty("DESCRIPTION", "Alarm");
+        snoozeAlarm.setProperty("TRIGGER", formatAsUTC(nextTrigger), Collections.singletonMap("VALUE", "DATE-TIME"));
+        snoozeAlarm.setProperty("RELATED-TO", relatedUID);
+        iCalResource.getVEvents().get(1).getComponents().add(snoozeAlarm);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment & exception on server
          */
