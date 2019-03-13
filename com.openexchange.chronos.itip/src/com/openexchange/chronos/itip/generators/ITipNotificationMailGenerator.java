@@ -855,17 +855,16 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         }
 
         protected boolean existsInUpdate(NotificationParticipant participant) {
-            for (Attendee attendee : updated.getAttendees()) {
-                if (participant.getIdentifier() == attendee.getEntity()) {
-                    return true;
-                }
-            }
-            return false;
+            return exists(updated.getAttendees(), participant);
         }
 
         protected boolean existsInOriginal(NotificationParticipant participant) {
-            for (Attendee attendee : original.getAttendees()) {
-                if (participant.getIdentifier() == attendee.getEntity()) {
+           return exists(original.getAttendees(), participant);
+        }
+
+        protected boolean exists(List<Attendee> attendees, NotificationParticipant participant) {
+            for (Attendee attendee : attendees) {
+                if(participant.matches(attendee)) {
                     return true;
                 }
             }
