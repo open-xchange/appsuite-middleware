@@ -132,7 +132,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         if (ITipAction.COUNTER.equals(action)) {
             return;
         }
-        
+
         CalendarUser principal = ITipUtils.getPrincipal(session);
         final ITipMailGenerator generator = mailGenerators.create(constructOriginalForMail(action, original, update, session, owner), update, session, owner, principal);
         switch (action) {
@@ -212,6 +212,15 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         }
     }
 
+    /**
+     * Construct a new {@link Event} based on the current event and resets the currents users status in the newly created event.
+     *
+     * @param event The current {@link Event}
+     * @param session The {@link CalendarSession}
+     * @param owner The owner (aka the current user)
+     * @return A new {@link Event} with owners status reset to {@link ParticipationStatus#NEEDS_ACTION}
+     * @throws OXException
+     */
     private Event constructFakeOriginal(final Event event, final CalendarSession session, int owner) throws OXException {
         Event copy = session.getUtilities().copyEvent(event, (EventField[]) null);
         if (copy.containsAttendees()) {
