@@ -109,7 +109,7 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
             if (Strings.isEmpty(keystoreName)) {
                 LOG.info("Missing \"keystore\" APNS HTTP/2 option for drive events for context {}. Ignoring APNS HTTP/2 configuration for drive events.", I(contextId));
             } else {
-                LOG.trace("Using configured certificate options for push via {} for user {} in context {}.", getServiceID(), userId, contextId);
+                LOG.trace("Using configured certificate options for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
                 String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
                 String password = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.password);
                 boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
@@ -124,7 +124,7 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
             if (Strings.isEmpty(privateKeyFile)) {
                 LOG.info("Missing \"privatekey\" APNS HTTP/2 option for drive events for context {}. Ignoring APNS HTTP/2 configuration for drive events.", I(contextId));
             } else {
-                LOG.trace("Using configured JWT options for push via {} for user {} in context {}.", getServiceID(), userId, contextId);
+                LOG.trace("Using configured JWT options for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
                 String keyId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keyid);
                 String teamId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.teamid);
                 String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
@@ -143,10 +143,10 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
              */
             ApnsHttp2OptionsProvider optionsProvider = services.getService(ApnsHttp2OptionsProvider.class);
             if (null != optionsProvider) {
-                LOG.trace("Using registered fallback options push via {} for user {} in context {}.", getServiceID(), userId, contextId);
+                LOG.trace("Using registered fallback options push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
                 return optionsProvider.getOptions();
             }
-            LOG.trace("No valid options available for push via {} for user {} in context {}.", getServiceID(), userId, contextId);
+            LOG.trace("No valid options available for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
         }
         return options;
 
