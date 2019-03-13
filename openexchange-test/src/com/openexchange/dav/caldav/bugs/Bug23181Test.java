@@ -51,6 +51,7 @@ package com.openexchange.dav.caldav.bugs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
@@ -67,8 +68,8 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link Bug23181Test}
@@ -80,7 +81,6 @@ import com.openexchange.test.pool.TestUser;
 public class Bug23181Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
-    private TestUser testUser2;
 
     @Override
     @Before
@@ -123,15 +123,15 @@ public class Bug23181Test extends CalDAVTest {
         String location = "tbd";
         Date start = TimeTools.D("tomorrow at 3pm");
         Date end = TimeTools.D("tomorrow at 4pm");
-        Appointment appointment = generateAppointment(start, end, uid, summary, location);
-        appointment.setOrganizer("extern1@example.com");
-        appointment.addParticipant(new ExternalUserParticipant("extern2@example.com"));
-        appointment.addParticipant(new ExternalUserParticipant("extern3@example.com"));
-        appointment.addParticipant(new ExternalUserParticipant(userB));
-        appointment.setIgnoreConflicts(true);
-        appointment.setParentFolderID(manager2.getClient().getValues().getPrivateAppointmentFolder());
-        appointment.setSequence(0);
-        manager2.insert(appointment);
+        Appointment appointmentB = generateAppointment(start, end, uid, summary, location);
+        appointmentB.setOrganizer("extern1@example.com");
+        appointmentB.addParticipant(new ExternalUserParticipant("extern2@example.com"));
+        appointmentB.addParticipant(new ExternalUserParticipant("extern3@example.com"));
+        appointmentB.addParticipant(new ExternalUserParticipant(userB));
+        appointmentB.setIgnoreConflicts(true);
+        appointmentB.setParentFolderID(manager2.getClient().getValues().getPrivateAppointmentFolder());
+        appointmentB.setSequence(0);
+        manager2.insert(appointmentB);
         /*
          * confirm updated appointment as user A in client
          */
@@ -164,40 +164,45 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * verify appointment as user A on server
          */
-        appointment = super.getAppointment(uid);
-        super.rememberForCleanUp(appointment);
-        assertNotNull("appointment not found on server", appointment);
-        assertNotNull("appointment has no users", appointment.getUsers());
-        UserParticipant partipantA = null;
-        UserParticipant partipantB = null;
-        for (UserParticipant user : appointment.getUsers()) {
-            if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
-                partipantA = user;
-            } else if (manager2.getClient().getValues().getUserId() == user.getIdentifier()) {
-                partipantB = user;
+        Appointment appointmentA = super.getAppointment(uid);
+        super.rememberForCleanUp(appointmentA);
+        assertNotNull("appointment not found on server", appointmentA);
+        assertNotNull("appointment has no users", appointmentA.getUsers());
+        UserParticipant userParticipantA = null;
+        ConfirmableParticipant participantB = null;
+        for (UserParticipant participant : appointmentA.getUsers()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
+                userParticipantA = participant;
             }
         }
-        assertNotNull("added user participant not found", partipantA);
-        assertNotNull("previous participant not found", partipantB);
-        assertEquals("confirmation status wrong", Appointment.ACCEPT, partipantA.getConfirm());
+        for (ConfirmableParticipant participant : appointmentA.getConfirmations()) {
+            if (manager2.getClient().getValues().getDefaultAddress().equals(participant.getEmailAddress())) {
+                participantB = participant;
+            }
+        }
+        assertNotNull("added user participant not found", userParticipantA);
+        assertNotNull("previous participant not found", participantB);
+        assertEquals("confirmation status wrong", Appointment.ACCEPT, userParticipantA.getConfirm());
         /*
          * verify appointment as user B on server
          */
-        appointment = manager2.get(manager2.getClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
-        assertNotNull("appointment not found on server", appointment);
-        assertNotNull("appointment has no users", appointment.getUsers());
-        partipantA = null;
-        partipantB = null;
-        for (UserParticipant user : appointment.getUsers()) {
-            if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
-                partipantA = user;
-            } else if (manager2.getClient().getValues().getUserId() == user.getIdentifier()) {
-                partipantB = user;
+        appointmentB = manager2.get(manager2.getClient().getValues().getPrivateAppointmentFolder(), appointmentB.getObjectID());
+        assertNotNull("appointment not found on server", appointmentB);
+        assertNotNull("appointment has no users", appointmentB.getUsers());
+        ConfirmableParticipant participantA = null;
+        UserParticipant userParticipantB = null;
+        for (UserParticipant participant : appointmentB.getUsers()) {
+            if (manager2.getClient().getValues().getUserId() == participant.getIdentifier()) {
+                userParticipantB = participant;
             }
         }
-        assertNotNull("added user participant not found", partipantA);
-        assertNotNull("previous participant not found", partipantB);
-        assertEquals("confirmation status wrong", Appointment.ACCEPT, partipantA.getConfirm());
+        for (ConfirmableParticipant participant : appointmentB.getConfirmations()) {
+            if (getClient().getValues().getDefaultAddress().equals(participant.getEmailAddress())) {
+                participantA = participant;
+            }
+        }
+        assertNull("added user participant A was found in B's appointment", participantA);
+        assertNotNull("previous participant not found", userParticipantB);
         /*
          * verify appointment as user A on client
          */
@@ -207,7 +212,7 @@ public class Bug23181Test extends CalDAVTest {
         ICalResource iCalResource = assertContains(uid, calendarData);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
-        assertEquals("LOCATION wrong", appointment.getLocation(), iCalResource.getVEvent().getLocation());
+        assertEquals("LOCATION wrong", appointmentB.getLocation(), iCalResource.getVEvent().getLocation());
         Property attendeeA = null;
         Property attendeeB = null;
         List<Property> attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
@@ -224,7 +229,7 @@ public class Bug23181Test extends CalDAVTest {
     }
 
     @Test
-    public void testDontImportOutSequencedAppointment() throws Exception {
+    public void testAlsoImportOutSequencedAppointment() throws Exception {
         /*
          * Create appointment in user B's calendar on server
          */
@@ -277,11 +282,11 @@ public class Bug23181Test extends CalDAVTest {
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
         ; // @formatter:on
-        assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
     }
 
     @Test
-    public void testDontImportOtherOrganizersAppointment() throws Exception {
+    public void testAlsoImportOtherOrganizersAppointment() throws Exception {
         /*
          * Create appointment in user B's calendar on server
          */
@@ -329,7 +334,7 @@ public class Bug23181Test extends CalDAVTest {
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
         ; // @formatter:on
-        assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, super.putICal(uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
     }
 
 }
