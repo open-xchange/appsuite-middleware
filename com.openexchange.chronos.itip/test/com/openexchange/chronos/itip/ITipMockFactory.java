@@ -81,15 +81,14 @@ public final class ITipMockFactory {
         Mockito.when(message.getMethod()).thenReturn(method);
         Mockito.when(message.getEvent()).thenReturn(update);
         Mockito.when(message.exceptions()).thenReturn(Collections.emptyList());
-        Mockito.when(message.hasFeature(ITipSpecialHandling.MICROSOFT)).thenReturn(Boolean.valueOf(microsoft));
+        Mockito.when(Boolean.valueOf(message.hasFeature(ITipSpecialHandling.MICROSOFT))).thenReturn(Boolean.valueOf(microsoft));
         return message;
     }
 
     public static CalendarSession mockCalendarSession(final int contextId, final int userId, final ServerSession serverSession, final CalendarUtilities utilities) {
         CalendarSession session = Mockito.mock(CalendarSession.class);
-        Mockito.when(session.getContextId()).thenReturn(Integer.valueOf(contextId));
-        Mockito.when(session.getUserId()).thenReturn(Integer.valueOf(userId));
-        Mockito.when(session.getEntityResolver()).thenReturn(null);
+        Mockito.when(Integer.valueOf(session.getContextId())).thenReturn(Integer.valueOf(contextId));
+        Mockito.when(Integer.valueOf(session.getUserId())).thenReturn(Integer.valueOf(userId));
         Mockito.when(session.getSession()).thenReturn(serverSession);
         Mockito.when(session.getUtilities()).thenReturn(utilities);
         return session;
@@ -116,22 +115,22 @@ public final class ITipMockFactory {
     public static ServerSession getServerSession(final Context context, final int contextId, final User user, final int userId) {
         ServerSession serverSession = Mockito.mock(ServerSession.class);
         Mockito.when(serverSession.getContext()).thenReturn(context);
-        Mockito.when(serverSession.getContextId()).thenReturn(Integer.valueOf(contextId));
+        Mockito.when(Integer.valueOf(serverSession.getContextId())).thenReturn(Integer.valueOf(contextId));
 
         Mockito.when(serverSession.getUser()).thenReturn(user);
-        Mockito.when(serverSession.getUserId()).thenReturn(Integer.valueOf(userId));
+        Mockito.when(Integer.valueOf(serverSession.getUserId())).thenReturn(Integer.valueOf(userId));
         return serverSession;
     }
 
     public static Context getContext(final int contextId) {
         Context lContext = Mockito.mock(Context.class);
-        Mockito.when(lContext.getContextId()).thenReturn(Integer.valueOf(contextId));
+        Mockito.when(Integer.valueOf(lContext.getContextId())).thenReturn(Integer.valueOf(contextId));
         return lContext;
     }
 
     public static User getUser(final int userId) {
         User lUser = Mockito.mock(User.class);
-        Mockito.when(lUser.getId()).thenReturn(Integer.valueOf(userId));
+        Mockito.when(Integer.valueOf(lUser.getId())).thenReturn(Integer.valueOf(userId));
 
         return lUser;
     }
