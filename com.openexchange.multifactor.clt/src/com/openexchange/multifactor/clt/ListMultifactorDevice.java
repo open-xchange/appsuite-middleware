@@ -58,6 +58,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.glassfish.jersey.client.ClientConfig;
@@ -74,24 +75,27 @@ import com.openexchange.cli.OutputHelper;
  */
 public class ListMultifactorDevice extends AbstractMultifactorClt {
 
+    private static String LIST_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -U <user:password>";
+
     public static void main(String[] args) {
         new ListMultifactorDevice().execute(args);
     }
 
-    private void printDevices(JSONObject entity) throws JSONException {
+    private void printDevices(JSONArray devices) throws JSONException {
         List<List<String>> dataToPrint = new ArrayList<List<String>>();
-        JSONArray devices = entity.getJSONArray("devices");
-        for (int i = 0; i < devices.length(); i++) {
-            JSONObject device = devices.getJSONObject(i);
-            List<String> deviceData = new ArrayList<String>();
-            deviceData.add(device.getString("id"));
-            deviceData.add(device.getString("providerName"));
-            deviceData.add(device.getString("name"));
-            deviceData.add(device.getString("enabled"));
-            deviceData.add(device.getString("backup"));
-            dataToPrint.add(deviceData);
+        if(!dataToPrint.isEmpty()) {
+            for (int i = 0; i < devices.length(); i++) {
+                JSONObject device = devices.getJSONObject(i);
+                List<String> deviceData = new ArrayList<String>();
+                deviceData.add(device.getString("id"));
+                deviceData.add(device.getString("providerName"));
+                deviceData.add(device.getString("name"));
+                deviceData.add(device.getString("enabled"));
+                deviceData.add(device.getString("backup"));
+                dataToPrint.add(deviceData);
+            }
+            OutputHelper.doOutput(new String[] { "l", "l", "l", "l", "l" }, new String[] { "ID", "Provider", "Name", "Enabled", "Backup" }, dataToPrint);
         }
-        OutputHelper.doOutput(new String[] { "l", "l", "l", "l", "l" }, new String[] { "ID", "Provider", "Name", "Enabled", "Backup" }, dataToPrint);
     }
 
     @Override
@@ -100,8 +104,8 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
     @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
-        options.addOption("c", PARAM_CONTEXTID_LONG, true, "A valid context identifier.");
-        options.addOption("i", PARAM_USERID_LONG, true, "A valid user identifier.");
+        options.addRequiredOption(PARAM_CONTEXTID_SHORT, PARAM_CONTEXTID_LONG, true, PARAM_CONTEXTID_DESC);
+        options.addRequiredOption(PARAM_USERID_SHORT, PARAM_USERID_LONG, true, PARAM_USERID_DESC);
     }
 
     @Override
@@ -124,6 +128,7 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
             return baseTarget;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
+            System.exit(-1);
         }
         return null;
     }
@@ -131,11 +136,16 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder executionContext) throws Exception {
         executionContext.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.TEXT_PLAIN_TYPE);
-        String response = executionContext.get(String.class);
-        JSONObject entity = new JSONObject(response);
-        if (entity.has("devices")) {
-            printDevices(entity);
+        Response response = executionContext.get();
+        String data = response.readEntity(String.class);
+        if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+            JSONArray deviceArrays = new JSONArray(data);
+            printDevices(deviceArrays);
         }
+        else {
+            printError("Failed to list multifactor authentication devices", data, response.getStatusInfo());
+        }
+
         return null;
     }
 
@@ -161,6 +171,6 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
 
     @Override
     protected String getName() {
-        return "listmultifactordevice [OPTIONS]";
+        return "listmultifactordevice " + LIST_MULTIFACTOR_DEVICE_USAGE;
     }
 }

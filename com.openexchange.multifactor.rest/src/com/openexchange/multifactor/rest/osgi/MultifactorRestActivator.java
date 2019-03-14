@@ -54,9 +54,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.multifactor.MultifactorManagementService;
 import com.openexchange.multifactor.rest.api.MultifactorManagementREST;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
  * {@link MultifactorRestActivator}
@@ -70,7 +72,7 @@ public class MultifactorRestActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MultifactorManagementService.class };
+        return new Class[] { MultifactorManagementService.class, UserService.class, ContextService.class };
     }
 
     @Override

@@ -69,7 +69,11 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorManagementService;
 import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
@@ -77,6 +81,7 @@ import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.user.UserService;
 
 /**
  * {@link MultifactorManagementRESTService} - The REST endpoint for administrating multifactor authentication devices.
@@ -88,11 +93,7 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
 @PermitAll
 public class MultifactorManagementREST {
 
-    /**
-     * The MultifactorManagementREST.java.
-     */
     private static final Logger LOG =  org.slf4j.LoggerFactory.getLogger(MultifactorManagementREST.class);
-    private static final String JSON_DEVICES = "devices";
     private static final String JSON_ID = "id";
     private static final String JSON_NAME = "name";
     private static final String JSON_PROVIDER_NAME = "providerName";
@@ -136,15 +137,44 @@ public class MultifactorManagementREST {
      *
      * @param ex The {@link OXException} to create the error object from
      * @return The JSON error object for the given {@link OXException}
+     * @throws JSONException
      */
-    private JSONObject generateError(OXException ex) {
+    private JSONObject generateError(OXException ex) throws JSONException {
         JSONObject main = new JSONObject();
         try {
             ResponseWriter.addException(main, ex);
         } catch (JSONException e) {
             LOG.error("Error while generating error for client.", e);
+            throw e;
         }
         return main;
+    }
+
+    /**
+     * Check if context and user IDs are valid and the according entities exist.
+     *
+     * @param contextId The identifier of the context
+     * @param userId The identifier of the user
+     * @return <code>null</code> if both IDs are valid. A {@link Response} to be returned to the client
+     *         in case one of the IDs is invalid.
+     * @throws OXException If services can't be obtained or context or user are unknown
+     */
+    private Response checkUserAndContext(int contextId, int userId) throws OXException {
+        ContextService contextService = requireService(ContextService.class);
+        UserService userService = requireService(UserService.class);
+        try {
+            Context context = contextService.getContext(contextId);
+            userService.getUser(userId, context);
+            return null;
+        } catch (OXException e) {
+            if (ContextExceptionCodes.UPDATE.equals(e)) {
+                // update tasks running
+                return Response.status(Status.SERVICE_UNAVAILABLE).build();
+            } else if (ContextExceptionCodes.NOT_FOUND.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            throw e;
+        }
     }
 
     /**
@@ -207,19 +237,19 @@ public class MultifactorManagementREST {
     }
 
     /**
-     * Internal method to create a JSONObject from the given collection of {@link MultifactorDevice} instances.
+     * Internal method to create a JSONArray from the given collection of {@link MultifactorDevice} instances.
      *
      * @param devices The devices
      * @return The devices as JSONArray
      * @throws JSONException
      */
-    private JSONObject createDevicesResponse(Collection<MultifactorDevice> devices) throws JSONException {
+    private JSONArray createDevicesResponse(Collection<MultifactorDevice> devices) throws JSONException {
        JSONArray array = new JSONArray(devices.size());
        int i = 0;
        for(MultifactorDevice device : devices) {
            array.add(i++, createDeviceResponse(device));
        }
-       return new JSONObject().put(JSON_DEVICES, array);
+       return array;
     }
 
     /**
@@ -229,24 +259,30 @@ public class MultifactorManagementREST {
      * @param contextId The context-ID of the user to get the devices for
      * @param userId The ID of the user to get the devices for
      * @return A {@link Repsonse} containing an JSONArray of devices, or an error code
+     * @throws JSONException
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDevices(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId) {
+    public Response getDevices(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId) throws JSONException {
         try {
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
+                // Return error response
+                return error;
+            }
             Response authenticationError = authenticate(contextId, auth);
             if (authenticationError != null) {
                 //access denied
                 return authenticationError;
             }
-            final JSONObject result = createDevicesResponse(requireService(MultifactorManagementService.class).getMultifactorDevices(contextId, userId));
+            final JSONArray result = createDevicesResponse(requireService(MultifactorManagementService.class).getMultifactorDevices(contextId, userId));
             return Response.ok().entity(result).build();
         } catch (OXException e) {
             LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId));
             return Response.serverError().entity(generateError(e)).build();
         } catch (Exception e) {
             LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId));
-            return Response.serverError().build();
+            return Response.serverError().entity(e.getMessage()).build();
         }
     }
 
@@ -259,6 +295,7 @@ public class MultifactorManagementREST {
      * @param providerName The name of the device's provider
      * @param deviceId The ID of the device
      * @return A {@link Response} containing an appropriated return code
+     * @throws JSONException
      */
     @DELETE
     @Path("/{provider-name}/{device-id}")
@@ -266,9 +303,14 @@ public class MultifactorManagementREST {
         @PathParam("context-id") int contextId,
         @PathParam("user-id") int userId,
         @PathParam("provider-name") String providerName,
-        @PathParam("device-id") String deviceId) {
+        @PathParam("device-id") String deviceId) throws JSONException {
 
         try {
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
+                // Return error response
+                return error;
+            }
             Response authenticationError = authenticate(contextId, auth);
             if (authenticationError != null) {
                 //access denied
@@ -293,10 +335,16 @@ public class MultifactorManagementREST {
      * @param contextId The context-ID of the user to delete the devices for
      * @param userId The ID of the user to delete the devices for
      * @return A {@link Response} containing an appropriated return code
+     * @throws JSONException
      */
     @DELETE
-    public Response removeDevices(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId) {
+    public Response removeDevices(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId) throws JSONException {
         try {
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
+                // Return error response
+                return error;
+            }
             Response authenticationError = authenticate(contextId, auth);
             if (authenticationError != null) {
                 //access denied

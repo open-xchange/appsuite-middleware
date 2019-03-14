@@ -20,7 +20,7 @@
       - application/json
     responses:
       '200':
-        description: An array of password change entries.
+        description: An array of multifactor devices.
         schema:
           type: array
           items:

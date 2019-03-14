@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.clt;
 
+import javax.ws.rs.core.Response.StatusType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.cli.AbstractRestCLI;
@@ -62,8 +63,14 @@ import com.openexchange.cli.AbstractRestCLI;
 public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
 
     protected static final String PARAM_ENDPOINT_LONG = "api-root";
+
     protected static final String PARAM_CONTEXTID_LONG = "contextid";
+    protected static final String PARAM_CONTEXTID_SHORT = "c";
+    protected static final String PARAM_CONTEXTID_DESC = "A valid context identifier.";
+
     protected static final String PARAM_USERID_LONG = "userid";
+    protected static final String PARAM_USERID_SHORT = "i";
+    protected static final String PARAM_USERID_DESC = "A valid user identifier.";
 
     protected static final String ENDPOINT_DEFAULT = "http://localhost:8009/admin/v1";
 
@@ -78,6 +85,20 @@ public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
         return endPointRoot.endsWith("/") ?
             endPointRoot.substring(0, endPointRoot.length() - 1) :
             endPointRoot;
+    }
+
+    /**
+     * Prints an error message
+     *
+     * @param msg The basic message
+     * @param error The error
+     * @param status The status code retunred from the server
+     */
+    protected void printError(String msg, String error, StatusType status) {
+        System.err.println(String.format("%s: \"%s\". HTTP error code %d.", msg, status.getReasonPhrase(), Integer.valueOf(status.getStatusCode())));
+        if (error != null && !error.isEmpty()) {
+            System.err.println(error);
+        }
     }
 
     @Override

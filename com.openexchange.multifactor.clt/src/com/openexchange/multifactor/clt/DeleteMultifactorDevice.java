@@ -70,7 +70,13 @@ import org.glassfish.jersey.client.ClientConfig;
 public class DeleteMultifactorDevice extends AbstractMultifactorClt {
 
     private static final String PARAM_PROVIDER_NAME = "provider";
+    private static final String PARAM_PROVIDER_NAME_SHORT = "r";
+    private static final String PARAM_PROVIDER_NAME_DESC = "The multifactor provider name.";
     private static final String PARAM_DEVICE_ID = "device";
+    private static final String PARAM_DEVICE_ID_SHORT = "d";
+    private static final String PARAM_DEVICE_ID_DESC = "The multifactor device id.";
+
+    private static String DELETE_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -r <providerName> -d <deviceId> -U <user:password>";
 
     public static void main(String[] args) {
         new DeleteMultifactorDevice().execute(args);
@@ -82,10 +88,10 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
     @Override
     protected void addOptions(Options options) {
         super.addOptions(options);
-        options.addOption("c", PARAM_CONTEXTID_LONG, true, "A valid context identifier.");
-        options.addOption("i", PARAM_USERID_LONG, true, "A valid user identifier.");
-        options.addOption("r", PARAM_PROVIDER_NAME, true, "The multifactor provider name.");
-        options.addOption("d", PARAM_DEVICE_ID, true, "The multifactor device id.");
+        options.addRequiredOption(PARAM_CONTEXTID_SHORT, PARAM_CONTEXTID_LONG, true, PARAM_CONTEXTID_DESC);
+        options.addRequiredOption(PARAM_USERID_SHORT, PARAM_USERID_LONG, true, PARAM_USERID_DESC);
+        options.addRequiredOption(PARAM_PROVIDER_NAME_SHORT, PARAM_PROVIDER_NAME, true, PARAM_PROVIDER_NAME_DESC);
+        options.addRequiredOption(PARAM_DEVICE_ID_SHORT, PARAM_DEVICE_ID, true, PARAM_DEVICE_ID_DESC);
     }
 
     @Override
@@ -111,6 +117,7 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
             return baseTarget;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
+            System.exit(-1);
         }
         return null;
     }
@@ -120,7 +127,8 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
         executionContext.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.TEXT_PLAIN_TYPE);
         Response delete = executionContext.delete();
         if (delete.getStatus() != Response.Status.OK.getStatusCode()) {
-            System.err.println("Failed to delete the device. The following error code was returned: " + delete.getStatus());
+            printError("Failed to delete the authentication device", delete.readEntity(String.class), delete.getStatusInfo());
+            System.exit(-1);
         }
         return null;
     }
@@ -148,7 +156,7 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
         if (!cmd.hasOption(PARAM_DEVICE_ID)) {
             System.out.println("You must provide a device ID.");
             printHelp();
-            System.exit(-1);
+            System.exit(1);
         }
     }
 
@@ -159,6 +167,6 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
 
     @Override
     protected String getName() {
-        return "deletemultifactordevice [OPTIONS]";
+        return "deletemultifactordevice " + DELETE_MULTIFACTOR_DEVICE_USAGE;
     }
 }
