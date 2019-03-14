@@ -78,7 +78,10 @@ public class MessageAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
             rollback = true;
             Column col = new Column("processed", "bigint(20) NOT NULL DEFAULT 0");
             Tools.checkAndAddColumns(con, TABLE , col);
-            Tools.createIndex(con, TABLE, "action", new String[] {"action", "triggerDate"}, false);
+            String[] indexColumns = new String[] { "action", "triggerDate" };
+            if (null == Tools.existsIndex(con, "calendar_alarm_trigger", indexColumns)) {
+                Tools.createIndex(con, TABLE, "action", indexColumns, false);
+            }
             con.commit();
             rollback = false;
         } catch (SQLException e) {

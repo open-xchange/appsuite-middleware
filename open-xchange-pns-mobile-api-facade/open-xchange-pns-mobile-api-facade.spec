@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -61,6 +61,8 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Mar 12 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2019-03-11 (5149)
 * Thu Feb 21 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-02-25 (5133)
 * Thu Feb 07 2019 Thorben Betten <thorben.betten@open-xchange.com>

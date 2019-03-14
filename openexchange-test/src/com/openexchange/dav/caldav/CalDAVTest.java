@@ -84,6 +84,8 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -136,6 +138,10 @@ public abstract class CalDAVTest extends WebDAVTest {
      */
     protected String getDefaultFolderID() {
         return Integer.toString(folderId);
+    }
+
+    protected String encodeFolderID(String folderID) {
+        return BaseEncoding.base64Url().omitPadding().encode(CalendarUtils.prependDefaultAccount(folderID).getBytes(Charsets.US_ASCII));
     }
 
     protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
