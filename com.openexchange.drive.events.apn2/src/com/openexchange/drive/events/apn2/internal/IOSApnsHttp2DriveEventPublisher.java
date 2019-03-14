@@ -68,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.1
  */
 public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublisher {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IOSApnsHttp2DriveEventPublisher.class);
 
     /**
@@ -99,53 +99,57 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
             LOG.trace("Push via {} is disabled for user {} in context {}.", getServiceID(), I(userId), I(contextId));
             return null;
         }
-        AuthType authType = AuthType.authTypeFor(configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.authtype));
-        if (AuthType.CERTIFICATE.equals(authType)) {
-            /*
-             * get certificate options via config cascade
-             */
-            String keystoreName = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keystore);
-            if (Strings.isEmpty(keystoreName)) {
-                LOG.info("Missing \"keystore\" APNS HTTP/2 option for drive events for context {}. Ignoring APNS HTTP/2 configuration for drive events.", I(contextId));
-                return null;
+        ApnsHttp2Options options = null;
+        {
+            AuthType authType = AuthType.authTypeFor(configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.authtype));
+            if (AuthType.CERTIFICATE.equals(authType)) {
+                /*
+                 * get certificate options via config cascade
+                 */
+                String keystoreName = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keystore);
+                if (Strings.isEmpty(keystoreName)) {
+                    LOG.info("Missing \"keystore\" APNS HTTP/2 option for drive events for context {}. Ignoring APNS HTTP/2 configuration for drive events.", I(contextId));
+                } else {
+                    LOG.trace("Using configured certificate options for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
+                    String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
+                    String password = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.password);
+                    boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
+                    options = new ApnsHttp2Options(new File(keystoreName), password, production, topic);
+                }
+            } else if (AuthType.JWT.equals(authType)) {
+                /*
+                 * get jwt options via config cascade
+                 */
+                String privateKeyFile = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.privatekey);
+                if (Strings.isEmpty(privateKeyFile)) {
+                    LOG.info("Missing \"privatekey\" APNS HTTP/2 option for drive events for context {}. Ignoring APNS HTTP/2 configuration for drive events.", I(contextId));
+                } else {
+                    LOG.trace("Using configured JWT options for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
+                    String keyId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keyid);
+                    String teamId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.teamid);
+                    String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
+                    boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
+                    try {
+                        options = new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
+                    } catch (IOException e) {
+                        LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
+                        return null;
+                    }
+                }
             }
-            LOG.trace("Using configured certificate options for push via {} for user {} in context {}.", getServiceID(), userId, contextId);
-            String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
-            String password = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.password);
-            boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
-            return new ApnsHttp2Options(new File(keystoreName), password, production, topic);
-        } 
-        if (AuthType.JWT.equals(authType)) {
-            /*
-             * get jwt options via config cascade
-             */
-            String privateKeyFile = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.privatekey);
-            if (Strings.isEmpty(privateKeyFile)) {
-                LOG.info("Missing \"privatekey\" APNS HTTP/2 option for drive events for context {}. Ignoring APNS HTTP/2 configuration for drive events.", I(contextId));
-                return null;
-            }
-            LOG.trace("Using configured JWT options for push via {} for user {} in context {}.", getServiceID(), userId, contextId);
-            String keyId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keyid);
-            String teamId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.teamid);
-            String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
-            boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
-            try {
-                return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
-            } catch (IOException e) {
-                LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFile, e);
-                return null;
-            }
-        } 
-        /*
-         * get options via registered options provider as fallback, otherwise
-         */
-        ApnsHttp2OptionsProvider optionsProvider = services.getService(ApnsHttp2OptionsProvider.class);
-        if (null != optionsProvider) {
-            LOG.trace("Using registered fallback options push via {} for user {} in context {}.", getServiceID(), userId, contextId);
-            return optionsProvider.getOptions();
         }
-        LOG.trace("No valid options available for push via {} for user {} in context {}.", getServiceID(), userId, contextId);
-        return null;
+        if (null == options) {
+            /*
+             * Try to get options via registered options provider as fallback
+             */
+            ApnsHttp2OptionsProvider optionsProvider = services.getService(ApnsHttp2OptionsProvider.class);
+            if (null != optionsProvider) {
+                LOG.trace("Using registered fallback options push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
+                return optionsProvider.getOptions();
+            }
+            LOG.trace("No valid options available for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
+        }
+        return options;
     }
 
 }

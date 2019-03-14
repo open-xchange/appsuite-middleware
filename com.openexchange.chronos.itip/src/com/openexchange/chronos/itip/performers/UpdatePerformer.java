@@ -126,45 +126,42 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
             ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
             Event original = determineOriginalEvent(change, processed, session);
-
+            Event updatedEvent;
+            
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
                     adjusteAttendeesPartStats(action, original, event, diff, owner);
-                    event = updateEvent(original, event, session);
-                    if (null == event) {
-                        LOGGER.warn("No event found to process.");
-                        continue NextChange;
-                    }
+                    updatedEvent = updateEvent(original, event, session);
                 } else {
                     continue NextChange;
                 }
             } else if (exceptionCreate) {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
-                event = updateEvent(masterEvent, event, session);
-                if (null == event) {
-                    LOGGER.warn("No event found to process.");
-                    continue NextChange;
-                }
+                updatedEvent = updateEvent(masterEvent, event, session);
             } else {
                 ensureFolderId(event, session);
                 event.removeId();
-                event = createEvent(event, session);
-                if (null == event) {
-                    LOGGER.warn("No event found to process.");
-                    continue NextChange;
-                }
+                updatedEvent = createEvent(event, session);
+            }
+            
+            // Check before continuing
+            if (null == updatedEvent) {
+                LOGGER.warn("No event found to process.");
+                continue NextChange;
             }
 
             if (!change.isException()) {
-                processed.put(event.getUid(), event);
+                processed.put(updatedEvent.getUid(), updatedEvent);
             }
 
-            event = util.loadEvent(event, session);
-            if (event != null) {
-                writeMail(action, original, event, session, owner);
-                result.add(event);
+            Event loadedEvent = util.loadEvent(updatedEvent, session);
+            if (loadedEvent != null) {
+                writeMail(action, original, loadedEvent, session, owner);
+                result.add(loadedEvent);
+            } else {
+                LOGGER.error("Can't load event with id {} from database.\nOriginal event: {}\nUpdated event: {}", updatedEvent.getId(), original, updatedEvent);
             }
         }
 
@@ -270,7 +267,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             // Update from attributes
             if (null != confirm) {
                 attendee.setPartStat(confirm);
-                attendee.setRsvp(false);
+                attendee.setRsvp(Boolean.FALSE);
             }
             if (Strings.isNotEmpty(message)) {
                 attendee.setComment(message);

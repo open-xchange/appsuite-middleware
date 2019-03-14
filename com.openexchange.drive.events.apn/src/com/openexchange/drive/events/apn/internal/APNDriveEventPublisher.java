@@ -50,6 +50,7 @@
 package com.openexchange.drive.events.apn.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Collections;
 import java.util.HashMap;
@@ -141,7 +142,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         if (Strings.isNotEmpty(keystore)) {
             String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
             boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
-            LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, userId, contextId);
+            LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, I(userId), I(contextId));
             return new APNAccess(keystore, password, production);
         }
         /*
@@ -149,10 +150,10 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
          */
         APNCertificateProvider certificateProvider = services.getOptionalService(certifcateProviderClass);
         if (null != certificateProvider) {
-            LOG.trace("Using fallback certificate provider for push via {} for user {} in context {}.", serviceId, userId, contextId);
+            LOG.trace("Using fallback certificate provider for push via {} for user {} in context {}.", serviceId, I(userId), I(contextId));
             return certificateProvider.getAccess();
         }
-        LOG.trace("No configuration for push via {} found for user {} in context {}.", serviceId, userId, contextId);
+        LOG.trace("No configuration for push via {} found for user {} in context {}.", serviceId, I(userId), I(contextId));
         return null;
     }
 
@@ -256,7 +257,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
                         if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
                             Device device = notification.getDevice();
                             int removed = removeSubscriptions(device);
-                            LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                            LOG.info("Removed {} subscriptions for device with token: {}.", I(removed), device.getToken());
                         }
                     }
                 }
@@ -286,12 +287,12 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
             for (Device device : devices) {
                 LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
                 int removed = removeSubscriptions(device);
-                LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                LOG.info("Removed {} subscriptions for device with token: {}.", I(removed), device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
         }
-        LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", serviceId, (System.currentTimeMillis() - start));
+        LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", serviceId, L((System.currentTimeMillis() - start)));
     }
 
     private PayloadPerDevice getSilentNotificationPayload(Subscription subscription) {

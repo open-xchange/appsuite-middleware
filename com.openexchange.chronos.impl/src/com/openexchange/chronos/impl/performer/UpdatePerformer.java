@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
@@ -62,14 +61,12 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -224,13 +221,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+            Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-            for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
-                insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
-            }
+            insertAlarms(newExceptionEvent, newExceptionAlarms, true);
             newExceptionEvent = loadEventData(newExceptionEvent.getId());
             resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
             /*
@@ -309,7 +305,23 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
         if (eventData.containsAlarms()) {
-            updateAlarms(eventUpdate.getUpdate(), calendarUserId, storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId), eventData.getAlarms());
+            List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
+            if(originalChangeExceptions != null) {
+
+                List<Event> copies = originalChangeExceptions.stream().collect(ArrayList::new, (list, event) -> {
+                    try {
+                        list.add(EventMapper.getInstance().copy(event, null, EventMapper.getInstance().getAssignedFields(event)));
+                    } catch (OXException e) {
+                        // Should never happen
+                    }
+                }, ArrayList::addAll);
+                List<Event> exceptionsWithAlarms = storage.getUtilities().loadAdditionalEventData(calendarUserId, copies, null);
+                Map<Event, List<Alarm>> alarmsToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, eventData.getAlarms(), exceptionsWithAlarms);
+                for (Entry<Event, List<Alarm>> toUpdate : alarmsToUpdate.entrySet()) {
+                    updateAlarms(toUpdate.getKey(), calendarUserId, toUpdate.getKey().getAlarms(), toUpdate.getValue());
+                }
+            }
+            updateAlarms(eventUpdate.getUpdate(), calendarUserId, originalAlarms, eventData.getAlarms());
         }
         for (int userId : getUserIDs(eventUpdate.getAttendeeUpdates().getAddedItems())) {
             List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
@@ -365,7 +377,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *      <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
     private boolean assumeExternalOrganizerUpdate(Event originalEvent, Event updatedEvent) {
-        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && 
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
             originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
             return true;
         }
@@ -549,7 +561,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     /**
      * Selects the recurrence rule to use for the event update after a split has been performed on a recurring event series. This may be
      * necessary when the rule's <code>COUNT</code> attribute was modified during the split operation.
-     * 
+     *
      * @param originalSeriesMaster The original series master event (before the split)
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @param clientUpdate The updated event data as passed by the client

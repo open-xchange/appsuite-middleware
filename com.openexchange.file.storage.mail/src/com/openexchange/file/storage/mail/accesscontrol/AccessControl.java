@@ -54,9 +54,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.session.Session;
@@ -69,22 +69,16 @@ import com.openexchange.session.Session;
  */
 public class AccessControl implements AutoCloseable {
 
-    private static final Integer DEFAULT_MAX_ACCESSES_PER_USER = Integer.valueOf(4);
+    private static final int DEFAULT_MAX_ACCESSES_PER_USER = 4;
 
-    private static Integer getMaxAccessesPerUser(Session session) throws OXException {
+    private static int getMaxAccessesPerUser(Session session) throws OXException {
         ConfigViewFactory factory = Services.getOptionalService(ConfigViewFactory.class);
         if (null == factory) {
             return DEFAULT_MAX_ACCESSES_PER_USER;
         }
 
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<Integer> property = view.property("com.openexchange.file.storage.mail.maxAccessesPerUser", int.class);
-
-        if (!property.isDefined()) {
-            return DEFAULT_MAX_ACCESSES_PER_USER;
-        }
-
-        return property.get();
+        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.file.storage.mail.maxAccessesPerUser", DEFAULT_MAX_ACCESSES_PER_USER, view);
     }
 
     private static final ConcurrentMap<Key, AccessControl> CONTROLS = new ConcurrentHashMap<>(512);
@@ -109,7 +103,7 @@ public class AccessControl implements AutoCloseable {
             accessControl = CONTROLS.get(key);
             if (null == accessControl) {
                 if (null == maxAccessesPerUser) {
-                    maxAccessesPerUser = getMaxAccessesPerUser(session);
+                    maxAccessesPerUser = Integer.valueOf(getMaxAccessesPerUser(session));
                 }
                 AccessControl newAccessControl = new AccessControl(maxAccessesPerUser.intValue(), key);
                 accessControl = CONTROLS.putIfAbsent(key, newAccessControl);
