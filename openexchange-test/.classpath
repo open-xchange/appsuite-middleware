@@ -143,8 +143,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.grizzly"/>
 	<classpathentry kind="lib" path="lib/tempus-fugit-1.2-20140129.191141-5.jar" sourcepath="lib/source/tempus-fugit-1.2-20140129.191141-5-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.25-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.25-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.26-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/httpClient-java.jar" sourcepath="lib/source/httpClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="lib/restClient-java.jar" sourcepath="lib/source/restClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.9.8.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.9.8-sources.jar"/>
@@ -190,8 +190,8 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.10.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.6.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.11.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.7.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-collections-3.2.2.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.20-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.20-sources.jar"/>

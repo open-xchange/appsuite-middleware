@@ -6,8 +6,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logging"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201404270220.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201404270220.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-classic-1.2.2-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-core-1.2.2-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.25-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.2.3.jar" sourcepath="/com.openexchange.bundles/source/logback-classic-1.2.3-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.2.3.jar" sourcepath="/com.openexchange.bundles/source/logback-core-1.2.3-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

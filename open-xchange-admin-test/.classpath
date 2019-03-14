@@ -24,6 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-lang3-3.8.1.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

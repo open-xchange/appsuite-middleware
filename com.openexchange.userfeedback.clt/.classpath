@@ -24,6 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -544,7 +544,9 @@ public final class Init {
 
     private static void startVersionBundle() throws Exception {
         // Using some static version because access to c.o.version bundle manifest is not possible currently.
-        TestServiceRegistry.getInstance().addService(VersionService.class, new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new Numbers("0.0.0", "0")));
+        com.openexchange.version.internal.VersionServiceImpl versionService = new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new Numbers("0.0.0", "0"));
+        TestServiceRegistry.getInstance().addService(VersionService.class, versionService);
+        services.put(VersionService.class, versionService);
     }
 
     public static void startAndInjectConfigBundle() {

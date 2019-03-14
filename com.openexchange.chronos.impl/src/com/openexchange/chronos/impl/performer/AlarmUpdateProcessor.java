@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,9 +84,8 @@ public class AlarmUpdateProcessor {
      * @param updatedAlarms The updated alarms of the master event
      * @param exceptions The list of event exceptions for the master event containing the alarms for those events.
      * @return A mapping of event exceptions to updated alarms for this exceptions
-     * @throws OXException
      */
-    public static Map<Event, List<Alarm>> getUpdatedExceptions(List<Alarm> originalAlarms, List<Alarm> updatedAlarms, List<Event> exceptions) throws OXException {
+    public static Map<Event, List<Alarm>> getUpdatedExceptions(List<Alarm> originalAlarms, List<Alarm> updatedAlarms, List<Event> exceptions) {
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
 
         return exceptions.stream().collect(HashMap::new, (map, event) -> {
@@ -92,15 +93,15 @@ public class AlarmUpdateProcessor {
             if (optRelations.isPresent()) {
                 Map<Integer, Alarm> relations = optRelations.get();
                 List<Alarm> newAlarms = new ArrayList<>(updatedAlarms.size());
-                alarmUpdates.getRemovedItems().forEach((removed) -> relations.remove(removed.getId()));
+                alarmUpdates.getRemovedItems().forEach((removed) -> relations.remove(I(removed.getId())));
                 alarmUpdates.getUpdatedItems().forEach((update) -> {
-                    Alarm exceptionAlarm = relations.remove(update.getOriginal().getId());
+                    Alarm exceptionAlarm = relations.remove(I(update.getOriginal().getId()));
                     try {
                         Alarm copy = AlarmMapper.getInstance().copy(exceptionAlarm, null, AlarmMapper.getInstance().getAssignedFields(exceptionAlarm));
                         AlarmMapper.getInstance().copy(update.getUpdate(), copy, update.getUpdatedFields().stream().toArray(AlarmField[]::new));
                         // add updated alarms
                         newAlarms.add(copy);
-                    } catch (OXException e) {
+                    } catch (@SuppressWarnings("unused") OXException e) {
                         // Should never happen
                     }
                 });
@@ -116,20 +117,29 @@ public class AlarmUpdateProcessor {
     /**
      * Optionally gets the original alarm ids mapped to the related alarm of the exception. Return an empty {@link Optional} in case the alarm lists contain unrelated items.
      *
-     * @param master The original alarms of the master event
-     * @param exception The original alarms of the exception event
+     * @param tmpMaster The original alarms of the master event
+     * @param tmpException The original alarms of the exception event
      * @return A mapping of id to alarms or an empty {@link Optional} in case an alarm is unrelated
      */
     private static Optional<Map<Integer, Alarm>> getRelations(List<Alarm> master, List<Alarm> exception) {
-        if (master.size() != exception.size()) {
+        List<Alarm> tmpMaster = master;
+        if(tmpMaster == null) {
+            tmpMaster = Collections.emptyList();
+        }
+        List<Alarm> tmpException = exception;
+        if(tmpException == null) {
+            tmpException = Collections.emptyList();
+        }
+        
+        if (tmpMaster.size() != tmpException.size()) {
             return Optional.empty();
         }
 
-        Map<Integer, Alarm> result = new HashMap<>(master.size());
-        for (Alarm alarm : master) {
-            Optional<Alarm> related = getRelated(alarm, exception);
+        Map<Integer, Alarm> result = new HashMap<>(tmpMaster.size());
+        for (Alarm alarm : tmpMaster) {
+            Optional<Alarm> related = getRelated(alarm, tmpException);
             if (related.isPresent()) {
-                result.put(alarm.getId(), related.get());
+                result.put(I(alarm.getId()), related.get());
             } else {
                 return Optional.empty();
             }
