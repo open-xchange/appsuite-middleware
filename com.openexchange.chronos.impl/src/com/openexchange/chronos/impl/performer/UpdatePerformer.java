@@ -309,13 +309,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
             if(originalChangeExceptions != null) {
 
-                List<Event> copies = originalChangeExceptions.stream().collect(ArrayList::new, (list, event) -> {
-                    try {
-                        list.add(EventMapper.getInstance().copy(event, null, EventMapper.getInstance().getAssignedFields(event)));
-                    } catch (OXException e) {
-                        // Should never happen
-                    }
-                }, ArrayList::addAll);
+                List<Event> copies = new ArrayList<>(originalChangeExceptions.size());
+                for(Event eve: originalChangeExceptions) {
+                    copies.add(EventMapper.getInstance().copy(eve, null, EventMapper.getInstance().getAssignedFields(eve)));
+                }
+                
                 List<Event> exceptionsWithAlarms = storage.getUtilities().loadAdditionalEventData(calendarUserId, copies, null);
                 Map<Event, List<Alarm>> alarmsToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, eventData.getAlarms(), exceptionsWithAlarms);
                 for (Entry<Event, List<Alarm>> toUpdate : alarmsToUpdate.entrySet()) {
