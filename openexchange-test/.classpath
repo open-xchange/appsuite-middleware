@@ -143,8 +143,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.grizzly"/>
 	<classpathentry kind="lib" path="lib/tempus-fugit-1.2-20140129.191141-5.jar" sourcepath="lib/source/tempus-fugit-1.2-20140129.191141-5-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.25-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.25-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.26-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/httpClient-java.jar" sourcepath="lib/source/httpClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="lib/restClient-java.jar" sourcepath="lib/source/restClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.9.8.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.9.8-sources.jar"/>
