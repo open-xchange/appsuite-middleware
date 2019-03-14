@@ -49,8 +49,10 @@
 
 package com.openexchange.unifiedinbox.copy;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -212,7 +214,7 @@ public final class UnifiedInboxMessageCopier {
         /*
          * A copy/move from a specific folder to this account's default folder
          */
-        final String[] retval;
+        String[] retval;
         // Parse source folder
         final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullName(sourceFolder);
         MailAccess<?, ?> mailAccess = null;
@@ -229,13 +231,26 @@ public final class UnifiedInboxMessageCopier {
             } else {
                 retval = mailAccess.getMessageStorage().copyMessages(sourceFullname, realDest, mailIds, fast);
             }
-
+            retval = transformMailId2UnifiedMailId(sourceFullnameArgument.getAccountId(), realDest, retval);
         } finally {
             if (null != mailAccess) {
                 mailAccess.close(true);
             }
         }
         return retval;
+    }
+
+    /**
+     * Transforms an array of normal mail ids to an array of unified mail ids
+     *
+     * @param account The id of the mail account
+     * @param dest The folder fullname
+     * @param mailids An array of normal mail ids
+     * @return An array of unified mail ids
+     */
+    private String[] transformMailId2UnifiedMailId(int account, String dest, String[] mailids) {
+        UnifiedInboxUID helper = new UnifiedInboxUID();
+        return Arrays.asList(mailids).stream().map((x) -> helper.setUID(account, dest, x).toString()).collect(Collectors.toList()).toArray(new String[mailids.length]);
     }
 
     private String[] accountFolder2AccountFolder(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
@@ -257,10 +272,13 @@ public final class UnifiedInboxMessageCopier {
             try {
                 mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
                 mailAccess.connect();
+                String[] retval;
                 if (move) {
-                    return mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, mailIds, fast);
+                    retval = mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, mailIds, fast);
+                } else {
+                    retval = mailAccess.getMessageStorage().copyMessages(sourceFullname, destFullname, mailIds, fast);
                 }
-                return mailAccess.getMessageStorage().copyMessages(sourceFullname, destFullname, mailIds, fast);
+                return transformMailId2UnifiedMailId(sourceFullnameArgument.getAccountId(), destFullname, retval);
             } finally {
                 if (null != mailAccess) {
                     mailAccess.close(true);
@@ -291,7 +309,7 @@ public final class UnifiedInboxMessageCopier {
                 sourceMailAccess.close(true);
             }
         }
-        return retval;
+        return transformMailId2UnifiedMailId(destFullnameArgument.getAccountId(), destFullname, retval);
     }
 
     private static void performCallables(final Collection<? extends Task<Object>> callables, final ThreadPoolService threadPoolService) throws OXException {

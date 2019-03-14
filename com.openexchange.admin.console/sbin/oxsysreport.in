@@ -631,11 +631,17 @@ exclude_secret_entries() {
         fi
     done
     IFS=${IFS_BA}
-    find "${_config_copy}" -type f | \
-        sed 's|[[:blank:]]|\\ |g' | \
-        xargs egrep -iHrIv "${_whitelist}" | \
-        sed -r 's/(:)/@SEPARATOR@/' | \
-        egrep -i "${_blacklist}" > ${_tmp_exclude_status}
+    # This method is sometimes called given a single file as first parameter. This file may have been deleted 4 lines above if it does not
+    # contain any useful information any more. This happens e.g. with /etc/security/limits.conf containing just comments.
+    if [ -e "${_config_copy}" ]; then
+        find "${_config_copy}" -type f | \
+            sed 's|[[:blank:]]|\\ |g' | \
+            xargs egrep -iHrIv "${_whitelist}" | \
+            sed -r 's/(:)/@SEPARATOR@/' | \
+            egrep -i "${_blacklist}" > ${_tmp_exclude_status}
+    else
+        echo -n "" > ${_tmp_exclude_status}
+    fi
 
     # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties:com.openexchange.oauth.msn.apiSecret=secret
     while read line; do
@@ -679,7 +685,12 @@ exclude_secret_entries() {
             # set this marker also if no value was set
             local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
         fi
-        sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
+
+        if [ -n "$(echo ${_file} | grep "^${TMP}/*${LOGDIR}")" ]; then
+            sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
+        else
+            die "${0}: Internal Error, tried to modify original data: ${_file}"
+        fi
         sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"

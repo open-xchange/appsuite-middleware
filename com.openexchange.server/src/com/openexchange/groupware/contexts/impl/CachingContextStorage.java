@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -241,18 +242,24 @@ public class CachingContextStorage extends ContextStorage {
 
     private ContextExtended load(final int contextId) throws OXException {
         final ContextExtended retval = CachingContextStorage.parent.getPersistantImpl().loadContext(contextId);
+
         // TODO We should introduce a logic layer above this context storage
         // layer. That layer should then trigger the update tasks.
         // Nearly all accesses to the ContextStorage need then to be replaced
         // with an access to the ContextService.
-        final Updater updater = Updater.getInstance();
+        Updater updater = Updater.getInstance();
         try {
-            final UpdateStatus status = updater.getStatus(retval);
-            retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
+            UpdateStatus status = updater.getStatus(retval.getContextId());
+            retval.setUpdating(status.blockingUpdatesRunning());
             if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                updater.startUpdate(retval);
+                if (denyImplicitUpdateOnContextLoad()) {
+                    retval.setUpdateNeeded(true);
+                } else {
+                    retval.setUpdating(true);
+                    updater.startUpdate(retval);
+                }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
                 LOG.warn("Switching to read only mode for context {} because master database is down.", contextId, e);
                 retval.setReadOnly(true);
@@ -260,4 +267,16 @@ public class CachingContextStorage extends ContextStorage {
         }
         return retval;
     }
+
+    private boolean denyImplicitUpdateOnContextLoad() {
+        boolean defaultValue = false;
+
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configService) {
+            return defaultValue;
+        }
+
+        return configService.getBoolProperty("com.openexchange.groupware.update.denyImplicitUpdateOnContextLoad", defaultValue);
+    }
+
 }
