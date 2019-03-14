@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 53
+%define        ox_release 54
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -75,6 +75,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Tue Mar 12 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2019-03-01 (5147)
 * Wed Feb 27 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2019-03-01 (5142)
 * Mon Feb 18 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>

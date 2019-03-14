@@ -54,6 +54,7 @@ import gnu.trove.list.linked.TIntLinkedList;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -111,8 +112,9 @@ final class KF2KFCallable implements Task<Object> {
             } else {
                 results = mailAccess.getMessageStorage().copyMessages(realSource, realDest, idList.toArray(new String[idList.size()]), fast);
             }
+            UnifiedInboxUID helper = new UnifiedInboxUID();
             for (int j = 0; j < results.length; j++) {
-                toFill[indexList.get(j)] = results[j];
+                toFill[indexList.get(j)] = helper.setUID(accountId, realDest, results[j]).toString();
             }
         } finally {
             if (null != mailAccess) {
