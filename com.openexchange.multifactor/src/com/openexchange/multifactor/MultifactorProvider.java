@@ -167,7 +167,7 @@ public interface MultifactorProvider {
      *
      * @param contextId Context of the user
      * @param userId Id of the user
-     * @return true, if at least one registration was removed, false otherwise
+     * @return <code>true</code>, if at least one registration was removed, <code>false</code> otherwise
      * @throws OXException in case the devices coulnd't be unregistered
      */
     boolean deleteRegistrations(int contextId, int userId) throws OXException;
@@ -176,7 +176,7 @@ public interface MultifactorProvider {
      * Deletes ALL multi-factor devices within a given context
      *
      * @param contextId  The id of the context
-     * @return true, if at least one registration was removed, false otherwise
+     * @return <code>true</code>, if at least one registration was removed, <code>false</code> otherwise
      * @throws OXException in case the devices coulnd't be unregistered
      */
     boolean deleteRegistrations(int contextId) throws OXException;

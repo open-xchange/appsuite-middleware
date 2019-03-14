@@ -51,9 +51,6 @@ package com.openexchange.multifactor.rest.api;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
-import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.auth.Authenticator;
-import com.openexchange.config.ConfigurationService;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -69,6 +66,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.auth.Authenticator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorManagementService;
@@ -120,7 +120,7 @@ public class MultifactorManagementREST {
     /**
      * Internal helper method to read MASTER_ACCOUNT_OVERRIDE property
      *
-     * @return The value of MASTER_ACCOUNT_OVERRIDE, i.e. true if the master-admin has access to all contexts.
+     * @return The value of MASTER_ACCOUNT_OVERRIDE, i.e. <code>true</code> if the master-admin has access to all contexts.
      */
     private boolean isMasterAccountOverride() {
        ConfigurationService configService = getService(ConfigurationService.class);
@@ -132,7 +132,7 @@ public class MultifactorManagementREST {
     }
 
     /**
-     * Generates an error JSONB object
+     * Generates an error JSON object
      *
      * @param ex The {@link OXException} to create the error object from
      * @return The JSON error object for the given {@link OXException}
@@ -239,8 +239,7 @@ public class MultifactorManagementREST {
                 //access denied
                 return authenticationError;
             }
-            final MultifactorManagementService service = requireService(MultifactorManagementService.class);
-            final JSONObject result = createDevicesResponse(service.getMultifactorDevices(contextId, userId));
+            final JSONObject result = createDevicesResponse(requireService(MultifactorManagementService.class).getMultifactorDevices(contextId, userId));
             return Response.ok().entity(result).build();
         } catch (OXException e) {
             LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId));
@@ -275,25 +274,12 @@ public class MultifactorManagementREST {
                 //access denied
                 return authenticationError;
             }
-            final MultifactorManagementService managementService = requireService(MultifactorManagementService.class);
-            managementService.removeDevice(contextId, userId, providerName, deviceId);
-            LOG.info("Removed multifactor device with id {} from provider {} for user {} in context {}",
-                deviceId,
-                providerName,
-                I(userId),
-                I(contextId));
+            requireService(MultifactorManagementService.class).removeDevice(contextId, userId, providerName, deviceId);
+            LOG.info("Removed multifactor device with id {} from provider {} for user {} in context {}", deviceId, providerName, I(userId), I(contextId));
             return Response.ok().build();
-        }
-        catch(OXException e) {
-            LOG.error("Error while removing multifactor device with id {} from provider {} for user {} in context {}",
-                deviceId,
-                providerName,
-                I(userId),
-                I(contextId));
-            if (MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.equals(e) ||
-                MultifactorExceptionCodes.UNKNOWN_PROVIDER.equals(e) ||
-                MultifactorExceptionCodes.UNKNOWN_DEVICE_ID.equals(e)) {
-
+        } catch (OXException e) {
+            LOG.error("Error while removing multifactor device with id {} from provider {} for user {} in context {}", deviceId, providerName, I(userId), I(contextId));
+            if (MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.equals(e) || MultifactorExceptionCodes.UNKNOWN_PROVIDER.equals(e) || MultifactorExceptionCodes.UNKNOWN_DEVICE_ID.equals(e)) {
                 return Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build();
             }
             return Response.serverError().entity(generateError(e)).build();
@@ -316,8 +302,7 @@ public class MultifactorManagementREST {
                 //access denied
                 return authenticationError;
             }
-            final MultifactorManagementService managementService = requireService(MultifactorManagementService.class);
-            managementService.removeAllDevices(contextId, userId);
+            requireService(MultifactorManagementService.class).removeAllDevices(contextId, userId);
             return Response.ok().build();
         } catch (OXException e) {
             LOG.error("Error while removing all multifactor devices for user {} in context {}", I(userId), I(contextId));

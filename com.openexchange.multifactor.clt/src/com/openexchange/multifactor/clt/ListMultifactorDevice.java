@@ -55,9 +55,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.client.Invocation.Builder;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.glassfish.jersey.client.ClientConfig;
@@ -156,7 +156,7 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
 
     @Override
     protected String getFooter() {
-        return "The command-line tool to list multifactor authentication devices.";
+        return "The command-line tool to list multifactor authentication devices for a given user.";
     }
 
     @Override

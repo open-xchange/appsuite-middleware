@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import com.openexchange.exception.OXException;
-import com.openexchange.multifactor.MultifactorAuthenticator;
 import com.openexchange.multifactor.MultifactorAuthenticatorFactory;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorManagementService;
@@ -114,8 +113,7 @@ public class MultifactorManagementServiceImpl implements MultifactorManagementSe
         final MultifactorRequest request = getMultifactorRequest(contextId, userId);
         Optional<MultifactorProvider> provider = registry.getProvider(providerName);
         if (provider.isPresent()) {
-            final MultifactorAuthenticator authenticator = authenticatorFactory.createAuthenticator(provider.get());
-            authenticator.deleteRegistration(request, deviceId);
+            authenticatorFactory.createAuthenticator(provider.get()).deleteRegistration(request, deviceId);
         } else {
             throw MultifactorExceptionCodes.UNKNOWN_PROVIDER.create(providerName);
         }
@@ -126,8 +124,7 @@ public class MultifactorManagementServiceImpl implements MultifactorManagementSe
         final MultifactorRequest request = getMultifactorRequest(contextId, userId);
         final Collection<MultifactorProvider> providers = registry.getProviders(request);
         for (final MultifactorProvider provider : providers) {
-            final MultifactorAuthenticator authenticator = authenticatorFactory.createAuthenticator(provider);
-            authenticator.deleteRegistrations(request);
+            authenticatorFactory.createAuthenticator(provider).deleteRegistrations(request);
         }
     }
 }
