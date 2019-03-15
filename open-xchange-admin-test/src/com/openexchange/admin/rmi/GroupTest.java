@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -70,28 +69,7 @@ import com.openexchange.admin.rmi.factory.UserFactory;
  */
 public class GroupTest extends UserTest {
 
-    // list of chars that must be valid
     private final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
-
-    private Context context;
-
-    /**
-     * Initialises a new {@link GroupTest}.
-     */
-    public GroupTest() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#setUp()
-     */
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        context = getContextManager().create(contextAdminCredentials);
-    }
 
     @Test
     public void testCreateGroup() throws Exception {

@@ -66,6 +66,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -96,14 +97,7 @@ public class UserTest extends AbstractRMITest {
     // global setting for stored password
     protected final String pass = "foo-user-pass";
 
-    private Context context;
-
-    /**
-     * Initialises a new {@link UserTest}.
-     */
-    public UserTest() {
-        super();
-    }
+    protected Context context;
 
     /*
      * (non-Javadoc)
@@ -114,6 +108,13 @@ public class UserTest extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
         context = getContextManager().create(contextAdminCredentials);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        getContextManager().delete(context, superAdminCredentials);
+
+        super.setUp();
     }
 
     /**
@@ -183,11 +184,11 @@ public class UserTest extends AbstractRMITest {
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         usr.setLoadRemoteMailContentByDefault(Boolean.TRUE);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
-        
+
         // Change value 
         createduser.setLoadRemoteMailContentByDefault(Boolean.FALSE);
         getUserManager().change(context, createduser, contextAdminCredentials);
-        
+
         // Check value
         User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         Assert.assertThat("Loading remote content should be disabled!", srv_loaded.isLoadRemoteMailContentByDefault(), is(Boolean.FALSE));
@@ -200,16 +201,15 @@ public class UserTest extends AbstractRMITest {
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         usr.setLoadRemoteMailContentByDefault(Boolean.TRUE);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
-        
+
         // Don't set value
         createduser.setLoadRemoteMailContentByDefault(null);
         getUserManager().change(context, createduser, contextAdminCredentials);
-        
+
         // Value should be unchanged
         User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         Assert.assertThat("Loading remote content should still be enabled!", srv_loaded.isLoadRemoteMailContentByDefault(), is(Boolean.TRUE));
     }
-    
 
     /**
      * Tests the user creation with context module access rights
