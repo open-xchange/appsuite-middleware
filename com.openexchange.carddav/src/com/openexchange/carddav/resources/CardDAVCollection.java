@@ -315,7 +315,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
                 searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
             }
             searchTerm.addSearchTerm(term);
-            searchIterator = factory.getContactService().searchContacts(factory.getSession(), term);
+            searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (isSynchronized(contact)) {
