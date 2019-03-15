@@ -177,7 +177,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
          */
         Map<APNAccess, List<PayloadPerDevice>> payloadsPerAccess = new HashMap<APNAccess, List<PayloadPerDevice>>();
         for (Subscription subscription : subscriptions) {
-            PayloadPerDevice payload = getSilentNotificationPayload(subscription);
+            PayloadPerDevice payload = getPayload(event, subscription);
             if (null == payload) {
                 LOG.debug("No payload constructed for subscription {}, skipping", subscription);
                 continue;
@@ -313,6 +313,29 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
             removeSubscription(subscription);
         }
         return null;
+    }
+
+    private PayloadPerDevice getPayload(DriveEvent event, Subscription subscription) {
+        String pushTokenReference = event.getPushTokenReference();
+        if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+            LOG.trace("Skipping push notification for subscription: {}", subscription);
+            return null;
+        }
+        try {
+            PushNotificationPayload payload = new PushNotificationBigPayload();
+            payload.addCustomAlertLocKey("TRIGGER_SYNC");
+            payload.addCustomAlertActionLocKey("OK");
+            payload.addCustomDictionary("root", subscription.getRootFolderID());
+            payload.addCustomDictionary("action", "sync");
+            return new PayloadPerDevice(payload, subscription.getToken());
+        } catch (JSONException e) {
+            LOG.warn("error constructing payload", e);
+            return null;
+        } catch (InvalidDeviceTokenFormatException e) {
+            LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
+            removeSubscription(subscription);
+            return null;
+        }
     }
 
     private boolean removeSubscription(Subscription subscription) {
