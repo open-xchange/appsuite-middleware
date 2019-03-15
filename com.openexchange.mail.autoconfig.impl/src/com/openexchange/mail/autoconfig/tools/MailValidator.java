@@ -341,7 +341,7 @@ public class MailValidator {
         } finally {
             closeSafe(s);
         }
-        return greeting != null;
+        return true;
     }
 
     /**
@@ -405,7 +405,7 @@ public class MailValidator {
         } finally {
             closeSafe(s);
         }
-        return greeting != null;
+        return true;
     }
 
     /**
@@ -469,7 +469,7 @@ public class MailValidator {
         } finally {
             closeSafe(s);
         }
-        return greeting != null;
+        return true;
     }
 
     private static void closeSafe(Socket s) {
