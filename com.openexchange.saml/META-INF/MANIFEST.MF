@@ -95,44 +95,44 @@ Import-Package: com.google.common.collect,
  javax.xml.ws.spi,
  javax.xml.ws.wsaddressing,
  javax.xml.xpath,
- org.apache.commons.codec;version="1.6.0",
- org.apache.commons.codec.binary;version="1.6.0",
- org.apache.commons.codec.digest;version="1.6.0",
- org.apache.commons.codec.language;version="1.6.0",
- org.apache.commons.codec.language.bm;version="1.6.0",
- org.apache.commons.codec.net;version="1.6.0",
- org.apache.commons.collections;version="3.2.1",
- org.apache.commons.collections.bag;version="3.2.1",
- org.apache.commons.collections.bidimap;version="3.2.1",
- org.apache.commons.collections.buffer;version="3.2.1",
- org.apache.commons.collections.collection;version="3.2.1",
- org.apache.commons.collections.comparators;version="3.2.1",
- org.apache.commons.collections.functors;version="3.2.1",
- org.apache.commons.collections.iterators;version="3.2.1",
- org.apache.commons.collections.keyvalue;version="3.2.1",
- org.apache.commons.collections.list;version="3.2.1",
- org.apache.commons.collections.map;version="3.2.1",
- org.apache.commons.collections.set;version="3.2.1",
- org.apache.commons.httpclient;version="3.1.0",
- org.apache.commons.httpclient.auth;version="3.1.0",
- org.apache.commons.httpclient.cookie;version="3.1.0",
- org.apache.commons.httpclient.methods;version="3.1.0",
- org.apache.commons.httpclient.methods.multipart;version="3.1.0",
- org.apache.commons.httpclient.params;version="3.1.0",
- org.apache.commons.httpclient.protocol;version="3.1.0",
- org.apache.commons.httpclient.util;version="3.1.0",
- org.apache.commons.io;version="2.0.1",
- org.apache.commons.lang;version="2.6.0",
- org.apache.commons.lang.builder;version="2.6.0",
- org.apache.commons.lang.enum;version="2.6.0",
- org.apache.commons.lang.enums;version="2.6.0",
- org.apache.commons.lang.exception;version="2.6.0",
- org.apache.commons.lang.math;version="2.6.0",
- org.apache.commons.lang.mutable;version="2.6.0",
- org.apache.commons.lang.reflect;version="2.6.0",
- org.apache.commons.lang.text;version="2.6.0",
- org.apache.commons.lang.time;version="2.6.0",
- org.apache.commons.logging;version="1.1.1",
+ org.apache.commons.codec
+ org.apache.commons.codec.binary
+ org.apache.commons.codec.digest
+ org.apache.commons.codec.language
+ org.apache.commons.codec.language.bm
+ org.apache.commons.codec.net
+ org.apache.commons.collections
+ org.apache.commons.collections.bag
+ org.apache.commons.collections.bidimap
+ org.apache.commons.collections.buffer
+ org.apache.commons.collections.collection
+ org.apache.commons.collections.comparators
+ org.apache.commons.collections.functors
+ org.apache.commons.collections.iterators
+ org.apache.commons.collections.keyvalue
+ org.apache.commons.collections.list
+ org.apache.commons.collections.map
+ org.apache.commons.collections.set
+ org.apache.commons.httpclient
+ org.apache.commons.httpclient.auth
+ org.apache.commons.httpclient.cookie
+ org.apache.commons.httpclient.methods
+ org.apache.commons.httpclient.methods.multipart
+ org.apache.commons.httpclient.params
+ org.apache.commons.httpclient.protocol
+ org.apache.commons.httpclient.util
+ org.apache.commons.io
+ org.apache.commons.lang
+ org.apache.commons.lang.builder
+ org.apache.commons.lang.enum
+ org.apache.commons.lang.enums
+ org.apache.commons.lang.exception
+ org.apache.commons.lang.math
+ org.apache.commons.lang.mutable
+ org.apache.commons.lang.reflect
+ org.apache.commons.lang.text
+ org.apache.commons.lang.time
+ org.apache.commons.logging
  org.apache.http,
  org.apache.http.client.utils,
  org.apache.xerces.dom,
@@ -348,33 +348,33 @@ Import-Package: com.google.common.collect,
  org.bouncycastle.x509,
  org.bouncycastle.x509.extension,
  org.bouncycastle.x509.util,
- org.joda.time;version="2.7.0",
- org.joda.time.base;version="2.7.0",
- org.joda.time.chrono;version="2.7.0",
- org.joda.time.convert;version="2.7.0",
- org.joda.time.field;version="2.7.0",
- org.joda.time.format;version="2.7.0",
- org.joda.time.tz;version="2.7.0",
- org.osgi.framework;version="1.7.0",
- org.osgi.service.http;version="1.2.1",
- org.osgi.util.tracker;version="1.5.1",
- org.owasp.esapi;version="2.0.1",
- org.owasp.esapi.codecs;version="2.0.1",
- org.owasp.esapi.crypto;version="2.0.1",
- org.owasp.esapi.errors;version="2.0.1",
- org.owasp.esapi.filters;version="2.0.1",
- org.owasp.esapi.reference;version="2.0.1",
- org.owasp.esapi.reference.accesscontrol;version="2.0.1",
- org.owasp.esapi.reference.accesscontrol.policyloader;version="2.0.1",
- org.owasp.esapi.reference.crypto;version="2.0.1",
- org.owasp.esapi.reference.validation;version="2.0.1",
- org.owasp.esapi.tags;version="2.0.1",
- org.owasp.esapi.util;version="2.0.1",
- org.owasp.esapi.waf;version="2.0.1",
- org.owasp.esapi.waf.actions;version="2.0.1",
- org.owasp.esapi.waf.configuration;version="2.0.1",
- org.owasp.esapi.waf.rules;version="2.0.1",
- org.slf4j;version="1.7.5",
+ org.joda.time
+ org.joda.time.base
+ org.joda.time.chrono
+ org.joda.time.convert
+ org.joda.time.field
+ org.joda.time.format
+ org.joda.time.tz
+ org.osgi.framework
+ org.osgi.service.http
+ org.osgi.util.tracker
+ org.owasp.esapi
+ org.owasp.esapi.codecs
+ org.owasp.esapi.crypto
+ org.owasp.esapi.errors
+ org.owasp.esapi.filters
+ org.owasp.esapi.reference
+ org.owasp.esapi.reference.accesscontrol
+ org.owasp.esapi.reference.accesscontrol.policyloader
+ org.owasp.esapi.reference.crypto
+ org.owasp.esapi.reference.validation
+ org.owasp.esapi.tags
+ org.owasp.esapi.util
+ org.owasp.esapi.waf
+ org.owasp.esapi.waf.actions
+ org.owasp.esapi.waf.configuration
+ org.owasp.esapi.waf.rules
+ org.slf4j
  org.w3c.dom,
  org.w3c.dom.bootstrap,
  org.w3c.dom.css,
