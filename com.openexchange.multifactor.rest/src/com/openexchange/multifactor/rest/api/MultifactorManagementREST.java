@@ -265,15 +265,15 @@ public class MultifactorManagementREST {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevices(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId) throws JSONException {
         try {
-            Response error = checkUserAndContext(contextId, userId);
-            if (null != error) {
-                // Return error response
-                return error;
-            }
             Response authenticationError = authenticate(contextId, auth);
             if (authenticationError != null) {
                 //access denied
                 return authenticationError;
+            }
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
+                // Return error response
+                return error;
             }
             final JSONArray result = createDevicesResponse(requireService(MultifactorManagementService.class).getMultifactorDevices(contextId, userId));
             return Response.ok().entity(result).build();
@@ -306,15 +306,15 @@ public class MultifactorManagementREST {
         @PathParam("device-id") String deviceId) throws JSONException {
 
         try {
-            Response error = checkUserAndContext(contextId, userId);
-            if (null != error) {
-                // Return error response
-                return error;
-            }
             Response authenticationError = authenticate(contextId, auth);
             if (authenticationError != null) {
                 //access denied
                 return authenticationError;
+            }
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
+                // Return error response
+                return error;
             }
             requireService(MultifactorManagementService.class).removeDevice(contextId, userId, providerName, deviceId);
             LOG.info("Removed multifactor device with id {} from provider {} for user {} in context {}", deviceId, providerName, I(userId), I(contextId));
@@ -340,15 +340,15 @@ public class MultifactorManagementREST {
     @DELETE
     public Response removeDevices(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId) throws JSONException {
         try {
-            Response error = checkUserAndContext(contextId, userId);
-            if (null != error) {
-                // Return error response
-                return error;
-            }
             Response authenticationError = authenticate(contextId, auth);
             if (authenticationError != null) {
                 //access denied
                 return authenticationError;
+            }
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
+                // Return error response
+                return error;
             }
             requireService(MultifactorManagementService.class).removeAllDevices(contextId, userId);
             return Response.ok().build();
