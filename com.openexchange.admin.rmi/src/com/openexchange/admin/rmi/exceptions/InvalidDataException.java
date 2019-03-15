@@ -152,7 +152,7 @@ public class InvalidDataException extends Exception {
             sb.append("The following field are invalid:\n");
             sb.append(fieldnames);
         }
-        return super.toString();
+        return sb.toString();
     }
 
 }
