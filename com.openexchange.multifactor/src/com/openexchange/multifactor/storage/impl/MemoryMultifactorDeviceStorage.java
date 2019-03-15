@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.storage.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -119,6 +120,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      */
     private class RegistrationContainer {
 
+        @SuppressWarnings("hiding")
         private final Collection<DeviceRegistration> registrations;
 
         RegistrationContainer() {
@@ -180,7 +182,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
                     iterator.remove();
                 }
             }
-            LOG.debug("storage size: {}", registrations.size());
+            LOG.debug("storage size: {}", I(registrations.size()));
         }
     }
 
@@ -200,7 +202,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
             if(existingContainer != null) {
                existingContainer.addDevices(device);
             }
-            LOG.debug("storage size: {}", registrations.size());
+            LOG.debug("storage size: {}", I(registrations.size()));
         }
     }
 
@@ -213,7 +215,7 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * @return <code>true</code> if the device was unregistered, <code>false</code> if the device was not found
      */
     public boolean unregisterDevice(int contextId, int userId, T device) {
-        device = Objects.requireNonNull(device, "device must not be null");
+        Objects.requireNonNull(device, "device must not be null");
         return unregisterDevice(contextId, userId, device.getId());
     }
 
@@ -229,11 +231,14 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
         synchronized (lock) {
             final String key = getKey(contextId, userId);
             RegistrationContainer registrationsForSession = registrations.get(key);
+            if(registrationsForSession == null) {
+                return false;
+            }
             boolean removed = registrationsForSession.removeDevice(deviceId);
             if(removed && registrationsForSession.getSize() == 0) {
                 registrations.remove(key);
             }
-            LOG.debug("storage size: {}", registrations.size());
+            LOG.debug("storage size: {}", I(registrations.size()));
             return removed;
         }
     }
