@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.autoconfig.tools;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -95,12 +96,12 @@ public class MailValidator {
             if (ConnectMode.SSL == connectMode) {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
             } else if (ConnectMode.STARTTLS == connectMode) {
-                props.put("mail.imap.starttls.required", true);
+                props.put("mail.imap.starttls.required", Boolean.TRUE);
                 props.put("mail.imap.ssl.trust", "*");
             } else {
                 props.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
-                props.put("mail.imap.ssl.socketFactory.port", port);
-                props.put("mail.imap.starttls.enable", true);
+                props.put("mail.imap.ssl.socketFactory.port", I(port));
+                props.put("mail.imap.starttls.enable", Boolean.TRUE);
                 props.put("mail.imap.ssl.trust", "*");
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
@@ -116,9 +117,9 @@ public class MailValidator {
                 }
             }
             props.put("mail.imap.socketFactory.fallback", "false");
-            props.put("mail.imap.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
-            props.put("mail.imap.timeout", DEFAULT_TIMEOUT);
-            props.put("mail.imap.socketFactory.port", port);
+            props.put("mail.imap.connectiontimeout", I(DEFAULT_CONNECT_TIMEOUT));
+            props.put("mail.imap.timeout", I(DEFAULT_TIMEOUT));
+            props.put("mail.imap.socketFactory.port", I(port));
             Session session = Session.getInstance(props, null);
             store = session.getStore("imap");
             store.connect(host, port, user, pwd);
@@ -153,12 +154,12 @@ public class MailValidator {
             if (ConnectMode.SSL == connectMode) {
                 props.put("mail.pop3.socketFactory.class", socketFactoryClass);
             } else if (ConnectMode.STARTTLS == connectMode) {
-                props.put("mail.pop3.starttls.required", true);
+                props.put("mail.pop3.starttls.required", Boolean.TRUE);
                 props.put("mail.pop3.ssl.trust", "*");
             } else {
                 props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
-                props.put("mail.pop3.ssl.socketFactory.port", port);
-                props.put("mail.pop3.starttls.enable", true);
+                props.put("mail.pop3.ssl.socketFactory.port", I(port));
+                props.put("mail.pop3.starttls.enable", Boolean.TRUE);
                 props.put("mail.pop3.ssl.trust", "*");
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
@@ -174,9 +175,9 @@ public class MailValidator {
                 }
             }
             props.put("mail.pop3.socketFactory.fallback", "false");
-            props.put("mail.pop3.socketFactory.port", port);
-            props.put("mail.pop3.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
-            props.put("mail.pop3.timeout", DEFAULT_TIMEOUT);
+            props.put("mail.pop3.socketFactory.port", I(port));
+            props.put("mail.pop3.connectiontimeout", I(DEFAULT_CONNECT_TIMEOUT));
+            props.put("mail.pop3.timeout", I(DEFAULT_TIMEOUT));
             Session session = Session.getInstance(props, null);
             store = session.getStore("pop3");
             store.connect(host, port, user, pwd);
@@ -226,12 +227,12 @@ public class MailValidator {
             if (ConnectMode.SSL == connectMode) {
                 props.put("mail.smtp.socketFactory.class", socketFactoryClass);
             } else if (ConnectMode.STARTTLS == connectMode) {
-                props.put("mail.smtp.starttls.required", true);
+                props.put("mail.smtp.starttls.required", Boolean.TRUE);
                 props.put("mail.smtp.ssl.trust", "*");
             } else {
                 props.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
-                props.put("mail.smtp.ssl.socketFactory.port", port);
-                props.put("mail.smtp.starttls.enable", true);
+                props.put("mail.smtp.ssl.socketFactory.port", I(port));
+                props.put("mail.smtp.starttls.enable", Boolean.TRUE);
                 props.put("mail.smtp.ssl.trust", "*");
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
@@ -246,10 +247,10 @@ public class MailValidator {
                     }
                 }
             }
-            props.put("mail.smtp.socketFactory.port", port);
+            props.put("mail.smtp.socketFactory.port", I(port));
             //props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
-            props.put("mail.smtp.timeout", DEFAULT_TIMEOUT);
+            props.put("mail.smtp.connectiontimeout", I(DEFAULT_CONNECT_TIMEOUT));
+            props.put("mail.smtp.timeout", I(DEFAULT_TIMEOUT));
             props.put("mail.smtp.socketFactory.fallback", "false");
             props.put("mail.smtp.auth", "true");
             Session session = Session.getInstance(props, null);
