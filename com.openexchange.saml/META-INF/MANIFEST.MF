@@ -95,44 +95,44 @@ Import-Package: com.google.common.collect,
  javax.xml.ws.spi,
  javax.xml.ws.wsaddressing,
  javax.xml.xpath,
- org.apache.commons.codec
- org.apache.commons.codec.binary
- org.apache.commons.codec.digest
- org.apache.commons.codec.language
- org.apache.commons.codec.language.bm
- org.apache.commons.codec.net
- org.apache.commons.collections
- org.apache.commons.collections.bag
- org.apache.commons.collections.bidimap
- org.apache.commons.collections.buffer
- org.apache.commons.collections.collection
- org.apache.commons.collections.comparators
- org.apache.commons.collections.functors
- org.apache.commons.collections.iterators
- org.apache.commons.collections.keyvalue
- org.apache.commons.collections.list
- org.apache.commons.collections.map
- org.apache.commons.collections.set
- org.apache.commons.httpclient
- org.apache.commons.httpclient.auth
- org.apache.commons.httpclient.cookie
- org.apache.commons.httpclient.methods
- org.apache.commons.httpclient.methods.multipart
- org.apache.commons.httpclient.params
- org.apache.commons.httpclient.protocol
- org.apache.commons.httpclient.util
- org.apache.commons.io
- org.apache.commons.lang
- org.apache.commons.lang.builder
- org.apache.commons.lang.enum
- org.apache.commons.lang.enums
- org.apache.commons.lang.exception
- org.apache.commons.lang.math
- org.apache.commons.lang.mutable
- org.apache.commons.lang.reflect
- org.apache.commons.lang.text
- org.apache.commons.lang.time
- org.apache.commons.logging
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.apache.commons.codec.digest,
+ org.apache.commons.codec.language,
+ org.apache.commons.codec.language.bm,
+ org.apache.commons.codec.net,
+ org.apache.commons.collections,
+ org.apache.commons.collections.bag,
+ org.apache.commons.collections.bidimap,
+ org.apache.commons.collections.buffer,
+ org.apache.commons.collections.collection,
+ org.apache.commons.collections.comparators,
+ org.apache.commons.collections.functors,
+ org.apache.commons.collections.iterators,
+ org.apache.commons.collections.keyvalue,
+ org.apache.commons.collections.list,
+ org.apache.commons.collections.map,
+ org.apache.commons.collections.set,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.cookie,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.methods.multipart,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
+ org.apache.commons.httpclient.util,
+ org.apache.commons.io,
+ org.apache.commons.lang,
+ org.apache.commons.lang.builder,
+ org.apache.commons.lang.enum,
+ org.apache.commons.lang.enums,
+ org.apache.commons.lang.exception,
+ org.apache.commons.lang.math,
+ org.apache.commons.lang.mutable,
+ org.apache.commons.lang.reflect,
+ org.apache.commons.lang.text,
+ org.apache.commons.lang.time,
+ org.apache.commons.logging,
  org.apache.http,
  org.apache.http.client.utils,
  org.apache.xerces.dom,
@@ -348,33 +348,33 @@ Import-Package: com.google.common.collect,
  org.bouncycastle.x509,
  org.bouncycastle.x509.extension,
  org.bouncycastle.x509.util,
- org.joda.time
- org.joda.time.base
- org.joda.time.chrono
- org.joda.time.convert
- org.joda.time.field
- org.joda.time.format
- org.joda.time.tz
- org.osgi.framework
- org.osgi.service.http
- org.osgi.util.tracker
- org.owasp.esapi
- org.owasp.esapi.codecs
- org.owasp.esapi.crypto
- org.owasp.esapi.errors
- org.owasp.esapi.filters
- org.owasp.esapi.reference
- org.owasp.esapi.reference.accesscontrol
- org.owasp.esapi.reference.accesscontrol.policyloader
- org.owasp.esapi.reference.crypto
- org.owasp.esapi.reference.validation
- org.owasp.esapi.tags
- org.owasp.esapi.util
- org.owasp.esapi.waf
- org.owasp.esapi.waf.actions
- org.owasp.esapi.waf.configuration
- org.owasp.esapi.waf.rules
- org.slf4j
+ org.joda.time,
+ org.joda.time.base,
+ org.joda.time.chrono,
+ org.joda.time.convert,
+ org.joda.time.field,
+ org.joda.time.format,
+ org.joda.time.tz,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker,
+ org.owasp.esapi,
+ org.owasp.esapi.codecs,
+ org.owasp.esapi.crypto,
+ org.owasp.esapi.errors,
+ org.owasp.esapi.filters,
+ org.owasp.esapi.reference,
+ org.owasp.esapi.reference.accesscontrol,
+ org.owasp.esapi.reference.accesscontrol.policyloader,
+ org.owasp.esapi.reference.crypto,
+ org.owasp.esapi.reference.validation,
+ org.owasp.esapi.tags,
+ org.owasp.esapi.util,
+ org.owasp.esapi.waf,
+ org.owasp.esapi.waf.actions,
+ org.owasp.esapi.waf.configuration,
+ org.owasp.esapi.waf.rules,
+ org.slf4j,
  org.w3c.dom,
  org.w3c.dom.bootstrap,
  org.w3c.dom.css,
