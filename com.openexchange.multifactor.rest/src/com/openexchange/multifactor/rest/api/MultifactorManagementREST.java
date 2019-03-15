@@ -115,7 +115,7 @@ public class MultifactorManagementREST {
     }
 
     private <T> T getService(Class<? extends T> clazz) {
-        return services.getService(clazz);
+        return services.getOptionalService(clazz);
     }
 
     /**
