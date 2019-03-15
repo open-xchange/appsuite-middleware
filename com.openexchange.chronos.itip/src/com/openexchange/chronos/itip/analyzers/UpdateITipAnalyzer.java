@@ -151,7 +151,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 analysis.addChange(change);
                 return analysis;
             }
-            if (isOrganizerChange(change, original, update)) {
+            if (isOrganizerChange(original, update)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
                 change.setType(ITipChange.Type.UPDATE);
@@ -207,7 +207,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         for (Event exception : message.exceptions()) {
             exception = session.getUtilities().copyEvent(exception, (EventField[]) null);
 
-            final Event matchingException = findAndRemoveMatchingException(master, exception, exceptions);
+            final Event matchingException = findAndRemoveMatchingException(exception, exceptions);
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
@@ -443,11 +443,10 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
      * Check if the organizer is changed. If so stop processing.
      * 
      * @param analysis The {@link ITipAnalysis}
-     * @param change The {@link ITipChange}
      * @param locale The users {@link Locale}
      * @return <code>true</code> when the organizer is changed, <code>false</code> otherwise
      */
-    private boolean isOrganizerChange(ITipChange change, Event originalEvent, Event updatedEvent) {
+    private boolean isOrganizerChange(Event originalEvent, Event updatedEvent) {
         Organizer original = originalEvent.getOrganizer();
         if (null != original) {
             return false == CalendarUtils.matches(original, updatedEvent.getOrganizer());
