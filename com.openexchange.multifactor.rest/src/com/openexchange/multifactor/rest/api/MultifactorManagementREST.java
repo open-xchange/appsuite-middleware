@@ -278,10 +278,10 @@ public class MultifactorManagementREST {
             final JSONArray result = createDevicesResponse(requireService(MultifactorManagementService.class).getMultifactorDevices(contextId, userId));
             return Response.ok().entity(result).build();
         } catch (OXException e) {
-            LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId));
+            LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId), e);
             return Response.serverError().entity(generateError(e)).build();
         } catch (Exception e) {
-            LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId));
+            LOG.error("Error while listing multifactor devices for user {} in context {}", I(userId), I(contextId), e);
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
@@ -320,7 +320,7 @@ public class MultifactorManagementREST {
             LOG.info("Removed multifactor device with id {} from provider {} for user {} in context {}", deviceId, providerName, I(userId), I(contextId));
             return Response.ok().build();
         } catch (OXException e) {
-            LOG.error("Error while removing multifactor device with id {} from provider {} for user {} in context {}", deviceId, providerName, I(userId), I(contextId));
+            LOG.error("Error while removing multifactor device with id {} from provider {} for user {} in context {}", deviceId, providerName, I(userId), I(contextId), e);
             if (MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.equals(e) || MultifactorExceptionCodes.UNKNOWN_PROVIDER.equals(e) || MultifactorExceptionCodes.UNKNOWN_DEVICE_ID.equals(e)) {
                 return Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build();
             }
@@ -353,7 +353,7 @@ public class MultifactorManagementREST {
             requireService(MultifactorManagementService.class).removeAllDevices(contextId, userId);
             return Response.ok().build();
         } catch (OXException e) {
-            LOG.error("Error while removing all multifactor devices for user {} in context {}", I(userId), I(contextId));
+            LOG.error("Error while removing all multifactor devices for user {} in context {}", I(userId), I(contextId), e);
             return Response.serverError().entity(generateError(e)).build();
         }
     }
