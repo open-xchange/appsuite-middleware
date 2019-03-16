@@ -97,7 +97,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
             if (isUnifiedINBOXAccount(mailAccount)) {
                 // Treat as no hit
@@ -112,6 +112,8 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
+
+            mailAccount = checkSpamInfo(mailAccount, session);
 
             final JSONObject jsonAccount = DefaultMailAccountWriter.write(mailAccount);
             // final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
