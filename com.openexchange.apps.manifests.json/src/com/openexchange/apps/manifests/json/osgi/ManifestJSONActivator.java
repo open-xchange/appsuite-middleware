@@ -76,9 +76,7 @@ import com.openexchange.serverconfig.ServerConfigService;
  */
 public class ManifestJSONActivator extends AJAXModuleActivator implements ForcedReloadable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivator.class);
-
-    private volatile ManifestBuilder manifestBuilder;
+    private ManifestBuilder manifestBuilder;
 
     /**
      * Initializes a new {@link ManifestJSONActivator}.
@@ -104,7 +102,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         this.manifestBuilder = null;
         UIVersion.UIVERSION.set("");
         super.stopBundle();
@@ -114,7 +112,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
      * {@inheritDoc}
      */
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
         rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
 
@@ -183,7 +181,8 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
                 manifests.put(fileManifests.get(i));
             }
         } catch (Exception e) {
-            LOG.error("", e);
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivator.class);
+            logger.error("", e);
         } finally {
             Streams.close(r);
         }

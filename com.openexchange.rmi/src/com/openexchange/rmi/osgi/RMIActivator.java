@@ -65,7 +65,7 @@ import com.openexchange.startup.SignalStartedService;
  */
 public class RMIActivator extends HousekeepingActivator {
 
-    private volatile Registry registry;
+    private Registry registry;
 
     /**
      * Initializes a new {@link RMIActivator}.
@@ -80,7 +80,7 @@ public class RMIActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
         logger.info("Starting bundle com.openexchange.rmi");
 
@@ -94,7 +94,7 @@ public class RMIActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
         logger.info("Stopping bundle com.openexchange.rmi");
         super.stopBundle();

@@ -91,8 +91,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
     private final AtomicBoolean isStopped = new AtomicBoolean(true);
-    private volatile HazelcastResourceDirectory directory;
-    private volatile String cleanerRegistrationId;
+    private HazelcastResourceDirectory directory;
+    private String cleanerRegistrationId;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -108,7 +108,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
 
@@ -180,7 +180,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         if (isStopped.compareAndSet(false, true)) {
             LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
 

@@ -67,7 +67,7 @@ public final class ControlActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ControlActivator.class);
 
-    private volatile Thread shutdownHookThread;
+    private Thread shutdownHookThread;
 
     /**
      * Initializes a new {@link ControlActivator}
@@ -82,7 +82,7 @@ public final class ControlActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.control");
         try {
             /*
@@ -103,7 +103,7 @@ public final class ControlActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.control");
         try {
             final Thread shutdownHookThread = this.shutdownHookThread;

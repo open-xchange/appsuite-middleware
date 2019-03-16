@@ -123,7 +123,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
         final BundleContext context;
         final SessiondActivator activator;
-        private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
+        private ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
 
         HazelcastConfTracker(BundleContext context, SessiondActivator activator) {
             super();
@@ -132,7 +132,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
         }
 
         @Override
-        public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
+        public synchronized HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
             final HazelcastConfigurationService hzConfig = context.getService(reference);
 
             try {
@@ -194,7 +194,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
         }
 
         @Override
-        public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+        public synchronized void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
             ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = this.hzInstanceTracker;
             if (null != hzInstanceTracker) {
                 hzInstanceTracker.close();

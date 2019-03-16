@@ -63,9 +63,14 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class Activator extends DeferredActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+    private String alias;
 
-    private volatile String alias;
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -73,17 +78,17 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
+    protected synchronized void handleAvailability(final Class<?> clazz) {
         registerServlet();
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
+    protected synchronized void handleUnavailability(final Class<?> clazz) {
         unregisterServlet();
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final ServiceRegistry registry = ServletServiceRegistry.getInstance();
         registry.clearRegistry();
         final Class<?>[] classes = getNeededServices();
@@ -98,7 +103,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         unregisterServlet();
         ServletServiceRegistry.getInstance().clearRegistry();
     }
@@ -106,13 +111,14 @@ public class Activator extends DeferredActivator {
     private void registerServlet() {
         HttpService httpService = ServletServiceRegistry.getInstance().getService(HttpService.class);
         if (null != httpService) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
             try {
                 String alias = getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist";
                 httpService.registerServlet(alias, new BlackWhiteListServlet(), null, null);
                 this.alias = alias;
-                LOG.info("Black-/Whitelist Servlet registered.");
+                logger.info("Black-/Whitelist Servlet registered.");
             } catch (final Exception e) {
-                LOG.error("", e);
+                logger.error("", e);
             }
         }
     }
@@ -123,7 +129,8 @@ public class Activator extends DeferredActivator {
             String alias = this.alias;
             if (null != alias) {
                 httpService.unregister(alias);
-                LOG.info("Black-/Whitelist Servlet unregistered.");
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
+                logger.info("Black-/Whitelist Servlet unregistered.");
                 this.alias = null;
             }
         }

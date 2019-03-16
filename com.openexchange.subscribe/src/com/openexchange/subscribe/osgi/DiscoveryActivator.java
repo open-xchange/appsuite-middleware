@@ -92,12 +92,12 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class DiscoveryActivator extends HousekeepingActivator {
 
-    private volatile OSGiSubscriptionSourceCollector collector;
-    private volatile WhiteboardContextService contextService;
-    private volatile WhiteboardGenericConfigurationStorageService genconfStorage;
+    private OSGiSubscriptionSourceCollector collector;
+    private WhiteboardContextService contextService;
+    private WhiteboardGenericConfigurationStorageService genconfStorage;
 
     @Override
-    public void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final OSGiSubscriptionSourceCollector collector = new OSGiSubscriptionSourceCollector(context);
         this.collector = collector;
         final WhiteboardContextService contextService = new WhiteboardContextService(context);
@@ -155,7 +155,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         final WhiteboardGenericConfigurationStorageService genconfStorage = this.genconfStorage;
         if (null != genconfStorage) {
             genconfStorage.close();

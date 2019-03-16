@@ -71,10 +71,10 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     private static final String NAMESPACE = "com.openexchange.groupware.dataRetrieval.tokens";
 
-    private volatile OSGIDataProviderRegistry dataProviderRegistry;
+    private OSGIDataProviderRegistry dataProviderRegistry;
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.SERVICE_LOOKUP = this;
 
         OSGIDataProviderRegistry dataProviderRegistry = new OSGIDataProviderRegistry(context);
@@ -103,7 +103,7 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         OSGIDataProviderRegistry dataProviderRegistry = this.dataProviderRegistry;
         if (dataProviderRegistry != null) {
             this.dataProviderRegistry = null;

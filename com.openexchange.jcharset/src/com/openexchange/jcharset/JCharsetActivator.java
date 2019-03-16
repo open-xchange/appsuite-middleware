@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class JCharsetActivator implements BundleActivator {
 
-    private volatile ServiceRegistration<CharsetProvider> serviceRegistration;
+    private ServiceRegistration<CharsetProvider> serviceRegistration;
 
     private final CharsetProvider charsetProvider;
 
@@ -76,7 +76,7 @@ public final class JCharsetActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         final org.slf4j.Logger log = LoggerFactory.getLogger(JCharsetActivator.class);
         log.info("Starting bundle: com.openexchange.freecharset");
         try {
@@ -91,7 +91,7 @@ public final class JCharsetActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         final org.slf4j.Logger log = LoggerFactory.getLogger(JCharsetActivator.class);
         try {
             /*

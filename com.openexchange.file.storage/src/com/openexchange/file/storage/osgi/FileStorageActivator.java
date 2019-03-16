@@ -67,8 +67,8 @@ import com.openexchange.secret.SecretService;
  */
 public final class FileStorageActivator extends HousekeepingActivator {
 
-    private volatile OSGIFileStorageServiceRegistry registry;
-    private volatile OSGIFileStorageAccountManagerLookupService lookupService;
+    private OSGIFileStorageServiceRegistry registry;
+    private OSGIFileStorageAccountManagerLookupService lookupService;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -83,7 +83,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
         try {
             log.info("starting bundle: com.openexchange.file.storage");
@@ -119,7 +119,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.file.storage");

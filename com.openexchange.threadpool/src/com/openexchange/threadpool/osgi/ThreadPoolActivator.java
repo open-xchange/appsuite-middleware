@@ -100,8 +100,8 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     public static final AtomicReference<CloseableControlService> REF_CLOSEABLE_CONTROL = new AtomicReference<CloseableControlService>();
 
-    private volatile ThreadPoolServiceImpl threadPool;
-    private volatile ProcessorServiceImpl processorService;
+    private ThreadPoolServiceImpl threadPool;
+    private ProcessorServiceImpl processorService;
 
     /**
      * Initializes a new {@link ThreadPoolActivator}.
@@ -111,7 +111,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
             LOG.info("starting bundle: com.openexchange.threadpool");
@@ -258,7 +258,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
             LOG.info("stopping bundle: com.openexchange.threadpool");

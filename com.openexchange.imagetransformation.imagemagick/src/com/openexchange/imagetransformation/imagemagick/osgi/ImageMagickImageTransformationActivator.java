@@ -64,7 +64,7 @@ import com.openexchange.processing.ProcessorService;
  */
 public class ImageMagickImageTransformationActivator extends HousekeepingActivator {
 
-    private volatile ImageMagickRegisterer registerer;
+    private ImageMagickRegisterer registerer;
 
     /**
      * Initializes a new {@link ImageMagickImageTransformationActivator}.
@@ -84,7 +84,7 @@ public class ImageMagickImageTransformationActivator extends HousekeepingActivat
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
         ImageMagickRegisterer registerer = new ImageMagickRegisterer(context, this);
         this.registerer = registerer;
@@ -93,7 +93,7 @@ public class ImageMagickImageTransformationActivator extends HousekeepingActivat
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         ImageMagickRegisterer registerer = this.registerer;
         if (null != registerer) {
             this.registerer = null;

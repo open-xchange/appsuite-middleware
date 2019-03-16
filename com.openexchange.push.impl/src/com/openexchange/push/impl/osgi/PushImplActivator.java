@@ -100,7 +100,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class PushImplActivator extends HousekeepingActivator {
 
-    private volatile PermanentListenerRescheduler rescheduler;
+    private PermanentListenerRescheduler rescheduler;
 
     /**
      * Initializes a new {@link PushImplActivator}.
@@ -115,7 +115,7 @@ public final class PushImplActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
         try {
             log.info("starting bundle: com.openexchange.push.impl");
@@ -189,7 +189,7 @@ public final class PushImplActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.push.impl");

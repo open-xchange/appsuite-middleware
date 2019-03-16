@@ -81,7 +81,7 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
  */
 public class SecretActivator extends HousekeepingActivator implements Reloadable {
 
-    private volatile WhiteboardSecretService whiteboardSecretService;
+    private WhiteboardSecretService whiteboardSecretService;
 
     /**
      * Initializes a new {@link SecretActivator}.
@@ -96,13 +96,13 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         reinit(configurationService, false);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         TokenBasedSecretService.RANDOM.set("unknown");
         final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
         if (null != whiteboardSecretService) {
@@ -113,7 +113,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
     }
 
     @Override
-    public void reloadConfiguration(final ConfigurationService configurationService) {
+    public synchronized void reloadConfiguration(final ConfigurationService configurationService) {
         reinit(configurationService, true);
     }
 

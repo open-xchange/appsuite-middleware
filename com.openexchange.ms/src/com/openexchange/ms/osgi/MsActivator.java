@@ -82,7 +82,7 @@ import com.openexchange.timer.TimerService;
  */
 public class MsActivator extends HousekeepingActivator implements Unregisterer {
 
-    private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker;
+    private ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker;
 
     /**
      * Initializes a new {@link MsActivator}.
@@ -97,7 +97,7 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
         Unregisterer.INSTANCE_REF.set(this);
         final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
@@ -164,7 +164,7 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker = this.hzTracker;
         if (null != hzTracker) {
             hzTracker.close();
@@ -177,7 +177,7 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
     }
 
     @Override
-    public void unregisterMsService() {
+    public synchronized void unregisterMsService() {
         ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker = this.hzTracker;
         if (null != hzTracker) {
             hzTracker.close();

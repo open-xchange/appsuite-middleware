@@ -82,7 +82,7 @@ import com.openexchange.xing.access.internal.XingOAuthAccessImpl;
  */
 public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
-    private volatile ServiceRegistration<XingOAuthAccessProvider> providerRegistration;
+    private ServiceRegistration<XingOAuthAccessProvider> providerRegistration;
 
     /**
      * Initializes a new {@link XingOAuthAccessActivator}.
@@ -120,7 +120,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
     /**
      * Registers the provider.
      */
-    public void registerProvider() {
+    public synchronized void registerProvider() {
         final XingOAuthAccessProvider provider = new XingOAuthAccessProvider() {
 
             @Override
@@ -167,7 +167,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
     /**
      * Unregisters the provider.
      */
-    public void unregisterProvider() {
+    public synchronized void unregisterProvider() {
         final ServiceRegistration<XingOAuthAccessProvider> providerRegistration = this.providerRegistration;
         if (null != providerRegistration) {
             providerRegistration.unregister();
