@@ -108,7 +108,10 @@ public final class ListAction extends AbstractMailAccountAction {
             }
         }
 
-        JSONArray jAccounts = DefaultMailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session);
+        MailAccount[] mailAccounts = accounts.toArray(new MailAccount[accounts.size()]);
+        mailAccounts = checkSpamInfo(mailAccounts, session);
+
+        JSONArray jAccounts = DefaultMailAccountWriter.writeArray(mailAccounts, attributes, session);
         return new AJAXRequestResult(jAccounts);
     }
 
