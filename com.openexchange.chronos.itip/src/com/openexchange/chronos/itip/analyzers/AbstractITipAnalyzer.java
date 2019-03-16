@@ -102,14 +102,11 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
         EventField.ALARMS, EventField.FLAGS, EventField.ATTENDEE_PRIVILEGES };
+    
     protected ITipIntegrationUtility util;
 
     @Override
     public ITipAnalysis analyze(final ITipMessage message, Map<String, String> header, final String style, final CalendarSession session) throws OXException {
-        if (header == null) {
-            header = new HashMap<String, String>();
-        }
-        header = lowercase(header);
 
         final ContextService contexts = Services.getService(ContextService.class);
         final UserService users = Services.getService(UserService.class);
@@ -117,7 +114,10 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         final Context ctx = contexts.getContext(session.getContextId());
         final User user = users.getUser(session.getUserId(), ctx);
 
-        return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
+        if (null == header) {
+            return analyze(message, new HashMap<String, String>(), wrapperFor(style), user.getLocale(), user, ctx, session);
+        }
+        return analyze(message, lowercase(header), wrapperFor(style), user.getLocale(), user, ctx, session);
     }
 
     private Map<String, String> lowercase(final Map<String, String> header) {
@@ -152,14 +152,17 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
         switch (change.getType()) {
             case CREATE:
-                createIntro(change, users, ctx, wrapper, user.getLocale());
+                createIntro(change, wrapper, user.getLocale());
                 break;
             case UPDATE:
-                updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
+                updateIntro(change, wrapper, user.getLocale(), message);
                 break;
             case CREATE_DELETE_EXCEPTION:
             case DELETE:
-                deleteIntro(change, users, ctx, wrapper, user.getLocale());
+                deleteIntro(change, wrapper, user.getLocale());
+                break;
+            default:
+                // Nothing to do
                 break;
         }
 
@@ -180,27 +183,30 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         switch (change.getType()) {
             case CREATE:
                 if (!change.isException()) {
-                    createIntro(change, users, ctx, wrapper, user.getLocale());
+                    createIntro(change, wrapper, user.getLocale());
                     break;
-                } // Else Fall Through, creating change exceptions is more similar to updates
+                } // $FALL-THROUGH$ Else Fall Through, creating change exceptions is more similar to updates
             case UPDATE:
-                updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
+                updateIntro(change, wrapper, user.getLocale(), message);
                 break;
             case CREATE_DELETE_EXCEPTION:
             case DELETE:
-                deleteIntro(change, users, ctx, wrapper, user.getLocale());
+                deleteIntro(change, wrapper, user.getLocale());
+                break;
+            default:
+                // Nothing to do
                 break;
         }
     }
 
-    private void deleteIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) {
-        final String displayName = displayNameFor(change.getDeletedEvent().getOrganizer(), users, ctx);
+    private void deleteIntro(final ITipChange change, final TypeWrapper wrapper, final Locale locale) {
+        final String displayName = displayNameFor(change.getDeletedEvent().getOrganizer());
         change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
 
     }
 
-    private void updateIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale, ITipMessage message) throws OXException {
-        String displayName = displayNameFor(change.getCurrentEvent().getOrganizer(), users, ctx);
+    private void updateIntro(final ITipChange change, final TypeWrapper wrapper, final Locale locale, ITipMessage message) throws OXException {
+        String displayName = displayNameFor(change.getCurrentEvent().getOrganizer());
         if (onlyStateChanged(change.getDiff())) {
             // External Participant
 
@@ -226,8 +232,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         }
     }
 
-    AttendeeField[] ALL_BUT_CONFIRMATION = new AttendeeField[] { AttendeeField.CN, AttendeeField.CU_TYPE, AttendeeField.EMAIL, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.ROLE, AttendeeField.RSVP,
-        AttendeeField.SENT_BY, AttendeeField.URI };
+    AttendeeField[] ALL_BUT_CONFIRMATION = new AttendeeField[] { AttendeeField.CN, AttendeeField.CU_TYPE, AttendeeField.EMAIL, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.ROLE, AttendeeField.RSVP, AttendeeField.SENT_BY, AttendeeField.URI };
 
     private boolean onlyStateChanged(ITipEventUpdate diff) {
         if (null == diff) {
@@ -261,12 +266,12 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return true;
     }
 
-    private void createIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) {
-        final String displayName = displayNameFor(change.getNewEvent().getOrganizer(), users, ctx);
+    private void createIntro(final ITipChange change, final TypeWrapper wrapper, final Locale locale) {
+        final String displayName = displayNameFor(change.getNewEvent().getOrganizer());
         change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
     }
 
-    protected String displayNameFor(Organizer organizer, final UserService users, final Context ctx) {
+    protected String displayNameFor(Organizer organizer) {
         if (organizer == null) {
             return "unknown";
         }
@@ -282,7 +287,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return "unknown";
     }
 
-    protected Event findAndRemoveMatchingException(final Event master, final Event exception, final List<Event> exceptions) {
+    protected Event findAndRemoveMatchingException(final Event exception, final List<Event> exceptions) {
         for (Iterator<Event> iterator = exceptions.iterator(); iterator.hasNext();) {
             Event existingException = iterator.next();
             if (existingException.getRecurrenceId().compareTo(exception.getRecurrenceId()) == 0) {

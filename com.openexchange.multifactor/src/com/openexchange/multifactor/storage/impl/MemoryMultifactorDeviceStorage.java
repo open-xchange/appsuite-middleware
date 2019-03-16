@@ -53,9 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,6 +62,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.multifactor.MultifactorDevice;
+import com.openexchange.session.UserAndContext;
 
 /**
  * {@link MemoryMultifactorDeviceStorage2} - A generic device storage which operates in memory
@@ -74,28 +73,22 @@ import com.openexchange.multifactor.MultifactorDevice;
 public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MemoryMultifactorDeviceStorage.class);
-    private static final String KEY_DELIMITER = ":";
+
     public static final long UNLIMITED_REGISTRATION_LIFETIME = 0;
     public static final long DEFAULT_REGISTRATION_LIFETIME = TimeUnit.MINUTES.toMillis(5); // 5min in ms
 
-    private final ConcurrentHashMap<String, RegistrationContainer> registrations = new ConcurrentHashMap<>();
-    private final Object lock = new Object();
-    final long registrationLifeTime;
-
     /**
-     * {@link DeviceRegistration} - Internal device registration
-     *
-     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
-     * @since v7.10.2
+     * Internal device registration
      */
-    private class DeviceRegistration {
+    private static class DeviceRegistration<T extends MultifactorDevice> {
 
         private final T    device;
         private final long createdOn;
 
         DeviceRegistration(T device) {
+            super();
             this.device = device;
-            this.createdOn = new Date().getTime();
+            this.createdOn = System.currentTimeMillis();
         }
 
         public T getDevice() {
@@ -107,51 +100,64 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
         }
     }
 
-    private String getKey(int contextId,  int userId) {
-        return String.valueOf(contextId) + KEY_DELIMITER + String.valueOf(userId);
-    }
-
     /**
-     *
-     * {@link RegistrationContainer} - Container holding device registration per "session"/"user"
-     *
-     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
-     * @since v7.10.2
+     * Container holding device registration per "session"/"user"
      */
-    private class RegistrationContainer {
+    private static class RegistrationContainer<T extends MultifactorDevice> {
 
-        @SuppressWarnings("hiding")
-        private final Collection<DeviceRegistration> registrations;
+        private final Collection<DeviceRegistration<T>> registrations;
+        private final long registrationLifeTime;
+        private boolean nonexistent;
 
-        RegistrationContainer() {
+        RegistrationContainer(long registrationLifeTime) {
+            super();
+            this.registrationLifeTime = registrationLifeTime;
             this.registrations = new ArrayList<>();
+            nonexistent = false;
         }
 
-        public synchronized boolean cleanup() {
-            final long now = System.currentTimeMillis();
-            if (registrationLifeTime > 0) {
-                return registrations.removeIf(r -> now - r.getCreatedOn() > registrationLifeTime);
+        public void markNonExistent() {
+            this.nonexistent = true;
+        }
+
+        public boolean isNonExistent() {
+            return nonexistent;
+        }
+
+        public boolean cleanup() {
+            if (registrationLifeTime <= 0) {
+                return false;
             }
-            return false;
+            final long now = System.currentTimeMillis();
+            return registrations.removeIf(r -> now - r.getCreatedOn() > registrationLifeTime);
         }
 
-        public synchronized RegistrationContainer addDevices(T device) {
-            registrations.add(new DeviceRegistration(device));
+        public RegistrationContainer<T> addDevices(T device) {
+            registrations.add(new DeviceRegistration<T>(device));
             return this;
         }
 
-        public synchronized boolean removeDevice(String id) {
+        public boolean removeDevice(String id) {
             return registrations.removeIf(r -> r.getDevice().getId().equals(id));
         }
 
-        public synchronized int getSize() {
-            return registrations.size();
+        public boolean isEmpty() {
+            return registrations.isEmpty();
         }
 
-        public synchronized Collection<T> getDevices() {
+        public Collection<T> getDevices() {
             return registrations.stream().map(r -> r.getDevice()).collect(Collectors.toList());
         }
     }
+
+    private static UserAndContext getKey(int contextId,  int userId) {
+        return UserAndContext.newInstance(userId, contextId);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentHashMap<UserAndContext, RegistrationContainer<T>> registrations = new ConcurrentHashMap<>();
+    private final long registrationLifeTime;
 
     /**
      * Initializes a new {@link MemoryMultifactorDeviceStorage} with the default lifetime.
@@ -173,17 +179,20 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * Internal method to remove expired pending device registrations
      */
     private void cleanup() {
-        synchronized (lock) {
-            final Iterator<Entry<String, RegistrationContainer>> iterator = registrations.entrySet().iterator();
-            while (iterator.hasNext()) {
-                final RegistrationContainer next = iterator.next().getValue();
+        int size = 0;
+        for (Iterator<RegistrationContainer<T>> iterator = registrations.values().iterator(); iterator.hasNext();) {
+            final RegistrationContainer<T> next = iterator.next();
+            synchronized (next) {
                 next.cleanup();
-                if (next.getSize() == 0) {
+                if (next.isEmpty()) {
                     iterator.remove();
+                    next.markNonExistent();
+                } else {
+                    size++;
                 }
             }
-            LOG.debug("storage size: {}", I(registrations.size()));
         }
+        LOG.debug("storage size: {}", I(size));
     }
 
     /**
@@ -194,14 +203,37 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * @param device The device to register
      */
     public void registerDevice(int contextId, int userId, T device) {
-        device = Objects.requireNonNull(device, "device  must not be null");
+        T nonNullDevice = Objects.requireNonNull(device, "device  must not be null");
         cleanup();
-        synchronized (lock) {
-            RegistrationContainer existingContainer =
-                registrations.putIfAbsent(getKey(contextId, userId), new RegistrationContainer().addDevices(device));
-            if(existingContainer != null) {
-               existingContainer.addDevices(device);
+
+        doRegisterDevice(contextId, userId, nonNullDevice);
+    }
+
+    private void doRegisterDevice(int contextId, int userId, T device) {
+        UserAndContext key = getKey(contextId, userId);
+        RegistrationContainer<T> container = registrations.get(key);
+        if (container == null) {
+            RegistrationContainer<T> newContainer = new RegistrationContainer<T>(registrationLifeTime);
+            container = registrations.putIfAbsent(key, newContainer);
+            if (container == null) {
+                container = newContainer;
             }
+        }
+
+        boolean retry = false;
+        synchronized (container) {
+            if (container.isNonExistent()) {
+                // Removed in the meantime
+                retry = true;
+            } else {
+                container.addDevices(device);
+            }
+        }
+
+        if (retry) {
+            // Retry since RegistrationContainer has been removed in the meantime
+            doRegisterDevice(contextId, userId, device);
+        } else {
             LOG.debug("storage size: {}", I(registrations.size()));
         }
     }
@@ -215,8 +247,8 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * @return <code>true</code> if the device was unregistered, <code>false</code> if the device was not found
      */
     public boolean unregisterDevice(int contextId, int userId, T device) {
-        Objects.requireNonNull(device, "device must not be null");
-        return unregisterDevice(contextId, userId, device.getId());
+        T nonNullDevice = Objects.requireNonNull(device, "device must not be null");
+        return unregisterDevice(contextId, userId, nonNullDevice.getId());
     }
 
     /**
@@ -228,19 +260,35 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      * @return <code>true</code> if the device was unregistered, <code>false</code> if the device was not found
      */
     public boolean unregisterDevice(int contextId, int userId, String deviceId) {
-        synchronized (lock) {
-            final String key = getKey(contextId, userId);
-            RegistrationContainer registrationsForSession = registrations.get(key);
-            if(registrationsForSession == null) {
-                return false;
-            }
-            boolean removed = registrationsForSession.removeDevice(deviceId);
-            if(removed && registrationsForSession.getSize() == 0) {
-                registrations.remove(key);
-            }
-            LOG.debug("storage size: {}", I(registrations.size()));
-            return removed;
+        UserAndContext key = getKey(contextId, userId);
+
+        RegistrationContainer<T> registrationsForSession = registrations.get(key);
+        if (registrationsForSession == null) {
+            return false;
         }
+
+        boolean removed = false;
+        boolean retry = false;
+        synchronized (registrationsForSession) {
+            if (registrationsForSession.isNonExistent()) {
+                // Removed in the meantime
+                retry = true;
+            } else {
+                removed = registrationsForSession.removeDevice(deviceId);
+                if (removed && registrationsForSession.isEmpty()) {
+                    registrations.remove(key);
+                    registrationsForSession.markNonExistent();
+                }
+            }
+        }
+
+        if (retry) {
+            // Retry since RegistrationContainer has been removed in the meantime
+            return unregisterDevice(contextId, userId, deviceId);
+        }
+
+        LOG.debug("storage size: {}", I(registrations.size()));
+        return removed;
     }
 
     /**
@@ -252,10 +300,24 @@ public class MemoryMultifactorDeviceStorage<T extends MultifactorDevice> {
      */
     public Collection<T> getDevices(int contextId, int userId) {
         cleanup();
-        RegistrationContainer registrationsForSession = registrations.get(getKey(contextId, userId));
-        return registrationsForSession == null ?
-            Collections.emptyList() :
-            Collections.unmodifiableCollection(registrationsForSession.getDevices());
+        return doGetDevices(contextId, userId);
+    }
+
+    private Collection<T> doGetDevices(int contextId, int userId) {
+        RegistrationContainer<T> registrationsForSession = registrations.get(getKey(contextId, userId));
+        if (registrationsForSession == null) {
+            return Collections.emptyList();
+        }
+
+
+        synchronized (registrationsForSession) {
+            if (!registrationsForSession.isNonExistent()) {
+                return Collections.unmodifiableCollection(registrationsForSession.getDevices());
+            }
+        }
+
+        // Retry since RegistrationContainer has been removed in the meantime
+        return doGetDevices(contextId, userId);
     }
 
     /**

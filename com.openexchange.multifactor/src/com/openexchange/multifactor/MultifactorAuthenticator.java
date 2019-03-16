@@ -196,6 +196,18 @@ public class MultifactorAuthenticator {
     }
 
     /**
+     * Removes all registrations for the {@link MultifactorProvider}
+     *
+     * @param multifactorRequest The request of the user who wants to remove the registration for the multi-factor provider.
+     * @throws OXException
+     */
+    public void deleteRegistrations(MultifactorRequest multifactorRequest) throws OXException {
+        if(multifactorProvider.deleteRegistrations(multifactorRequest.getContextId(), multifactorRequest.getUserId())) {
+            listenerChain.onAfterDelete(multifactorRequest.getUserId(), multifactorRequest.getContextId(), getEnabledDeviceCount(multifactorRequest));
+        }
+    }
+
+    /**
      * Starts the authentication process against a given {@link MultifactorDevice}
      *
      * @param multifactorRequest The request

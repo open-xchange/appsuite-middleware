@@ -196,6 +196,5 @@
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.20-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.20-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.principalusecount"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.multifactor.rmi"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

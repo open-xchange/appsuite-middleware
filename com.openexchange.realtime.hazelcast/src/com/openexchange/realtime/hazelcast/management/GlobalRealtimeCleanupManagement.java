@@ -80,10 +80,10 @@ public class GlobalRealtimeCleanupManagement extends ManagementObject<GlobalReal
     private final HazelcastResourceDirectory hazelcastResourceDirectory;
 
     /**
-     * Initializes a new {@link RealtimeConfigManagement}.
+     * Initializes a new {@link GlobalRealtimeCleanupManagement}.
      * 
-     * @param mbeanInterface
-     * @param isMxBean
+     * @param globalRealtimeCleanup The {@link GlobalRealtimeCleanup}
+     * @param hazelcastResourceDirectory THe {@link HazelcastResourceDirectory}
      * @throws IllegalArgumentException if the String is missing
      */
     public GlobalRealtimeCleanupManagement(GlobalRealtimeCleanup globalRealtimeCleanup, HazelcastResourceDirectory hazelcastResourceDirectory) {
@@ -115,8 +115,8 @@ public class GlobalRealtimeCleanupManagement extends ManagementObject<GlobalReal
     @Override
     public MBeanInfo getMBeanInfo() {
         MBeanOperationInfo[] operations = new MBeanOperationInfo[3];
-        MBeanParameterInfo[] cleanIdParameterInfo = new MBeanParameterInfo[1];
-        cleanIdParameterInfo[0] = new MBeanParameterInfo("id", "string", "the id");
+        //        MBeanParameterInfo[] cleanIdParameterInfo = new MBeanParameterInfo[1];
+        //        cleanIdParameterInfo[0] = new MBeanParameterInfo("id", "string", "the id");
         operations[0] = getCleanIdOperationInfo();
         operations[1] = getCleanContextOperationInfo();
         operations[2] = getCleanAllOperationInfo();
@@ -140,7 +140,7 @@ public class GlobalRealtimeCleanupManagement extends ManagementObject<GlobalReal
     @Override
     public void cleanContext(String contextId) throws Exception {
         try {
-            IMap<PortableID,PortableResource> resourceMapping = hazelcastResourceDirectory.getResourceMapping();
+            IMap<PortableID, PortableResource> resourceMapping = hazelcastResourceDirectory.getResourceMapping();
             Set<PortableID> keySet = resourceMapping.keySet(new PortableContextPredicate(contextId));
             for (PortableID id : keySet) {
                 globalRealtimeCleanup.cleanForId(id);
@@ -170,8 +170,6 @@ public class GlobalRealtimeCleanupManagement extends ManagementObject<GlobalReal
     }
 
     private MBeanOperationInfo getCleanAllOperationInfo() {
-        MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[1];
-        parameterInfo[0] = new MBeanParameterInfo("contextId", String.class.getName(), "The String representation of the ID of the context to clean. Example: 1, internal");
         return new MBeanOperationInfo("cleanAll", "Clean up states that were kept for all contexts", null, "void", MBeanOperationInfo.ACTION);
     }
 

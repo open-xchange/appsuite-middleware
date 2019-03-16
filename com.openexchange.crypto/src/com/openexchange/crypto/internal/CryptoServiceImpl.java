@@ -61,6 +61,8 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
@@ -79,6 +81,8 @@ import de.rtner.security.auth.spi.PBKDF2Parameters;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class CryptoServiceImpl implements CryptoService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
     /**
      * Hash Algorithm for generating PBE-Keys.
@@ -236,6 +240,10 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
+            if (encryptedData.getBytes().length < 2) {
+                LOG.debug("Data is too short to be decrypted");
+                throw SecurityException.create();
+            }
             encrypted = java.util.Base64.getDecoder().decode(encryptedData);
 
             cipher = Cipher.getInstance(CIPHER_TYPE);

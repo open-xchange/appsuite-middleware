@@ -428,19 +428,13 @@ public class MultifactorSMSProvider implements MultifactorProvider{
     }
 
     @Override
-    public void deleteRegistrations(int contextId, int userId) throws OXException {
-        if(getStorageSave().deleteAllForUser(userId, contextId)) {
-            return;
-        }
-        throw MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.create();
+    public boolean deleteRegistrations(int contextId, int userId) throws OXException {
+        return getStorageSave().deleteAllForUser(userId, contextId);
     }
 
     @Override
-    public void deleteRegistrations(int contextId) throws OXException {
-        if(getStorageSave().deleteAllForContext(contextId)) {
-            return;
-        }
-        throw MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.create();
+    public boolean deleteRegistrations(int contextId) throws OXException {
+        return getStorageSave().deleteAllForContext(contextId);
     }
 
     @Override

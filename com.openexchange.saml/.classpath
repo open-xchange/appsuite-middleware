@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcprov-jdk15on-160.jar" sourcepath="/com.openexchange.bundles/source/bcprov-jdk15on-1.60-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcpkix-jdk15on-160.jar" sourcepath="/com.openexchange.bundles/source/bcpkix-jdk15on-1.60-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcprov-jdk15on-1.61.jar" sourcepath="/com.openexchange.bundles/source/bcprov-jdk15on-1.61-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcpkix-jdk15on-1.61.jar" sourcepath="/com.openexchange.bundles/source/bcpkix-jdk15on-1.61-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/not-yet-commons-ssl-0.3.17.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xmlsec-2.1.1.jar" sourcepath="lib/src/xmlsec-2.1.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcip-annotations-1.0.jar"/>

@@ -119,7 +119,7 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
 
         if (isException) {
             List<Event> exceptions = util.getExceptions(declinedFor, session);
-            declinedFor = findAndRemoveMatchingException(null, event, exceptions);
+            declinedFor = findAndRemoveMatchingException(event, exceptions);
             if (declinedFor == null) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.DECLINED_FOR_UNKNOWN, locale));
                 analysis.recommendActions(ITipAction.IGNORE, ITipAction.REFRESH);

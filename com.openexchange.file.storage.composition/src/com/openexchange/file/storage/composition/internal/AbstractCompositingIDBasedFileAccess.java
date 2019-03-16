@@ -681,10 +681,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
                 @Override
                 protected List<IDTuple> callInTransaction(FileStorageFileAccess access) throws OXException {
-                    List<IDTuple> conflicted = access.removeDocument(toDelete, sequenceNumber, hardDelete);
-                    List<IDTuple> deleted = new ArrayList<>(toDelete);
-                    deleted.removeAll(conflicted);
-                    return conflicted;
+                    return access.removeDocument(toDelete, sequenceNumber, hardDelete);
                 }
             }.call(access);
             String serviceId = access.getAccountAccess().getService().getId();
@@ -695,11 +692,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * Send event
              */
+            toDelete.removeAll(conflicted);
+            EventProperty hardDeleteProperty = new EventProperty(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
+            EventProperty shareCleanupDoneProperty = new EventProperty(FileStorageEventConstants.SHARE_CLEANUP_DONE, Boolean.TRUE);
             for (IDTuple tuple : toDelete) {
                 String folderId = new FolderID(serviceId, accountId, tuple.getFolder()).toUniqueID();
                 String fileId = new FileID(serviceId, accountId, tuple.getFolder(), tuple.getId()).toUniqueID();
-                EventProperty hardDeleteProperty = new EventProperty(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
-                EventProperty shareCleanupDoneProperty = new EventProperty(FileStorageEventConstants.SHARE_CLEANUP_DONE, Boolean.TRUE);
                 postEvent(FileStorageEventHelper.buildDeleteEvent(
                     session, serviceId, accountId, folderId, fileId, null, null, hardDeleteProperty, shareCleanupDoneProperty));
             }

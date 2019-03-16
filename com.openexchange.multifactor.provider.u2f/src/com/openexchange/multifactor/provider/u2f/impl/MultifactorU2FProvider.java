@@ -397,19 +397,13 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
     }
 
     @Override
-    public void deleteRegistrations(int contextId, int userId) throws OXException {
-        if(storage.deleteAllForUser(userId, contextId)) {
-            return;
-        }
-        throw MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.create();
+    public boolean deleteRegistrations(int contextId, int userId) throws OXException {
+        return storage.deleteAllForUser(userId, contextId);
     }
 
     @Override
-    public void deleteRegistrations(int contextId) throws OXException {
-        if(storage.deleteAllForContext(contextId)) {
-            return;
-        }
-        throw MultifactorExceptionCodes.DEVICE_REMOVAL_FAILED.create();
+    public boolean deleteRegistrations(int contextId) throws OXException {
+        return storage.deleteAllForContext(contextId);
     }
 
     @Override

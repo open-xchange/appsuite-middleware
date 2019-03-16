@@ -64,6 +64,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.login.multifactor.MultifactorLoginService;
 import com.openexchange.multifactor.MultifactorAuthenticatorFactory;
 import com.openexchange.multifactor.MultifactorLockoutService;
+import com.openexchange.multifactor.MultifactorManagementService;
 import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.multifactor.MultifactorProvider;
 import com.openexchange.multifactor.MultifactorProviderRegistry;
@@ -73,6 +74,7 @@ import com.openexchange.multifactor.MultifactorSessionInspector;
 import com.openexchange.multifactor.MultifactorSessionStorage;
 import com.openexchange.multifactor.impl.MultifactorAuthenticatorFactoryImpl;
 import com.openexchange.multifactor.impl.MultifactorLoginServiceImpl;
+import com.openexchange.multifactor.impl.MultifactorManagementServiceImpl;
 import com.openexchange.multifactor.listener.MultifactorDispatcherListener;
 import com.openexchange.multifactor.listener.MultifactorListener;
 import com.openexchange.multifactor.listener.MultifactorListenerChain;
@@ -160,6 +162,7 @@ public class MultifactorActivator extends HousekeepingActivator {
         MultifactorLoginService mfLoginService = new MultifactorLoginServiceImpl(registry, factory, configurationService);
         registerService(MultifactorLoginService.class, mfLoginService);
         registerService(MultifactorAuthenticatorFactory.class, factory);
+        registerService(MultifactorManagementService.class, new MultifactorManagementServiceImpl(registry, factory));
 
         // Handle user and context deletion
         registerService(DeleteListener.class, new MultifactorDeleteListener(registry));
