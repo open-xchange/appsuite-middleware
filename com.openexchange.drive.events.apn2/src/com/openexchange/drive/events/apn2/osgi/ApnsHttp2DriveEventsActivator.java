@@ -101,7 +101,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.apn2");
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
             private ApnsHttp2OptionsProvider provider;
@@ -130,6 +130,12 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
          * register publisher
          */
         getServiceSafe(DriveEventService.class).registerPublisher(new IOSApnsHttp2DriveEventPublisher(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 
     @Override

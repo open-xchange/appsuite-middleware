@@ -65,7 +65,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 public class StanzaHandlerActivator extends HousekeepingActivator {
 
-    private volatile Future<Object> messageFuture;
+    private Future<Object> messageFuture;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -73,7 +73,7 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
         StanzaQueueServiceImpl queueService = new StanzaQueueServiceImpl();
         ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
@@ -83,7 +83,7 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
 
         Future<Object> messageFuture = this.messageFuture;

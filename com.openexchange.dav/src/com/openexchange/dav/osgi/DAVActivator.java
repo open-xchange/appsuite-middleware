@@ -78,7 +78,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class DAVActivator extends HousekeepingActivator {
 
-    private volatile OSGiPropertyMixin mixin;
+    private OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -86,7 +86,7 @@ public class DAVActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         HttpService httpService = getService(HttpService.class);
         /*
          * root
@@ -121,7 +121,7 @@ public class DAVActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
             mixin.close();

@@ -64,7 +64,7 @@ import com.openexchange.mailcap.OXMailcapCommandMap;
  */
 public final class CommonActivator implements BundleActivator {
 
-    private volatile ServiceRegistration<MailcapCommandMap> mailcapRegistration;
+    private ServiceRegistration<MailcapCommandMap> mailcapRegistration;
 
     /**
      * Initializes a new {@link CommonActivator}.
@@ -74,7 +74,7 @@ public final class CommonActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonActivator.class);
         logger.info("Starting bundle: com.openexchange.common");
         try {
@@ -112,7 +112,7 @@ public final class CommonActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonActivator.class);
         logger.info("Stopping bundle: com.openexchange.common");
         try {

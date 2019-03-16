@@ -82,8 +82,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class OAuthJSONActivator extends AJAXModuleActivator {
 
-    private volatile OSGiOAuthService oAuthService;
-    private volatile WhiteboardSecretService secretService;
+    private OSGiOAuthService oAuthService;
+    private WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -92,7 +92,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
             AbstractOAuthAJAXActionService.PREFIX.set(getService(DispatcherPrefixService.class));
@@ -144,7 +144,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         try {
             super.stopBundle();
             final WhiteboardSecretService secretService = this.secretService;

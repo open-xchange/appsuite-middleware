@@ -43,10 +43,10 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         if (hazelcastConfig.isEnabled()) {
             track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
 
-                volatile DistributedFileManagementImpl distributedFileManagement;
+                private DistributedFileManagementImpl distributedFileManagement;
 
                 @Override
-                public void added(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
+                public synchronized void added(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
 
                     // Address and map name
@@ -74,7 +74,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                 }
 
                 @Override
-                public void removed(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
+                public synchronized void removed(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     shutDownDistributedFileManagement();
                 }
 

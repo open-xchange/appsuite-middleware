@@ -86,10 +86,10 @@ public class EventsHaloActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         track(IDBasedCalendarAccessFactory.class, new ServiceTrackerCustomizer<IDBasedCalendarAccessFactory, IDBasedCalendarAccessFactory>() {
 
-            private volatile ServiceRegistration<HaloContactDataSource> eventsHaloRegistration;
+            private ServiceRegistration<HaloContactDataSource> eventsHaloRegistration;
 
             @Override
-            public IDBasedCalendarAccessFactory addingService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference) {
+            public synchronized IDBasedCalendarAccessFactory addingService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference) {
                 IDBasedCalendarAccessFactory calendarAccessFactory = context.getService(serviceReference);
                 eventsHaloRegistration = context.registerService(HaloContactDataSource.class, new EventsContactHalo(calendarAccessFactory), null);
                 return calendarAccessFactory;
@@ -101,7 +101,7 @@ public class EventsHaloActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference, IDBasedCalendarAccessFactory service) {
+            public synchronized void removedService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference, IDBasedCalendarAccessFactory service) {
                 ServiceRegistration<HaloContactDataSource> eventsHaloRegistration = this.eventsHaloRegistration;
                 if (null != eventsHaloRegistration) {
                     this.eventsHaloRegistration = null;

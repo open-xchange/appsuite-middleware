@@ -114,7 +114,7 @@ import com.openexchange.version.VersionService;
 
 public class AdminActivator extends HousekeepingActivator {
 
-    private volatile AdminDaemon daemon;
+    private AdminDaemon daemon;
 
     /**
      * Initializes a new {@link AdminActivator}.
@@ -129,7 +129,7 @@ public class AdminActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         AdminServiceRegistry.getInstance().addService(ThreadPoolService.class, getService(ThreadPoolService.class));
 
@@ -283,7 +283,7 @@ public class AdminActivator extends HousekeepingActivator {
      * {@inheritDoc}
      */
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         {
             TaskManager taskManager = TaskManager.getInstance();
             if (null != taskManager) {

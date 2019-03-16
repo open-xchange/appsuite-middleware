@@ -83,6 +83,7 @@ import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.ConfiguredServer;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -91,12 +92,15 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.internal.SpamSuppressingMailAccount;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountJsonUtility;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -352,6 +356,70 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      */
     protected static boolean isDefaultMailAccount(final MailAccountDescription mailAccount) {
         return MailAccount.DEFAULT_ID == mailAccount.getId();
+    }
+
+    /**
+     * Checks whether to drop confirmed-spam/confirmed-ham information from given mail accounts according to spam handler specification.
+     *
+     * @param mailAccounts The mail accounts to check
+     * @param session The session
+     * @return The checked mail accounts
+     * @throws OXException If check for spam handler fails
+     */
+    protected static MailAccount[] checkSpamInfo(MailAccount[] mailAccounts, ServerSession session) throws OXException {
+        if (null == mailAccounts) {
+            return mailAccounts;
+        }
+
+        int length = mailAccounts.length;
+        if (0 == length) {
+            return mailAccounts;
+        }
+
+        MailAccount[] revisedMailAccounts = new MailAccount[length];
+        for (int i = revisedMailAccounts.length; i-- > 0;) {
+            MailAccount mailAccount = mailAccounts[i];
+            if (null == mailAccount) {
+                revisedMailAccounts[i] = null;
+            } else {
+                revisedMailAccounts[i] = ((MailAccount.DEFAULT_ID == mailAccount.getId()) ? checkSpamInfo0(mailAccount, session) : mailAccount);
+            }
+        }
+        return revisedMailAccounts;
+    }
+
+    /**
+     * Checks whether to drop confirmed-spam/confirmed-ham information from given mail account according to spam handler specification.
+     *
+     * @param mailAccount The mail account to check
+     * @param session The session
+     * @return The checked mail accounts
+     * @throws OXException If check for spam handler fails
+     */
+    protected static MailAccount checkSpamInfo(MailAccount mailAccount, ServerSession session) throws OXException {
+        if (null == mailAccount) {
+            return null;
+        }
+
+        return (MailAccount.DEFAULT_ID == mailAccount.getId()) ? checkSpamInfo0(mailAccount, session) : mailAccount;
+    }
+
+    private static MailAccount checkSpamInfo0(MailAccount mailAccount, ServerSession session) throws OXException {
+        // Detect if spam option is enabled
+        boolean isSpamOptionEnabled = UserSettingMailStorage.getInstance().loadUserSettingMail(session.getUserId(), session.getContext()).isSpamOptionEnabled();
+        if (!isSpamOptionEnabled) {
+            // No spam enabled
+            return new SpamSuppressingMailAccount(mailAccount, true, true);
+        }
+
+        MailProvider provider = MailProviderRegistry.getRealMailProvider(mailAccount.getMailProtocol());
+        SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, MailAccount.DEFAULT_ID, provider);
+        boolean suppressSpam = (false == spamHandler.isCreateConfirmedSpam(session));
+        if (suppressSpam) {
+            return new SpamSuppressingMailAccount(mailAccount, suppressSpam, (false == spamHandler.isCreateConfirmedHam(session)));
+        }
+        boolean suppressHam = (false == spamHandler.isCreateConfirmedHam(session));
+        return suppressHam ? new SpamSuppressingMailAccount(mailAccount, false, suppressHam) : mailAccount;
     }
 
     /**

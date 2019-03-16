@@ -101,7 +101,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.apn");
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
             private IOSAPNCertificateProvider iosProvider;
@@ -214,7 +214,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.apn");
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }
 

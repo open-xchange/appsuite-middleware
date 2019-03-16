@@ -80,7 +80,14 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class CarddavActivator extends HousekeepingActivator {
 
-    private volatile OSGiPropertyMixin mixin;
+    private OSGiPropertyMixin mixin;
+
+    /**
+     * Initializes a new {@link CarddavActivator}.
+     */
+    public CarddavActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -91,7 +98,7 @@ public class CarddavActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("starting bundle: \"com.openexchange.carddav\"");
             /*
@@ -129,7 +136,7 @@ public class CarddavActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("stopping bundle: \"com.openexchange.carddav\"");
         /*
          * close OSGi property mixin

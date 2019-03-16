@@ -82,7 +82,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ContactCollectorActivator extends HousekeepingActivator {
 
-    private volatile ContactCollectorServiceImpl collectorInstance;
+    private ContactCollectorServiceImpl collectorInstance;
 
     /**
      * Initializes a new {@link ContactCollectorActivator}.
@@ -99,7 +99,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         // Check if disabled by configuration
         {
             final ConfigurationService cService = getService(ConfigurationService.class);
@@ -139,7 +139,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         /*
          * Stop service
          */

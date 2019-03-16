@@ -82,7 +82,7 @@ public class PushMsActivator extends HousekeepingActivator {
      */
     public static final AtomicReference<PushMsInit> INIT_REF = new AtomicReference<PushMsInit>();
 
-    private volatile boolean activated;
+    private boolean activated;
 
     /**
      * Initializes a new {@link PushMsActivator}.
@@ -98,7 +98,7 @@ public class PushMsActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsActivator.class);
 
         {
@@ -142,7 +142,7 @@ public class PushMsActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         if (!activated) {
             super.stopBundle();
             return;

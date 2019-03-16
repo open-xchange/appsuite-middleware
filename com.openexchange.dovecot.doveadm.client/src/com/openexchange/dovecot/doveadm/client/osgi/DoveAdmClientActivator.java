@@ -69,7 +69,7 @@ import com.openexchange.version.VersionService;
  */
 public class DoveAdmClientActivator extends HousekeepingActivator {
 
-    private volatile HttpDoveAdmClient client;
+    private HttpDoveAdmClient client;
 
     /**
      * Initializes a new {@link DoveAdmClientActivator}.
@@ -89,7 +89,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(DoveAdmClientActivator.class);
         Services.setServiceLookup(this);
 
@@ -127,7 +127,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(DoveAdmClientActivator.class);
 
         // Clean-up

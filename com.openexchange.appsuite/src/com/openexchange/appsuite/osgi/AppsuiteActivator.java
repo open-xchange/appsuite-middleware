@@ -73,8 +73,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppsuiteActivator extends HousekeepingActivator implements ForcedReloadable {
 
-    private volatile AppsLoadServlet appsLoadServlet;
-    private volatile String alias;
+    private AppsLoadServlet appsLoadServlet;
+    private String alias;
 
     /**
      * Initializes a new {@link AppsuiteActivator}.
@@ -89,7 +89,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AppsuiteActivator.class);
 
         // Get needed configuration service
@@ -151,7 +151,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             String alias = this.alias;
@@ -181,7 +181,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
     // ----------------------------------------------------------------------------------------------------------------------
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         AppsLoadServlet appsLoadServlet = this.appsLoadServlet;
         if (null != appsLoadServlet) {
             try {

@@ -58,7 +58,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import org.osgi.framework.BundleContext;
@@ -189,7 +188,7 @@ public class I18nActivator extends HousekeepingActivator {
 
         }
 
-        for (final Entry<Locale, List<I18nService>> localeEntry : locales.entrySet()) {
+        for (final Map.Entry<Locale, List<I18nService>> localeEntry : locales.entrySet()) {
             final List<I18nService> list = localeEntry.getValue();
 
             final Dictionary<String, Object> prop = new Hashtable<String, Object>(1);
@@ -210,8 +209,8 @@ public class I18nActivator extends HousekeepingActivator {
         return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
     }
 
-    private volatile ConfigurationServiceHolder csh;
-    private volatile I18nServiceHolderListener listener;
+    private ConfigurationServiceHolder csh;
+    private I18nServiceHolderListener listener;
 
     /**
      * Initializes a new {@link I18nActivator}.
@@ -226,7 +225,7 @@ public class I18nActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.debug("I18n Starting");
 
 
@@ -256,7 +255,7 @@ public class I18nActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         LOG.debug("Stopping I18n");
 
         try {

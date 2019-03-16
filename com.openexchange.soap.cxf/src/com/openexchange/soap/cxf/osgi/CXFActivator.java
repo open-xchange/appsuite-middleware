@@ -109,11 +109,11 @@ public class CXFActivator extends HousekeepingActivator {
              */
             final ServiceTrackerCustomizer<HttpService, HttpService> trackerCustomizer = new ServiceTrackerCustomizer<HttpService, HttpService>() {
 
-                    private volatile WebserviceCollector collector;
-                    private volatile String alias3;
+                    private WebserviceCollector collector;
+                    private String alias3;
 
                     @Override
-                    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
+                    public synchronized void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
                         final HttpService httpService = service;
                         if (httpService != null) {
                             try {
@@ -146,7 +146,7 @@ public class CXFActivator extends HousekeepingActivator {
                     }
 
                     @Override
-                    public HttpService addingService(final ServiceReference<HttpService> reference) {
+                    public synchronized HttpService addingService(final ServiceReference<HttpService> reference) {
                         final HttpService httpService = context.getService(reference);
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;

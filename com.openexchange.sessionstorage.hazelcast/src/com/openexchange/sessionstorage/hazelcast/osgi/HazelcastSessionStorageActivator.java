@@ -120,11 +120,11 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                 trackService(SessiondService.class);
                 ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
-                    private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
-                    private volatile ScheduledTimerTask sessionToucherTask; 
+                    private ServiceRegistration<SessionStorageService> sessionStorageRegistration;
+                    private ScheduledTimerTask sessionToucherTask;
 
                     @Override
-                    public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                    public synchronized HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                         final HazelcastInstance hazelcastInstance = context.getService(reference);
                         HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
                         /*
@@ -137,7 +137,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                          * schedule timer task to touch active sessions regularly
                          */
                         long period = SessionToucher.getTouchPeriod(getService(ConfigurationService.class));
-                        sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new SessionToucher(sessionStorage), period, period); 
+                        sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new SessionToucher(sessionStorage), period, period);
                         return hazelcastInstance;
                     }
 
@@ -147,7 +147,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                     }
 
                     @Override
-                    public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    public synchronized void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                         /*
                          * cancel session toucher timer task
                          */
@@ -155,7 +155,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                         if (null != sessionToucherTask) {
                             sessionToucherTask.cancel();
                             this.sessionToucherTask = null;
-                        }                        
+                        }
                         /*
                          * remove session storage registration
                          */

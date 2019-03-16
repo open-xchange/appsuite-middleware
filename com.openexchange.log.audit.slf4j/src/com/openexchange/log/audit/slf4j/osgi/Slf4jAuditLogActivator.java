@@ -78,7 +78,7 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
     private ServiceRegistration<AuditLogService> serviceRegistration;
     private Slf4jAuditLogService service;
 
-    private volatile NearRegistryServiceTracker<AuditLogFilter> filters;
+    private NearRegistryServiceTracker<AuditLogFilter> filters;
 
     /**
      * Initializes a new {@link Slf4jAuditLogActivator}.
@@ -93,7 +93,7 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         NearRegistryServiceTracker<AuditLogFilter> filters = new FilterTracker(context);
         this.filters = filters;
         rememberTracker(filters);
@@ -118,7 +118,7 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         unregisterService();
         super.stopBundle();
     }

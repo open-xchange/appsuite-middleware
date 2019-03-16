@@ -94,10 +94,10 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
         MultipleServiceTracker tracker = new MultipleServiceTracker(context, CacheEventService.class, PortableMsService.class, ConfigurationService.class) {
 
-            private volatile MsCacheEventHandler eventHandler;
+            private MsCacheEventHandler eventHandler;
 
             @Override
-            protected boolean serviceRemoved(Object service) {
+            protected synchronized boolean serviceRemoved(Object service) {
                 logger.debug("Stopping messaging service cache event handler");
                 MsCacheEventHandler eventHandler = this.eventHandler;
                 if (null != eventHandler) {
@@ -108,7 +108,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
             }
 
             @Override
-            protected void onAllAvailable() {
+            protected synchronized void onAllAvailable() {
                 logger.debug("Initializing messaging service cache event handler");
                 this.eventHandler = new MsCacheEventHandler(getTrackedService(PortableMsService.class), getTrackedService(CacheEventService.class), getTrackedService(ConfigurationService.class));
             }

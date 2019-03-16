@@ -107,7 +107,14 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
-    private volatile OSGiPropertyMixin mixin;
+    private OSGiPropertyMixin mixin;
+
+    /**
+     * Initializes a new {@link CaldavActivator}.
+     */
+    public CaldavActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -119,7 +126,7 @@ public class CaldavActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
@@ -216,7 +223,7 @@ public class CaldavActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             httpService.unregister(SERVLET_PATH);

@@ -49,12 +49,8 @@
 
 package com.openexchange.database.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -67,6 +63,7 @@ import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.lock.LockService;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -74,11 +71,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
-
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
-    private volatile ServiceRegistration<CreateTableService> createTableRegistration;
-    private volatile ServiceRegistration<Reloadable> reloadableRegistration;
+public class Activator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link Activator}.
@@ -88,40 +81,28 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
-
-        DatabaseConnectionListenerTracker connectionListenerTracker = new DatabaseConnectionListenerTracker(context);
-        trackers.push(connectionListenerTracker);
-
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ConfigViewFactory.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DBMigrationExecutorService.class.getName() + "))");
-        trackers.push(new ServiceTracker<Object, Object>(context, filter, new DatabaseServiceRegisterer(connectionListenerTracker, context)));
-
-        trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<LockService, LockService>(context, LockService.class, new LockServiceTracker(context)));
-        for (final ServiceTracker<?, ?> tracker : trackers) {
-            tracker.open();
-        }
-        reloadableRegistration = context.registerService(Reloadable.class, GenericReloadable.getInstance(), null);
-        context.registerService(Reloadable.class, new GlobalDbConfigsReloadable(), null);
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public void stop(final BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-        final ServiceRegistration<CreateTableService> createTableRegistration = this.createTableRegistration;
-        if (null != createTableRegistration) {
-            createTableRegistration.unregister();
-            this.createTableRegistration = null;
-        }
-        final ServiceRegistration<Reloadable> reloadableRegistration = this.reloadableRegistration;
-        if (null != reloadableRegistration) {
-            reloadableRegistration.unregister();
-            this.reloadableRegistration = null;
-        }
+    protected void startBundle() throws Exception {
+        registerService(CreateTableService.class, new CreateReplicationTable(), null);
+
+        DatabaseConnectionListenerTracker connectionListenerTracker = new DatabaseConnectionListenerTracker(context);
+        rememberTracker(connectionListenerTracker);
+
+        Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ConfigViewFactory.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DBMigrationExecutorService.class.getName() + "))");
+        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new DatabaseServiceRegisterer(connectionListenerTracker, context)));
+
+        track(ManagementService.class, new ManagementServiceCustomizer(context));
+        track(TimerService.class, new TimerServiceCustomizer(context));
+        track(CacheService.class, new CacheServiceCustomizer(context));
+        track(LockService.class, new LockServiceTracker(context));
+        openTrackers();
+
+        registerService(Reloadable.class, GenericReloadable.getInstance(), null);
+        registerService(Reloadable.class, new GlobalDbConfigsReloadable(), null);
     }
+
 }

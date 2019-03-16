@@ -165,10 +165,10 @@ public class DriveActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         track(ClusterTimerService.class, new ServiceTrackerCustomizer<ClusterTimerService, ClusterTimerService>() {
 
-            private volatile PeriodicChecksumCleaner checksumCleaner;
+            private PeriodicChecksumCleaner checksumCleaner;
 
             @Override
-            public ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
+            public synchronized ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
                 LOG.debug("Initializing periodic checksum cleaner task");
                 ClusterTimerService timerService = context.getService(reference);
                 long interval = DriveConfig.getInstance().getChecksumCleanerInterval();
@@ -186,7 +186,7 @@ public class DriveActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+            public synchronized void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
                 LOG.debug("Stopping periodic checksum cleaner task");
                 PeriodicChecksumCleaner checksumCleaner = this.checksumCleaner;
                 if (null != checksumCleaner) {

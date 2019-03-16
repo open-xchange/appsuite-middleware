@@ -67,10 +67,12 @@ public class Activator extends DeferredActivator {
 
     private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
-    private volatile ServletRegisterer servletRegisterer;
+    private ServletRegisterer servletRegisterer;
+    private ServiceRegistration<PreferencesItemService> serviceRegistration;
 
-    private volatile ServiceRegistration<PreferencesItemService> serviceRegistration;
-
+    /**
+     * Initializes a new {@link Activator}.
+     */
     public Activator() {
         super();
     }
@@ -81,7 +83,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
+    protected synchronized void handleAvailability(final Class<?> clazz) {
         LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         if (HttpService.class.equals(clazz)) {
@@ -90,7 +92,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
+    protected synchronized void handleUnavailability(final Class<?> clazz) {
         LOG.info("Re-available service: {}", clazz.getName());
         if (HttpService.class.equals(clazz)) {
             servletRegisterer.unregisterServlet();
@@ -99,7 +101,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             {
                 final ServiceRegistry registry = getServiceRegistry();
@@ -125,7 +127,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
             final ServiceRegistration<PreferencesItemService> serviceRegistration = this.serviceRegistration;
             if (null != serviceRegistration) {

@@ -80,7 +80,8 @@ import com.openexchange.timer.TimerService;
  */
 public class DriveEventsActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventsActivator.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventsActivator.class);
 
     /**
      * Initializes a new {@link DriveEventsActivator}.
@@ -114,10 +115,10 @@ public class DriveEventsActivator extends HousekeepingActivator {
         registerService(CustomPortableFactory.class, new PortableDriveEventFactory());
         track(PortableMsService.class, new ServiceTrackerCustomizer<PortableMsService, PortableMsService>() {
 
-            private volatile MsDriveEventHandler eventHandler;
+            private MsDriveEventHandler eventHandler;
 
             @Override
-            public PortableMsService addingService(ServiceReference<PortableMsService> reference) {
+            public synchronized PortableMsService addingService(ServiceReference<PortableMsService> reference) {
                 PortableMsService messagingService = context.getService(reference);
                 MsDriveEventHandler.setMsService(messagingService);
                 LOG.debug("Initializing messaging service drive event handler");
@@ -136,7 +137,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
+            public synchronized void removedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
                 LOG.debug("Stopping messaging service cache event handler");
                 MsDriveEventHandler eventHandler = this.eventHandler;
                 if (null != eventHandler) {

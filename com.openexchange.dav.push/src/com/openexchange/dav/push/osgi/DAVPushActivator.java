@@ -97,7 +97,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class DAVPushActivator extends HousekeepingActivator implements Reloadable  {
 
-    private volatile PushSubscribeFactory factory;
+    private PushSubscribeFactory factory;
 //    private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
 //    private ServiceRegistration<EventHandler> eventHandlerRegistration;
 //    private List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations;
@@ -143,14 +143,14 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         getLogger(DAVPushActivator.class).info("stopping bundle {}", context.getBundle());
         reinit(null);
         super.stopBundle();
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         try {
             reinit(configService);
         } catch (Exception e) {

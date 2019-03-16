@@ -103,7 +103,7 @@ public class RealtimeActivator extends HousekeepingActivator {
 
     private final AtomicBoolean isStopped = new AtomicBoolean(true);
 
-    private volatile SyntheticChannel synth;
+    private SyntheticChannel synth;
     private RealtimeConfig realtimeConfig;
 
     /**
@@ -119,7 +119,7 @@ public class RealtimeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         RealtimeServiceRegistry.SERVICES.set(this);
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
@@ -202,7 +202,7 @@ public class RealtimeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         if (isStopped.compareAndSet(false, true)) {
             synth.shutdown();
             // Conceal all ManagementObjects for this bundle and remove them from the housekeeper

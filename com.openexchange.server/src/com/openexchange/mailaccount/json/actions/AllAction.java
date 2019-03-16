@@ -103,6 +103,8 @@ public final class AllAction extends AbstractMailAccountAction {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
+        userMailAccounts = checkSpamInfo(userMailAccounts, session);
+
         JSONArray jsonArray = DefaultMailAccountWriter.writeArray(userMailAccounts, attributes, session);
         return new AJAXRequestResult(jsonArray);
     }

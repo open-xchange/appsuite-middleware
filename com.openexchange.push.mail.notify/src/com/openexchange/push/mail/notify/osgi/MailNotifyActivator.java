@@ -110,8 +110,8 @@ public final class MailNotifyActivator extends HousekeepingActivator {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private volatile MailNotifyPushListenerRegistry registry;
-    private volatile MailNotifyPushUdpSocketListener udpListener;
+    private MailNotifyPushListenerRegistry registry;
+    private MailNotifyPushUdpSocketListener udpListener;
 
     /**
      * Initializes a new {@link MailNotifyActivator}.
@@ -128,7 +128,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             Services.set(this);
 
@@ -159,7 +159,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
             // Stop UPD listener
             stopUdpListener();
