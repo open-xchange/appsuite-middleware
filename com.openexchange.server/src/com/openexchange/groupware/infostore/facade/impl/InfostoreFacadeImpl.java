@@ -1899,9 +1899,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         Context context = session.getContext();
         String whereClause = "infostore.folder_id = " + folderId;
-        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
         if (!allDocuments.isEmpty()) {
-            List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+            List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
             objectPermissionLoader.add(allDocuments, context, objectPermissionLoader.load(folderId, context));
             removeDocuments(allDocuments, allVersions, date, session, null);
         }
@@ -2049,7 +2049,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return Collections.emptyList();
         }
         if (1 == ids.length) {
-            return InfostoreIterator.allDocumentsWhere("infostore.id = " + ids[0], metadata, provider, context).asList();
+            return SearchIterators.asList(InfostoreIterator.allDocumentsWhere("infostore.id = " + ids[0], metadata, provider, context));
         }
         StringBuilder StringBuilder = new StringBuilder("infostore.id IN (");
         StringBuilder.append(String.valueOf(ids[0]));
@@ -2057,7 +2057,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             StringBuilder.append(',').append(String.valueOf(ids[i]));
         }
         StringBuilder.append(')');
-        return InfostoreIterator.allDocumentsWhere(StringBuilder.toString(), metadata, provider, context).asList();
+        return SearchIterators.asList(InfostoreIterator.allDocumentsWhere(StringBuilder.toString(), metadata, provider, context));
     }
 
     /**
@@ -2301,8 +2301,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Strings.join(objectIDs, ",", stringBuilder);
             whereClause = stringBuilder.append(')').toString();
         }
-        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
         objectPermissionLoader.add(allDocuments, context, idsToFolders.keySet());
 
         // Ensure folder ids are consistent between request and existing documents
@@ -2358,8 +2358,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Strings.join(objectIDs, ",", stringBuilder);
             whereClause = stringBuilder.append(')').toString();
         }
-        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {
@@ -2453,7 +2453,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         versions.setLength(versions.length() - 1);
         versions.append(')');
 
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ", Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ", Metadata.VALUES_ARRAY, this, context));
 
         boolean anyRemoved = false;
         boolean removeCurrent = false;
@@ -2974,8 +2974,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
         if (folderId == getSharedFilesFolderID(session)) {
-            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, null, 0, -1, -1, this);
-            return it.asList().size();
+            return SearchIterators.asList(InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, null, 0, -1, -1, this)).size();
         }
 
         boolean onlyOwn = false;
@@ -3620,7 +3619,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             /*
              * prepare customizable timed result to add additional metadata as requested
              */
-            final List<DocumentMetadata> documents = iterator.asList();
+            final List<DocumentMetadata> documents = SearchIterators.asList(iterator);
             if (0 == documents.size()) {
                 return com.openexchange.groupware.results.Results.emptyTimedResult();
             }

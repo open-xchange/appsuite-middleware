@@ -182,7 +182,7 @@ public class InfostoreAutodeletePerformer {
         /*
          * query elapsed versions in folder
          */
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere("infostore.folder_id = " + folderId + " AND infostore_document.last_modified < " + maxLastModified.getTime() + " AND infostore_document.file_store_location IS NOT NULL AND (infostore.version <> infostore_document.version_number)" + (optOwner > 0 ? " AND infostore.created_by="+optOwner : ""), Metadata.VALUES_ARRAY, infostoreFacade, session.getContext()).asList();
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere("infostore.folder_id = " + folderId + " AND infostore_document.last_modified < " + maxLastModified.getTime() + " AND infostore_document.file_store_location IS NOT NULL AND (infostore.version <> infostore_document.version_number)" + (optOwner > 0 ? " AND infostore.created_by="+optOwner : ""), Metadata.VALUES_ARRAY, infostoreFacade, session.getContext()));
         if (allVersions.isEmpty()) {
             return;
         }
@@ -219,43 +219,38 @@ public class InfostoreAutodeletePerformer {
         /*
          * query versions
          */
-        InfostoreIterator iterator = InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.file_store_location IS NOT NULL", Metadata.VALUES_ARRAY, infostoreFacade, session.getContext());
-        try {
-            List<DocumentMetadata> versionsOfDocument = iterator.asList();
-            /*
-             * delete oldest version until max. number of versions is satisfied
-             */
-            int numberOfVersionsToDelete = versionsOfDocument.size() - maxVersions;
-            if (numberOfVersionsToDelete > 0) {
-                Collections.sort(versionsOfDocument, new Comparator<DocumentMetadata>() {
+        List<DocumentMetadata> versionsOfDocument = SearchIterators.asList(InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.file_store_location IS NOT NULL", Metadata.VALUES_ARRAY, infostoreFacade, session.getContext()));
+        /*
+         * delete oldest version until max. number of versions is satisfied
+         */
+        int numberOfVersionsToDelete = versionsOfDocument.size() - maxVersions;
+        if (numberOfVersionsToDelete > 0) {
+            Collections.sort(versionsOfDocument, new Comparator<DocumentMetadata>() {
 
-                    @Override
-                    public int compare(DocumentMetadata d1, DocumentMetadata d2) {
-                        if (d1.isCurrentVersion()) {
-                            if (!d2.isCurrentVersion()) {
-                                return 1;
-                            }
-                        } else if (d2.isCurrentVersion()) {
-                            if (!d1.isCurrentVersion()) {
-                                return -1;
-                            }
+                @Override
+                public int compare(DocumentMetadata d1, DocumentMetadata d2) {
+                    if (d1.isCurrentVersion()) {
+                        if (!d2.isCurrentVersion()) {
+                            return 1;
                         }
-
-                        int x = d1.getVersion();
-                        int y = d2.getVersion();
-                        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+                    } else if (d2.isCurrentVersion()) {
+                        if (!d1.isCurrentVersion()) {
+                            return -1;
+                        }
                     }
-                });
 
-                TIntList versionsToDelete = new TIntArrayList(numberOfVersionsToDelete);
-                Iterator<DocumentMetadata> versionsOfDocumentIter = versionsOfDocument.iterator();
-                for (int i = numberOfVersionsToDelete; i-- > 0;) {
-                    versionsToDelete.add(versionsOfDocumentIter.next().getVersion());
+                    int x = d1.getVersion();
+                    int y = d2.getVersion();
+                    return (x < y) ? -1 : ((x == y) ? 0 : 1);
                 }
-                infostoreFacade.removeVersion(id, versionsToDelete.toArray(), false, false, session);
+            });
+
+            TIntList versionsToDelete = new TIntArrayList(numberOfVersionsToDelete);
+            Iterator<DocumentMetadata> versionsOfDocumentIter = versionsOfDocument.iterator();
+            for (int i = numberOfVersionsToDelete; i-- > 0;) {
+                versionsToDelete.add(versionsOfDocumentIter.next().getVersion());
             }
-        } finally {
-            SearchIterators.close(iterator);
+            infostoreFacade.removeVersion(id, versionsToDelete.toArray(), false, false, session);
         }
     }
 
