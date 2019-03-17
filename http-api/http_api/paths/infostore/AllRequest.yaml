@@ -33,6 +33,11 @@
         type: integer
         description: A positive integer number to specify how many items shall be returned according to given sorting; overrides left_hand_limit/right_hand_limit parameters and is equal to left_hand_limit=0 and right_hand_limit=<limit>.
         required: false
+      - in: query
+        name: pregenerate_previews
+        type: boolean
+        description: If set to "true" preview generation is triggered in the background for all files in request result
+        required: false
     responses:
       200:
         description: |
