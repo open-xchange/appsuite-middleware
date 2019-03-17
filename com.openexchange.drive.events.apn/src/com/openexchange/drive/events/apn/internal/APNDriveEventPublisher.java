@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -97,7 +99,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private final Map<APNAccess, Boolean> initializedFeedbackQueries;
+    private final ConcurrentMap<APNAccess, Boolean> initializedFeedbackQueries;
     private final ServiceLookup services;
     private final String serviceId;
     private final Class<? extends APNCertificateProvider> certifcateProviderClass;
@@ -105,10 +107,10 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
 
     /**
      * Initializes a new {@link APNDriveEventPublisher}.
-     * 
+     *
      * @param services The service lookup reference
      * @param serviceId The service identifier used for push subscriptions, i.e. <code>apn</code> or <code>apn.macos</code>
-     * @param type The operation system type, this publisher is responsible for. 
+     * @param type The operation system type, this publisher is responsible for.
      * @param certifcateProviderClass The class under which the fallback APN certificate provider gets registered.
      */
     public APNDriveEventPublisher(ServiceLookup services, String serviceId, OperationSystemType type, Class<? extends APNCertificateProvider> certifcateProviderClass) {
@@ -119,7 +121,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         HashMap<String, String> map = new HashMap<>(1);
         map.put(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
         optionals = Collections.unmodifiableMap(map);
-        this.initializedFeedbackQueries = new HashMap<APNAccess, Boolean>();
+        this.initializedFeedbackQueries = new ConcurrentHashMap<>();
     }
 
     private APNAccess getAccess(int contextId, int userId) {
@@ -210,18 +212,21 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         processNotificationResults(notifications);
     }
 
-    private void setupFeedbackQueriesIfNeeded(APNAccess access) {
-        Boolean bInitialized = initializedFeedbackQueries.get(access);
-        if (null == bInitialized || !bInitialized.booleanValue()) {
-            synchronized (this) {
-                // Still not initialized
-                bInitialized = initializedFeedbackQueries.get(access);
-                if (null == bInitialized || !bInitialized.booleanValue()) {
-                    try {
-                        setupFeedbackQueries(access);
-                        initializedFeedbackQueries.put(access, Boolean.TRUE);
-                    } catch (OXException e) {
-                        LOG.warn("Error setting up feedback queries for {}.", serviceId, e);
+    private void setupFeedbackQueriesIfNeeded(final APNAccess access) {
+        Boolean marker = initializedFeedbackQueries.get(access);
+        if (null == marker) {
+            marker = initializedFeedbackQueries.putIfAbsent(access, Boolean.TRUE);
+            if (null == marker) {
+                // This thread set the marker and thus is supposed to setup feedback queries
+                boolean error = true; // pessimistic
+                try {
+                    setupFeedbackQueries(access);
+                    error = false;
+                } catch (OXException e) {
+                    LOG.warn("Error setting up feedback queries for {}.", serviceId, e);
+                } finally {
+                    if (error) {
+                        initializedFeedbackQueries.remove(access);
                     }
                 }
             }
@@ -267,7 +272,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
 
     /**
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
-     * 
+     *
      * @param access The underlying APN access to use
      */
     public void queryFeedbackService(APNAccess access) {
