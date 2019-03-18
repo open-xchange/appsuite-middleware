@@ -55,12 +55,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.Timeout;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -97,8 +94,9 @@ public abstract class AbstractRMITest {
     protected User superAdmin;
     protected User contextAdmin;
 
-    @Rule
-    public Timeout globalTimeout = new Timeout(30, TimeUnit.SECONDS); // 30 seconds max per method tested
+//    FIXME comment in
+//    @Rule
+//    public Timeout globalTimeout = new Timeout(30, TimeUnit.SECONDS); // 30 seconds max per method tested
 
     /**
      * Initializes a new {@link AbstractRMITest}.

@@ -52,12 +52,12 @@ package com.openexchange.rest.passwordchange.history;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.util.List;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.json.JSONArray;
 import org.junit.Test;
 import com.openexchange.admin.rest.passwordchange.history.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import com.openexchange.testing.restclient.models.PasswordChangeHistoryEntry;
 
 /**
  * {@link TimeTest}
@@ -74,16 +74,12 @@ public class TimeTest extends AbstractPasswordchangehistoryTest {
 
     @Test
     public void testTime() throws Exception {
-
-        String retval = pwdhapi.passwdChanges(contextID, userID, new Long(0), "date");
-        JSONArray array = new JSONArray(retval);
-
-        for (int i = 0; i < array.length(); i++) {
-            PasswordChangeInfo info = parse(array.getJSONObject(i));
-            if ((send - info.getCreated()) < 1000) {
+        List<PasswordChangeHistoryEntry> retval = pwdhapi.passwdChanges(contextID, userID, 0, "date");
+        for (PasswordChangeHistoryEntry entry : retval) {
+            if ((send - entry.getDate().intValue()) < 1000) {
                 // Check other criteria. This may fail if a password change made by another test was within the last second
-                assertEquals("Was not changed by this test!", CLIENT_ID, info.getClient());
-                assertTrue("IP must be set.", null != info.getIP());
+                assertEquals("Was not changed by this test!", CLIENT_ID, entry.getClientId());
+                assertTrue("IP must be set.", null != entry.getClientAddress());
                 return;
             }
         }

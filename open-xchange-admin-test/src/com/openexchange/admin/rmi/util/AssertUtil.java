@@ -304,11 +304,11 @@ public class AssertUtil {
         Hashtable<String, OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-            for (int i = 0; i < aexts.size(); i++) {
-                OXCommonExtensionInterface aext = aexts.get(i);
-                OXCommonExtensionInterface bext = bexts.get(i);
-                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-            }
+//            for (int i = 0; i < aexts.size(); i++) {
+//                OXCommonExtensionInterface aext = aexts.get(i);
+//                OXCommonExtensionInterface bext = bexts.get(i);
+//                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+//            }
         }
 
         assertEquals("User Attributes not equal", a.getUserAttributes(), b.getUserAttributes());
