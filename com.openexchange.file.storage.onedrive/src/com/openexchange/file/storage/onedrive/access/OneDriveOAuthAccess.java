@@ -49,19 +49,12 @@
 
 package com.openexchange.file.storage.onedrive.access;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.net.ssl.SSLHandshakeException;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -71,11 +64,11 @@ import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
-import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
@@ -272,64 +265,8 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 }
                 return accessToken;
             } catch (org.scribe.exceptions.OAuthException e) {
-                throw handleScribeOAuthException(e, cachedAccount, session);
+                throw OAuthUtil.handleScribeOAuthException(e, cachedAccount, session);
             }
-        }
-    }
-
-    /**
-     * Handles the specified {@link OAuthException}
-     * 
-     * @param e The exception to handle
-     * @param oauthAccount The {@link OAuthAccount}
-     * @param session The groupware {@link Session}
-     * @return the appropriate {@link OXException}
-     */
-    static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e, OAuthAccount oauthAccount, Session session) {
-        if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-            List<Object> displayArgs = new ArrayList<>(2);
-            displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
-            displayArgs.add("graph.microsoft.com");
-            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
-        }
-
-        String exMessage = e.getMessage();
-        String errorMsg = parseErrorFrom(exMessage);
-        if (Strings.isEmpty(errorMsg)) {
-            return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
-        }
-        if (exMessage.contains("invalid_grant") || exMessage.contains("invalid_request")) {
-            if (null != oauthAccount) {
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, oauthAccount.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
-            }
-            return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
-        }
-        return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
-    }
-
-    /**
-     * Parses the errors from the specified message
-     * 
-     * @param message The message to parse errors from
-     * @return The parsed error message, or <code>null</code> if no message could be parsed
-     */
-    private static String parseErrorFrom(String message) {
-        if (Strings.isEmpty(message)) {
-            return null;
-        }
-
-        String marker = "Can't extract a token from this: '";
-        int pos = message.indexOf(marker);
-        if (pos < 0) {
-            return null;
-        }
-
-        try {
-            JSONObject jo = new JSONObject(message.substring(pos + marker.length(), message.length() - 1));
-            return jo.optString("error", null);
-        } catch (JSONException e) {
-            // Apparent no JSON response
-            return null;
         }
     }
 }
