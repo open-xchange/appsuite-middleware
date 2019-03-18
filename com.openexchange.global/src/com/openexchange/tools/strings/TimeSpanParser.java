@@ -165,7 +165,7 @@ public class TimeSpanParser  implements StringParser {
             return null;
         }
 
-        Long timespan = null;
+        long timespan;
         try {
             timespan = parseTimespanToPrimitive(s);
         } catch (final IllegalArgumentException x) {
@@ -173,9 +173,9 @@ public class TimeSpanParser  implements StringParser {
         }
 
         if (t == Long.class || t == long.class) {
-            return (T) timespan;
+            return (T) Long.valueOf(timespan);
         } else if (t == Date.class) {
-            return (T) new Date(timespan.longValue());
+            return (T) new Date(timespan);
         }
         return null;
     }
