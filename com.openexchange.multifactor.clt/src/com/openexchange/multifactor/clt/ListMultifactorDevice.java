@@ -75,7 +75,7 @@ import com.openexchange.cli.OutputHelper;
  */
 public class ListMultifactorDevice extends AbstractMultifactorClt {
 
-    private static String LIST_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -U <user:password>";
+    private static String LIST_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword>";
 
     public static void main(String[] args) {
         new ListMultifactorDevice().execute(args);
@@ -83,7 +83,7 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
 
     private void printDevices(JSONArray devices) throws JSONException {
         List<List<String>> dataToPrint = new ArrayList<List<String>>();
-        if(!dataToPrint.isEmpty()) {
+        if(!devices.isEmpty()) {
             for (int i = 0; i < devices.length(); i++) {
                 JSONObject device = devices.getJSONObject(i);
                 List<String> deviceData = new ArrayList<String>();

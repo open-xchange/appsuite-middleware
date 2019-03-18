@@ -107,6 +107,17 @@ public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
     }
 
     @Override
+    protected void addAdministrativeOptions(Options options) {
+        options.addOption(createArgumentOption("A", "adminuser", "adminuser", "Admin username", true));
+        options.addOption(createArgumentOption("P", "adminpass", "adminpassword", "Admin password", true));
+    }
+
+    @Override
+    protected String getAuthorizationHeader(CommandLine cmd) {
+        return cmd.getOptionValue("A") + ":" + cmd.getOptionValue("P");
+    }
+
+    @Override
     protected boolean requiresAdministrativePermission() {
         return true;
     }

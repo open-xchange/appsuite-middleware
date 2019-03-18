@@ -76,7 +76,7 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
     private static final String PARAM_DEVICE_ID_SHORT = "d";
     private static final String PARAM_DEVICE_ID_DESC = "The multifactor device id.";
 
-    private static String DELETE_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -r <providerName> -d <deviceId> -U <user:password>";
+    private static String DELETE_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -r <providerName> -d <deviceId> -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword>";
 
     public static void main(String[] args) {
         new DeleteMultifactorDevice().execute(args);
