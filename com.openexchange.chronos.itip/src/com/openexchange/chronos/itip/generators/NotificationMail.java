@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -438,29 +439,32 @@ public class NotificationMail {
             return false;
         }
 
-        if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
+        if (recipient.getConfiguration().sendITIP() && itipMessage != null) {
             return true;
         }
 
+        boolean isInterestedInChanges = recipient.getConfiguration().interestedInChanges();
+        boolean isInterestedInStateChanges = recipient.getConfiguration().interestedInStateChanges();
+
         // Not interested in anything
-        if (!getRecipient().getConfiguration().interestedInChanges() && !getRecipient().getConfiguration().interestedInStateChanges()) {
+        if (!isInterestedInChanges && !isInterestedInStateChanges) {
             return false;
         }
 
         // Interested in state changes, but not in other changes
-        if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
+        if (isInterestedInStateChanges && !isInterestedInChanges) {
             boolean aboutStateChanges = isAboutStateChanges();
-            LOG.debug("NotificationMail.shouldBeSend (1), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChanges), diffs());
+            LOG.debug("NotificationMail.shouldBeSend (1), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), B(isInterestedInStateChanges), B(isInterestedInChanges), B(aboutStateChanges), diffs());
             return aboutStateChanges;
         }
 
         // Interested in other changes, but not in state changes
         boolean aboutStateChangesOnly = isAboutStateChangesOnly();
-        if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
+        if (!isInterestedInStateChanges && isInterestedInChanges) {
+            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), B(isInterestedInStateChanges), B(isInterestedInChanges), B(aboutStateChangesOnly), diffs(), getUserDiff());
             return !aboutStateChangesOnly;
         }
-        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), B(isInterestedInStateChanges), B(isInterestedInChanges), B(aboutStateChangesOnly), diffs(), getUserDiff());
         return true;
     }
 
@@ -470,7 +474,7 @@ public class NotificationMail {
 
     private String id() {
         if (null != recipient && null != recipient.getUser()) {
-            return String.valueOf(getRecipient().getUser().getId());
+            return String.valueOf(recipient.getUser().getId());
         }
         return null;
     }
@@ -523,20 +527,6 @@ public class NotificationMail {
 
         if (null != eventUpdate && null != eventUpdate.getUpdatedFields()) {
             return eventUpdate.getUpdatedFields().toString();
-        }
-        return null;
-    }
-
-    private Boolean changes() {
-        if (null != recipient && null != recipient.getConfiguration()) {
-            return Boolean.valueOf(recipient.getConfiguration().interestedInChanges());
-        }
-        return null;
-    }
-
-    private Boolean stateChanges() {
-        if (null != recipient && null != recipient.getConfiguration()) {
-            return Boolean.valueOf(recipient.getConfiguration().interestedInStateChanges());
         }
         return null;
     }
