@@ -49,17 +49,15 @@
 
 package com.openexchange.tools.stream;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link CountingInputStream} - An {@link InputStream} that counts (and optionally limits) the number of bytes read.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CountingInputStream extends FilterInputStream {
+public class CountingInputStream extends CountingOnlyInputStream {
 
     public static interface IOExceptionCreator {
 
@@ -83,8 +81,6 @@ public class CountingInputStream extends FilterInputStream {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
-    private final AtomicLong count;
-    private volatile long mark;
     private volatile long max;
     private final IOExceptionCreator exceptionCreator;
 
@@ -108,114 +104,34 @@ public class CountingInputStream extends FilterInputStream {
     public CountingInputStream(InputStream in, long max, IOExceptionCreator exceptionCreator) {
         super(in);
         this.max = max;
-        count = new AtomicLong(0L);
-        mark = -1L;
         this.exceptionCreator = null == exceptionCreator ? DEFAULT_EXCEPTION_CREATOR : exceptionCreator;
     }
 
-    private void check(int consumed) throws IOException {
+    @Override
+    protected long add(int consumed) throws IOException {
+        long newCount = super.add(consumed);
+
         long max = this.max;
         if (max > 0) {
-            if (count.addAndGet(consumed) > max) {
+            if (newCount > max) {
                 // Pass 0 (zero) as total size of the stream is unknown or requires to count the remaining bytes from stream respectively
                 throw exceptionCreator.createIOException(0L, max);
             }
-        } else {
-            count.addAndGet(consumed);
         }
-    }
-
-    /**
-     * Sets the byte count back to <code>0</code> (zero).
-     *
-     * @return The previous count prior to resetting
-     */
-    public long resetByteCount() {
-        final long tmp = count.get();
-        count.set(0L);
-        return tmp;
-    }
-
-    /**
-     * Gets the number of bytes read so far.
-     *
-     * @return The number of bytes read so far
-     */
-    public long getCount() {
-        return count.get();
-    }
-
-    @Override
-    public int read() throws IOException {
-        int result = in.read();
-        if (result < 0) {
-            // The end of the stream is reached
-            return result;
-        }
-
-        // Consumed 1 more byte from stream
-        check(1);
-        return result;
-    }
-
-    @Override
-    public int read(byte[] b) throws IOException {
-        int result = in.read(b, 0, b.length);
-        if (result < 0) {
-            // There is no more data because the end of the stream has been reached.
-            return result;
-        }
-
-        // Consumed more bytes from stream
-        check(result);
-        return result;
-    }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int result = in.read(b, off, len);
-        if (result < 0) {
-            // There is no more data because the end of the stream has been reached.
-            return result;
-        }
-
-        // Consumed more bytes from stream
-        check(result);
-        return result;
+        return newCount;
     }
 
     @Override
     public long skip(long n) throws IOException {
-        final long result = in.skip(n);
-        final long max = this.max;
+        long result = super.skip(n);
+
+        // Adjust "max" by number of skipped bytes
+        long max = this.max;
         if (max > 0) {
-            this.max = max + n;
+            this.max = max + result;
         }
-        count.addAndGet(result);
+
         return result;
     }
 
-    @Override
-    public void mark(int readlimit) {
-        /*
-         * It's okay to mark even if mark isn't supported, as reset won't work
-         */
-        in.mark(readlimit);
-        mark = count.get();
-    }
-
-    @Override
-    public void reset() throws IOException {
-        if (!in.markSupported()) {
-            throw new IOException("Mark not supported");
-        }
-
-        long mark = this.mark;
-        if (mark == -1) {
-            throw new IOException("Mark not set");
-        }
-
-        in.reset();
-        count.set(mark);
-    }
 }

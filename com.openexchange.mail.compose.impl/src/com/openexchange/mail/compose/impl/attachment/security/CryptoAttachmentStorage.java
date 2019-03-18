@@ -73,7 +73,7 @@ import com.openexchange.mail.compose.impl.CryptoUtility;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.stream.CountingInputStream;
+import com.openexchange.tools.stream.CountingOnlyInputStream;
 
 /**
  * {@link CryptoAttachmentStorage}
@@ -187,7 +187,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
         InputStream inputToUse = input;
         SizeProvider sizeProviderToUse = sizeProvider;
         if (null == sizeProviderToUse) {
-            final CountingInputStream countingStream = new CountingInputStream(input, -1);
+            final CountingOnlyInputStream countingStream = new CountingOnlyInputStream(input);
             inputToUse = countingStream;
             sizeProviderToUse = new CountingInputStreamSizeProvider(countingStream);
         }
@@ -228,12 +228,12 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
 
     private static class CountingInputStreamSizeProvider implements SizeProvider {
 
-        private final CountingInputStream countingStream;
+        private final CountingOnlyInputStream countingStream;
 
         /**
          * Initializes a new {@code CountingInputStreamSizeProvider} instance.
          */
-        CountingInputStreamSizeProvider(CountingInputStream countingStream) {
+        CountingInputStreamSizeProvider(CountingOnlyInputStream countingStream) {
             this.countingStream = countingStream;
         }
 

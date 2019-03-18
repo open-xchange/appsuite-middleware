@@ -80,7 +80,7 @@ import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.stream.CountingInputStream;
+import com.openexchange.tools.stream.CountingOnlyInputStream;
 
 
 /**
@@ -377,9 +377,9 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 // Size is unknown...
                 if (null == sizeProvider) {
                     // Need to count to determine number of bytes
-                    CountingInputStream countingStream = null;
+                    CountingOnlyInputStream countingStream = null;
                     try {
-                        countingStream = new CountingInputStream(input, -1);
+                        countingStream = new CountingOnlyInputStream(input);
                         storageIdentifier = saveData(countingStream, -1, session);
                         size = countingStream.getCount();
                     } finally {
