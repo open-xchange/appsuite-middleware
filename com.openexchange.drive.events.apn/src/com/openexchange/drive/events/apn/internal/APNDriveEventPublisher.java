@@ -237,7 +237,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         LeanConfigurationService configService = requireService(LeanConfigurationService.class, services);
         String feedbackQueryInterval = configService.getProperty(DriveEventsAPNProperty.feedbackQueryInterval, optionals);
         if (Strings.isNotEmpty(feedbackQueryInterval)) {
-            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval).longValue();
+            long interval = TimeSpanParser.parseTimespanToPrimitive(feedbackQueryInterval);
             if (60 * 1000 <= interval) {
                 requireService(TimerService.class, services).scheduleWithFixedDelay(new Runnable() {
 
