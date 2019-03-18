@@ -201,7 +201,7 @@ public final class FileUtils {
         }
         return extractedFiles;
     }
-    
+
     public static void main(String[] args) {
         File f = new File("asd");
         System.out.println(f.getParent());
@@ -232,8 +232,8 @@ public final class FileUtils {
         if (false == keep) {
             parentFile.deleteOnExit();
         }
-        parentFile.mkdirs();
         try (FileOutputStream fos = new FileOutputStream(newFile)) {
+            parentFile.mkdirs();
             int len;
             while ((len = zipInputStream.read(buffer)) > 0) {
                 fos.write(buffer, 0, len);
@@ -300,7 +300,7 @@ public final class FileUtils {
 
     /**
      * Picks a random line from the specified file and returns it.
-     * 
+     *
      * @param randomAccessFile The {@link RandomAccessFile} instance
      * @param length The length of the file
      * @param random The random generator

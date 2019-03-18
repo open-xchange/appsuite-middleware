@@ -39,6 +39,11 @@
         type: boolean
         description: 'If set to `true` and a `folder` is specified, this folder and all of its subfolders are considered by the search.'
         required: false
+      - in: query
+        name: pregenerate_previews
+        type: boolean
+        description: If set to "true" preview generation is triggered in the background for all files in request result
+        required: false
       - in: body
         name: body
         description: A JSON object containing search parameters.

@@ -233,13 +233,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
      */
     private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(int[] ids, Context context) throws OXException {
         Metadata[] metadata = new Metadata[] { Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.CREATED_BY_LITERAL };
-        InfostoreIterator searchIterator = null;
-        try {
-            searchIterator = InfostoreIterator.list(ids, metadata, this, context);
-            return searchIterator.asList();
-        } finally {
-            SearchIterators.close(searchIterator);
-        }
+        return SearchIterators.asList(InfostoreIterator.list(ids, metadata, this, context));
     }
 
     private List<EffectiveInfostorePermission> getInfostorePermissions0(List<DocumentMetadata> documents, Context ctx, User user, UserPermissionBits userPermissions) throws OXException {

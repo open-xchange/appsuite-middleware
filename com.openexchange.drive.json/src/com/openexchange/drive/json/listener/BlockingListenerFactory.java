@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.listener;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -78,10 +79,10 @@ public class BlockingListenerFactory implements LongPollingListenerFactory {
     public LongPollingListener create(DriveSession session, List<String> rootFolderIDs) throws OXException {
         LeanConfigurationService service = services.getService(LeanConfigurationService.class);
         ServerSession serverSession = session.getServerSession();
-        if (service.getBooleanProperty(serverSession.getContextId(), serverSession.getUserId(), DriveProperty.EVENTS_BLOCKING_LONG_POLLING_ENABLED)) {
+        if (service.getBooleanProperty(serverSession.getUserId(), serverSession.getContextId(), DriveProperty.EVENTS_BLOCKING_LONG_POLLING_ENABLED)) {
             return new BlockingListener(session, rootFolderIDs);
         }
-        throw DriveExceptionCodes.LONG_POLLING_DISABLED.create(serverSession.getUserId(), serverSession.getContextId());
+        throw DriveExceptionCodes.LONG_POLLING_DISABLED.create(I(serverSession.getUserId()), I(serverSession.getContextId()));
     }
 
     @Override

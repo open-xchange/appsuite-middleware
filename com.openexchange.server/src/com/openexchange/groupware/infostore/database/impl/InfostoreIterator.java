@@ -59,6 +59,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,7 @@ import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
@@ -439,13 +441,19 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
      *
      * @return A listing of remaining elements
      * @throws OXException If list view cannot be returned
+     * @deprecated Prefer using {@link SearchIterators#asList(SearchIterator)} instead
      */
+    @Deprecated
     public List<DocumentMetadata> asList() throws OXException {
         try {
-            List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
-            while (hasNext()) {
-                result.add(next());
+            if (!hasNext()) {
+                return Collections.emptyList();
             }
+
+            List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
+            do {
+                result.add(next());
+            } while (hasNext());
             return result;
         } finally {
             close();

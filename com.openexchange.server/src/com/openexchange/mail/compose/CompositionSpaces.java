@@ -76,6 +76,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.HtmlProcessing;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -161,10 +162,13 @@ public class CompositionSpaces {
      * @param folderId The identifier of the folder in which the contact resides
      * @param session The session providing user information
      * @return The vCard as byte array
-     * @throws OXException
+     * @throws OXException If contact's vCard cannot be returned
      */
     public static VCardAndFileName getContactVCard(String contactId, String folderId, Session session) throws OXException {
         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        if (null == contactService) {
+            throw ServiceExceptionCode.absentService(ContactService.class);
+        }
         Contact contact = contactService.getContact(session, folderId, contactId);
 
         byte[] vcard;
@@ -180,25 +184,25 @@ public class CompositionSpaces {
 
         String displayName = contact.getDisplayName();
         if (Strings.isEmpty(displayName)) {
-            TranslatorFactory translatorFactory = ServerServiceRegistry.getInstance().getService(TranslatorFactory.class);
-
-            User user;
-            if (session instanceof ServerSession) {
-                user = ((ServerSession) session).getUser();
-            } else {
-                user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-            }
-
-            Translator translator = translatorFactory.translatorFor(user.getLocale());
-
             String givenName = contact.getGivenName();
             String surname = contact.getSurName();
-            displayName = String.format(translator.translate(USER_NAME), givenName, surname);
-        }
-        String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
-        String fileName = saneDisplayName + ".vcf";
 
-        return new VCardAndFileName(vcard, fileName);
+            TranslatorFactory translatorFactory = ServerServiceRegistry.getInstance().getService(TranslatorFactory.class);
+            if (null != translatorFactory) {
+                // Determine user's locale
+                User user;
+                if (session instanceof ServerSession) {
+                    user = ((ServerSession) session).getUser();
+                } else {
+                    user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+                }
+                Translator translator = translatorFactory.translatorFor(user.getLocale());
+                displayName = String.format(translator.translate(USER_NAME), givenName, surname);
+            } else {
+                displayName = new StringBuilder(givenName).append(' ').append(surname).toString();
+            }
+        }
+        return new VCardAndFileName(vcard, Strings.replaceWhitespacesWith(displayName, "") + ".vcf");
     }
 
     /**
