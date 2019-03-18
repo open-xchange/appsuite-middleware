@@ -18,6 +18,8 @@ tags:
     description: Interface for provisioning and other administrative operations.
   - name: Health
     description: The health-check module
+  - name: Passwordchangehistory
+    description: The password change histroy module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml
