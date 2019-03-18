@@ -94,7 +94,7 @@ public class Consistency {
         }
         TimeZone selectedTimeZone = Utils.selectTimeZone(session, calendarUserId, dateTime.getTimeZone(), null == originalDateTime ? null : originalDateTime.getTimeZone());
         if (false == dateTime.getTimeZone().equals(selectedTimeZone)) {
-            return dateTime.shiftTimeZone(selectedTimeZone);
+            return DateTime.parse(selectedTimeZone, dateTime.toString());
         }
         return dateTime;
     }
