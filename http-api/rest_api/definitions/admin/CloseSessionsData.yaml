@@ -1,7 +1,7 @@
 type: object
-propertties:
+properties:
   closed:
     type: array
     description: "Array of the closed session identifiers"
-  items:
-    type: string
+    items:
+      type: string
