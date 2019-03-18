@@ -396,109 +396,93 @@ public class NotificationMail {
         // Interested in other changes, but not in state changes
         boolean aboutStateChangesOnly = isAboutStateChangesOnly();
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
+            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
             return !aboutStateChangesOnly;
         }
-        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
         return true;
     }
+    
+    /*
+     * ============= HELPERS FOR LOGGING =============
+     */
 
-    private Object id() {
-        // Return as Object to avoid possibly superfluous String creation
-        return new Object() {
-
-            @Override
-            public String toString() {
-                try {
-                    return getRecipient().getUser().getId() + "";
-                } catch (Exception e) {
-                    return "NPE";
-                }
-            }
-        };
+    private String id() {
+        if (null != recipient && null != recipient.getUser()) {
+            return String.valueOf(getRecipient().getUser().getId());
+        }
+        return null;
     }
 
-    private Object getUserDiff() {
-        // Return as Object to avoid possibly superfluous String creation
-        return new Object() {
-
-            @Override
-            public String toString() {
-                StringBuilder sb = new StringBuilder(" Changed Users: ");
-                try {
-                    if (getDiff().getAttendeeUpdates() != null) {
-                        if (getDiff().getAttendeeUpdates().getAddedItems() != null && getDiff().getAttendeeUpdates().getAddedItems().size() > 0) {
-                            sb.append("A: ");
-                            for (Attendee added : getDiff().getAttendeeUpdates().getAddedItems()) {
-                                sb.append(added.getEMail() + "(" + added.getEntity() + "), ");
-                            }
-                        }
-                        if (getDiff().getAttendeeUpdates().getRemovedItems() != null && getDiff().getAttendeeUpdates().getRemovedItems().size() > 0) {
-                            sb.append("R: ");
-                            for (Attendee removed : getDiff().getAttendeeUpdates().getRemovedItems()) {
-                                sb.append(removed.getEMail() + "(" + removed.getEntity() + "), ");
-                            }
-                        }
-                        if (getDiff().getAttendeeUpdates().getUpdatedItems() != null && getDiff().getAttendeeUpdates().getUpdatedItems().size() > 0) {
-                            sb.append("U: ");
-                            for (ItemUpdate<Attendee, AttendeeField> updated : getDiff().getAttendeeUpdates().getUpdatedItems()) {
-                                sb.append(updated.getOriginal().getEMail() + "(" + updated.getOriginal().getEntity() + ") | ");
-                                sb.append(updated.getUpdatedFields().toString()).append(", ");
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    return "Error";
-                }
-                return sb.toString();
-            }
-        };
-    }
-
-    private Object diffs() {
-        // Return as Object to avoid possibly superfluous String creation
-        return new Object() {
-
-            @Override
-            public String toString() {
-                try {
-                    return getDiff().getUpdatedFields().toString();
-                } catch (Exception e) {
-                    return "NPE";
+    private String getUserDiff() {
+        // Try to get diff
+        ITipEventUpdate eventUpdate = null;
+        try {
+            eventUpdate = getDiff();
+        } catch (OXException e) {
+            LOG.debug("Unable to get EventUpdate", e);
+        }
+        if (null == eventUpdate) {
+            return null;
+        }
+        
+        // Explain diff
+        StringBuilder sb = new StringBuilder(" Changed Users: ");
+        if (eventUpdate.getAttendeeUpdates() != null) {
+            if (eventUpdate.getAttendeeUpdates().getAddedItems() != null && eventUpdate.getAttendeeUpdates().getAddedItems().size() > 0) {
+                sb.append("Added: ");
+                for (Attendee added : eventUpdate.getAttendeeUpdates().getAddedItems()) {
+                    sb.append(added.getEMail() + "(" + added.getEntity() + "), ");
                 }
             }
-        };
-    }
-
-    private Object changes() {
-        // Return as Object to avoid possibly superfluous String creation
-        return new Object() {
-
-            @Override
-            public String toString() {
-                try {
-                    return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
-                } catch (Exception e) {
-                    return "NPE";
+            if (eventUpdate.getAttendeeUpdates().getRemovedItems() != null && eventUpdate.getAttendeeUpdates().getRemovedItems().size() > 0) {
+                sb.append("Removed: ");
+                for (Attendee removed : eventUpdate.getAttendeeUpdates().getRemovedItems()) {
+                    sb.append(removed.getEMail() + "(" + removed.getEntity() + "), ");
                 }
             }
-        };
-    }
-
-    private Object stateChanges() {
-        // Return as Object to avoid possibly superfluous String creation
-        return new Object() {
-
-            @Override
-            public String toString() {
-                try {
-                    return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
-                } catch (Exception e) {
-                    return "NPE";
+            if (eventUpdate.getAttendeeUpdates().getUpdatedItems() != null && eventUpdate.getAttendeeUpdates().getUpdatedItems().size() > 0) {
+                sb.append("Updated: ");
+                for (ItemUpdate<Attendee, AttendeeField> updated : eventUpdate.getAttendeeUpdates().getUpdatedItems()) {
+                    sb.append(updated.getOriginal().getEMail() + "(" + updated.getOriginal().getEntity() + ") | ");
+                    sb.append(updated.getUpdatedFields().toString()).append(", ");
                 }
             }
-        };
+        }
+        return sb.toString();
     }
+
+    private String diffs() {
+        ITipEventUpdate eventUpdate = null;
+        try {
+            eventUpdate = getDiff();
+        } catch (Exception e) {
+            LOG.debug("Unable to get EventUpdate", e);
+        }
+
+        if (null != eventUpdate && null != eventUpdate.getUpdatedFields()) {
+            return eventUpdate.getUpdatedFields().toString();
+        }
+        return null;
+    }
+
+    private Boolean changes() {
+        if (null != recipient && null != recipient.getConfiguration()) {
+            return Boolean.valueOf(recipient.getConfiguration().interestedInChanges());
+        }
+        return null;
+    }
+
+    private Boolean stateChanges() {
+        if (null != recipient && null != recipient.getConfiguration()) {
+            return Boolean.valueOf(recipient.getConfiguration().interestedInStateChanges());
+        }
+        return null;
+    }
+    
+    /*
+     * ============= HELPERS =============
+     */
 
     private boolean endsInPast(final Event event) throws OXException {
         final Date now = new Date();
