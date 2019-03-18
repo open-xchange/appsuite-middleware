@@ -8,6 +8,6 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-system
 Architecture: all
-Depends: ${misc:Depends}, adduser, sed, coreutils
+Depends: ${misc:Depends}, adduser, sed, coreutils, perl
 Conflicts: open-xchange-core (<< 7.10.0)
 Description: system integration specific infrastructure
