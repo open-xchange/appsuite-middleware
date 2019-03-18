@@ -56,8 +56,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
+import javax.ws.rs.core.HttpHeaders;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -73,6 +77,7 @@ import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.LoginApi;
 import com.openexchange.testing.httpclient.modules.MultifactorApi;
 import com.openexchange.testing.httpclient.modules.UserMeApi;
+import com.openexchange.testing.restclient.modules.AdminApi;
 
 /**
  * {@link AbstractMultifactorProviderTest} is an abstract "Template Method Pattern" class which provides common tests for Multifactor Providers
@@ -205,10 +210,26 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         return startRegistrationResult;
     }
 
+    protected String getBasePath() {
+        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        if (protocol == null) {
+            protocol = "http";
+        }
+        return protocol + "://" + hostname + ":8009";
+    }
+
+    private AdminApi getAdminApi() {
+        com.openexchange.testing.restclient.invoker.ApiClient adminRestClient =
+            new com.openexchange.testing.restclient.invoker.ApiClient();
+        adminRestClient.setBasePath(getBasePath());
+        String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((admin.getUser() + ":" + admin.getPassword()).getBytes(StandardCharsets.UTF_8));
+        adminRestClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
+        return new AdminApi(adminRestClient);
+    }
+
     protected void clearAllMultifactorDevices() throws Exception {
-//        MultifactorManagementRemoteService stub = (MultifactorManagementRemoteService) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + MultifactorManagementRemoteService.RMI_NAME);
-//        TestUser admin = TestContextPool.getOxAdminMaster();
-//        stub.removeAllDevices(contextId, userId, new Credentials(admin.getUser(), admin.getPassword()));;
+        getAdminApi().multifactorDeleteDevices(contextId, userId);
     }
 
     protected void clearAllMultifactorDevicesByUser() throws Exception {
