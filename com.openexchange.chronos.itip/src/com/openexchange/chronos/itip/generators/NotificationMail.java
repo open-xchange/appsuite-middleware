@@ -94,8 +94,8 @@ public class NotificationMail {
     private String html;
     private String subject;
 
-    private Event           original;
-    private Event           event;
+    private Event original;
+    private Event event;
     private ITipEventUpdate diff;
 
     private NotificationParticipant sender;
@@ -126,6 +126,10 @@ public class NotificationMail {
         super();
         additionalHeaders = new LinkedHashMap<>(4);
     }
+
+    /*
+     * ============= SETTER and GETTER =============
+     */
 
     /**
      * Sets given additional header
@@ -269,24 +273,6 @@ public class NotificationMail {
         this.sharedCalendarOwner = sharedCalendarOwner;
     }
 
-    public boolean actionIsDoneOnBehalfOfAnother() throws OXException {
-        if (actor == null || actor.hasRole(ITipRole.PRINCIPAL)) {
-            return false;
-        }
-        return !actor.equals(getOnBehalfOf());
-    }
-
-    public boolean actionIsDoneOnMyBehalf() throws OXException {
-        if (isAboutActorsStateChangeOnly()) {
-            return false;
-        }
-        if (actor != null && actor.hasRole(ITipRole.PRINCIPAL)) {
-            return false;
-        }
-
-        return recipient.equals(principal) || recipient.equals(sharedCalendarOwner);
-    }
-
     public void setParticipants(List<NotificationParticipant> recipients) {
         sortedParticipants = false;
         this.participants = recipients;
@@ -333,20 +319,95 @@ public class NotificationMail {
         return attachmentUpdate;
     }
 
-    private boolean recipientIsOrganizerAndHasNoAccess() {
-        if (recipient.isExternal()) {
+    public void setActor(NotificationParticipant actor) {
+        this.actor = actor;
+    }
+
+    public NotificationParticipant getActor() {
+        return actor;
+    }
+
+    public Type getStateType() {
+        return stateType;
+    }
+
+    public void setStateType(Type stateType) {
+        this.stateType = stateType;
+    }
+
+    public void addAttachment(Attachment attachment) {
+        attachments.add(attachment);
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    /*
+     * ============= FUNCTIONS =============
+     */
+
+    public boolean actionIsDoneOnBehalfOfAnother() throws OXException {
+        if (actor == null || actor.hasRole(ITipRole.PRINCIPAL)) {
+            return false;
+        }
+        return !actor.equals(getOnBehalfOf());
+    }
+
+    public boolean actionIsDoneOnMyBehalf() throws OXException {
+        if (isAboutActorsStateChangeOnly()) {
+            return false;
+        }
+        if (actor != null && actor.hasRole(ITipRole.PRINCIPAL)) {
+            return false;
+        }
+
+        return recipient.equals(principal) || recipient.equals(sharedCalendarOwner);
+    }
+
+    public boolean isAboutStateChangesOnly() throws OXException {
+        if (getDiff() == null) {
+            return false;
+        }
+
+        if (isAttachmentUpdate()) {
+            return false;
+        }
+
+        if (isStateChangeExceptionCreate()) {
             return true;
         }
-        if (!recipient.hasRole(ITipRole.ORGANIZER)) {
-            return true;
+        return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
+    }
+
+    public boolean isAboutStateChanges() throws OXException {
+        if (getDiff() == null) {
+            return false;
         }
-        if (recipient.getIdentifier() == recipient.getContext().getMailadmin()) {
-            if (MailProperties.getInstance().isAdminMailLoginEnabled() == false) {
-                // Context administrator is recipient but does not have permission to access mail
-                return false;
-            }
+
+        return diff.isAboutStateChanges();
+    }
+
+    public boolean isAboutActorsStateChangeOnly() throws OXException {
+        if (!isAboutStateChangesOnly()) {
+            return false;
         }
-        return true;
+        return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
+    }
+
+    public boolean someoneElseChangedPrincipalsState() {
+        if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
+            return false;
+        }
+        return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
+    }
+
+    public boolean isStateChangeExceptionCreate() {
+        boolean candidate = diff.containsExactTheseChanges(new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.ATTENDEES });
+        if (candidate) {
+            return diff.isAboutStateChanges();
+        }
+        return false;
     }
 
     public boolean shouldBeSent(CalendarSession session) throws OXException {
@@ -402,7 +463,7 @@ public class NotificationMail {
         LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}, {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
         return true;
     }
-    
+
     /*
      * ============= HELPERS FOR LOGGING =============
      */
@@ -425,7 +486,7 @@ public class NotificationMail {
         if (null == eventUpdate) {
             return null;
         }
-        
+
         // Explain diff
         StringBuilder sb = new StringBuilder(" Changed Users: ");
         if (eventUpdate.getAttendeeUpdates() != null) {
@@ -479,7 +540,7 @@ public class NotificationMail {
         }
         return null;
     }
-    
+
     /*
      * ============= HELPERS =============
      */
@@ -525,8 +586,7 @@ public class NotificationMail {
         return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
     }
 
-    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.ORGANIZER };
+    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES, EventField.CHANGE_EXCEPTION_DATES, EventField.ORGANIZER };
 
     private boolean anInterestingFieldChanged() throws OXException {
         if (getDiff() == null) {
@@ -546,73 +606,20 @@ public class NotificationMail {
         return diff.containsExactTheseChanges(new EventField[] { EventField.RECURRENCE_ID });
     }
 
-    public boolean isAboutStateChangesOnly() throws OXException {
-        if (getDiff() == null) {
-            return false;
-        }
-
-        if (isAttachmentUpdate()) {
-            return false;
-        }
-
-        if (isStateChangeExceptionCreate()) {
+    private boolean recipientIsOrganizerAndHasNoAccess() {
+        if (recipient.isExternal()) {
             return true;
         }
-        return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
-    }
-
-    public boolean isAboutStateChanges() throws OXException {
-        if (getDiff() == null) {
-            return false;
+        if (!recipient.hasRole(ITipRole.ORGANIZER)) {
+            return true;
         }
-
-        return diff.isAboutStateChanges();
-    }
-
-    public boolean isAboutActorsStateChangeOnly() throws OXException {
-        if (!isAboutStateChangesOnly()) {
-            return false;
+        if (recipient.getIdentifier() == recipient.getContext().getMailadmin()) {
+            if (MailProperties.getInstance().isAdminMailLoginEnabled() == false) {
+                // Context administrator is recipient but does not have permission to access mail
+                return false;
+            }
         }
-        return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
-    }
-
-    public boolean someoneElseChangedPrincipalsState() {
-        if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
-            return false;
-        }
-        return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
-    }
-
-    public boolean isStateChangeExceptionCreate() {
-        boolean candidate = diff.containsExactTheseChanges(new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.ATTENDEES });
-        if (candidate) {
-            return diff.isAboutStateChanges();
-        }
-        return false;
-    }
-
-    public void setActor(NotificationParticipant actor) {
-        this.actor = actor;
-    }
-
-    public NotificationParticipant getActor() {
-        return actor;
-    }
-
-    public Type getStateType() {
-        return stateType;
-    }
-
-    public void setStateType(Type stateType) {
-        this.stateType = stateType;
-    }
-
-    public void addAttachment(Attachment attachment) {
-        attachments.add(attachment);
-    }
-
-    public List<Attachment> getAttachments() {
-        return attachments;
+        return true;
     }
 
 }
