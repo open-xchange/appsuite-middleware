@@ -1,4 +1,0 @@
-type: array
-description: Array of multifactor devices.
-items:
-    $ref: "#/definitions/MultifactorDeviceData"
