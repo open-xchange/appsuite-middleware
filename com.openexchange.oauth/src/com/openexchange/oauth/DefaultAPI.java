@@ -132,9 +132,6 @@ public class DefaultAPI implements API {
         } else if (!displayName.equals(other.displayName)) {
             return false;
         }
-        if (hash != other.hash) {
-            return false;
-        }
         if (serviceId == null) {
             if (other.serviceId != null) {
                 return false;
