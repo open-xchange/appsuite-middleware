@@ -6,7 +6,7 @@ Appsuite version 7.10.2 provides methods for users to require secondary, additio
 
 ## Enabling Multifactor
 
-No additional packages are required for the core of multifactor authentication, although for some methods (such as SMS), additional packages will be required.
+The `open-xchange-multifactor` package is required for the core of multifactor authentication. For some methods (such as SMS), additional packages will be required.
 
 With SMS, for example, you must also install a provider, such as `open-xchange-sms-sipgate`.
 
