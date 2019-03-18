@@ -160,7 +160,7 @@ public class CountingInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b) throws IOException {
-        int result = super.read(b);
+        int result = in.read(b, 0, b.length);
         if (result < 0) {
             // There is no more data because the end of the stream has been reached.
             return result;
