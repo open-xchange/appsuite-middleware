@@ -577,7 +577,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     }
                 }
                 MailPath editFor = meta.getEditFor();
-                if (null != editFor) {
+                if (null != editFor && MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
                     try {
                         mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
                     } catch (Exception e) {
