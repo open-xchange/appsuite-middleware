@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip;
 
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +68,8 @@ import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -185,6 +188,13 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     private CalendarStorage getStorage(CalendarSession session) throws OXException {
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Context context = contexts.getContext(session.getSession().getContextId());
+        
+        Connection connection = session.get(Connection.class.getName(), Connection.class, null);
+        if(null != connection) {
+            return storageFactory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session.getEntityResolver(), new SimpleDBProvider(connection, connection), DBTransactionPolicy.NO_TRANSACTIONS);
+        }
+        
+        
         return storageFactory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session.getEntityResolver());
     }
 
