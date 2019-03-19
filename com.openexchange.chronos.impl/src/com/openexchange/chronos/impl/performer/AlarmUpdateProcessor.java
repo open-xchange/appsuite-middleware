@@ -125,7 +125,7 @@ public class AlarmUpdateProcessor {
             // Finally add all new alarms
             if (null != alarmUpdates.getAddedItems() && false == alarmUpdates.getAddedItems().isEmpty()) {
                 try {
-                    newAlarms.addAll(AlarmMapper.getInstance().copy(alarmUpdates.getAddedItems(), (AlarmField) null));
+                    newAlarms.addAll(AlarmMapper.getInstance().copy(alarmUpdates.getAddedItems(), (AlarmField[]) null));
                 } catch (OXException e) {
                     // Should never happen
                     LOGGER.debug("Unable to copy alarm", e);
