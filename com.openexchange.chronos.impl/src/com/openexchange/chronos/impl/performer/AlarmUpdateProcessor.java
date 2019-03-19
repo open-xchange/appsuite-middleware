@@ -110,15 +110,26 @@ public class AlarmUpdateProcessor {
                 // Alarm IDs mapped to the exceptions alarm
                 Entry<Integer, Alarm> entry = iterator.next();
                 if (updatedMasterAlarms.containsKey(entry.getKey())) {
-                    newAlarms.add(copyAlarm(updatedMasterAlarms, entry));
+                    Alarm copy = copyAlarm(updatedMasterAlarms, entry);
+                    if(copy != null) {
+                        newAlarms.add(copy);
+                    }
                 } else {
                     // Add as-is
-                    newAlarms.add(copyAlarm(entry.getValue(), (AlarmField[]) null));
+                    Alarm copy = copyAlarm(entry.getValue(), (AlarmField[]) null);
+                    if(copy != null) {
+                        newAlarms.add(copy);
+                    }
                 }
             }
             // Finally add all new alarms
             if (null != alarmUpdates.getAddedItems() && false == alarmUpdates.getAddedItems().isEmpty()) {
-                newAlarms.addAll(copyAlarms(alarmUpdates.getAddedItems()));
+                try {
+                    newAlarms.addAll(AlarmMapper.getInstance().copy(alarmUpdates.getAddedItems(), (AlarmField) null));
+                } catch (OXException e) {
+                    // Should never happen
+                    LOGGER.debug("Unable to copy alarm", e);
+                }
             }
 
             // Add to result
@@ -208,17 +219,10 @@ public class AlarmUpdateProcessor {
         try {
             return AlarmMapper.getInstance().copy(alarm, null, fields);
         } catch (OXException e) {
+            // Should never happen
             LOGGER.debug("Unable to copy alarm", e);
         }
-        return alarm;
-    }
-
-    private static List<Alarm> copyAlarms(List<Alarm> alarms) {
-        List<Alarm> copied = new LinkedList<Alarm>();
-        for (Alarm alarm : alarms) {
-            copied.add(copyAlarm(alarm, (AlarmField[]) null));
-        }
-        return copied;
+        return null;
     }
 
     private static Alarm copyAlarm(Map<Integer, ItemUpdate<Alarm, AlarmField>> updatedMasterAlarms, Entry<Integer, Alarm> entry) {
@@ -227,9 +231,10 @@ public class AlarmUpdateProcessor {
             Alarm copy = copyAlarm(entry.getValue(), AlarmMapper.getInstance().getAssignedFields(entry.getValue()));
             return AlarmMapper.getInstance().copy(masterAlarm.getUpdate(), copy, masterAlarm.getUpdatedFields().toArray(new AlarmField[0]));
         } catch (OXException e) {
+            // Should never happen
             LOGGER.debug("Unable to copy alarm", e);
         }
-        return masterAlarm.getUpdate();
+        return null;
     }
 
 }
