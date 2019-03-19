@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.google.migration;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashSet;
@@ -173,14 +174,14 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                     inserted = true;
                     calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
                 } catch (JSONException e) {
-                    LOG.error("Error during migration of google subscriptions. Subscription with id {} in context {} could not be migrated to a calendar account because of: {}", sub.getId(), ctxId, e.getMessage());
+                    LOG.error("Error during migration of google subscriptions. Subscription with id {} in context {} could not be migrated to a calendar account because of: {}", I(sub.getId()), I(ctxId), e.getMessage());
                     // remove the subscription so it does not get deleted
                     iterator.remove();
                 } catch (OXException e) {
                     if (inserted) {
-                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id {}", sub.getUserId());
+                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id {}", I(sub.getUserId()));
                     } else {
-                        LOG.error("Error during migration of google subscriptions. Subscription with id {} in context {} could not be migrated to a calendar account because of: {}", sub.getId(), ctxId, e.getMessage());
+                        LOG.error("Error during migration of google subscriptions. Subscription with id {} in context {} could not be migrated to a calendar account because of: {}", I(sub.getId()), I(ctxId), e.getMessage());
                         // remove the subscription so it does not get deleted
                         iterator.remove();
                     }
@@ -201,13 +202,13 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 try {
                     UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
                     Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
-                    int folderId = Integer.valueOf(sub.getFolderId());
+                    int folderId = Integer.valueOf(sub.getFolderId()).intValue();
                     for (Integer user : userFromPermissions) {
-                        String folderProperty = storage.getFolderProperty(ctxId, folderId, user, "cal/subscribed");
+                        String folderProperty = storage.getFolderProperty(ctxId, folderId, i(user), "cal/subscribed");
                         if (folderProperty == null) {
-                            storage.insertFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
-                        } else if (Boolean.valueOf(folderProperty) == true) {
-                            storage.updateFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                            storage.insertFolderProperty(ctxId, folderId, i(user), "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                        } else if (Boolean.valueOf(folderProperty).booleanValue() == true) {
+                            storage.updateFolderProperty(ctxId, folderId, i(user), "cal/subscribed", Boolean.FALSE.toString(), writeCon);
                         }
                     }
                 } catch (OXException e) {
@@ -228,15 +229,15 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             if (perm.isGroup()) {
                 try {
                     Group group = groupService.getGroup(ctx, perm.getEntity());
-                    for (Integer member : group.getMember()) {
-                        result.add(member);
+                    for (int member : group.getMember()) {
+                        result.add(I(member));
                     }
                 } catch (OXException e) {
                     // Continue
                     LOG.debug("{}", e.getMessage(), e);
                 }
             } else {
-                result.add(perm.getEntity());
+                result.add(I(perm.getEntity()));
             }
         }
         return result;

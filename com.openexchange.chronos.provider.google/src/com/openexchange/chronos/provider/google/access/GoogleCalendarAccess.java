@@ -267,7 +267,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
             if (token != null) {
                 if (isSyncToken) {
-                    list.setShowDeleted(true);
+                    list.setShowDeleted(Boolean.TRUE);
                     list.setSyncToken(token);
                 } else {
                     list.setPageToken(token);
