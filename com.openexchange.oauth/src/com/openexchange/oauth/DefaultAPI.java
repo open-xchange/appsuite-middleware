@@ -62,6 +62,7 @@ public class DefaultAPI implements API {
     private final String displayName;
     private final int hash;
     private final String capability;
+    private final String url;
 
     /**
      * Initializes a new {@link DefaultAPI}.
@@ -70,15 +71,17 @@ public class DefaultAPI implements API {
      * @param displayName The API's name
      * @param aliases The optional aliases of the provider
      */
-    public DefaultAPI(String serviceId, String displayName, String capability) {
+    public DefaultAPI(String serviceId, String displayName, String capability, String url) {
         this.serviceId = serviceId;
         this.displayName = displayName;
         this.capability = capability;
+        this.url = url;
 
         int prime = 31;
         int result = 1;
         result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
         result = prime * result + ((capability == null) ? 0 : capability.hashCode());
         hash = result;
     }
@@ -89,8 +92,18 @@ public class DefaultAPI implements API {
     }
 
     @Override
-    public int hashCode() {
-        return hash;
+    public String getURL() {
+        return url;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public String getCapability() {
+        return capability;
     }
 
     @Override
@@ -105,6 +118,13 @@ public class DefaultAPI implements API {
             return false;
         }
         DefaultAPI other = (DefaultAPI) obj;
+        if (capability == null) {
+            if (other.capability != null) {
+                return false;
+            }
+        } else if (!capability.equals(other.capability)) {
+            return false;
+        }
         if (displayName == null) {
             if (other.displayName != null) {
                 return false;
@@ -117,6 +137,13 @@ public class DefaultAPI implements API {
                 return false;
             }
         } else if (!serviceId.equals(other.serviceId)) {
+            return false;
+        }
+        if (url == null) {
+            if (other.url != null) {
+                return false;
+            }
+        } else if (!url.equals(other.url)) {
             return false;
         }
         return true;
@@ -135,22 +162,15 @@ public class DefaultAPI implements API {
         if (capability != null) {
             builder.append("capability=").append(capability);
         }
+        if (url != null) {
+            builder.append("url=").append(url);
+        }
         builder.append("]");
         return builder.toString();
     }
 
     @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.API#getCapability()
-     */
-    @Override
-    public String getCapability() {
-        return capability;
+    public int hashCode() {
+        return hash;
     }
 }

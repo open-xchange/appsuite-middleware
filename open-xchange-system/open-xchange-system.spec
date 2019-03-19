@@ -31,6 +31,7 @@ Requires:      which
 %endif
 Requires:      sed
 Requires:      coreutils
+Requires:      perl
 Conflicts:     open-xchange-core < 7.10.0
 %description
 System integration specific infrastructure

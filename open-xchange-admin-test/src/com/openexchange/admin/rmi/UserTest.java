@@ -66,7 +66,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -79,6 +78,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
 import com.openexchange.data.conversion.ical.Assert;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link UserTest}
@@ -110,13 +110,6 @@ public class UserTest extends AbstractRMITest {
         context = getContextManager().create(contextAdminCredentials);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        getContextManager().delete(context, superAdminCredentials);
-
-        super.setUp();
-    }
-
     /**
      * Tests whether the default module access is set
      */
@@ -133,7 +126,7 @@ public class UserTest extends AbstractRMITest {
             String name = m.getName();
             if (!name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get"))) {
                 //System.out.println("*******" + name);
-                boolean res = (Boolean) m.invoke(ret, (Object[]) null);
+                boolean res = Autoboxing.b((Boolean) m.invoke(ret, (Object[]) null));
                 if (name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
                     assertTrue(name + " must return true", res);
                 } else {
@@ -481,7 +474,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testGetDataByID() throws Exception {
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
@@ -505,7 +497,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testGetModuleAccess() throws Exception {
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
@@ -522,7 +513,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testChangeModuleAccess() throws Exception {
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
@@ -605,8 +595,8 @@ public class UserTest extends AbstractRMITest {
         if (fs == null) {
             //create new filestore
             fs = new Filestore();
-            fs.setMaxContexts(1000);
-            fs.setSize(1024l);
+            fs.setMaxContexts(new Integer(1000));
+            fs.setSize(new Long(1024));
             fs.setUrl("file:///");
 
             fs = getFilestoreManager().register(fs);
@@ -634,7 +624,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testListAll() throws Exception {
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
@@ -658,7 +647,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testChange() throws Exception {
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -696,7 +684,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testChangeAlias() throws Exception {
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -736,11 +723,8 @@ public class UserTest extends AbstractRMITest {
     @Test
     public void testChangeAliasTooLong() throws Exception {
         // Try to change alias with too long name (Bug 52763)
-
         // get context to create an user
-
         // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -801,7 +785,6 @@ public class UserTest extends AbstractRMITest {
     @Test
     public void testChangeSingleAttributeNull() throws Exception {
         // set single values to null in the user object and then call change, what happens?
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -871,7 +854,6 @@ public class UserTest extends AbstractRMITest {
     public void testChangeAllAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -921,7 +903,6 @@ public class UserTest extends AbstractRMITest {
     public void testChangeAllAllowedAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -974,7 +955,6 @@ public class UserTest extends AbstractRMITest {
     @Test
     public void testChangeSingleAttribute() throws Exception {
         // change only 1 attribute of user object per call
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -1024,7 +1004,7 @@ public class UserTest extends AbstractRMITest {
 
         for (MethodMapObject map_obj : meth_objects) {
             if (!notallowed.contains(map_obj.getMethodName())) {
-                User tmp_usr = new User(srv_loaded.getId());
+                User tmp_usr = new User(Autoboxing.i(srv_loaded.getId()));
                 if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String") && map_obj.getGetter().getParameterTypes().length == 0) {
                     String oldvalue = (String) map_obj.getGetter().invoke(srv_loaded);
                     if (map_obj.getMethodName().equals("setLanguage")) {
@@ -1038,12 +1018,12 @@ public class UserTest extends AbstractRMITest {
                 }
                 if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Integer")) {
                     Integer oldvalue = (Integer) map_obj.getGetter().invoke(srv_loaded);
-                    map_obj.getSetter().invoke(tmp_usr, oldvalue + 1);
+                    map_obj.getSetter().invoke(tmp_usr, Autoboxing.I(oldvalue.intValue() + 1));
                     //System.out.println("Setting Integer via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                 }
                 if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Boolean")) {
                     Boolean oldvalue = (Boolean) map_obj.getGetter().invoke(srv_loaded);
-                    map_obj.getSetter().invoke(tmp_usr, !oldvalue);
+                    map_obj.getSetter().invoke(tmp_usr, Autoboxing.B(!oldvalue.booleanValue()));
                     //System.out.println("Setting Boolean via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                 }
                 if (map_obj.getMethodParameterType().equalsIgnoreCase("java.util.Date")) {
@@ -1082,7 +1062,6 @@ public class UserTest extends AbstractRMITest {
     public void testChangeWithEmptyUserIdentifiedByID() throws Exception {
         // STEP 1
         // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -1098,7 +1077,7 @@ public class UserTest extends AbstractRMITest {
         }
 
         // STEP 3
-        User emptyusr = new User(srv_loaded.getId());
+        User emptyusr = new User(Autoboxing.i(srv_loaded.getId()));
         getUserManager().change(context, emptyusr, contextAdminCredentials);
 
         // STEP 4
@@ -1119,7 +1098,6 @@ public class UserTest extends AbstractRMITest {
     @Test
     public void testChangeWithEmptyUserIdentifiedByName() throws Exception {
         // STEP 1
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -1361,7 +1339,7 @@ public class UserTest extends AbstractRMITest {
         retval.setFilestoreId(null);
         //retval.setName(null); // INFO: Commented because the server does not throw any exception if username is sent!
         retval.setPasswordMech(null);
-        retval.setMailenabled(!usr.getMailenabled());
+        retval.setMailenabled(Autoboxing.B(!usr.getMailenabled().booleanValue()));
 
         // do not change primary mail, that's forbidden per default, see
         //PRIMARY_MAIL_UNCHANGEABLE in User.properties
@@ -1428,7 +1406,7 @@ public class UserTest extends AbstractRMITest {
         retval.setNumber_of_children(usr.getNumber_of_children() + change_suffix);
         retval.setNumber_of_employee(usr.getNumber_of_employee() + change_suffix);
         retval.setTelephone_pager(usr.getTelephone_pager() + change_suffix);
-        retval.setPassword_expired(!usr.getPassword_expired());
+        retval.setPassword_expired(Autoboxing.B(!usr.getPassword_expired().booleanValue()));
         retval.setTelephone_assistant(usr.getTelephone_assistant() + change_suffix);
         retval.setTelephone_business1(usr.getTelephone_business1() + change_suffix);
         retval.setTelephone_business2(usr.getTelephone_business2() + change_suffix);
@@ -1626,7 +1604,7 @@ public class UserTest extends AbstractRMITest {
         private Method getter = null;
         private Method setter = null;
         private String methodParameterType = null;
-        private String methodName = null;
+        String methodName = null;
 
         /**
          * @return the getter

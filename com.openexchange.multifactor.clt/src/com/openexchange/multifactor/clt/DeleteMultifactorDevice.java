@@ -76,14 +76,16 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
     private static final String PARAM_DEVICE_ID_SHORT = "d";
     private static final String PARAM_DEVICE_ID_DESC = "The multifactor device id.";
 
-    private static String DELETE_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -r <providerName> -d <deviceId> -U <user:password>";
+    private static final String DELETE_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -r <providerName> -d <deviceId> -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword>";
 
     public static void main(String[] args) {
         new DeleteMultifactorDevice().execute(args);
     }
 
     @Override
-    protected void checkArguments(CommandLine cmd) {}
+    protected void checkArguments(CommandLine cmd) {
+        // Nothing
+    }
 
     @Override
     protected void addOptions(Options options) {
@@ -126,7 +128,9 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
     protected Void invoke(Options option, CommandLine cmd, Builder executionContext) throws Exception {
         executionContext.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.TEXT_PLAIN_TYPE);
         Response delete = executionContext.delete();
-        if (delete.getStatus() != Response.Status.OK.getStatusCode()) {
+        if (delete.getStatus() == Response.Status.OK.getStatusCode()) {
+            System.out.println("Multifactor authentication device successfully deleted");
+        } else {
             printError("Failed to delete the authentication device", delete.readEntity(String.class), delete.getStatusInfo());
             System.exit(-1);
         }

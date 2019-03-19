@@ -270,10 +270,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.firstRunDelay", "120s");
         config.setProperty(GroupProperty.MERGE_FIRST_RUN_DELAY_SECONDS.getName(),
-            String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
+            String.valueOf(TimeSpanParser.parseTimespanToPrimitive(mergeFirstRunDelay) / 1000));
         String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.runDelay", "120s");
         config.setProperty(GroupProperty.MERGE_NEXT_RUN_DELAY_SECONDS.getName(),
-            String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
+            String.valueOf(TimeSpanParser.parseTimespanToPrimitive(mergeRunDelay) / 1000));
         /*
          * Network Config
          */
@@ -302,7 +302,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         config.setProperty(GroupProperty.SOCKET_BIND_ANY.getName(), String.valueOf(
         configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
-        
+
         /*
          * Encryption
          */

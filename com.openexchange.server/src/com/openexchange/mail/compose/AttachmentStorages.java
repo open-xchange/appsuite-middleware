@@ -58,6 +58,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -81,8 +82,8 @@ public class AttachmentStorages {
         super();
     }
 
-    private static final com.openexchange.mail.compose.Attachment.ContentDisposition ATTACHMENT = com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT;
-    private static final com.openexchange.mail.compose.Attachment.ContentDisposition INLINE = com.openexchange.mail.compose.Attachment.ContentDisposition.INLINE;
+    private static final ContentDisposition ATTACHMENT = ContentDisposition.ATTACHMENT;
+    private static final ContentDisposition INLINE = ContentDisposition.INLINE;
 
     /**
      * Creates an attachment description for given non-inline mail part.
@@ -159,7 +160,7 @@ public class AttachmentStorages {
         // Compile attachment
         AttachmentDescription attachment = new AttachmentDescription();
         attachment.setCompositionSpaceId(compositionSpaceId);
-        attachment.setContentDisposition(com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT);
+        attachment.setContentDisposition(ContentDisposition.ATTACHMENT);
         attachment.setMimeType(MimeTypes.MIME_TEXT_VCARD + "; charset=\"UTF-8\"");
         attachment.setName(userVCard.getFileName());
         attachment.setSize(vcard.length);
@@ -179,12 +180,17 @@ public class AttachmentStorages {
     public static AttachmentDescription createUploadFileAttachmentDescriptionFor(StreamedUploadFile uploadFile, String disposition, UUID compositionSpaceId) throws OXException {
         AttachmentDescription attachment = new AttachmentDescription();
         attachment.setCompositionSpaceId(compositionSpaceId);
-        attachment.setContentDisposition(com.openexchange.mail.compose.Attachment.ContentDisposition.dispositionFor(disposition));
-        ContentType contentType = new ContentType(uploadFile.getContentType());
-        attachment.setMimeType(contentType.getBaseType());
-        if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
-            // Set a Content-Id for inline image, too
-            attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
+        {
+            ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
+            attachment.setContentDisposition(null == contentDisposition ? ATTACHMENT : contentDisposition);
+        }
+        {
+            ContentType contentType = new ContentType(uploadFile.getContentType());
+            attachment.setMimeType(contentType.getBaseType());
+            if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
+                // Set a Content-Id for inline image, too
+                attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
+            }
         }
         attachment.setName(uploadFile.getPreparedFileName());
         attachment.setOrigin(AttachmentOrigin.UPLOAD);

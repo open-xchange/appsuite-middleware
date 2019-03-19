@@ -75,18 +75,19 @@ import com.openexchange.cli.OutputHelper;
  */
 public class ListMultifactorDevice extends AbstractMultifactorClt {
 
-    private static String LIST_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -U <user:password>";
+    private static final String LIST_MULTIFACTOR_DEVICE_USAGE = "-c <contextId> -i <userId> -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword>";
 
     public static void main(String[] args) {
         new ListMultifactorDevice().execute(args);
     }
 
     private void printDevices(JSONArray devices) throws JSONException {
-        List<List<String>> dataToPrint = new ArrayList<List<String>>();
-        if(!dataToPrint.isEmpty()) {
-            for (int i = 0; i < devices.length(); i++) {
+        int length = devices.length();
+        if (length > 0) {
+            List<List<String>> dataToPrint = new ArrayList<List<String>>(length);
+            for (int i = 0; i < length; i++) {
                 JSONObject device = devices.getJSONObject(i);
-                List<String> deviceData = new ArrayList<String>();
+                List<String> deviceData = new ArrayList<String>(6);
                 deviceData.add(device.getString("id"));
                 deviceData.add(device.getString("providerName"));
                 deviceData.add(device.getString("name"));
@@ -95,6 +96,8 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
                 dataToPrint.add(deviceData);
             }
             OutputHelper.doOutput(new String[] { "l", "l", "l", "l", "l" }, new String[] { "ID", "Provider", "Name", "Enabled", "Backup" }, dataToPrint);
+        } else {
+            System.out.println("No multifactor authentication devices for given user");
         }
     }
 
@@ -141,8 +144,7 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
         if (response.getStatus() == Response.Status.OK.getStatusCode()) {
             JSONArray deviceArrays = new JSONArray(data);
             printDevices(deviceArrays);
-        }
-        else {
+        } else {
             printError("Failed to list multifactor authentication devices", data, response.getStatusInfo());
         }
 

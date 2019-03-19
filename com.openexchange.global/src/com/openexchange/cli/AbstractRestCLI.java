@@ -93,6 +93,25 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
     }
 
     /**
+     * Adds administrative options
+     *
+     * @param options The {@link Options} instance to add administrative options to.
+     */
+    protected void addAdministrativeOptions(Options options) {
+        options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for API authentication (user:password).", true));
+    }
+
+    /**
+     * Gets the raw value of authorization header added to the HTTP request.
+     *
+     * @param cmd The {@link CommandLine}
+     * @return The uncoded value of the authorization header to add to the HTTP request.
+     */
+    protected String getAuthorizationHeader(CommandLine cmd) {
+        return cmd.getOptionValue(USER_SHORT);
+    }
+
+    /**
      * Executes the command-line tool.
      *
      * @param args The arguments
@@ -106,7 +125,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             // Option for help
             options.addOption(createSwitch("h", "help", "Prints this help text", false));
             if (requiresAdministrativePermission()) {
-                options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for API authentication (user:password).", true));
+                addAdministrativeOptions(options);
             }
 
             // Add other options
@@ -135,7 +154,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
 
             executionContext = endpoint.request();
             if (requiresAdministrativePermission()) {
-                String authString = cmd.getOptionValue(USER_SHORT);
+                String authString = getAuthorizationHeader(cmd);
                 String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
                 executionContext.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
             }
@@ -212,7 +231,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getContext()
      */
     @Override

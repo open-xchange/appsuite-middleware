@@ -22,10 +22,11 @@
       produces:
         - application/json
       responses:
-        description: |
-          A JSON object containing all identifiers of the successfully closed sessions.
-        schema:
-          $ref: "#/definitions/CloseSessionsData"
+        200:
+          description: |
+            A JSON object containing all identifiers of the successfully closed sessions.
+          schema:
+            $ref: "#/definitions/CloseSessionsData"
         400:
           description: 'Bad request, response contains error message.'
         401:

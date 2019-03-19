@@ -60,7 +60,7 @@ import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.rest.AbstractRestTest;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.restclient.invoker.ApiClient;
-import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
+import com.openexchange.testing.restclient.modules.AdminApi;
 
 /**
  * {@link AbstractPasswordchangehistoryTest}
@@ -70,11 +70,11 @@ import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
  */
 public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
 
-    protected PasswordchangehistoryApi pwdhapi;
-    protected Long                     contextID;
-    protected Long                     userID;
-    protected Long                     limit = new Long(1);
-    protected long                     send;
+    protected AdminApi pwdhapi;
+    protected int contextID;
+    protected int userID;
+    protected int limit = 1;
+    protected long send;
 
     protected ApiClient pwdRestClient;
 
@@ -94,7 +94,7 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
         pwdRestClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
 
         // API to operate on
-        pwdhapi = new PasswordchangehistoryApi(pwdRestClient);
+        pwdhapi = new AdminApi(pwdRestClient);
 
         // Do a password change
         PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
@@ -104,8 +104,8 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
         assertFalse("Warnings in response!", response.hasWarnings());
 
         // Get context and user ID
-        contextID = new Long(getAjaxClient().getValues().getContextId());
-        userID = new Long(getAjaxClient().getValues().getUserId());
+        contextID = getAjaxClient().getValues().getContextId();
+        userID = getAjaxClient().getValues().getUserId();
     }
 
     protected PasswordChangeInfo parse(JSONObject data) throws Exception {

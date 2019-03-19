@@ -686,7 +686,7 @@ public class DriveConfig {
     private long parseTimeSpan(String interval, int minimum) throws OXException {
         long cleanerInterval = -1L;
         try {
-            cleanerInterval = TimeSpanParser.parseTimespan(interval).longValue();
+            cleanerInterval = TimeSpanParser.parseTimespanToPrimitive(interval);
         } catch (IllegalArgumentException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, interval);
         }

@@ -24,7 +24,7 @@
         schema:
           type: array
           items:
-            $ref: '#/definitions/MultifactorDevicesData'
+            $ref: '#/definitions/MultifactorDeviceData'
       '401':
         description: Not authorized
       '404':

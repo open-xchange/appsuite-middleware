@@ -280,7 +280,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     private void setupFeedbackQueries(ApnPushNotificationTransport apnTransport, String feedbackQueryInterval) {
         if (Strings.isNotEmpty(feedbackQueryInterval)) {
-            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval.trim()).longValue();
+            long interval = TimeSpanParser.parseTimespanToPrimitive(feedbackQueryInterval.trim());
             if (60 * 1000 > interval) {
                 LOG.warn("Ignoring too small value '{}' for APNS feedback query interval.", feedbackQueryInterval);
                 return;

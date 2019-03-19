@@ -56,7 +56,7 @@ import java.security.NoSuchAlgorithmException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.stream.CountingInputStream;
+import com.openexchange.tools.stream.CountingOnlyInputStream;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 import jonelo.jacksum.util.Service;
@@ -111,10 +111,10 @@ public abstract class FileStreamAction extends AbstractUndoable implements Undoa
 
     @Override
     public void perform() throws OXException {
-        CountingInputStream countingStream = null;
+        CountingOnlyInputStream countingStream = null;
         DigestInputStream digestStream = null;
         try {
-            countingStream = new CountingInputStream(data, -1);
+            countingStream = new CountingOnlyInputStream(data);
             if (calculateChecksum) {
                 try {
                     digestStream = new DigestInputStream(countingStream, MessageDigest.getInstance(CHECKSUM_ALGORITHM));

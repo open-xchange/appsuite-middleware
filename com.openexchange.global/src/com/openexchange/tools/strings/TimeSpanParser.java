@@ -89,11 +89,31 @@ public class TimeSpanParser  implements StringParser {
      * So, for example <tt>&quot;2D 1h 12ms&quot;</tt> would be 2 days and one hour and 12 milliseconds
      *
      * @param span The span string
-     * @return The parsed <tt>Long</tt> value
+     * @return The parsed <tt>long</tt> value
      */
     public static Long parseTimespan(final String span) {
+        return Long.valueOf(parseTimespanToPrimitive(span));
+    }
+
+    /**
+     * A timespan specification consists of a number and a unit of measurement. Units are:
+     * <ul>
+     * <li><tt>ms</tt> for miliseconds</li>
+     * <li><tt>s</tt> for seconds</li>
+     * <li><tt>m</tt> for minutes</li>
+     * <li><tt>h</tt> for hours</li>
+     * <li><tt>D</tt> for days</li>
+     * <li><tt>W</tt> for weeks</li>
+     * </ul>
+     *
+     * So, for example <tt>&quot;2D 1h 12ms&quot;</tt> would be 2 days and one hour and 12 milliseconds
+     *
+     * @param span The span string
+     * @return The parsed <tt>long</tt> value
+     */
+    public static long parseTimespanToPrimitive(final String span) {
         if (span == null) {
-            return Long.valueOf(-1);
+            return -1L;
         }
 
         final StringBuilder numberBuilder = new StringBuilder();
@@ -134,24 +154,26 @@ public class TimeSpanParser  implements StringParser {
             }
             tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
         }
-        return Long.valueOf(tally);
+        return tally;
     }
 
     private static final Set<Class<?>> SUPPORTED = ImmutableSet.of(Long.class, long.class, Date.class);
 
     @Override
     public <T> T parse(final String s, final Class<T> t) {
-        if(!SUPPORTED.contains(t)) {
+        if (!SUPPORTED.contains(t)) {
             return null;
         }
-        Long timespan = null;
+
+        long timespan;
         try {
-            timespan = parseTimespan(s);
+            timespan = parseTimespanToPrimitive(s);
         } catch (final IllegalArgumentException x) {
             return null;
         }
-        if(t == Long.class || t == long.class) {
-            return (T) timespan;
+
+        if (t == Long.class || t == long.class) {
+            return (T) Long.valueOf(timespan);
         } else if (t == Date.class) {
             return (T) new Date(timespan);
         }

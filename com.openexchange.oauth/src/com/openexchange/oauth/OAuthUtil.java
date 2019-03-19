@@ -54,15 +54,23 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.net.ssl.SSLHandshakeException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.scribe.exceptions.OAuthException;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
@@ -286,6 +294,71 @@ public final class OAuthUtil {
             return Integer.parseInt(accountId.toString());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
+        }
+    }
+    
+    /**
+     * Handles the specified {@link OAuthException} for the specified {@link OAuthAccount} and the
+     * specified {@link Session} and returns an appropriate {@link OXException}.
+     * 
+     * @param e The exception to handle
+     * @param oauthAccount the {@link OAuthAccount}
+     * @param session The groupware session
+     * @return The appropriate OXException
+     */
+    public static OXException handleScribeOAuthException(OAuthException e, OAuthAccount oauthAccount, Session session) {
+        if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+            List<Object> displayArgs = new ArrayList<>(2);
+            displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+            displayArgs.add(oauthAccount.getAPI().getURL());
+            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
+        }
+
+        String exMessage = e.getMessage();
+        String errorMsg = parseKeyFrom(exMessage, "error");
+        if (Strings.isEmpty(errorMsg)) {
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+        }
+        if (exMessage.contains("invalid_grant") || exMessage.contains("deleted_client")) {
+            if (null != oauthAccount) {
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, oauthAccount.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+            }
+            return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
+        }
+
+        String errorDescription = parseKeyFrom(exMessage, "error_description");
+        if (Strings.isEmpty(errorDescription)) {
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+        }
+        if (errorDescription.contains("Missing required parameter: refresh_token")) {
+             return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(oauthAccount.getDisplayName(), oauthAccount.getId());
+        }
+        return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+    }
+
+    /**
+     * Parses the specified key from from the specified message
+     * 
+     * @param message The message from which to parse the error code
+     * @return The error code, or <code>null</code> if none can be parsed
+     */
+    private static String parseKeyFrom(String message, String key) {
+        if (Strings.isEmpty(message)) {
+            return null;
+        }
+
+        String marker = "Can't extract a token from this: '";
+        int pos = message.indexOf(marker);
+        if (pos < 0) {
+            return null;
+        }
+
+        try {
+            JSONObject jo = new JSONObject(message.substring(pos + marker.length(), message.length() - 1));
+            return jo.optString(key, null);
+        } catch (JSONException e) {
+            // Apparent no JSON response
+            return null;
         }
     }
 }

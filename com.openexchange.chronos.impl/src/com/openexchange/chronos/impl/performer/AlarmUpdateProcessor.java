@@ -53,15 +53,21 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,6 +77,8 @@ import com.openexchange.exception.OXException;
  * @since v7.10.2
  */
 public class AlarmUpdateProcessor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlarmUpdateProcessor.class);
 
     /**
      * Initializes a new {@link AlarmUpdateProcessor}.
@@ -87,78 +95,141 @@ public class AlarmUpdateProcessor {
      */
     public static Map<Event, List<Alarm>> getUpdatedExceptions(List<Alarm> originalAlarms, List<Alarm> updatedAlarms, List<Event> exceptions) {
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
+        if (null == exceptions || alarmUpdates.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
-        return exceptions.stream().collect(HashMap::new, (map, event) -> {
-            Optional<Map<Integer, Alarm>> optRelations = getRelations(originalAlarms, event.getAlarms());
-            if (optRelations.isPresent()) {
-                Map<Integer, Alarm> relations = optRelations.get();
-                List<Alarm> newAlarms = new ArrayList<>(updatedAlarms.size());
-                alarmUpdates.getRemovedItems().forEach((removed) -> relations.remove(I(removed.getId())));
-                alarmUpdates.getUpdatedItems().forEach((update) -> {
-                    Alarm exceptionAlarm = relations.remove(I(update.getOriginal().getId()));
-                    try {
-                        Alarm copy = AlarmMapper.getInstance().copy(exceptionAlarm, null, AlarmMapper.getInstance().getAssignedFields(exceptionAlarm));
-                        AlarmMapper.getInstance().copy(update.getUpdate(), copy, update.getUpdatedFields().stream().toArray(AlarmField[]::new));
-                        // add updated alarms
-                        newAlarms.add(copy);
-                    } catch (@SuppressWarnings("unused") OXException e) {
-                        // Should never happen
-                    }
-                });
-                // add new alarms
-                newAlarms.addAll(alarmUpdates.getAddedItems());
-                // Add unchanged alarms
-                newAlarms.addAll(relations.values());
-                map.put(event, newAlarms);
+        // Get removed and updated items
+        List<Integer> removedItems = getRemovedItems(alarmUpdates);
+        Map<Integer, ItemUpdate<Alarm, AlarmField>> updatedMasterAlarms = getUpdatedAlarms(alarmUpdates);
+
+        Map<Event, List<Alarm>> result = new HashMap<Event, List<Alarm>>(updatedAlarms.size());
+        for (Event exception : exceptions) {
+            List<Alarm> newAlarms = new ArrayList<>(updatedAlarms.size());
+            for (Iterator<Entry<Integer, Alarm>> iterator = getRelations(originalAlarms, exception.getAlarms(), removedItems).entrySet().iterator(); iterator.hasNext();) {
+                // Alarm IDs mapped to the exceptions alarm
+                Entry<Integer, Alarm> entry = iterator.next();
+                if (updatedMasterAlarms.containsKey(entry.getKey())) {
+                    newAlarms.add(copyAlarm(updatedMasterAlarms, entry));
+                } else {
+                    // Add as-is
+                    newAlarms.add(copyAlarm(entry.getValue(), (AlarmField[]) null));
+                }
             }
-        }, HashMap::putAll);
+            // Finally add all new alarms
+            if (null != alarmUpdates.getAddedItems() && false == alarmUpdates.getAddedItems().isEmpty()) {
+                newAlarms.addAll(copyAlarms(alarmUpdates.getAddedItems()));
+            }
+
+            // Add to result
+            result.put(exception, newAlarms);
+        }
+        return result;
     }
 
     /**
-     * Optionally gets the original alarm ids mapped to the related alarm of the exception. Return an empty {@link Optional} in case the alarm lists contain unrelated items.
+     * Get a {@link List} of identifier for removed alarms
      *
-     * @param tmpMaster The original alarms of the master event
-     * @param tmpException The original alarms of the exception event
-     * @return A mapping of id to alarms or an empty {@link Optional} in case an alarm is unrelated
+     * @param alarmUpdates {@link CollectionUpdate} containing the removed alarms
+     * @return A {@link List} containing removed items
      */
-    private static Optional<Map<Integer, Alarm>> getRelations(List<Alarm> master, List<Alarm> exception) {
-        List<Alarm> tmpMaster = master;
-        if(tmpMaster == null) {
-            tmpMaster = Collections.emptyList();
+    private static List<Integer> getRemovedItems(CollectionUpdate<Alarm, AlarmField> alarmUpdates) {
+        if (null != alarmUpdates.getRemovedItems() && false == alarmUpdates.getRemovedItems().isEmpty()) {
+            List<Integer> removedItems = new LinkedList<Integer>();
+            for (Alarm a : alarmUpdates.getRemovedItems()) {
+                removedItems.add(I(a.getId()));
+            }
+            return removedItems;
         }
-        List<Alarm> tmpException = exception;
-        if(tmpException == null) {
-            tmpException = Collections.emptyList();
+        return Collections.emptyList();
+    }
+
+    /**
+     * Get all alarm updates mapped by their ID
+     *
+     * @param alarmUpdates All alarm changes in an {@link CollectionUpdate}
+     * @return A {@link Map} containing the {@link ItemUpdate}s identified by their ID
+     */
+    private static Map<Integer, ItemUpdate<Alarm, AlarmField>> getUpdatedAlarms(CollectionUpdate<Alarm, AlarmField> alarmUpdates) {
+        if (null == alarmUpdates.getUpdatedItems() || alarmUpdates.getUpdatedItems().isEmpty()) {
+            return Collections.emptyMap();
         }
-        
-        if (tmpMaster.size() != tmpException.size()) {
-            return Optional.empty();
+        Map<Integer, ItemUpdate<Alarm, AlarmField>> updated = new HashMap<>(alarmUpdates.getUpdatedItems().size());
+        for (ItemUpdate<Alarm, AlarmField> itemUpdate : alarmUpdates.getUpdatedItems()) {
+            updated.put(I(itemUpdate.getOriginal().getId()), itemUpdate);
+        }
+        return updated;
+    }
+
+    /**
+     * Gets the original alarm ids mapped to the related alarm of the exception. Return an empty map in case the alarm lists contain unrelated items.
+     *
+     * @param originalAlarms The original alarms of the master event
+     * @param exceptionAlarms The original alarms of the exception event
+     * @param removedItems The removed alarms to skip implicit
+     * @return A mapping of id to alarms or an empty map in case an alarm is unrelated
+     */
+    private static Map<Integer, Alarm> getRelations(List<Alarm> originalAlarms, List<Alarm> exceptionAlarms, List<Integer> removedItems) {
+        if (originalAlarms == null || exceptionAlarms == null || originalAlarms.size() != exceptionAlarms.size()) {
+            // Avoid changing exceptions alarms if they do not match the alarms in the master event
+            return Collections.emptyMap();
         }
 
-        Map<Integer, Alarm> result = new HashMap<>(tmpMaster.size());
-        for (Alarm alarm : tmpMaster) {
-            Optional<Alarm> related = getRelated(alarm, tmpException);
-            if (related.isPresent()) {
-                result.put(I(alarm.getId()), related.get());
-            } else {
-                return Optional.empty();
+        Map<Integer, Alarm> result = new HashMap<>(originalAlarms.size());
+        for (Alarm alarm : originalAlarms) {
+            Optional<Alarm> related = getRelated(alarm, exceptionAlarms);
+            if (false == related.isPresent()) {
+                // Alarms differ, avoid any overwrite
+                return Collections.emptyMap();
             }
+            Alarm exceptionAlarm = related.get();
+            // Skip removed alarms
+            if (false == removedItems.contains(I(exceptionAlarm.getId())))
+                result.put(I(alarm.getId()), exceptionAlarm);
         }
-        return Optional.of(result);
+        return result;
     }
 
     /**
      * Optionally get the related alarm for the given alarm
      *
      * @param alarm The alarm to find a related alarm for
-     * @param alarms The list of alarms to check
+     * @param exceptionAlarms The list of alarms to check
      * @return An {@link Optional} containing the alarm or not
      */
-    private static Optional<Alarm> getRelated(Alarm alarm, List<Alarm> alarms) {
-        return alarms.stream().filter((other) -> {
+    private static Optional<Alarm> getRelated(Alarm alarm, List<Alarm> exceptionAlarms) {
+        return exceptionAlarms.stream().filter((other) -> {
             return AlarmMapper.getInstance().getDifferentFields(alarm, other, true, AlarmField.ID, AlarmField.UID, AlarmField.TIMESTAMP).isEmpty();
-        }).findFirst();
+        }).findAny();
 
+    }
+
+    private static Alarm copyAlarm(Alarm alarm, AlarmField... fields) {
+        try {
+            return AlarmMapper.getInstance().copy(alarm, null, fields);
+        } catch (OXException e) {
+            LOGGER.debug("Unable to copy alarm", e);
+        }
+        return alarm;
+    }
+
+    private static List<Alarm> copyAlarms(List<Alarm> alarms) {
+        List<Alarm> copied = new LinkedList<Alarm>();
+        for (Alarm alarm : alarms) {
+            copied.add(copyAlarm(alarm, (AlarmField[]) null));
+        }
+        return copied;
+    }
+
+    private static Alarm copyAlarm(Map<Integer, ItemUpdate<Alarm, AlarmField>> updatedMasterAlarms, Entry<Integer, Alarm> entry) {
+        ItemUpdate<Alarm, AlarmField> masterAlarm = updatedMasterAlarms.get(entry.getKey());
+        try {
+            Alarm copy = copyAlarm(entry.getValue(), AlarmMapper.getInstance().getAssignedFields(entry.getValue()));
+            return AlarmMapper.getInstance().copy(masterAlarm.getUpdate(), copy, masterAlarm.getUpdatedFields().toArray(new AlarmField[0]));
+        } catch (OXException e) {
+            LOGGER.debug("Unable to copy alarm", e);
+        }
+        return masterAlarm.getUpdate();
     }
 
 }
