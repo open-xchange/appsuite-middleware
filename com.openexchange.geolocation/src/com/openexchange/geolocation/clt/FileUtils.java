@@ -69,6 +69,7 @@ import java.util.zip.ZipInputStream;
 import com.openexchange.cli.ProgressMonitor;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Numbers;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -232,15 +233,18 @@ public final class FileUtils {
         if (false == keep) {
             parentFile.deleteOnExit();
         }
-        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+        FileOutputStream fos = null;
+        try {
             parentFile.mkdirs();
-            int len;
-            while ((len = zipInputStream.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
+            fos = new FileOutputStream(newFile);
+            for (int read; (read = zipInputStream.read(buffer)) > 0;) {
+                fos.write(buffer, 0, read);
             }
         } catch (IOException e) {
             System.out.println("failed.");
             throw e;
+        } finally {
+            Streams.close(fos);
         }
         System.out.println("OK");
     }
