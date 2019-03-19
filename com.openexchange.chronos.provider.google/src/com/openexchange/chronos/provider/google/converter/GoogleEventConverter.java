@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import org.slf4j.Logger;
@@ -84,6 +85,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
 
 /**
  * {@link GoogleEventConverter}
@@ -592,7 +594,11 @@ public class GoogleEventConverter {
 
         public DateTime convert(EventDateTime from) {
             if (from.getDateTime() == null) {
-                return new DateTime(from.getDate().getValue());
+                String timeZoneStr = from.getTimeZone();
+                TimeZone tz = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
+                java.util.Calendar cal = java.util.Calendar.getInstance(tz);
+                cal.setTimeInMillis(from.getDate().getValue());
+                return new DateTime(cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH));
             }
             return new DateTime(from.getDateTime().getValue());
         }
