@@ -61,7 +61,6 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Repeat;
 import com.openexchange.chronos.Trigger;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
 import com.openexchange.groupware.tools.mappings.Mapping;
@@ -114,7 +113,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, Integer value) throws OXException {
+            public void set(Alarm object, Integer value) {
                 object.setId(null != value ? Autoboxing.i(value) : 0);
             }
 
@@ -136,7 +135,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, String value) throws OXException {
+            public void set(Alarm object, String value) {
                 object.setSummary(value);
             }
 
@@ -158,7 +157,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, String value) throws OXException {
+            public void set(Alarm object, String value) {
                 object.setDescription(value);
             }
 
@@ -180,7 +179,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, String value) throws OXException {
+            public void set(Alarm object, String value) {
                 object.setUid(value);
             }
 
@@ -202,7 +201,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, String value) throws OXException {
+            public void set(Alarm object, String value) {
                 object.setUid(value);
             }
 
@@ -224,7 +223,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, RelatedTo value) throws OXException {
+            public void set(Alarm object, RelatedTo value) {
                 object.setRelatedTo(value);
             }
 
@@ -246,7 +245,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, Repeat value) throws OXException {
+            public void set(Alarm object, Repeat value) {
                 object.setRepeat(value);
             }
 
@@ -263,7 +262,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
         mappings.put(AlarmField.TRIGGER, new DefaultMapping<Trigger, Alarm>() {
 
             @Override
-            public void copy(Alarm from, Alarm to) throws OXException {
+            public void copy(Alarm from, Alarm to) {
                 Trigger value = get(from);
                 set(to, null == value ? null : new Trigger(value));
             }
@@ -274,7 +273,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, Trigger value) throws OXException {
+            public void set(Alarm object, Trigger value) {
                 object.setTrigger(value);
             }
 
@@ -291,7 +290,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
         mappings.put(AlarmField.ACTION, new DefaultMapping<AlarmAction, Alarm>() {
 
             @Override
-            public void copy(Alarm from, Alarm to) throws OXException {
+            public void copy(Alarm from, Alarm to) {
                 AlarmAction value = get(from);
                 set(to, value);
             }
@@ -302,7 +301,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, AlarmAction value) throws OXException {
+            public void set(Alarm object, AlarmAction value) {
                 object.setAction(value);
             }
 
@@ -319,7 +318,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
         mappings.put(AlarmField.ACKNOWLEDGED, new DefaultMapping<Date, Alarm>() {
 
             @Override
-            public void copy(Alarm from, Alarm to) throws OXException {
+            public void copy(Alarm from, Alarm to) {
                 Date value = get(from);
                 set(to, value);
             }
@@ -330,7 +329,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, Date value) throws OXException {
+            public void set(Alarm object, Date value) {
                 object.setAcknowledged(value);
             }
 
@@ -352,7 +351,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, List<Attachment> value) throws OXException {
+            public void set(Alarm object, List<Attachment> value) {
                 object.setAttachments(value);
             }
 
@@ -374,7 +373,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, List<Attendee> value) throws OXException {
+            public void set(Alarm object, List<Attendee> value) {
                 object.setAttendees(value);
             }
 
@@ -396,7 +395,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, ExtendedProperties value) throws OXException {
+            public void set(Alarm object, ExtendedProperties value) {
                 object.setExtendedProperties(value);
             }
 
@@ -418,13 +417,13 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, Long value) throws OXException {
-                object.setTimestamp(value);
+            public void set(Alarm object, Long value) {
+                object.setTimestamp(Autoboxing.l(value));
             }
 
             @Override
             public Long get(Alarm object) {
-                return object.getTimestamp();
+                return Autoboxing.L(object.getTimestamp());
             }
 
             @Override
