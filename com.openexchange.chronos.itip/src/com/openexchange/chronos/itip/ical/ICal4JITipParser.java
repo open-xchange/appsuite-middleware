@@ -84,6 +84,7 @@ public class ICal4JITipParser {
         ICalService iCalService = Services.getService(ICalService.class);
         ICalParameters parameters = iCalService.initParameters();
         parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
+        parameters.set(ICalParameters.IGNORE_ALARM, Boolean.TRUE);
         ImportedCalendar calendar = iCalService.importICal(ical, parameters);
 
         boolean microsoft = looksLikeMicrosoft(calendar);

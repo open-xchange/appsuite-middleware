@@ -202,7 +202,9 @@ public class ICalUtils {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedEvent importedEvent = new ImportedEvent(index, mapper.importVEvent(vEvent, parameters, warnings), warnings);
-        importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
+        if (!Autoboxing.b(parameters.get(ICalParameters.IGNORE_ALARM, Boolean.class, Boolean.FALSE))) {
+            importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
+        }
         return importedEvent;
     }
 

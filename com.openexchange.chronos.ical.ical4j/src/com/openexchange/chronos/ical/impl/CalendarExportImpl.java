@@ -68,6 +68,7 @@ import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.chronos.ical.ical4j.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.version.VersionService;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Component;
@@ -236,10 +237,12 @@ public class CalendarExportImpl implements CalendarExport {
         /*
          * export alarms as sub-components
          */
-        List<Alarm> alarms = event.getAlarms();
-        if (null != alarms && 0 < alarms.size()) {
-            for (Alarm alarm : alarms) {
-                vEvent.getAlarms().add(exportAlarm(alarm));
+        if (!Autoboxing.b(parameters.get(ICalParameters.IGNORE_ALARM, Boolean.class, Boolean.FALSE))) {
+            List<Alarm> alarms = event.getAlarms();
+            if (null != alarms && 0 < alarms.size()) {
+                for (Alarm alarm : alarms) {
+                    vEvent.getAlarms().add(exportAlarm(alarm));
+                }
             }
         }
         return vEvent;

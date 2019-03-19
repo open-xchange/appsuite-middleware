@@ -108,6 +108,13 @@ public interface ICalParameters {
     /**
      * {@link Boolean}
      * <p/>
+     * Configures whether the <code>VALARM</code> component should be ignored during import or export.
+     */
+    String IGNORE_ALARM = "IGNORE_ALARM";
+
+    /**
+     * {@link Boolean}
+     * <p/>
      * Configures whether properties that are not present in the iCalendar input should either be skipped, or if the mapped object
      * attribute(s) should be explicitly set to <code>null</code>. The latter option will make the typical <code>containsXXX</code>
      * methods return <code>true</code>, while ignoring such properties will keep the attributes appear unset.
