@@ -150,6 +150,46 @@ public final class IMAPConversationWorker {
         return b.booleanValue();
     }
 
+    private static volatile Boolean prefillCache;
+    static boolean prefillCache() {
+        Boolean b = prefillCache;
+        if (null == b) {
+            synchronized (IMAPConversationWorker.class) {
+                b = prefillCache;
+                if (null == b) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return true;
+                    }
+
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.refthreader.cache.prefillCache", true));
+                    prefillCache = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    private static volatile Boolean useCache;
+    static boolean useCache() {
+        Boolean b = useCache;
+        if (null == b) {
+            synchronized (IMAPConversationWorker.class) {
+                b = useCache;
+                if (null == b) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return true;
+                    }
+
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.refthreader.cache.enabled", true));
+                    useCache = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -161,7 +201,10 @@ public final class IMAPConversationWorker {
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.useImapThreaderIfSupported");
+                return Reloadables.interestsForProperties(
+                    "com.openexchange.imap.useImapThreaderIfSupported",
+                    "com.openexchange.imap.refthreader.cache.prefillCache"
+                );
             }
         });
     }
@@ -282,49 +325,51 @@ public final class IMAPConversationWorker {
         final boolean isRev1 = imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1();
 
         // Check cache
-        final ConversationCache conversationCache = ConversationCache.getInstance();
-        if (false == body) {
-            if (conversationCache.containsCachedConversations(fullName, imapMessageStorage.getAccountId(), imapMessageStorage.getSession())) {
-                int total = imapMessageStorage.getImapFolder().getMessageCount();
-                long uidNext = imapMessageStorage.getImapFolder().getUIDNext();
-                int sentTotal = 0;
-                long sentUidNext = 0L;
-                if (mergeWithSent) {
-                    // Switch folder
-                    imapMessageStorage.openReadOnly(sentFullName);
+        final ConversationCache optConversationCache = useCache() ? ConversationCache.getInstance() : null;
+        if (optConversationCache != null) {
+            if (false == body) {
+                if (optConversationCache.containsCachedConversations(fullName, imapMessageStorage.getAccountId(), imapMessageStorage.getSession())) {
+                    int total = imapMessageStorage.getImapFolder().getMessageCount();
+                    long uidNext = imapMessageStorage.getImapFolder().getUIDNext();
+                    int sentTotal = 0;
+                    long sentUidNext = 0L;
+                    if (mergeWithSent) {
+                        // Switch folder
+                        imapMessageStorage.openReadOnly(sentFullName);
 
-                    sentTotal = imapMessageStorage.getImapFolder().getMessageCount();
-                    sentUidNext = imapMessageStorage.getImapFolder().getUIDNext();
+                        sentTotal = imapMessageStorage.getImapFolder().getMessageCount();
+                        sentUidNext = imapMessageStorage.getImapFolder().getUIDNext();
 
-                    // Switch back folder
-                    imapMessageStorage.openReadOnly(fullName);
-                }
+                        // Switch back folder
+                        imapMessageStorage.openReadOnly(fullName);
+                    }
 
-                String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, sentTotal, sentUidNext);
-                List<List<MailMessage>> list = conversationCache.getCachedConversations(fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
-                if (null != list) {
+                    String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, sentTotal, sentUidNext);
+                    List<List<MailMessage>> list = optConversationCache.getCachedConversations(fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+                    if (null != list) {
 
-                    // Filter for searchterm
-                    if (useSearchTerm) {
-                        List<List<MailMessage>> result = filterThreads(list, searchTerm);
+                        // Filter for searchterm
+                        if (useSearchTerm) {
+                            List<List<MailMessage>> result = filterThreads(list, searchTerm);
+                            // Slice & fill with recent flags
+                            if (usedFields.containsAny(FIELDS_FLAGS)) {
+                                return sliceAndFill(result, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
+                            }
+                            return sliceMessages(result, indexRange);
+                        }
+
                         // Slice & fill with recent flags
                         if (usedFields.containsAny(FIELDS_FLAGS)) {
-                            return sliceAndFill(result, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
+                            return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
                         }
-                        return sliceMessages(result, indexRange);
+                        return sliceMessages(list, indexRange);
                     }
-
-                    // Slice & fill with recent flags
-                    if (usedFields.containsAny(FIELDS_FLAGS)) {
-                        return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
-                    }
-                    return sliceMessages(list, indexRange);
                 }
             }
-        }
 
-        // No suitable cache content - Generate from scratch
-        conversationCache.removeAccountConversations(imapMessageStorage.getAccountId(), imapMessageStorage.getSession());
+            // No suitable cache content - Generate from scratch
+            optConversationCache.removeAccountConversations(imapMessageStorage.getAccountId(), imapMessageStorage.getSession());
+        }
 
         // Define the behavior how to query the conversation-relevant information from IMAP; either via ENVELOPE or by dedicated headers
         final boolean byEnvelope = false;
@@ -418,7 +463,9 @@ public final class IMAPConversationWorker {
             fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
 
             // Put into cache
-            conversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+            if (optConversationCache != null) {
+                optConversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+            }
 
             // Filter for searchterm
             if (useSearchTerm) {
@@ -435,27 +482,39 @@ public final class IMAPConversationWorker {
             // Fill
             fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
             // Put into cache
-            conversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+            if (optConversationCache != null) {
+                optConversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+            }
             // Slice
             return sliceMessages(list, indexRange);
         }
 
         // Use a separate thread...
         Object[] parts = slicePartsFrom(list, indexRange);
-        @SuppressWarnings("unchecked")
-        final List<List<MailMessage>> first = (List<List<MailMessage>>) parts[0];
-        @SuppressWarnings("unchecked")
-        List<List<MailMessage>> slice = (List<List<MailMessage>>) parts[1];
+        @SuppressWarnings("unchecked") List<List<MailMessage>> slice = (List<List<MailMessage>>) parts[1];
         if (null == slice) {
             // Return empty iterator if start is out of range
             return Collections.emptyList();
         }
-        @SuppressWarnings("unchecked")
-        final List<List<MailMessage>> rest = (List<List<MailMessage>>) parts[2];
-        parts = null;
 
         // Fill slice with this thread
         fillMessages(slice, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
+
+        if (optConversationCache == null) {
+            return slice;
+        }
+
+        final List<List<MailMessage>> first;
+        final List<List<MailMessage>> rest;
+        if (prefillCache()) {
+            first = (List<List<MailMessage>>) parts[0];
+            rest = (List<List<MailMessage>>) parts[2];
+        } else {
+            first = null;
+            rest = null;
+        }
+        parts = null;
+
         // Fill others with another thread & put complete list into cache after all filled
         if (null != first || null != rest) {
             final MailAccount mailAccount = imapMessageStorage.getMailAccount();
@@ -490,7 +549,7 @@ public final class IMAPConversationWorker {
                     }
 
                     // Put into cache
-                    conversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+                    optConversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
 
                     return null;
                 }
@@ -498,7 +557,7 @@ public final class IMAPConversationWorker {
             ThreadPools.getThreadPool().submit(t);
         } else {
             // Put into cache
-            conversationCache.putCachedConversations(slice, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+            optConversationCache.putCachedConversations(slice, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
         }
 
         return slice;
