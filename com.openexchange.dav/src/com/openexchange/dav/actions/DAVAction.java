@@ -51,6 +51,11 @@ package com.openexchange.dav.actions;
 
 import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -72,6 +77,7 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -381,6 +387,47 @@ public abstract class DAVAction extends AbstractAction {
         if (null != value) {
             response.setHeader(header, value.toString());
         }
+    }
+
+    /**
+     * Gets the decoded WebDAV paths from all <code>DAV:href</code> children of the supplied parent element.
+     * 
+     * @param request The underlying WebDAV request
+     * @param parentElement The parent element to extract the paths of the children from
+     * @return The extracted WebDAV paths, or an empty list if there are none
+     */
+    protected List<WebdavPath> getHrefPaths(WebdavRequest request, Element parentElement) throws WebdavProtocolException {
+        List<Element> children = null == parentElement ? null : parentElement.getChildren("href", DAV_NS);
+        if (null == children || children.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
+        for (Element element : children) {
+            paths.add(getPath(request, element.getText()));
+        }
+        return paths;
+    }
+
+    /**
+     * Gets the WebDAV path from the supplied <code>href</code> value.
+     * 
+     * @param request The underlying WebDAV request
+     * @param href The <code>href</code> value to get the WebDAV path from
+     * @return The WebDAV path
+     */
+    protected WebdavPath getPath(WebdavRequest request, String href) throws WebdavProtocolException {
+        String path;
+        try {
+            path = new URI(href).getPath();
+        } catch (URISyntaxException e) {
+            org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error instantiating an URI from {}", href, e);
+            path = href;
+        }
+        String urlPrefix = request.getURLPrefix();
+        if (Strings.isNotEmpty(urlPrefix) && path.startsWith(urlPrefix)) {
+            path = path.substring(urlPrefix.length());
+        }
+        return ((DAVFactory) request.getFactory()).decode(new WebdavPath(path));
     }
 
 }
