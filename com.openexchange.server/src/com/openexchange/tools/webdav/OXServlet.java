@@ -416,7 +416,7 @@ public abstract class OXServlet extends WebDavServlet {
     private Session doBasicAuth(AuthorizationHeader authHeader, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(authHeader.getRawValue());
-            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
+            if ((!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) || Strings.isEmpty(creds.getLogin())) {
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return null;
             }
