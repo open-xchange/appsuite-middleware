@@ -78,7 +78,7 @@ public interface ISimplifiedThreadStructure {
      * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
      * @param cache Whether caller allows to serve this call with possibly cached content
      * @param indexRange The optional index range
-     * @param max The max. number of messages to consider
+     * @param max A reference used to compute the look ahead value in case indexRange is missing
      * @param sortField The sort field applied to thread root elements
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
