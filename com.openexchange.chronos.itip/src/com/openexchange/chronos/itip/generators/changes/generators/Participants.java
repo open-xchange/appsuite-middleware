@@ -142,8 +142,8 @@ public class Participants implements ChangeDescriptionGenerator {
 
         if (diff != null && diff.getUpdatedFields() != null && diff.getUpdatedFields().contains(EventField.ATTENDEES) && diff.getAttendeeUpdates() != null) {
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = diff.getAttendeeUpdates();
-            investigateSetOperation(attendeeUpdates, attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.ADD, attendeeUpdates.getAddedItems());
-            investigateSetOperation(attendeeUpdates, attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, attendeeUpdates.getRemovedItems());
+            investigateSetOperation(attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.ADD, attendeeUpdates.getAddedItems());
+            investigateSetOperation(attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, attendeeUpdates.getRemovedItems());
             investigateChanges(attendeeUpdates, attendeeIds, attendeeChange, externalChange);
         }
 
@@ -289,7 +289,7 @@ public class Participants implements ChangeDescriptionGenerator {
         return ChangeType.ACCEPT;
     }
 
-    private void investigateSetOperation(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Attendee> list) {
+    private void investigateSetOperation(Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Attendee> list) {
         for (Attendee added : list) {
             if (null != added) {
                 CalendarUserType cuType = added.getCuType();

@@ -78,7 +78,7 @@ public class ChangeHelper {
 
     private final TimeZone timezone;
 
-    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper) {
+    public ChangeHelper(final Context ctx, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper) {
         super();
         this.original = original;
         this.update = update;

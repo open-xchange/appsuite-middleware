@@ -232,7 +232,7 @@ public class NotificationParticipant implements Cloneable {
     }
 
     public void setResource(boolean b) {
-        this.resource = true;
+        this.resource = b;
     }
 
     public boolean isResource() {

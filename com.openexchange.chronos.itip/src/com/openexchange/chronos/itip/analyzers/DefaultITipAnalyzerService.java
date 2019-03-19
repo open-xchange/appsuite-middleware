@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -104,13 +103,12 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
     @Override
     public List<ITipAnalysis> analyze(InputStream ical, String format, CalendarSession session, Map<String, String> mailHeader) throws OXException {
         ICal4JITipParser itipParser = new ICal4JITipParser();
-        TimeZone tz = session.getEntityResolver().getTimeZone(session.getUserId());
         int owner = 0;
         if (mailHeader.containsKey("com.openexchange.conversion.owner")) {
             owner = Integer.parseInt(mailHeader.get("com.openexchange.conversion.owner"));
         }
 
-        List<ITipMessage> messages = itipParser.parseMessage(ical, tz, owner, session);
+        List<ITipMessage> messages = itipParser.parseMessage(ical, owner, session);
 
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {

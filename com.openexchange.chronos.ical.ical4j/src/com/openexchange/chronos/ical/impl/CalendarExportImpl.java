@@ -272,9 +272,8 @@ public class CalendarExportImpl implements CalendarExport {
      *
      * @param availability The {@link Availability} to export
      * @return The exported {@link VAvailability} component
-     * @throws OXException if an error is occurred
      */
-    private VAvailability exportAvailability(Availability availability) throws OXException {
+    private VAvailability exportAvailability(Availability availability) {
         VAvailability vAvailability = mapper.exportAvailability(availability, parameters, warnings);
         ICalUtils.removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         // TODO: Track timezones of availability/available components

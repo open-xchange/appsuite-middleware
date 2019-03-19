@@ -83,7 +83,7 @@ public class UpdateITipAnalyzerTest {
     private Event update = new Event();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         Mockito.when(original.getAttendees()).thenReturn(null);

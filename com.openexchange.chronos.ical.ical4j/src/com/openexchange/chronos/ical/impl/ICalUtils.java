@@ -176,7 +176,7 @@ public class ICalUtils {
         return importCalendar(new VCalendar(importCalendar(iCalFile, iCalParameters)), mapper, iCalParameters);
     }
 
-    static ImportedCalendar importCalendar(VCalendar vCalendar, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    static ImportedCalendar importCalendar(VCalendar vCalendar, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vCalendar, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
@@ -245,9 +245,8 @@ public class ICalUtils {
      * @param mapper The {@link ICalMapper}
      * @param parameters The {@link ICalParameters}
      * @return A {@link List} with the imported {@link Availability} components
-     * @throws OXException if an error is occurred
      */
-    static Availability importAvailability(Component availabilityComponent, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    static Availability importAvailability(Component availabilityComponent, ICalMapper mapper, ICalParameters parameters) {
         if (null == availabilityComponent) {
             return null;
         }
@@ -267,9 +266,8 @@ public class ICalUtils {
      * @param mapper The {@link ICalMapper} to use
      * @param parameters The {@link ICalParameters}
      * @return The imported {@link VAvailability} component as {@link Availability}
-     * @throws OXException if a parsing error occurs
      */
-    static Availability importAvailability(VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    static Availability importAvailability(VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return mapper.importVAvailability(vAvailability, parameters, warnings);

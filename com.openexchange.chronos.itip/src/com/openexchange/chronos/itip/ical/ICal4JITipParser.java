@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
@@ -78,7 +77,7 @@ import com.openexchange.java.Strings;
  */
 public class ICal4JITipParser {
 
-    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, int owner, CalendarSession session) throws OXException {
+    public List<ITipMessage> parseMessage(InputStream ical, int owner, CalendarSession session) throws OXException {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         ICalService iCalService = Services.getService(ICalService.class);
