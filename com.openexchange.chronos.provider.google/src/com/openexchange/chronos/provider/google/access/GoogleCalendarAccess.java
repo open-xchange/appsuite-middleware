@@ -264,6 +264,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             com.google.api.services.calendar.Calendar.Events.List list = googleCal.events().list(folderId);
+            list.setAlwaysIncludeEmail(Boolean.TRUE);
 
             if (token != null) {
                 if (isSyncToken) {
