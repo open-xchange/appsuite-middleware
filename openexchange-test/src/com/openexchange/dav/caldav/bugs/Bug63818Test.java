@@ -49,90 +49,58 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import org.junit.Test;
+import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug63818Test} - caldav calendar-multiget REPORT issue
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.2
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ // @formatter:off
-    Bug21794Test.class,
-    Bug22094Test.class,
-    Bug22352Test.class,
-    Bug22338Test.class,
-    Bug22395Test.class,
-    Bug22451Test.class,
-    Bug22723Test.class,
-    Bug23067Test.class,
-    Bug23167Test.class,
-    Bug23181Test.class,
-    Bug32897Test.class,
-    Bug23610Test.class,
-    Bug23612Test.class,
-    Bug24682Test.class,
-    Bug25783Test.class,
-    Bug25672Test.class,
-    Bug26957Test.class,
-    Bug27224Test.class,
-    Bug27309Test.class,
-    Bug28490Test.class,
-    Bug28734Test.class,
-    Bug29554Test.class,
-    Bug29728Test.class,
-    Bug25160Test.class,
-    Bug30359Test.class,
-    Bug31453Test.class,
-    Bug31490Test.class,
-    Bug37112Test.class,
-    Bug37887Test.class,
-    Bug39098Test.class,
-    Bug39819Test.class,
-    Bug40298Test.class,
-    Bug40657Test.class,
-    Bug42104Test.class,
-    Bug43297Test.class,
-    Bug43376Test.class,
-    Bug43521Test.class,
-    Bug43782Test.class,
-    Bug44131Test.class,
-    Bug44144Test.class,
-    Bug44167Test.class,
-    Bug44309Test.class,
-    Bug44304Test.class,
-    Bug46811Test.class,
-    Bug47121Test.class,
-    Bug48856Test.class,
-    Bug44109Test.class,
-    Bug48917Test.class,
-    Bug48241Test.class,
-    Bug45028Test.class,
-    Bug48828Test.class,
-    Bug48242Test.class,
-    Bug26293Test.class,
-    Bug51462Test.class,
-    Bug51768Test.class,
-    Bug52255Test.class,
-    Bug52095Test.class,
-    Bug53479Test.class,
-    Bug54192Test.class,
-    Bug55068Test.class,
-    Bug55653Test.class,
-    Bug57203Test.class,
-    Bug57313Test.class,
-    Bug57858Test.class,
-    Bug58154Test.class,
-    Bug60193Test.class,
-    Bug60589Test.class,
-    Bug61998Test.class,
-    Bug62008Test.class,
-    Bug62737Test.class,
-    Bug63360Test.class,
-    Bug63818Test.class
-}) // @formatter:on
-public final class CalDAVBugSuite {
+public class Bug63818Test extends CalDAVTest {
+
+    @Test
+    public void testMultigetWitFullURI() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment on server
+         */
+        String uid = randomUID();
+        String summary = "hallo";
+        String location = "achtung";
+        Date start = TimeTools.D("next friday at 11:30");
+        Date end = TimeTools.D("next friday at 12:45");
+        Appointment appointment = generateAppointment(start, end, uid, summary, location);
+        rememberForCleanUp(create(appointment));
+        /*
+         * verify appointment on client
+         */
+        Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<String> hrefs = new ArrayList<String>();
+        for (String href : eTags.keySet()) {
+            hrefs.add(getBaseUri() + href);
+        }
+        List<ICalResource> calendarData = calendarMultiget(hrefs);
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
+    }
 
 }
