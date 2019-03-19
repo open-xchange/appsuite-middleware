@@ -51,10 +51,12 @@ package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -79,6 +81,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
@@ -676,6 +679,55 @@ public class EventPatches {
         }
 
         /**
+         * Restores deleted change exception events from the past where the calendar user attendee's participation status was 
+         * previously set to 'declined'. This is done for the iOS client who sometimes decides to send such updates without user 
+         * interaction. 
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void restoreDeclinedDeleteExceptions(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (false == resource.exists() || false == isSeriesMaster(resource.getEvent()) || null == importedEvent || false == DAVUserAgent.IOS.equals(resource.getUserAgent())) {
+                return; // not applicable
+            }
+            SortedSet<RecurrenceId> deleteExceptionDates = importedEvent.getDeleteExceptionDates();
+            DateTime now = new DateTime(System.currentTimeMillis());
+            if (isNullOrEmpty(deleteExceptionDates) || now.before(importedEvent.getDeleteExceptionDates().first().getValue())) {
+                return; // not applicable
+            }
+            try {
+                new CalendarAccessOperation<Void>(factory) {
+
+                    @Override
+                    protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                        /*
+                         * check for new delete exception dates for previous change exceptions
+                         */
+                        Event originalSeriesMaster = access.getEvent(getEventID(resource.getEvent()));
+                        for (RecurrenceId exceptionDate : originalSeriesMaster.getChangeExceptionDates()) {
+                            if (deleteExceptionDates.contains(exceptionDate) && now.after(exceptionDate.getValue())) {
+                                Event originalChangeException = access.getEvent(
+                                    new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), exceptionDate));
+                                Attendee attendee = find(originalChangeException.getAttendees(), resource.getParent().getCalendarUser().getId());
+                                if (null != attendee && ParticipationStatus.DECLINED.matches(attendee.getPartStat())) {
+                                    /*
+                                     * restore original change exception; remove delete exception date
+                                     */
+                                    deleteExceptionDates.remove(exceptionDate);
+                                    importedChangeExceptions.add(exportAndImport(resource, originalChangeException));
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                }.execute(factory.getSession());                
+            } catch (OXException e) {
+                LOG.warn("Error restoring declined delete exceptions", e);
+            }
+        }
+
+        /**
          * Applies all known patches to an event after importing.
          *
          * @param resource The parent event resource
@@ -696,6 +748,7 @@ public class EventPatches {
                 applyFilename(resource, importedEvent);
                 adjustAttendeeComments(resource, importedEvent);
                 adjustProposedTimePrefixes(importedEvent);
+                restoreDeclinedDeleteExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null);
                 applyManagedAttachments(importedEvent);

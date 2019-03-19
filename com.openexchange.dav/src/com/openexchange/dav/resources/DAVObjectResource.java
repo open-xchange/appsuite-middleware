@@ -144,7 +144,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
     }
 
     @Override
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() {
         return exists;
     }
 
