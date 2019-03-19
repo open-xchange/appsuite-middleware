@@ -239,9 +239,9 @@ public class TaskCopyTask implements CopyUserTaskService {
         }
     }
 
-    private List<Participant> convertInternalToExternalParticipant(final Task task) {
-        final List<Participant> participants = new ArrayList<Participant>();
+    private void convertInternalToExternalParticipant(final Task task) {
         if (task.getParticipants() != null) {
+            final List<Participant> participants = new ArrayList<Participant>();
             for (final Participant p : task.getParticipants()) {
                 final Participant participant;
                 if (p.getType() == Participant.USER) {
@@ -263,8 +263,8 @@ public class TaskCopyTask implements CopyUserTaskService {
                 }
                 participants.add(participant);
             }
+            task.setParticipants(participants);
         }
-        return participants;
     }
 
     private void exchangeIds(final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
