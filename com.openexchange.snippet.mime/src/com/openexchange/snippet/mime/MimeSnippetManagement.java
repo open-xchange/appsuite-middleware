@@ -1111,20 +1111,25 @@ public final class MimeSnippetManagement implements SnippetManagement {
             return Collections.emptySet();
         }
 
-        Set<String> set = new HashSet<String>(2);
+        Set<String> result = new HashSet<String>(2);
         do {
             String imageUri = matcher.group(1);
             if (!imageUri.startsWith("cid:")) {
-                ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(imageUri);
-                if (null != imageLocation) {
-                    String imageId = imageLocation.getImageId();
-                    if (null != imageId) {
-                        set.add(imageId);
+                try {
+                    ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(imageUri);
+                    if (null != imageLocation) {
+                        String imageId = imageLocation.getImageId();
+                        if (null != imageId) {
+                            result.add(imageId);
+                        }
                     }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.debug("Unable to find image location for uri: {}", imageUri);
+                    // Probably an external image
                 }
             }
         } while (matcher.find());
-        return set;
+        return result;
     }
 
     private static void deleteSafe(String file, FileStorage fileStorage) {
