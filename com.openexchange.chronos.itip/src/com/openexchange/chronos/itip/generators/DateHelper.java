@@ -128,12 +128,11 @@ public class DateHelper {
         if (differentDays(startDate, endDate)) {
             if (event.getStartDate().isAllDay()) {
                 return String.format("%s - %s", formatDate(startDate, utc), formatDate(endDate, utc));
-            } else {
-                return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
             }
-        } else {
-            return formatDate(startDate);
+            return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
+
         }
+        return formatDate(startDate);
     }
 
     public String formatDate(Date date) {
@@ -170,12 +169,11 @@ public class DateHelper {
         if (differentDays(startDate, endDate)) {
             if (differentWeeks(startDate, endDate)) {
                 return formatTimeAndDay(startDate) + " - " + formatTimeAndDay(endDate);
-            } else {
-                return formatTimeAndWeekday(startDate) + " - " + formatTimeAndWeekday(endDate);
             }
-        } else {
-            return formatTime(startDate) + " - " + formatTime(endDate);
+            return formatTimeAndWeekday(startDate) + " - " + formatTimeAndWeekday(endDate);
+
         }
+        return formatTime(startDate) + " - " + formatTime(endDate);
     }
 
     private boolean differentDays(Date startDate, Date endDate) {
