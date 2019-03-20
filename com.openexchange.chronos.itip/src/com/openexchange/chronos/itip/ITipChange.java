@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -177,7 +178,8 @@ public class ITipChange {
 
         if (isException && master != null && newEvent != null && newEvent.getRecurrenceId() != null && newEvent.getRecurrenceId().getValue() != null && type == Type.CREATE) {
             RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-            Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
+            TimeZone timeZone = newEvent.getRecurrenceId().getValue().getTimeZone();
+            Calendar recurrenceId = GregorianCalendar.getInstance(null == timeZone ? TimeZone.getTimeZone("UTC") : timeZone);
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
             int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
             if (position > 0) {
