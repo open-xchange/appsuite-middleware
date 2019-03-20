@@ -51,9 +51,10 @@ package com.openexchange.groupware.dataRetrieval.osgi;
 
 import java.util.Map;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.dataRetrieval.actions.RetrievalActions;
-import com.openexchange.groupware.dataRetrieval.services.Services;
+import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.servlets.FileDeliveryServlet;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.groupware.dataRetrieval.servlets.RetrievalServlet;
@@ -75,8 +76,6 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        Services.SERVICE_LOOKUP = this;
-
         OSGIDataProviderRegistry dataProviderRegistry = new OSGIDataProviderRegistry(context);
         this.dataProviderRegistry = dataProviderRegistry;
         dataProviderRegistry.open();
@@ -86,18 +85,15 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
             NAMESPACE,
             null,
             null);
+        
+        Configuration configuration = new Configuration(getServiceSafe(ConfigurationService.class));
 
-        final RetrievalActions retrievalActions = new RetrievalActions(dataProviderRegistry, randomTokenContainer);
-        RetrievalServlet.RETRIEVAL_ACTIONS = retrievalActions;
-
-        FileDeliveryServlet.DATA_PROVIDERS = dataProviderRegistry;
-        FileDeliveryServlet.PARAM_MAP = randomTokenContainer;
-
+        final RetrievalActions retrievalActions = new RetrievalActions(dataProviderRegistry, randomTokenContainer, configuration, this);
         final AJAXActionServiceAdapterHandler actionService = new AJAXActionServiceAdapterHandler(retrievalActions, Paths.MODULE);
-
+        
         final String prefix = getService(DispatcherPrefixService.class).getPrefix();
-        registerSessionServlet(prefix + Paths.MODULE, new RetrievalServlet());
-        registerServlet(prefix + Paths.FILE_DELIVERY_PATH_APPENDIX, new FileDeliveryServlet());
+        registerSessionServlet(prefix + Paths.MODULE, new RetrievalServlet(retrievalActions));
+        registerServlet(prefix + Paths.FILE_DELIVERY_PATH_APPENDIX, new FileDeliveryServlet(randomTokenContainer, dataProviderRegistry, configuration));
         registerService(MultipleHandlerFactoryService.class, actionService, null);
 
     }
@@ -119,7 +115,7 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { SessionSpecificContainerRetrievalService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { SessionSpecificContainerRetrievalService.class, DispatcherPrefixService.class, ConfigurationService.class };
     }
 
 }
