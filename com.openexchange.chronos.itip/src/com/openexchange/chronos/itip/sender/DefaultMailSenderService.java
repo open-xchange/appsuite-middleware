@@ -214,12 +214,12 @@ public class DefaultMailSenderService implements MailSenderService {
         } else if (!recipientConfig.includeHTML()) { // text + iCal
             if (!addAttachments) {
                 message.setContentType(MULTIPART_ALTERNATIVE);
-                text = generateTextAndIcalMultipart(mail, charset, session);
+                text = generateTextAndIcalMultipart(mail, charset);
             } else {
                 message.setContentType(MULTIPART_MIXED);
                 MimeMultipart multipart = new MimeMultipart(MIXED);
                 addAttachments(mail, multipart, session);
-                multipart.addBodyPart(toPart(generateTextAndIcalMultipart(mail, charset, session)));
+                multipart.addBodyPart(toPart(generateTextAndIcalMultipart(mail, charset)));
                 text = multipart;
             }
         } else { // (text + html) + iCal
@@ -228,7 +228,7 @@ public class DefaultMailSenderService implements MailSenderService {
             if (addAttachments) {
                 addAttachments(mail, multipart, session);
             }
-            generateTextAndHtmlAndIcalAndIcalAttachment(multipart, mail, charset, session, false);
+            generateTextAndHtmlAndIcalAndIcalAttachment(multipart, mail, charset);
             text = multipart;
         }
 
@@ -308,22 +308,22 @@ public class DefaultMailSenderService implements MailSenderService {
         }
     }
 
-    private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(Multipart multipart, NotificationMail mail, String charset, Session session, boolean iCalAsAttachment) throws MessagingException, OXException {
+    private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(Multipart multipart, NotificationMail mail, String charset) throws MessagingException, OXException {
         BodyPart textAndHtml = new MimeBodyPart();
-        Multipart textAndHtmlAndIcalMultipart = generateTextAndIcalAndHtmlMultipart(mail, charset, session);
+        Multipart textAndHtmlAndIcalMultipart = generateTextAndIcalAndHtmlMultipart(mail, charset);
         MessageUtility.setContent(textAndHtmlAndIcalMultipart, textAndHtml);
         // textAndHtml.setContent(textAndHtmlAndIcalMultipart);
-        BodyPart iCalAttachment = generateIcalAttachmentPart(mail, charset, session);
+        BodyPart iCalAttachment = generateIcalAttachmentPart(mail, charset);
 
         multipart.addBodyPart(textAndHtml);
         multipart.addBodyPart(iCalAttachment);
         return multipart;
     }
 
-    private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
+    private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset) throws MessagingException, OXException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart htmlPart = generateHtmlPart(mail, charset);
-        BodyPart iCalPart = generateIcalPart(mail, charset, session);
+        BodyPart iCalPart = generateIcalPart(mail, charset);
 
         MimeMultipart multipart = new MimeMultipart(ALTERNATIVE);
         multipart.addBodyPart(textPart);
@@ -332,9 +332,9 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private Multipart generateTextAndIcalMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
+    private Multipart generateTextAndIcalMultipart(NotificationMail mail, String charset) throws MessagingException, OXException {
         BodyPart textPart = generateTextPart(mail, charset);
-        BodyPart iCalPart = generateIcalPart(mail, charset, session);
+        BodyPart iCalPart = generateIcalPart(mail, charset);
 
         MimeMultipart multipart = new MimeMultipart(ALTERNATIVE);
         multipart.addBodyPart(textPart);
@@ -342,7 +342,7 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private MimeBodyPart generateIcal(NotificationMail mail, String charset, Session session, boolean checkASCII, Consumer<ContentType> processContent) throws MessagingException, OXException {
+    private MimeBodyPart generateIcal(NotificationMail mail, String charset, boolean checkASCII, Consumer<ContentType> processContent) throws MessagingException, OXException {
         MimeBodyPart icalPart = new MimeBodyPart();
         /*
          * Compose Content-Type
@@ -406,8 +406,8 @@ public class DefaultMailSenderService implements MailSenderService {
         event.setExtendedProperties(props);
     }
 
-    private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
-        return generateIcal(mail, charset, session, true, new Consumer<ContentType>() {
+    private BodyPart generateIcalPart(NotificationMail mail, String charset) throws MessagingException, OXException {
+        return generateIcal(mail, charset, true, new Consumer<ContentType>() {
 
             @Override
             public void accept(ContentType ct) {
@@ -417,7 +417,7 @@ public class DefaultMailSenderService implements MailSenderService {
         });
     }
 
-    private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
+    private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset) throws MessagingException, OXException {
         /*
          * Determine file name
          */
@@ -433,7 +433,7 @@ public class DefaultMailSenderService implements MailSenderService {
                 fileName = "response.ics";
                 break;
         }
-        MimeBodyPart icalPart = generateIcal(mail, charset, session, false, new Consumer<ContentType>() {
+        MimeBodyPart icalPart = generateIcal(mail, charset, false, new Consumer<ContentType>() {
 
             @Override
             public void accept(ContentType ct) {

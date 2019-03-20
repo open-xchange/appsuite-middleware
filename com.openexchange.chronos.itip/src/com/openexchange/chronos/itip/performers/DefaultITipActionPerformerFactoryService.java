@@ -68,7 +68,7 @@ import com.openexchange.chronos.itip.sender.MailSenderService;
  */
 public class DefaultITipActionPerformerFactoryService implements ITipActionPerformerFactoryService {
 
-    public static final Integer RANKING = 0;
+    public static final Integer RANKING = Integer.valueOf(0);
 
     private final EnumMap<ITipAction, ITipActionPerformer> performerRegistry = new EnumMap<>(ITipAction.class);
 

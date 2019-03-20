@@ -47,45 +47,60 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.SearchTerm;
-
+import java.util.Map;
+import org.junit.Test;
+import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link ISimplifiedThreadStructure}
+ * {@link Bug63818Test} - caldav calendar-multiget REPORT issue
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.2
  */
-public interface ISimplifiedThreadStructure {
+public class Bug63818Test extends CalDAVTest {
 
-    /**
-     * An <b>optional</b> convenience method that gets the messages located in given folder sorted by message thread reference. By default
-     * <code>null</code> is returned assuming that mailing system does not support message thread reference, but may be overridden if it
-     * does.
-     * <p>
-     * If underlying mailing system is IMAP, this method requires the IMAPv4 SORT extension or in detail the IMAP <code>CAPABILITY</code>
-     * command should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES".
-     *
-     * @param folder The folder full name
-     * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
-     * @param cache Whether caller allows to serve this call with possibly cached content
-     * @param indexRange The optional index range
-     * @param max A reference used to compute the look ahead value in case indexRange is missing
-     * @param sortField The sort field applied to thread root elements
-     * @param order Whether ascending or descending sort order
-     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
-     * @param headerNames The header names to pre-fill in returned instances of {@link MailMessage}
-     * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
-     * @throws OXException If messages cannot be returned
-     */
-    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields, SearchTerm<?> searchTerm) throws OXException;
+    @Test
+    public void testMultigetWitFullURI() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment on server
+         */
+        String uid = randomUID();
+        String summary = "hallo";
+        String location = "achtung";
+        Date start = TimeTools.D("next friday at 11:30");
+        Date end = TimeTools.D("next friday at 12:45");
+        Appointment appointment = generateAppointment(start, end, uid, summary, location);
+        rememberForCleanUp(create(appointment));
+        /*
+         * verify appointment on client
+         */
+        Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<String> hrefs = new ArrayList<String>();
+        for (String href : eTags.keySet()) {
+            hrefs.add(getBaseUri() + href);
+        }
+        List<ICalResource> calendarData = calendarMultiget(hrefs);
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
+        assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
+    }
 
 }

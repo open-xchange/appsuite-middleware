@@ -49,14 +49,11 @@
 
 package com.openexchange.carddav.reports;
 
-import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.carddav.CarddavProtocol;
-import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
@@ -86,37 +83,22 @@ public class AddressbookMultigetReport extends PROPFINDAction {
 
     @Override
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        Document requestBody = optRequestBody(request);
+        /*
+         * get paths of requested resources
+         */
+        Document requestBody = requireRequestBody(request);
+        List<WebdavPath> paths = getHrefPaths(request, requestBody.getRootElement());
+        /*
+         * resolve & marshal requested resources
+         */
         List<Element> elements = new ArrayList<Element>();
         ResourceMarshaller marshaller = getMarshaller(request, requestBody);
-        for (WebdavPath webdavPath : getPaths(request, requestBody)) {
+        for (WebdavPath webdavPath : paths) {
             elements.addAll(marshaller.marshal(request.getFactory().resolveResource(webdavPath)));
         }
         Element multistatusElement = prepareMultistatusElement();
         multistatusElement.addContent(elements);
         sendMultistatusResponse(response, multistatusElement);
-    }
-
-    private List<WebdavPath> getPaths(WebdavRequest request, Document requestBody) throws WebdavProtocolException {
-        if (requestBody == null) {
-            return Collections.emptyList();
-        }
-
-        List<Element> children = requestBody.getRootElement().getChildren("href", DAV_NS);
-        if (children == null || children.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
-        int length = request.getURLPrefix().length();
-        for (Object object : children) {
-            Element href = (Element) object;
-            String url = href.getText();
-            url = url.substring(length);
-            paths.add(((GroupwareCarddavFactory) request.getFactory()).decode(new WebdavPath(url)));
-        }
-
-        return paths;
     }
 
 }

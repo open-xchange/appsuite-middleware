@@ -75,6 +75,7 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
@@ -351,7 +352,7 @@ public abstract class OXServlet extends WebDavServlet {
         if (null == session) {
             AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(Header.AUTH_HEADER));
             if (authHeader == null) {
-                addUnauthorizedHeader(req, resp);
+                addUnauthorizedHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
             }
@@ -379,8 +380,8 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
-                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
-                addUnauthorizedHeader(req, resp);
+                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, ".");
+                addUnauthorizedHeader(resp);
                 removeSession(session.getSessionID());
                 removeCookie(req, resp, COOKIE_SESSIONID);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -395,14 +396,13 @@ public abstract class OXServlet extends WebDavServlet {
      * Handles OXExceptions thrown during login requests by responding with an HTTP error code.
      *
      * @param e the exception
-     * @param req The servlet request
      * @param resp The servlet response
      * @throws IOException
      */
-    private void handleFailedWebDAVLogin(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void handleFailedWebDAVLogin(OXException e, HttpServletResponse resp) throws IOException {
         if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
             LOG.debug("WebDAV login failed", e);
-            addUnauthorizedHeader(req, resp);
+            addUnauthorizedHeader(resp);
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
         } else if (LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e)) {
             LOG.debug("WebDAV login failed", e);
@@ -416,14 +416,14 @@ public abstract class OXServlet extends WebDavServlet {
     private Session doBasicAuth(AuthorizationHeader authHeader, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(authHeader.getRawValue());
-            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
+            if ((!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) || Strings.isEmpty(creds.getLogin())) {
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return null;
             }
             LoginRequest loginRequest = parseLoginRequest(creds, req);
             return performWebDAVLogin(loginRequest, req, resp);
         } catch (OXException e) {
-            handleFailedWebDAVLogin(e, req, resp);
+            handleFailedWebDAVLogin(e, resp);
             return null;
         }
     }
@@ -438,15 +438,14 @@ public abstract class OXServlet extends WebDavServlet {
              * try to get session indirectly from store
              */
             return WebDAVSessionStore.getInstance().getSession(loginRequest, req);
-        } else {
-            /*
-             * login as usual
-             */
-            final Map<String, Object> properties = new HashMap<String, Object>(1);
-            Session session = addSession(loginRequest, properties);
-            resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
-            return session;
         }
+        /*
+         * login as usual
+         */
+        final Map<String, Object> properties = new HashMap<String, Object>(1);
+        Session session = addSession(loginRequest, properties);
+        resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
+        return session;
     }
 
     private Session doOAuth(AuthorizationHeader authHeader, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
@@ -472,7 +471,7 @@ public abstract class OXServlet extends WebDavServlet {
 
                 sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, Collections.singletonMap(HttpHeaders.WWW_AUTHENTICATE, sb.toString()));
             } else {
-                handleFailedWebDAVLogin(e, httpRequest, httpResponse);
+                handleFailedWebDAVLogin(e, httpResponse);
             }
         }
 
@@ -579,7 +578,7 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
-                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
+                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, ".");
                 addBasicAuthenticateHeader(resp);
                 removeSession(session.getSessionID());
                 removeCookie(req, resp, COOKIE_SESSIONID);
@@ -624,7 +623,7 @@ public abstract class OXServlet extends WebDavServlet {
      *
      * @param resp the response to that the header should be added.
      */
-    private void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
+    private void addUnauthorizedHeader(final HttpServletResponse resp) {
         if (useHttpAuth()) {
             resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
             if (allowOAuthAccess()) {

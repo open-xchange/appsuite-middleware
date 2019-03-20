@@ -1056,7 +1056,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields2, int[] fromToIndices, final long lookAhead, SearchTerm<?> searchTerm) throws OXException {
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, 
+                                                                        boolean includeSent, 
+                                                                        boolean cache, 
+                                                                        int sortCol, 
+                                                                        int order, 
+                                                                        int[] fields, 
+                                                                        String[] headerFields2, 
+                                                                        int[] fromToIndices, 
+                                                                        final long max, 
+                                                                        SearchTerm<?> searchTerm) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int localAccountId = argument.getAccountId();
         initConnection(localAccountId);
@@ -1087,7 +1096,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         ISimplifiedThreadStructureEnhanced stse = messageStorage.supports(ISimplifiedThreadStructureEnhanced.class);
         if (null != stse) {
             try {
-                List<List<MailMessage>> result = stse.getThreadSortedMessages(fullName, mergeWithSent, cache, null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]), lookAhead, sortField, orderDir, mailFields.toArray(), headerFields, searchTerm);
+                List<List<MailMessage>> result = stse.getThreadSortedMessages(fullName, mergeWithSent, cache, null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]), max, sortField, orderDir, mailFields.toArray(), headerFields, searchTerm);
 
                 if (!mailAccess.getWarnings().isEmpty()) {
                     warnings.addAll(mailAccess.getWarnings());
@@ -1129,7 +1138,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         ISimplifiedThreadStructure sts = messageStorage.supports(ISimplifiedThreadStructure.class);
         if (null != sts) {
             try {
-                List<List<MailMessage>> mails = sts.getThreadSortedMessages(fullName, mergeWithSent, cache, null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]), lookAhead, sortField, orderDir, mailFields.toArray(), searchTerm);
+                List<List<MailMessage>> mails = sts.getThreadSortedMessages(fullName, mergeWithSent, cache, null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]), max, sortField, orderDir, mailFields.toArray(), searchTerm);
 
                 if (null != headerFields && headerFields.length > 0) {
                     MessageUtility.enrichWithHeaders(mails, headerFields, messageStorage);

@@ -235,13 +235,12 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
     protected static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
-        } else {
-            String statementString = String.valueOf(stmt);
-            long start = System.currentTimeMillis();
-            ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
-            return resultSet;
         }
+        String statementString = String.valueOf(stmt);
+        long start = System.currentTimeMillis();
+        ResultSet resultSet = stmt.executeQuery();
+        LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
+        return resultSet;
     }
 
     /**
@@ -253,13 +252,12 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
     protected static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeUpdate();
-        } else {
-            String statementString = String.valueOf(stmt);
-            long start = System.currentTimeMillis();
-            int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
-            return rowCount;
         }
+        String statementString = String.valueOf(stmt);
+        long start = System.currentTimeMillis();
+        int rowCount = stmt.executeUpdate();
+        LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
+        return rowCount;
     }
 
     /**

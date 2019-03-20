@@ -66,6 +66,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
 import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import com.openexchange.chronos.Event;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link HumanReadableRecurrences}
@@ -147,14 +148,14 @@ public class HumanReadableRecurrences {
             if (byDayPart.size() > 1) {
                 return no();
             } else {
-                return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), rrule.getInterval());
+                return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), Autoboxing.I(rrule.getInterval()));
             }
         } else {
             List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
             if (byMonthDay.size() > 1) {
                 return no();
             } else {
-                return format(locale, HRRStrings.MONTHLY_1, byMonthDay.get(0), rrule.getInterval());
+                return format(locale, HRRStrings.MONTHLY_1, byMonthDay.get(0), Autoboxing.I(rrule.getInterval()));
             }
         }
     }
@@ -163,11 +164,11 @@ public class HumanReadableRecurrences {
         if (rrule.getInterval() == 1) {
             return format(locale, HRRStrings.WEEKLY_EACH, parseDays(locale));
         }
-        return format(locale, HRRStrings.WEEKLY, rrule.getInterval(), parseDays(locale));
+        return format(locale, HRRStrings.WEEKLY, Autoboxing.I(rrule.getInterval()), parseDays(locale));
     }
 
     private String daily() {
-        return format(locale, HRRStrings.DAILY, rrule.getInterval());
+        return format(locale, HRRStrings.DAILY, Autoboxing.I(rrule.getInterval()));
     }
 
     private String parseDays(Locale locale) {
@@ -222,7 +223,7 @@ public class HumanReadableRecurrences {
             return no();
         }
 
-        switch (byMonth.get(0)) {
+        switch (Autoboxing.i(byMonth.get(0))) {
             case Calendar.JANUARY:
                 return format(locale, HRRStrings.JANUARY);
             case Calendar.FEBRUARY:

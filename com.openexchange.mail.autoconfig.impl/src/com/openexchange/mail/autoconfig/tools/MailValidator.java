@@ -58,10 +58,11 @@ import java.util.Map;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import javax.mail.Service;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
@@ -73,6 +74,8 @@ import com.sun.mail.smtp.SMTPTransport;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MailValidator {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailValidator.class);
 
     private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
     private static final int DEFAULT_TIMEOUT = 10000;
@@ -288,60 +291,7 @@ public class MailValidator {
      * @return <code>true</code> if such a socket could be successfully linked to the given IMAP end-point; otherwise <code>false</code>
      */
     public static boolean tryImapConnect(String host, int port, boolean secure) {
-        Socket s = null;
-        String greeting = null;
-        try {
-            if (secure) {
-                SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-                s = factoryProvider.getDefault().createSocket();
-            } else {
-                s = new Socket();
-            }
-
-            /*
-             * Set connect timeout
-             */
-            s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
-            s.setSoTimeout(DEFAULT_TIMEOUT);
-            InputStream in = s.getInputStream();
-            OutputStream out = s.getOutputStream();
-            StringBuilder sb = new StringBuilder(512);
-            /*
-             * Read IMAP server greeting on connect
-             */
-            boolean eol = false;
-            boolean skipLF = false;
-            int i = -1;
-            while (!eol && ((i = in.read()) != -1)) {
-                final char c = (char) i;
-                if (c == '\r') {
-                    eol = true;
-                    skipLF = true;
-                } else if (c == '\n') {
-                    eol = true;
-                    skipLF = false;
-                } else {
-                    sb.append(c);
-                }
-            }
-            greeting = sb.toString();
-
-            if (skipLF) {
-                /*
-                 * Consume final LF
-                 */
-                in.read();
-                skipLF = false;
-            }
-
-            out.write("A11 LOGOUT\r\n".getBytes());
-            out.flush();
-        } catch (Exception e) {
-            return false;
-        } finally {
-            closeSafe(s);
-        }
-        return true;
+        return tryConnect(host, port, secure, "A11 LOGOUT\r\n");
     }
 
     /**
@@ -353,59 +303,7 @@ public class MailValidator {
      * @return <code>true</code> if such a socket could be successfully linked to the given SMTP end-point; otherwise <code>false</code>
      */
     public static boolean trySmtpConnect(String host, int port, boolean secure) {
-        Socket s = null;
-        String greeting = null;
-        try {
-            if (secure) {
-                SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-                s = factoryProvider.getDefault().createSocket();
-            } else {
-                s = new Socket();
-            }
-            /*
-             * Set connect timeout
-             */
-            s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
-            s.setSoTimeout(DEFAULT_TIMEOUT);
-            InputStream in = s.getInputStream();
-            OutputStream out = s.getOutputStream();
-            StringBuilder sb = new StringBuilder(512);
-            /*
-             * Read IMAP server greeting on connect
-             */
-            boolean eol = false;
-            boolean skipLF = false;
-            int i = -1;
-            while (!eol && ((i = in.read()) != -1)) {
-                final char c = (char) i;
-                if (c == '\r') {
-                    eol = true;
-                    skipLF = true;
-                } else if (c == '\n') {
-                    eol = true;
-                    skipLF = false;
-                } else {
-                    sb.append(c);
-                }
-            }
-            greeting = sb.toString();
-
-            if (skipLF) {
-                /*
-                 * Consume final LF
-                 */
-                in.read();
-                skipLF = false;
-            }
-
-            out.write("QUIT\r\n".getBytes());
-            out.flush();
-        } catch (Exception e) {
-            return false;
-        } finally {
-            closeSafe(s);
-        }
-        return true;
+        return tryConnect(host, port, secure, "QUIT\r\n");
     }
 
     /**
@@ -417,15 +315,11 @@ public class MailValidator {
      * @return <code>true</code> if such a socket could be successfully linked to the given POP3 end-point; otherwise <code>false</code>
      */
     public static boolean tryPop3Connect(String host, int port, boolean secure) {
-        Socket s = null;
-        String greeting = null;
-        try {
-            if (secure) {
-                SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-                s = factoryProvider.getDefault().createSocket();
-            } else {
-                s = new Socket();
-            }
+        return tryConnect(host, port, secure, "QUIT\r\n");
+    }
+    
+    private static boolean tryConnect(String host, int port, boolean secure, String closePhrase) {
+        try (Socket s = secure ? Services.getService(SSLSocketFactoryProvider.class).getDefault().createSocket() : new Socket()) {
             /*
              * Set connect timeout
              */
@@ -433,7 +327,9 @@ public class MailValidator {
             s.setSoTimeout(DEFAULT_TIMEOUT);
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
-            StringBuilder sb = new StringBuilder(512);
+            if (null == in || null == out) {
+                return false;
+            }
             /*
              * Read IMAP server greeting on connect
              */
@@ -448,46 +344,33 @@ public class MailValidator {
                 } else if (c == '\n') {
                     eol = true;
                     skipLF = false;
-                } else {
-                    sb.append(c);
                 }
+                // else; Ignore
             }
-            greeting = sb.toString();
 
             if (skipLF) {
                 /*
                  * Consume final LF
                  */
                 in.read();
-                skipLF = false;
             }
 
-            out.write("QUIT\r\n".getBytes());
+            out.write(closePhrase.getBytes());
             out.flush();
         } catch (Exception e) {
+            LOGGER.trace("Unable to connect.", e);
             return false;
-        } finally {
-            closeSafe(s);
         }
         return true;
     }
 
-    private static void closeSafe(Socket s) {
+    private static void closeSafe(AutoCloseable s) {
         if (s != null) {
             try {
                 s.close();
             } catch (Exception e) {
                 // Ignore
-            }
-        }
-    }
-
-    private static void closeSafe(Service service) {
-        if (null != service) {
-            try {
-                service.close();
-            } catch (Exception e) {
-                // Ignore
+                LOGGER.trace("Unable to close resource.", e);
             }
         }
     }

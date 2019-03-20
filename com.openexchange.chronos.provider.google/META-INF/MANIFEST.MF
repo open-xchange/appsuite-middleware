@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Google Calendar Provider
 Bundle-SymbolicName: com.openexchange.chronos.provider.google
+Automatic-Module-Name: com.openexchange.chronos.provider.google
 Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.chronos.provider.google.osgi.Activator
 Bundle-Vendor: OX Software GmbH

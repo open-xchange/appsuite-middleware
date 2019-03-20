@@ -220,6 +220,10 @@ public final class IMAPConversationWorker {
                     while (indexRange.end >= (lookAhead / 2)) {
                         lookAhead = lookAhead + 1000;
                     }
+                } else {
+                    while (max >= (lookAhead / 2)) {
+                        lookAhead = lookAhead + 1000;
+                    } 
                 }
                 if (lookAhead > messageCount) {
                     lookAhead = -1;

@@ -191,7 +191,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
     // --------------------------------------------------------------------------------------------------
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         ManifestBuilder manifestBuilder = this.manifestBuilder;
         if (null != manifestBuilder) {
             // Read manifests from files

@@ -90,16 +90,16 @@ public class Rescheduling implements ChangeDescriptionGenerator {
     }
 
     private String timeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
-        Format format = chooseFormat(diff, timezone);
-        if (differentDays(event.getStartDate(), event.getEndDate(), timezone)) {
+        Format format = chooseFormat(diff);
+        if (differentDays(event.getStartDate(), event.getEndDate())) {
             format = Format.DIFFERENT_DAYS;
         }
         return time(format, event, locale, timezone);
     }
 
     private String updatedTimeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
-        Format format = chooseFormat(diff, timezone);
-        if (differentDays(event.getStartDate(), event.getEndDate(), timezone)) {
+        Format format = chooseFormat(diff);
+        if (differentDays(event.getStartDate(), event.getEndDate())) {
             format = Format.DIFFERENT_DAYS;
         }
         return updatedTime(format, event, locale, timezone);
@@ -171,16 +171,16 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         return new Date(endDate.getTime() - 1000); // Move this before midnight, so the time formatting routines don't lie
     }
 
-    private Format chooseFormat(ITipEventUpdate diff, TimeZone timezone) {
+    private Format chooseFormat(ITipEventUpdate diff) {
 
         if (diff.getUpdatedFields().contains(EventField.START_DATE)) {
-            if (differentDays(diff.getOriginal().getStartDate(), diff.getUpdate().getStartDate(), timezone)) {
+            if (differentDays(diff.getOriginal().getStartDate(), diff.getUpdate().getStartDate())) {
                 return Format.DIFFERENT_DAYS;
             }
         }
 
         if (diff.getUpdatedFields().contains(EventField.END_DATE)) {
-            if (differentDays(diff.getOriginal().getEndDate(), diff.getUpdate().getEndDate(), timezone)) {
+            if (differentDays(diff.getOriginal().getEndDate(), diff.getUpdate().getEndDate())) {
                 return Format.DIFFERENT_DAYS;
             }
         }
@@ -188,7 +188,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         return Format.SAME_DAY;
     }
 
-    private boolean differentDays(DateTime original, DateTime update, TimeZone timezone) {
+    private boolean differentDays(DateTime original, DateTime update) {
         if (original.getYear() != update.getYear()) {
             return true;
         }

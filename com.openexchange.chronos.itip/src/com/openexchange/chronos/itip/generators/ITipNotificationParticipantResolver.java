@@ -77,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -115,7 +116,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
     // TODO: Principal
     @Override
     public List<NotificationParticipant> resolveAllRecipients(Event original, Event update, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
-        final NotificationConfiguration defaultConfiguration = getDefaultConfiguration(user, ctx);
+        final NotificationConfiguration defaultConfiguration = getDefaultConfiguration();
 
         final Map<Integer, Attendee> userIds = new HashMap<Integer, Attendee>();
         final List<Attendee> externalParticipants = new ArrayList<>();
@@ -430,7 +431,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             return update.getCreatedBy();
         }
         // Use current user as fall back
-        LOG.debug("Unable to resolve organizer for appointment: {} in context {}. Using current user as organizer", update.getId(), ctx.getContextId());
+        LOG.debug("Unable to resolve organizer for appointment: {} in context {}. Using current user as organizer", update.getId(), Autoboxing.I(ctx.getContextId()));
         User defaultOrganizer = userService.getUser(userId, ctx);
         CalendarUser cu = new CalendarUser();
         cu.setCn(defaultOrganizer.getDisplayName());
@@ -485,7 +486,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         return resourceParticipants;
     }
 
-    protected NotificationConfiguration getDefaultConfiguration(final User user, final Context ctx) {
+    protected NotificationConfiguration getDefaultConfiguration() {
         final NotificationConfiguration configuration = new NotificationConfiguration();
 
         configuration.setIncludeHTML(true); // TODO: pay attention to user

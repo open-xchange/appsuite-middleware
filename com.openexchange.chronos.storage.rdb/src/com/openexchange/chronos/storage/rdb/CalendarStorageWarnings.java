@@ -167,7 +167,7 @@ public abstract class CalendarStorageWarnings {
      * @param field The corresponding event field of the unsupported data
      * @param severity The problem severity
      * @param message The message providing details of the error
-     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
      */
     public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message) throws OXException {
         addUnsupportedDataError(eventId, field, severity, message, null);
@@ -183,7 +183,7 @@ public abstract class CalendarStorageWarnings {
      * @param severity The problem severity
      * @param message The message providing details of the error
      * @param cause The optional initial cause
-     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
      */
     public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) throws OXException {
         OXException error = getUnsupportedDataError(eventId, field, severity, message, cause);
