@@ -64,6 +64,7 @@ import org.junit.runners.Suite;
     BackupStringProviderTests.class,
     SMSProviderTests.class,
     TOTPProviderTests.class,
-    U2FProviderTest.class
+    U2FProviderTest.class,
+    MultifactorRESTTests.class
 })
 public class MultifactorTestSuite {/*empty*/}
