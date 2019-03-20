@@ -50,10 +50,10 @@
 package com.openexchange.chronos.common;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chronos.service.CalendarParameters;
 
 /**
@@ -64,14 +64,14 @@ import com.openexchange.chronos.service.CalendarParameters;
  */
 public class DefaultCalendarParameters implements CalendarParameters {
 
-    private final Map<String, Object> parameters;
+    private final ConcurrentMap<String, Object> parameters;
 
     /**
      * Initializes a new {@link DefaultCalendarParameters}.
      */
     public DefaultCalendarParameters() {
         super();
-        this.parameters = new HashMap<String, Object>();
+        this.parameters = new ConcurrentHashMap<String, Object>();
     }
 
     /**
@@ -90,7 +90,11 @@ public class DefaultCalendarParameters implements CalendarParameters {
 
     @Override
     public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
+        if (null != value) {
+            parameters.put(parameter, value);
+        } else {
+            parameters.remove(parameter);
+        }
         return this;
     }
 
