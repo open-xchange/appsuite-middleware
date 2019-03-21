@@ -5,18 +5,7 @@ Bundle-SymbolicName: com.openexchange.dovecot.doveadm.client
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.fasterxml.jackson.annotation,
- com.fasterxml.jackson.core,
- com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.format,
- com.fasterxml.jackson.core.io,
- com.fasterxml.jackson.core.json,
- com.fasterxml.jackson.core.sym,
- com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util,
- com.fasterxml.jackson.databind,
- com.fasterxml.jackson.databind.annotation,
- com.google.common.annotations,
+Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
  com.google.common.io,

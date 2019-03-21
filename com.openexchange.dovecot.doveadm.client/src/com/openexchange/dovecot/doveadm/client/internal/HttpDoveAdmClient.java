@@ -91,9 +91,6 @@ import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ConfigView;
@@ -704,27 +701,6 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         R retval = parseIntoObject(httpResponse.getEntity().getContent(), type);
         consume(httpResponse);
         return retval;
-    }
-
-    /**
-     * The Jackson object mapper instance.
-     */
-    private static final ObjectMapper MAPPER;
-    static {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        MAPPER = objectMapper;
-    }
-
-    /**
-     * Gets the object mapper.
-     *
-     * @return The object mapper
-     */
-    protected static ObjectMapper getObjectMapper() {
-        return MAPPER;
     }
 
     /**
