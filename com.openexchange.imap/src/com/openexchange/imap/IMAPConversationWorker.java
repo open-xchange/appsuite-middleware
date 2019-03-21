@@ -157,12 +157,13 @@ public final class IMAPConversationWorker {
             synchronized (IMAPConversationWorker.class) {
                 b = prefillCache;
                 if (null == b) {
+                    boolean def = true;
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
-                        return true;
+                        return def;
                     }
 
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.refthreader.cache.prefillCache", true));
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.refthreader.cache.prefillCache", def));
                     prefillCache = b;
                 }
             }
@@ -177,12 +178,13 @@ public final class IMAPConversationWorker {
             synchronized (IMAPConversationWorker.class) {
                 b = useCache;
                 if (null == b) {
+                    boolean def = true;
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
-                        return true;
+                        return def;
                     }
 
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.refthreader.cache.enabled", true));
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.refthreader.cache.enabled", def));
                     useCache = b;
                 }
             }
@@ -203,7 +205,8 @@ public final class IMAPConversationWorker {
             public Interests getInterests() {
                 return Reloadables.interestsForProperties(
                     "com.openexchange.imap.useImapThreaderIfSupported",
-                    "com.openexchange.imap.refthreader.cache.prefillCache"
+                    "com.openexchange.imap.refthreader.cache.prefillCache",
+                    "com.openexchange.imap.refthreader.cache.enabled"
                 );
             }
         });
@@ -266,7 +269,7 @@ public final class IMAPConversationWorker {
                 } else {
                     while (max >= (lookAhead / 2)) {
                         lookAhead = lookAhead + 1000;
-                    } 
+                    }
                 }
                 if (lookAhead > messageCount) {
                     lookAhead = -1;
