@@ -223,13 +223,14 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
                         if (value != null) {
                             return value.toString();
                         }
-                    } catch (NoSuchElementException ignore) {
-                    } catch (NamingException ignore) {
+                    } catch (NoSuchElementException | NamingException ignore) {
+                        LOG.trace("", ignore);
                     }
                 }
             }
             return null;
         } catch (InvalidNameException e) {
+            LOG.trace("", e);
             throw new SSLException(subjectPrincipal + " is not a valid X500 distinguished name");
         }
     }
@@ -239,6 +240,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
         try {
             c = cert.getSubjectAlternativeNames();
         } catch (final CertificateParsingException ignore) {
+            LOG.trace("", ignore);
         }
         List<String> subjectAltList = null;
         if (c != null) {
@@ -268,6 +270,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
             final InetAddress inetAddress = InetAddress.getByName(hostname);
             return inetAddress.getHostAddress();
         } catch (final UnknownHostException unexpected) { // Should not happen, because we check for IPv6 address above
+            LOG.trace("", unexpected);
             return hostname;
         }
     }
