@@ -348,11 +348,11 @@ public class MailValidator {
                 // else; Ignore
             }
 
-            if (skipLF) {
-                /*
-                 * Consume final LF
-                 */
-                in.read();
+            /*
+             * Consume final LF
+             */
+            if (skipLF && -1 == in.read()) {
+                LOGGER.trace("Final LF should have been read but the end of the stream was already reached.");
             }
 
             out.write(closePhrase.getBytes());
