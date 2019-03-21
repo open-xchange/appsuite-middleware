@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.itip.handler;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -296,9 +298,44 @@ public class ITipHandler implements CalendarHandler {
                 }
             }
         }
+        
+        if(isMove(update)) {
+            return;
+        }
 
         // Handle update
         handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
+    }
+    
+    
+    private static final EventField[] NOT_MOVE_EVENT_FIELDS;
+    
+    static {
+        List<EventField> allitems = new ArrayList<>(Arrays.asList(EventField.values()));
+        allitems.removeAll(Arrays.asList(EventField.ATTENDEES, EventField.TIMESTAMP, EventField.LAST_MODIFIED));
+        NOT_MOVE_EVENT_FIELDS = allitems.toArray(new EventField[allitems.size()]);
+    }
+    
+    /**
+     * 
+     * Checks if the {@link UpdateResult} only contains a move operation
+     *
+     * @param update The {@link UpdateResult} to check
+     * @return <code>true</code> if it is only a move operation, <code>false</code> otherwise
+     */
+    private boolean isMove(UpdateResult update) {
+        // @formatter:off
+        if(update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
+           update.getAttendeeUpdates().getAddedItems().isEmpty() == false ||
+           update.getAttendeeUpdates().getRemovedItems().isEmpty() == false ||
+           update.getAttendeeUpdates().getUpdatedItems().size() != 1 || 
+           update.getAttendeeUpdates().getUpdatedItems().get(0).getUpdatedFields().size() != 1 || 
+           update.getAttendeeUpdates().getUpdatedItems().get(0).getUpdatedFields().iterator().next().equals(AttendeeField.FOLDER_ID) == false ) {
+            return false;
+        }
+        // @formatter:on
+        
+        return true;
     }
 
     private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, Set<DeleteResult> ignore, CalendarEvent event) throws OXException {
