@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.calendar.account.service.impl;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -178,7 +180,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          */
         CalendarAccount storedAccount = getAccount(session, id, parameters);
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
         }
         /*
          * get associated calendar provider & initialize account config
@@ -206,7 +208,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          */
         CalendarAccount storedAccount = getAccount(session, id, parameters);
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
         }
         /*
          * get associated calendar provider & initialize account config
@@ -413,10 +415,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 protected CalendarAccount call(CalendarStorage storage) throws OXException {
                     CalendarAccount account = storage.getAccountStorage().loadAccount(userId, accountId);
                     if (null == account) {
-                        throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+                        throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
                     }
                     if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
-                        throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
+                        throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), L(clientTimestamp), L(account.getLastModified().getTime()));
                     }
                     CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
                     storage.getAccountStorage().updateAccount(accountUpdate, clientTimestamp);
@@ -527,7 +529,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     private CalendarAccountStorage initAccountStorage(int contextId, CalendarParameters parameters) throws OXException {
         CalendarStorageFactory storageFactory = requireService(CalendarStorageFactory.class, services);
         Context context = requireService(ContextService.class, services).getContext(contextId);
-        Connection connection = null == parameters ? null : parameters.get(Connection.class.getName(), Connection.class);
+        Connection connection = null == parameters ? null : parameters.get(PARAMETER_CONNECTION(), Connection.class);
         if (null != connection) {
             SimpleDBProvider dbProvider = new SimpleDBProvider(connection, connection);
             return storageFactory.create(context, -1, null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS).getAccountStorage();

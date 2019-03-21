@@ -98,7 +98,7 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
             CalendarAccount account = getAccount(accountId);
             return getAccountQuota(account, getAccess(account, QuotaAware.class).getQuotas());
         } catch (NumberFormatException e) {
-            throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
+            throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(e, accountID, getModuleID());
         }
     }
 
@@ -119,7 +119,7 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
      * @return The {@link AccountQuota}
      * @throws OXException In case the access is denied or quota is not available
      */
-    private AccountQuota getAccountQuota(CalendarAccount account, Quota[] quotas) throws OXException {
+    private AccountQuota getAccountQuota(CalendarAccount account, Quota[] quotas) {
         DefaultAccountQuota accountQuota = new DefaultAccountQuota(String.valueOf(account.getAccountId()), getProviderName(account));
         if (null != quotas && 0 < quotas.length) {
             for (Quota quota : quotas) {

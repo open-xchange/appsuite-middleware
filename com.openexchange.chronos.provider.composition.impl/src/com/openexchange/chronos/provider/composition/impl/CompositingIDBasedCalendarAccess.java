@@ -225,8 +225,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
          */
         List<Event> events = new ArrayList<Event>(eventIDs.size());
         for (EventID requestedID : eventIDs) {
-            Integer accountId = I(getAccountId(requestedID.getFolderID()));
-            Event event = find(eventsPerAccountId.get(accountId), getRelativeId(requestedID));
+            int accountId = getAccountId(requestedID.getFolderID());
+            Event event = find(eventsPerAccountId.get(I(accountId)), getRelativeId(requestedID));
             events.add(null != event ? withUniqueID(event, accountId) : null);
         }
         return events;

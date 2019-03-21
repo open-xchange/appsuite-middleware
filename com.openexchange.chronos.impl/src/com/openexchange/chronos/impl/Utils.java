@@ -63,7 +63,7 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
-import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -751,7 +751,7 @@ public class Utils {
          * get configured amount quota limit
          */
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class, true);
-        Connection connection = session.get(PARAM_CONNECTION, Connection.class);
+        Connection connection = optConnection(session);
         long limit;
         if (null != connection) {
             limit = AmountQuotas.getLimit(session.getSession(), Module.CALENDAR.getName(), configViewFactory, connection);
@@ -1283,7 +1283,7 @@ public class Utils {
      * @return The connection, or <code>null</code> if not defined
      */
     public static Connection optConnection(CalendarSession session) {
-        return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
+        return session.get(PARAMETER_CONNECTION(), Connection.class, null);
     }
 
     private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {

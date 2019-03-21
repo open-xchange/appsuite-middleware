@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -75,9 +76,6 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class AbstractStorageOperation<S, T> implements StorageOperation<T> {
 
-    /** The session parameter name where the underlying database connection is held during transactions */
-    public static final String PARAM_CONNECTION = Connection.class.getName();
-
     protected final CalendarSession session;
     protected final Context context;
 
@@ -98,10 +96,10 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
         Connection readConnection = null;
         try {
             readConnection = dbService.getReadOnly(context);
-            session.set(PARAM_CONNECTION, readConnection);
+            session.set(PARAMETER_CONNECTION(), readConnection);
             return execute(session, initStorage(new SimpleDBProvider(readConnection, null)));
         } finally {
-            session.set(PARAM_CONNECTION, null);
+            session.set(PARAMETER_CONNECTION(), null);
             if (null != readConnection) {
                 dbService.backReadOnly(context, readConnection);
             }
@@ -116,7 +114,7 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
         try {
             writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
-            session.set(PARAM_CONNECTION, writeConnection);
+            session.set(PARAMETER_CONNECTION(), writeConnection);
             T result = execute(session, initStorage(new SimpleDBProvider(writeConnection, writeConnection)));
             writeConnection.commit();
             committed = true;
@@ -127,7 +125,7 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
             }
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            session.set(PARAM_CONNECTION, null);
+            session.set(PARAMETER_CONNECTION(), null);
             if (null != writeConnection) {
                 if (false == committed) {
                     Databases.rollback(writeConnection);
