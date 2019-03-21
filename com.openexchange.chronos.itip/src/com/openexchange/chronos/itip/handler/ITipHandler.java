@@ -326,8 +326,10 @@ public class ITipHandler implements CalendarHandler {
     private boolean isMove(UpdateResult update) {
         // @formatter:off
         if(update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
-           update.getAttendeeUpdates().getAddedItems().isEmpty() == false ||
-           update.getAttendeeUpdates().getRemovedItems().isEmpty() == false ||
+           update.getAttendeeUpdates() == null || 
+           (update.getAttendeeUpdates().getAddedItems() != null && update.getAttendeeUpdates().getAddedItems().isEmpty() == false) ||
+           (update.getAttendeeUpdates().getRemovedItems() != null && update.getAttendeeUpdates().getRemovedItems().isEmpty() == false) ||
+           update.getAttendeeUpdates().getUpdatedItems() == null ||
            update.getAttendeeUpdates().getUpdatedItems().size() != 1 || 
            update.getAttendeeUpdates().getUpdatedItems().get(0).getUpdatedFields().size() != 1 || 
            update.getAttendeeUpdates().getUpdatedItems().get(0).getUpdatedFields().iterator().next().equals(AttendeeField.FOLDER_ID) == false ) {
