@@ -104,7 +104,7 @@ public class Presence extends Stanza {
 
 
 
-    private static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
+    static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
 
     /** Predicate to filter extension elements from {@link Stanza#payloads} */
     private transient Predicate<PayloadTree> defaultsPredicate = null;
@@ -118,7 +118,10 @@ public class Presence extends Stanza {
 
                 @Override
                 public boolean apply(PayloadTree input) {
-                    return defaultElements.contains(input.getElementPath());
+                    if (null != input) {
+                        return defaultElements.contains(input.getElementPath());
+                    }
+                    return false;
                 }
             };
         }
@@ -132,7 +135,10 @@ public class Presence extends Stanza {
 
                 @Override
                 public boolean apply(PayloadTree input) {
-                    return !defaultElements.contains(input.getElementPath());
+                    if (null != input) {
+                        return !defaultElements.contains(input.getElementPath());
+                    }
+                    return true;
                 }
             };
         }
