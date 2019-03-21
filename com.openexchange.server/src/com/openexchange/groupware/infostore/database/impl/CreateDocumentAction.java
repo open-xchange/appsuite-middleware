@@ -66,6 +66,8 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 
     /**
      * Initializes a new {@link CreateDocumentAction}.
+     * 
+     * @param session The {@link Session}
      */
     public CreateDocumentAction(Session session) {
         super(session);
@@ -78,6 +80,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
      * @param queryCatalog The query catalog
      * @param context The context
      * @param documents The documents to create
+     * @param session The {@link Session}
      */
     public CreateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, Session session) {
         super(provider, queryCatalog, context, documents, session);
