@@ -1,0 +1,24 @@
+Source: open-xchange-geoip-maxmind
+Section: web
+Priority: optional
+Maintainer: Thorben Betten <thorben.betten@open-xchange.com>
+Build-Depends: debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-geoip-maxmind
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Breaks: open-xchange-geoip (<< 7.10.2)
+Replaces: open-xchange-geoip (<< 7.10.2)
+Description: The Open-Xchange GeoIP service
+ This package provides connectivity to a GeoIP service based on the MaxMind's GeoDatabase
+
+Package: open-xchange-geoip
+Depends: ${misc:Depends}, open-xchange-geoip-maxmin
+Architecture: all
+Priority: optional
+Section: oldlibs
+Description: transitional package
+ This is a transitional package. It can safely be removed.

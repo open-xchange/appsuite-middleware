@@ -1,0 +1,5 @@
+open-xchange-geoip-maxmind (7.10.2-0) unstable; urgency=medium
+
+  * prepare for 7.10.2 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 18 Oct 2018 10:39:25 +0200

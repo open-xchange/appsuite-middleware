@@ -3,6 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-system"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-osgi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hazelcast-community"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xerces"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin"/>
@@ -51,11 +52,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-googledrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-onedrive"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip-ip2location"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip-maxmind"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-halo"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hazelcast-community"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-76x"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-780-782"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-783"/>

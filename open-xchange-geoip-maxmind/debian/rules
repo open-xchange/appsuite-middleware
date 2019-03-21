@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+include /usr/share/dpkg/pkg-info.mk
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	dh_auto_install
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(CURDIR)/debian/tmp -DpackageName=$(DEB_SOURCE) -f build/build.xml build
