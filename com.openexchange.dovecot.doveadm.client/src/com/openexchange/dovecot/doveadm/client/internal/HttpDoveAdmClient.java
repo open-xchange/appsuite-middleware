@@ -92,12 +92,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -706,7 +701,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             return (R) httpResponse.getEntity().getContent();
         }
 
-        R retval = parseIntoObject(httpResponse.getEntity().getContent(), type.getType());
+        R retval = parseIntoObject(httpResponse.getEntity().getContent(), type);
         consume(httpResponse);
         return retval;
     }
@@ -740,18 +735,25 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @return The Java object representation
      * @throws OXException If Java object representation cannot be returned
      */
-    protected static <T> T parseIntoObject(InputStream inputStream, Class<T> clazz) throws OXException {
-        try {
-            JsonFactory jsonFactory = new JsonFactory();
-            JsonParser jp = jsonFactory.createParser(inputStream);
-            return getObjectMapper().readValue(jp, clazz);
-        } catch (JsonGenerationException | JsonMappingException | JsonParseException e) {
-            throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw DoveAdmClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    @SuppressWarnings("unchecked")
+    protected static <T> T parseIntoObject(InputStream inputStream, ResultType<T> resultType) throws OXException {
+        if(ResultType.JSON.equals(resultType)) {
+            // Return JSONValue
+            try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+                return (T) JSONObject.parse(reader);
+            } catch (JSONException e) {
+                throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw DoveAdmClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (RuntimeException e) {
+                throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        } else if(ResultType.INPUT_STREAM.equals(resultType)) {
+            // Return the input stream
+            return (T) inputStream;
         }
+        // else; Void
+        return null;
     }
 
     /**
