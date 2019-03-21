@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
@@ -355,7 +356,7 @@ public class MailValidator {
                 LOGGER.trace("Final LF should have been read but the end of the stream was already reached.");
             }
 
-            out.write(closePhrase.getBytes());
+            out.write(closePhrase.getBytes(StandardCharsets.ISO_8859_1));
             out.flush();
         } catch (Exception e) {
             LOGGER.trace("Unable to connect.", e);
