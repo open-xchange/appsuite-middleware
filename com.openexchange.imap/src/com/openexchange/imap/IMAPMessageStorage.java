@@ -4269,7 +4269,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
                 } catch (OXException ex) {
                     if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex) || MimeMailExceptionCode.QUOTA_EXCEEDED.equals(ex)) {
-                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create();
+                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create(ex);
                     }
                     throw ex;
 
