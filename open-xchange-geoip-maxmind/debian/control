@@ -16,7 +16,7 @@ Description: The Open-Xchange GeoIP service
  This package provides connectivity to a GeoIP service based on the MaxMind's GeoDatabase
 
 Package: open-xchange-geoip
-Depends: ${misc:Depends}, open-xchange-geoip-maxmin
+Depends: ${misc:Depends}, open-xchange-geoip-maxmind
 Architecture: all
 Priority: optional
 Section: oldlibs
