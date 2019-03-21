@@ -23,7 +23,6 @@
 
 package com.openexchange.socketio.protocol;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.ParsePosition;
@@ -34,9 +33,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.socketio.server.SocketIOProtocolException;
 
 /**
@@ -208,13 +212,14 @@ public final class SocketIOProtocol {
     }
 
     static Object fromJSON(String s) throws SocketIOProtocolException {
-        try {
-            if (s == null || s.isEmpty()) {
-                return null;
-            }
+        if (s == null || s.isEmpty()) {
+            return null;
+        }
 
-            return mapper.readValue(s, Object.class);
-        } catch (IOException e) {
+        try (UnsynchronizedStringReader reader = new UnsynchronizedStringReader(s)) {
+            JSONValue json = JSONObject.parse(reader);
+            return JSONCoercion.coerceToNative(json);
+        } catch (JSONException e) {
             throw new SocketIOProtocolException("Cannot parse JSON", e);
         }
     }
