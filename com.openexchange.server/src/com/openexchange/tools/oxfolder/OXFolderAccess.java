@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -649,7 +650,7 @@ public class OXFolderAccess {
                 return tasks.containsNotSelfCreatedTasks(session, readCon, folder.getObjectID());
             } else if (module == FolderObject.CALENDAR) {
                 CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-                calendarSession.set(Connection.class.getName(), readCon);
+                calendarSession.set(PARAMETER_CONNECTION(), readCon);
                 return calendarSession.getCalendarService().getUtilities().containsForeignEvents(calendarSession, String.valueOf(folder.getObjectID()));
             } else if (module == FolderObject.CONTACT) {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
@@ -684,7 +685,7 @@ public class OXFolderAccess {
                 }
                 case FolderObject.CALENDAR: {
                     CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-                    calendarSession.set(Connection.class.getName(), readCon);
+                    calendarSession.set(PARAMETER_CONNECTION(), readCon);
                     return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(folder.getObjectID()));
                 }
                 case FolderObject.CONTACT: {
@@ -721,7 +722,7 @@ public class OXFolderAccess {
                 }
                 case FolderObject.CALENDAR: {
                     CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-                    calendarSession.set(Connection.class.getName(), readCon);
+                    calendarSession.set(PARAMETER_CONNECTION(), readCon);
                     return calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(folder.getObjectID()));
                 }
                 case FolderObject.CONTACT:
