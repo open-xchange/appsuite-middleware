@@ -56,6 +56,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -64,6 +66,7 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.java.Autoboxing;
 
 
 /**
@@ -72,6 +75,8 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionRemoverTask implements UpdateTaskV2 {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(SubscriptionRemoverTask.class);
 
     private final List<String> subscriptionSourceIds;
 
@@ -140,9 +145,11 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
                 stmt.setString(1, id);
                 stmt.addBatch();
             }
-            stmt.executeUpdate();
-
+            int[] deleted = stmt.executeBatch();
             con.commit();
+            
+            Integer result = Autoboxing.I(Arrays.stream(deleted).reduce(Integer::sum).getAsInt());
+            LOG.info("Removed {} invalid subscriptions.", result);
             rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
