@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -119,7 +120,8 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
     protected abstract Object[] getAdditionals(DocumentMetadata doc);
 
     public void setDocuments(final List<DocumentMetadata> documents) {
-        this.documents = documents;
+        // Documents will never be null but this will avoid analysis tools to report null pointer ..  
+        this.documents = null == documents ? Collections.emptyList() : documents;
     }
 
     public List<DocumentMetadata> getDocuments() {
