@@ -109,11 +109,14 @@ import liquibase.resource.ResourceAccessor;
  */
 public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTaskChange, CustomTaskRollback {
 
+    private final boolean considerOnlyDuplicates;
+
     /**
      * Initializes a new {@link ChangeFilestore2UserPrimaryKeyCustomTaskChange}.
      */
     public ChangeFilestore2UserPrimaryKeyCustomTaskChange() {
         super();
+        considerOnlyDuplicates = true;
     }
 
     @Override
@@ -187,10 +190,12 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
     private void execute(Connection configDbCon, org.slf4j.Logger logger) throws CustomChangeException {
         try {
-            Map<SchemaInfo, TIntObjectMap<TIntSet>> mapping = readInUsers(configDbCon, logger);
-            if (false == mapping.isEmpty()) {
-                Map<UserAndContext, Integer> user2filestore = determineFilestoreIdsFor(mapping, configDbCon, logger);
-                updateFilestoreAssociation(user2filestore, configDbCon, logger);
+            if (!considerOnlyDuplicates) {
+                Map<SchemaInfo, TIntObjectMap<TIntSet>> mapping = readInUsers(configDbCon, logger);
+                if (false == mapping.isEmpty()) {
+                    Map<UserAndContext, Integer> user2filestore = determineFilestoreIdsFor(mapping, configDbCon, logger);
+                    updateFilestoreAssociation(user2filestore, configDbCon, logger);
+                }
             }
 
             Set<UserAndContext> duplicateEntries = getDuplicateEntries(configDbCon, logger);
