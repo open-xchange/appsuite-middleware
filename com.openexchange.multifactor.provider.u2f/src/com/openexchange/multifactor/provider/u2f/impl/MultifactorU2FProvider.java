@@ -378,9 +378,9 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
                     return pendingDevice.get();
                 } catch (final U2fRegistrationException e) {
                     // Registration denied; Could not validate signature
-                    throw MultifactorExceptionCodes.REGISTRATION_FAILED.create();
+                    throw MultifactorExceptionCodes.REGISTRATION_FAILED.create(e);
                 } catch (U2fBadInputException | CertificateException e) {
-                    throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e.getMessage());
+                    throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e, e.getMessage());
                 }
             }
             throw MultifactorExceptionCodes.REGISTRATION_FAILED.create();
