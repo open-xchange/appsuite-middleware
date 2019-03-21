@@ -53,9 +53,12 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.core.HttpHeaders;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDeleteResponse;
@@ -73,6 +76,8 @@ import com.openexchange.testing.httpclient.models.MultifactorStartAuthentication
 import com.openexchange.testing.httpclient.models.MultifactorStartRegistrationResponse;
 import com.openexchange.testing.httpclient.models.MultifactorStartRegistrationResponseData;
 import com.openexchange.testing.httpclient.modules.MultifactorApi;
+import com.openexchange.testing.restclient.modules.AdminApi;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * {@link AbstractMultifactorTest}
@@ -82,13 +87,22 @@ import com.openexchange.testing.httpclient.modules.MultifactorApi;
  */
 public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession {
 
-    private MultifactorApi multifactorApi;
     private static String EMPTY_PROVIDER_FILTER = "";
+    private MultifactorApi multifactorApi;
+    private AdminApi adminApi;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         multifactorApi = new MultifactorApi(getApiClient());
+
+        com.openexchange.testing.restclient.invoker.ApiClient adminRestClient =
+            new com.openexchange.testing.restclient.invoker.ApiClient();
+        adminRestClient.setBasePath(getRestBasePath());
+        String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((admin.getUser() + ":" + admin.getPassword()).getBytes(StandardCharsets.UTF_8));
+        adminRestClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
+        adminApi = new AdminApi(adminRestClient);
+
         super.setUpConfiguration();
     }
 
@@ -122,6 +136,24 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
 
     protected <T> T checkResponse(MultifactorDeleteResponse response, T data) {
         return super.checkResponse(response.getError(), response.getErrorDesc(), data);
+    }
+
+    protected String getRestBasePath() {
+        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        if (protocol == null) {
+            protocol = "http";
+        }
+        return protocol + "://" + hostname + ":8009";
+    }
+
+    /**
+     * Returns the {@link AdminApi}
+     *
+     * @return The {@link AdminApi}
+     */
+    protected AdminApi getAdminApi() {
+        return adminApi;
     }
 
     /**
@@ -245,6 +277,25 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
         String phoneNumber,
         boolean backup) throws ApiException {
 
+        return startRegistration(multifactorApi, providerName, deviceName, phoneNumber, backup);
+    }
+
+    /**
+     * Starts registering a new multifactor device for the given provider
+     *
+     * @param api The API instance to use
+     * @param providerName The name of the provider
+     * @param deviceName The name of the new device, or null to choose a default name
+     * @param phoneNumber [SMS] The phone number for the SMS provider or null for other providers
+     * @param backup [SMS] Whether the device should be used as backup device or not
+     * @return The response data
+     * @throws ApiException
+     */
+    protected MultifactorStartRegistrationResponseData startRegistration(MultifactorApi api, String providerName,
+        String deviceName,
+        String phoneNumber,
+        boolean backup) throws ApiException {
+
         final MultifactorDevice deviceData = new MultifactorDevice();
         deviceData.setProviderName(providerName);
         deviceData.setName(deviceName);
@@ -256,7 +307,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
             deviceData.setParameters(paramters);
         }
 
-        MultifactorStartRegistrationResponse resp = MultifactorApi().multifactorDeviceActionStartRegistration(getSessionId(), deviceData);
+        MultifactorStartRegistrationResponse resp = api.multifactorDeviceActionStartRegistration(api.getApiClient().getSession(), deviceData);
         return checkResponse(resp, resp.getData());
     }
 
@@ -271,13 +322,29 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @return The response data
      * @throws ApiException
      */
-    protected MultifactorDevice  finishRegistration(String providerName, String deviceId, String secretToken, String clientData, String registrationData) throws ApiException {
+    protected MultifactorDevice finishRegistration(String providerName, String deviceId, String secretToken, String clientData, String registrationData) throws ApiException {
+        return finishRegistration(multifactorApi, providerName, deviceId, secretToken, clientData, registrationData);
+    }
+
+    /**
+     * Finishes the registration of new mulitfactor device for the given provider
+     *
+     * @param api The API instance to use
+     * @param providerName The name of the provider
+     * @param deviceId The ID of the device to finish registration for
+     * @param secretToken [TOTP, SMS] The secret authentication token
+     * @param clientData [U2F] clientData
+     * @param registrationData [U2F] registrationData
+     * @return The response data
+     * @throws ApiException
+     */
+    protected MultifactorDevice finishRegistration(MultifactorApi api, String providerName, String deviceId, String secretToken, String clientData, String registrationData) throws ApiException {
         MultifactorFinishRegistrationData  data = new MultifactorFinishRegistrationData();
         data.setSecretCode(secretToken);
-        data.setClientData(clientData);;
+        data.setClientData(clientData);
         data.setRegistrationData(registrationData);
 
-        MultifactorFinishRegistrationResponse resp = MultifactorApi().multifactorDeviceActionfinishRegistration(getSessionId(), providerName, deviceId, data);
+        MultifactorFinishRegistrationResponse resp = api.multifactorDeviceActionfinishRegistration(api.getApiClient().getSession(), providerName, deviceId, data);
         return checkResponse(resp, resp.getData());
     }
 

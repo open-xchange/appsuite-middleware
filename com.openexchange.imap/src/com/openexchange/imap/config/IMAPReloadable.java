@@ -77,7 +77,7 @@ public final class IMAPReloadable implements Reloadable {
 
     private static final String[] PROPERTIES = new String[] {"com.openexchange.imap.invalidMailboxNameCharacters",
         "com.openexchange.imap.enableTls", "com.openexchange.imap.maxNumExternalConnections", "com.openexchange.imap.maxNumConnections",
-        "com.openexchange.imap.namespacePerUser" };
+        "com.openexchange.imap.namespacePerUser", "com.openexchange.imap.auditLog.enabled" };
 
     /**
      * Gets the instance.

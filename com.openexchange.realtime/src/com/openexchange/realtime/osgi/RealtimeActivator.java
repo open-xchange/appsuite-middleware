@@ -173,8 +173,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         });
 
         DefaultPayloadTreeConverter converter = new DefaultPayloadTreeConverter(this);
-        PayloadTree.CONVERTER = converter;
-        PayloadTreeNode.CONVERTER = converter;
+        PayloadTree.setConverter(converter);
+        PayloadTreeNode.setConverter(converter);
 
         registerService(PayloadTreeConverter.class, converter);
 
@@ -210,6 +210,8 @@ public class RealtimeActivator extends HousekeepingActivator {
             ID.ID_MANAGER_REF.set(null);
             RealtimeJanitors.getInstance().cleanup();
             realtimeConfig.stop();
+            PayloadTree.setConverter(null);
+            PayloadTreeNode.setConverter(null);
             super.stopBundle();
         }
     }

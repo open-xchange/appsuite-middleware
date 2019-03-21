@@ -127,7 +127,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
             Event original = determineOriginalEvent(change, processed, session);
             Event updatedEvent;
-            
+
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
@@ -145,7 +145,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 event.removeId();
                 updatedEvent = createEvent(event, session);
             }
-            
+
             // Check before continuing
             if (null == updatedEvent) {
                 LOGGER.warn("No event found to process.");
@@ -156,13 +156,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 processed.put(updatedEvent.getUid(), updatedEvent);
             }
 
-            Event loadedEvent = util.loadEvent(updatedEvent, session);
-            if (loadedEvent != null) {
-                writeMail(action, original, loadedEvent, session, owner);
-                result.add(loadedEvent);
-            } else {
-                LOGGER.error("Can't load event with id {} from database.\nOriginal event: {}\nUpdated event: {}", updatedEvent.getId(), original, updatedEvent);
-            }
+            writeMail(action, original, updatedEvent, session, owner);
+            result.add(updatedEvent);
         }
 
         return result;
@@ -172,34 +167,29 @@ public class UpdatePerformer extends AbstractActionPerformer {
         EventUpdate diff = session.getUtilities().compare(original, event, true, (EventField[]) null);
 
         Event update = new Event();
-        boolean write = false;
         if (!diff.getUpdatedFields().isEmpty()) {
             EventMapper.getInstance().copy(diff.getUpdate(), update, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
-            write = true;
-        }
+            update.setFolderId(original.getFolderId());
+            update.setId(original.getId());
 
-        update.setFolderId(original.getFolderId());
-        update.setId(original.getId());
+            if (!update.containsSequence()) {
+                update.setSequence(original.getSequence());
+            }
+            if (!update.containsUid()) {
+                update.setUid(original.getUid());
+            }
+            if (!update.containsOrganizer()) {
+                update.setOrganizer(original.getOrganizer());
+            }
+            if (original.containsSeriesId()) {
+                update.setSeriesId(original.getSeriesId());
+            }
+            if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
+                update.setRecurrenceId(event.getRecurrenceId());
+            } else if (original.containsRecurrenceId()) {
+                update.setRecurrenceId(original.getRecurrenceId());
+            }
 
-        if (!update.containsSequence()) {
-            update.setSequence(original.getSequence());
-        }
-        if (!update.containsUid()) {
-            update.setUid(original.getUid());
-        }
-        if (!update.containsOrganizer()) {
-            update.setOrganizer(original.getOrganizer());
-        }
-        if (original.containsSeriesId()) {
-            update.setSeriesId(original.getSeriesId());
-        }
-        if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
-            update.setRecurrenceId(event.getRecurrenceId());
-        } else if (original.containsRecurrenceId()) {
-            update.setRecurrenceId(original.getRecurrenceId());
-        }
-
-        if (write) {
             CalendarResult calendarResult = session.getCalendarService().updateEventAsOrganizer(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
             /*
              * Check creations first because;
@@ -207,13 +197,17 @@ public class UpdatePerformer extends AbstractActionPerformer {
              * + To create exceptions master needs to be updated. Nevertheless the created exception must be returned
              */
             if (false == calendarResult.getCreations().isEmpty()) {
-                update = calendarResult.getCreations().get(0).getCreatedEvent();
+                return calendarResult.getCreations().get(0).getCreatedEvent();
             }
-            if (null == update && false == calendarResult.getUpdates().isEmpty()) {
-                update = calendarResult.getUpdates().get(0).getUpdate();
+            if (false == calendarResult.getUpdates().isEmpty()) {
+                return calendarResult.getUpdates().get(0).getUpdate();
             }
+            LOGGER.debug("Did write data but unable to find correct element to return.");
+            return null;
         }
-        return update;
+
+        LOGGER.debug("Did not write any data.");
+        return null;
     }
 
     /**

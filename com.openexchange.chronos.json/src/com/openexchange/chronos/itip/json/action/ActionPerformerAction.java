@@ -129,6 +129,7 @@ public class ActionPerformerAction extends AbstractITipAction {
         if (list != null) {
             JSONArray array = new JSONArray(list.size());
             for (Event event : list) {
+                event = EventMapper.getInstance().copy(event, null, (EventField[]) null);
                 event.setFolderId(CalendarUtils.prependDefaultAccount(event.getFolderId()));
                 JSONObject object = EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), tz, session);
                 array.put(object);

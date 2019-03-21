@@ -121,7 +121,7 @@ public class ConfigurationFile extends AbstractConfigSource {
         }
 
         // If 'forceSecure' is true, ensure that both - mail and transport settings - either support SSL or STARTTLS
-        if (forceSecure && ((!autoconfig.isMailSecure() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure() && !autoconfig.isTransportStartTls()))) {
+        if (skipDueToForcedSecure(forceSecure, autoconfig)) {
             // Either mail or transport do not support a secure connection (or neither of them)
             return null;
         }

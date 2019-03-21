@@ -50,12 +50,10 @@
 package com.openexchange.chronos.impl.session;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
@@ -83,7 +81,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class DefaultCalendarSession implements CalendarSession {
 
     private final CalendarService calendarService;
-    private final Map<String, Object> parameters;
+    private final CalendarParameters parameters;
     private final ServerSession session;
     private final EntityResolver entityResolver;
     private final HostData hostData;
@@ -97,9 +95,20 @@ public class DefaultCalendarSession implements CalendarSession {
      * @param calendarService A reference to the calendar service
      */
     public DefaultCalendarSession(Session session, CalendarService calendarService) throws OXException {
+        this(session, calendarService, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultCalendarSession}.
+     *
+     * @param session The underlying server session
+     * @param calendarService A reference to the calendar service
+     * @param Additional calendar parameters to use
+     */
+    public DefaultCalendarSession(Session session, CalendarService calendarService, CalendarParameters parameters) throws OXException {
         super();
         this.calendarService = calendarService;
-        this.parameters = new HashMap<String, Object>();
+        this.parameters = null != parameters ? parameters : new DefaultCalendarParameters();
         this.session = Check.hasCalendar(ServerSessionAdapter.valueOf(session));
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
         RequestContext requestContext = RequestContextHolder.get();
@@ -170,29 +179,27 @@ public class DefaultCalendarSession implements CalendarSession {
 
     @Override
     public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
-        return this;
+        return parameters.set(parameter, value);
     }
 
     @Override
     public <T> T get(String parameter, Class<T> clazz) {
-        return get(parameter, clazz, null);
+        return parameters.get(parameter, clazz);
     }
 
     @Override
     public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
-        Object value = parameters.get(parameter);
-        return null == value ? defaultValue : clazz.cast(value);
+        return parameters.get(parameter, clazz, defaultValue);
     }
 
     @Override
     public boolean contains(String parameter) {
-        return parameters.containsKey(parameter);
+        return parameters.contains(parameter);
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        return Collections.unmodifiableSet(parameters.entrySet());
+        return parameters.entrySet();
     }
 
     @Override

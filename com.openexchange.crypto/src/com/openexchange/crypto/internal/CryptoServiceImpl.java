@@ -53,6 +53,7 @@ import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
 import static com.openexchange.crypto.CryptoErrorMessage.NoSalt;
 import static com.openexchange.crypto.CryptoErrorMessage.SecurityException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
@@ -240,7 +241,7 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            if (encryptedData.getBytes().length < 2) {
+            if (encryptedData.getBytes(StandardCharsets.US_ASCII).length < 2) {
                 LOG.debug("Data is too short to be decrypted");
                 throw SecurityException.create();
             }

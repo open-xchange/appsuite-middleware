@@ -54,8 +54,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
+import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -68,10 +69,14 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
 
     private static final long serialVersionUID = -4402820599792777503L;
 
-    public static volatile DefaultPayloadTreeConverter CONVERTER = null;
-    
+    private static final AtomicReference<PayloadTreeConverter> CONVERTER_REF = new AtomicReference<>();
+
+    public static void setConverter(PayloadTreeConverter converter) {
+        CONVERTER_REF.set(converter);
+    }
+
     private PayloadTreeNode parent;
-    
+
     // ElementPath for empty container nodes
     private ElementPath elementPath;
 
@@ -98,8 +103,8 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
     }
 
     /**
-     * Initializes a new {@link PayloadTreeNode} without a PayloadElement For e.g. Collection nodes that contain data as cildren. 
-     * 
+     * Initializes a new {@link PayloadTreeNode} without a PayloadElement For e.g. Collection nodes that contain data as cildren.
+     *
      * @param elementPath The {@link ElementPath} to use for this node.
      */
     public PayloadTreeNode(ElementPath elementPath) {
@@ -340,21 +345,23 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
             child.accept(visitor);
         }
     }
-    
+
     public PayloadTreeNode toInternal() throws OXException {
-        if (CONVERTER != null) {
-            return CONVERTER.incoming(this);
+        PayloadTreeConverter converter = CONVERTER_REF.get();
+        if (converter != null) {
+            return converter.incoming(this);
         }
         throw new IllegalStateException("No Converter is set!");
     }
-    
+
     public PayloadTreeNode toExternal(String format) throws OXException {
-        if (CONVERTER != null) {
-            return CONVERTER.outgoing(this, format);
+        PayloadTreeConverter converter = CONVERTER_REF.get();
+        if (converter != null) {
+            return converter.outgoing(this, format);
         }
         throw new IllegalStateException("No Converter is set!");
     }
-    
+
     public PayloadTreeNode internalClone() throws OXException {
         return toExternal("native").toInternal();
     }
@@ -473,7 +480,7 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
             node.setPayloadElement(payloadElement);
             return this;
         }
-  
+
         /**
          * Create a new PayloadTreeNode and add it as child to the PayloadTreeNode we are currently building.
          *

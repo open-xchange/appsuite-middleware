@@ -59,20 +59,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
 import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
-import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link FileDeliveryServlet}
@@ -84,8 +81,25 @@ public class FileDeliveryServlet extends HttpServlet {
     private static final long serialVersionUID = -1246179982601539367L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileDeliveryServlet.class);
 
-    public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
-    public static DataProviderRegistry DATA_PROVIDERS = null;
+    private final RandomTokenContainer<Map<String, Object>> paramMap;
+    private final DataProviderRegistry dataProviders;
+
+    private final Configuration configuration;
+
+    /**
+     * Initializes a new {@link FileDeliveryServlet}.
+     * 
+     * @param paramMap {@link RandomTokenContainer}
+     * @param dataProviders {@link DataProviderRegistry}
+     * 
+     * @param configuration The {@link Configuration}
+     */
+    public FileDeliveryServlet(RandomTokenContainer<Map<String, Object>> paramMap, DataProviderRegistry dataProviders, Configuration configuration) {
+        super();
+        this.paramMap = paramMap;
+        this.dataProviders = dataProviders;
+        this.configuration = configuration;
+    }
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -100,18 +114,17 @@ public class FileDeliveryServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final Configuration configuration = Services.getConfiguration();
         if (configuration.isEnabled() == false) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Data retrieval is disabled.");
             return;
         }
         final String token = req.getParameter("token");
-        if(token == null) {
+        if (token == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing parameter 'token");
             return;
         }
-        final Map<String, Object> parameters = PARAM_MAP.get(token);
-        if(parameters == null) {
+        final Map<String, Object> parameters = paramMap.get(token);
+        if (parameters == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -119,44 +132,44 @@ public class FileDeliveryServlet extends HttpServlet {
         final String id = (String) parameters.get(Constants.DATA_PROVDER_KEY);
         final ServerSession session = (ServerSession) parameters.get(Constants.SESSION_KEY);
 
-        if(configuration.hasExpired((Long)parameters.get(Constants.CREATED))) {
+        if (configuration.hasExpired(((Long) parameters.get(Constants.CREATED)).longValue())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        DataProvider provider = null;
+        DataProvider<Object> provider = null;
         Object state = null;
         try {
-            provider = DATA_PROVIDERS.getProvider(id);
+            provider = dataProviders.getProvider(id);
 
             state = provider.start();
 
             final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
 
             InputStream stream = provider.retrieve(state, parameters, session);
-            stream = setHeaders(stream, metadata, req, resp);
+            stream = setHeaders(stream, metadata, resp);
 
             IOTools.copy(stream, resp.getOutputStream());
-            if(configuration.expiresAfterAccess()) {
-                PARAM_MAP.remove(token);
+            if (configuration.expiresAfterAccess()) {
+                paramMap.remove(token);
             }
         } catch (final Exception e) {
             LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {
-            if(state != null && provider != null) {
+            if (state != null && provider != null) {
                 provider.close(state);
             }
         }
     }
 
-    private InputStream setHeaders(final InputStream stream, final FileMetadata metadata, final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
+    private InputStream setHeaders(final InputStream stream, final FileMetadata metadata, final HttpServletResponse resp) throws IOException {
         final InputStream in = new BufferedInputStream(stream, 65536); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
         final ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
         int count = 0;
         int value = 0;
         try {
-            while((value = in.read()) != -1) {
+            while ((value = in.read()) != -1) {
                 out.write(value);
                 count++;
             }
@@ -166,7 +179,7 @@ public class FileDeliveryServlet extends HttpServlet {
 
         resp.setContentLength(count);
 
-        if(metadata.getType() != null) {
+        if (metadata.getType() != null) {
             resp.setContentType(metadata.getType());
         }
 
