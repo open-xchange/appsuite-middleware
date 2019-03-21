@@ -132,7 +132,6 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
@@ -140,6 +139,7 @@ import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageEnhancedDeletion;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
+import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -4191,8 +4191,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      */
                     uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
                 } catch (OXException ex) {
-                    if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex)) {
-                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create();
+                    if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex) || MimeMailExceptionCode.QUOTA_EXCEEDED.equals(ex)) {
+                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create(ex);
                     }
                     throw ex;
 
