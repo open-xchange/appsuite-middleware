@@ -833,11 +833,13 @@ public abstract class EventConverter {
      */
     public static Attendee getAttendee(Participant participant) {
         Attendee attendee = new Attendee();
-        if (0 < participant.getIdentifier()) {
-            attendee.setEntity(participant.getIdentifier());
-        }
         if (0 < participant.getType()) {
             attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
+        }
+        if (CalendarUserType.GROUP.matches(attendee.getCuType()) && 0 <= participant.getIdentifier()) {
+            attendee.setEntity(participant.getIdentifier());
+        } else if (0 < participant.getIdentifier()) {
+            attendee.setEntity(participant.getIdentifier());
         }
         if (null != participant.getEmailAddress()) {
             attendee.setUri(Appointment2Event.getURI(participant.getEmailAddress()));
