@@ -305,7 +305,7 @@ specific field data of single or multiple objects.
 |567 |Telephone IP | telephone_ip | String ||
 |568 |Telephone assistant | telephone_assistant | String ||
 |569 |Company | company | String ||
-|570 || image1 | String ||
+|570 || image1 | String | Deprecated. Use 606 instead.|
 |571 |Dynamic Field 1 | userfield01 | String ||
 |572 |Dynamic Field 2 | userfield02 | String ||
 |573 |Dynamic Field 3 | userfield03 | String ||
