@@ -156,8 +156,9 @@ public class ResolvePerformer extends AbstractQueryPerformer {
          */
         List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
         if (1 < events.size()) {
-            String message = "UID \"" + uid + "\" resolves to multiple events [" + events.stream().map(Event::getId).collect(Collectors.joining(", ")) + ']';
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(new IllegalStateException(message), Utils.PROVIDER_ID);
+            String conflictingIds = events.stream().map(Event::getId).collect(Collectors.joining(", "));
+            Exception cause = new IllegalStateException("UID \"" + uid + "\" resolves to multiple events [" + conflictingIds + ']');
+            throw CalendarExceptionCodes.UID_CONFLICT.create(cause, uid, conflictingIds);
         }
         return events.isEmpty() ? null : events.get(0).getId();
     }
