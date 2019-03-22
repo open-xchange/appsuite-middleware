@@ -63,6 +63,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -276,6 +277,11 @@ public final class FileUtils {
     }
 
     /**
+     * Pattern to extract strings in quotes
+     */
+    private static final Pattern EXTRACTOR = Pattern.compile("\"(.*?)\"");
+
+    /**
      * Checks whether the specified CSV file denotes a valid CSV file with the specified amount of fields
      * on each row.
      *
@@ -294,7 +300,7 @@ public final class FileUtils {
             int maxLines = 5;
             for (int i = 0; i < maxLines; i++) {
                 String line = pickRandomLine(randomAccessFile, file.length(), random);
-                String[] split = line.split(",");
+                String[] split = EXTRACTOR.split(line);
                 if (split == null || split.length != maxFields) {
                     throw new IllegalArgumentException("The CSV file you provided does not seem to be a valid one.");
                 }
