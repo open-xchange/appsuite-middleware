@@ -455,7 +455,7 @@ public final class MyServletRequest  {
                     map_val = URLEncoder.encode(map_val, "UTF-8");
                 }
                 // replace the placeholder with values
-                raw_text = raw_text.replaceAll(map_key.propertyName, map_val);
+                raw_text = raw_text.replaceAll(map_key.getPropertyName(), map_val);
             }
         }
 
