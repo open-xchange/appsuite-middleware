@@ -74,6 +74,7 @@ import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
 
@@ -229,7 +230,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
             @Override
             public Long get(Alarm object) {
                 Date acknowledged = object.getAcknowledged();
-                return acknowledged != null ? acknowledged.getTime() : null;
+                return acknowledged != null ? Autoboxing.L(acknowledged.getTime()) : null;
             }
 
             @Override

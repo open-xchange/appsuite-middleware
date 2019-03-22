@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.chronos.impl.Utils.optConnection;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -104,7 +104,7 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
 
     @Override
     protected void onConnection(Connection connection) {
-        session.set(PARAM_CONNECTION, connection);
+        session.set(PARAMETER_CONNECTION(), connection);
     }
 
     @Override

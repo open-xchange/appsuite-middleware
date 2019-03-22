@@ -77,7 +77,7 @@ public class CalendarQuotaProvider implements QuotaProvider {
      * @param registry The {@link CalendarProviderRegistry} for {@link CompositingIDBasedCalendarQuotaProvider}
      * @throws OXException In case a service is unavailable
      */
-    public CalendarQuotaProvider(ServiceLookup services, CalendarProviderRegistry registry) throws OXException {
+    public CalendarQuotaProvider(ServiceLookup services, CalendarProviderRegistry registry) {
         super();
         this.services = services;
         this.registry = registry;

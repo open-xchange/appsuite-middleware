@@ -1,6 +1,6 @@
 %define __jar_repack %{nil}
 
-Name:          open-xchange-geoip
+Name:          open-xchange-geoip-maxmind
 BuildArch:     noarch
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
@@ -24,6 +24,8 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange GeoIP service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
+Obsoletes:     open-xchange-geoip < @OXVERSION@
+Provides:      open-xchange-geoip = @OXVERSION@
 
 %description
 This package provides connectivity to a GeoIP service based on the MaxMind's GeoDatabase.
@@ -65,31 +67,3 @@ GLOBIGNORE='*'
 %changelog
 * Thu Oct 18 2018 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.10.2 release
-* Thu Oct 11 2018 Thorben Betten <thorben.betten@open-xchange.com>
-First candidate for 7.10.1 release
-* Thu Sep 06 2018 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.10.1 release
-* Fri Jun 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Fourth candidate for 7.10.0 release
-* Wed Jun 27 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Third candidate for 7.10.0 release
-* Mon Jun 25 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Second candidate for 7.10.0 release
-* Mon Jun 11 2018 Thorben Betten <thorben.betten@open-xchange.com>
-First candidate for 7.10.0 release
-* Fri May 18 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Sixth preview of 7.10.0 release
-* Thu Apr 19 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Fifth preview of 7.10.0 release
-* Tue Apr 03 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Fourth preview of 7.10.0 release
-* Tue Feb 20 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Third preview of 7.10.0 release
-* Fri Feb 02 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Second preview for 7.10.0 release
-* Fri Dec 01 2017 Thorben Betten <thorben.betten@open-xchange.com>
-First preview for 7.10.0 release
-* Thu Oct 12 2017 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.10.0 release
-* Mon Feb 08 2016 Thorben Betten <thorben.betten@open-xchange.com>
-Initial release

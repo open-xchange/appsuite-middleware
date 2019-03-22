@@ -62,6 +62,7 @@ import static com.openexchange.chronos.provider.internal.Constants.PUBLIC_FOLDER
 import static com.openexchange.chronos.provider.internal.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.chronos.provider.internal.Constants.USER_PROPERTY_PREFIX;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
@@ -428,7 +429,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     private Connection optConnection() {
-        return session.get(Connection.class.getName(), Connection.class);
+        return session.get(PARAMETER_CONNECTION(), Connection.class);
     }
 
     /**
@@ -454,25 +455,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     /**
-     * Gets a list of groupware calendar folders representing the userized folders in the supplied folder response.
-     *
-     * @param folderResponse The response from the folder service
-     * @return The groupware calendar folders
-     */
-    private List<GroupwareCalendarFolder> getCalendarFolders(FolderResponse<UserizedFolder[]> folderResponse) throws OXException {
-        UserizedFolder[] folders = folderResponse.getResponse();
-        if (null == folders || 0 == folders.length) {
-            return Collections.emptyList();
-        }
-        List<GroupwareCalendarFolder> calendarFolders = new ArrayList<GroupwareCalendarFolder>(folders.length);
-        for (UserizedFolder userizedFolder : folders) {
-            calendarFolders.add(getCalendarFolder(userizedFolder));
-        }
-        return calendarFolders;
-    }
-
-    /**
-     * Gets a list of groupware calendar folders representing the userized folders in the supplied userized folders.
+     * Gets a list of groupware calendar folders representing the folders in the supplied userized folders.
      *
      * @param folders The folders from the folder service
      * @return The groupware calendar folders
@@ -524,11 +507,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
          * used for sync
          */
         if (folder.isDefault() && PrivateType.getInstance().equals(folder.getType())) {
-            properties.add(USED_FOR_SYNC(true, true));
+            properties.add(USED_FOR_SYNC(Boolean.TRUE, true));
         } else if (userProperties.containsKey(USER_PROPERTY_PREFIX + USED_FOR_SYNC_LITERAL)) {
             properties.add(USED_FOR_SYNC(userProperties.get(USER_PROPERTY_PREFIX + USED_FOR_SYNC_LITERAL), false));
         } else {
-            properties.add(USED_FOR_SYNC(true, false));
+            properties.add(USED_FOR_SYNC(Boolean.TRUE, false));
         }
         /*
          * schedule transparency
@@ -602,9 +585,8 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
         Connection connection = optConnection();
         if (null == connection) {
             return propertyStorage.getFolderProperties(contextId, asInt(folderId), userId);
-        } else {
-            return propertyStorage.getFolderProperties(contextId, asInt(folderId), userId, connection);
         }
+        return propertyStorage.getFolderProperties(contextId, asInt(folderId), userId, connection);
     }
 
     private void storeUserProperties(int contextId, String folderId, int userId, Map<String, String> properties) throws OXException {

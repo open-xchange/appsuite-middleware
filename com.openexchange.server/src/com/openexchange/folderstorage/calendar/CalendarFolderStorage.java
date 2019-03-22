@@ -50,13 +50,13 @@
 package com.openexchange.folderstorage.calendar;
 
 import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarType;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolders;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarConfig;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -145,7 +145,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
                 if (null == transactionManager) {
                     return true;
                 }
-                calendarAccess.set(Connection.class.getName(), transactionManager.getConnection());
+                calendarAccess.set(PARAMETER_CONNECTION(), transactionManager.getConnection());
                 transactionManager.transactionStarted(this);
             }
         }
@@ -163,7 +163,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
                 org.slf4j.LoggerFactory.getLogger(CalendarFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
             } finally {
                 if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
-                    calendarAccess.set(Connection.class.getName(), null);
+                    calendarAccess.set(PARAMETER_CONNECTION(), null);
                 }
             }
         }
@@ -177,7 +177,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
                 calendarAccess.commit();
             } finally {
                 if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
-                    calendarAccess.set(Connection.class.getName(), null);
+                    calendarAccess.set(PARAMETER_CONNECTION(), null);
                 }
             }
         }

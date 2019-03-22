@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
@@ -1135,7 +1136,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             return readCon == null ? tasks.isFolderEmpty(ctx, folderId) : tasks.isFolderEmpty(ctx, readCon, folderId);
         } else if (module == FolderObject.CALENDAR) {
             CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-            calendarSession.set(Connection.class.getName(), readCon);
+            calendarSession.set(PARAMETER_CONNECTION(), readCon);
             return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(folderId));
         } else if (module == FolderObject.CONTACT) {
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
@@ -2035,7 +2036,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private void deleteContainedEvents(int folderId) throws OXException {
         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-        calendarSession.set(Connection.class.getName(), writeCon);
+        calendarSession.set(PARAMETER_CONNECTION(), writeCon);
         calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), CalendarUtils.DISTANT_FUTURE);
     }

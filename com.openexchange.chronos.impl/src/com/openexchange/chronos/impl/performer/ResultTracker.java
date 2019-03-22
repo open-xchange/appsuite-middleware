@@ -61,6 +61,7 @@ import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,7 +84,6 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
-import com.openexchange.chronos.impl.AbstractStorageOperation;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
@@ -404,8 +404,8 @@ public class ResultTracker {
         if (null != originalUserizedEvent) {
             return originalUserizedEvent;
         }
-        Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
-        session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
+        Connection oldConnection = session.get(PARAMETER_CONNECTION(), Connection.class);
+        session.set(PARAMETER_CONNECTION(), null);
         try {
             return new InternalCalendarStorageOperation<Event>(session) {
 
@@ -415,7 +415,7 @@ public class ResultTracker {
                 }
             }.executeQuery();
         } finally {
-            session.set(AbstractStorageOperation.PARAM_CONNECTION, oldConnection);
+            session.set(PARAMETER_CONNECTION(), oldConnection);
         }
     }
 

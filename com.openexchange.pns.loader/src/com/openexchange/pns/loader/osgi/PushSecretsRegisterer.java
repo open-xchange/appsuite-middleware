@@ -253,12 +253,8 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
             try {
                 keystore = KeyStore.getInstance("PKCS12");
                 keystore.load(is, password.toCharArray());
-            } catch (KeyStoreException e) {
-                throw new IOException("Error reading certificate from  '" + filename + "'");
-            } catch (NoSuchAlgorithmException e) {
-                throw new IOException("Error reading certificate from  '" + filename + "'");
-            } catch (CertificateException e) {
-                throw new IOException("Error reading certificate from  '" + filename + "'");
+            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+                throw new IOException("Error reading certificate from  '" + filename + "'", e);
             }
 
             return new ApnOptions(keystore, password, production);

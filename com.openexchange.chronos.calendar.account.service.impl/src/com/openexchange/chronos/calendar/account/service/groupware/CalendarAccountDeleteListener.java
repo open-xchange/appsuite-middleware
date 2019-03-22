@@ -60,6 +60,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -102,7 +103,7 @@ public class CalendarAccountDeleteListener implements DeleteListener {
          */
         SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
         DefaultCalendarParameters parameters = new DefaultCalendarParameters();
-        parameters.set(Connection.class.getName(), writeCon);
+        parameters.set(CalendarParameters.PARAMETER_CONNECTION(), writeCon);
         CalendarStorage calendarStorage = requireService(CalendarStorageFactory.class, services).create(event.getContext(), -1, null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         List<CalendarAccount> storedAccounts = calendarStorage.getAccountStorage().loadAccounts(event.getId());
         if (null == storedAccounts || storedAccounts.isEmpty()) {

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.session;
 
 import static com.openexchange.chronos.impl.Utils.PROVIDER_ID;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
@@ -59,7 +60,6 @@ import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.impl.AbstractStorageOperation;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -72,6 +72,7 @@ import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
+
 /**
  * {@link CalendarUserSettings}
  *
@@ -206,7 +207,7 @@ public class CalendarUserSettings {
     }
 
     private Connection optConnection() {
-        return null == optSession ? null : optSession.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
+        return null == optSession ? null : optSession.get(PARAMETER_CONNECTION(), Connection.class, null);
     }
 
     private UserConfigWrapper getUserConfig(int userId) throws OXException {
