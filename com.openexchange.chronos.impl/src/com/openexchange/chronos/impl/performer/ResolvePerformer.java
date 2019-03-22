@@ -81,7 +81,6 @@ import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -164,8 +163,9 @@ public class ResolvePerformer extends AbstractQueryPerformer {
          */
         List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
         if (1 < events.size()) {
-            String message = "UID \"" + uid + "\" resolves to multiple events [" + events.stream().map(Event::getId).collect(Collectors.joining(", ")) + ']';
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(new IllegalStateException(message), CalendarProviders.ID_CHRONOS);
+            String conflictingIds = events.stream().map(Event::getId).collect(Collectors.joining(", "));
+            Exception cause = new IllegalStateException("UID \"" + uid + "\" resolves to multiple events [" + conflictingIds + ']');
+            throw CalendarExceptionCodes.UID_CONFLICT.create(cause, uid, conflictingIds);
         }
         return events.isEmpty() ? null : events.get(0).getId();
     }

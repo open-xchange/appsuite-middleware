@@ -68,6 +68,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -120,8 +121,23 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         } else if (message.exceptions().iterator().hasNext()) {
             uid = message.exceptions().iterator().next().getUid();
         }
-        Event original = util.resolveUid(uid, session);
-
+        Event original;
+        try {
+            original = util.resolveUid(uid, session);
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.UID_CONFLICT.equals(e)) {
+                /*
+                 * UID resolved to multiple events, assume foreign copy exists & handle as 'old update'
+                 */
+                analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
+                analysis.recommendAction(ITipAction.IGNORE);
+                change.setType(ITipChange.Type.UPDATE);
+                analysis.addChange(change);
+                return analysis;
+            }
+            throw e;
+        }
+        
         if (null == update) {
             if (null == original) {
                 if (message.numberOfExceptions() > 0) {
@@ -143,7 +159,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original != null) {
             // TODO: Needs to be removed, when we handle external resources.
             addResourcesToUpdate(original, update);
-            if (isOutdated(update, original)) {
+            if (isOutdated(update, original) || isForeignCopy(session, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
                 change.setCurrentEvent(original);
@@ -362,6 +378,22 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether a specific event represents the copy of another internal user, and therefore shouldn't be touched.
+     * <p/>
+     * The check is performed on the session user being present in the attendee list, but in an <i>unresolved</i> state, i.e. without his
+     * entity identifier being applied yet.
+     * 
+     * @param session The calendar session
+     * @param event The event to check
+     * @return <code>true</code> if the supplied event represents a foreign event copy, <code>false</code>, otherwise
+     */
+    private boolean isForeignCopy(CalendarSession session, Event event) throws OXException {
+        Attendee userAttendee = session.getEntityResolver().prepareUserAttendee(session.getUserId());
+        Attendee originalAttendee = CalendarUtils.find(event.getAttendees(), userAttendee);
+        return false == CalendarUtils.isInternal(originalAttendee);
     }
 
     private long timeInMillisWithoutMillis(Calendar cal) {
