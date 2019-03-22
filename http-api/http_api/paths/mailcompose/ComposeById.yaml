@@ -15,7 +15,7 @@
         description: Not authorized
 
   delete:
-    operationId: getMailComposeById
+    operationId: deleteMailComposeById
     tags:
       - MailCompose
     summary: Deletes the composition space under the given identifier
