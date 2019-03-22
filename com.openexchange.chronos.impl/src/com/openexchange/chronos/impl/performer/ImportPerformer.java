@@ -182,7 +182,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
                 String eventId = session.getCalendarService().getUtilities().resolveByUID(session, masterEvent.getUid());
                 Event loadEvent = storage.getEventStorage().loadEvent(eventId, null);
                 loadEvent = storage.getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
-                if (new DefaultEventUpdate(loadEvent, masterEvent, false, EventField.LAST_MODIFIED, EventField.TIMESTAMP).getUpdatedFields().isEmpty()) {
+                if (null == loadEvent || new DefaultEventUpdate(loadEvent, masterEvent, false, EventField.LAST_MODIFIED, EventField.TIMESTAMP).getUpdatedFields().isEmpty()) {
                     // Nothing to update
                     return null;
                 }
