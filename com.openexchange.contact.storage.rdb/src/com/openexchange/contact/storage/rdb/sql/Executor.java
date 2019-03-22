@@ -1295,7 +1295,7 @@ public class Executor {
             // Cannot return any match
             return EmptyResultSet.getInstance();
         } catch (SQLException e) {
-            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
     }
@@ -1310,7 +1310,7 @@ public class Executor {
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         } catch (SQLException e) {
-            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
     }
