@@ -437,7 +437,7 @@ public final class IMAPConversationWorker {
         // Comparator
         MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
-        final List<List<MailMessage>> list = new LinkedList<>();
+        final List<List<MailMessage>> list = new ArrayList<>(conversations.size());
         for (final Conversation conversation : conversations) {
             list.add(conversation.getMessages(threadComparator));
         }
@@ -493,8 +493,8 @@ public final class IMAPConversationWorker {
         }
 
         // Use a separate thread...
-        Object[] parts = slicePartsFrom(list, indexRange);
-        @SuppressWarnings("unchecked") List<List<MailMessage>> slice = (List<List<MailMessage>>) parts[1];
+        SliceResult parts = slicePartsFrom(list, indexRange);
+        List<List<MailMessage>> slice = parts.slice;
         if (null == slice) {
             // Return empty iterator if start is out of range
             return Collections.emptyList();
@@ -503,15 +503,17 @@ public final class IMAPConversationWorker {
         // Fill slice with this thread
         fillMessages(slice, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
 
+        // Check cache availability
         if (optConversationCache == null) {
             return slice;
         }
 
+        // Cache available: Check other cache-able chunks
         final List<List<MailMessage>> first;
         final List<List<MailMessage>> rest;
         if (prefillCache()) {
-            first = (List<List<MailMessage>>) parts[0];
-            rest = (List<List<MailMessage>>) parts[2];
+            first = parts.first;
+            rest = parts.rest;
         } else {
             first = null;
             rest = null;
@@ -592,24 +594,24 @@ public final class IMAPConversationWorker {
         return list;
     }
 
-    private Object[] slicePartsFrom(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
+    private SliceResult slicePartsFrom(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
         List<List<MailMessage>> list = listOfConversations;
         // Check for index range
         int fromIndex = indexRange.start;
         int size = list.size();
         if ((fromIndex) > size) {
             // Return empty iterator if start is out of range
-            return new Object[] { list, null, null };
+            return new SliceResult(list, null, null);
         }
         // Reset end index if out of range
         int toIndex = indexRange.end;
         if (toIndex >= size) {
             if (fromIndex == 0) {
-                return new Object[] { null, list, null };
+                return new SliceResult(null, list, null);
             }
             toIndex = size;
         }
-        return new Object[] { fromIndex > 0 ? list.subList(0, fromIndex) : null, list.subList(fromIndex, toIndex), toIndex < size ? list.subList(toIndex, size) : null };
+        return new SliceResult(fromIndex > 0 ? list.subList(0, fromIndex) : null, list.subList(fromIndex, toIndex), toIndex < size ? list.subList(toIndex, size) : null);
     }
 
     private List<List<MailMessage>> sliceMessages(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
@@ -1354,6 +1356,22 @@ public final class IMAPConversationWorker {
             idx = applyThreadLevel(currentNode.getChilds(), level + 1, msgs, idx);
         }
         return idx;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class SliceResult {
+
+        final List<List<MailMessage>> first;
+        final List<List<MailMessage>> slice;
+        final List<List<MailMessage>> rest;
+
+        SliceResult(List<List<MailMessage>> first, List<List<MailMessage>> slice, List<List<MailMessage>> rest) {
+            super();
+            this.first = first;
+            this.slice = slice;
+            this.rest = rest;
+        }
     }
 
 }
