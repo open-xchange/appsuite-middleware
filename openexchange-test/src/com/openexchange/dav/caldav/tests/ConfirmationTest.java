@@ -57,6 +57,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +72,6 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -287,7 +287,7 @@ public class ConfirmationTest extends CalDAVTest {
         }
         attendee = exception.getAttendee(getClient().getValues().getDefaultAddress());
         attendee.getAttributes().put("PARTSTAT", "ACCEPTED");
-        Calendar calendar = Calendar.getInstance(TimeZones.UTC);
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(appointment.getTimezone()));
         calendar.setTime(appointment.getStartDate());
         calendar.add(Calendar.DAY_OF_YEAR, 5);
         Date exceptionStartDate = calendar.getTime();
@@ -397,7 +397,7 @@ public class ConfirmationTest extends CalDAVTest {
          * accept occurrence on server
          */
         appointment = getAppointment(uid);
-        Calendar calendar = Calendar.getInstance(TimeZones.UTC);
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(appointment.getTimezone()));
         calendar.setTime(appointment.getStartDate());
         calendar.add(Calendar.DAY_OF_YEAR, 5);
         Date exceptionStartDate = calendar.getTime();
