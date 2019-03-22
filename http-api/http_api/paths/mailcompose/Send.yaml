@@ -1,0 +1,13 @@
+/mail/compose/<id>/send:
+  post:
+    operationId: getSave
+    tags:
+      - MailCompose
+    summary: Send message. Space gets deleted. Optionally deletes draft if referenced.
+    responses:
+      200:
+        description: The path to the sent mail or {"success"=true}.
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized

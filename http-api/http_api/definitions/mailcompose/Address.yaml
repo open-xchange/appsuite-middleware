@@ -1,0 +1,4 @@
+type: array
+description: Flat array of two strings. First item is display name, second item is email address.
+items:
+  type: string

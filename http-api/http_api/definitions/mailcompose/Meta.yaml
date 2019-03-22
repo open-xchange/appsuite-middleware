@@ -1,0 +1,23 @@
+type: object
+description: Object of meta information
+properties:
+  type:
+    type: string
+    description: The type
+    enum:
+      - NEW
+      - REPLY
+      - REPLY_ALL
+      - FORWARD_INLINE
+      - FORWARD_ATTACHMENT
+      - RESEND
+  date:
+    type: integer
+    format: int64
+    description: The date we should use for "On 6.6.2018 someone <someone@example.org> wrote:". Server decides whether this is sent or received date. Milliseconds since January 1, 1970, 00:00:00 GMT
+  originalFolderId:
+    type: string
+    description: Original folder id during reply or forward
+  originalId:
+    type: string
+    description: Original message id during reply or forward

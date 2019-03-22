@@ -1,0 +1,15 @@
+/mail/compose/<id>/attachments/vcard:
+  post:
+    operationId: postAttachmentsVcard
+    tags:
+      - MailCompose
+    summary: Attach vcard later on.
+    responses:
+      200:
+        description: A JSON object containing the new attachment.
+        schema:
+          $ref: "#/definitions/MailComposeAttachment"
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized

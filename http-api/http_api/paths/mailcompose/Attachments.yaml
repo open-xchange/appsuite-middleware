@@ -1,0 +1,23 @@
+/mail/compose/<id>/attachments:
+  post:
+    operationId: postAttachments
+    tags:
+      - MailCompose
+    summary: Add new attachment.
+    parameters:
+      -
+        name: body
+        in: body
+        description: The file to add
+        schema:
+          type: string
+          format: binary
+    responses:
+      200:
+        description: A JSON object containing the newly added attachment.
+        schema:
+          $ref: "#/definitions/MailComposeAttachment"
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized

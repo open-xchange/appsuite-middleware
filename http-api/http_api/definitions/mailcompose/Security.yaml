@@ -1,0 +1,9 @@
+type: object
+description: The security settings
+properties:
+  encrypt:
+    type: boolean
+  pgpInline:
+    type: boolean
+  sign:
+    type: boolean

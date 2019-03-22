@@ -1,0 +1,34 @@
+type: object
+description: An attachment object.
+properties:
+  id:
+    type: string
+    description: The attachment id
+  name:
+    type: string
+    description: The attachment name
+  size:
+    type: integer
+    format: int64
+    description: The attachments size in bytes
+  mimeType:
+    type: string
+    description: The mime type
+  cid:
+    type: string
+    description: The attachments content identifier
+  contentDisposition:
+    type: string
+    description: Allows filtering. Inline images don't need to be displayed in the attachment list.
+    enum:
+      - inline
+      - attachment
+  origin:
+    type: string
+    description: Origin of file, i.e. File from drive instead of local attachment.
+    enum:
+      - upload
+      - mail
+      - drive
+      - contact
+      - vcard
