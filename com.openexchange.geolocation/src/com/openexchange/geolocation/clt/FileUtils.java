@@ -279,7 +279,7 @@ public final class FileUtils {
     /**
      * Pattern to extract strings in quotes
      */
-    private static final Pattern EXTRACTOR = Pattern.compile("\"(.*?)\"");
+    private static final Pattern EXTRACTOR = Pattern.compile("(?:^|,)((?:[^\",]|\"[^\"]*\")*)");
 
     /**
      * Checks whether the specified CSV file denotes a valid CSV file with the specified amount of fields
@@ -299,13 +299,29 @@ public final class FileUtils {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             int maxLines = 5;
             for (int i = 0; i < maxLines; i++) {
-                String line = pickRandomLine(randomAccessFile, file.length(), random);
-                String[] split = EXTRACTOR.split(line);
-                if (split == null || split.length != maxFields) {
-                    throw new IllegalArgumentException("The CSV file you provided does not seem to be a valid one.");
-                }
+                checkLine(maxFields, pickRandomLine(randomAccessFile, file.length(), random));
             }
         }
+    }
+
+    /**
+     * Checks that the specified line contains the exact amount of <code>maxFields</code>
+     * 
+     * @param expectedFields The expected amount of fields
+     * @param line The line to check
+     * @throws IllegalArgumentException if the specified line does not contain the exact amount
+     *             of the specified fields
+     */
+    private static void checkLine(int expectedFields, String line) {
+        Matcher matcher = EXTRACTOR.matcher(line);
+        int fields = 0;
+        while (matcher.find()) {
+            fields++;
+        }
+        if (fields == expectedFields) {
+            return;
+        }
+        throw new IllegalArgumentException("The line '" + line + "' does not contain the expected amount of '" + expectedFields + "' fields");
     }
 
     /**
