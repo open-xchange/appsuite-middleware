@@ -95,7 +95,6 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
         this.session = session;
         user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
         this.userId = user.getId();
-        user.getGroups();
         this.ctx = ctx;
         this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
