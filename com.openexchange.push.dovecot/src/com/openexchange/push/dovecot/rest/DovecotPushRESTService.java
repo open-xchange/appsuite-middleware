@@ -33,6 +33,7 @@ import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
+import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
@@ -153,14 +154,7 @@ public class DovecotPushRESTService {
                                 try {
                                     session = Hazelcasts.executeByMembersAndFilter(new PortableSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
                                 } catch (ExecutionException e) {
-                                    Throwable cause = e.getCause();
-                                    if (cause instanceof RuntimeException) {
-                                        throw ((RuntimeException) cause);
-                                    }
-                                    if (cause instanceof Error) {
-                                        throw (Error) cause;
-                                    }
-                                    throw new IllegalStateException("Not unchecked", cause);
+                                    throw handleExecutionError(e);
                                 }
                             }
                         }
@@ -182,6 +176,14 @@ public class DovecotPushRESTService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private OXException handleExecutionError(ExecutionException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof RuntimeException || cause instanceof Error) {
+            return PushExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
+        return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", cause), cause.getMessage());
     }
 
     private void sendViaNotificationService(int userId, int contextId, long uid, String folder, JSONObject data, PushNotificationService pushNotificationService) throws OXException {
