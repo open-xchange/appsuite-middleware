@@ -96,6 +96,8 @@ tags:
     description: The conversion module is a generic module to request data from a data source and to process obtained/submitted data with a data handler. Thus data is converted from a data source by a data handler.
   - name: Mailaccount
     description: The mailaccount module is used to manage multiple mail accounts held by a user.
+  - name: MailCompose
+    description: The MailCompose REST API.
   - name: Autoconfig
     description: The module autoconfig can be used to request the best available settings for an appropriate mail server.
   - name: User

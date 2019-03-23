@@ -204,11 +204,8 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
         newAttendees.removeAll(attendeesToDelete);
         for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
-            Attendee originalAttendee = attendeeToUpdate.getOriginal();
-            newAttendees.remove(originalAttendee);
-            Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
-            newAttendees.add(newAttendee);
+            newAttendees.remove(attendeeToUpdate.getOriginal());
+            newAttendees.add(apply(attendeeToUpdate));
         }
         newAttendees.addAll(attendeesToInsert);
         return newAttendees;
@@ -289,8 +286,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
          * apply updated attendee data
          */
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
-            Attendee attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), null, (AttendeeField[]) null);
-            attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            Attendee attendee = apply(attendeeUpdate);
             if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.URI)) {
                 if (false == isInternal(attendee) && false == isSkipExternalAttendeeURIChecks(session)) {
                     attendee = Check.requireValidEMail(attendee);
@@ -536,6 +532,19 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             }
         }
         return false;
+    }
+
+    /**
+     * Instantiates a new attendee, takes over all <i>set</i> properties from the updated item in the supplied attendee update, then
+     * copies over any <i>static</i> property values from the original - so that the resulting attendee represents the attendee after
+     * the update.
+     * 
+     * @param attendeeUpdate The attendee update to apply
+     * @return A new attendee instance representing the updated attendee
+     */
+    private static Attendee apply(ItemUpdate<Attendee, AttendeeField> attendeeUpdate) throws OXException {
+        Attendee newAttendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), null, (AttendeeField[]) null);
+        return AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), newAttendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
     }
 
     private static boolean containsAllUris(List<Attendee> attendees, List<String> uris) {

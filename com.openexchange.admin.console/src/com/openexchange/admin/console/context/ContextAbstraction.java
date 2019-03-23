@@ -95,7 +95,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
         private final String string;
         private final int index;
-        private boolean required;
+        private final boolean required;
 
         private ContextConstants(String string, boolean required) {
             this.index = CONTEXT_INITIAL_CONSTANTS_VALUE + ordinal();
@@ -120,7 +120,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
         @Override
         public void setRequired(final boolean required) {
-            this.required = required;
+            throw new UnsupportedOperationException("setRequired() is not supported for ContextConstants." + this.name() + " enum constant");
         }
 
     }

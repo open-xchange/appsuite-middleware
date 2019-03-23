@@ -504,6 +504,11 @@ MailAccountValidationResponse:
   $ref: ./mailaccount/MailAccountValidationResponse.yaml
 MailAccountStatusResponse:
   $ref: ./mailaccount/MailAccountStatusResponse.yaml
+# Module: mailcompose
+MailComposeMessageModel:
+  $ref: ./mailcompose/MessageModel.yaml
+MailComposeAttachment:
+  $ref: ./mailcompose/Attachment.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml

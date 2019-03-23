@@ -124,7 +124,6 @@ public final class MyServletRequest  {
 
 
     // config options
-    private static final String PROPERTY_METHOD_EXTERNAL_SHOP_API_URL = "com.openexchange.upsell.multiple.method.external.shop_api_url";
     private static final String PROPERTY_METHOD_STATIC_SHOP_REDIR_URL = "com.openexchange.upsell.multiple.method.static.shop_redir_url";
     private static final String PROPERTY_METHOD = "com.openexchange.upsell.multiple.method"; // one of: external, static, email, direct
 
@@ -396,7 +395,6 @@ public final class MyServletRequest  {
 
             // now check for custom implementations of the URL
             final UpsellURLService urlservice = getServiceRegistry().getService(UpsellURLService.class);
-            final UpsellURLService provider = null;
             if (null != urlservice) {
                 LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
                 // We have a special service providing login information, so we use that one...
@@ -455,7 +453,7 @@ public final class MyServletRequest  {
                     map_val = URLEncoder.encode(map_val, "UTF-8");
                 }
                 // replace the placeholder with values
-                raw_text = raw_text.replaceAll(map_key.propertyName, map_val);
+                raw_text = raw_text.replaceAll(map_key.getPropertyName(), map_val);
             }
         }
 
@@ -590,19 +588,8 @@ public final class MyServletRequest  {
         return jsonResponseObject;
     }
 
-
     private String getFromConfig(final String key) throws OXException{
         return this.configView.get(key, String.class);
     }
-
-    //	private static final HttpClient HTTPCLIENT;
-    //
-    //	    static {
-    //	            MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
-    //	            HttpConnectionManagerParams params = manager.getParams();
-    //	            params.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, 23);
-    //	            HTTPCLIENT = new HttpClient(manager);
-    //	    }
-
 
 }

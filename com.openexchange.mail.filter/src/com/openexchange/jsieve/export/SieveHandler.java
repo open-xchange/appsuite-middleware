@@ -1260,16 +1260,6 @@ public class SieveHandler {
     }
 
     /**
-     * Old method for compatibility reasons
-     *
-     * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
-     */
-    @Deprecated
-    protected SieveResponse.Code parseSIEVEResponse(final String resp) {
-        return parseSIEVEResponse(resp, null);
-    }
-
-    /**
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
      *
@@ -1277,7 +1267,7 @@ public class SieveHandler {
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
-    protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
+    protected SieveResponse parseSIEVEResponse(final String resp, final String multiline) {
         if (!useSIEVEResponseCodes || null == resp) {
             return null;
         }
@@ -1287,16 +1277,15 @@ public class SieveHandler {
         if (m.matches()) {
             final int gcount = m.groupCount();
             if (gcount > 1) {
-                final SieveResponse.Code ret = SieveResponse.Code.getCode(m.group(1));
+                final SieveResponse.Code code = SieveResponse.Code.getCode(m.group(1));
                 final String group = m.group(2);
                 if (group.startsWith("{")) {
                     // Multi line, use the multiline parsed before here
-                    ret.setMessage(multiline);
+                    return new SieveResponse(code, multiline);
                 } else {
                     // Single line
-                    ret.setMessage(group);
+                    return new SieveResponse(code, group);
                 }
-                return ret;
             }
         }
         return null;

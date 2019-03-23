@@ -1,0 +1,59 @@
+/mail/compose/<id>:
+  get:
+    operationId: getMailComposeById
+    tags:
+      - MailCompose
+    summary: Load the composition space under the given identifier
+    responses:
+      200:
+        description: A JSON object containing the requested composition space.
+        schema:
+          $ref: "#/definitions/MailComposeMessageModel"
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized
+
+  delete:
+    operationId: deleteMailComposeById
+    tags:
+      - MailCompose
+    summary: Deletes the composition space under the given identifier
+    responses:
+      200:
+        description: A JSON object containing the success status.
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+              description: True if such a composition space has been successfully closed; false otherwise
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized
+
+  patch:
+    operationId: patchMailComposeById
+    tags:
+      - MailCompose
+    summary: Updates the composition space
+    description: Payload is JSON that reflects changes. Response is the current composition space message model after update.
+    parameters:
+      -
+        name: body
+        in: body
+        description: An object containing the attributes to update
+        required: true
+        schema:
+          $ref: "#/definitions/MailComposeMessageModel"
+
+    responses:
+      200:
+        description: A JSON object containing the updated composition space.
+        schema:
+          $ref: "#/definitions/MailComposeMessageModel"
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized

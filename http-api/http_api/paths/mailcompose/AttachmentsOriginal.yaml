@@ -1,0 +1,18 @@
+/mail/compose/<id>/attachments/original:
+  post:
+    operationId: postAttachmentsOriginal
+    tags:
+      - MailCompose
+    summary: Add all original attachments (useful for replies).
+    responses:
+      200:
+        description: A JSON array containing the added attachments to concat.
+        schema:
+          description: Attachments array
+          type: array
+          items:
+            $ref: "#/definitions/MailComposeAttachment"
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized

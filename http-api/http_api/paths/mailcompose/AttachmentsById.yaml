@@ -1,0 +1,57 @@
+/mail/compose/<id>/attachments/<attachmentId>:
+  post:
+    operationId: postAttachmentsById
+    tags:
+      - MailCompose
+    summary: Uploads an attachment again and removes the old attachment from the server. Used for image resize.
+    parameters:
+      -
+        name: body
+        in: body
+        description: The file to add
+        schema:
+          type: string
+    responses:
+      200:
+        description: A JSON object containing the newly added attachment.
+        schema:
+          $ref: "#/definitions/MailComposeAttachment"
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized
+
+  get:
+    operationId: getAttachmentsById
+    tags:
+      - MailCompose
+    summary: Get binary attachment. This URL pattern can be used for inline images.
+    responses:
+      200:
+        description: The attachment as file.
+        schema:
+          type: string
+          format: binary
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized
+
+  delete:
+    operationId: deleteAttachmentsById
+    tags:
+      - MailCompose
+    summary: Delete an existing attachment.
+    responses:
+      200:
+        description: A JSON object containing the success status.
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+              description: true if the attachment has been successfully deleted
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized

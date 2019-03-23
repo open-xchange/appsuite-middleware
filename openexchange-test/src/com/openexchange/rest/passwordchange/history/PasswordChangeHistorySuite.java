@@ -53,16 +53,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * {@link PasswordchangehistorySuite}
+ * {@link PasswordChangeHistorySuite}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    LimitTest.class,
-    TimeTest.class
+    PasswordChangeHistoryTest.class,
 })
-public class PasswordchangehistorySuite {
+public class PasswordChangeHistorySuite {
 
 }

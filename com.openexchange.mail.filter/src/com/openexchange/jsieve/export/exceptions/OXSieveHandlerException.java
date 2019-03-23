@@ -62,7 +62,7 @@ public class OXSieveHandlerException extends Exception {
 
 	private final String sieveHost;
 	private final int sieveHostPort;
-	private final SieveResponse.Code sieveResponseCode;
+    private final SieveResponse response;
     private boolean parseError;
     private boolean authTimeoutError;
 
@@ -72,12 +72,13 @@ public class OXSieveHandlerException extends Exception {
      * @param message The message
      * @param sieveHost The sieve host name
      * @param sieveHostPort The sieve host port
+     * @param response The {@link SieveResponse}
      */
-    public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SieveResponse.Code responseCode) {
+    public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SieveResponse response) {
         super(message);
         this.sieveHost = sieveHost;
         this.sieveHostPort = sieveHostPort;
-        this.sieveResponseCode = responseCode;
+        this.response = response;
     }
 
     /**
@@ -86,13 +87,14 @@ public class OXSieveHandlerException extends Exception {
      * @param message The message
      * @param sieveHost The sieve host name
      * @param sieveHostPort The sieve host port
+     * @param response The {@link SieveResponse}
      * @param cause The cause
      */
-    public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SieveResponse.Code responseCode, Throwable cause) {
+    public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SieveResponse response, Throwable cause) {
         super(message, cause);
         this.sieveHost = sieveHost;
         this.sieveHostPort = sieveHostPort;
-        this.sieveResponseCode = responseCode;
+        this.response = response;
     }
 
     /**
@@ -154,10 +156,10 @@ public class OXSieveHandlerException extends Exception {
 	}
 
 	/**
-	 * @return the sieveResponseCode
-	 */
-	public final SieveResponse.Code getSieveResponseCode() {
-	    return sieveResponseCode;
+     * @return the {@link SieveResponse}
+     */
+    public final SieveResponse getSieveResponse() {
+        return response;
 	}
 }
 

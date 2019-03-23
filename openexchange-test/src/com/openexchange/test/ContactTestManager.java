@@ -621,7 +621,7 @@ public class ContactTestManager implements TestManager {
 
             if (null != contactObject.getImage1()) {
                 final String image1 = new String(contactObject.getImage1());
-                if (0 < image1.length() && image1.contains("image")) {
+                if (0 < image1.length() && image1.contains("picture")) {
                     // interpret as image url, download real image
                     String url = image1 + "&compress=false&rotate=false";
                     try {
