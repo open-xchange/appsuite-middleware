@@ -298,7 +298,21 @@ public class DateTime extends Date {
                 setUtc(true);
             } else {
                 if (timezone != null) {
-                    setTime(value, (DateFormat) DEFAULT_FORMAT.get(), timezone);
+                    try {
+                        setTime(value, (DateFormat) DEFAULT_FORMAT.get(), timezone);
+                    } catch (ParseException e) {
+                        // possibly incomplete timezone; retry parsing with a well-known timezone if possible
+                        if (null != timezone.getID() && timezone.getID().equals(TimeZone.getTimeZone(timezone.getID()).getID())) {
+                            try {
+                                setTime(value, DEFAULT_FORMAT.get(), TimeZone.getTimeZone(timezone.getID()));
+                            } catch (Exception x) {
+                                // ignore & throw previous parse exception
+                                throw e;
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
                 } else {
                     // Use lenient parsing for floating times. This is to
                     // overcome
