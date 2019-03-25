@@ -1039,11 +1039,11 @@ public class SieveHandler {
         {
             String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"OAUTHBEARER\" {").append(irs.length()).append("+}").append(CRLF).toString();
             commandBuilder.setLength(0);
-            bos_sieve.write(auth_mech_string.getBytes(UTF_8));
+            bos_sieve.write(auth_mech_string.getBytes());
         }
 
-        bos_sieve.write(irs.getBytes(UTF_8));
-        bos_sieve.write(CRLF.getBytes(UTF_8));
+        bos_sieve.write(irs.getBytes());
+        bos_sieve.write(CRLF.getBytes());
         bos_sieve.flush();
 
         while (true) {
