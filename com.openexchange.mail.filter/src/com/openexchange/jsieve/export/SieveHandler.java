@@ -60,6 +60,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1170,9 +1171,9 @@ public class SieveHandler {
         commandBuilder.setLength(0);
 
         // We don't need to specify an encoding here because all strings contain only ASCII Text
-        bos_sieve.write(auth_mech_string.getBytes());
-        bos_sieve.write(user_size.getBytes());
-        bos_sieve.write(user_auth_pass_64.getBytes());
+        bos_sieve.write(auth_mech_string.getBytes(StandardCharsets.ISO_8859_1));
+        bos_sieve.write(user_size.getBytes(StandardCharsets.ISO_8859_1));
+        bos_sieve.write(user_auth_pass_64.getBytes(StandardCharsets.ISO_8859_1));
         bos_sieve.flush();
 
         while (true) {
