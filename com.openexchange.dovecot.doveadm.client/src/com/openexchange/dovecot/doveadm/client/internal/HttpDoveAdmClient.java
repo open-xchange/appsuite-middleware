@@ -713,9 +713,9 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      */
     @SuppressWarnings("unchecked")
     protected static <T> T parseIntoObject(InputStream inputStream, ResultType<T> resultType) throws OXException {
-        if(ResultType.JSON.equals(resultType)) {
+        if (ResultType.JSON.equals(resultType)) {
             // Return JSONValue
-            try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8)) {
                 return (T) JSONObject.parse(reader);
             } catch (JSONException e) {
                 throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());

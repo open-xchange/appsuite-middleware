@@ -606,7 +606,7 @@ public class Strings {
         return P_SPLIT_CRLF.split(s, 0);
     }
 
-    private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
+    // private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
 
     /**
      * Splits given string by tabs.
@@ -615,10 +615,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByTab(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_TAB.split(s, 0);
+        return splitBy(s, '\t', false);
     }
 
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
