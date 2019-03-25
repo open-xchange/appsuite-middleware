@@ -59,6 +59,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -234,7 +235,7 @@ public class Mail extends PermissionServlet {
             return resp.getWriter();
         } catch (final IllegalStateException ise) {
             // The getOutputStream() method has already been called for given HttpServletResponse
-            return new PrintWriter(resp.getOutputStream());
+            return new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), StandardCharsets.ISO_8859_1)));
         }
     }
 
