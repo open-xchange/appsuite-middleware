@@ -715,7 +715,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
     private void sendLogoutResponseViaPOST(String responseXML, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         try {
-            String encoded = Base64.encodeBase64String(responseXML.getBytes());
+            String encoded = Base64.encodeBase64String(responseXML.getBytes(StandardCharsets.ISO_8859_1));
             TemplateService templateService = services.getService(TemplateService.class);
             OXTemplate template = templateService.loadTemplate(config.getLogoutResponseTemplate());
             Map<String, String> vars = new HashMap<String, String>(5);
