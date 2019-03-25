@@ -355,6 +355,20 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         return syncStatus;
     }
 
+    @Override
+    protected void internalDelete() throws WebdavProtocolException {
+        if (null != folder && null != folder.getOwnPermission() && false == folder.getOwnPermission().isAdmin() &&
+            null != folder.getSupportedCapabilities() && folder.getSupportedCapabilities().contains("subscribe") && folder.isSubscribed()) {
+            /*
+             * treat as "unsubscribe" request of shared calendar
+             */
+            getFolderToUpdate().setSubscribed(false);
+            save();
+        } else {
+            super.internalDelete();
+        }
+    }
+
     private int getMaxResults() {
         int defaultValue = 500;
         try {
