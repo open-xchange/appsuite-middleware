@@ -54,6 +54,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.servlet.http.Tools;
@@ -69,18 +71,20 @@ import com.openexchange.tools.servlet.http.Tools;
  * @since v7.6.1
  */
 public class DefaultExceptionHandler implements ExceptionHandler {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
     @Override
     public void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendErrorPage(httpRequest, httpResponse, exception);
+        sendErrorPage(httpResponse, exception);
     }
 
     @Override
     public void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendErrorPage(httpRequest, httpResponse, exception);
+        sendErrorPage(httpResponse, exception);
     }
 
-    protected static void sendErrorPage(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+    protected static void sendErrorPage(HttpServletResponse httpResponse, OXException exception) {
         String message = exception.getDisplayMessage(Locale.US);
         if (message == null) {
             message = exception.getMessage();
@@ -113,13 +117,13 @@ public class DefaultExceptionHandler implements ExceptionHandler {
         } catch (IOException e) {
             try {
                 httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (IOException e1) {
+            } catch (IOException | IllegalStateException e1) {
                 // nothing to do here
-            } catch (IllegalStateException e1) {
-                // nothing to do here
+                LOGGER.trace("Unable to send response", e1);
             }
         } catch (IllegalStateException e) {
             // response already commited
+            LOGGER.trace("Unable to send response", e);
         }
     }
 
