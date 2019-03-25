@@ -50,7 +50,6 @@
 package com.openexchange.saml.spi;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -105,7 +104,7 @@ public class DefaultExceptionHandler implements ExceptionHandler {
             "    <p>" + message + "</p>" +
             "  </body>\n" +
             "</html>";
-        byte[] responseBytes = response.getBytes(StandardCharsets.ISO_8859_1);
+        byte[] responseBytes = response.getBytes(com.openexchange.java.Charsets.UTF_8);
 
         Tools.disableCaching(httpResponse);
         httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

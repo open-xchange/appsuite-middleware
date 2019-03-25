@@ -12,7 +12,6 @@ import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -54,7 +53,7 @@ public class ChunkingUtilities {
             mergeNewWithStoredData(storedDataFile, data);
         }
 
-        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(storedDataFile), StandardCharsets.ISO_8859_1)) {
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(storedDataFile), com.openexchange.java.Charsets.UTF_8)) {
             // overwrite the so far stored data
             JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(data);
             fw.write(jsonData.toString(2));

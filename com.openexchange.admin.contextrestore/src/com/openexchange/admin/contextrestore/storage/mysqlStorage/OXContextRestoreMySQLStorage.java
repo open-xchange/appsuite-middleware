@@ -100,7 +100,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             File file = tempfilemap.get(poolidandschema.getSchema());
             BufferedReader reader;
             try {
-                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.ISO_8859_1));
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
             } catch (final FileNotFoundException e1) {
                 throw new OXContextRestoreException(Code.CONFIGDB_FILE_NOT_FOUND, e1);
             }

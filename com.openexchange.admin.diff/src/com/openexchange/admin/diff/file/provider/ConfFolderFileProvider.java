@@ -108,7 +108,7 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
 
         for (File currentFile : filesToAdd) {
             if (currentFile.getAbsolutePath().contains("/conf/")) {
-                try (InputStreamReader reader = new InputStreamReader(new FileInputStream(currentFile), StandardCharsets.ISO_8859_1)) {
+                try (InputStreamReader reader = new InputStreamReader(new FileInputStream(currentFile), StandardCharsets.UTF_8)) {
                     String fileContent = IOUtils.toString(reader);
 
                     ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);

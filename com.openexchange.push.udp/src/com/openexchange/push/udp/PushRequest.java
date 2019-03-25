@@ -52,7 +52,6 @@ package com.openexchange.push.udp;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
@@ -208,7 +207,7 @@ public class PushRequest {
     private String[] getArgsFromPacket(final DatagramPacket datagramPacket) throws OXException {
         final byte[] b = new byte[datagramPacket.getLength()];
         System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
-        final String data = new String(b, StandardCharsets.ISO_8859_1);
+        final String data = new String(b, com.openexchange.java.Charsets.UTF_8);
 
         LOG.debug("push request data: {}", data);
 

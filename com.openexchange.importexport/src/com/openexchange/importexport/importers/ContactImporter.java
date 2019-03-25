@@ -51,7 +51,6 @@ package com.openexchange.importexport.importers;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
@@ -123,7 +122,7 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
-        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes(StandardCharsets.ISO_8859_1)));
+        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)));
     }
 
     /**
