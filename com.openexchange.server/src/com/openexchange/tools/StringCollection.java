@@ -50,6 +50,7 @@
 package com.openexchange.tools;
 
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -259,7 +260,7 @@ public final class StringCollection {
     }
 
     public static String disarmSQLString(final String s) {
-        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR));
+        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(StandardCharsets.ISO_8859_1), DSO, DSOR), DAP, DAPR));
     }
 
     /**
