@@ -51,6 +51,7 @@ package com.openexchange.subscribe.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -78,7 +79,7 @@ public class MicroformatAppointmentParser {
             xmlReader = XMLReaderFactory.createXMLReader();
             xmlReader.setContentHandler( handler );
             xmlReader.setErrorHandler( handler );
-            xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
+            xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes(StandardCharsets.ISO_8859_1)) ) );
             appointments = handler.getObjects();
         } catch (SAXException e) {
             LOG.error("", e);
