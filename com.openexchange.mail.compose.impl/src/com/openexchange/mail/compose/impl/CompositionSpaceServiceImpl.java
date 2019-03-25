@@ -1936,13 +1936,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
              * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
              * "References:" field.
              */
-            message.setReferences(refBuilder.toString());
+            message.setHeader(HDR_REFERENCES, refBuilder.toString());
         } else if (refBuilder.length() > 0) {
             /*
              * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
              * "References:" field.
              */
-            message.setReferences(refBuilder.toString());
+            message.setHeader(HDR_REFERENCES, refBuilder.toString());
         }
     }
 
