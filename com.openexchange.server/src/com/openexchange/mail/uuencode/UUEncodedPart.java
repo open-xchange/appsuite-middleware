@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
@@ -187,7 +188,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         try {
             BufferedReader br = null;
             try {
-                br = new BufferedReader(new InputStreamReader(getInputStream()));
+                br = new BufferedReader(new InputStreamReader(getInputStream(), StandardCharsets.ISO_8859_1));
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     encodedPart.append(line).append('\n');
