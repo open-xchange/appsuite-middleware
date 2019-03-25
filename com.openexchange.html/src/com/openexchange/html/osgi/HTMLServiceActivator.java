@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -413,7 +414,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             entityMap.append("zwj=8205\n");
             entityMap.append("prod=8719\n");
             entityMap.append("le=8804");
-            htmlEntities.load(new UnsynchronizedByteArrayInputStream(String.valueOf(entityMap.toString()).getBytes()));
+            htmlEntities.load(new UnsynchronizedByteArrayInputStream(String.valueOf(entityMap.toString()).getBytes(StandardCharsets.ISO_8859_1)));
         } catch (final IOException e) {
             /*
              * Cannot occur
@@ -474,7 +475,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 defaultConfig.append("#smart-indent=no\n");
                 defaultConfig.append("output-xhtml=yes\n");
                 defaultConfig.append("char-encoding=latin1");
-                properties.load(new ByteArrayInputStream(String.valueOf(defaultConfig.toString()).getBytes()));
+                properties.load(new ByteArrayInputStream(String.valueOf(defaultConfig.toString()).getBytes(StandardCharsets.ISO_8859_1)));
             } catch (final UnsupportedEncodingException e) {
                 /*
                  * Cannot occur
