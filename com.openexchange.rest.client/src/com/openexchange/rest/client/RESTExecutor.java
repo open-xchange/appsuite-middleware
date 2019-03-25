@@ -304,7 +304,7 @@ public class RESTExecutor {
         try {
             final HttpEntity ent = response.getEntity();
             if (ent != null) {
-                final InputStreamReader in = new InputStreamReader(ent.getContent(), StandardCharsets.ISO_8859_1);
+                final InputStreamReader in = new InputStreamReader(ent.getContent(), StandardCharsets.UTF_8);
                 // Wrap this with a Buffer, so we can re-parse it if it's
                 // not JSON
                 // Has to be at least 16384, because this is defined as the buffer size in
