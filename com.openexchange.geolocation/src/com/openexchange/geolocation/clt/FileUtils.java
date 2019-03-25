@@ -63,7 +63,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -204,11 +203,6 @@ public final class FileUtils {
         return extractedFiles;
     }
 
-    public static void main(String[] args) {
-        File f = new File("asd");
-        System.out.println(f.getParent());
-    }
-
     /**
      * Extracts the ZIP entries from the specified {@link ZipInputStream}
      *
@@ -277,11 +271,6 @@ public final class FileUtils {
     }
 
     /**
-     * Pattern to extract strings in quotes
-     */
-    private static final Pattern EXTRACTOR = Pattern.compile("(?:^|,)((?:[^\",]|\"[^\"]*\")*)");
-
-    /**
      * Checks whether the specified CSV file denotes a valid CSV file with the specified amount of fields
      * on each row.
      *
@@ -313,12 +302,8 @@ public final class FileUtils {
      *             of the specified fields
      */
     private static void checkLine(int expectedFields, String line) {
-        Matcher matcher = EXTRACTOR.matcher(line);
-        int fields = 0;
-        while (matcher.find()) {
-            fields++;
-        }
-        if (fields == expectedFields) {
+        String[] s = Strings.splitByCommaNotInQuotes(line);
+        if (s.length == expectedFields) {
             return;
         }
         throw new IllegalArgumentException("The line '" + line + "' does not contain the expected amount of '" + expectedFields + "' fields");
