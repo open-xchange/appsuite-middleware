@@ -78,34 +78,4 @@ public class DefaultFileStorageGuestObjectPermission extends DefaultFileStorageO
         this.recipient = recipient;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 53;
-        int result = super.hashCode();
-        result = prime * result + ((recipient == null) ? 0 : recipient.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        DefaultFileStorageGuestObjectPermission other = (DefaultFileStorageGuestObjectPermission) obj;
-        if (recipient == null) {
-            if (other.recipient != null) {
-                return false;
-            }
-        } else if (!recipient.equals(other.recipient)) {
-            return false;
-        }
-        if (!super.equals(other)) {
-            return false;
-        }
-        return true;
-    }
-
 }
