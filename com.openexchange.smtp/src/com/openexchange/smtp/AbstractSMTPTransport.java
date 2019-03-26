@@ -276,9 +276,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @param e The messaging error to handle
      * @param config The associated configuration
      * @return The appropriate {@code OXException} instance
-     * @throws OXException If appropriate {@code OXException} instance cannot be returned
      */
-    protected OXException handleMessagingException(MessagingException e, MailConfig config) throws OXException {
+    protected OXException handleMessagingException(MessagingException e, MailConfig config) {
         return MimeMailException.handleMessagingException(e, config, null);
     }
 
