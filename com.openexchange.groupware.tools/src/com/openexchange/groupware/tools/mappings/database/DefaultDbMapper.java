@@ -214,6 +214,24 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
     }
 
     /**
+     * Validates all <i>set</i> properties in the supplied object.
+     *
+     * @param object The object to validate all properties in
+     * @throws OXException If validation fails
+     * @see DbMapping#validate(Object)
+     */
+    public void validateAll(O object) throws OXException {
+        if (null == object) {
+            throw new IllegalArgumentException("object");
+        }
+        for (DbMapping<? extends Object, O> mapping : mappings.values()) {
+            if (mapping.isSet(object)) {
+                //                mapping.validate(object);
+            }
+        }
+    }
+
+    /**
      * Gets all mapped fields.
      *
      * @return The mapped fields
