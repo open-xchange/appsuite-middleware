@@ -51,8 +51,10 @@ package com.openexchange.tokenlogin.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -155,7 +157,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(secretsFile));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(secretsFile), StandardCharsets.UTF_8));
             final Map<String, TokenLoginSecret> map = new LinkedHashMap<String, TokenLoginSecret>(16);
             String line;
             while ((line = reader.readLine()) != null) {
