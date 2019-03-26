@@ -81,6 +81,7 @@ public class FileMetadataParser {
      * @param jsonObject the JSON object to parse
      * @param setFields A list where to those fields that were set in the parsed JSON object
      * @return The parsed file
+     * @throws OXException Wrap other exceptions in {@link DriveExceptionCodes#METDATA_PARSE_ERROR}
      */
     public static File parse(JSONObject jsonObject, List<Field> setFields) throws OXException {
         try {
@@ -128,26 +129,25 @@ public class FileMetadataParser {
             parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, timeZone));
             parsedGuestPermission.setPermissions(bits);
             return parsedGuestPermission;
-        } else {
-            /*
-             * parse as already known permission entity
-             */
-            DefaultFileStorageObjectPermission parsedPermission = new DefaultFileStorageObjectPermission();
-            int entity = jsonObject.optInt("entity", 0);
-            if (0 >= entity) {
-                throw OXException.mandatoryField("entity");
-            }
-            parsedPermission.setEntity(entity);
-            if (jsonObject.has("group")) {
-                parsedPermission.setGroup(jsonObject.getBoolean("group"));
-            } else if (null != type) {
-                parsedPermission.setGroup(RecipientType.GROUP == type);
-            } else {
-                throw OXException.mandatoryField("group");
-            }
-            parsedPermission.setPermissions(bits);
-            return parsedPermission;
         }
+        /*
+         * parse as already known permission entity
+         */
+        DefaultFileStorageObjectPermission parsedPermission = new DefaultFileStorageObjectPermission();
+        int entity = jsonObject.optInt("entity", 0);
+        if (0 >= entity) {
+            throw OXException.mandatoryField("entity");
+        }
+        parsedPermission.setEntity(entity);
+        if (jsonObject.has("group")) {
+            parsedPermission.setGroup(jsonObject.getBoolean("group"));
+        } else if (null != type) {
+            parsedPermission.setGroup(RecipientType.GROUP == type);
+        } else {
+            throw OXException.mandatoryField("group");
+        }
+        parsedPermission.setPermissions(bits);
+        return parsedPermission;
     }
 
 }
