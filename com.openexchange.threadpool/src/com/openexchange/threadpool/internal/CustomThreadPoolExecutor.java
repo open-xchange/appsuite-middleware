@@ -980,24 +980,30 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ScheduledFutureTask other = (ScheduledFutureTask) obj;
-            if (period != other.period)
+            if (period != other.period) {
                 return false;
-            if (sequenceNumber != other.sequenceNumber)
+            }
+            if (sequenceNumber != other.sequenceNumber) {
                 return false;
+            }
             if (task == null) {
-                if (other.task != null)
+                if (other.task != null) {
                     return false;
-            } else if (!task.equals(other.task))
+                }
+            }
+            if (time != other.time) {
                 return false;
-            if (time != other.time)
-                return false;
+            }
             return true;
         }
 
