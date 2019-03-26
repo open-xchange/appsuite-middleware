@@ -55,6 +55,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
@@ -146,5 +147,17 @@ public class SMSProviderTests  extends AbstractMultifactorProviderTest {
         MultifactorFinishAuthenticationData data = new MultifactorFinishAuthenticationData();
         data.setSecretCode("THIS IS A WRONG CODE");
         return MultifactorApi().multifactorDeviceActionfinishAuthentication(getSessionId(), SMS_PROVIDER_NAME, startRegistrationData.getDeviceId(), data);
+    }
+
+    @Override
+    @Test
+    public void testReauthenticationRequiredAfterAutologin() throws Exception {
+        super.testReauthenticationRequiredAfterAutologin();
+    }
+
+    @Override
+    @Test
+    public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
+        super.testRegisterNewDeviceAfterDeviceDeletedAndAutologin();
     }
 }

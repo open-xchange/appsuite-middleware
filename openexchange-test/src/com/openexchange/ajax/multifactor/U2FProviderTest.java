@@ -60,6 +60,7 @@ import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClient;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClient.AuthenticationData;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClient.RegisterData;
@@ -213,5 +214,17 @@ public class U2FProviderTest extends AbstractMultifactorProviderTest  {
             //Remove the crypto mock and reset the orgiginal crypto impl.
             u2fClient.setCrypto(originalCrypto);
         }
+    }
+
+    @Override
+    @Test
+    public void testReauthenticationRequiredAfterAutologin() throws Exception {
+        super.testReauthenticationRequiredAfterAutologin();
+    }
+
+    @Override
+    @Test
+    public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
+        super.testRegisterNewDeviceAfterDeviceDeletedAndAutologin();
     }
 }

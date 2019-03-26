@@ -321,7 +321,6 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(currentUser.getCode(), is("MFA-0001"));
     }
 
-    @Test
     public void testReauthenticationRequiredAfterAutologin() throws Exception {
 
         //Register a new device and logout
@@ -354,7 +353,6 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(deleteResponse.getCode(), is("MFA-0015"));
     }
 
-    @Test
     public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
         //After the last device was deleted, it should be possible to register new devices again after autologin was performed
 

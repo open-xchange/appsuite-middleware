@@ -56,6 +56,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
@@ -142,5 +143,17 @@ public class TOTPProviderTests extends AbstractMultifactorProviderTest {
     @Override
     protected CommonResponse doWrongAuthentication(MultifactorStartRegistrationResponseData startRegistrationData, MultifactorStartAuthenticationResponseData startAuthenticationData) throws Exception {
         return finishAuthentication(TOTP_PROVIDER_NAME, startRegistrationData.getDeviceId(), WRONG_TEST_TOKEN, null, null, null);
+    }
+
+    @Override
+    @Test
+    public void testReauthenticationRequiredAfterAutologin() throws Exception {
+        super.testReauthenticationRequiredAfterAutologin();
+    }
+
+    @Override
+    @Test
+    public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
+        super.testRegisterNewDeviceAfterDeviceDeletedAndAutologin();
     }
 }
