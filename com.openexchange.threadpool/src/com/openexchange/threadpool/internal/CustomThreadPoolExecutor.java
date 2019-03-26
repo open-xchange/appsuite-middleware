@@ -973,8 +973,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             int result = 1;
             result = prime * result + (int) (period ^ (period >>> 32));
             result = prime * result + (int) (sequenceNumber ^ (sequenceNumber >>> 32));
-            result = prime * result + ((task == null) ? 0 : 1337);
             result = prime * result + (int) (time ^ (time >>> 32));
+            result = prime * result + ((task == null) ? 0 : 1337);
             return result;
         }
 
@@ -996,13 +996,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (sequenceNumber != other.sequenceNumber) {
                 return false;
             }
+            if (time != other.time) {
+                return false;
+            }
             if (task == null) {
                 if (other.task != null) {
                     return false;
                 }
-            }
-            if (time != other.time) {
-                return false;
             }
             return true;
         }
