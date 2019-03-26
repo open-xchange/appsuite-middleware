@@ -96,4 +96,38 @@ public class PushDelayedObject implements Delayed {
     public void updateTime() {
         creationTime = System.currentTimeMillis();
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 83;
+        int result = 1;
+        result = prime * result + ((abstractPushObject == null) ? 0 : abstractPushObject.hashCode());
+        result = prime * result + (int) (creationTime ^ (creationTime >>> 32));
+        result = prime * result + (int) (delay ^ (delay >>> 32));
+        result = prime * result + (int) (finalTimeout ^ (finalTimeout >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PushDelayedObject other = (PushDelayedObject) obj;
+        if (abstractPushObject == null) {
+            if (other.abstractPushObject != null)
+                return false;
+        } else if (!abstractPushObject.equals(other.abstractPushObject))
+            return false;
+        if (creationTime != other.creationTime)
+            return false;
+        if (delay != other.delay)
+            return false;
+        if (finalTimeout != other.finalTimeout)
+            return false;
+        return true;
+    }
 }
