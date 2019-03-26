@@ -413,6 +413,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         try {
                             internetAddress.setPersonal("", "US-ASCII");
                         } catch (final UnsupportedEncodingException e) {
+                            LOG.trace("\"US-ASCII\" is not supported", e);
                             // Ignore as personal is cleared
                         }
                     }
@@ -553,6 +554,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                                 throw MailExceptionCode.NON_SECURE_DENIED.create(smtpConfig.getServer());
                             }
                         } catch (final IOException e) {
+                            LOG.trace("Failed to determine SMTP server capabilities", e);
                             smtpProps.put("mail.smtp.starttls.enable", "true");
                         }
                         /*
@@ -905,7 +907,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      */
     protected MimeMessage transport(MimeMessage smtpMessage, Address[] recipients, javax.mail.Session smtpSession, SMTPConfig smtpConfig, MtaStatusInfo mtaInfo, SecuritySettings securitySettings) throws OXException {
         // Prepare addresses
-        prepareAddresses(recipients);
+        Address[] recipientz = recipients;
+        prepareAddresses(recipientz);
 
         Transport transport = null;
         try {
@@ -930,7 +933,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
 
                 // Check listener chain
-                Result result = listenerChain.onBeforeMessageTransport(messageToSend, recipients, securitySettings, session);
+                Result result = listenerChain.onBeforeMessageTransport(messageToSend, recipientz, securitySettings, session);
 
                 // Examine reply of the listener chain
                 {
@@ -945,9 +948,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         return result.getMimeMessage();
                     }
                     // Check recipient list from result
-                    recipients = result.getRecipients();
+                    recipientz = result.getRecipients();
                     // If not recipients, no need to continue sending.
-                    if (recipients == null || recipients.length == 0) {
+                    if (recipientz == null || recipientz.length == 0) {
                         return result.getMimeMessage();
                     }
 
@@ -984,7 +987,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
                 // Transport
                 long start = System.currentTimeMillis();
-                doTransport(messageToSend, recipients, transport);
+                doTransport(messageToSend, recipientz, transport);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 logMessageTransport(messageToSend, smtpConfig);
             } catch (OXException e) {
@@ -1122,6 +1125,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     @Override
     public MailMessage sendMailMessage(ComposedMailMessage composedMail, ComposeType sendType, Address[] allRecipients, MtaStatusInfo mtaStatusInfo) throws OXException {
+        Address[] allRecipientz = allRecipients;
         final SMTPConfig smtpConfig = getTransportConfig();
         try {
             /*
@@ -1150,6 +1154,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpFiller.setCommonHeaders(mimeMessage);
                     }
                 } catch (final Exception e) {
+                    LOG.trace("Failed to extract MIME message from {} instance", ContentAware.class.getName(), e);
                     mimeMessage = null;
                 }
             }
@@ -1182,11 +1187,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     /*
                      * Check recipients
                      */
-                    if (allRecipients == null) {
+                    if (allRecipientz == null) {
                         if (composedMail.hasRecipients()) {
-                            allRecipients = composedMail.getRecipients();
+                            allRecipientz = composedMail.getRecipients();
                         } else {
-                            allRecipients = smtpMessage.getAllRecipients();
+                            allRecipientz = smtpMessage.getAllRecipients();
                         }
                     }
 
@@ -1202,7 +1207,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
 
-            MimeMessage sentMimeMessage = sendMimeMessage(mimeMessage, allRecipients, mtaStatusInfo, composedMail.getSecuritySettings());
+            MimeMessage sentMimeMessage = sendMimeMessage(mimeMessage, allRecipientz, mtaStatusInfo, composedMail.getSecuritySettings());
             return MimeMessageConverter.convertMessage(sentMimeMessage);
         } catch (final MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
@@ -1463,6 +1468,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 try {
                     content = part.getContent();
                 } catch (Exception e) {
+                    LOG.trace("Failed to acquire MIME part's content", e);
                     content = null;
                 }
                 if (content instanceof MimeMessage) {
@@ -1544,9 +1550,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     message.addHeader(header, mail);
                 }
             } catch (MessagingException e) {
-                LOG.error("Couldn't add header to the outgoing mail.", e);
+                LOG.error("Couldn't add header {} to the outgoing mail.", header, e);
             } catch (OXException e) {
-                LOG.error("The user {} in context {} wasn't found. Therefore the header {} wasn't appended to the message.", I(session.getUserId()), I(session.getContextId()), header);
+                LOG.error("The user {} in context {} wasn't found. Therefore the header {} wasn't appended to the message.", I(session.getUserId()), I(session.getContextId()), header, e);
             }
         }
     }
