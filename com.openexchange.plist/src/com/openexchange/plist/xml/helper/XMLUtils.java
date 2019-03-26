@@ -210,7 +210,7 @@ public final class XMLUtils {
     }
 
     public static Document parse(final String in) throws ParserConfigurationException, SAXException, IOException {
-        return parse(in.getBytes());
+        return parse(in.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
     public static Document parse(final byte[] in) throws ParserConfigurationException, SAXException, IOException {
