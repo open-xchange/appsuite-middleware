@@ -549,12 +549,7 @@ public class MimeMessageFiller {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
             if (isCustomOrReplyHeader(name)) {
-                String value = entry.getValue();
-                if(HDR_REFERENCES.equals(name)) {
-                    mimeMessage.setHeader(name, MimeMessageUtility.fold(12, value));
-                } else {
-                    mimeMessage.setHeader(name, value);
-                }
+                mimeMessage.setHeader(name, MimeMessageUtility.fold(name.length() + 2, entry.getValue()));
             }
         }
     }
@@ -580,7 +575,7 @@ public class MimeMessageFiller {
                 }
             } else {
                 String replyTo = compositionParameters.getReplyToAddress();
-                if (replyTo != null) {
+                if (!isEmpty(replyTo)) {
                     try {
                         mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyTo, true));
                     } catch (final AddressException e) {

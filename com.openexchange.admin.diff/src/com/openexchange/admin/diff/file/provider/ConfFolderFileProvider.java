@@ -50,9 +50,11 @@
 package com.openexchange.admin.diff.file.provider;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -106,12 +108,8 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
 
         for (File currentFile : filesToAdd) {
             if (currentFile.getAbsolutePath().contains("/conf/")) {
-                FileReader fileReader = null;
-                try {
-                    fileReader = new FileReader(currentFile);
-                    String fileContent = IOUtils.toString(fileReader);
-                    fileReader.close();
-                    fileReader = null;
+                try (InputStreamReader reader = new InputStreamReader(new FileInputStream(currentFile), StandardCharsets.UTF_8)) {
+                    String fileContent = IOUtils.toString(reader);
 
                     ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                     ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
@@ -119,10 +117,6 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                     diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
                 } catch (IOException e) {
                     diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
-                } finally {
-                    if (null != fileReader) {
-                        try { fileReader.close(); } catch (Exception e) { /*ignore*/ }
-                    }
                 }
             }
         }

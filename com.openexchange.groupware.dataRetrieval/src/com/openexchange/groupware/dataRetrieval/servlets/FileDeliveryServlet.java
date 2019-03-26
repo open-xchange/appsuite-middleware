@@ -81,8 +81,8 @@ public class FileDeliveryServlet extends HttpServlet {
     private static final long serialVersionUID = -1246179982601539367L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileDeliveryServlet.class);
 
-    private final RandomTokenContainer<Map<String, Object>> paramMap;
-    private final DataProviderRegistry dataProviders;
+    private transient final RandomTokenContainer<Map<String, Object>> paramMap;
+    private transient final DataProviderRegistry dataProviders;
 
     private final Configuration configuration;
 
@@ -91,7 +91,6 @@ public class FileDeliveryServlet extends HttpServlet {
      * 
      * @param paramMap {@link RandomTokenContainer}
      * @param dataProviders {@link DataProviderRegistry}
-     * 
      * @param configuration The {@link Configuration}
      */
     public FileDeliveryServlet(RandomTokenContainer<Map<String, Object>> paramMap, DataProviderRegistry dataProviders, Configuration configuration) {

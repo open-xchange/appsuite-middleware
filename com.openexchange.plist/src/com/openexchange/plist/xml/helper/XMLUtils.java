@@ -333,27 +333,6 @@ public final class XMLUtils {
         return bos.toString();
     }
 
-    public static String toString(final Node node, final int indent) {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTo(node, out, indent);
-        return out.toString();
-    }
-
-    public static String toString(final Node node) {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTo(node, out);
-        return out.toString();
-    }
-
-    public static void printDOM(final Node node) {
-        printDOM("", node);
-    }
-
-    public static void printDOM(final String words, final Node node) {
-        System.out.println(words);
-        System.out.println(toString(node));
-    }
-
     public static Attr getAttribute(final Element el, final String attrName) {
         return el.getAttributeNode(attrName);
     }

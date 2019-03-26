@@ -156,7 +156,7 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         downloadFilePath = cmd.getOptionValue('z');
         ipBlocksFilePath = cmd.getOptionValue('b');
         ipLocationsFilePath = cmd.getOptionValue('l');
-        if (ipBlocksFilePath != null && false == ipBlocksFilePath.isEmpty() && ipLocationsFilePath != null && false == ipLocationsFilePath.isEmpty()) {
+        if (downloadFilePath != null || ipBlocksFilePath != null && false == ipBlocksFilePath.isEmpty() && ipLocationsFilePath != null && false == ipLocationsFilePath.isEmpty()) {
             importMode = true;
         }
     }

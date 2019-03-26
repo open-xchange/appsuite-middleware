@@ -57,6 +57,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -292,12 +293,12 @@ public final class MIMEMultipartMailPart extends MailPart {
     /**
      * Sequence: LF LF
      */
-    private static final byte[] DELIM2 = "\n\n".getBytes();
+    private static final byte[] DELIM2 = "\n\n".getBytes(StandardCharsets.ISO_8859_1);
 
     /**
      * Sequence: LF CR LF
      */
-    private static final byte[] DELIM1 = "\n\r\n".getBytes();
+    private static final byte[] DELIM1 = "\n\r\n".getBytes(StandardCharsets.ISO_8859_1);
 
     public static int getHeaderEnd(final byte[] dataBytes) {
         int headerEnd = indexOf(dataBytes, DELIM1, 0, dataBytes.length);

@@ -1,4 +1,5 @@
 type: object
+title: Meta
 description: Object of meta information
 properties:
   type:

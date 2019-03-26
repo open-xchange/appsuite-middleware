@@ -49,62 +49,45 @@
 
 package com.openexchange.groupware.dataRetrieval.config;
 
+import java.io.Serializable;
 import com.openexchange.config.ConfigurationService;
-
 
 /**
  * {@link Configuration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Configuration {
+public class Configuration implements Serializable {
+
+    private static final long serialVersionUID = 9139571663724448075L;
 
     public static final String ENABLE_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.enable";
     public static final String LIFETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.lifetime";
     public static final String ISONETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.onetime";
     private static final String FORCE_PROTOCOL_NAME = "com.openexchange.groupware.dataRetrieval.forceProtocol";
 
-    private long lifetime;
-    private boolean expireAfterAccess;
+    private long lifetime = -1;
+    private boolean expireAfterAccess = true;
+    private boolean enabled = false;
     private String forceProtocol = null;
-    boolean enabled = false;
-
 
     public Configuration(ConfigurationService service) {
         enabled = service.getBoolProperty(ENABLE_OPTIONS_NAME, false);
         String lifetime = service.getProperty(LIFETIME_OPTIONS_NAME);
-        if(lifetime == null) {
-            this.lifetime = -1;
-        } else {
+        if (lifetime != null) {
             this.lifetime = Long.parseLong(lifetime.trim());
         }
 
         String onetime = service.getProperty(ISONETIME_OPTIONS_NAME);
-        if(onetime == null) {
-            expireAfterAccess = true;
-        } else {
+        if (onetime != null) {
             expireAfterAccess = Boolean.parseBoolean(onetime.trim());
         }
 
         forceProtocol = service.getProperty(FORCE_PROTOCOL_NAME);
     }
 
-    public Configuration(int lifetime, boolean expireAfterAccess) {
-        super();
-        this.lifetime = lifetime;
-        this.expireAfterAccess = expireAfterAccess;
-    }
-
     public long getLifetime() {
         return lifetime;
-    }
-
-    public void setLifetime(long lifetime) {
-        this.lifetime = lifetime;
-    }
-
-    public void setExpireAfterAccess(boolean expireAfterAccess) {
-        this.expireAfterAccess = expireAfterAccess;
     }
 
     public boolean expiresAfterAccess() {
@@ -112,7 +95,7 @@ public class Configuration {
     }
 
     public boolean hasExpired(long created) {
-        if(lifetime < 0) {
+        if (lifetime < 0) {
             return false;
         }
         return created + lifetime < System.currentTimeMillis();

@@ -1398,14 +1398,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
     }
 
     private int getUserId() {
-        int userId;
-        if (user == null) {
-            userId = ConfigProviderService.NO_USER;
-        } else {
-            userId = user.getId();
-        }
-
-        return userId;
+        return user == null ? ConfigProviderService.NO_USER : user.getId();
     }
 
     private void prepareAddresses(final Address[] addresses) {
@@ -1426,15 +1419,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     private String getHostName() {
         final HostnameService hostnameService = Services.getService(HostnameService.class);
-        String hostName;
         if (null == hostnameService) {
-            hostName = getFallbackHostname();
+            return getFallbackHostname();
+        }
+
+        String hostName;
+        User user = this.user;
+        if (null != user && user.isGuest()) {
+            hostName = hostnameService.getGuestHostname(user.getId(), ctx.getContextId());
         } else {
-            if (null != user && user.isGuest()) {
-                hostName = hostnameService.getGuestHostname(getUserId(), ctx.getContextId());
-            } else {
-                hostName = hostnameService.getHostname(getUserId(), ctx.getContextId());
-            }
+            hostName = hostnameService.getHostname(getUserId(), ctx.getContextId());
         }
         if (null == hostName) {
             hostName = getFallbackHostname();
@@ -1484,10 +1478,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     private String getFallbackHostname() {
         final String serverName = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
-        if (null == serverName) {
-            return getStaticHostName();
-        }
-        return serverName;
+        return null == serverName ? getStaticHostName() : serverName;
     }
 
     private static String getStaticHostName() {

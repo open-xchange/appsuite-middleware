@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import com.openexchange.java.Streams;
 
 /**
@@ -96,7 +97,7 @@ public final class CommandExecutor {
      * @throws IOException
      */
     public void send(final String in) throws IOException {
-        inputStream.write(in.getBytes());
+        inputStream.write(in.getBytes(StandardCharsets.ISO_8859_1));
         inputStream.flush();
         inputStream.close();
     }

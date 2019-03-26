@@ -99,7 +99,7 @@ public class DefaultGeoInformation implements GeoInformation {
          */
         public Builder continent(String continent) {
             this.continent = continent;
-            if (continent != null) {
+            if (Strings.isNotEmpty(continent)) {
                 bitmask = (short) (bitmask | 8);
             }
             return this;
@@ -113,7 +113,7 @@ public class DefaultGeoInformation implements GeoInformation {
          */
         public Builder country(String country) {
             this.country = country;
-            if (country != null) {
+            if (Strings.isNotEmpty(country)) {
                 bitmask = (short) (bitmask | 4);
             }
             return this;
@@ -127,7 +127,7 @@ public class DefaultGeoInformation implements GeoInformation {
          */
         public Builder city(String city) {
             this.city = city;
-            if (city != null) {
+            if (Strings.isNotEmpty(city)) {
                 bitmask = (short) (bitmask | 2);
             }
             return this;
