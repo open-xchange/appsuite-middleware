@@ -223,8 +223,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         super.setUp();
         ConfigApi configApi = new ConfigApi(apiClient);
         ConfigResponse configResponse = configApi.getConfigNode("/context_id", apiClient.getSession());
-        this.contextId = (int)
-            super.checkResponse(configResponse.getError(),configResponse.getErrorDesc(), configResponse.getData());
+        this.contextId = (int) super.checkResponse(configResponse.getError(), configResponse.getErrorDesc(), configResponse.getData());
         this.userId = MultifactorApi().getApiClient().getUserId();
     }
 
