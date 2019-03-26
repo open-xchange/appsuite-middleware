@@ -967,6 +967,40 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             return (d == 0) ? 0 : ((d < 0) ? -1 : 1);
         }
 
+        @Override
+        public int hashCode() {
+            final int prime = 97;
+            int result = 1;
+            result = prime * result + (int) (period ^ (period >>> 32));
+            result = prime * result + (int) (sequenceNumber ^ (sequenceNumber >>> 32));
+            result = prime * result + ((task == null) ? 0 : 1337);
+            result = prime * result + (int) (time ^ (time >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ScheduledFutureTask other = (ScheduledFutureTask) obj;
+            if (period != other.period)
+                return false;
+            if (sequenceNumber != other.sequenceNumber)
+                return false;
+            if (task == null) {
+                if (other.task != null)
+                    return false;
+            } else if (!task.equals(other.task))
+                return false;
+            if (time != other.time)
+                return false;
+            return true;
+        }
+
         /**
          * Returns true if this is a periodic (not a one-shot) action.
          *
