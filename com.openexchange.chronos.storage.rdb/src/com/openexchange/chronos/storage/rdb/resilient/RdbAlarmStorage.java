@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.resilient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.ProblemSeverity;
@@ -91,17 +92,17 @@ public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage
 
     @Override
     public void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
-        delegate.insertAlarms(event, userID, alarms);
+        runWithRetries(() -> delegate.insertAlarms(event, userID, alarms), f -> handleObjects(event.getId(), alarms, f));
     }
 
     @Override
     public void insertAlarms(Event event, Map<Integer, List<Alarm>> alarmsByUserId) throws OXException {
-        delegate.insertAlarms(event, alarmsByUserId);
+        runWithRetries(() -> delegate.insertAlarms(event, alarmsByUserId), f -> handleMappedObjects(event.getId(), alarmsByUserId, f));
     }
 
     @Override
     public void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException {
-        delegate.insertAlarms(alarmsByUserByEventId);
+        runWithRetries(() -> delegate.insertAlarms(alarmsByUserByEventId), f -> handleMappedObjectsPerEventId(alarmsByUserByEventId, f));
     }
 
     @Override
@@ -126,7 +127,7 @@ public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage
 
     @Override
     public void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
-        delegate.updateAlarms(event, userID, alarms);
+        runWithRetries(() -> delegate.updateAlarms(event, userID, alarms), f -> handleObjects(event.getId(), alarms, f));
     }
 
     @Override
@@ -182,6 +183,25 @@ public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage
     @Override
     public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
         return delegate.getLatestTimestamp(eventIds, userId);
+    }
+
+    /**
+     * Tries to handle an exception that occurred during inserting data automatically.
+     *
+     * @param eventId The identifier of the event where data is stored for
+     * @param mappedObjectsPerEventId The objects being stored per event id, mapped to an arbitrary key
+     * @param failure The exception
+     * @return <code>true</code> if the data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
+     */
+    private boolean handleMappedObjectsPerEventId(Map<String, Map<Integer, List<Alarm>>> mappedObjectsPerEventId, Throwable failure) {
+        if (null != mappedObjectsPerEventId) {
+            for (Entry<String, Map<Integer, List<Alarm>>> entry : mappedObjectsPerEventId.entrySet()) {
+                if (handleMappedObjects(entry.getKey(), entry.getValue(), failure)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

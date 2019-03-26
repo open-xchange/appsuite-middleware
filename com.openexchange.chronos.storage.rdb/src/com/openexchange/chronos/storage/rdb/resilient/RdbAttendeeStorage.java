@@ -49,13 +49,11 @@
 
 package com.openexchange.chronos.storage.rdb.resilient;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.exception.ProblemSeverity;
-import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -138,106 +136,37 @@ public class RdbAttendeeStorage extends RdbResilientStorage implements AttendeeS
 
     @Override
     public void insertAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        runWithRetries(() -> delegate.insertAttendees(eventId, attendees), f -> handle(eventId, attendees, f));
+        runWithRetries(() -> delegate.insertAttendees(eventId, attendees), f -> handleObjects(eventId, attendees, f));
     }
 
     @Override
     public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        runWithRetries(() -> delegate.insertAttendees(attendeesByEventId), f -> handle(attendeesByEventId, f));
+        runWithRetries(() -> delegate.insertAttendees(attendeesByEventId), f -> handleObjectsPerEventId(attendeesByEventId, f));
     }
 
     @Override
     public void updateAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        runWithRetries(() -> delegate.updateAttendees(eventId, attendees), f -> handle(eventId, attendees, f));
+        runWithRetries(() -> delegate.updateAttendees(eventId, attendees), f -> handleObjects(eventId, attendees, f));
     }
 
     @Override
     public void updateAttendee(String eventId, Attendee attendee) throws OXException {
-        runWithRetries(() -> delegate.updateAttendee(eventId, attendee), f -> handle(eventId, Collections.singletonList(attendee), f));
+        runWithRetries(() -> delegate.updateAttendee(eventId, attendee), f -> handle(eventId, attendee, f));
     }
 
     @Override
     public void insertAttendeeTombstone(String eventId, Attendee attendee) throws OXException {
-        runWithRetries(() -> delegate.insertAttendeeTombstone(eventId, attendee), f -> handle(eventId, Collections.singletonList(attendee), f));
+        runWithRetries(() -> delegate.insertAttendeeTombstone(eventId, attendee), f -> handle(eventId, attendee, f));
     }
 
     @Override
     public void insertAttendeeTombstones(String eventId, List<Attendee> attendees) throws OXException {
-        runWithRetries(() -> delegate.insertAttendeeTombstones(eventId, attendees), f -> handle(eventId, attendees, f));
+        runWithRetries(() -> delegate.insertAttendeeTombstones(eventId, attendees), f -> handleObjects(eventId, attendees, f));
     }
 
     @Override
     public void insertAttendeeTombstones(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        runWithRetries(() -> delegate.insertAttendeeTombstones(attendeesByEventId), f -> handle(attendeesByEventId, f));
-    }
-
-    /**
-     * Tries to handle an exception that occurred during inserting data automatically.
-     *
-     * @param attendeesByEventId The attendees being stored, mapped to the corresponding event identifier
-     * @param failure The exception
-     * @return <code>true</code> if the attendees data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
-     */
-    private boolean handle(Map<String, List<Attendee>> attendeesByEventId, Throwable failure) {
-        if (false == OXException.class.isInstance(failure)) {
-            return false;
-        }
-        OXException e = (OXException) failure;
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
-                    return handleIncorrectStrings && handleIncorrectString(e, attendeesByEventId);
-                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
-                    return handleTruncations && handleTruncation(e, attendeesByEventId);
-                default:
-                    return false;
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
-            return false;
-        }
-    }
-
-    /**
-     * Tries to handle an exception that occurred during inserting data automatically.
-     *
-     * @param eventId The identifier of the event the attendees are stored for
-     * @param attendees The attendees being stored
-     * @param failure The exception
-     * @return <code>true</code> if the attendees data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
-     */
-    private boolean handle(String eventId, List<Attendee> attendees, Throwable failure) {
-        return handle(Collections.singletonMap(eventId, attendees), failure);
-    }
-
-    private boolean handleIncorrectString(OXException e, Map<String, List<Attendee>> attendeesByEventId) {
-        LOG.debug("Incorrect string detected while storing calendar data, replacing problematic characters and trying again.", e);
-        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
-        if (null == calendarUtilities) {
-            return false;
-        }
-        for (Map.Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
-            if (calendarUtilities.handleIncorrectString(e, entry.getValue())) {
-                addWarning(entry.getKey(), e);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean handleTruncation(OXException e, Map<String, List<Attendee>> attendeesByEventId) {
-        LOG.debug("Data truncation detected while storing calendar data, trimming problematic fields and trying again.");
-        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
-        if (null == calendarUtilities) {
-            return false;
-        }
-        for (Map.Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
-            if (calendarUtilities.handleDataTruncation(e, entry.getValue())) {
-                addWarning(entry.getKey(), e);
-                return true;
-            }
-        }
-        return false;
+        runWithRetries(() -> delegate.insertAttendeeTombstones(attendeesByEventId), f -> handleObjectsPerEventId(attendeesByEventId, f));
     }
 
 }

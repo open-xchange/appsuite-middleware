@@ -334,6 +334,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             .toString();
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 int parameterIndex = 1;
+                MAPPER.validateAll(attendee);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, fields);
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
@@ -446,6 +447,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 if (attendeeList != null && attendeeList.size() > 0) {
                     attendeesToStore = true;
                     for (Attendee attendee : entry.getValue()) {
+                        MAPPER.validateAll(attendee);
                         attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
                         stmt.setInt(parameterIndex++, context.getContextId());
                         stmt.setInt(parameterIndex++, accountId);

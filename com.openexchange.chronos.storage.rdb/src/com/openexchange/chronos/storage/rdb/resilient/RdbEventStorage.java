@@ -55,7 +55,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.ProblemSeverity;
-import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
@@ -208,50 +207,7 @@ public class RdbEventStorage extends RdbResilientStorage implements EventStorage
      * @return <code>true</code> if the event data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
      */
     private boolean handle(Event event, Throwable failure) {
-        return OXException.class.isInstance(failure) ? handle(event, (OXException) failure) : false;
-    }
-
-    /**
-     * Tries to handle an exception that occurred during inserting data automatically.
-     *
-     * @param event The event being stored
-     * @param e The exception
-     * @return <code>true</code> if the event data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
-     */
-    private boolean handle(Event event, OXException e) {
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
-                    return handleIncorrectStrings && handleIncorrectString(e, event);
-                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
-                    return handleTruncations && handleTruncation(e, event);
-                default:
-                    return false;
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
-            return false;
-        }
-    }
-
-    private boolean handleIncorrectString(OXException e, Event event) {
-        LOG.debug("Incorrect string detected while storing calendar data, replacing problematic characters and trying again.", e);
-        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
-        if (null != calendarUtilities && calendarUtilities.handleIncorrectString(e, event)) {
-            addWarning(event.getId(), e);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean handleTruncation(OXException e, Event event) {
-        LOG.debug("Data truncation detected while storing calendar data, trimming problematic fields and trying again.");
-        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
-        if (null != calendarUtilities && calendarUtilities.handleDataTruncation(e, event)) {
-            addWarning(event.getId(), e);
-            return true;
-        }
-        return false;
+        return handle(event.getId(), event, failure);
     }
 
 }

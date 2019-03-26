@@ -371,6 +371,23 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             public void remove(Alarm object) {
                 object.removeExtendedProperties();
             }
+
+            @Override
+            public boolean replaceAll(Alarm object, String regex, String replacement) throws OXException {
+                if (super.replaceAll(object, regex, replacement)) {
+                    /*
+                     * also replace in properties that get encoded as extended properties
+                     */
+                    if (object.containsDescription() && null != object.getDescription()) {
+                        object.setDescription(object.getDescription().replaceAll(regex, replacement));
+                    }
+                    if (object.containsSummary() && null != object.getSummary()) {
+                        object.setSummary(object.getSummary().replaceAll(regex, replacement));
+                    }
+                    return true;
+                }
+                return false;
+            }
         });
 
         return mappings;
