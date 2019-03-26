@@ -329,7 +329,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Login again with autologin enabled
         LoginApi loginApi = new LoginApi(getApiClient());
-        getApiClient().login(testUser.getUser(), testUser.getPassword());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         loginApi.refreshAutoLoginCookie(getSessionId());
 
         //..And provide the 2nd factor - Authentication must not fail!
@@ -362,7 +362,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Login again with autologin enabled
         LoginApi loginApi = new LoginApi(getApiClient());
-        getApiClient().login(testUser.getUser(), testUser.getPassword());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         loginApi.refreshAutoLoginCookie(getSessionId());
 
         //..And provide the 2nd factor - Authentication must not fail!
