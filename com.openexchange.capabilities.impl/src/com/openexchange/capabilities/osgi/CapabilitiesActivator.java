@@ -50,6 +50,7 @@
 package com.openexchange.capabilities.osgi;
 
 import static com.openexchange.capabilities.internal.AbstractCapabilityService.getCapability;
+import static com.openexchange.java.Charsets.UTF_8;
 import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -124,7 +125,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes(UTF_8);
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         }
         {
@@ -142,7 +143,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes(UTF_8);
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         }
         {
@@ -160,7 +161,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes(UTF_8);
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         }
         {
