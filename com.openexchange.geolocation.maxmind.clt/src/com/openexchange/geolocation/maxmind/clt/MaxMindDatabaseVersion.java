@@ -58,25 +58,41 @@ import com.openexchange.geolocation.clt.DatabaseVersion;
  * @since v7.10.2
  */
 public enum MaxMindDatabaseVersion implements DatabaseVersion {
-    CITY(4, "GeoLite2-City-CSV", "GeoIP2-City-CSV"),
-    COUNTRY(8, "GeoLite2-Country-CSV", "GeoIP2-Country-CSV");
+    CITY(10, 14, "GeoLite2-City-CSV", "GeoIP2-City-CSV"),
+    COUNTRY(6, 7, "GeoLite2-Country-CSV", "GeoIP2-Country-CSV");
 
-    private final int numberOfFields;
+    private final int ipBlocksNumberOfFields;
+    private final int ipLocationsNumberOfFields;
     private final String liteName;
     private final String name;
 
     /**
      * Initialises a new {@link MaxMindDatabaseVersion}.
      */
-    private MaxMindDatabaseVersion(int numberOfFields, String liteName, String name) {
-        this.numberOfFields = numberOfFields;
+    private MaxMindDatabaseVersion(int ipBlocksNumberOfFields, int ipLocationsNumberOfFields, String liteName, String name) {
+        this.ipBlocksNumberOfFields = ipBlocksNumberOfFields;
+        this.ipLocationsNumberOfFields = ipLocationsNumberOfFields;
         this.liteName = liteName;
         this.name = name;
     }
 
+    /**
+     * Returns the number of the IPBlocks' fields
+     * 
+     * @return the number of the IPBlocks' fields
+     */
     @Override
     public int getNumberOfFields() {
-        return numberOfFields;
+        return ipBlocksNumberOfFields;
+    }
+
+    /**
+     * Returns the number of fields of the IP locations file
+     * 
+     * @return the number of fields of the IP locations file
+     */
+    public int getNumberOfIPLocationsFields() {
+        return ipLocationsNumberOfFields;
     }
 
     @Override
