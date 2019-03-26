@@ -57,13 +57,16 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import java.security.PrivateKey;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClient;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClient.AuthenticationData;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClient.RegisterData;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClientCrypto;
 import com.openexchange.ajax.multifactor.u2fclient.U2FClientException;
 import com.openexchange.ajax.multifactor.u2fclient.U2FDeviceAccess.U2FKeyPair;
+import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
 import com.openexchange.testing.httpclient.models.MultifactorStartAuthenticationResponseData;
@@ -88,6 +91,13 @@ public class U2FProviderTest extends AbstractMultifactorProviderTest  {
     public void setUp() throws Exception {
         u2fClient = U2FClient.createTestClient();
         super.setUp();
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        HashMap<String, String> result = new HashMap<>();
+        result.put(MultifactorProperties.PREFIX + "u2f.enabled", Boolean.TRUE.toString());
+        return result;
     }
 
     @Override
