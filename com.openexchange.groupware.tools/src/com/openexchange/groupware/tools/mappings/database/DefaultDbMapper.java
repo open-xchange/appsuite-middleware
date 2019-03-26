@@ -226,7 +226,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
         }
         for (DbMapping<? extends Object, O> mapping : mappings.values()) {
             if (mapping.isSet(object)) {
-                //                mapping.validate(object);
+                mapping.validate(object);
             }
         }
     }
