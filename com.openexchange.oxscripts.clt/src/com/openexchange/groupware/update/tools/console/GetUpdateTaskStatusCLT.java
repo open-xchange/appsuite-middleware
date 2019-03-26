@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.tools.console;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link GetUpdateTaskStatusCLT}
@@ -63,7 +64,7 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
 
     /**
      * Entry point
-     * 
+     *
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -83,7 +84,7 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
@@ -93,7 +94,7 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -105,13 +106,13 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
             System.out.println("No job found for id '" + jobId + "'.");
             return null;
         }
-        System.out.println(jobStatus.replaceAll("\\\\R", "\n"));
+        System.out.println(Strings.replaceSequenceWith(jobStatus, "\\R", Strings.getLineSeparator()));
         return null;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
