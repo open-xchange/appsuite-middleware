@@ -105,7 +105,7 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
             System.out.println("No job found for id '" + jobId + "'.");
             return null;
         }
-        System.out.println(jobStatus);
+        System.out.println(jobStatus.replaceAll("\\\\R", "\n"));
         return null;
     }
 
