@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange sipgate sms bundle
 Bundle-SymbolicName: com.openexchange.sms.sipgate
+Automatic-Module-Name: com.openexchange.sms.sipgate
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -9,6 +10,7 @@ Bundle-ClassPath: .
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.sms,
