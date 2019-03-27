@@ -552,11 +552,11 @@ public final class MyServletRequest  {
 
     }
 
-    static public String getFileContents(final File file) {
+    static String getFileContents(final File file) {
         final StringBuilder stringBuilder = new StringBuilder();
         BufferedReader input = null;
         try {
-            input = new BufferedReader(new FileReader(file));
+            input = new BufferedReader(new InputStreamReader(new FileInputStream(file), com.openexchange.java.Charsets.UTF_8));
             String line = null;
             while ((line = input.readLine()) != null) {
                 stringBuilder.append(line);
