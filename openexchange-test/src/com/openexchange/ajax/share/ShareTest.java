@@ -662,7 +662,8 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected File updateFile(File file, Field[] modifiedColumns, RequestCustomizer<UpdateInfostoreRequest> customizer) throws Exception {
-        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, file.getLastModified());
+        Date timestamp = file.getMeta() == null ? file.getLastModified() : (Date) file.getMeta().getOrDefault("timestamp", file.getLastModified()); 
+        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, timestamp);
         updateInfostoreRequest.setNotifyPermissionEntities(Transport.MAIL);
         updateInfostoreRequest.setFailOnError(true);
         if (customizer != null) {
@@ -673,7 +674,9 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(updateInfostoreResponse.getID());
         getInfostoreRequest.setFailOnError(true);
         GetInfostoreResponse getInfostoreResponse = getClient().execute(getInfostoreRequest);
-        return getInfostoreResponse.getDocumentMetadata();
+        File result = getInfostoreResponse.getDocumentMetadata();
+        result.setMeta(Collections.singletonMap("timestamp", getInfostoreResponse.getTimestamp()));
+        return result;
     }
 
     /**

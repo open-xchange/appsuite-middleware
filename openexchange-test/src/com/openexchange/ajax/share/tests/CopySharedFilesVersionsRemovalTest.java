@@ -51,7 +51,10 @@ package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Date;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -62,7 +65,9 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.actions.CopyInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.CopyInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.exception.OXException;
@@ -155,11 +160,14 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
     private void createNewFileVersions(AJAXClient theClient, File theFile) throws OXException, IOException, JSONException, InterruptedException {
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(theFile, new Field[] { Field.NUMBER_OF_VERSIONS, Field.VERSION, Field.CURRENT_VERSION, Field.CREATED_BY, Field.CONTENT }, upload, theFile.getLastModified());
+        Date timestamp = theFile.getMeta() == null ? theFile.getLastModified() : (Date) theFile.getMeta().getOrDefault("timestamp", theFile.getLastModified());
+        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(theFile, new Field[] { Field.NUMBER_OF_VERSIONS, Field.VERSION, Field.CURRENT_VERSION, Field.CREATED_BY, Field.CONTENT }, upload, timestamp);
         // create new versions
         for (int i = 0; i < 4; i++) {
-            theClient.execute(updateInfostoreRequest);
+            UpdateInfostoreResponse response = theClient.execute(updateInfostoreRequest);
+            assertNull(response.getErrorMessage(), response.getErrorMessage());
             Thread.sleep(1000L);
+            updateInfostoreRequest = new UpdateInfostoreRequest(theFile, new Field[] { Field.NUMBER_OF_VERSIONS, Field.VERSION, Field.CURRENT_VERSION, Field.CREATED_BY, Field.CONTENT }, upload, response.getTimestamp());
         }
     }
 
@@ -222,7 +230,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         try {
             addUserPermission(getClient2().getValues().getUserId());
             addGuestPermission(lGuestPermission.getRecipient());
-            updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
+            file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
             createNewFileVersions();
             //pre assertions
@@ -247,7 +255,9 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             String shareURL = discoverShareURL(guest);
 
             guestClient = resolveShare(shareURL, getUsername(lGuestPermission.getRecipient()), getPassword(lGuestPermission.getRecipient()));
-            File sharedFileToCopy = guestClient.execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata();
+            GetInfostoreResponse response = guestClient.execute(new GetInfostoreRequest(sharedFileId));
+            File sharedFileToCopy = response.getDocumentMetadata();
+            sharedFileToCopy.setMeta(Collections.singletonMap("timestamp", response.getTimestamp()));
 
             createNewFileVersions(guestClient, sharedFileToCopy);
             assertExistingVersions(file.getId(), 9);
@@ -318,7 +328,9 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             String sharedFileId = sharedFileId(file.getId());
 
             createNewFileVersions();
-            File copiedFile = getClient2().execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata();
+            GetInfostoreResponse response = getClient2().execute(new GetInfostoreRequest(sharedFileId));
+            File copiedFile = response.getDocumentMetadata();
+            copiedFile.setMeta(Collections.singletonMap("timestamp", response.getTimestamp()));
             createNewFileVersions(getClient2(), copiedFile);
             //pre assertions
             assertExistingVersions(file.getId(), 9);
