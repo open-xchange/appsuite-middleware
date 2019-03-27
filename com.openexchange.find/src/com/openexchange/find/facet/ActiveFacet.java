@@ -50,6 +50,7 @@
 package com.openexchange.find.facet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.Serializable;
 
 
 /**
@@ -59,7 +60,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class ActiveFacet {
+public class ActiveFacet implements Serializable {
+
+    private static final long serialVersionUID = -7373982187282668862L;
 
     private final FacetType type;
 
