@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -302,7 +303,7 @@ public final class SMTPCapabilityCache {
                 /*
                  * Request capabilities through EHLO command
                  */
-                out.write(("EHLO " + domain + "\r\n").getBytes());
+                out.write(("EHLO " + domain + "\r\n").getBytes(StandardCharsets.UTF_8));
                 out.flush();
                 {
                     String line;
@@ -316,7 +317,7 @@ public final class SMTPCapabilityCache {
                 /*
                  * Close connection through QUIT command
                  */
-                out.write("QUIT\r\n".getBytes());
+                out.write("QUIT\r\n".getBytes(StandardCharsets.UTF_8));
                 out.flush();
                 /*
                  * Create new Capabilities object
