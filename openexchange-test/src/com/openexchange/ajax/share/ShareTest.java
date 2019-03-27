@@ -526,6 +526,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         GetInfostoreResponse getResponse = client.execute(getRequest);
         File createdFile = getResponse.getDocumentMetadata();
         assertNotNull(createdFile);
+        createdFile.setMeta(Collections.singletonMap("timestamp", getResponse.getTimestamp()));
         return createdFile;
     }
 
