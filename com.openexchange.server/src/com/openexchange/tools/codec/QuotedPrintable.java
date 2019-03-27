@@ -52,6 +52,9 @@ package com.openexchange.tools.codec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.java.Charsets;
@@ -82,6 +85,19 @@ public final class QuotedPrintable {
         super();
     }
 
+    private static final ConcurrentMap<String, Pattern> REGEXES = new ConcurrentHashMap<>(8);
+
+    private static Pattern getRegexFor(String charset) {
+        Pattern pattern = REGEXES.get(charset);
+        if (pattern != null) {
+            return pattern;
+        }
+
+        pattern = Pattern.compile(new StringBuilder(REGEX_PREFIX).append(charset).append(REGEX_APPENDIX).toString());
+        REGEXES.put(charset, pattern);
+        return pattern;
+    }
+
     /**
      * Encodes specified original string with given character encoding and transfer encoding <code>QUOTED PRINTABLE</code>.
      *
@@ -92,7 +108,7 @@ public final class QuotedPrintable {
      */
     public static String encodeString(final String originalStr, final String charset) throws UnsupportedEncodingException {
         String encStr = MimeUtility.encodeText(originalStr, charset, ENCODE_Q);
-        encStr = encStr.replaceAll(new StringBuilder().append(REGEX_PREFIX).append(charset).append(REGEX_APPENDIX).toString(), "");
+        encStr = getRegexFor(charset).matcher(encStr).replaceAll("");
         for (int i = 0; i < RPL.length; i++) {
             encStr = encStr.replaceAll(RPL[i], SUB[i]);
         }
@@ -109,13 +125,10 @@ public final class QuotedPrintable {
      * @throws MessagingException If a messaging error occurs
      */
     public static String decodeString(final String quotedPrintableStr, final String charset) throws IOException, MessagingException {
-        final InputStream inStream = MimeUtility.decode(
-            new UnsynchronizedByteArrayInputStream(quotedPrintableStr.getBytes(charset)),
-            ENCODING_QP);
+        final InputStream inStream = MimeUtility.decode(new UnsynchronizedByteArrayInputStream(quotedPrintableStr.getBytes(charset)), ENCODING_QP);
         final UnsynchronizedByteArrayOutputStream decodedBytes = new UnsynchronizedByteArrayOutputStream();
-        int k = -1;
-        final byte[] buffer = new byte[512];
-        while ((k = inStream.read(buffer)) > 0) {
+        byte[] buffer = new byte[512];
+        for (int k; (k = inStream.read(buffer)) > 0;) {
             decodedBytes.write(buffer, 0, k);
         }
         return new String(decodedBytes.toByteArray(), Charsets.forName(charset));
