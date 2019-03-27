@@ -98,6 +98,7 @@ public class U2FProviderTest extends AbstractMultifactorProviderTest  {
     protected Map<String, String> getNeededConfigurations() {
         HashMap<String, String> result = new HashMap<>();
         result.put(MultifactorProperties.PREFIX + "u2f.enabled", Boolean.TRUE.toString());
+        result.put(MultifactorProperties.PREFIX + "u2f.appId", "https://localhost");
         return result;
     }
 

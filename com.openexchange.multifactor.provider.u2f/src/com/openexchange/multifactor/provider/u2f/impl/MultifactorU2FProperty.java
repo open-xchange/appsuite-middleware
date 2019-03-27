@@ -65,7 +65,7 @@ public enum MultifactorU2FProperty implements Property {
      *
      * Only providers which are "enabled" can be used by a user.
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
 
     /**
      * Defines the U2f APP ID to propagate to the client. Empty to use the host-name
@@ -75,7 +75,7 @@ public enum MultifactorU2FProperty implements Property {
     /**
      * Defines the lifetime of a U2F challenge token for authentication; i.e this is the time the client needs to resolve the challenge.
      */
-    tokenLifetime(60);
+    tokenLifetime(Integer.valueOf(60));
 
     private static final String PREFIX = MultifactorProperties.PREFIX + "u2f.";
     private Object              defaultValue;
