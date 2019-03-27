@@ -1009,6 +1009,7 @@ public class Strings {
         return join(list, connector);
     }
 
+    private static final byte[][] BYTE_ORDER_MARKS = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
     /**
      * Removes byte order marks from UTF8 strings.
      * 
@@ -1016,10 +1017,8 @@ public class Strings {
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
-        final byte[][] byteOrderMarks = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
-
         final byte[] bytes = str.getBytes();
-        for (final byte[] bom : byteOrderMarks) {
+        for (final byte[] bom : BYTE_ORDER_MARKS) {
             if (bom.length > bytes.length) {
                 continue;
             }
@@ -1214,11 +1213,11 @@ public class Strings {
     }
 
     /**
-     * Generates a string of code points for given string
+     * Generates a string of code points for given string and print it
+     * either to the given stream or to {@link System#out}
      *
      * @param str The string
      * @param out The print stream to print to
-     * @return The code points
      */
     public static void outCodePoints(final String str, final PrintStream out) {
         if (null == out) {
