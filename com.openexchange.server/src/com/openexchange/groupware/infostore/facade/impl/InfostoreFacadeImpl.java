@@ -649,9 +649,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * adjust parent folder if required
          */
-        if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
+        if (getSharedFilesFolderID() == folderId || false == permission.canReadObjectInFolder()) {
             document.setOriginalFolderId(document.getFolderId());
-            document.setFolderId(getSharedFilesFolderID(session));
+            document.setFolderId(getSharedFilesFolderID());
             /*
              * Re-sharing of files is not allowed.
              */
@@ -757,9 +757,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * adjust parent folder if required, add further metadata
          */
-        if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
+        if (getSharedFilesFolderID() == folderId || false == permission.canReadObjectInFolder()) {
             metadata.setOriginalFolderId(metadata.getFolderId());
-            metadata.setFolderId(getSharedFilesFolderID(session));
+            metadata.setFolderId(getSharedFilesFolderID());
             /*
              * Re-sharing of files is not allowed.
              */
@@ -1387,7 +1387,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
     }
 
-    // FIXME Move 2 query builder
     private int getNextVersionNumberForInfostoreObject(final int cid, final int infostore_id, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1510,7 +1509,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Check permissions
         Context context = session.getContext();
-        int sharedFilesFolderID = getSharedFilesFolderID(session);
+        int sharedFilesFolderID = getSharedFilesFolderID();
         EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, document.getId());
         if (false == infoPerm.canWriteObject() || contains(modifiedColumns, Metadata.OBJECT_PERMISSIONS_LITERAL) && (document.getFolderId() == sharedFilesFolderID || false == infoPerm.canShareObject())) {
             throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
@@ -1894,7 +1893,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
-        if (folderId == getSharedFilesFolderID(session)) {
+        if (folderId == getSharedFilesFolderID()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
         }
         Context context = session.getContext();
@@ -2643,7 +2642,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 public DocumentMetadata handle(DocumentMetadata document) {
                     if (false == infoPerm.canReadObjectInFolder()) {
                         document.setOriginalFolderId(document.getFolderId());
-                        document.setFolderId(getSharedFilesFolderID(session));
+                        document.setFolderId(getSharedFilesFolderID());
                         /*
                          * Re-sharing of files is not allowed.
                          */
@@ -2731,14 +2730,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      */
                     if (false == infostorePermission.canReadObjectInFolder()) {
                         Long requestedFolderID = idsToFolders.get(I(document.getId()));
-                        if (null == requestedFolderID || getSharedFilesFolderID(session) != requestedFolderID.intValue()) {
+                        if (null == requestedFolderID || getSharedFilesFolderID() != requestedFolderID.intValue()) {
                             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                         }
                         /*
                          * adjust parent folder id to match requested identifier
                          */
                         document.setOriginalFolderId(document.getFolderId());
-                        document.setFolderId(getSharedFilesFolderID(session));
+                        document.setFolderId(getSharedFilesFolderID());
                         /*
                          * Re-sharing of files is not allowed.
                          */
@@ -2749,7 +2748,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      * adjust parent folder id to match requested identifier
                      */
                     Long requestedFolderID = idsToFolders.get(I(document.getId()));
-                    if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
+                    if (getSharedFilesFolderID() == requestedFolderID.intValue()) {
                         document.setOriginalFolderId(document.getFolderId());
                         document.setFolderId(requestedFolderID.longValue());
                         /*
@@ -2803,7 +2802,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
-        final int sharedFilesFolderID = getSharedFilesFolderID(session);
+        final int sharedFilesFolderID = getSharedFilesFolderID();
         if (folderId == sharedFilesFolderID) {
             DocumentCustomizer customizer = new DocumentCustomizer() {
 
@@ -2973,7 +2972,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
-        if (folderId == getSharedFilesFolderID(session)) {
+        if (folderId == getSharedFilesFolderID()) {
             return SearchIterators.asList(InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, null, 0, -1, -1, this)).size();
         }
 
@@ -2995,7 +2994,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public boolean hasFolderForeignObjects(final long folderId, final ServerSession session) throws OXException {
-        if (folderId == getSharedFilesFolderID(session)) {
+        if (folderId == getSharedFilesFolderID()) {
             return true;
         }
 
@@ -3117,6 +3116,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param shouldTriggerMediaDataExtraction <code>true</code> to trigger extraction of media metadata; otherwise <code>false</code>
      * @return The enhanced search results
      */
+    @SuppressWarnings("resource")
     private SearchIterator<DocumentMetadata> postProcessSearch(ServerSession session, SearchIterator<DocumentMetadata> searchIterator, Metadata[] fields, final Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID, boolean shouldTriggerMediaDataExtraction) throws OXException {
         /*
          * check requested metadata
@@ -3557,7 +3557,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
-        final long sharedFilesFolderID = getSharedFilesFolderID(context, user);
+        final long sharedFilesFolderID = getSharedFilesFolderID();
         final EffectiveInfostoreFolderPermission folderPermission;
         InfostoreIterator iterator = null;
         try {
@@ -3684,21 +3684,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     /**
      * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
      *
-     * @param session The session
      * @return The identifier of the shared documents folder
      */
-    int getSharedFilesFolderID(ServerSession session) {
-        return getSharedFilesFolderID(session.getContext(), session.getUser());
-    }
-
-    /**
-     * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
-     *
-     * @param context The context
-     * @param user The user
-     * @return The identifier of the shared documents folder
-     */
-    private int getSharedFilesFolderID(Context context, User user) {
+    protected int getSharedFilesFolderID() {
         return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
     }
 
