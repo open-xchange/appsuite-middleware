@@ -1003,8 +1003,8 @@ public class Strings {
 
     public static String join(final byte[] arr, final String connector) {
         final List<Byte> list = new LinkedList<Byte>();
-        for (final Byte i : arr) {
-            list.add(i);
+        for (byte i : arr) {
+            list.add(Byte.valueOf(i));
         }
         return join(list, connector);
     }
@@ -1140,7 +1140,7 @@ public class Strings {
      * @return The quoted string.
      */
     public static String quote(final String s) {
-        return concat('"', s, '"');
+        return concat(Character.valueOf('"'), s, Character.valueOf('"'));
     }
 
     /**
@@ -1844,6 +1844,6 @@ public class Strings {
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+        return String.format("%.1f %sB", Double.valueOf(bytes / Math.pow(unit, exp)), pre);
     }
 }
