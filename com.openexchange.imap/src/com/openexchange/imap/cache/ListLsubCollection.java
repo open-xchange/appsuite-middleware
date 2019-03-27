@@ -2206,7 +2206,7 @@ final class ListLsubCollection implements Serializable {
 
         private Boolean hasChildren;
 
-        private Rights myRights;
+        private transient Rights myRights;
 
         private Boolean subscribed;
 
