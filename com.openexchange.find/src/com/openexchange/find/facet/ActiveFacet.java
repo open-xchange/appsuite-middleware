@@ -129,23 +129,30 @@ public class ActiveFacet implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ActiveFacet other = (ActiveFacet) obj;
         if (type == null) {
-            if (other.type != null)
+            if (other.type != null) {
                 return false;
-        } else if (!type.equals(other.type))
+            }
+        } else if (!type.equals(other.type)) {
             return false;
+        }
         if (valueId == null) {
-            if (other.valueId != null)
+            if (other.valueId != null) {
                 return false;
-        } else if (!valueId.equals(other.valueId))
+            }
+        } else if (!valueId.equals(other.valueId)) {
             return false;
+        }
         return true;
     }
 
