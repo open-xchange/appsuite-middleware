@@ -159,9 +159,7 @@ public class SipgateSMSService implements SMSServiceSPI {
             } else {
                 throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
             }
-        } catch (IOException e) {
-            throw SMSExceptionCode.SERVICE_UNAVAILABLE.create(e, e.getMessage());
-        } catch (JSONException e) {
+        } catch (JSONException | IOException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         } finally {
             if (null != method && method.hasBeenUsed()) {
