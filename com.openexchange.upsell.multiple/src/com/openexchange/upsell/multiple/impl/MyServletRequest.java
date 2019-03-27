@@ -49,12 +49,14 @@
 
 package com.openexchange.upsell.multiple.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
@@ -64,8 +66,6 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.httpclient.URIException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceException;
@@ -161,28 +161,26 @@ public final class MyServletRequest  {
         this.configView = configViewFactory.getView(sessionObj.getUserId(), sessionObj.getContextId());
     }
 
-    public Object action(final String action, final JSONObject jsonObject, final HttpServletRequest http_request) throws OXException, JSONException {
+    // Keep method 
+    public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
         Object retval = null;
 
-        // Host/UI URL from where the request came, needed for different types of shops per domain/branding
-        final String request_src_hostname = http_request.getServerName();
-
         if(action.equalsIgnoreCase(ACTION_GET_CONFIGURED_METHOD)){
-            // return configur\ufffded upsell method
-            retval = actionGetUpsellMethod(jsonObject);
+            // return configure\ufffded upsell method
+            retval = actionGetUpsellMethod();
         }else if(action.equalsIgnoreCase(ACTION_GET_STATIC_REDIRECT_URL_METHOD)){
             // return static redirect URL containing all needed parameters
-            retval = actionGetStaticRedirectURL(jsonObject,request_src_hostname);
+            retval = actionGetStaticRedirectURL(jsonObject);
         }else if(action.equalsIgnoreCase(ACTION_GET_EXTERNAL_REDIRECT_URL_METHOD)){
             // return the generated URL from the external system
-            retval = actionGetExternalRedirectURL(jsonObject,request_src_hostname);
+            retval = actionGetExternalRedirectURL();
         }else if(action.equalsIgnoreCase(ACTION_DOWNGRADE)){
             // downgrade the context which is within this users session
             retval = actionUpDownGradeContext(jsonObject);
         }else if(action.equalsIgnoreCase(ACTION_TRIGGER_UPSELL_EMAIL)){
             // trigger and send email with all need params to configured email addy
             // UI must send feature, upsell package and hostname
-            retval = actionTriggerEmailUpsell(jsonObject,request_src_hostname);
+            retval = actionTriggerEmailUpsell(jsonObject);
         }else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         }
@@ -210,14 +208,14 @@ public final class MyServletRequest  {
             final Credentials authcreds = new Credentials(getFromConfig(PROPERTY_RMI_MASTERADMIN),getFromConfig(PROPERTY_RMI_MASTERADMIN_PWD));
 
             iface.getAccessCombinationName(bla, authcreds);
-            LOG.info("Current access combination name for context {}: {}", this.ctx.getContextId(), iface.getAccessCombinationName(bla, authcreds));
+            LOG.info("Current access combination name for context {}: {}", I(this.ctx.getContextId()), iface.getAccessCombinationName(bla, authcreds));
 
             // update the level of the context
             iface.changeModuleAccess(bla,upsell_plan, authcreds);
 
             // get updated level to debug if it was correctly set
             iface.getAccessCombinationName(bla, authcreds);
-            LOG.info("Updated access combination name for context {} to: {}", this.ctx.getContextId(), iface.getAccessCombinationName(bla, authcreds));
+            LOG.info("Updated access combination name for context {} to: {}", I(this.ctx.getContextId()), iface.getAccessCombinationName(bla, authcreds));
 
         } catch (final RemoteException e) {
             LOG.error("Error changing context",e);
@@ -252,24 +250,20 @@ public final class MyServletRequest  {
         return null;
     }
 
-    private Object actionGetExternalRedirectURL(final JSONObject jsonObject,final String request_src_hostname) {
-
-
+    private Object actionGetExternalRedirectURL() {
         return null;
     }
 
 
 
     /**
-     *
      * Send an upsell mail to configured email address with configured/parsed body and subject
      *
-     * @param jsonObject
-     * @param request_src_hostname
-     * @return
-     * @throws OXException
+     * @param jsonObject THe {@link JSONObject}
+     * @return <code>null</code>
+     * @throws OXException Other wrapped as {@link MyServletExceptionCodes#EMAIL_COMMUNICATION_ERROR}
      */
-    private Object actionTriggerEmailUpsell(final JSONObject jsonObject,final String request_src_hostname) throws OXException {
+    private Object actionTriggerEmailUpsell(final JSONObject jsonObject) throws OXException {
 
         try {
 
@@ -321,9 +315,6 @@ public final class MyServletRequest  {
         } catch (final OXException e) {
             LOG.error("Error reading mandatory configuration parameters for sending upsell email",e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final URIException e) {
-            LOG.error("Error parsing upsell email text",e);
-            throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Error parsing upsell email text",e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
@@ -335,52 +326,41 @@ public final class MyServletRequest  {
         return null;
     }
 
-
-    private String getTemplateContent(final String fulltemplatepath,final boolean i18n){
-
-
+    private String getTemplateContent(final String fulltemplatepath, final boolean i18n) {
         if (!i18n) {
             final File templateFile = new File(fulltemplatepath);
             if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
                 LOG.debug("Found and now using the upsell mail template at {}", fulltemplatepath);
                 return getFileContents(templateFile);
-            } else {
-                LOG.error("Could not find an upsell mail template at {}, using {} as mail body.", fulltemplatepath, PROPERTY_METHOD_EMAIL_SUBJECT);
-                return null;
             }
-        } else {
-            // load with langcode extension
-            final File templateFile_i18n = new File(fulltemplatepath + "_"+ this.user.getPreferredLanguage());
-            final File templateFile = new File(fulltemplatepath);
-            // first try to load i18n file, then the fallback file
-            if (templateFile_i18n.exists() && templateFile_i18n.canRead()
-                && templateFile_i18n.isFile()) {
-                LOG.debug("Found and now using the i18n upsell mail template at {}", templateFile_i18n.getPath());
-                return getFileContents(templateFile_i18n);
-            } else if (templateFile.exists() && templateFile.canRead()
-                && templateFile.isFile()) {
-                LOG.debug("Found and now using the upsell mail template at {}", templateFile.getPath());
-                return getFileContents(templateFile);
-            } else {
-                LOG.error("Could not find an i18n upsell mail template with base path {}", fulltemplatepath);
-                return null;
-            }
+            LOG.error("Could not find an upsell mail template at {}, using {} as mail body.", fulltemplatepath, PROPERTY_METHOD_EMAIL_SUBJECT);
+            return null;
         }
-
+        
+        // load with langcode extension
+        final File templateFile_i18n = new File(fulltemplatepath + "_" + this.user.getPreferredLanguage());
+        final File templateFile = new File(fulltemplatepath);
+        // first try to load i18n file, then the fallback file
+        if (templateFile_i18n.exists() && templateFile_i18n.canRead() && templateFile_i18n.isFile()) {
+            LOG.debug("Found and now using the i18n upsell mail template at {}", templateFile_i18n.getPath());
+            return getFileContents(templateFile_i18n);
+        } else if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
+            LOG.debug("Found and now using the upsell mail template at {}", templateFile.getPath());
+            return getFileContents(templateFile);
+        }
+        LOG.error("Could not find an i18n upsell mail template with base path {}", fulltemplatepath);
+        return null;
     }
 
-
-
     /**
-     *
      * Return the parsed URL to the UI to which it should redirect
      *
-     * @param jsonObject
-     * @return
+     * @param jsonObject The {@link JSONObject}
+     * @return A new {@link JSONObject} containing the redirect URL
      * @throws ServiceException
      * @throws JSONException
      */
-    private Object actionGetStaticRedirectURL(final JSONObject jsonObject,final String request_src_hostname) throws OXException, JSONException {
+    private Object actionGetStaticRedirectURL(final JSONObject jsonObject) throws OXException, JSONException {
         final JSONObject jsonResponseObject = new JSONObject();
 
         // Default implementation to generate the redirect URL
@@ -408,8 +388,6 @@ public final class MyServletRequest  {
             }
 
             jsonResponseObject.put("upsell_static_redirect_url",url); // parsed url with all parameter
-        } catch (final URIException e) {
-            LOG.error("Error encoding static redirect URL", e);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Error encoding static redirect URL", e);
         }
@@ -425,7 +403,7 @@ public final class MyServletRequest  {
     private String getRedirectURL() throws OXException{
 
         String STATIC_URL_RAW = getFromConfig(PROPERTY_METHOD_STATIC_SHOP_REDIR_URL);
-        final int contextId = this.ctx.getContextId();
+        final Integer contextId = I(this.ctx.getContextId());
 
         LOG.debug("Admin user attributes for context {} : {}", contextId, this.admin.getAttributes());
 
@@ -441,7 +419,7 @@ public final class MyServletRequest  {
         return STATIC_URL_RAW;
     }
 
-    private String parseText(String raw_text, final JSONObject json, final boolean url_encode_it) throws JSONException, URIException, UnsupportedEncodingException {
+    private String parseText(String raw_text, final JSONObject json, final boolean url_encode_it) throws JSONException, UnsupportedEncodingException {
         final Map<UpsellURLParametersMap, String> bla = getParameterMap(json);
 
         // loop through all params and replace
@@ -493,7 +471,7 @@ public final class MyServletRequest  {
             try {
                 mailConfig = transport.getTransportConfig();
                 transport.sendMailMessage(new ContentAwareComposedMailMessage(mimeMessage, sessionObj, ctx), ComposeType.NEW);
-                LOG.info("Upsell request from user {} (cid:{})  was sent to {}", this.sessionObj.getLogin(), this.ctx.getContextId(), to);
+                LOG.info("Upsell request from user {} (cid:{})  was sent to {}", this.sessionObj.getLogin(), I(this.ctx.getContextId()), to);
             } finally {
                 transport.close();
             }
@@ -571,16 +549,14 @@ public final class MyServletRequest  {
     }
 
     /**
-     *
      * Return configured method of upsell plugin to handle actions different in UI.
      *
-     * @param jsonObject
-     * @return
+     * @return {@link JSONObject} containing the upsell method
      * @throws ServiceException
      * @throws JSONException
      * @throws OXException
      */
-    private Object actionGetUpsellMethod(final JSONObject jsonObject) throws JSONException, OXException {
+    private Object actionGetUpsellMethod() throws JSONException, OXException {
         final JSONObject jsonResponseObject = new JSONObject();
 
         jsonResponseObject.put("upsell_method",getFromConfig(PROPERTY_METHOD)); // send method
