@@ -49,13 +49,15 @@
 
 package com.openexchange.tools.encoding;
 
+import java.nio.charset.StandardCharsets;
 
 /**
  * QuotedPrintable
  *
  * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
+ * @deprecated DOn't use this class
  */
-
+@Deprecated
 public final class QuotedPrintable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotedPrintable.class);
@@ -72,7 +74,7 @@ public final class QuotedPrintable {
         String x = "";
 
         try {
-            final byte b[] = s.getBytes();
+            final byte b[] = s.getBytes(StandardCharsets.ISO_8859_1);
 
             for (int a = 0; a < b.length; a++) {
                 final int unsignedInt = (0xff & b[a]);
@@ -108,7 +110,7 @@ public final class QuotedPrintable {
         String x = "";
 
         try {
-            final byte b[] = s.getBytes();
+            final byte b[] = s.getBytes(StandardCharsets.ISO_8859_1);
 
             for (int a = 0; a < b.length; a++) {
                 if (b[a] == 61) {
