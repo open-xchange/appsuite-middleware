@@ -56,9 +56,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -431,7 +431,7 @@ public class TemplateServiceImpl implements TemplateService {
         checkTemplatePath(templateFile.getPath());
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(templateFile), 2048);
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(templateFile), com.openexchange.java.Charsets.UTF_8), 2048);
             final StringBuilder builder = new StringBuilder(2048);
             String line;
             while ((line = reader.readLine()) != null) {
