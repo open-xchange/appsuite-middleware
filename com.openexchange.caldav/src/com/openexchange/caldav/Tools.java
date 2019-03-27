@@ -49,9 +49,16 @@
 
 package com.openexchange.caldav;
 
+import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
@@ -88,6 +95,45 @@ public class Tools {
      * The OAuth scope token for CalDAV
      */
     public static final String OAUTH_SCOPE = DAVOAuthScope.CALDAV.getScope();
+
+    /**
+     * Gets the <i>significant</i> events for a collection of arbitrary events from multiple calendar object resources.
+     *
+     * @param events The events get the significant events from
+     * @return The significant events, or an empty list if passed event collection was null or empty
+     */
+    public static List<Event> getSignificantEvents(List<Event> events) {
+        if (null == events || events.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Event> significantEvents = new ArrayList<Event>(events.size());
+        for (List<Event> eventGroup : getEventsByUID(events, false).values()) {
+            Event event = getSignificantEvent(eventGroup);
+            if (null != event) {
+                significantEvents.add(event);
+            }
+        }
+        return significantEvents;
+    }
+
+    /**
+     * Gets the <i>significant</i> event of multiple events within the same calendar object resource (with the same unique identifier).
+     * This is the event itself for non-recurring events, or the series master event for a recurring event series with change exceptions.
+     * In case only change exceptions are contained in the collection, a <i>phantom master</i> event is used implicitly.
+     *
+     * @param events The events of a calendar object resource to get the significant event from
+     * @return The significant event, or <code>null</code> if passed event collection was null or empty
+     */
+    public static Event getSignificantEvent(List<Event> events) {
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
+        if (1 == events.size()) {
+            return isSeriesException(events.get(0)) ? new PhantomMaster(events) : events.get(0);
+        }
+        List<Event> eventGroup = sortSeriesMasterFirst(events);
+        return isSeriesMaster(eventGroup.get(0)) ? eventGroup.get(0) : new PhantomMaster(eventGroup);
+    }
 
     public static String encodeFolderId(String folderId) {
         return null == folderId ? null : BaseEncoding.base64Url().omitPadding().encode(folderId.getBytes(Charsets.US_ASCII));

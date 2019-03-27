@@ -49,6 +49,8 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.caldav.Tools.getSignificantEvent;
+import static com.openexchange.caldav.Tools.getSignificantEvents;
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
 import static com.openexchange.java.Autoboxing.I;
@@ -215,7 +217,7 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
 
     @Override
     protected Collection<Event> getObjects(Date rangeStart, Date rangeEnd) throws OXException {
-        return new CalendarAccessOperation<List<Event>>(factory) {
+        return getSignificantEvents(new CalendarAccessOperation<List<Event>>(factory) {
 
             @Override
             protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
@@ -224,21 +226,21 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
                 access.set(CalendarParameters.PARAMETER_RANGE_END, rangeEnd);
                 return access.getEventsInFolder(folderID);
             }
-        }.execute(factory.getSession());
+        }.execute(factory.getSession()));
     }
 
     @Override
     protected Collection<Event> getObjects() throws OXException {
-        return new CalendarAccessOperation<Collection<Event>>(factory) {
+        return getSignificantEvents(new CalendarAccessOperation<List<Event>>(factory) {
 
             @Override
-            protected Collection<Event> perform(IDBasedCalendarAccess access) throws OXException {
+            protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
                 access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
                 access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
                 access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
                 return access.getEventsInFolder(folderID);
             }
-        }.execute(factory.getSession());
+        }.execute(factory.getSession()));
     }
 
     @Override
@@ -246,19 +248,14 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         if (Strings.isEmpty(resourceName)) {
             return null;
         }
-        return new CalendarAccessOperation<Event>(factory) {
+        return getSignificantEvent(new CalendarAccessOperation<List<Event>>(factory) {
 
             @Override
-            protected Event perform(IDBasedCalendarAccess access) throws OXException {
+            protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
                 access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
-                List<Event> events = access.resolveResource(folderID, resourceName);
-                if (null == events || events.isEmpty()) {
-                    return null;
-                }
-                Event event = events.get(0);
-                return CalendarUtils.isSeriesException(event) ? new PhantomMaster(events) : event;
+                return access.resolveResource(folderID, resourceName);
             }
-        }.execute(factory.getSession());
+        }.execute(factory.getSession()));
     }
 
     public Map<String, EventsResult> resolveEvents(List<String> resourceNames) throws OXException {
