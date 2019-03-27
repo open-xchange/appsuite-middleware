@@ -60,6 +60,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
@@ -94,7 +98,7 @@ import com.openexchange.sms.SMSServiceSPI;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10."
  */
-public class MultifactorSMSProvider implements MultifactorProvider{
+public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
 
     private static final Logger LOG = LoggerFactory.getLogger(MultifactorSMSProvider.class);
 
@@ -107,6 +111,7 @@ public class MultifactorSMSProvider implements MultifactorProvider{
     private final PhoneNumberParserService                        phoneNumberParser;
     private final SMSServiceSPI                                   smsService;
     private final LeanConfigurationService                        configService;
+    private volatile Boolean demoMode = null;
 
     /**
      *
@@ -145,7 +150,20 @@ public class MultifactorSMSProvider implements MultifactorProvider{
     }
 
     private boolean isDemoMode() {
-       return this.configService.getBooleanProperty(MultifactorProperties.demo);
+        if(demoMode == null) {
+            demoMode = Boolean.valueOf(configService.getBooleanProperty(MultifactorProperties.demo));
+        }
+        return demoMode.booleanValue();
+    }
+    
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        demoMode = Boolean.valueOf(configService.getBoolProperty(MultifactorProperties.demo.getFQPropertyName(), MultifactorProperties.demo.getDefaultValue(Boolean.class).booleanValue()));
+    }
+    
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest(MultifactorProperties.demo.getFQPropertyName()).build();
     }
 
     private static String newUid() {

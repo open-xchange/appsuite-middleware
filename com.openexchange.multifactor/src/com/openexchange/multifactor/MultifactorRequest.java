@@ -128,7 +128,7 @@ public class MultifactorRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, contextId);
+        return Objects.hash(Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
     public String getHost() {

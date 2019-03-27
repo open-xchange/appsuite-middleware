@@ -64,7 +64,7 @@ public enum MultifactorProperties implements Property {
      * This is for testing only!
      * DO NOT SET TO TRUE IN A PRODUCTIVE ENVIRONMENT!
      */
-    demo(false),
+    demo(Boolean.FALSE),
 
     /**
      * List of urls that require a recent multifactor authentication. This means that the use must have
@@ -79,7 +79,7 @@ public enum MultifactorProperties implements Property {
      * multifactor authentication recently. If the multifactor authentication happened prior the configured amount of
      * minutes, the requests defined in recentAuthRequired will be denied.
      */
-    recentAuthenticationTime(10);
+    recentAuthenticationTime(Integer.valueOf(10));
 
     public static final String PREFIX = "com.openexchange.multifactor.";
     private Object             defaultValue;
