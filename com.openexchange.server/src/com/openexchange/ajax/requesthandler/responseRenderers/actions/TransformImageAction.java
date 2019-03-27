@@ -483,8 +483,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
                         if (LOG.isDebugEnabled()) {
                             try {
                                 LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDirReference).getPath(), e);
-                            } catch (final Exception excp) {
-                                LOG.error("Unable to transform image from {}", repetitiveFile.getName(), e);
+                            } catch (IOException | OXException excp) {
+                                LOG.error("Unable to transform image from {}", repetitiveFile.getName(), excp);
                             }
                         } else {
                             LOG.error("Unable to transform image from {}", repetitiveFile.getName(), e);

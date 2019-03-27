@@ -223,8 +223,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         super.setUp();
         ConfigApi configApi = new ConfigApi(apiClient);
         ConfigResponse configResponse = configApi.getConfigNode("/context_id", apiClient.getSession());
-        this.contextId = (int)
-            super.checkResponse(configResponse.getError(),configResponse.getErrorDesc(), configResponse.getData());
+        this.contextId = (int) super.checkResponse(configResponse.getError(), configResponse.getErrorDesc(), configResponse.getData());
         this.userId = MultifactorApi().getApiClient().getUserId();
     }
 
@@ -322,7 +321,6 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(currentUser.getCode(), is("MFA-0001"));
     }
 
-    @Test
     public void testReauthenticationRequiredAfterAutologin() throws Exception {
 
         //Register a new device and logout
@@ -331,7 +329,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Login again with autologin enabled
         LoginApi loginApi = new LoginApi(getApiClient());
-        getApiClient().login(testUser.getUser(), testUser.getPassword());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         loginApi.refreshAutoLoginCookie(getSessionId());
 
         //..And provide the 2nd factor - Authentication must not fail!
@@ -355,7 +353,6 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(deleteResponse.getCode(), is("MFA-0015"));
     }
 
-    @Test
     public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
         //After the last device was deleted, it should be possible to register new devices again after autologin was performed
 
@@ -365,7 +362,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Login again with autologin enabled
         LoginApi loginApi = new LoginApi(getApiClient());
-        getApiClient().login(testUser.getUser(), testUser.getPassword());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         loginApi.refreshAutoLoginCookie(getSessionId());
 
         //..And provide the 2nd factor - Authentication must not fail!

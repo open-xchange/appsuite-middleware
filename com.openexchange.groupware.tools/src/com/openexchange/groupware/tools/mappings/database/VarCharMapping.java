@@ -71,6 +71,11 @@ public abstract class VarCharMapping<O> extends DefaultDbMapping<String, O> {
 		return resultSet.getString(columnLabel);
 	}
 
+    @Override
+    public void validate(O object) throws OXException {
+        validateString(get(object));
+    }
+
 	@Override
 	public boolean truncate(O object, int length) throws OXException {
 		final String value = this.get(object);

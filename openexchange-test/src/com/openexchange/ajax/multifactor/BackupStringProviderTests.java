@@ -55,9 +55,12 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
@@ -91,6 +94,13 @@ public class BackupStringProviderTests extends AbstractMultifactorProviderTest {
             token,
             null,
             null);
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        HashMap<String, String> result = new HashMap<>();
+        result.put(MultifactorProperties.PREFIX + "totp.enabled", Boolean.TRUE.toString());
+        return result;
     }
 
 

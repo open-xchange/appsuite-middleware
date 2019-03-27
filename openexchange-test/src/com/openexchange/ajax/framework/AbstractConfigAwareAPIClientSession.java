@@ -108,11 +108,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
                 try {
                     Object value = entry.getValue();
                     if (value == JSONObject.NULL) {
-                        //TODO: Delete the value
                         value = null;
-                    }
-                    if (value == null) {
-                        value = " ";
                     }
                     newMap.put(entry.getKey(), (String) value);
                 } catch (ClassCastException cce) {

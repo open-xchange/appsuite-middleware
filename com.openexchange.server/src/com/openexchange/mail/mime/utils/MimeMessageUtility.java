@@ -107,6 +107,7 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -2375,7 +2376,8 @@ public final class MimeMessageUtility {
             }
             out.flush();
             return newTempFile;
-        } catch (final Exception e) {
+        } catch (IOException | MimeException e) {
+            LOG.debug("An error occurred", e);
             return file;
         } finally {
             Streams.close(in, out);

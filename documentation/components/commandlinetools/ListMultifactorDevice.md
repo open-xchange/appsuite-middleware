@@ -7,6 +7,10 @@ This tool lists multifactor authentication devices configured for a specific use
 
 ## Parameters
 
+- ``-A,--adminuser <arg>``<br>
+Admin user name for authentication
+- ``-P,--adminpass <arg>``<br>
+Admin password for authentication
 - ``--api-root <arg>``      
 URL to an alternative HTTP API endpoint. Example:
 'https://192.168.0.1:8443/admin/v1'
@@ -16,8 +20,6 @@ A valid context identifier
 Prints a help text
 - ``-i,--userid <arg>``<br>
 A valid user identifier
-- ``-U,--api-user <arg>``        
-Username and password to use for API authentication (user:password).
 
 ### Examples
 

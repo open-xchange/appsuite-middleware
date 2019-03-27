@@ -445,6 +445,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             for (Event event : events) {
+                MAPPER.validateAll(event);
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
@@ -474,6 +475,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             for (Event event : events) {
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
+                MAPPER.validateAll(event);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
                 stmt.setLong(parameterIndex++, getRangeFrom(event));
                 stmt.setLong(parameterIndex++, getRangeUntil(event));
@@ -493,6 +495,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
+            MAPPER.validateAll(event);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), assignedfields);
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
@@ -512,6 +515,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
+            MAPPER.validateAll(event);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), assignedfields);
             stmt.setLong(parameterIndex++, rangeFrom);
             stmt.setLong(parameterIndex++, rangeUntil);

@@ -64,11 +64,11 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 public class MappedIncorrectString<O> implements IncorrectString {
 
 	/**
-	 * Extracts all mapped incorrect strings from the supplied problematic attributes.
-	 *
-	 * @param e The problematic attributes
-	 * @return The mapped incorrect strings
-	 */
+     * Extracts all mapped incorrect strings from the supplied problematic attributes.
+     *
+     * @param problematics The problematic attributes
+     * @return The mapped incorrect strings
+     */
 	public static <O> List<MappedIncorrectString<O>> extract(ProblematicAttribute[] problematics) {
 		List<MappedIncorrectString<O>> truncations = new ArrayList<MappedIncorrectString<O>>();
 		if (null != problematics) {
@@ -101,11 +101,11 @@ public class MappedIncorrectString<O> implements IncorrectString {
 	}
 
 	/**
-	 * Removes problematic attributes from the supplied object.
-	 *
-	 * @param e The problematic attributes
-	 * @param object The object to remove the property values for
-	 */
+     * Removes problematic attributes from the supplied object.
+     *
+     * @param problematics The problematic attributes
+     * @param object The object to remove the property values for
+     */
 	public static <O> void remove(ProblematicAttribute[] problematics, O object) {
 		List<MappedIncorrectString<O>> incorrectStrings = MappedIncorrectString.extract(problematics);
 		if (null != incorrectStrings && 0 < incorrectStrings.size()) {

@@ -282,7 +282,7 @@ public final class FileUtils {
     public static final void checkCSVFormat(String csvFile, int maxFields) throws IOException {
         File file = new File(csvFile);
         if (false == file.exists()) {
-            throw new IllegalArgumentException("The CSV file you provided does not exist.");
+            throw new FileNotFoundException("The CSV file you provided does not exist.");
         }
         Random random = new Random();
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {

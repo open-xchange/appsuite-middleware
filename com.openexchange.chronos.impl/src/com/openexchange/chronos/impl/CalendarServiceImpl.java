@@ -453,9 +453,17 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
         Boolean oldSuppressItip = session.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        Boolean oldIgnoreStorageWarnings = session.get(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.class);
+        Boolean oldCheckConflicts = session.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class);
         try {
             if (null == oldSuppressItip) {
                 session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            }
+            if (null == oldIgnoreStorageWarnings) {
+                session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
+            }
+            if (null == oldCheckConflicts) {
+                session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
             }
             /*
              * import events
@@ -478,6 +486,8 @@ public class CalendarServiceImpl implements CalendarService {
             return importResults;
         } finally {
             session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, oldSuppressItip);
+            session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, oldIgnoreStorageWarnings);
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, oldCheckConflicts);
         }
     }
 

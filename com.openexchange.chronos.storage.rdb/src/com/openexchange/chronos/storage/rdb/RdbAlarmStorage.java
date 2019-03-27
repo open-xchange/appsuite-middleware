@@ -728,7 +728,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param alarm The alarm to adjust
      * @return The (possibly adjusted) alarm reference
      */
-    private Alarm adjustPriorSave(String eventId, Alarm alarm) {
+    private Alarm adjustPriorSave(String eventId, Alarm alarm) throws OXException {
         /*
          * get or initialize new extended properties container
          */
@@ -752,6 +752,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         if (alarm.containsAttendees()) {
             encdodeAttendees(eventId, extendedProperties, alarm.getAttendees());
         }
+        /*
+         * validate properties afterwards
+         */
+        MAPPER.validateAll(alarm);
         return alarm;
     }
 

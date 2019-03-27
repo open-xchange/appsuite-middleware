@@ -48,8 +48,8 @@ You can define them system-wide or via the config cascade mechanism.
 
 ## Problem
 Google has recently restricted the possibility to allow 3rd party developers to integrate their applications with Google services, see 
-[this article](https://support.google.com/cloud/answer/7454865) for further information. In essence, a verification process was introduced that requires multiple 
-steps to be taken. This change affects all Google integrations for OX App Suite:
+[this](https://support.google.com/cloud/answer/7454865) and [this](https://cloud.google.com/blog/products/g-suite/elevating-user-trust-in-our-api-ecosystems) article 
+for further information. In essence, a verification process was introduced that requires multiple steps to be taken. This change affects all Google integrations for OX App Suite:
 
 * external mail accounts (if configured to use OAuth for Google)
 * calendar

@@ -173,6 +173,11 @@ public class Ip2LocationCLT extends AbstractGeoLocationCLT {
             return;
         }
         token = cmd.getOptionValue('t');
+        if (Strings.isEmpty(token)) {
+            System.out.println("The option '-t' is mandatory. Please provide a 'token' to proceed.");
+            System.exit(1);
+            return;
+        }
         dbVersionName = cmd.hasOption('l') ? getDatabaseVersion().getLiteName() : getDatabaseVersion().getName();
     }
 

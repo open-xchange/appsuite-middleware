@@ -54,9 +54,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
@@ -79,6 +83,13 @@ public class TOTPProviderTests extends AbstractMultifactorProviderTest {
 
     private String createTOTPToken(String secret) throws OXException {
         return Integer.toString((new TotpGenerator().create(secret)));
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        HashMap<String, String> result = new HashMap<>();
+        result.put(MultifactorProperties.PREFIX + "totp.enabled", Boolean.TRUE.toString());
+        return result;
     }
 
     @Override
@@ -142,5 +153,17 @@ public class TOTPProviderTests extends AbstractMultifactorProviderTest {
     @Override
     protected CommonResponse doWrongAuthentication(MultifactorStartRegistrationResponseData startRegistrationData, MultifactorStartAuthenticationResponseData startAuthenticationData) throws Exception {
         return finishAuthentication(TOTP_PROVIDER_NAME, startRegistrationData.getDeviceId(), WRONG_TEST_TOKEN, null, null, null);
+    }
+
+    @Override
+    @Test
+    public void testReauthenticationRequiredAfterAutologin() throws Exception {
+        super.testReauthenticationRequiredAfterAutologin();
+    }
+
+    @Override
+    @Test
+    public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
+        super.testRegisterNewDeviceAfterDeviceDeletedAndAutologin();
     }
 }

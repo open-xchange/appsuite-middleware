@@ -7,6 +7,10 @@ This tool deletes a multifactor authentication device for a specific user.
 
 ## Parameters
 
+- ``-A,--adminuser <arg>``<br>
+Admin user name for authentication
+- ``-P,--adminpass <arg>``<br>
+Admin password for authentication
 - ``--api-root <arg>``      
 URL to an alternative HTTP API endpoint. Example:
 'https://192.168.0.1:8443/admin/v1'
@@ -20,8 +24,6 @@ Prints a help text
 A valid user identifier
 - ``-r,--provider <arg>``<br>
 The name of the device's provider
-- ``-U,--api-user <arg>``        
-Username and password to use for API authentication (user:password).
 
 ### Examples
 

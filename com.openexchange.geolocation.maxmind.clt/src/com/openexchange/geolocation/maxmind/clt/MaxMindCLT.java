@@ -285,8 +285,8 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
      * @throws IOException if any I/O error is occurred
      */
     private void checkCSVFormat() throws IOException {
-        checkCSVFormat(ipBlocksFilePath, 10, "ip-blocks");
-        checkCSVFormat(ipLocationsFilePath, 14, "ip-locations");
+        checkCSVFormat(ipBlocksFilePath, getDatabaseVersion().getNumberOfFields(), "ip-blocks"); //6 for country
+        checkCSVFormat(ipLocationsFilePath, ((MaxMindDatabaseVersion) getDatabaseVersion()).getNumberOfIPLocationsFields(), "ip-locations"); //7 for country
     }
 
     /**
@@ -301,7 +301,11 @@ public class MaxMindCLT extends AbstractGeoLocationCLT {
         try {
             FileUtils.checkCSVFormat(path, fields);
         } catch (IllegalArgumentException e) {
-            System.out.println("The file '" + path + "' you provided does not seem to be a valid " + name + " CSV file.");
+            System.out.println("The file '" + path + "' you provided does not seem to be a valid " + name + " CSV file. Are you using the correct database version? (See '-d' option)");
+            System.exit(1);
+            return;
+        } catch (FileNotFoundException e) {
+            System.out.println("The file '" + path + "' you provided does not exist.");
             System.exit(1);
             return;
         }

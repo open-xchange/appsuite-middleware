@@ -1322,7 +1322,7 @@ public class Spamc {
             flags = Spamc.readArgs(spamc, combinedArgs);
 
             // read the message from stdin
-            final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            final BufferedReader in = new BufferedReader(new InputStreamReader(System.in, com.openexchange.java.Charsets.UTF_8));
             final StringBuilder sb = new StringBuilder(System.in.available());
             while (in.ready()) {
                 sb.append(in.readLine()).append("\r\n");

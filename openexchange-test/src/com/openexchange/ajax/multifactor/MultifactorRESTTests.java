@@ -58,7 +58,9 @@ import static com.openexchange.java.Autoboxing.L;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
@@ -66,6 +68,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
@@ -99,6 +102,13 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         assertThat("The new device must have the correct name", newDevice.getName(), is(randomDeviceName));
         assertThat("The new device must have the correct 'backup' state", newDevice.getBackup(), is(B(isBackupDevice)));
         return newDevice;
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        HashMap<String, String> result = new HashMap<>();
+        result.put(MultifactorProperties.PREFIX + "sms.enabled", Boolean.TRUE.toString());
+        return result;
     }
 
     private Collection<MultifactorDevice> registerTestDevices(MultifactorApi api, int count) throws ApiException {

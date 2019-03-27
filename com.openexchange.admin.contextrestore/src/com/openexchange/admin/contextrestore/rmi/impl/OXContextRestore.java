@@ -53,11 +53,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -297,7 +299,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                     if (!tempfilemap.containsKey(databasename)) {
                                         final File createTempFile = File.createTempFile(databasename, null);
                                         tempfilemap.put(databasename, createTempFile);
-                                        bufferedWriter = new BufferedWriter(new FileWriter(createTempFile));
+                                        bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(createTempFile), StandardCharsets.UTF_8));
                                         bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n");
                                     } else {
                                         // We are in the seconds pass so we don't need to write the configdb entries again

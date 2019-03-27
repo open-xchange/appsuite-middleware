@@ -55,6 +55,8 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
+import com.openexchange.multifactor.MultifactorProperties;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
@@ -68,7 +70,7 @@ import com.openexchange.testing.httpclient.models.MultifactorStartRegistrationRe
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.1
  */
-public class SMSProviderTests  extends AbstractMultifactorProviderTest {
+public class SMSProviderTests extends AbstractMultifactorProviderTest {
 
     private static final String SMS_PROVIDER_NAME = "SMS";
     private static final String DEMO_TOKEN = "0815";
@@ -78,6 +80,7 @@ public class SMSProviderTests  extends AbstractMultifactorProviderTest {
     protected Map<String, String> getNeededConfigurations() {
         HashMap<String, String> configuration = new HashMap<String, String>();
         configuration.put("com.openexchange.multifactor.demo", "true");
+        configuration.put(MultifactorProperties.PREFIX + "sms.enabled", Boolean.TRUE.toString());
         return configuration;
     }
 
@@ -146,5 +149,17 @@ public class SMSProviderTests  extends AbstractMultifactorProviderTest {
         MultifactorFinishAuthenticationData data = new MultifactorFinishAuthenticationData();
         data.setSecretCode("THIS IS A WRONG CODE");
         return MultifactorApi().multifactorDeviceActionfinishAuthentication(getSessionId(), SMS_PROVIDER_NAME, startRegistrationData.getDeviceId(), data);
+    }
+
+    @Override
+    @Test
+    public void testReauthenticationRequiredAfterAutologin() throws Exception {
+        super.testReauthenticationRequiredAfterAutologin();
+    }
+
+    @Override
+    @Test
+    public void testRegisterNewDeviceAfterDeviceDeletedAndAutologin() throws Exception {
+        super.testRegisterNewDeviceAfterDeviceDeletedAndAutologin();
     }
 }

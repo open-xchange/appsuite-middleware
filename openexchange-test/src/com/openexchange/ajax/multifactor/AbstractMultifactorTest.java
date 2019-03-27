@@ -268,15 +268,11 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @param providerName The name of the provider
      * @param deviceName The name of the new device, or null to choose a default name
      * @param phoneNumber [SMS] The phone number for the SMS provider or null for other providers
-     * @param backup [SMS] Whether the device should be used as backup device or not
+     * @param backup Whether the device should be used as backup device or not
      * @return The response data
      * @throws ApiException
      */
-    protected MultifactorStartRegistrationResponseData startRegistration(String providerName,
-        String deviceName,
-        String phoneNumber,
-        boolean backup) throws ApiException {
-
+    protected MultifactorStartRegistrationResponseData startRegistration(String providerName, String deviceName, String phoneNumber, boolean backup) throws ApiException {
         return startRegistration(multifactorApi, providerName, deviceName, phoneNumber, backup);
     }
 
@@ -287,21 +283,18 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @param providerName The name of the provider
      * @param deviceName The name of the new device, or null to choose a default name
      * @param phoneNumber [SMS] The phone number for the SMS provider or null for other providers
-     * @param backup [SMS] Whether the device should be used as backup device or not
+     * @param backup Whether the device should be used as backup device or not
      * @return The response data
      * @throws ApiException
      */
-    protected MultifactorStartRegistrationResponseData startRegistration(MultifactorApi api, String providerName,
-        String deviceName,
-        String phoneNumber,
-        boolean backup) throws ApiException {
+    protected MultifactorStartRegistrationResponseData startRegistration(MultifactorApi api, String providerName, String deviceName, String phoneNumber, boolean backup) throws ApiException {
 
         final MultifactorDevice deviceData = new MultifactorDevice();
         deviceData.setProviderName(providerName);
         deviceData.setName(deviceName);
         deviceData.backup(backup);
 
-        if(phoneNumber != null) {
+        if (phoneNumber != null) {
             MultifactorDeviceParameters paramters = new MultifactorDeviceParameters();
             paramters.setPhoneNumber(phoneNumber);
             deviceData.setParameters(paramters);

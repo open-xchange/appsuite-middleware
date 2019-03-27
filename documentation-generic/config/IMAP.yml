@@ -825,7 +825,7 @@ properties:
         request for a subsequent chunk would then cause to build conversations threads again from look-ahead result set.
         
       defaultValue: true
-      version: 7.10.0
+      version: 7.10.2
       reloadable: true
       configcascadeAware: false
       related: com.openexchange.imap.refthreader.cache.prefillCache
@@ -839,7 +839,7 @@ properties:
         again.
         
       defaultValue: true
-      version: 7.10.0
+      version: 7.10.2
       reloadable: true
       configcascadeAware: false
       related: com.openexchange.imap.refthreader.cache.enabled

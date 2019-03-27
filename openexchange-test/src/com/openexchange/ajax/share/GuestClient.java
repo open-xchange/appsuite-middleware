@@ -557,7 +557,7 @@ public class GuestClient extends AJAXClient {
      * This method checks only for object permissions. If you shared the parent folder you need
      * to check the files accessibility otherwise.
      *
-     * @param fileID The identifier of the file to check
+     * @param id The identifier of the file to check
      * @param permissions The guest permissions for that file
      * @throws Exception
      */

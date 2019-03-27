@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.chronos.Event;
@@ -250,30 +251,20 @@ public class ImportPerformer extends AbstractUpdatePerformer {
     }
 
     private InternalImportResult createEvent(Event importedEvent) {
-        final int MAX_RETRIES = 5;
         List<OXException> warnings = new ArrayList<OXException>();
         warnings.addAll(extractWarnings(importedEvent));
-        for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
-            try {
-                InternalCalendarResult calendarResult = new CreatePerformer(storage, session, folder).perform(importedEvent);
-                Event createdEvent = getFirstCreatedEvent(calendarResult);
-                if (null == createdEvent) {
-                    OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedEvent + "\"");
-                    return new InternalImportResult(calendarResult, extractIndex(importedEvent), warnings, error);
-                }
-                return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedEvent), warnings);
-            } catch (OXException e) {
-                if (retryCount < MAX_RETRIES && handle(e, importedEvent)) {
-                    // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), Integer.valueOf(retryCount), Integer.valueOf(MAX_RETRIES), e);
-                    warnings.add(e);
-                    continue;
-                }
-                // "re-throw"
-                return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedEvent), warnings, e);
+        try {
+            InternalCalendarResult calendarResult = new CreatePerformer(storage, session, folder).perform(importedEvent);
+            warnings.addAll(extractWarnings(storage));
+            Event createdEvent = getFirstCreatedEvent(calendarResult);
+            if (null == createdEvent) {
+                OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedEvent + "\"");
+                return new InternalImportResult(calendarResult, extractIndex(importedEvent), warnings, error);
             }
+            return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedEvent), warnings);
+        } catch (OXException e) {
+            return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedEvent), warnings, e);
         }
-        throw new AssertionError(); // should not get here
     }
 
     private InternalImportResult createEventException(EventID masterEventID, Event importedException, long clientTimestamp) {
@@ -281,30 +272,20 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("Cannot create exception for  \"" + importedException + "\" due to missing master event.");
             return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedException), Collections.emptyList(), error);
         }
-        final int MAX_RETRIES = 5;
         List<OXException> warnings = new ArrayList<OXException>();
         warnings.addAll(extractWarnings(importedException));
-        for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
-            try {
-                InternalCalendarResult calendarResult = new UpdatePerformer(storage, session, folder).perform(masterEventID.getObjectID(), null, importedException, clientTimestamp);
-                Event createdEvent = getFirstCreatedEvent(calendarResult);
-                if (null == createdEvent) {
-                    OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedException + "\"");
-                    return new InternalImportResult(calendarResult, extractIndex(importedException), warnings, error);
-                }
-                return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedException), warnings);
-            } catch (OXException e) {
-                if (retryCount < MAX_RETRIES && handle(e, importedException)) {
-                    // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), Integer.valueOf(retryCount), Integer.valueOf(MAX_RETRIES), e);
-                    warnings.add(e);
-                    continue;
-                }
-                // "re-throw"
-                return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedException), warnings, e);
+        try {
+            InternalCalendarResult calendarResult = new UpdatePerformer(storage, session, folder).perform(masterEventID.getObjectID(), null, importedException, clientTimestamp);
+            warnings.addAll(extractWarnings(storage));
+            Event createdEvent = getFirstCreatedEvent(calendarResult);
+            if (null == createdEvent) {
+                OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedException + "\"");
+                return new InternalImportResult(calendarResult, extractIndex(importedException), warnings, error);
             }
+            return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedException), warnings);
+        } catch (OXException e) {
+            return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedException), warnings, e);
         }
-        throw new AssertionError(); // should not get here
     }
 
     private static List<OXException> extractWarnings(Event importedEvent) {
@@ -315,6 +296,18 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             }
         }
         return Collections.emptyList();
+    }
+
+    private static List<OXException> extractWarnings(CalendarStorage storage) {
+        Map<String, List<OXException>> warningsPerEventId = storage.getAndFlushWarnings();
+        if (null == warningsPerEventId || warningsPerEventId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<OXException> warnings = new ArrayList<OXException>();
+        for (List<OXException> value : warningsPerEventId.values()) {
+            warnings.addAll(value);
+        }
+        return warnings;
     }
 
     private static int extractIndex(Event importedEvent) {
@@ -332,30 +325,6 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             }
         }
         return null;
-    }
-
-    /**
-     * Tries to handle data truncation and incorrect string errors automatically.
-     *
-     * @param e The exception to handle
-     * @param event The event being saved
-     * @return <code>true</code> if the exception could be handled and the operation should be tried again, <code>false</code>, otherwise
-     */
-    private boolean handle(OXException e, Event event) {
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-4227": // Incorrect string [string %1$s, field %2$s, column %3$s]
-                    return session.getUtilities().handleIncorrectString(e, event);
-                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
-                    return session.getUtilities().handleDataTruncation(e, event);
-                default:
-                    // Fall through
-                    break;
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
-        }
-        return false;
     }
 
 }
