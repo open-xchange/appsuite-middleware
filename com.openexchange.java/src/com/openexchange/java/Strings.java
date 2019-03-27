@@ -253,7 +253,8 @@ public class Strings {
 
     /**
      * High speed test for whitespace! Faster than the java one (from some testing).
-     *
+     * 
+     * @param c The character to check 
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isWhitespace(final char c) {
@@ -280,6 +281,7 @@ public class Strings {
     /**
      * High speed test for ASCII numbers!
      *
+     * @param c The character to check  
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isDigit(final char c) {
@@ -303,10 +305,11 @@ public class Strings {
     /**
      * High speed test for punctuation character!
      *
+     * @param c The character to check 
      * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
      */
-    public static boolean isPunctuation(char ch) {
-        switch (ch) {
+    public static boolean isPunctuation(char c) {
+        switch (c) {
             case '!':
             case '"':
             case '#':
@@ -349,6 +352,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter!
      *
+     * @param c The character to check  
      * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
      */
     public static boolean isAsciiLetter(final char c) {
@@ -358,6 +362,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter or digit!
      *
+     * @param c The character to check 
      * @return <code>true</code> if the indicated character is an ASCII letter or digit; otherwise <code>false</code>
      */
     public static boolean isAsciiLetterOrDigit(final char c) {
@@ -367,7 +372,7 @@ public class Strings {
     /**
      * Gets specified string's ASCII bytes
      *
-     * @param str The string
+     * @param cs The string
      * @return The ASCII bytes
      */
     public static byte[] toAsciiBytes(final CharSequence cs) {
@@ -906,12 +911,12 @@ public class Strings {
     }
 
     /**
-     * Joins a collection of objects by connecting the results of their #toString() method with a connector
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector.
+     * Can be <code>null</code> if collection == null or empty string if collection is empty
      *
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @param builder The string builder to use
-     * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final Collection<? extends Object> coll, final String connector, final StringBuilder builder) {
         if (coll == null) {
@@ -935,12 +940,12 @@ public class Strings {
     }
 
     /**
-     * Joins an array of integers by connecting their String representations with a connector
+     * Joins an array of integers by connecting their String representations with a connector.
+     * Can be <code>null</code> if collection == null or empty string if collection is empty
      *
      * @param arr Integers to be connected
      * @param connector Connector place between two objects
      * @param builder The string builder to use
-     * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final int[] arr, final String connector, final StringBuilder builder) {
         final List<Integer> list = new LinkedList<Integer>();
@@ -1004,7 +1009,8 @@ public class Strings {
 
     /**
      * Removes byte order marks from UTF8 strings.
-     *
+     * 
+     * @param str The string to remove byte marks on 
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
@@ -1165,6 +1171,7 @@ public class Strings {
      * Removes surrounding characters from a string in case it is actually surrounded.
      *
      * @param s The value to be un-char'd
+     * @param c The character to remove
      * @return The un-char'd value or <code>null</code>
      */
     public static String unchar(final String s, final char c) {
@@ -1219,7 +1226,12 @@ public class Strings {
         }
     }
 
-    /** ASCII-wise to upper-case */
+    /**
+     * ASCII-wise to upper-case
+     * 
+     * @param chars The {@link CharSequence} to transform
+     * @return A new String with upper case characters
+     */
     public static String toUpperCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -1244,7 +1256,12 @@ public class Strings {
         return null == builder ? chars.toString() : builder.toString();
     }
 
-    /** ASCII-wise to lower-case */
+    /**
+     * ASCII-wise to lower-case
+     * 
+     * @param chars The {@link CharSequence} to transform
+     * @return A new String with lower case characters
+     */
     public static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
