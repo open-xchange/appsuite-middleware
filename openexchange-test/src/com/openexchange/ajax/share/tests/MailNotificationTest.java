@@ -118,7 +118,7 @@ public class MailNotificationTest extends ShareTest {
         super.setUp();
         userValues = getClient().getValues();
         testFolder1 = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userValues.getPrivateInfostoreFolder());
-        publicDriveFolder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
+        publicDriveFolder = insertPublicFolder(FolderObject.INFOSTORE);
         image1 = getFile(createFile(testFolder1, IMAGENAME1, IMAGETYPE1).getId());
         file1 = getFile(createFile(testFolder1, FILENAME1, FILETYPE1).getId());
         initUserConfig();

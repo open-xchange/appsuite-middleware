@@ -116,7 +116,7 @@ public class GuestContactTest extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
         GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
@@ -158,7 +158,7 @@ public class GuestContactTest extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
         GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
@@ -215,7 +215,7 @@ public class GuestContactTest extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
         /*

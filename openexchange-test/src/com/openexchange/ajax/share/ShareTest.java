@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -337,7 +338,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The inserted folder
      * @throws Exception
      */
-    protected FolderObject insertPublicFolder(EnumAPI api, int module) throws Exception {
+    protected FolderObject insertPublicFolder(int module) throws Exception {
         FolderObject folder = new FolderObject();
         folder.setFolderName(randomUID());
         folder.setModule(module);
@@ -876,7 +877,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param emailAddress The guest's e-mail address to search for
      * @return The message, or <code>null</code> if not found
      */
-    protected Message discoverInvitationMessage(List<Message> messages, String emailAddress) throws Exception {
+    protected Message discoverInvitationMessage(List<Message> messages, String emailAddress) {
         for (Message message : messages) {
             String toHeader = message.getHeaders().get("To");
             if (Strings.isNotEmpty(toHeader)) {
@@ -948,25 +949,23 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     /**
      * Discovers a specific guest permission entity amongst all available shares of the current user, based on the file- and guest identifiers.
      *
-     * @param folder The folder ID to discover the share for
      * @param item The item ID to discover the share for
      * @param guest The ID of the guest associated to the share
      * @return The guest permission entity, or <code>null</code> if not found
      */
-    protected ExtendedPermissionEntity discoverGuestEntity(String folder, String item, int guest) throws Exception {
-        return discoverGuestEntity(getClient(), folder, item, guest);
+    protected ExtendedPermissionEntity discoverGuestEntity(String item, int guest) throws Exception {
+        return discoverGuestEntity(getClient(), item, guest);
     }
 
     /**
      * Discovers a specific guest permission entity amongst all available shares of the current user, based on the file- and guest identifiers.
      *
      * @param client The ajax client to use
-     * @param folder The folder ID to discover the share for
      * @param item The item ID to discover the share for
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, String folder, String item, int guest) throws Exception {
+    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, String item, int guest) throws Exception {
         List<FileShare> shares = getFileShares(client);
         for (FileShare share : shares) {
             if (share.getId().equals(item)) {
@@ -984,7 +983,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected static ExtendedPermissionEntity discoverGuestEntity(List<ExtendedPermissionEntity> entities, int guest) throws OXException, IOException, JSONException {
+    protected static ExtendedPermissionEntity discoverGuestEntity(List<ExtendedPermissionEntity> entities, int guest) {
         if (null != entities) {
             for (ExtendedPermissionEntity entity : entities) {
                 if (entity.getEntity() == guest) {
@@ -1130,9 +1129,9 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param actual The actual permissions
      */
     protected static void checkPermissions(FileStorageObjectPermission expected, FileStorageObjectPermission actual) {
-        assertEquals("Permission wrong", expected.canDelete(), actual.canDelete());
-        assertEquals("Permission wrong", expected.canWrite(), actual.canWrite());
-        assertEquals("Permission wrong", expected.canRead(), actual.canRead());
+        assertEquals("Permission wrong", B(expected.canDelete()), B(actual.canDelete()));
+        assertEquals("Permission wrong", B(expected.canWrite()), B(actual.canWrite()));
+        assertEquals("Permission wrong", B(expected.canRead()), B(actual.canRead()));
     }
 
     /**
