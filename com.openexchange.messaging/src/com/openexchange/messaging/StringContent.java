@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import java.io.Serializable;
+
 /**
  * {@link StringContent} - A string content.
  *
@@ -56,8 +58,10 @@ package com.openexchange.messaging;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class StringContent implements SimpleContent<String> {
+public class StringContent implements SimpleContent<String>, Serializable {
 
+    private static final long serialVersionUID = 5708086498526356536L;
+    
     private String data;
 
     /**

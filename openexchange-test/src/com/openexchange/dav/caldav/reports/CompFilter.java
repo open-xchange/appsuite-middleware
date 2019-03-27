@@ -47,89 +47,61 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.dav.caldav.reports;
 
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
- * QuotedPrintable
+ * {@link CompFilter}
  *
- * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
- * @deprecated DOn't use this class
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.2
  */
-@Deprecated
-public final class QuotedPrintable {
+public class CompFilter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotedPrintable.class);
+    private String name;
+    private List<CompFilter> subFilters;
 
-    private QuotedPrintable() {
+    public CompFilter(String name, List<CompFilter> subFilters) {
         super();
+        this.setSubFilters(subFilters);
+        this.setName(name);
     }
 
-    public static String encode(final String s) {
-
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes(StandardCharsets.ISO_8859_1);
-
-            for (int a = 0; a < b.length; a++) {
-                final int unsignedInt = (0xff & b[a]);
-                if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
-                    sb.append((char) b[a]);
-                } else {
-                    i = b[a];
-                    if (i < 0) {
-                        i = i + 256;
-                    }
-
-                    x = Integer.toString(i, 16).toUpperCase();
-
-                    if (x.length() == 1) {
-                        x = '0' + x;
-                    }
-
-                    sb.append('=').append(x);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error("encode error: {}", exc, exc);
-        }
-
-        return sb.toString();
+    /**
+     * Gets the subFilters
+     *
+     * @return The subFilters
+     */
+    public List<CompFilter> getSubFilters() {
+        return subFilters;
     }
 
-    public static String decode(final String s) {
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes(StandardCharsets.ISO_8859_1);
-
-            for (int a = 0; a < b.length; a++) {
-                if (b[a] == 61) {
-                    if ((a + 2) < b.length) {
-                        x = (new StringBuilder().append((char) b[a + 1]).append((char) b[a + 2]).toString());
-
-                        i = Integer.parseInt(x, 16);
-
-                        sb.append((char) i);
-                        a = a + 2;
-                    }
-                } else {
-                    sb.append((char) b[a]);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error("", exc);
-        }
-
-        return sb.toString();
+    /**
+     * Sets the subFilters
+     *
+     * @param subFilters The subFilters to set
+     */
+    public void setSubFilters(List<CompFilter> subFilters) {
+        this.subFilters = subFilters;
     }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name
+     *
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

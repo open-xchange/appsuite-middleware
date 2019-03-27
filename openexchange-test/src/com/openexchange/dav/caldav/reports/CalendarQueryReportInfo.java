@@ -47,89 +47,52 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.dav.caldav.reports;
 
-import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.xml.DomUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import com.openexchange.dav.PropertyNames;
 
 /**
- * QuotedPrintable
+ * {@link CalendarQueryReportInfo}
  *
- * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
- * @deprecated DOn't use this class
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.2
  */
-@Deprecated
-public final class QuotedPrintable {
+public class CalendarQueryReportInfo extends ReportInfo {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotedPrintable.class);
+    private final CompFilter filter;
 
-    private QuotedPrintable() {
-        super();
+    public CalendarQueryReportInfo(CompFilter filter, DavPropertyNameSet propertyNames, int depth) {
+        super(CalendarQueryReport.CALENDAR_QUERY, depth, propertyNames);
+        this.filter = filter;
     }
 
-    public static String encode(final String s) {
-
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes(StandardCharsets.ISO_8859_1);
-
-            for (int a = 0; a < b.length; a++) {
-                final int unsignedInt = (0xff & b[a]);
-                if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
-                    sb.append((char) b[a]);
-                } else {
-                    i = b[a];
-                    if (i < 0) {
-                        i = i + 256;
-                    }
-
-                    x = Integer.toString(i, 16).toUpperCase();
-
-                    if (x.length() == 1) {
-                        x = '0' + x;
-                    }
-
-                    sb.append('=').append(x);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error("encode error: {}", exc, exc);
+    @Override
+    public Element toXml(final Document document) {
+        Element element = super.toXml(document);
+        Element filterElement = DomUtil.createElement(document, "filter", PropertyNames.NS_CALDAV);
+        if (null != filter) {
+            filterElement.appendChild(getFilterElement(document, filter));
         }
-
-        return sb.toString();
+        element.appendChild(filterElement);
+        return element;
     }
 
-    public static String decode(final String s) {
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes(StandardCharsets.ISO_8859_1);
-
-            for (int a = 0; a < b.length; a++) {
-                if (b[a] == 61) {
-                    if ((a + 2) < b.length) {
-                        x = (new StringBuilder().append((char) b[a + 1]).append((char) b[a + 2]).toString());
-
-                        i = Integer.parseInt(x, 16);
-
-                        sb.append((char) i);
-                        a = a + 2;
-                    }
-                } else {
-                    sb.append((char) b[a]);
-                }
+    private static Element getFilterElement(Document document, CompFilter filter) {
+        Element element = DomUtil.createElement(document, "comp-filter", PropertyNames.NS_CALDAV);
+        element.setAttribute("name", filter.getName());
+        List<CompFilter> subFilters = filter.getSubFilters();
+        if (null != subFilters) {
+            for (CompFilter subFilter : subFilters) {
+                element.appendChild(getFilterElement(document, subFilter));
             }
-        } catch (final Exception exc) {
-            LOG.error("", exc);
         }
-
-        return sb.toString();
+        return element;
     }
+
 }

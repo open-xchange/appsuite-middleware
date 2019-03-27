@@ -300,7 +300,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The IMAP configuration.
      */
-    private volatile IMAPConfig imapConfig;
+    private transient volatile IMAPConfig imapConfig;
 
     /**
      * A simple cache for max. count values per server.
@@ -634,7 +634,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             javax.mail.Session imapSession;
             {
-                boolean forceSecure = imapConfig.isRequireTls();
+                boolean forceSecure = getIMAPConfig().isRequireTls();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
@@ -773,7 +773,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Remove proxy settings for whitelisted hosts
              */
             HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
-            if (nonProxyHosts.contains(imapConfig.getImapServerAddress())) {
+            if (nonProxyHosts.contains(getIMAPConfig().getImapServerAddress())) {
                 imapProps.remove("mail.imap.proxy.host");
                 imapProps.remove("mail.imap.proxy.port");
                 imapProps.remove("mail.imaps.proxy.host");
@@ -785,7 +785,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                boolean forceSecure = accountId > 0 && imapConfig.isRequireTls();
+                boolean forceSecure = accountId > 0 && getIMAPConfig().isRequireTls();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
@@ -979,9 +979,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Set log properties
          */
+        IMAPConfig config = getIMAPConfig();
         LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId));
         LogProperties.put(LogProperties.Name.MAIL_HOST, server + ":" + port);
-        LogProperties.put(LogProperties.Name.MAIL_LOGIN, imapConfig.getLogin());
+        LogProperties.put(LogProperties.Name.MAIL_LOGIN, config.getLogin());
         /*-
          * Get connected IMAP store
          *
@@ -1000,7 +1001,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             boolean checkConnectivityIfPolled = checkConnectivityIfPolled();
             final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null), checkConnectivityIfPolled);
             if (null == borrowedIMAPStore) {
-                throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, imapConfig, session, imapConfig.getServer(), imapConfig.getLogin());
+                throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, config, session, config.getServer(), config.getLogin());
             }
             return borrowedIMAPStore;
         }
@@ -1029,7 +1030,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
         }
-        throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, imapConfig.getLogin(), "xxxx"));
+        throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, config.getLogin(), "xxxx"));
     }
 
     private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId) throws MessagingException {
