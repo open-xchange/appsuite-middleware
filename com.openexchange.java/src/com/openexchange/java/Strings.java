@@ -646,6 +646,7 @@ public class Strings {
      * @param replacement The replacement character
      * @return The string with all occurrences replaced
      */
+    @SuppressWarnings("null")
     public static String replaceSequenceWith(String s, String sequence, char replacement) {
         if ((null == s) || (null == sequence)) {
             return s;
@@ -682,6 +683,7 @@ public class Strings {
      * @param replacement The replacement
      * @return The string with all occurrences replaced
      */
+    @SuppressWarnings("null")
     public static String replaceSequenceWith(String s, String sequence, String replacement) {
         if ((null == s) || (null == sequence) || (null == replacement)) {
             return s;
@@ -1294,6 +1296,7 @@ public class Strings {
      * @param s The string
      * @return The lower-case string
      */
+    @SuppressWarnings("null")
     public static String asciiLowerCase(String s) {
         if (null == s) {
             return null;
