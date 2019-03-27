@@ -51,6 +51,7 @@ package com.openexchange.mail.uuencode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import javax.mail.MessagingException;
@@ -84,7 +85,7 @@ public class UUEncodedBodyPart {
     private UUEncodedBodyPart(final String bodyPart, final boolean initialize) throws MessagingException {
         this.bodyPart = bodyPart;
         if (initialize && findUUEncodedAttachmentPosition()) {
-            final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3).getBytes());
+            final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3).getBytes(StandardCharsets.ISO_8859_1));
             bodyPartInputStream = MimeUtility.decode(bStream, "uuencode");
         } else {
             bodyPartInputStream = null;
