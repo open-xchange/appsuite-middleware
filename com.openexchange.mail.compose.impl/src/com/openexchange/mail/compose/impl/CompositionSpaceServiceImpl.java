@@ -601,17 +601,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      * Private method to pull the security settings from given message.
      *
      * @param m The message from which to pull security settings
-     * @param request The AJAX request if authentication should be generated, may be <code>null</code>
+     * @param optRequest The optional AJAX request if authentication should be generated, may be <code>null</code>
      * @return The security settings if any present and set, otherwise <code>null</code>
      * @throws OXException If security settings cannot be returned
      */
-    private SecuritySettings getSecuritySettings (Message m, AJAXRequestData request) throws OXException {
+    private SecuritySettings getSecuritySettings (Message m, AJAXRequestData optRequest) throws OXException {
         Security security = m.getSecurity();
         if (null != security && false == security.isDisabled()) {
-            CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
             String authentication = null;
-            if (request != null && authenticationFactory != null) {
-                authentication = authenticationFactory.createAuthenticationFrom(request);
+            if (optRequest != null) {
+                CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                if (authenticationFactory != null) {
+                    authentication = authenticationFactory.createAuthenticationFrom(optRequest);
+                }
             }
 
             SecuritySettings settings = SecuritySettings.builder()
