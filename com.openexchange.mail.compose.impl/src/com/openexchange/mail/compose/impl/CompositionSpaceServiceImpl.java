@@ -610,7 +610,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         if (null != security && false == security.isDisabled()) {
             String authentication = null;
             if (optRequest != null) {
-                CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                CryptographicServiceAuthenticationFactory authenticationFactory = services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
                 if (authenticationFactory != null) {
                     authentication = authenticationFactory.createAuthenticationFrom(optRequest);
                 }
