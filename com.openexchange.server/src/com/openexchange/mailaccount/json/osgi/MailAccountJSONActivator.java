@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
@@ -62,6 +63,7 @@ import com.openexchange.mailaccount.CredentialsProviderRegistry;
 import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.internal.MailAccountOAuthAccountDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountOAuthAccountReauthorizedListener;
+import com.openexchange.mailaccount.internal.Pop3SessionCacheInvalidator;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
@@ -123,6 +125,7 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
             }
         });
         trackService(Dispatcher.class);
+        track(CacheEventService.class, new Pop3SessionCacheInvalidator(context));
         openTrackers();
 
         registerModule(new MailAccountActionFactory(providerTracker), Constants.getModule());
