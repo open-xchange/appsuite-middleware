@@ -1,9 +1,16 @@
-/mail/compose/<id>/send:
+/mail/compose/{id}/send:
   post:
     operationId: getSave
     tags:
       - MailCompose
     summary: Send message. Space gets deleted. Optionally deletes draft if referenced.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        type: string
     responses:
       200:
         description: The path to the sent mail or {"success"=true}.

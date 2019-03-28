@@ -1,12 +1,17 @@
-/mail/compose/<id>/attachments:
+/mail/compose/{id}/attachments:
   post:
     operationId: postAttachments
     tags:
       - MailCompose
     summary: Add new attachment.
     parameters:
-      -
-        name: body
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        type: string
+      - name: body
         in: body
         description: The file to add
         schema:

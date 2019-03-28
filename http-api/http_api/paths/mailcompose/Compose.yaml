@@ -1,4 +1,6 @@
 /mail/compose:
+  parameters:
+    - $ref: "#/parameters/gblQueryParamSession"
   post:
     operationId: postMailCompose
     tags:

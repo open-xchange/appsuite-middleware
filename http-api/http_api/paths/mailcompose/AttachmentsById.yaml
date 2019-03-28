@@ -1,12 +1,23 @@
-/mail/compose/<id>/attachments/<attachmentId>:
+/mail/compose/{id}/attachments/{attachmentId}:
+  parameters:
+    - $ref: "#/parameters/gblQueryParamSession"
+    - in: path
+      name: id
+      description: The ID of the composition space
+      required: true
+      type: string
+    - in: path
+      name: attachmentId
+      description: The ID of the attachment 
+      required: true
+      type: string
   post:
     operationId: postAttachmentsById
     tags:
       - MailCompose
     summary: Uploads an attachment again and removes the old attachment from the server. Used for image resize.
     parameters:
-      -
-        name: body
+      - name: body
         in: body
         description: The file to add
         schema:
