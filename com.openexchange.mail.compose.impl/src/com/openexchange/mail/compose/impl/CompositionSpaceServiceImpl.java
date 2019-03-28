@@ -158,6 +158,7 @@ import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
+import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -388,27 +389,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         // Security
         {
-            CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
-            String authentication = null;
-            if (authenticationFactory != null) {
-                authentication = authenticationFactory.createAuthenticationFrom(request);
-            }
-
-            Security security = m.getSecurity();
-            if (null != security && false == security.isDisabled()) {
-                SecuritySettings settings = SecuritySettings.builder()
-                    .encrypt(security.isEncrypt())
-                    .pgpInline(security.isPgpInline())
-                    .sign(security.isSign())
-                    .authentication(authentication)
-                    .guestLanguage(security.getLanguage())
-                    .guestMessage(security.getMessage())
-                    .pin(security.getPin())
-                    .msgRef(security.getMsgRef())
-                    .build();
-                if (settings.anythingSet()) {
-                    sourceMessage.setSecuritySettings(settings);
-                }
+            SecuritySettings securitySettings = getSecuritySettings (m, request);
+            if (securitySettings != null) {
+                sourceMessage.setSecuritySettings(securitySettings);
             }
         }
 
@@ -614,6 +597,42 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         return sentMailPath;
     }
 
+    /**
+     * Private method to pull the security settings from Message
+     *
+     * @param m  Message from which to pull security settings
+     * @param request  AjaxRequest if generating authentcation, may be null
+     * @return  SecuritySettings if any present and set, otherwise null
+     * @throws OXException
+     */
+    private SecuritySettings getSecuritySettings (Message m, AJAXRequestData request) throws OXException {
+        {
+            CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+            String authentication = null;
+            if (request != null && authenticationFactory != null) {
+                authentication = authenticationFactory.createAuthenticationFrom(request);
+            }
+
+            Security security = m.getSecurity();
+            if (null != security && false == security.isDisabled()) {
+                SecuritySettings settings = SecuritySettings.builder()
+                    .encrypt(security.isEncrypt())
+                    .pgpInline(security.isPgpInline())
+                    .sign(security.isSign())
+                    .authentication(authentication)
+                    .guestLanguage(security.getLanguage())
+                    .guestMessage(security.getMessage())
+                    .pin(security.getPin())
+                    .msgRef(security.getMsgRef())
+                    .build();
+                if (settings.anythingSet()) {
+                    return settings;
+                }
+            }
+        }
+        return null;
+    }
+
     private void checkAndApplyLineWrapAfter(AJAXRequestData request, UserSettingMail usm) throws OXException {
         String paramName = "lineWrapAfter";
         if (request.containsParameter(paramName)) { // Provided as URL parameter
@@ -738,6 +757,16 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
 
             ContentAwareComposedMailMessage mailMessage = new ContentAwareComposedMailMessage(mimeMessage, session, session.getContextId());
+
+            SecuritySettings securitySettings = getSecuritySettings(m, null);
+
+            if (securitySettings !=  null && securitySettings.anythingSet()) {
+                mailMessage.setSecuritySettings(securitySettings);
+                EncryptedMailService encryptor = services.getOptionalService(EncryptedMailService.class);
+                if (encryptor != null) {
+                    mailMessage = (ContentAwareComposedMailMessage) encryptor.encryptDraftEmail(mailMessage, session, null);
+                }
+            }
 
             mailInterface = MailServletInterface.getInstance(session);
             MailPath draftPath = mailInterface.saveDraft(mailMessage, false, accountId);
