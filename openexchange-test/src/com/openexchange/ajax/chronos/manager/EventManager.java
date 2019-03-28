@@ -165,7 +165,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData createEvent(EventData eventData, boolean ignoreConflicts) throws ApiException {
-        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), getFolder(eventData), eventData, B(ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES, null);
+        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), getFolder(eventData), eventData, B(ignoreConflicts == false), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES, null);
         EventData event = handleCreation(createEvent);
         return event;
     }
@@ -768,7 +768,7 @@ public class EventManager extends AbstractManager {
         CalendarResult snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getCategories(), snoozeResponse.getData());
         assertEquals(1, snoozeResult.getUpdated().size());
         EventData updatedEvent = snoozeResult.getUpdated().get(0);
-        assertEquals(2, updatedEvent.getAlarms().size()); // The previous snooze alarm should be replaced by a new one
+        assertEquals(2, updatedEvent.getAlarms().size());
 
         return updatedEvent;
     }
@@ -803,19 +803,34 @@ public class EventManager extends AbstractManager {
      * Updates the attendee status of the event with the specified identifier.
      *
      * @param eventId The event identifier
+     * @param reccurenceId The recurrence id or null for the master event
      * @param attendeeAndAlarm The status of the attendee
      * @param expectException If an error is expected when updating the attendee
      * @throws ApiException if an API error occurs
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, L(lastTimeStamp), attendeeAndAlarm, null, Boolean.FALSE, Boolean.TRUE, null, Boolean.FALSE, null, null, EXPAND_SERIES);
+    public void updateAttendee(String eventId, String reccurenceId, String folderId, AttendeeAndAlarm attendeeAndAlarm, boolean expectException) throws ApiException, ChronosApiException {
+        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), folderId == null ? defaultFolder : folderId, eventId, L(lastTimeStamp), attendeeAndAlarm, reccurenceId, Boolean.FALSE, Boolean.TRUE, null, Boolean.FALSE, null, null, EXPAND_SERIES);
         if (expectException) {
             assertNotNull("An error was expected", updateAttendee.getError());
             throw new ChronosApiException(updateAttendee.getCode(), updateAttendee.getError());
         }
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getCategories(), updateAttendee.getData());
         setLastTimeStamp(updateAttendee.getTimestamp());
+    }
+    
+    
+    /**
+     * Updates the attendee status of the event with the specified identifier.
+     *
+     * @param eventId The event identifier
+     * @param attendeeAndAlarm The status of the attendee
+     * @param expectException If an error is expected when updating the attendee
+     * @throws ApiException if an API error occurs
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm, boolean expectException) throws ApiException, ChronosApiException {
+        updateAttendee(eventId, null, null, attendeeAndAlarm, expectException);
     }
 
     //////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////

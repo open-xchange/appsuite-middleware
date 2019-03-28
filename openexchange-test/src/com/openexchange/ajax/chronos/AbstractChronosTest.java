@@ -53,12 +53,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -395,5 +397,32 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
         return body;
+    }
+    
+    protected static List<EventData> getEventsByUid(List<EventData> events, String uid) {
+        List<EventData> matchingEvents = new ArrayList<EventData>();
+        if (null != events) {
+            for (EventData event : events) {
+                if (uid.equals(event.getUid())) {
+                    matchingEvents.add(event);
+                }
+            }
+        }
+        matchingEvents.sort(new Comparator<EventData>() {
+
+            @Override
+            public int compare(EventData event1, EventData event2) {
+                String recurrenceId1 = event1.getRecurrenceId();
+                String recurrenceId2 = event2.getRecurrenceId();
+                if (null == recurrenceId1) {
+                    return null == recurrenceId2 ? 0 : -1;
+                }
+                if (null == recurrenceId2) {
+                    return 1;
+                }
+                return new DefaultRecurrenceId(recurrenceId1).compareTo(new DefaultRecurrenceId(recurrenceId2));
+            }
+        });
+        return matchingEvents;
     }
 }
