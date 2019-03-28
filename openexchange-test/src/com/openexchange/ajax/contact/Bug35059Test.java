@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Comparator;
 import java.util.UUID;
 import org.junit.Test;
+import com.davekoelle.AlphanumComparator;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
@@ -102,13 +103,20 @@ public class Bug35059Test extends AbstractManagedContactTest {
         /*
          * check sort order
          */
+        AlphanumComparator alphanumComparator = new AlphanumComparator(getClient().getValues().getLocale());
         Comparator<DistributionListEntryObject> comparator = new Comparator<DistributionListEntryObject>() {
 
             @Override
             public int compare(DistributionListEntryObject o1, DistributionListEntryObject o2) {
-                String name1 = null == o1.getDisplayname() ? o1.getEmailaddress() : o1.getDisplayname() + o1.getEmailaddress();
-                String name2 = null == o2.getDisplayname() ? o2.getEmailaddress() : o2.getDisplayname() + o2.getEmailaddress();
-                return name1.compareTo(name2);
+                Contact contact1 = new Contact();
+                contact1.setDisplayName(o1.getDisplayname());
+                contact1.setEmail1(o1.getEmailaddress());
+                String sortName1 = contact1.getSortName();
+                Contact contact2 = new Contact();
+                contact2.setDisplayName(o2.getDisplayname());
+                contact2.setEmail1(o2.getEmailaddress());
+                String sortName2 = contact2.getSortName();
+                return alphanumComparator.compare(sortName1, sortName2);
             }
         };
         for (int i = 0; i < list.length - 1; i++) {
