@@ -598,36 +598,34 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     /**
-     * Private method to pull the security settings from Message
+     * Private method to pull the security settings from given message.
      *
-     * @param m  Message from which to pull security settings
-     * @param request  AjaxRequest if generating authentcation, may be null
-     * @return  SecuritySettings if any present and set, otherwise null
-     * @throws OXException
+     * @param m The message from which to pull security settings
+     * @param request The AJAX request if authentication should be generated, may be <code>null</code>
+     * @return The security settings if any present and set, otherwise <code>null</code>
+     * @throws OXException If security settings cannot be returned
      */
     private SecuritySettings getSecuritySettings (Message m, AJAXRequestData request) throws OXException {
-        {
+        Security security = m.getSecurity();
+        if (null != security && false == security.isDisabled()) {
             CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
             String authentication = null;
             if (request != null && authenticationFactory != null) {
                 authentication = authenticationFactory.createAuthenticationFrom(request);
             }
 
-            Security security = m.getSecurity();
-            if (null != security && false == security.isDisabled()) {
-                SecuritySettings settings = SecuritySettings.builder()
-                    .encrypt(security.isEncrypt())
-                    .pgpInline(security.isPgpInline())
-                    .sign(security.isSign())
-                    .authentication(authentication)
-                    .guestLanguage(security.getLanguage())
-                    .guestMessage(security.getMessage())
-                    .pin(security.getPin())
-                    .msgRef(security.getMsgRef())
-                    .build();
-                if (settings.anythingSet()) {
-                    return settings;
-                }
+            SecuritySettings settings = SecuritySettings.builder()
+                .encrypt(security.isEncrypt())
+                .pgpInline(security.isPgpInline())
+                .sign(security.isSign())
+                .authentication(authentication)
+                .guestLanguage(security.getLanguage())
+                .guestMessage(security.getMessage())
+                .pin(security.getPin())
+                .msgRef(security.getMsgRef())
+                .build();
+            if (settings.anythingSet()) {
+                return settings;
             }
         }
         return null;
@@ -758,13 +756,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             ContentAwareComposedMailMessage mailMessage = new ContentAwareComposedMailMessage(mimeMessage, session, session.getContextId());
 
-            SecuritySettings securitySettings = getSecuritySettings(m, null);
-
-            if (securitySettings !=  null && securitySettings.anythingSet()) {
-                mailMessage.setSecuritySettings(securitySettings);
-                EncryptedMailService encryptor = services.getOptionalService(EncryptedMailService.class);
-                if (encryptor != null) {
-                    mailMessage = (ContentAwareComposedMailMessage) encryptor.encryptDraftEmail(mailMessage, session, null);
+            // Security
+            {
+                SecuritySettings securitySettings = getSecuritySettings(m, null);
+                if (securitySettings !=  null) {
+                    mailMessage.setSecuritySettings(securitySettings);
+                    EncryptedMailService encryptor = services.getOptionalService(EncryptedMailService.class);
+                    if (encryptor != null) {
+                        mailMessage = (ContentAwareComposedMailMessage) encryptor.encryptDraftEmail(mailMessage, session, null);
+                    }
                 }
             }
 
