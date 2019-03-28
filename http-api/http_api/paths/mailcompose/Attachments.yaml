@@ -4,6 +4,8 @@
     tags:
       - MailCompose
     summary: Add new attachment.
+    consumes:
+      - multipart/form-data
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: path
@@ -11,12 +13,11 @@
         description: The ID of the composition space
         required: true
         type: string
-      - name: body
-        in: body
+      - name: file
+        in: formData
         description: The file to add
-        schema:
-          type: string
-          format: binary
+        type: file
+        required: true
     responses:
       200:
         description: A JSON object containing the newly added attachment.

@@ -16,12 +16,14 @@
     tags:
       - MailCompose
     summary: Uploads an attachment again and removes the old attachment from the server. Used for image resize.
+    consumes:
+      - multipart/form-data
     parameters:
-      - name: body
-        in: body
+      - name: file
+        in: formData
         description: The file to add
-        schema:
-          type: string
+        type: file
+        required: true
     responses:
       200:
         description: A JSON object containing the newly added attachment.
