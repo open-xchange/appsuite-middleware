@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.sms.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,9 +60,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.multifactor.Challenge;
@@ -84,7 +90,7 @@ import com.openexchange.multifactor.storage.impl.MemoryMultifactorDeviceStorage;
 import com.openexchange.multifactor.util.DeviceNaming;
 import com.openexchange.multifactor.util.MultifactorFormatter;
 import com.openexchange.sms.PhoneNumberParserService;
-import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.sms.SMSServiceSPI; 
 
 /**
  * {@link SMSMultifactorProvider} - A multifactor provider which sends a secret token to a user's phone via SMS
@@ -92,7 +98,7 @@ import com.openexchange.sms.SMSServiceSPI;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10."
  */
-public class MultifactorSMSProvider implements MultifactorProvider{
+public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
 
     private static final Logger LOG = LoggerFactory.getLogger(MultifactorSMSProvider.class);
 
@@ -105,6 +111,7 @@ public class MultifactorSMSProvider implements MultifactorProvider{
     private final PhoneNumberParserService                        phoneNumberParser;
     private final SMSServiceSPI                                   smsService;
     private final LeanConfigurationService                        configService;
+    private volatile Boolean demoMode = null;
 
     /**
      *
@@ -143,7 +150,20 @@ public class MultifactorSMSProvider implements MultifactorProvider{
     }
 
     private boolean isDemoMode() {
-       return this.configService.getBooleanProperty(MultifactorProperties.demo);
+        if(demoMode == null) {
+            demoMode = Boolean.valueOf(configService.getBooleanProperty(MultifactorProperties.demo));
+        }
+        return demoMode.booleanValue();
+    }
+    
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        demoMode = Boolean.valueOf(configService.getBoolProperty(MultifactorProperties.demo.getFQPropertyName(), MultifactorProperties.demo.getDefaultValue(Boolean.class).booleanValue()));
+    }
+    
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest(MultifactorProperties.demo.getFQPropertyName()).build();
     }
 
     private static String newUid() {
@@ -177,7 +197,7 @@ public class MultifactorSMSProvider implements MultifactorProvider{
             sourceDevice.setName("*" + phoneNumber.substring(phoneNumber.length() - 4));
         }
 
-        return new SMSMultifactorDevice(newUid(), sourceDevice.getName(), phoneNumber, sourceDevice.isBackup());
+        return new SMSMultifactorDevice(newUid(), sourceDevice.getName(), phoneNumber, Autoboxing.B(sourceDevice.isBackup()));
     }
 
     /**
@@ -317,7 +337,7 @@ public class MultifactorSMSProvider implements MultifactorProvider{
            sendToken(multifactorRequest, device, newToken);
            return true;
         }
-        LOG.info("Could not send a new SMS token to user {} in context{}, because the max. allowed amount of active tokens exceeded", multifactorRequest.getUserId(), multifactorRequest.getContextId());
+        LOG.info("Could not send a new SMS token to user {} in context{}, because the max. allowed amount of active tokens exceeded", I(multifactorRequest.getUserId()), I(multifactorRequest.getContextId()));
         return false;
     }
 
@@ -358,7 +378,7 @@ public class MultifactorSMSProvider implements MultifactorProvider{
 
     @Override
     public Collection<? extends MultifactorDevice> getEnabledDevices(MultifactorRequest multifactorRequest) throws OXException {
-        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled()).collect(Collectors.toList());
+        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled() != null && d.isEnabled().booleanValue()).collect(Collectors.toList());
     }
 
     @Override
@@ -399,13 +419,13 @@ public class MultifactorSMSProvider implements MultifactorProvider{
                 doAuthenticationInternal(multifactorRequest, pendingDevice.get(), (String) answer.requireField(SMSAnswerField.SECRET));
 
                 //Enable the device
-                pendingDevice.get().enable(true);
+                pendingDevice.get().enable(Boolean.TRUE);
 
                 try {
                     //Add the device to the persistent storage
                     getStorageSave().registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), pendingDevice.get());
                 } catch(Exception e) {
-                   pendingDevice.get().enable(false);
+                   pendingDevice.get().enable(Boolean.FALSE);
                    throw e;
                 }
 

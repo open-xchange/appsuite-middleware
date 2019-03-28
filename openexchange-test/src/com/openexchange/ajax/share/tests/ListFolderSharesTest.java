@@ -141,7 +141,7 @@ public class ListFolderSharesTest extends ShareTest {
          */
         int module = randomModule();
         OCLGuestPermission guestPermission = randomGuestPermission(module);
-        FolderObject folder = insertPublicFolder(EnumAPI.OX_NEW, module);
+        FolderObject folder = insertPublicFolder(module);
         folder.addPermission(guestPermission);
         folder = updateFolder(EnumAPI.OX_NEW, folder);
         /*
@@ -177,7 +177,7 @@ public class ListFolderSharesTest extends ShareTest {
          */
         int module = randomModule();
         OCLGuestPermission guestPermission = randomGuestPermission(module);
-        FolderObject folder = insertPublicFolder(EnumAPI.OX_NEW, module);
+        FolderObject folder = insertPublicFolder(module);
         FolderObject subfolder = folder.clone();
         subfolder.setParentFolderID(folder.getObjectID());
         subfolder.removeObjectID();

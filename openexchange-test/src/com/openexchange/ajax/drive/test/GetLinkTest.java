@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.drive.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
@@ -86,6 +87,7 @@ import com.openexchange.test.TestInit;
  */
 public class GetLinkTest extends AbstractDriveShareTest {
 
+    @SuppressWarnings("hiding")
     private InfostoreTestManager itm;
     private FolderObject rootFolder, folder;
     private DefaultFile file;
@@ -136,7 +138,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
         target.setName(file.getFileName());
         target.setChecksum("bad");
 
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target, false);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(I(rootFolder.getObjectID()), target, false);
         GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         assertTrue("Expected error.", getLinkResponse.hasError());
         assertTrue("Wrong exception", DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
@@ -148,14 +150,14 @@ public class GetLinkTest extends AbstractDriveShareTest {
         target.setDrivePath("/" + folder.getFolderName());
         target.setChecksum("bad");
 
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target, false);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(I(rootFolder.getObjectID()), target, false);
         GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         assertTrue("Expected error.", getLinkResponse.hasError());
         assertTrue("Wrong exception", DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
     }
 
     private void performTest(DriveShareTarget target) throws OXException, IOException, JSONException, Exception {
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(I(rootFolder.getObjectID()), target);
         GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getUrl();
 
@@ -165,12 +167,12 @@ public class GetLinkTest extends AbstractDriveShareTest {
         guestClient.checkShareAccessible(expectedPermission);
         int guestID = guestClient.getValues().getUserId();
 
-        getClient().execute(new DeleteLinkRequest(rootFolder.getObjectID(), target));
+        getClient().execute(new DeleteLinkRequest(I(rootFolder.getObjectID()), target));
         ExtendedPermissionEntity guestEntity;
         if (target.isFolder()) {
             guestEntity = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, folder2.getObjectID(), guestID);
         } else {
-            guestEntity = discoverGuestEntity(file.getFolderId(), file.getId(), guestID);
+            guestEntity = discoverGuestEntity(file.getId(), guestID);
         }
         assertNull("Share was not deleted", guestEntity);
         List<FileStorageObjectPermission> objectPermissions = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();

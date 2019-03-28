@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -761,7 +762,7 @@ public interface File {
             try {
                 final int number = Integer.parseInt(key);
                 return byNumber.get(Integer.valueOf(number));
-            } catch (final NumberFormatException x) {
+            } catch (@SuppressWarnings("unused") final NumberFormatException x) {
                 return null;
             }
         }
@@ -778,13 +779,13 @@ public interface File {
         }
 
         public static Field get(final int number) {
-            return byNumber.get(number);
+            return byNumber.get(I(number));
         }
 
         public static List<Field> get(final int[] numbers) {
             final List<Field> fields = new ArrayList<Field>(numbers.length);
             for (int number : numbers) {
-                Field field = byNumber.get(number);
+                Field field = byNumber.get(I(number));
                 if (field != null) {
                     fields.add(field);
                 }

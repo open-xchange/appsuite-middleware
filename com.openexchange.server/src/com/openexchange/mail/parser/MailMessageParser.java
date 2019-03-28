@@ -242,6 +242,7 @@ public final class MailMessageParser {
     private final List<OXException> warnings;
     private String mailId;
     private String folder;
+    private boolean reparsed;
 
     /**
      * Constructor
@@ -252,6 +253,7 @@ public final class MailMessageParser {
         inlineDetector = LENIENT_DETECTOR;
         mimeFilter = null;
         warnings = new ArrayList<OXException>(2);
+        reparsed = false;
     }
 
     /**
@@ -305,6 +307,7 @@ public final class MailMessageParser {
         stop = false;
         multipartDetected = false;
         subject = null;
+        reparsed = false;
         return this;
     }
 
@@ -360,6 +363,7 @@ public final class MailMessageParser {
                     MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
                     MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
                     reset();
+                    reparsed = true;
                     parseMailContent(reparsedMail, handler, prefix, 1);
                 }
             }
@@ -431,7 +435,7 @@ public final class MailMessageParser {
                 if (count == -1) {
                     throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
                 }
-                if ((mailPart instanceof MimeMailPart) && ((MimeMailPart) mailPart).isEmptyStringMultipart()) {
+                if (!reparsed && (mailPart instanceof MimeMailPart) && ((MimeMailPart) mailPart).isEmptyStringMultipart()) {
                     // Need to reparse...
                     throw new InvalidMultipartException("Multipart initialized from an empty string");
                 }

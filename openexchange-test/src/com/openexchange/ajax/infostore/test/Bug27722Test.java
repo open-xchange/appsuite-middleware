@@ -79,6 +79,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
     private FolderObject testFolder;
     private List<File> items;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

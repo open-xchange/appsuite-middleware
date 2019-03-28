@@ -50,13 +50,16 @@
 package com.openexchange.find.facet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.Serializable;
 
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class Option {
+public class Option implements Serializable{
+
+    private static final long serialVersionUID = 5585827431039480470L;
 
     private final String id;
 

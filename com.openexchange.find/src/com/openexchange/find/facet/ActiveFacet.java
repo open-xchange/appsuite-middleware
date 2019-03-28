@@ -50,6 +50,7 @@
 package com.openexchange.find.facet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.Serializable;
 
 
 /**
@@ -59,7 +60,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class ActiveFacet {
+public class ActiveFacet implements Serializable {
+
+    private static final long serialVersionUID = -7373982187282668862L;
 
     private final FacetType type;
 
@@ -126,23 +129,30 @@ public class ActiveFacet {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ActiveFacet other = (ActiveFacet) obj;
         if (type == null) {
-            if (other.type != null)
+            if (other.type != null) {
                 return false;
-        } else if (!type.equals(other.type))
+            }
+        } else if (!type.equals(other.type)) {
             return false;
+        }
         if (valueId == null) {
-            if (other.valueId != null)
+            if (other.valueId != null) {
                 return false;
-        } else if (!valueId.equals(other.valueId))
+            }
+        } else if (!valueId.equals(other.valueId)) {
             return false;
+        }
         return true;
     }
 

@@ -50,12 +50,9 @@
 package com.openexchange.chronos.service;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -87,46 +84,6 @@ public interface CalendarUtilities {
      * @return The copied event
      */
     Event copyEvent(Event event, EventField... fields) throws OXException;
-
-    /**
-     * Handles a possible {@link CalendarExceptionCodes#INCORRECT_STRING} exception that occurred when attempting to store the event data
-     * by removing any character sequences that are indicated in the exception's <i>problematics</i>.
-     *
-     * @param e The exception to handle
-     * @param event The event being stored
-     * @return <code>true</code> if incorrect strings have been successfully replaced, <code>false</code>, otherwise
-     */
-    boolean handleIncorrectString(OXException e, Event event);
-
-    /**
-     * Handles a possible {@link CalendarExceptionCodes#INCORRECT_STRING} exception that occurred when attempting to store the attendees data
-     * by removing any character sequences that are indicated in the exception's <i>problematics</i>.
-     *
-     * @param e The exception to handle
-     * @param attendees The attendees being stored
-     * @return <code>true</code> if incorrect strings have been successfully replaced, <code>false</code>, otherwise
-     */
-    boolean handleIncorrectString(OXException e, List<Attendee> attendees);
-
-    /**
-     * Handles a possible {@link CalendarExceptionCodes#DATA_TRUNCATION} exception that occurred when attempting to store the event data
-     * by trimming the affected values to the maximum allowed length that are indicated in the exception's <i>problematics</i>.
-     *
-     * @param e The exception to handle
-     * @param event The event being stored
-     * @return <code>true</code> if truncated values were trimmed successfully, <code>false</code>, otherwise
-     */
-    boolean handleDataTruncation(OXException e, Event event);
-
-    /**
-     * Handles a possible {@link CalendarExceptionCodes#DATA_TRUNCATION} exception that occurred when attempting to store the attendees data
-     * by trimming the affected values to the maximum allowed length that are indicated in the exception's <i>problematics</i>.
-     *
-     * @param e The exception to handle
-     * @param attendees The attendees being stored
-     * @return <code>true</code> if truncated values were trimmed successfully, <code>false</code>, otherwise
-     */
-    boolean handleDataTruncation(OXException e, List<Attendee> attendees);
 
     /**
      * Gets an entity resolver for a specific context.

@@ -110,6 +110,7 @@ public class SMSProviderActivator extends HousekeepingActivator {
                 smsService,
                 phoneNumberParser).setTokenStorage(defaultStorage);
         registerService(MultifactorProvider.class, smsProvider);
+        registerService(Reloadable.class, smsProvider);
 
         //Track hazelcast; hazelcast is preferred as token storage if available
         final ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> hazelcastTracker =

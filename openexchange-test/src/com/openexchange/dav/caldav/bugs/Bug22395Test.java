@@ -85,11 +85,13 @@ public class Bug22395Test extends CalDAVTest {
         /*
          * create appointment series on server
          */
+        TimeZone timeZone = getClient().getValues().getTimeZone();
         List<Appointment> appointments = new ArrayList<Appointment>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(TimeTools.D("Tomorrow at midnight", TimeZone.getTimeZone("Europe/Berlin")));
+        Calendar calendar = Calendar.getInstance(timeZone);
+        calendar.setTime(TimeTools.D("Tomorrow at midnight", timeZone));
         for (int i = 0; i < 24; i++) {
             Appointment appointment = new Appointment();
+            appointment.setTimezone(timeZone.getID());
             appointment.setUid(randomUID());
             appointment.setTitle("Series " + i);
             appointment.setIgnoreConflicts(true);

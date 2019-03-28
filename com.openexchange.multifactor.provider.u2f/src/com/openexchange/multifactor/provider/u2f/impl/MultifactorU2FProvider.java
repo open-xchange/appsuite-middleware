@@ -245,7 +245,7 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
     private String getDefaultName(MultifactorRequest multifactorRequest) throws OXException {
         final int count = getCount(multifactorRequest) + 1;
         final String name = StringHelper.valueOf(multifactorRequest.getLocale()).getString(U2FStrings.AUTHENTICATION_NAME);
-        return String.format(name, count);
+        return String.format(name, Integer.valueOf(count));
     }
 
     /**
@@ -308,7 +308,7 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
 
     @Override
     public Collection<? extends MultifactorDevice> getEnabledDevices(MultifactorRequest multifactorRequest) throws OXException {
-        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled()).collect(Collectors.toList());
+        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled() != null && d.isEnabled().booleanValue()).collect(Collectors.toList());
     }
 
     @Override
@@ -341,7 +341,7 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
             pendingStorage.registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), device);
             return new U2FRegistrationChallenge(device.getId(), registerData);
         } catch (final U2fBadConfigurationException e) {
-            throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e.getMessage());
+            throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -362,13 +362,13 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
                     device.setAttestationCertificate(deviceRegistration.getAttestationCertificate());
                     device.setCounter(deviceRegistration.getCounter());
                     device.setCompromised(deviceRegistration.isCompromised());
-                    device.enable(true);
+                    device.enable(Boolean.TRUE);
 
                     try {
                         // store authed/registered device
                         storage.registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), device);
                     } catch (Exception e) {
-                        device.enable(false);
+                        device.enable(Boolean.FALSE);
                         throw e;
                     }
 

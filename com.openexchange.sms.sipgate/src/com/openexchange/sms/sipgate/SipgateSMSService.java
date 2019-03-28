@@ -68,6 +68,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSExceptionCode;
@@ -110,7 +111,7 @@ public class SipgateSMSService implements SMSServiceSPI {
     @Override
     public void sendMessage(String[] recipients, String message, int userId, int contextId) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(Autoboxing.I(message.length()), Autoboxing.I(MAX_MESSAGE_LENGTH));
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
@@ -158,9 +159,7 @@ public class SipgateSMSService implements SMSServiceSPI {
             } else {
                 throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
             }
-        } catch (IOException e) {
-            throw SMSExceptionCode.SERVICE_UNAVAILABLE.create(e, e.getMessage());
-        } catch (JSONException e) {
+        } catch (JSONException | IOException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         } finally {
             if (null != method && method.hasBeenUsed()) {

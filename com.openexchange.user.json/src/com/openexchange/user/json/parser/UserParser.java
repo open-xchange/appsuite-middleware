@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.parser;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -567,7 +568,7 @@ public final class UserParser {
         public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException {
             final String image = parseString(jsonobject, ContactFields.IMAGE1);
             if (image != null) {
-                contactobject.setImage1(image.getBytes());
+                contactobject.setImage1(image.getBytes(StandardCharsets.ISO_8859_1));
             } else {
                 contactobject.setImage1(null);
             }

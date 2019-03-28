@@ -79,14 +79,14 @@ public class SMSProviderTests extends AbstractMultifactorProviderTest {
     @Override
     protected Map<String, String> getNeededConfigurations() {
         HashMap<String, String> configuration = new HashMap<String, String>();
-        configuration.put("com.openexchange.multifactor.demo", "true");
+        configuration.put("com.openexchange.multifactor.demo", Boolean.TRUE.toString());
         configuration.put(MultifactorProperties.PREFIX + "sms.enabled", Boolean.TRUE.toString());
         return configuration;
     }
 
     @Override
     protected String getReloadables() {
-        return "DemoAwareTokenCreationStrategy,DemoAwareSMSServiceSPI";
+        return "DemoAwareTokenCreationStrategy,MultifactorSMSProvider";
     }
 
     @Override
@@ -132,7 +132,7 @@ public class SMSProviderTests extends AbstractMultifactorProviderTest {
     protected void validateStartAuthenticationResponse(MultifactorStartAuthenticationResponseData data) {
         //The server must have responded with a tail of the phone number used
         assertThat(data.getChallenge().getPhoneNumberTail(), is(not(nullValue())));
-        assertThat(data.getChallenge().getPhoneNumberTail().length(), is(4));
+        assertThat(Integer.valueOf(data.getChallenge().getPhoneNumberTail().length()), is(Integer.valueOf(4)));
         //..But  this must not be the full phone number
         assertThat(data.getChallenge().getPhoneNumberTail(), is(not(DEMO_PHONE_NUMBER)));
     }

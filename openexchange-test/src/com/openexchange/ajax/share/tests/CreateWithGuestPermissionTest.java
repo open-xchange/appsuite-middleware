@@ -161,7 +161,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         /*
          * check access to share

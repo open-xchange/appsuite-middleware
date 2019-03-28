@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.multifactor;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.L;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,8 +107,14 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
     @Override
     protected Map<String, String> getNeededConfigurations() {
         HashMap<String, String> result = new HashMap<>();
+        result.put("com.openexchange.multifactor.demo", Boolean.TRUE.toString());
         result.put(MultifactorProperties.PREFIX + "sms.enabled", Boolean.TRUE.toString());
         return result;
+    }
+    
+    @Override
+    protected String getReloadables() {
+        return "DemoAwareTokenCreationStrategy,MultifactorSMSProvider";
     }
 
     private Collection<MultifactorDevice> registerTestDevices(MultifactorApi api, int count) throws ApiException {
