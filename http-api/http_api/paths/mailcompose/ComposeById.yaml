@@ -14,7 +14,7 @@
       200:
         description: A JSON object containing the requested composition space.
         schema:
-          $ref: "#/definitions/MailComposeMessageModel"
+          $ref: "#/definitions/MailComposeResponse"
       400:
         description: Bad request, response contains error message.
       401:
@@ -52,13 +52,13 @@
         description: An object containing the attributes to update
         required: true
         schema:
-          $ref: "#/definitions/MailComposeMessageModel"
+          $ref: "#/definitions/MailComposeResponse"
 
     responses:
       200:
         description: A JSON object containing the updated composition space.
         schema:
-          $ref: "#/definitions/MailComposeMessageModel"
+          $ref: "#/definitions/MailComposeResponse"
       400:
         description: Bad request, response contains error message.
       401:
