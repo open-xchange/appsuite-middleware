@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.l;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -69,6 +70,7 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.service.SortOrder;
@@ -638,8 +640,18 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData changeEventOrganizer(EventData eventData, CalendarUser organizer, String comment, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().changeOrganizer(userApi.getSession(), getFolder(eventData), eventData.getId(), L(this.lastTimeStamp), new ChangeOrganizerBody().organizer(organizer).comment(comment), null, null, Boolean.TRUE, null, null, null, null);
-        return handleUpdate(updateResponse, expectException);
+        String folder = getFolder(eventData);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().changeOrganizer(userApi.getSession(), folder, eventData.getId(), L(this.lastTimeStamp), new ChangeOrganizerBody().organizer(organizer).comment(comment), null, null, Boolean.TRUE, null, null, null, null);
+        if (expectException) {
+            assertNotNull("An error was expected", updateResponse.getError());
+            throw new ChronosApiException(updateResponse.getCode(), updateResponse.getError());
+        }
+        CalendarResult calendarResult = checkResponse(updateResponse.getErrorDesc(), updateResponse.getError(), updateResponse.getCategories(), updateResponse.getData());
+        // Search for the correct result, folders might have been shared and thus more than one result is returned
+        EventData update = calendarResult.getUpdated().stream().filter(u -> eventData.getId().equals(u.getId()) && folder.equals(u.getFolder())).findFirst().orElse(null);
+        Assert.assertThat("No matching event found", update, notNullValue());
+        setLastTimeStamp(update.getTimestamp());
+        return update;
     }
 
     /**
