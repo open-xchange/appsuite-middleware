@@ -52,9 +52,9 @@ package com.openexchange.dav.caldav.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
@@ -146,52 +146,8 @@ public class AlarmTestLightning extends CalDAVTest {
          * acknowledge reminder in client
          */
         Date acknowledgedDate = TimeTools.D("next sunday at 15:47:32");
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:test\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(acknowledgedDate) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().setProperty("X-MOZ-LASTACK", formatAsUTC(acknowledgedDate));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -204,7 +160,9 @@ public class AlarmTestLightning extends CalDAVTest {
         iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(acknowledgedDate), iCalResource.getVEvent().getPropertyValue("X-MOZ-LASTACK"));
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
     }
 
     @Test
@@ -276,54 +234,9 @@ public class AlarmTestLightning extends CalDAVTest {
          */
         Date acknowledgedDate = TimeTools.D("next sunday at 15:47:32");
         Date nextTrigger = TimeTools.D("next sunday at 15:52:32");
-        Date nextAcknowledged = TimeTools.D("next sunday at 15:51:32");
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:test\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(acknowledgedDate) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-SNOOZE-TIME:" + formatAsUTC(nextTrigger) + "\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().setProperty("X-MOZ-LASTACK", formatAsUTC(acknowledgedDate));
+        iCalResource.getVEvent().setProperty("X-MOZ-SNOOZE-TIME", formatAsUTC(nextTrigger));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -339,7 +252,7 @@ public class AlarmTestLightning extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(nextAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(acknowledgedDate), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("X-MOZ-SNOOZE-TIME wrong", formatAsUTC(nextTrigger), iCalResource.getVEvent().getPropertyValue("X-MOZ-SNOOZE-TIME"));
     }
 
@@ -410,49 +323,9 @@ public class AlarmTestLightning extends CalDAVTest {
         /*
          * edit reminder in client
          */
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:test\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT20M\r\n" +
-            "DESCRIPTION:Mozilla Standardbeschreibung\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().getVAlarm().setProperty("TRIGGER", "-PT20M", Collections.singletonMap("VALUE", "DURATION"));
+        iCalResource.getVEvent().getVAlarm().setProperty("DESCRIPTION", "Mozilla Standardbeschreibung");
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -542,57 +415,13 @@ public class AlarmTestLightning extends CalDAVTest {
          */
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         calendar.setTime(initialAcknowledged);
-        calendar.add(Calendar.DATE, 1);
-        Date nextAcknowledged = calendar.getTime();
-        calendar.setTime(initialAcknowledged);
         calendar.add(Calendar.MINUTE, 3);
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime();
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:recurring\r\n" +
-            "RRULE:FREQ=DAILY\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(acknowledgedDate) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().setProperty("X-MOZ-LASTACK", formatAsUTC(acknowledgedDate));
+        iCalResource.getVEvent().getVAlarm().setProperty("X-LIC-ERROR", "Parse error in property name: ACKNOWLEDGED", 
+            Collections.singletonMap("X-LIC-ERRORTYPE", "PROPERTY-PARSE-ERROR")); 
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -608,7 +437,7 @@ public class AlarmTestLightning extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(nextAcknowledged), iCalResource.getVEvent().getPropertyValue("X-MOZ-LASTACK"));
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(acknowledgedDate), iCalResource.getVEvent().getPropertyValue("X-MOZ-LASTACK"));
     }
 
     @Test
@@ -681,55 +510,11 @@ public class AlarmTestLightning extends CalDAVTest {
          */
         Date acknowledgedDate = TimeTools.D("next friday at 09:46:24");
         Date nextTrigger = TimeTools.D("next friday at 09:51:24");
-        Date nextAcknowledged = TimeTools.D("next friday at 09:50:24");
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:recurring\r\n" +
-            "RRULE:FREQ=DAILY\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(acknowledgedDate) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-SNOOZE-TIME-" + start.getTime() + "000:" + formatAsUTC(nextTrigger) + "\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().setProperty("X-MOZ-LASTACK", formatAsUTC(acknowledgedDate));
+        iCalResource.getVEvent().setProperty("X-MOZ-SNOOZE-TIME-" + start.getTime() + "000", formatAsUTC(nextTrigger));
+        iCalResource.getVEvent().getVAlarm().setProperty("X-LIC-ERROR", "Parse error in property name: ACKNOWLEDGED", 
+            Collections.singletonMap("X-LIC-ERRORTYPE", "PROPERTY-PARSE-ERROR")); 
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
@@ -745,7 +530,7 @@ public class AlarmTestLightning extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(nextAcknowledged), iCalResource.getVEvent().getPropertyValue("X-MOZ-LASTACK"));
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(acknowledgedDate), iCalResource.getVEvent().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("X-MOZ-SNOOZE-TIME wrong", formatAsUTC(nextTrigger), iCalResource.getVEvent().getPropertyValue("X-MOZ-SNOOZE-TIME-" + start.getTime() + "000"));
     }
 
@@ -806,8 +591,6 @@ public class AlarmTestLightning extends CalDAVTest {
             "ACTION:DISPLAY\r\n" +
             "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
             "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "BEGIN:VEVENT\r\n" +
@@ -828,8 +611,6 @@ public class AlarmTestLightning extends CalDAVTest {
             "ACTION:DISPLAY\r\n" +
             "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
             "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
@@ -856,8 +637,7 @@ public class AlarmTestLightning extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
-        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "edit", iCalResource.getVEvents().get(1).getSummary());
@@ -870,78 +650,8 @@ public class AlarmTestLightning extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -14);
         calendar.add(Calendar.SECOND, 52);
         Date exceptionAcknowledged = calendar.getTime();
-        calendar.setTime(seriesAcknowledged);
-        calendar.add(Calendar.DATE, 1);
-        seriesAcknowledged = calendar.getTime();
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:sdfs\r\n" +
-            "RRULE:FREQ=DAILY\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(exceptionAcknowledged) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:edit\r\n" +
-            "RECURRENCE-ID:" + formatAsUTC(exceptionStart) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(exceptionStart, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(exceptionEnd, "Europe/Berlin") + "\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvents().get(1).setProperty("X-MOZ-LASTACK", formatAsUTC(exceptionAcknowledged));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment & exception on server
          */
@@ -963,12 +673,13 @@ public class AlarmTestLightning extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "edit", iCalResource.getVEvents().get(1).getSummary());
-        assertNull("ALARM in iCal exception found", iCalResource.getVEvents().get(1).getVAlarm());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
+        assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
     }
 
     @Test
@@ -1028,8 +739,6 @@ public class AlarmTestLightning extends CalDAVTest {
             "ACTION:DISPLAY\r\n" +
             "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
             "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "BEGIN:VEVENT\r\n" +
@@ -1050,8 +759,6 @@ public class AlarmTestLightning extends CalDAVTest {
             "ACTION:DISPLAY\r\n" +
             "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
             "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
@@ -1078,7 +785,6 @@ public class AlarmTestLightning extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
@@ -1094,76 +800,9 @@ public class AlarmTestLightning extends CalDAVTest {
         Date exceptionAcknowledged = calendar.getTime();
         calendar.add(Calendar.MINUTE, 5);
         Date nextTrigger = calendar.getTime();
-        iCal =
-            "BEGIN:VCALENDAR\r\n" +
-            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
-            "VERSION:2.0\r\n" +
-            "BEGIN:VTIMEZONE\r\n" +
-            "TZID:Europe/Berlin\r\n" +
-            "BEGIN:DAYLIGHT\r\n" +
-            "TZOFFSETFROM:+0100\r\n" +
-            "TZOFFSETTO:+0200\r\n" +
-            "TZNAME:CEST\r\n" +
-            "DTSTART:19700329T020000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
-            "END:DAYLIGHT\r\n" +
-            "BEGIN:STANDARD\r\n" +
-            "TZOFFSETFROM:+0200\r\n" +
-            "TZOFFSETTO:+0100\r\n" +
-            "TZNAME:CET\r\n" +
-            "DTSTART:19701025T030000\r\n" +
-            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
-            "END:STANDARD\r\n" +
-            "END:VTIMEZONE\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:sdfs\r\n" +
-            "RRULE:FREQ=DAILY\r\n" +
-            "X-MOZ-LASTACK:" + formatAsUTC(exceptionAcknowledged) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-SNOOZE-TIME-" + exceptionStart.getTime() + "000:" + formatAsUTC(nextTrigger) + "\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "BEGIN:VEVENT\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "SUMMARY:edit\r\n" +
-            "RECURRENCE-ID:" + formatAsUTC(exceptionStart) + "\r\n" +
-            "DTSTART;TZID=Europe/Berlin:" + format(exceptionStart, "Europe/Berlin") + "\r\n" +
-            "DTEND;TZID=Europe/Berlin:" + format(exceptionEnd, "Europe/Berlin") + "\r\n" +
-            "TRANSP:OPAQUE\r\n" +
-            "CLASS:PUBLIC\r\n" +
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "SEQUENCE:0\r\n" +
-            "X-MOZ-GENERATION:1\r\n" +
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "TRIGGER;VALUE=DURATION:-PT15M\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "X-LIC-ERROR;X-LIC-ERRORTYPE=PROPERTY-PARSE-ERROR:Parse error in property n\r\n" +
-            " ame: ACKNOWLEDGED\r\n" +
-            "END:VALARM\r\n" +
-            "END:VEVENT\r\n" +
-            "END:VCALENDAR\r\n"
-        ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().setProperty("X-MOZ-LASTACK", formatAsUTC(exceptionAcknowledged));
+        iCalResource.getVEvent().setProperty("X-MOZ-SNOOZE-TIME-" + exceptionStart.getTime() + "000", formatAsUTC(nextTrigger));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
 
         // TODO: The snooze information is hidden within the series master. This is currently not considered.
 
