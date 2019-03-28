@@ -84,6 +84,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEvent;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -163,12 +166,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      */
     private static final int TYPE_VARCHAR = Types.VARCHAR;
 
+    /** The name of the virtual cache region for POP3 session caches */
+    public static final String REGION_POP3_SESSION_CACHE = "Pop3SessionCache";
+
     private static final String PARAM_POP3_STORAGE_FOLDERS = "com.openexchange.mailaccount.pop3Folders";
 
     private static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            lock = Session.EMPTY_LOCK;
+            return task.call();
         }
         lock.lock();
         try {
@@ -178,13 +184,57 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    /**
+     * Drops caches POP3 folder in all active sessions associated with given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
     private static void dropPOP3StorageFolders(final int userId, final int contextId) {
+        dropPOP3StorageFolders(userId, contextId, true);
+    }
+
+    /**
+     * Drops caches POP3 folder in all active sessions associated with given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param notify Whether to notify other remote nodes
+     */
+    static void dropPOP3StorageFolders(final int userId, final int contextId, boolean notify) {
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != service) {
             for (final Session session : service.getSessions(userId, contextId)) {
                 session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
             }
         }
+        if (notify) {
+            fireInvalidatePop3SessionCacheEvent(userId, contextId);
+        }
+    }
+
+    private static final Object SENDER = new Object();
+
+    private static void fireInvalidatePop3SessionCacheEvent(int userId, int contextId) {
+        CacheEventService cacheEventService = ServerServiceRegistry.getInstance().getService(CacheEventService.class);
+        if (null != cacheEventService) {
+            CacheEvent event = newCacheEventFor(userId, contextId);
+            if (null != event) {
+                cacheEventService.notify(SENDER, event, false);
+            }
+        }
+    }
+
+    /**
+     * Creates a new cache event for invalidating POP3 session cache.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The cache event
+     */
+    private static CacheEvent newCacheEventFor(int userId, int contextId) {
+        CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        return null == service ? null : CacheEvent.INVALIDATE(REGION_POP3_SESSION_CACHE, Integer.toString(contextId), service.newCacheKey(contextId, userId));
     }
 
     @Override
