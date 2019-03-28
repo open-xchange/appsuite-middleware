@@ -652,9 +652,8 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
-                    } else {
-                        nanos = available.awaitNanos(nanos);
                     }
+                    nanos = available.awaitNanos(nanos);
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
