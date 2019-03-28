@@ -60,6 +60,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.Random;
 import java.util.Set;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -76,6 +79,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.arrays.Collections;
 
@@ -86,6 +90,8 @@ import com.openexchange.tools.arrays.Collections;
  * @since v7.10.0
  */
 public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
+
+    private static final Logger RdbAttendeeStorage_LOG = LoggerFactory.getLogger(RdbAttendeeStorage.class);
 
     private static final int INSERT_CHUNK_SIZE = 200;
     private static final int DELETE_CHUNK_SIZE = 200;
@@ -421,6 +427,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
+    private static final int MAX_RETRY = 5;
+
     private int insertAttendees(Connection connection, Map<String, List<Attendee>> attendeesByEventId, boolean tombstones) throws SQLException, OXException {
         if (null == attendeesByEventId || 0 == attendeesByEventId.size()) {
             return 0;
@@ -437,27 +445,40 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         stringBuilder.setLength(stringBuilder.length() - 1);
         stringBuilder.append(';');
-        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
-            int parameterIndex = 1;
-            boolean attendeesToStore = false;
-            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
-                Set<Integer> usedEntities = new HashSet<Integer>(entry.getValue().size());
-                int eventId = asInt(entry.getKey());
-                List<Attendee> attendeeList = entry.getValue();
-                if (attendeeList != null && attendeeList.size() > 0) {
-                    attendeesToStore = true;
-                    for (Attendee attendee : entry.getValue()) {
-                        MAPPER.validateAll(attendee);
-                        attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
-                        stmt.setInt(parameterIndex++, context.getContextId());
-                        stmt.setInt(parameterIndex++, accountId);
-                        stmt.setInt(parameterIndex++, eventId);
-                        parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+        int retry = 0;
+        Random random = new Random();
+        while (retry < MAX_RETRY) {
+            try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+                int parameterIndex = 1;
+                boolean attendeesToStore = false;
+                for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                    Set<Integer> usedEntities = new HashSet<Integer>(entry.getValue().size());
+                    int entitySalt = random.nextInt();
+                    int eventId = asInt(entry.getKey());
+                    List<Attendee> attendeeList = entry.getValue();
+                    if (attendeeList != null && attendeeList.size() > 0) {
+                        attendeesToStore = true;
+                        for (Attendee attendee : entry.getValue()) {
+                            MAPPER.validateAll(attendee);
+                            attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities, entitySalt);
+                            stmt.setInt(parameterIndex++, context.getContextId());
+                            stmt.setInt(parameterIndex++, accountId);
+                            stmt.setInt(parameterIndex++, eventId);
+                            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+                        }
                     }
                 }
+                return attendeesToStore ? logExecuteUpdate(stmt) : 0;
+            } catch (SQLException e) {
+                if (e.getErrorCode() == 1062 && retry < MAX_RETRY) { // Duplicate entry '%s' for key %d
+                    retry++;
+                    RdbAttendeeStorage_LOG.info("Primary key violation. Message: {}. Retry ({}).", e.getMessage(), Autoboxing.I(retry));
+                } else {
+                    throw e;
+                }
             }
-            return attendeesToStore ? logExecuteUpdate(stmt) : 0;
         }
+        return 0;
     }
 
     private Map<String, List<Attendee>> selectAttendees(Connection connection, String[] eventIds, Boolean internal, boolean tombstones, AttendeeField[] fields) throws SQLException, OXException {

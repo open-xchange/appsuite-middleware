@@ -54,14 +54,25 @@ import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
+import com.openexchange.chronos.common.EntityUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
@@ -77,6 +88,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -190,12 +202,74 @@ public final class CalendarDeleteListener implements DeleteListener {
             }
         }
         /*
+         * Replace attendee tombstones with externals
+         */
+        replaceTombstones(dbProvider, context, userId);
+        /*
          * Delete account
          */
         updater.deleteAccount();
 
         // Trigger calendar events
         updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+    }
+
+    private static final String SELECT_TOMBSTONES = "SELECT account, event, uri FROM calendar_attendee_tombstone WHERE cid = ? AND entity = ?;";
+
+    private static final String REPLACE_TOMBSTONES = "UPDATE calendar_attendee_tombstone SET folder = NULL, entity = ? WHERE cid = ? AND account = ? AND event = ? AND entity = ?;";
+
+    /**
+     * Replaces the tombstone entries for the user with externals.
+     *
+     * @param dbProvider
+     * @param context
+     * @param userId
+     * @throws OXException
+     */
+    private void replaceTombstones(DBProvider dbProvider, Context context, int userId) throws OXException {
+        Connection con = dbProvider.getWriteConnection(context);
+        boolean onlyRead = true;
+        try {
+            List<Triple<Integer, Integer, String>> triples = new ArrayList<>();
+            try (PreparedStatement stmt = con.prepareStatement(SELECT_TOMBSTONES)) {
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        triples.add(new ImmutableTriple<>(Autoboxing.I(rs.getInt("account")), Autoboxing.I(rs.getInt("event")), rs.getString("uri")));
+                    }
+                }
+            } catch (SQLException e) {
+                throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            }
+
+            Random r = new Random();
+            try (PreparedStatement stmt = con.prepareStatement(REPLACE_TOMBSTONES)) {
+                Attendee attendee = new Attendee();
+                attendee.setCuType(CalendarUserType.INDIVIDUAL);
+                attendee.setEntity(userId);
+                attendee.setEntity(-1);
+                for (Triple<Integer, Integer, String> a : triples) {
+                    attendee.setUri(a.getRight());
+                    stmt.setInt(1, EntityUtils.determineEntity(attendee, new HashSet<>(), r.nextInt()));
+                    stmt.setInt(2, context.getContextId());
+                    stmt.setInt(3, Autoboxing.i(a.getLeft()));
+                    stmt.setInt(4, Autoboxing.i(a.getMiddle()));
+                    stmt.setInt(5, userId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                onlyRead = false;
+            } catch (SQLException e) {
+                throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            }
+        } finally {
+            if (onlyRead) {
+                dbProvider.releaseWriteConnectionAfterReading(context, con);
+            } else {
+                dbProvider.releaseWriteConnection(context, con);
+            }
+        }
     }
 
     /**
