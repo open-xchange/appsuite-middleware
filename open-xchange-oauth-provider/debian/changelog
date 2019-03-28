@@ -1,3 +1,9 @@
+open-xchange-oauth-provider (7.10.2-1) stable; urgency=medium
+
+  * First preview for 7.10.2 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 28 Mar 2019 13:47:33 +0100
+
 open-xchange-oauth-provider (7.10.2-0) unstable; urgency=medium
 
   * prepare for 7.10.2 release
