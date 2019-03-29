@@ -13,5 +13,6 @@ Import-Package: com.openexchange.config,
  javax.xml.parsers,
  org.osgi.framework,
  org.slf4j,
+ org.w3c.dom,
  org.xml.sax
 Export-Package: com.openexchange.serialization
