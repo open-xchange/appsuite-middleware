@@ -54,9 +54,9 @@ import java.util.List;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -89,11 +89,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AddAttachmentMailComposeAction.class);
-    }
-
     /**
      * Initializes a new {@link AddAttachmentMailComposeAction}.
      * @param services
@@ -103,7 +98,7 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
     }
 
     private boolean hasUploads(long maxFileSize, long maxSize, AJAXRequestData request) throws OXException {
-        return request.hasUploads(maxFileSize, maxSize, true);
+        return request.hasUploads(maxFileSize, maxSize, StreamParams.streamed(false));
     }
 
     @Override
