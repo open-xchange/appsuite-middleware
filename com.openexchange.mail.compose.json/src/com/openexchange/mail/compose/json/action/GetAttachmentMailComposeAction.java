@@ -51,14 +51,18 @@ package com.openexchange.mail.compose.json.action;
 
 import java.util.UUID;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.json.AttachmentFileHolder;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -68,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-@DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
+@DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
 public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
 
     /**
@@ -92,8 +96,33 @@ public class GetAttachmentMailComposeAction extends AbstractMailComposeAction {
         CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
         Attachment attachment = compositionSpaceService.getAttachment(uuid, attachmentUuid, session);
 
+        if (isNoImage(attachment)) {
+            // Require session parameter for non-image contents
+            String sessionId = requestData.requireParameter(AJAXServlet.PARAMETER_SESSION);
+            if (!sessionId.equals(session.getSessionID())) {
+                throw SessionExceptionCodes.WRONG_SESSION.create();
+            }
+        }
+
         AttachmentFileHolder fileHolder = new AttachmentFileHolder(attachment);
         return new AJAXRequestResult(fileHolder, "file");
+    }
+
+    private boolean isNoImage(Attachment attachment) {
+        return false == isImage(attachment);
+    }
+
+    private boolean isImage(Attachment attachment) {
+        return (mimeTypeIndicatesImage(attachment.getMimeType()) || mimeTypeIndicatesImage(getMimeTypeByFileName(attachment.getName())));
+    }
+
+    private boolean mimeTypeIndicatesImage(String mimeType) {
+        // Starts with "image/"
+        return (null != mimeType && Strings.asciiLowerCase(mimeType).startsWith("image/"));
+    }
+
+    private String getMimeTypeByFileName(String fileName) {
+        return MimeType2ExtMap.getContentType(fileName, null);
     }
 
 }
