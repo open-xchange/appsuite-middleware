@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
@@ -292,12 +291,14 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         return 0 < events.size() ? events.get(0).getId() : null;
     }
 
-    private List<Event> resolveByField(EventField field, String folderId, String resourceName, EventField[] fields) throws OXException {
+    private List<Event> resolveByField(EventField field, CalendarFolder folder, String resourceName, EventField[] fields) throws OXException {
         /*
          * construct search term to lookup matching events in folder
          */
-        CalendarFolder folder = getFolder(session, folderId);
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder)).addSearchTerm(getSearchTerm(field, SingleOperation.EQUALS, resourceName));
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getFolderIdTerm(session, folder))
+            .addSearchTerm(getSearchTerm(field, SingleOperation.EQUALS, resourceName))
+        ;
         /*
          * return matching events
          */
@@ -328,14 +329,16 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         /*
          * resolve by UID or filename
          */
-        List<Event> events = resolveByField(EventField.UID, folderId, resourceName, new EventField[] { EventField.ID });
+        CalendarFolder folder = getFolder(session, folderId);
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        List<Event> events = resolveByField(EventField.UID, folder, resourceName, fields);
         if (null == events || events.isEmpty()) {
-            events = resolveByField(EventField.FILENAME, folderId, resourceName, new EventField[] { EventField.ID });
+            events = resolveByField(EventField.FILENAME, folder, resourceName, fields);
+            if (null == events || events.isEmpty()) {
+                return null;
+            }
         }
-        if (null == events || events.isEmpty()) {
-            return null;
-        }
-        return resolveEvent(session, storage, folderId, events.get(0).getId());
+        return getResult(folder, events);
     }
 
     /**
@@ -418,36 +421,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         try {
             return postProcessor().process(events, folder).getEventsResult();
         } catch (OXException e) {
-            return new DefaultEventsResult(e);
-        }
-    }
-
-    private static EventsResult resolveEvent(CalendarSession session, CalendarStorage storage, String folderId, String id) {
-        /*
-         * get event & any overridden instances in folder
-         */
-        try {
-            Event event = new GetPerformer(session, storage).perform(folderId, id, null);
-            List<Event> events = new ArrayList<Event>();
-            events.add(event);
-            if (isSeriesMaster(event)) {
-                events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folderId, id));
-            }
-            return new DefaultEventsResult(events);
-        } catch (OXException e) {
-            if ("CAL-4041".equals(e.getErrorCode())) {
-                /*
-                 * "Event not found in folder..." -> try to load detached occurrences
-                 */
-                try {
-                    List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folderId, id);
-                    if (0 < detachedOccurrences.size()) {
-                        return new DefaultEventsResult(detachedOccurrences);
-                    }
-                } catch (OXException x) {
-                    // ignore
-                }
-            }
             return new DefaultEventsResult(e);
         }
     }
