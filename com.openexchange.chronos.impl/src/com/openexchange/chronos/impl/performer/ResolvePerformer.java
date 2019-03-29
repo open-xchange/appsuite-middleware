@@ -60,6 +60,7 @@ import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -291,6 +292,19 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         return 0 < events.size() ? events.get(0).getId() : null;
     }
 
+    private List<Event> resolveByField(EventField field, String folderId, String resourceName, EventField[] fields) throws OXException {
+        /*
+         * construct search term to lookup matching events in folder
+         */
+        CalendarFolder folder = getFolder(session, folderId);
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder)).addSearchTerm(getSearchTerm(field, SingleOperation.EQUALS, resourceName));
+        /*
+         * return matching events
+         */
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        events = storage.getUtilities().loadAdditionalEventData(folder.getCalendarUserId(), events, fields);
+        return sortSeriesMasterFirst(events);
+    }
 
     /**
      * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which
@@ -314,14 +328,14 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         /*
          * resolve by UID or filename
          */
-        String id = resolveByUid(resourceName);
-        if (null == id) {
-            id = resolveByFilename(resourceName);
-            if (null == id) {
-                return null;
-            }
+        List<Event> events = resolveByField(EventField.UID, folderId, resourceName, new EventField[] { EventField.ID });
+        if (null == events || events.isEmpty()) {
+            events = resolveByField(EventField.FILENAME, folderId, resourceName, new EventField[] { EventField.ID });
         }
-        return resolveEvent(session, storage, folderId, id);
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
+        return resolveEvent(session, storage, folderId, events.get(0).getId());
     }
 
     /**
