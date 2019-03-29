@@ -624,10 +624,9 @@ public class Utils {
     public static boolean isInFolder(Event event, CalendarFolder folder) {
         if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event) && null != event.getFolderId()) {
             return folder.getId().equals(event.getFolderId());
-        } else {
-            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId()) && false == userAttendee.isHidden();
         }
+        Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
+        return null != userAttendee && folder.getId().equals(userAttendee.getFolderId()) && false == userAttendee.isHidden();
     }
 
     /**
