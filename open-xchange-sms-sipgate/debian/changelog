@@ -1,3 +1,9 @@
+open-xchange-sms-sipgate (7.10.2-1) stable; urgency=medium
+
+  * First preview for 7.10.2 release
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 28 Mar 2019 13:48:00 +0100
+
 open-xchange-sms-sipgate (7.10.2-0) unstable; urgency=medium
 
   * prepare for 7.10.2 release

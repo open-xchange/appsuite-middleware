@@ -144,7 +144,7 @@ public final class Charsets {
     /**
      * Gets the ASCII string from specified <code>ByteArrayInputStream</code> instance.
      *
-     * @param bytes The bytes
+     * @param is The {@link ByteArrayInputStream}
      * @return The ASCII string
      */
     public static String toAsciiString(final ByteArrayInputStream is) {
@@ -203,7 +203,7 @@ public final class Charsets {
     /**
      * Gets specified string's ASCII bytes
      *
-     * @param str The string
+     * @param cs The string as {@link CharSequence}
      * @return The ASCII bytes
      */
     public static byte[] toAsciiBytes(final CharSequence cs) {
@@ -220,13 +220,7 @@ public final class Charsets {
         if (null == str) {
             return null;
         }
-        final int length = str.length();
-        if (0 == length) {
-            return new byte[0];
-        }
-        final byte[] ret = new byte[length];
-        str.getBytes(0, length, ret, 0);
-        return ret;
+        return str.getBytes(Charsets.US_ASCII);
     }
 
     private static final int _64K = 65536;
@@ -251,8 +245,7 @@ public final class Charsets {
                 out.write((byte) str.charAt(i++));
             }
         } else {
-            final byte[] ret = new byte[length];
-            str.getBytes(0, length, ret, 0);
+            final byte[] ret = str.getBytes(Charsets.US_ASCII);
             out.write(ret, 0, length);
         }
     }

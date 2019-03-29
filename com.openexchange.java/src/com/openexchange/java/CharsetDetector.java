@@ -235,12 +235,7 @@ public final class CharsetDetector {
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
     public static String detectCharset(final InputStream in, String fallback, boolean close) {
-        try {
-            return detectCharsetFailOnError(in, fallback, close);
-        } catch (final IOException e) {
-            LOG.error("", e);
-            return FALLBACK;
-        }
+        return detectCharsetFailOnError(in, fallback, close);
     }
 
     /**
@@ -250,10 +245,9 @@ public final class CharsetDetector {
      *
      * @param in The input stream to examine
      * @throws NullPointerException If input stream is <code>null</code>
-     * @throws IOException If reading from stream fails
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
-    public static String detectCharsetFailOnError(final InputStream in) throws IOException {
+    public static String detectCharsetFailOnError(final InputStream in) {
         return detectCharsetFailOnError(in, getFallback(), true);
     }
 
@@ -264,10 +258,9 @@ public final class CharsetDetector {
      * @param fallback The fallback charset to return if detection was not successful
      * @param close <code>true</code> to close the input stream after detection, <code>false</code>, otherwise
      * @throws NullPointerException If input stream is <code>null</code>
-     * @throws IOException If reading from stream fails
      * @return The detected charset or the supplied fallback if no matching/supported charset could be found
      */
-    public static String detectCharsetFailOnError(final InputStream in, String fallback, boolean close) throws IOException {
+    public static String detectCharsetFailOnError(final InputStream in, String fallback, boolean close) {
         if (null == in) {
             throw new NullPointerException("input stream is null");
         }
@@ -300,7 +293,7 @@ public final class CharsetDetector {
     private static String getResultingCharset(UniversalDetector detector, String fallback) {
         String detectedCharset = detector.getDetectedCharset();
         if (null == detectedCharset || false == isValid(detectedCharset)) {
-            return fallback;
+            return Strings.isEmpty(fallback) ? FALLBACK : fallback;
         }
         return detectedCharset;
     }

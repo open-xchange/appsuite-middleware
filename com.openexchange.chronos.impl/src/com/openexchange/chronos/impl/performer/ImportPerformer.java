@@ -305,7 +305,11 @@ public class ImportPerformer extends AbstractUpdatePerformer {
         }
         List<OXException> warnings = new ArrayList<OXException>();
         for (List<OXException> value : warningsPerEventId.values()) {
-            warnings.addAll(value);
+            for (OXException e : value) {
+                if (false == CalendarExceptionCodes.IGNORED_INVALID_DATA.equals(e)) {
+                    warnings.addAll(value);
+                }
+            }
         }
         return warnings;
     }

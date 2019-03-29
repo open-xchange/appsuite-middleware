@@ -69,8 +69,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link BufferingQueue}
  * <p/>
  * Wraps an event queue as a buffer for elements that should be available in the queue after a defined timespan. Offering the same
- * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(BufferedElement)}, up to a defined maximum
- * duration, or may replace the existing element via {@link #offerOrReplace(BufferedElement)}.
+ * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(Object)}, up to a defined maximum
+ * duration, or may replace the existing element via {@link #offerOrReplace(Object)}.
  * <p/>
  * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate elements before they get available
  * for consumers.
@@ -652,9 +652,8 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
-                    } else {
-                        nanos = available.awaitNanos(nanos);
                     }
+                    nanos = available.awaitNanos(nanos);
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
@@ -1052,6 +1051,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
             hash = source.hash;
         }
 
+        @SuppressWarnings("rawtypes") // Type safety is ensured by invoking list
         @Override
         public int compareTo(Delayed o) {
             long thisStamp = this.stamp;

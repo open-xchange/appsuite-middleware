@@ -59,6 +59,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * {@link ConcurrentEnumMap} - A concurrent {@link EnumMap} backed by a {@link AtomicReference} holding a delegate map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @param <E> The {@link Enum}
+ * @param <V> The Object to map to
  * @since 7.4.0
  */
 public class ConcurrentEnumMap<E extends Enum<E>, V> implements Map<E, V> {
@@ -67,6 +69,8 @@ public class ConcurrentEnumMap<E extends Enum<E>, V> implements Map<E, V> {
 
     /**
      * Initializes a new {@link ConcurrentEnumMap}.
+     * 
+     * @param elementType The {@link Class} of the elements 
      */
     public ConcurrentEnumMap(final Class<E> elementType) {
         super();
@@ -132,6 +136,7 @@ public class ConcurrentEnumMap<E extends Enum<E>, V> implements Map<E, V> {
      * @throws NullPointerException If the specified key or value is null, and this map does not permit null keys or values
      * @throws IllegalArgumentException If some property of the specified key or value prevents it from being stored in this map
      */
+    @Override
     public V putIfAbsent(final E key, final V value) {
         EnumMap<E, V> expected;
         EnumMap<E, V> map;

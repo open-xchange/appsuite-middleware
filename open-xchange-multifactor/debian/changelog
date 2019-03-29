@@ -1,3 +1,9 @@
+open-xchange-multifactor (7.10.2-1) stable; urgency=medium
+
+  * First preview for 7.10.2 release
+
+ -- Benjamin Gruedelbach <benjamin.gruedelbach@open-xchange.com>  Thu, 28 Mar 2019 13:47:30 +0100
+
 open-xchange-multifactor (7.10.2-0) unstable; urgency=low
 
   * Initial release

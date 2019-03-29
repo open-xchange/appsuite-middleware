@@ -80,6 +80,7 @@ import com.openexchange.file.storage.FileStorageReadOnly;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.accesscontrol.AccessControl;
 import com.openexchange.file.storage.mail.sort.MailDriveSortUtility;
 import com.openexchange.groupware.results.Delta;
@@ -750,32 +751,125 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         return search(pattern, fields, folderId, false, sort, order, start, end);
     }
 
+    private SortTerm[] optSortTermsForField(Field sort, SortDirection order) {
+        SortTerm sortTerm = null;
+        switch (sort) {
+            case CREATED:
+                //$FALL-THROUGH$
+            case LAST_MODIFIED:
+                //$FALL-THROUGH$
+            case LAST_MODIFIED_UTC:
+                sortTerm = SortTerm.ARRIVAL;
+                break;
+            case FILE_SIZE:
+                sortTerm = SortTerm.SIZE;
+                break;
+            case TITLE:
+                //$FALL-THROUGH$
+            case FILENAME:
+                sortTerm = SortTerm.SUBJECT;
+                break;
+            default:
+                break;
+        }
+        return sortTerm == null ? null : SortDirection.DESC == order ? new SortTerm[] { SortTerm.REVERSE, sortTerm } : new SortTerm[] { sortTerm };
+    }
+
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        final List<FullName> fullNames;
+        final FullName fullName;
         {
             if (null == folderId) {
-                fullNames = fullNameCollection.asList();
+                fullName = fullNameCollection.getFullNameFor(Type.ALL);
             } else {
-                fullNames = Collections.singletonList(checkFolderId(folderId));
+                fullName = checkFolderId(folderId);
             }
         }
 
-        List<File> files = perform(new MailDriveClosure<List<File>>() {
+        final SortTerm[] sortTerm = optSortTermsForField(sort, order);
 
-            @Override
-            protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
-                List<File> files = new LinkedList<>();
+        List<File> files;
+        if (sortTerm != null) {
+            files = perform(new MailDriveClosure<List<File>>() {
 
-                for (FullName fullName : fullNames) {
+                @Override
+                protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
+                    List<File> files = new LinkedList<>();
+
                     if (fullName.isNotDefaultFolder()) {
                         IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
                         folder.open(Folder.READ_ONLY);
                         try {
                             if (folder.getMessageCount() > 0) {
+                                Message[] sortedMessages = folder.getSortedMessages(sortTerm, new SubjectTerm(pattern));
+
+                                // Slice...
+                                if ((start != NOT_SET) && (end != NOT_SET)) {
+                                    int size = sortedMessages.length;
+                                    if (start > size) {
+                                        // Return empty list if start is out of range
+                                        return Collections.emptyList();
+                                    }
+
+                                    // Reset end index if out of range
+                                    int toIndex = end;
+                                    if (toIndex >= size) {
+                                        toIndex = size;
+                                    }
+
+                                    int newLength = toIndex - start;
+                                    if (newLength < 0) {
+                                        return Collections.emptyList();
+                                    }
+
+                                    Message[] copy = new Message[newLength];
+                                    System.arraycopy(sortedMessages, start, copy, 0, Math.min(sortedMessages.length - start, newLength));
+                                    sortedMessages = copy;
+                                }
+
+                                // Fetch for determined chunk
+                                folder.fetch(sortedMessages, FETCH_PROFILE_VIRTUAL);
+
+                                // Convert to files
+                                int i = 0;
+                                for (int k = sortedMessages.length; k-- > 0;) {
+                                    IMAPMessage message = (IMAPMessage) sortedMessages[i++];
+                                    long uid = message.getUID();
+                                    if (uid < 0) {
+                                        uid = folder.getUID(message);
+                                    }
+                                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
+                                    if (null != mailDriveFile) {
+                                        files.add(mailDriveFile);
+                                    }
+                                }
+                            }
+                        } finally {
+                            folder.close(false);
+                        }
+                    }
+
+                    return files;
+                }
+            });
+        } else {
+            // Need to fetch all and sort in-application
+            files = perform(new MailDriveClosure<List<File>>() {
+
+                @Override
+                protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
+                    List<File> files = new LinkedList<>();
+
+                    if (fullName.isNotDefaultFolder()) {
+                        IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
+                        folder.open(Folder.READ_ONLY);
+                        try {
+                            if (folder.getMessageCount() > 0) {
+                                // Search and fetch for result set
                                 Message[] messages = folder.search(new SubjectTerm(pattern));
                                 folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
+                                // Convert to files
                                 int i = 0;
                                 for (int k = messages.length; k-- > 0;) {
                                     IMAPMessage message = (IMAPMessage) messages[i++];
@@ -793,35 +887,35 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                             folder.close(false);
                         }
                     }
+
+                    return files;
                 }
+            });
 
-                return files;
-            }
-        });
+            // Sort collection
+            sort(files, sort, order);
 
-        // Sort collection
-        sort(files, sort, order);
-
-        // Slice...
-        if ((start != NOT_SET) && (end != NOT_SET)) {
-            int size = files.size();
-            if ((start) > size) {
+            // Slice...
+            if ((start != NOT_SET) && (end != NOT_SET)) {
+                int size = files.size();
+                if ((start) > size) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return SearchIteratorAdapter.emptyIterator();
+                }
                 /*
-                 * Return empty iterator if start is out of range
+                 * Reset end index if out of range
                  */
-                return SearchIteratorAdapter.emptyIterator();
+                int toIndex = end;
+                if (toIndex >= size) {
+                    toIndex = size;
+                }
+                files = files.subList(start, toIndex);
             }
-            /*
-             * Reset end index if out of range
-             */
-            int toIndex = end;
-            if (toIndex >= size) {
-                toIndex = size;
-            }
-            files = files.subList(start, toIndex);
         }
 
-        return new SearchIteratorAdapter<>(files.iterator(), files.size());
+        return files.isEmpty() ? SearchIteratorAdapter.emptyIterator() : new SearchIteratorAdapter<>(files.iterator(), files.size());
     }
 
     @Override

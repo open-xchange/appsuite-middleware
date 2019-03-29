@@ -1,4 +1,6 @@
 /mail/compose:
+  parameters:
+    - $ref: "#/parameters/gblQueryParamSession"
   post:
     operationId: postMailCompose
     tags:
@@ -42,7 +44,7 @@
       200:
         description: A JSON object containing the newly created message model.
         schema:
-          $ref: "#/definitions/MailComposeMessageModel"
+          $ref: "#/definitions/MailComposeResponse"
       400:
         description: Bad request, response contains error message.
       401:
@@ -66,7 +68,7 @@
       200:
         description: A JSON array containing message models.
         schema:
-          $ref: "#/definitions/MailComposeMessageModel"
+          $ref: "#/definitions/MailComposeResponse"
       400:
         description: Bad request, response contains error message.
       401:

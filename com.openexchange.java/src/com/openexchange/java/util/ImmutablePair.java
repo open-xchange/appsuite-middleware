@@ -54,6 +54,8 @@ package com.openexchange.java.util;
  * {@link ImmutablePair} - An immutable pair.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @param <T> The key of the pair
+ * @param <V> The value of the pair
  * @since v7.10.0
  */
 public final class ImmutablePair<T, V> {
@@ -67,7 +69,12 @@ public final class ImmutablePair<T, V> {
         return new Builder<>();
     }
 
-    /** A builder for an <code>ImmutablePair</code> */
+    /**
+     * A builder for an <code>ImmutablePair</code>
+     * 
+     * @param <T> The key of the pair
+     * @param <V> The value of the pair
+     */
     public static final class Builder<T, V> {
 
         private T first;
@@ -145,7 +152,7 @@ public final class ImmutablePair<T, V> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ImmutablePair other = (ImmutablePair) obj;
+        ImmutablePair<?, ?> other = (ImmutablePair<?, ?>) obj;
         if (first == null) {
             if (other.first != null) {
                 return false;
