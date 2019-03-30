@@ -1305,7 +1305,7 @@ public class AJAXRequestData {
      * @see #hasUploads(long, long)
      */
     public boolean hasUploads() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         return !files.isEmpty();
     }
 
@@ -1321,7 +1321,7 @@ public class AJAXRequestData {
     public boolean hasUploads(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         return !files.isEmpty();
     }
 
@@ -1340,18 +1340,37 @@ public class AJAXRequestData {
      * @throws OXException If upload files cannot be processed
      */
     public boolean hasUploads(long maxUploadFileSize, long maxUploadSize, boolean streamed) throws OXException {
+        return hasUploads(maxUploadFileSize, maxUploadSize, streamed ? StreamParams.streamed(true) : StreamParams.nonStreamed());
+    }
+
+    /**
+     * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
+     * multiple module.
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
+     *
+     * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param streamParams Controls whether a streamed upload is preferred
+     * @return <code>true</code> if one or more files were uploaded, <code>false</code> otherwise.
+     * @throws OXException If upload files cannot be processed
+     */
+    public boolean hasUploads(long maxUploadFileSize, long maxUploadSize, StreamParams streamParams) throws OXException {
         if (!files.isEmpty()) {
             // Already parsed
             return true;
         }
 
+        boolean streamed = streamParams.streamed;
         if (streamed) {
             Boolean hasStreamedUpload = this.hasStreamedUpload;
             if (null == hasStreamedUpload) {
                 this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
                 this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
                 try {
-                    processUpload(maxUploadFileSize, maxUploadSize, true);
+                    processUpload(maxUploadFileSize, maxUploadSize, streamParams);
                 } catch (OXException e) {
                     if (UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
                         return (null != e.getArgument("__uploadEvent")) && !files.isEmpty();
@@ -1367,7 +1386,7 @@ public class AJAXRequestData {
 
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, streamParams);
         return !files.isEmpty();
     }
 
@@ -1379,7 +1398,7 @@ public class AJAXRequestData {
      * @see #getFiles(long, long)
      */
     public List<UploadFile> getFiles() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         return Collections.unmodifiableList(files);
     }
 
@@ -1394,7 +1413,7 @@ public class AJAXRequestData {
     public List<UploadFile> getFiles(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         return Collections.unmodifiableList(files);
     }
 
@@ -1407,7 +1426,7 @@ public class AJAXRequestData {
      * @see #getFile(String, long, long)
      */
     public @Nullable UploadFile getFile(String name) throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
@@ -1428,7 +1447,7 @@ public class AJAXRequestData {
     public @Nullable UploadFile getFile(String name, long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
                 return file;
@@ -1448,7 +1467,22 @@ public class AJAXRequestData {
      * @throws OXException If upload cannot be processed
      */
     public StreamedUpload getStreamedUpload() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize, true);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.streamed(true));
+        return streamedUpload;
+    }
+
+    /**
+     * Gets the streamed upload
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
+     *
+     * @return The streamed upload
+     * @throws OXException If upload cannot be processed
+     */
+    public StreamedUpload getStreamedUpload(boolean requireStartingFormField) throws OXException {
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.streamed(requireStartingFormField));
         return streamedUpload;
     }
 
@@ -1467,7 +1501,7 @@ public class AJAXRequestData {
     public StreamedUpload getStreamedUpload(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize, true);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.streamed(true));
         return streamedUpload;
     }
 
@@ -1479,7 +1513,7 @@ public class AJAXRequestData {
      * @see #getUploadEvent(long, long)
      */
     public UploadEvent getUploadEvent() throws OXException {
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         return uploadEvent;
     }
 
@@ -1494,15 +1528,18 @@ public class AJAXRequestData {
     public UploadEvent getUploadEvent(long maxUploadFileSize, long maxUploadSize) throws OXException {
         this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
         this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-        processUpload(maxUploadFileSize, maxUploadSize, false);
+        processUpload(maxUploadFileSize, maxUploadSize, StreamParams.nonStreamed());
         return uploadEvent;
     }
 
-    private void processUpload(long maxFileSize, long maxOverallSize, boolean streamed) throws OXException {
+    private void processUpload(long maxFileSize, long maxOverallSize, StreamParams streamParams) throws OXException {
         HttpServletRequest localHttpServletRequest = httpServletRequest;
         if (null == localHttpServletRequest) {
             return;
         }
+
+        boolean streamed = streamParams.streamed;
+        boolean requireStartingFormField = streamParams.requireStartingFormField;
         if (multipart) {
             final List<UploadFile> thisFiles = this.files;
             synchronized (thisFiles) {
@@ -1518,7 +1555,7 @@ public class AJAXRequestData {
                     StreamedUpload streamedUpload = this.streamedUpload;
                     if (null == streamedUpload) {
                         try {
-                            streamedUpload = UploadUtility.processStreamedUpload(true, localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                            streamedUpload = UploadUtility.processStreamedUpload(requireStartingFormField, localHttpServletRequest, maxFileSize, maxOverallSize, session);
                             this.streamedUpload = streamedUpload;
                             for (Iterator<String> names = streamedUpload.getFormFieldNames(); names.hasNext();) {
                                 String name = names.next();
@@ -2003,4 +2040,43 @@ public class AJAXRequestData {
         return prefix;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /** Controls whether a streamed upload is performed */
+    public static class StreamParams {
+
+        private static final StreamParams NON_STREAMED = new StreamParams(false, false);
+
+        /**
+         * Gets the stream parameters to perform a non-streamed upload
+         *
+         * @return The stream parameters
+         */
+        public static StreamParams nonStreamed() {
+            return NON_STREAMED;
+        }
+
+        private static final StreamParams STREAMED_REQUIRED = new StreamParams(true, true);
+
+        private static final StreamParams STREAMED_NOT_REQUIRED = new StreamParams(true, false);
+
+        /**
+         * Gets the stream parameters to perform a streamed upload
+         *
+         * @param requireStartingFormField <code>true</code> to require that multipart upload request starts with at least one simple form field; otherwise <code>false</code>
+         * @return The stream parameters
+         */
+        public static StreamParams streamed(boolean requireStartingFormField) {
+            return requireStartingFormField ? STREAMED_REQUIRED : STREAMED_NOT_REQUIRED;
+        }
+
+        final boolean streamed;
+        final boolean requireStartingFormField;
+
+        private StreamParams(boolean streamed, boolean requireStartingFormField) {
+            super();
+            this.streamed = streamed;
+            this.requireStartingFormField = requireStartingFormField;
+        }
+    }
 }

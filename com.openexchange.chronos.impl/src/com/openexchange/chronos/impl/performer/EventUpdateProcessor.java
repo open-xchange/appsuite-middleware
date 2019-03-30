@@ -330,7 +330,7 @@ public class EventUpdateProcessor implements EventUpdate {
         } else {
             adjustForGroupScheduled(originalEvent, updatedEvent);
         }
-        if (CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity())) {
+        if (CalendarUtils.isInternal(originalEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
             /*
              * reset attendee's partstats if required & increment sequence number as needed
              */
@@ -899,9 +899,9 @@ public class EventUpdateProcessor implements EventUpdate {
      */
     private boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
         /*
-         * reset participation status if change is performed by organizer, and a different time period will be occupied by the update
+         * reset participation status if a different time period will be occupied by the update
          */
-        return CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity()) && coversDifferentTimePeriod(originalEvent, updatedEvent);
+        return coversDifferentTimePeriod(originalEvent, updatedEvent);
     }
 
 }

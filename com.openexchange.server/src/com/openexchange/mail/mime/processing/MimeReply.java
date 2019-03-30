@@ -1012,9 +1012,9 @@ public final class MimeReply extends AbstractMimeProcessing {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
                     if (isEmpty(text)) {
-                        final String htmlContent = getHtmlContent(multipartPart, count);
+                        String htmlContent = getHtmlContent(multipartPart, count);
                         if (null != htmlContent) {
-                            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                             text = null == htmlService ? "" : htmlService.html2text(htmlContent, true);
                         }
                     }
@@ -1035,11 +1035,49 @@ public final class MimeReply extends AbstractMimeProcessing {
                         final ContentType nextContentType = nextPart.getContentType();
                         if (nextContentType.startsWith(TEXT) && (avoidHTML ? !nextContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
                             String text = MimeProcessingUtility.handleInlineTextPart(nextPart, nextContentType, pc.usm.isDisplayHtmlInlineContent());
-                            pc.textBuilder.append(text);
+                            if (text != null && text.length() > 0) {
+                                if (pc.retvalContentType.startsWith(TEXT_HTM)) {
+                                    if (nextContentType.startsWith(TEXT_HTM)) {
+                                        pc.textBuilder.append(text);
+                                    } else {
+                                        // Don't append non-HTML to HTML
+                                    }
+                                } else {
+                                    if (nextContentType.startsWith(TEXT_HTM)) {
+                                        // Don't append HTML to non-HTML
+                                    } else {
+                                        pc.textBuilder.append(text);
+                                    }
+                                }
+                            }
+                        } else if (nextContentType.startsWith("image/") && MimeProcessingUtility.isInline(nextPart, nextContentType) && pc.retvalContentType.startsWith(TEXT_HTM)) {
+                            final String imageURL;
+                            String fileName = nextPart.getFileName();
+                            {
+                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                if (null == fileName) {
+                                    final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
+                                    fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
+                                }
+                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, pc.origMail.getFolder())).id(pc.origMail.getMailId()).build();
+                                imageURL = imgSource.generateUrl(imageLocation, pc.session);
+                            }
+                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                            pc.textBuilder.append(imgTag);
                         } else if (nextContentType.startsWith(MULTIPART)) {
                             gatherAllTextContents(nextPart, nextContentType, accountId, pc);
                         }
                     }
+
+                    if (pc.retvalContentType.startsWith(TEXT_HTM)) {
+                        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                        if (htmlService != null) {
+                            String compositeHtml = pc.textBuilder.toString();
+                            pc.textBuilder.setLength(0);
+                            pc.textBuilder.append(htmlService.getWellFormedHTMLDocument(compositeHtml));
+                        }
+                    }
+
                     return true;
                 }
                 found = true;

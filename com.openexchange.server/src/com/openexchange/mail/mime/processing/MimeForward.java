@@ -704,9 +704,46 @@ public final class MimeForward extends AbstractMimeProcessing {
                     final ContentType nextContentType = nextPart.getContentType();
                     if (nextContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
                         String nextText = MimeProcessingUtility.handleInlineTextPart(nextPart, retvalContentType, usm.isDisplayHtmlInlineContent());
-                        sb.append(nextText);
+                        if (nextText != null && nextText.length() > 0) {
+                            if (retvalContentType.startsWith(TEXT_HTM)) {
+                                if (nextContentType.startsWith(TEXT_HTM)) {
+                                    sb.append(nextText);
+                                } else {
+                                    // Don't append non-HTML to HTML
+                                }
+                            } else {
+                                if (nextContentType.startsWith(TEXT_HTM)) {
+                                    // Don't append HTML to non-HTML
+                                } else {
+                                    sb.append(nextText);
+                                }
+                            }
+                        }
+                    } else if (nextContentType.startsWith("image/") && MimeProcessingUtility.isInline(nextPart, nextContentType) && retvalContentType.startsWith(TEXT_HTM)) {
+                        final String imageURL;
+                        String fileName = nextPart.getFileName();
+                        {
+                            final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                            if (null == fileName) {
+                                final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
+                                fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
+                            }
+                            final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(origMail.getAccountId(), origMail.getFolder())).id(origMail.getMailId()).build();
+                            imageURL = imgSource.generateUrl(imageLocation, session);
+                        }
+                        final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                        sb.append(imgTag);
                     }
                 }
+
+                if (retvalContentType.startsWith(TEXT_HTM)) {
+                    HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    if (htmlService != null) {
+                        String compositeHtml = sb.toString();
+                        return htmlService.getWellFormedHTMLDocument(compositeHtml);
+                    }
+                }
+
                 return sb.toString();
             } else if (partContentType.startsWith(MULTIPART)) {
                 final String text = getFirstSeenText(part, retvalContentType, usm, origMail, session, alt);
