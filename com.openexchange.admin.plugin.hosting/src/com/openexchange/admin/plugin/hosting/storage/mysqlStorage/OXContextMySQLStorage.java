@@ -118,6 +118,7 @@ import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage;
 import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.utils.CreateTableRegistry;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -222,6 +223,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         {
             LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
             Utils.removeFileStorages(ctx, true);
+            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
             LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
         }
 
