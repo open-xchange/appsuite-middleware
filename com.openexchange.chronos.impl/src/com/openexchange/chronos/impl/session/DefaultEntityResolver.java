@@ -169,7 +169,6 @@ public class DefaultEntityResolver implements EntityResolver {
     
     @Override
     public List<Attendee> prepare(List<Attendee> attendees, int[] resolvableEntities) throws OXException {
-        //resolvableEntities = null;
         if (null != attendees) {
             for (Attendee attendee : attendees) {
                 /*
@@ -183,17 +182,22 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType) throws OXException {
-        return prepare(calendarUser, cuType, false);
+        return prepare(calendarUser, cuType, false, null);
     }
 
-    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds) throws OXException {
+    @Override
+    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, int[] resolvableEntities) throws OXException {
+        return prepare(calendarUser, cuType, false, resolvableEntities);
+    }
+
+    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds, int[] resolvableEntities) throws OXException {
         if (null == calendarUser) {
             return null;
         }
         /*
          * try and resolve external calendar user address to internal calendar user, enhance with static properties
          */
-        return applyEntityData(resolveExternals(calendarUser, cuType, resolveResourceIds, null), cuType);
+        return applyEntityData(resolveExternals(calendarUser, cuType, resolveResourceIds, resolvableEntities), cuType);
     }
 
     @Override

@@ -142,7 +142,7 @@ public class ICal4JITipParser {
             return;
         }
 
-        session.getEntityResolver().prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL);
+        session.getEntityResolver().prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL, new int[] { session.getUserId() });
     }
 
     private boolean looksLikeMicrosoft(ImportedCalendar calendar) {
