@@ -115,7 +115,7 @@ import com.openexchange.java.Strings;
  */
 public class EventPatches {
     
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
 
     /**
      * Initializes a new {@link Incoming}.
@@ -142,7 +142,7 @@ public class EventPatches {
     private static final String COMMENT_PROPOSAL_PREFIX_INTERNAL = "\u200B\u0e4f\u200B ";
 
     /** The "empty" trigger used in Apple default alarms (<code>19760401T005545Z</code>) */
-    private static final Trigger EMPTY_ALARM_TRIGGER = new Trigger(new Date(197168145000L));  // 19760401T005545Z
+    static final Trigger EMPTY_ALARM_TRIGGER = new Trigger(new Date(197168145000L));  // 19760401T005545Z
 
     /** Extended properties that are derived from others and injected on a per-client basis */
     private static final String[] DERIVED_X_PROPERTIES = {
@@ -185,7 +185,7 @@ public class EventPatches {
      * @param The prefix to replace
      * @param The replacement prefix
      */
-    private static void patchPrivateComments(List<Attendee> attendees, String prefix, String replacement) {
+    static void patchPrivateComments(List<Attendee> attendees, String prefix, String replacement) {
         if (null == attendees || 0 == attendees.size()) {
             return;
         }
@@ -206,7 +206,7 @@ public class EventPatches {
      * @param event The event being imported/exported
      * @return The patched event
      */
-    private static Event removeAttachmentsFromExceptions(EventResource resource, Event event) {
+    static Event removeAttachmentsFromExceptions(EventResource resource, Event event) {
         if (null != event.getAttachments() && DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) && (isSeriesException(event) || null != event.getRecurrenceId())) {
             event.removeAttachments();
         }
@@ -219,7 +219,7 @@ public class EventPatches {
      * @param event The event to strip the derived extended properties from
      * @return The passed event reference
      */
-    private static Event stripDerivedProperties(Event event) {
+    static Event stripDerivedProperties(Event event) {
         ExtendedProperties extendedProperties = event.getExtendedProperties();
         if (null != extendedProperties && 0 < extendedProperties.size()) {
             List<ExtendedProperty> propertiesToRemove = new ArrayList<ExtendedProperty>();
@@ -249,7 +249,7 @@ public class EventPatches {
          *
          * @param factory The factory
          */
-        private Incoming(GroupwareCaldavFactory factory) {
+        Incoming(GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
         }
@@ -370,9 +370,12 @@ public class EventPatches {
                         return;
                     }
                     Event newChangeException = newChangeExceptions.get(0);
+                    if(newChangeException == null) {
+                        return;
+                    }
                     Alarm snoozedAlarm = null;
                     Alarm snoozeAlarm = null;
-                    if (null != newChangeException && null != newChangeException.getAlarms()) {
+                    if (null != newChangeException.getAlarms()) {
                         for (Alarm alarm : newChangeException.getAlarms()) {
                             /*
                              * XXX: If the original event did contain more than one alarm the snooze alarm of e.g. the second alarm
@@ -457,7 +460,7 @@ public class EventPatches {
             return null;
         }
 
-        private Event exportAndImport(EventResource resource, Event event) throws OXException {
+        Event exportAndImport(EventResource resource, Event event) throws OXException {
             /*
              * prepare exported event
              */
@@ -801,7 +804,7 @@ public class EventPatches {
          *
          * @param factory The factory
          */
-        private Outgoing(GroupwareCaldavFactory factory) {
+        Outgoing(GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
         }
