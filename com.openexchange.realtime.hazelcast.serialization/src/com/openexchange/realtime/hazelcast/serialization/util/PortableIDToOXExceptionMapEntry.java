@@ -63,7 +63,8 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.serialization.FilteringObjectStreamFactory;
+import com.openexchange.serialization.FilteringObjectInputStream;
+import com.openexchange.serialization.FilteringObjectStreamBlacklistProvider;
 
 /**
  * {@link PortableIDToOXExceptionMapEntry} - Makes entries from IDMap portable by serializing them as pairs.
@@ -177,7 +178,7 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
      */
     private static OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
-        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
+        try (final ObjectInputStream objectInputStream = new FilteringObjectInputStream(byteArrayInputStream, Services.getService(FilteringObjectStreamBlacklistProvider.class).blacklist())) {
             return OXException.class.cast(objectInputStream.readObject());
         }
     }

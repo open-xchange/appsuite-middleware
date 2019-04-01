@@ -51,8 +51,8 @@ package com.openexchange.serialization.osgi;
 
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.serialization.FilteringObjectStreamFactory;
-import com.openexchange.serialization.impl.FilteringObjectStreamFactoryImpl;
+import com.openexchange.serialization.FilteringObjectStreamBlacklistProvider;
+import com.openexchange.serialization.impl.FilteringObjectStreamBlacklistProviderImpl;
 
 /**
  * {@link Activator}
@@ -76,8 +76,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        FilteringObjectStreamFactoryImpl service = new FilteringObjectStreamFactoryImpl();
-        registerService(FilteringObjectStreamFactory.class, service);
+        FilteringObjectStreamBlacklistProviderImpl service = new FilteringObjectStreamBlacklistProviderImpl();
+        registerService(FilteringObjectStreamBlacklistProvider.class, service);
         registerService(ForcedReloadable.class, service);
     }
 
