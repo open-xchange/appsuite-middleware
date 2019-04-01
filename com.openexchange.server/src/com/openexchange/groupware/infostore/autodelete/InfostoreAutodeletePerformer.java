@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import org.slf4j.Logger;
@@ -92,6 +93,20 @@ public class InfostoreAutodeletePerformer {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreAutodeletePerformer.class);
     }
 
+    private static class FolderCollection {
+
+        final TIntList deleteAll;
+        final TIntList deleteOwn;
+
+        FolderCollection(TIntList deleteAll, TIntList deleteOwn) {
+            super();
+            this.deleteAll = deleteAll;
+            this.deleteOwn = deleteOwn;
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private final InfostoreFacadeImpl infostoreFacade;
 
     /**
@@ -102,14 +117,7 @@ public class InfostoreAutodeletePerformer {
         this.infostoreFacade = infostoreFacade;
     }
 
-    /**
-     * Removes versions of all documents, which are older than specified number of retention days.
-     *
-     * @param retentionDays The number of retention days
-     * @param session The session
-     * @throws OXException If remove operation fails
-     */
-    public void removeVersionsByRetentionDays(int retentionDays, ServerSession session) throws OXException {
+    private FolderCollection determineFolders(ServerSession session) throws OXException {
         int userId = session.getUserId();
         TIntList deleteAll = null;
         TIntList deleteOwn = null;
@@ -145,7 +153,25 @@ public class InfostoreAutodeletePerformer {
             }
         }
 
-        Date maxLastModified = getMaxLastModified(retentionDays);
+        return new FolderCollection(deleteAll, deleteOwn);
+    }
+
+    /**
+     * Removes versions of all documents, which are older than specified number of retention days.
+     *
+     * @param retentionDays The number of retention days
+     * @param session The session
+     * @throws OXException If remove operation fails
+     */
+    public void removeVersionsByRetentionDays(int retentionDays, ServerSession session) throws OXException {
+        FolderCollection folderCollection = determineFolders(session);
+        TIntList deleteAll = folderCollection.deleteAll;
+        TIntList deleteOwn = folderCollection.deleteOwn;
+        if (deleteAll == null && deleteOwn == null) {
+            return;
+        }
+
+        final Date maxLastModified = getMaxLastModified(retentionDays);
 
         if (null != deleteAll) {
             deleteAll.forEach(new TIntProcedure() {
@@ -168,7 +194,7 @@ public class InfostoreAutodeletePerformer {
                 @Override
                 public boolean execute(int folderId) {
                     try {
-                        cleanupVersionsByMaxLastModified(folderId, userId, maxLastModified, session);
+                        cleanupVersionsByMaxLastModified(folderId, session.getUserId(), maxLastModified, session);
                     } catch (Exception e) {
                         LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
                     }
@@ -208,6 +234,85 @@ public class InfostoreAutodeletePerformer {
     }
 
     /**
+     * Removes all versions of a those documents, which exceed the given max. number of versions.
+     *
+     * @param maxVersions The max. number of versions
+     * @param session The session
+     * @throws OXException If remove operation fails
+     */
+    public void removeVersionsByMaxCount(int maxVersions, ServerSession session) throws OXException {
+        FolderCollection folderCollection = determineFolders(session);
+        TIntList deleteAll = folderCollection.deleteAll;
+        TIntList deleteOwn = folderCollection.deleteOwn;
+        if (deleteAll == null && deleteOwn == null) {
+            return;
+        }
+
+        if (null != deleteAll) {
+            deleteAll.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(int folderId) {
+                    try {
+                        cleanupVersionsByMaxCount(folderId, 0, maxVersions, session);
+                    } catch (Exception e) {
+                        LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
+                    }
+                    return true;
+                }
+            });
+        }
+
+        if (null != deleteOwn) {
+            deleteOwn.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(int folderId) {
+                    try {
+                        cleanupVersionsByMaxCount(folderId, session.getUserId(), maxVersions, session);
+                    } catch (Exception e) {
+                        LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
+                    }
+                    return true;
+                }
+            });
+        }
+    }
+
+    void cleanupVersionsByMaxCount(int folderId, int optOwner, int maxVersions, ServerSession session) throws OXException {
+        /*
+         * query elapsed versions in folder
+         */
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere("infostore.folder_id = " + folderId + " AND infostore_document.file_store_location IS NOT NULL AND (infostore.version <> infostore_document.version_number)" + (optOwner > 0 ? " AND infostore.created_by="+optOwner : ""), Metadata.VALUES_ARRAY, infostoreFacade, session.getContext()));
+        if (allVersions.isEmpty()) {
+            return;
+        }
+        /*
+         * group by document
+         */
+        TIntObjectMap<List<DocumentMetadata>> groupedByDocument = new TIntObjectHashMap<List<DocumentMetadata>>(allVersions.size());
+        for (DocumentMetadata version : allVersions) {
+            List<DocumentMetadata> versions = groupedByDocument.get(version.getId());
+            if (null == versions) {
+                versions = new LinkedList<DocumentMetadata>();
+                groupedByDocument.put(version.getId(), versions);
+            }
+            versions.add(version);
+        }
+        /*
+         * iterate by document & clean elapsed versions
+         */
+        for (TIntObjectIterator<List<DocumentMetadata>> it = groupedByDocument.iterator(); it.hasNext();) {
+            it.advance();
+            List<DocumentMetadata> versionsOfDocument = it.value();
+            /*
+             * delete oldest version until max. number of versions is satisfied
+             */
+            cleanupDocumentVersionsByMaxCount(versionsOfDocument, it.key(), maxVersions, session);
+        }
+    }
+
+    /**
      * Removes all versions of a certain document, which exceed the given max. number of versions.
      *
      * @param id The document identifier
@@ -223,6 +328,10 @@ public class InfostoreAutodeletePerformer {
         /*
          * delete oldest version until max. number of versions is satisfied
          */
+        cleanupDocumentVersionsByMaxCount(versionsOfDocument, id, maxVersions, session);
+    }
+
+    private void cleanupDocumentVersionsByMaxCount(List<DocumentMetadata> versionsOfDocument, int id, int maxVersions, ServerSession session) throws OXException {
         int numberOfVersionsToDelete = versionsOfDocument.size() - maxVersions;
         if (numberOfVersionsToDelete > 0) {
             Collections.sort(versionsOfDocument, new Comparator<DocumentMetadata>() {
