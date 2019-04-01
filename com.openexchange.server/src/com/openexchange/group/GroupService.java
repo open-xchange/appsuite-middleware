@@ -97,6 +97,17 @@ public interface GroupService {
     Group getGroup(Context context, int groupId) throws OXException;
 
     /**
+     * Returns the denoted group.
+     *
+     * @param context The context
+     * @param groupId The group identifier
+     * @param loadMembers Whether to load members or not.
+     * @return The group
+     * @throws OXException If group cannot be returned
+     */
+    Group getGroup(Context context, int groupId, boolean loadMembers) throws OXException;
+
+    /**
      * Returns the all groups of a given context.
      *
      * @param ctx The context

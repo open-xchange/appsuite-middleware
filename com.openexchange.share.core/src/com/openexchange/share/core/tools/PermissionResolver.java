@@ -231,7 +231,7 @@ public class PermissionResolver {
     }
 
     /**
-     * Gets a specific group.
+     * Gets a specific group. Group members are not resolved.
      *
      * @param groupID The identifier of the group to get
      * @return The group, or <code>null</code> if it can't be resolved
@@ -241,7 +241,7 @@ public class PermissionResolver {
         Group group = knownGroups.get(key);
         if (null == group && 0 <= groupID) {
             try {
-                group = services.getService(GroupService.class).getGroup(session.getContext(), groupID);
+                group = services.getService(GroupService.class).getGroup(session.getContext(), groupID, false);
                 knownGroups.put(key, group);
             } catch (OXException e) {
                 LOGGER.error("Error getting group {}", key, e);
@@ -478,7 +478,7 @@ public class PermissionResolver {
             GroupService groupService = services.getService(GroupService.class);
             for (Integer groupID : groupIDs) {
                 try {
-                    knownGroups.put(groupID, groupService.getGroup(session.getContext(), i(groupID)));
+                    knownGroups.put(groupID, groupService.getGroup(session.getContext(), i(groupID), false));
                 } catch (OXException e) {
                     if (LdapExceptionCode.GROUP_NOT_FOUND.equals(e)) {
                         // Apparently no such group exists. Ignore
