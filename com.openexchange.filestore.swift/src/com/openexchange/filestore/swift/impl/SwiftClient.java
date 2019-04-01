@@ -591,11 +591,17 @@ public class SwiftClient {
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
         Boolean unavailable = Utils.endpointUnavailable(endpoint, httpClient);
-        if (null != unavailable && unavailable.booleanValue()) {
-            LOG.warn("Swift end-point is unavailable: {}", endpoint);
-            boolean anyAvailable = endpoints.blacklist(endpoint);
-            if (anyAvailable) {
-                // Signal retry
+        if (null != unavailable) {
+            if (unavailable.booleanValue()) {
+                // Encountered an I/O error and end-point is unavailable
+                LOG.warn("Swift end-point is unavailable: {}", endpoint);
+                boolean anyAvailable = endpoints.blacklist(endpoint);
+                if (anyAvailable) {
+                    // Signal retry
+                    return null;
+                }
+            } else {
+                // Encountered an I/O error but end-point seems to be basically available: Signal retry
                 return null;
             }
         }

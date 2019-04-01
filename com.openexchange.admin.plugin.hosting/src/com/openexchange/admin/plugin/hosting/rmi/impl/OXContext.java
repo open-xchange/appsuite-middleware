@@ -70,6 +70,7 @@ import com.openexchange.admin.plugin.hosting.services.PluginInterfaces;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.plugin.hosting.tools.DatabaseDataMover;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -98,7 +99,6 @@ import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXContextCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
@@ -506,7 +506,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            // Trigger plugin extensions
+            // Trigger plug-in extensions for pre-deletion
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
@@ -522,7 +522,25 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             oxcox.delete(ctx);
-            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
+
+            // Trigger plug-in extensions for post-deletion
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        if (oxContextPlugin instanceof OXContextPluginInterfaceExtended) {
+                            OXContextPluginInterfaceExtended extended = (OXContextPluginInterfaceExtended) oxContextPlugin;
+                            try {
+                                extended.postDelete(ctx, auth);
+                            } catch (final PluginException e) {
+                                LOGGER.error("", e);
+                                throw StorageException.wrapForRMI(e);
+                            }
+                        }
+                    }
+                }
+            }
+
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);

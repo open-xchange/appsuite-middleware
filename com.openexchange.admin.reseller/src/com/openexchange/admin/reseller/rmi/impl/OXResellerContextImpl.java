@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
@@ -84,7 +84,7 @@ import com.openexchange.tools.pipesnfilters.Filter;
 /**
  * @author choeger
  */
-public class OXResellerContextImpl implements OXContextPluginInterface {
+public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     private static AdminCache cache = null;
 
@@ -246,7 +246,12 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
 
     @Override
     public void delete(final Context ctx, final Credentials auth) throws PluginException {
-        final boolean ismasteradmin = cache.isMasterAdmin(auth);
+        // Nothing to do prior to actual context deletion
+    }
+
+    @Override
+    public void postDelete(Context ctx, Credentials auth) throws PluginException {
+        boolean ismasteradmin = cache.isMasterAdmin(auth);
         try {
             if (ismasteradmin) {
                 oxresell.applyRestrictionsToContext(null, ctx);
@@ -255,18 +260,16 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
                 if (0 == owner.getId().intValue()) {
                     // context does not belong to anybody, so it is save to be removed
                     return;
-                } else {
-                    // context belongs to somebody, so we must remove the ownership
-                    oxresell.unownContextFromAdmin(ctx, owner);
                 }
+                // context belongs to somebody, so we must remove the ownership
+                oxresell.unownContextFromAdmin(ctx, owner);
             } else {
-                if (oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
-                    oxresell.applyRestrictionsToContext(null, ctx);
-                    oxresell.deleteCustomFields(ctx);
-                    oxresell.unownContextFromAdmin(ctx, auth);
-                } else {
+                if (!oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
                     throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
                 }
+                oxresell.applyRestrictionsToContext(null, ctx);
+                oxresell.deleteCustomFields(ctx);
+                oxresell.unownContextFromAdmin(ctx, auth);
             }
         } catch (final StorageException e) {
             throw new PluginException(e);

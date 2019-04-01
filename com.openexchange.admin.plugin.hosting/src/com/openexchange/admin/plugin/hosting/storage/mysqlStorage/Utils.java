@@ -111,7 +111,7 @@ public class Utils {
                 }
             }
         }
-        if (0 < deleteFailures.size()) {
+        if (!deleteFailures.isEmpty()) {
             /*
              * fall-back to hard-deletion of "file" file storages as last resort
              */
