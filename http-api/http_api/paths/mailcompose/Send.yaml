@@ -4,6 +4,8 @@
     tags:
       - MailCompose
     summary: Send message. Space gets deleted. Optionally deletes draft if referenced.
+    consumes:
+      - multipart/form-data
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: path
