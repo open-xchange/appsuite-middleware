@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
@@ -70,4 +71,10 @@ public interface SSLSocketFactoryProvider {
      */
     SSLSocketFactory getDefault();
 
+    /**
+     * Returns the originating {@link SSLContext}, that is used to create the {@link SSLSocketFactory} according to configuration.
+     *
+     * @return The {@link SSLContext} instance
+     */
+    SSLContext getOriginatingDefaultContext();
 }

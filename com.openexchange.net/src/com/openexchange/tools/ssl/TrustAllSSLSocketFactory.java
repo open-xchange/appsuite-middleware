@@ -83,6 +83,15 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
         return new TrustAllSSLSocketFactory();
     }
 
+    /**
+     * Gets a new trust-all SSL socket factory.
+     *
+     * @return A new trust-all SSL socket factory
+     */
+    public static SSLContext getCreatingDefaultContext() {
+        return getSSLContext();
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
     /** This factory will trust all certificates. */
@@ -93,15 +102,7 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
      */
     protected TrustAllSSLSocketFactory() {
         super();
-        try {
-            final SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new TrustManager[] { new TrustAllManager() }, new SecureRandom());
-            factory = context.getSocketFactory();
-        } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } catch (final KeyManagementException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
+        factory = getSSLContext().getSocketFactory();
     }
 
     @Override
@@ -172,4 +173,15 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
         return new DelegatingSSLSocket(sslSocket);
     }
 
+    private static SSLContext getSSLContext() throws IllegalStateException {
+        try {
+            final SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, new TrustManager[] { new TrustAllManager() }, new SecureRandom());
+            return context;
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        } catch (final KeyManagementException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
 }

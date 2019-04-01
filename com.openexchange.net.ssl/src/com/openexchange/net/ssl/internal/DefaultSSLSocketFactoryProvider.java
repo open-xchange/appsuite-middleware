@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.internal;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
@@ -78,17 +79,16 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
         this.sslConfigService = sslConfigService;
     }
 
-    @Override
-    public SSLSocketFactory getDefault() {
+    private TrustLevel getEffectiveTrustLevel() {
         if (sslConfigService.getTrustLevel().equals(TrustLevel.TRUST_ALL)) {
-            // Globally configured to user trust-all socket factory
-            return TrustAllSSLSocketFactory.getDefault();
+            // Globally configured to use trust-all socket factory
+            return TrustLevel.TRUST_ALL;
         }
 
         UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
         if (null == userSSLConfig) {
             // Absent user-aware SSL config service. This happens for setups w/o a user/context service.
-            return TrustAllSSLSocketFactory.getDefault();
+            return TrustLevel.TRUST_ALL;
         }
 
         // Try to determine by user
@@ -96,10 +96,21 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
         if ((user < 0) || (context < 0)) {
             // No user-specific socket factory selectable
-            return TrustedSSLSocketFactory.getDefault();
+            return TrustLevel.TRUST_RESTRICTED;
         }
 
-        return userSSLConfig.isTrustAll(user, context) ? TrustAllSSLSocketFactory.getDefault() : TrustedSSLSocketFactory.getDefault();
+        return userSSLConfig.isTrustAll(user, context) ? TrustLevel.TRUST_ALL : TrustLevel.TRUST_RESTRICTED;
     }
 
+    @Override
+    public SSLSocketFactory getDefault() {
+        TrustLevel effectiveTrustLevel = getEffectiveTrustLevel();
+        return TrustLevel.TRUST_ALL == effectiveTrustLevel ? TrustAllSSLSocketFactory.getDefault() : TrustedSSLSocketFactory.getDefault();
+    }
+
+    @Override
+    public SSLContext getOriginatingDefaultContext() {
+        TrustLevel effectiveTrustLevel = getEffectiveTrustLevel();
+        return TrustLevel.TRUST_ALL == effectiveTrustLevel ? TrustAllSSLSocketFactory.getCreatingDefaultContext() : TrustedSSLSocketFactory.getCreatingDefaultContext();
+    }
 }
