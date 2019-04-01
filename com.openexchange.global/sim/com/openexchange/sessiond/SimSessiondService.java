@@ -293,6 +293,11 @@ public class SimSessiondService implements SessiondService {
         // Nothing to do.
         return true;
     }
+    
+    @Override
+    public boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException {
+        return true;
+    }
 
     @Override
     public Collection<String> findSessions(SessionFilter filter) {
