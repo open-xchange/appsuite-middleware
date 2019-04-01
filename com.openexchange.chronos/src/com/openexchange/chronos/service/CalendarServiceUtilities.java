@@ -92,17 +92,6 @@ public interface CalendarServiceUtilities {
     String resolveByUID(CalendarSession session, String uid, int calendarUserId) throws OXException;
 
     /**
-     * Resolves a resource filename to the identifier of an existing event. The lookup is performed context-wise, independently of the
-     * current session user's access rights. If an event series with change exceptions is matched, the identifier of the recurring
-     * <i>master</i> event is returned.
-     *
-     * @param session The calendar session
-     * @param filename The filename to resolve
-     * @return The identifier of the resolved event, or <code>null</code> if not found
-     */
-    String resolveByFilename(CalendarSession session, String filename) throws OXException;
-
-    /**
      * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
      * appropriate parent folder identifier assigned.
      * <p/>
