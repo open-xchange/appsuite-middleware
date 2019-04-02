@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.rmi.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.OXResellerTools.ClosureInterface;
+import com.openexchange.admin.reseller.rmi.dataobjects.CustomField;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -246,32 +248,52 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void delete(final Context ctx, final Credentials auth) throws PluginException {
-        // Nothing to do prior to actual context deletion
+        undoableDelete(ctx, auth);
     }
 
     @Override
-    public void postDelete(Context ctx, Credentials auth) throws PluginException {
+    public Map<String, Object> undoableDelete(Context ctx, Credentials auth) throws PluginException {
         boolean ismasteradmin = cache.isMasterAdmin(auth);
         try {
+            Map<String, Object> undoInfo = new HashMap<String, Object>(4);
             if (ismasteradmin) {
-                oxresell.applyRestrictionsToContext(null, ctx);
-                oxresell.deleteCustomFields(ctx);
+                Restriction[] restrictions = oxresell.applyRestrictionsToContext(null, ctx);
+                CustomField[] customFields = oxresell.deleteCustomFields(ctx);
+                undoInfo.put("reseller.restrictions", restrictions);
+                undoInfo.put("reseller.customFields", customFields);
                 final ResellerAdmin owner = oxresell.getContextOwner(ctx);
                 if (0 == owner.getId().intValue()) {
                     // context does not belong to anybody, so it is save to be removed
-                    return;
+                    return undoInfo;
                 }
                 // context belongs to somebody, so we must remove the ownership
-                oxresell.unownContextFromAdmin(ctx, owner);
+                int sid = oxresell.unownContextFromAdmin(ctx, owner);
+                undoInfo.put("reseller.subadmin", Integer.valueOf(sid));
             } else {
                 if (!oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
                     throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
                 }
-                oxresell.applyRestrictionsToContext(null, ctx);
-                oxresell.deleteCustomFields(ctx);
-                oxresell.unownContextFromAdmin(ctx, auth);
+                Restriction[] restrictions = oxresell.applyRestrictionsToContext(null, ctx);
+                CustomField[] customFields = oxresell.deleteCustomFields(ctx);
+                int sid = oxresell.unownContextFromAdmin(ctx, auth);
+                undoInfo.put("reseller.restrictions", restrictions);
+                undoInfo.put("reseller.customFields", customFields);
+                undoInfo.put("reseller.subadmin", Integer.valueOf(sid));
             }
+            return undoInfo;
         } catch (final StorageException e) {
+            throw new PluginException(e);
+        }
+    }
+
+    @Override
+    public void undelete(Context ctx, Map<String, Object> undoInfo) throws PluginException {
+        try {
+            Restriction[] restrictions = (Restriction[]) undoInfo.get("reseller.restrictions");
+            CustomField[] customFields = (CustomField[]) undoInfo.get("reseller.customFields");
+            Integer sid = (Integer) undoInfo.get("reseller.subadmin");
+            oxresell.restore(ctx, null == sid ? 0 : sid.intValue(), restrictions, customFields);
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }

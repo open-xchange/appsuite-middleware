@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,37 +47,60 @@
  *
  */
 
-package com.openexchange.admin.plugins;
+package com.openexchange.admin.reseller.rmi.dataobjects;
 
-import java.util.Map;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
- * {@link OXContextPluginInterfaceExtended} - The extended admin plug-in interface offering additional methods.
+ * {@link CustomField}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public interface OXContextPluginInterfaceExtended extends OXContextPluginInterface {
+public class CustomField {
+
+    private final String customId;
+    private final long createTimestamp;
+    private final long modifyTimestamp;
 
     /**
-     * Define the operations which should be done before the real context delete process.
+     * Initializes a new {@link CustomField}.
      *
-     * @param ctx
-     * @param auth
-     * @return The undo information
-     * @throws PluginException
+     * @param customId The custom identifier
+     * @param createTimestamp The create time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @param modifyTimestamp The modified time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
-    Map<String, Object> undoableDelete(final Context ctx, final Credentials auth) throws PluginException;
+    public CustomField(String customId, long createTimestamp, long modifyTimestamp) {
+        super();
+        this.customId = customId;
+        this.createTimestamp = createTimestamp;
+        this.modifyTimestamp = modifyTimestamp;
+    }
 
     /**
-     * Undos context deletion.
+     * Gets the custom identifier
      *
-     * @param ctx The context which could not be deleted
-     * @param undoInfo The required information to undo the delete
-     * @throws PluginException If operation fails
+     * @return The custom identifier
      */
-    void undelete(Context ctx, Map<String, Object> undoInfo) throws PluginException;
+    public String getCustomId() {
+        return customId;
+    }
+
+    /**
+     * Gets the create time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     *
+     * @return The create time stamp
+     */
+    public long getCreateTimestamp() {
+        return createTimestamp;
+    }
+
+    /**
+     * Gets the modified time; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     *
+     * @return The modified time
+     */
+    public long getModifyTimestamp() {
+        return modifyTimestamp;
+    }
 
 }
