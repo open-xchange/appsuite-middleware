@@ -1861,7 +1861,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (id != NEW && checkAutodeleteCapabilitySafe(folderAdmin, session)) {
                     int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(folderAdmin, session.getContextId());
                     if (maxVersions > 0) {
-                        new InfostoreAutodeletePerformer(this, session).removeVersionsByMaxCount(id, maxVersions);
+                        new InfostoreAutodeletePerformer(this).removeVersionsByMaxCount(id, maxVersions, session);
                     }
                 }
             }
