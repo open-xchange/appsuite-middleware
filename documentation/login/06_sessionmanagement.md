@@ -4,8 +4,7 @@ title: Session management
 
 # Introduction
 With v7.10.0 the Open-Xchange middleware offers the user the possibility to check what other sessions are already active based on his credentials.
-Information shown per session consists of IP address, time of login, client and user-agent associated to this session. In case the IP-based geolocation service is active the location of the ip address
-is also shown. Additionally the user is able to terminate any of his sessions, e.g. if a device has been stolen.
+Information shown per session consists of IP address, time of login, client and user-agent associated to this session. In case the IP-based [geolocation service](https://documentation.open-xchange.com/7.10.2/middleware/components/geolocation_deployment_guide.html) is active the location of the ip address is also shown. Additionally the user is able to terminate any of his sessions, e.g. if a device has been stolen.
 
 # Installation
 This feature is included in ``open-xchange-core`` package. Thus, no additional packages need to be installed.
