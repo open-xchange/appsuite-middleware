@@ -236,12 +236,9 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             boolean includeSubfolders = searchRequest.getOptions().getBoolOption("includeSubfolders", true);
 
             // Sort field
-            String sortFieldOption = searchRequest.getOptions().getOption("sort", null);
-            Field sortField;
-            if (sortFieldOption == null) {
+            Field sortField = Field.get(searchRequest.getOptions().getOption("sort", null));
+            if (sortField == null) {
                 sortField = Field.TITLE;
-            } else {
-                sortField = Field.get(sortFieldOption);
             }
             // Sort direction;
             String sortDirectionOption = searchRequest.getOptions().getOption("order", null);
