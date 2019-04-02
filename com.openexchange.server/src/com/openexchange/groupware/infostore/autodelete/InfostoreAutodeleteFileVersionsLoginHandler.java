@@ -55,7 +55,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
@@ -87,25 +86,9 @@ public class InfostoreAutodeleteFileVersionsLoginHandler implements LoginHandler
 
         Session session = login.getSession();
         if (InfostoreAutodeleteSettings.hasAutodeleteCapability(session)) {
-            InfostoreAutodeletePerformer autodeletePerformer = null;
-            ServerSession serverSession = null;
-
             int retentionDays = InfostoreAutodeleteSettings.getNumberOfRetentionDays(session);
             if (retentionDays > 0) {
-                serverSession = ServerSessionAdapter.valueOf(session);
-                autodeletePerformer = new InfostoreAutodeletePerformer(infostoreFacade);
-                autodeletePerformer.removeVersionsByRetentionDays(retentionDays, serverSession);
-            }
-
-            int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(session);
-            if (maxVersions > 0) {
-                if (serverSession == null) {
-                    serverSession = ServerSessionAdapter.valueOf(session);
-                }
-                if (autodeletePerformer == null) {
-                    autodeletePerformer = new InfostoreAutodeletePerformer(infostoreFacade);
-                }
-                autodeletePerformer.removeVersionsByMaxCount(maxVersions, serverSession);
+                new InfostoreAutodeletePerformer(infostoreFacade).removeVersionsByRetentionDays(retentionDays, ServerSessionAdapter.valueOf(session));
             }
         }
     }
