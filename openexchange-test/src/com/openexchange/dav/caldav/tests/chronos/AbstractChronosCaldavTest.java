@@ -111,6 +111,7 @@ import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.testing.httpclient.models.EventId;
 import net.fortuna.ical4j.model.component.Available;
 import net.fortuna.ical4j.model.component.VAvailability;
 
@@ -331,7 +332,14 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
 
         return putICal(getCaldavFolder(), resourceName, iCal);
     }
-
+    
+    public void rememberEvent(String id) {
+        EventId eventId = new EventId();
+        eventId.setFolder(getDefaultFolderID());
+        eventId.setId(id);
+        rememberEventId(defaultUserApi, eventId);
+    }
+    
     private String getCaldavFolder(){
         String defaultFolderID = getDefaultFolderID();
         if(defaultFolderID.indexOf("/")!=-1){

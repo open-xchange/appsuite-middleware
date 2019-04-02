@@ -126,7 +126,8 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         /*
          * verify appointment on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify appointment on client
          */
@@ -250,7 +251,8 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         /*
          * verify appointment on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify appointment on client
          */
@@ -378,7 +380,8 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         /*
          * verify appointment on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify appointment on client
          */
@@ -500,7 +503,8 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         /*
          * verify appointment on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify appointment on client
          */
@@ -629,7 +633,8 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         /*
          * verify appointment on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify appointment on client
          */
@@ -797,6 +802,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(event.getId());
         /*
          * verify appointment & exception on client
          */
@@ -805,7 +811,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
@@ -859,7 +864,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
             "CLASS:PUBLIC\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
             "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
+            "SEQUENCE:"+event.getSequence()+"\r\n" +
             "X-MOZ-GENERATION:1\r\n" +
             "BEGIN:VALARM\r\n" +
             "ACTION:DISPLAY\r\n" +
@@ -881,7 +886,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
             "TRANSP:OPAQUE\r\n" +
             "CLASS:PUBLIC\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "SEQUENCE:0\r\n" +
+            "SEQUENCE:"+event.getSequence()+"\r\n" +
             "X-MOZ-GENERATION:1\r\n" +
             "BEGIN:VALARM\r\n" +
             "ACTION:DISPLAY\r\n" +
@@ -907,7 +912,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
@@ -1008,6 +1012,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(event.getId());
 
         /*
          * verify appointment & exception on client
@@ -1017,7 +1022,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(seriesAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
@@ -1070,7 +1074,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
             "CLASS:PUBLIC\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
             "TRANSP:OPAQUE\r\n" +
-            "SEQUENCE:0\r\n" +
+            "SEQUENCE:"+event.getSequence()+"\r\n" +
             "X-MOZ-SNOOZE-TIME-" + exceptionStart.getTime() + "000:" + formatAsUTC(nextTrigger) + "\r\n" +
             "X-MOZ-GENERATION:1\r\n" +
             "BEGIN:VALARM\r\n" +
@@ -1093,7 +1097,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
             "TRANSP:OPAQUE\r\n" +
             "CLASS:PUBLIC\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
-            "SEQUENCE:0\r\n" +
+            "SEQUENCE:"+event.getSequence()+"\r\n" +
             "X-MOZ-GENERATION:1\r\n" +
             "BEGIN:VALARM\r\n" +
             "ACTION:DISPLAY\r\n" +
@@ -1114,7 +1118,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
