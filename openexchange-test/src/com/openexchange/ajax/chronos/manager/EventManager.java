@@ -146,7 +146,7 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * Creates an event and does not ignore conflicts
+     * Creates an event and does <b>NOT</b> ignore conflicts
      *
      * @param eventData The data of the event
      * @return The created {@link EventData}
@@ -160,7 +160,7 @@ public class EventManager extends AbstractManager {
      * Creates an event
      *
      * @param eventData The data of the event
-     * @param ignoreConflicts Flag whether or not to ignore conflicts
+     * @param ignoreConflicts <code>true</code> to ignore conflicts. If set to <code>false</code> conflicts will be checked and throw an appropriated error
      * @return The created {@link EventData}
      * @throws ApiException if an API error is occurred
      */

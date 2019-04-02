@@ -111,7 +111,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Test
     public void testCorrectAttendeePrivileges() throws Exception {
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
         assertThat("Not the correct permission!", event.getAttendeePrivileges(), is(Privileges.MODIFY.name()));
     }
 
@@ -119,14 +119,14 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     public void testDefaultAttendeePrivileges() throws Exception {
         // Create event
         event.setAttendeePrivileges(null);
-        event = eventManager.createEvent(event);
+        event = createEvent();
         assertThat("Not the correct permission!", event.getAttendeePrivileges(), anyOf(is(Privileges.DEFAULT.name()), nullValue()));
     }
 
     @Test
     public void testAddExternalAttendee() throws Exception {
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         addExternalAttendee(event, false);
 
@@ -142,7 +142,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         Attendee external = AttendeeFactory.createIndividual("organizer@example.org");
         event.getAttendees().add(external);
         event.setOrganizer(AttendeeFactory.createOrganizerFrom(external));
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         addExternalAttendee(event, true);
     }
@@ -150,7 +150,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Test
     public void testDeleteEventAsAttendee() throws Exception {
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         EventId eventId = new EventId();
         eventId.setId(event.getId());
@@ -171,7 +171,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Test(expected = ChronosApiException.class)
     public void testRemoveOrganizerAsAttendee() throws Exception {
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         EventData eventUpdate = prepareEventUpdate(event);
         eventUpdate.setAttendees(Collections.singletonList(actingAttendee));
@@ -185,7 +185,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         event.getAttendees().add(external);
 
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         String summary = "AttendeePrivilegesTest: Modify summary";
         EventData eventUpdate = prepareEventUpdate(event);
@@ -200,7 +200,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         EventData occurrence = getSecondOccurrence();
 
@@ -230,7 +230,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         EventData occurrence = getSecondOccurrence();
 
@@ -251,7 +251,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         EventData occurrence = getSecondOccurrence(eventManager2);
         occurrence = eventManager2.getEvent(null, occurrence.getId(), occurrence.getRecurrenceId(), false);
@@ -269,7 +269,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     public void testSetPropertyAsAttendee() throws Exception {
         // Create event
         event.setExtendedProperties(null);
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         // Set extended properties and update as an attendee
         EventData data = eventManager2.getEvent(folderId2, event.getId());
@@ -282,7 +282,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     public void testPrivilegesAsOrganizer() throws Exception {
         // Create event
         event.setExtendedProperties(null);
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         // Set extended properties and update as an attendee
         EventData data = eventManager.getEvent(null, event.getId());
@@ -300,7 +300,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Test
     public void testChangeOrganizerAsAttendee() throws Exception {
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         // Get data
         EventData data = eventManager2.getEvent(null, event.getId());
@@ -317,7 +317,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Test
     public void testRemoveAttendeeViaUpdate() throws Exception {
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         // Get data
         EventData data = eventManager2.getEvent(null, event.getId());
@@ -335,7 +335,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         event.setRrule("FREQ=" + EventFactory.RecurringFrequency.DAILY.name() + ";COUNT=" + 10);
 
         // Create event
-        event = eventManager.createEvent(event);
+        event = createEvent();
 
         EventData occurrence = getSecondOccurrence(eventManager);
         occurrence = eventManager.getEvent(null, occurrence.getId(), occurrence.getRecurrenceId(), false);
@@ -379,6 +379,10 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
 
     private void setAttendeePrivileges(EventData data) {
         data.setAttendeePrivileges(Privileges.MODIFY.name());
+    }
+    
+    private EventData createEvent() throws ApiException {
+        return eventManager.createEvent(event, true);
     }
 
 }
