@@ -93,8 +93,8 @@ public class InfostoreAutodeleteFileVersionsLoginHandler implements LoginHandler
             int retentionDays = InfostoreAutodeleteSettings.getNumberOfRetentionDays(session);
             if (retentionDays > 0) {
                 serverSession = ServerSessionAdapter.valueOf(session);
-                autodeletePerformer = new InfostoreAutodeletePerformer(infostoreFacade);
-                autodeletePerformer.removeVersionsByRetentionDays(retentionDays, serverSession);
+                autodeletePerformer = new InfostoreAutodeletePerformer(infostoreFacade, serverSession);
+                autodeletePerformer.removeVersionsByRetentionDays(retentionDays);
             }
 
             int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(session);
@@ -103,9 +103,9 @@ public class InfostoreAutodeleteFileVersionsLoginHandler implements LoginHandler
                     serverSession = ServerSessionAdapter.valueOf(session);
                 }
                 if (autodeletePerformer == null) {
-                    autodeletePerformer = new InfostoreAutodeletePerformer(infostoreFacade);
+                    autodeletePerformer = new InfostoreAutodeletePerformer(infostoreFacade, serverSession);
                 }
-                autodeletePerformer.removeVersionsByMaxCount(maxVersions, serverSession);
+                autodeletePerformer.removeVersionsByMaxCount(maxVersions);
             }
         }
     }
