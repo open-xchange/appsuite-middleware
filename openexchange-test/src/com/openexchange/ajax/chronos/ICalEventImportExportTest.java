@@ -79,7 +79,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
 
     @Test
     public void testFolderEventExport() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testCreateSingle"), true);
         String iCalEvent = importExportManager.exportICalFile(defaultUserApi.getSession(), expectedEventData.getFolder());
         assertNotNull(iCalEvent);
         assertTrue(iCalEvent.contains("testCreateSingle"));
@@ -88,7 +88,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
     @Test
     public void testBatchEventExport() throws Exception {
         List<EventData> eventData = new ArrayList<>();
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testBatchEvent1"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testBatchEvent1"), true);
         List<InfoItemExport> itemList = new ArrayList<>();
 
         addInfoItemExport(itemList, expectedEventData.getFolder(), expectedEventData.getId());
@@ -99,7 +99,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(10));
 
-        expectedEventData = eventManager.createEvent(EventFactory.createSingleEvent(defaultUserApi.getCalUser(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end)));
+        expectedEventData = eventManager.createEvent(EventFactory.createSingleEvent(defaultUserApi.getCalUser().intValue(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end)), true);
         addInfoItemExport(itemList, expectedEventData.getFolder(), expectedEventData.getId());
         eventData.add(expectedEventData);
 
