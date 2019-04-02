@@ -64,6 +64,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  *
@@ -83,15 +84,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ICalService.class, 
-                                LeanConfigurationService.class, 
-                                SSLSocketFactoryProvider.class, 
-                                SSLConfigurationService.class, 
-                                CryptoService.class, 
-                                ConversionService.class, 
-                                AdministrativeCalendarAccountService.class,
-                                CalendarUtilities.class,
-                                DatabaseService.class};
+        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class, ConversionService.class, AdministrativeCalendarAccountService.class, CalendarUtilities.class, DatabaseService.class, VersionService.class };
     }
 
     @Override
