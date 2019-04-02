@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.oauth.OAuthUtil;
@@ -68,6 +70,8 @@ import com.openexchange.session.Session;
  * @since v7.10.1
  */
 public abstract class AbstractFileStorageOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileStorageOAuthAccountAssociationProvider.class);
 
     private final AbstractOAuthFileStorageService storageService;
 
@@ -90,7 +94,12 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
         List<FileStorageAccount> accounts = storageService.getAccounts(session);
         for (FileStorageAccount fileStorageAccount : accounts) {
             Map<String, Object> configuration = fileStorageAccount.getConfiguration();
-            if (OAuthUtil.getAccountId(configuration) != accountId) {
+            try {
+                if (OAuthUtil.getAccountId(configuration) != accountId) {
+                    continue;
+                }
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Possible malfunctioning file storage oauth account with id: {}, for user: {}, in context {}.", accountId, session.getUserId(), session.getContextId(), e);
                 continue;
             }
             if (null == associations) {
