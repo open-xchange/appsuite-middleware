@@ -1,5 +1,6 @@
 ---
 title: Web Sockets
+icon: fa-rocket
 ---
 
 # Web Sockets documentation

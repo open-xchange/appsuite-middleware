@@ -1,5 +1,6 @@
 ---
 title: Push Notification Service
+icon: fa-bell
 ---
 
 # Introduction
