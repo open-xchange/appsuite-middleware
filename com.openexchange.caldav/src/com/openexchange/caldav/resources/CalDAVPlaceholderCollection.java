@@ -107,7 +107,7 @@ public class CalDAVPlaceholderCollection<T> extends CalDAVFolderCollection<T> {
      * @param contentType The default content type to use
      * @param treeID The tree identifier to use
      */
-    public CalDAVPlaceholderCollection(GroupwareCaldavFactory factory, WebdavPath url, ContentType contentType, String treeID) throws OXException {
+    public CalDAVPlaceholderCollection(GroupwareCaldavFactory factory, WebdavPath url, @SuppressWarnings("unused") ContentType contentType, String treeID) throws OXException {
         super(factory, url, null, CalendarOrder.NO_ORDER);
         /*
          * prepare placeholder folder and apply defaults

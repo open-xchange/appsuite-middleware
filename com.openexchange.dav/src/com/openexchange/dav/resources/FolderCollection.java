@@ -193,7 +193,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
             for (T object : this.getObjects()) {
                 children.add(createResource(object, constructPathForChildResource(object)));
             }
-            LOG.debug("{}: added {} child resources.", this.getUrl(), children.size());
+            LOG.debug("{}: added {} child resources.", this.getUrl(), Integer.valueOf(children.size()));
             return children;
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
@@ -252,7 +252,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
             try {
                 since = new Date(Long.parseLong(token));
             } catch (NumberFormatException e) {
-                OXException cause = OXException.general("Invalid sync token \"" + token + "\"");
+                OXException cause = OXException.general("Invalid sync token \"" + token + "\"", e);
                 throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
         }
@@ -299,7 +299,6 @@ public abstract class FolderCollection<T> extends DAVCollection {
         return null != folder ? folder.getCreationDateUTC() : null;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public String getDisplayName() throws WebdavProtocolException {
         Locale locale = factory.getUser().getLocale();
@@ -365,7 +364,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         if (null != folder.getOwnPermission() && false == folder.getOwnPermission().isAdmin() && DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
             // Client will continue to show an exclamation mark if responding with 403 on an "unsubscribe" request,
             // so pretend a successful deletion here
-            LOG.info("{}: Ignoring delete/unsubscribe request for folder {} due to missing admin permissions of user {}.", getUrl(), folder, factory.getUser().getId());
+            LOG.info("{}: Ignoring delete/unsubscribe request for folder {} due to missing admin permissions of user {}.", getUrl(), folder, Integer.valueOf(factory.getUser().getId()));
             return;
         }
         if (folder.isDefault()) {

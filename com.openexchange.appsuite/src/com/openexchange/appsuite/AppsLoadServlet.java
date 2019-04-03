@@ -92,9 +92,8 @@ public class AppsLoadServlet extends SessionServlet {
      * Initializes a new {@link AppsLoadServlet}.
      *
      * @param contributor The (composite) file contributor.
-     * @throws IOException If canonical path names of given files cannot be determined
      */
-    public AppsLoadServlet(FileContributor contributor) throws IOException {
+    public AppsLoadServlet(FileContributor contributor) {
         super();
         fileContributorReference = new AtomicReference<FileContributor>(contributor);
     }
@@ -112,11 +111,12 @@ public class AppsLoadServlet extends SessionServlet {
     }
 
     private String escapeName(String name) {
-        if (name.length() > 256) {
-            name = name.substring(0, 256);
+        String nameToEscape = name;
+        if (nameToEscape.length() > 256) {
+            nameToEscape = nameToEscape.substring(0, 256);
         }
         final StringBuffer sb = new StringBuffer();
-        escape(name, sb);
+        escape(nameToEscape, sb);
         return sb.toString();
     }
 
@@ -159,12 +159,12 @@ public class AppsLoadServlet extends SessionServlet {
         }
 
         public void write(byte[] data, String options) throws IOException {
-
+            byte[] dataToWrite = data;
             if (buffering) {
-                data = new StringBuilder(new String(data, "UTF-8")).append("\n\n/* :oxoptions: " + options + " :/oxoptions: */").toString().getBytes("UTF-8");
-                buffer[count++] = data;
+                dataToWrite = new StringBuilder(new String(dataToWrite, "UTF-8")).append("\n\n/* :oxoptions: " + options + " :/oxoptions: */").toString().getBytes("UTF-8");
+                buffer[count++] = dataToWrite;
             } else {
-                out.write(data);
+                out.write(dataToWrite);
                 if (options != null) {
                     out.write(("\n// :oxoptions: " + options + " :/oxoptions: \n").getBytes("UTF-8"));
                 }
@@ -244,7 +244,7 @@ public class AppsLoadServlet extends SessionServlet {
                     sb.append("define('").append(module).append("','");
                     try {
                         escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
-                    } catch (UnsupportedEncodingException e) {
+                    } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
                         // everybody should have UTF-8
                     }
                     sb.append("');\n");
@@ -267,7 +267,7 @@ public class AppsLoadServlet extends SessionServlet {
                             try {
                                 optionsO.put("cache", !contribution.isCachingDisabled());
                                 options = optionsO.toString();
-                            } catch (JSONException e) {
+                            } catch (@SuppressWarnings("unused") JSONException e) {
                                 // Doesn't happen
                             }
                         }
@@ -296,9 +296,13 @@ public class AppsLoadServlet extends SessionServlet {
         }
         int[] key = new int[8];
         java.util.Random r = new java.util.Random();
-        for (int j = 0; j < key.length; j++) key[j] = r.nextInt(256);
+        for (int j = 0; j < key.length; j++) {
+            key[j] = r.nextInt(256);
+        }
         char[] obfuscated = moduleName.toCharArray();
-        for (int j = 0; j < obfuscated.length; j++) obfuscated[j] += key[j % key.length];
+        for (int j = 0; j < obfuscated.length; j++) {
+            obfuscated[j] += key[j % key.length];
+        }
         ew.error(("(function(){" +
             "var key = [" + Strings.join(key, ",") + "], name = '" + escapeName(new String(obfuscated)) + "';" +
             "function c(c, i) { return c.charCodeAt(0) - key[i % key.length]; }" +
@@ -323,16 +327,16 @@ public class AppsLoadServlet extends SessionServlet {
         "\\\\f", "\\\\r", "\\\\x0e", "\\\\x0f", "\\\\x10", "\\\\x11", "\\\\x12", "\\\\x13", "\\\\x14", "\\\\x15", "\\\\x16", "\\\\x17",
         "\\\\x18", "\\\\x19", "\\\\x1a", "\\\\x1b", "\\\\x1c", "\\\\x1d", "\\\\x1e", "\\\\x1f" };
 
-    private static byte[] SUFFIX;
+    static byte[] SUFFIX;
     static {
         try {
             SUFFIX = "\n/*:oxsep:*/\n".getBytes(Charsets.UTF_8_NAME);
-        } catch (UnsupportedEncodingException e) {
+        } catch (@SuppressWarnings("unused") UnsupportedEncodingException e) {
             SUFFIX = "\n/*:oxsep:*/\n".getBytes();
         }
     }
 
-    private static void escape(final CharSequence s, final StringBuffer sb) {
+    static void escape(final CharSequence s, final StringBuffer sb) {
         final Matcher e = escapeRE.matcher(s);
         while (e.find()) {
             final int chr = e.group().codePointAt(0);

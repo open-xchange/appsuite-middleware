@@ -98,7 +98,7 @@ import ch.qos.logback.core.util.FileSize;
 
 /**
  * {@link AuditEventHandler}
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a> - refactoring
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Switched from appointments to calendar events
@@ -304,7 +304,7 @@ public class AuditEventHandler implements EventHandler {
                 try {
                     final int iFolderId = Integer.parseInt(folderId);
                     logBuilder.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
-                } catch (NumberFormatException e) {
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     logBuilder.append("FOLDER: ").append(folderId).append(';');
                 }
             }
@@ -412,7 +412,7 @@ public class AuditEventHandler implements EventHandler {
      * @param context - the {@link Context}
      * @param logBuilder - the log to add information
      */
-    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) {
+    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, @SuppressWarnings("unused") Context context, StringBuilder logBuilder) {
 
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
         Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
@@ -593,7 +593,7 @@ public class AuditEventHandler implements EventHandler {
         String displayName;
         try {
             displayName = userService.getUser(userId, ContextStorage.getInstance().getContext(contextId)).getDisplayName();
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") final Exception e) {
             // Ignore
             displayName = null;
         }
@@ -645,7 +645,7 @@ public class AuditEventHandler implements EventHandler {
             logBuilder.append(text).append(value).append("; ");
         }
     }
-    
+
     private static <T> T castTo(Object actionObject, Class<T> clazz) {
         if (null != actionObject && clazz.isAssignableFrom(actionObject.getClass())) {
             return clazz.cast(actionObject);

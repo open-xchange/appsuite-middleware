@@ -72,7 +72,7 @@ import com.openexchange.tools.encoding.Base64;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class ForwardedTGTDelegateGenerator implements PrivilegedExceptionAction<ClientPrincipal> {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(ForwardedTGTDelegateGenerator.class);
 
     private final GSSManager manager;
@@ -113,6 +113,7 @@ final class ForwardedTGTDelegateGenerator implements PrivilegedExceptionAction<C
                 throw KerberosExceptionCodes.DELEGATE_FAILED.create(clientName);
             }
         } catch (GSSException e) {
+            final byte[] forwardedTicket = this.forwardedTicket;
             Object ticketLog = new Object() {
                 @Override
                 public String toString() {

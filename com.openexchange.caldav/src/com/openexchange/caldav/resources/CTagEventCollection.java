@@ -83,7 +83,7 @@ public class CTagEventCollection extends EventCollection {
 
     /**
      * Initializes a new {@link CTagEventCollection}.
-     * 
+     *
      * @param factory The factory
      * @param url The WebDAV path
      * @param folder The underlying folder, or <code>null</code> if it not yet exists
@@ -117,6 +117,7 @@ public class CTagEventCollection extends EventCollection {
     @Override
     public String getCTag() throws WebdavProtocolException {
         try {
+            final UserizedFolder folder = this.folder;
             return new CalendarAccessOperation<String>(factory) {
 
                 @Override
@@ -139,6 +140,7 @@ public class CTagEventCollection extends EventCollection {
         if (Strings.isEmpty(resourceName)) {
             return null;
         }
+        final UserizedFolder folder = this.folder;
         return new CalendarAccessOperation<Event>(factory) {
 
             @Override
@@ -150,6 +152,7 @@ public class CTagEventCollection extends EventCollection {
 
     @Override
     public Map<String, EventsResult> resolveEvents(List<String> resourceNames) throws OXException {
+        final UserizedFolder folder = this.folder;
         return new CalendarAccessOperation<Map<String, EventsResult>>(factory) {
 
             @Override

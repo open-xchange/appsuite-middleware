@@ -90,11 +90,11 @@ final class ConstrainedDelegateGenerator implements PrivilegedExceptionAction<Su
         GSSContext context = manager.createContext(backendService, getKerberosMechanism(), clientCred, GSSContext.DEFAULT_LIFETIME);
         // create a security context between the client and the service
         final Subject delegateSubject;
-        final byte[] serviceTicket;
+        /* final byte[] serviceTicket; */
         try {
             context.requestMutualAuth(true);
             context.requestCredDeleg(true);
-            serviceTicket = context.initSecContext(new byte[0], 0, 0);
+            /* serviceTicket = */context.initSecContext(new byte[0], 0, 0);
 
             delegateSubject = new Subject();
             if (context.getCredDelegState()) {

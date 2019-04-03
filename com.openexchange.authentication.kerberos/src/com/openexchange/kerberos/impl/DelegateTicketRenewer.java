@@ -87,7 +87,7 @@ final class DelegateTicketRenewer implements PrivilegedExceptionAction<ClientPri
             final byte[] empty = new byte[0];
             // context.requestLifetime(60);
             context.requestCredDeleg(true);
-            final byte[] tokenForClient = context.acceptSecContext(empty, 0, empty.length);
+            /* final byte[] tokenForClient = */context.acceptSecContext(empty, 0, empty.length);
 
             final GSSName clientGSSName = context.getSrcName();
             final String clientName = clientGSSName.toString();

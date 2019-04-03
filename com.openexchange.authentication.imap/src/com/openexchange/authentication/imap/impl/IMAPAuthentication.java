@@ -206,8 +206,8 @@ public class IMAPAuthentication implements AuthenticationService {
 
             LOG.debug("Using imap server: {}", host);
             LOG.debug("Using imap port: {}", port);
-            LOG.debug("Using full login info: {}", useFullLogin);
-            LOG.debug("Using full login info for user look-up: {}", useFullLoginForUserLookup);
+            LOG.debug("Using full login info: {}", Boolean.valueOf(useFullLogin));
+            LOG.debug("Using full login info for user look-up: {}", Boolean.valueOf(useFullLoginForUserLookup));
 
             // Set IMAP login
             String imapLogin = useFullLogin ? splitResult.fullLoginInfo : localPart;
@@ -273,7 +273,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = Integer.valueOf(defaultMailAccount.getMailPort());
 	            secure = defaultMailAccount.isMailSecure();
-	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, userId, ctxId);
+	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, Integer.valueOf(userId), Integer.valueOf(ctxId));
 
 
             } else {

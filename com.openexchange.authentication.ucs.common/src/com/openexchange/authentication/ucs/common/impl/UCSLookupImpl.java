@@ -278,7 +278,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
             throw LoginExceptionCodes.COMMUNICATION.create(e1);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -344,9 +344,9 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
         DirContext ctx = null;
         try {
             ctx = new InitialDirContext(ldapConfig);
-            
+
             Attributes users_attr = ctx.getAttributes(user_dn,attribs);
-            
+
             String ldapCtxId = null;
             if (hasContextIdAttr) {
                 Attribute attr = users_attr.get(config.contextIdAttr);
@@ -354,7 +354,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                     ldapCtxId = (String) attr.get(0);
                 }
             }
-            
+
             String login;
             {
                 Attribute attr = users_attr.get(config.loginAttr);
@@ -364,7 +364,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                 }
                 login = (String) attr.get(0);
             }
-            
+
             // ### Needed for password expired check against ldap ###
             {
                 Attribute shadowlastchange = users_attr.get("shadowLastChange");
@@ -373,8 +373,8 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                     try {
                         long shadowlastchange_days = Long.parseLong(((String) shadowlastchange.get()));
                         long shadowmax_days = Long.parseLong(((String) shadowmax.get()));
-                        LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
-                        
+                        LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", Long.valueOf(shadowlastchange_days), Long.valueOf(shadowmax_days));
+
                         /**
                          * Bug #12593
                          * Check if password is already expired.
@@ -384,7 +384,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                         long days_since_1970 = System.currentTimeMillis() / 86400000;
                         long sum_up = shadowlastchange_days + shadowmax_days;
                         if (sum_up < days_since_1970) {
-                            LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, sum_up, days_since_1970);
+                            LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, Long.valueOf(sum_up), Long.valueOf(days_since_1970));
                             throw LoginExceptionCodes.PASSWORD_EXPIRED.create(config.passwordChangeURL.toString());
                         }
                     } catch (Exception whatever) {
@@ -395,7 +395,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                     LOG.debug("LDAP Attributes shadowlastchange and shadowmax not found in LDAP, no password expiry calculation will be done!");
                 }
             }
-            
+
             String contextIdOrName;
             if (null != ldapCtxId) {
                 LOG.debug("Bind with DN successfull, using context id {} as found in ldap attribute {} as context", ldapCtxId, config.contextIdAttr);
@@ -404,7 +404,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                 // Fetch the users mail attribute and parse the configured attribute to get the context name (domain part of email in this case)
                 LOG.debug("Bind with DN successfull, now parsing attribute {} to resolve context", config.mailAttr);
                 final Attribute emailattrib = users_attr.get(config.mailAttr);
-                
+
                 int numOfEmailAttribs = emailattrib.size();
                 if (numOfEmailAttribs != 1) {
                     if (numOfEmailAttribs == 0) {
@@ -412,23 +412,23 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                         LOG.error("Fatal, no {} value found, cannot resolve correct context", config.mailAttr);
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }
-                    
+
                     // Otherwise more than one mailAttr value found, cannot resolve correct context
                     LOG.error("Fatal, more than one {} value found, cannot resolv correct context", config.mailAttr);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
-                
+
                 String[] data = Strings.splitBy((String) emailattrib.get(), '@', false);
                 if (data.length != 2) {
                     LOG.error("Fatal, Email address {} could not be parsed!", emailattrib.get());
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
-                
+
                 contextIdOrName = data[1];
             }
-            
+
             LOG.debug("Returning context={}, user={} to OX API!", contextIdOrName, login);
-            
+
             // return username AND context-name to the OX API
             return new AuthenticatedImpl(login, contextIdOrName);
         } finally {
@@ -452,7 +452,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                 SearchControls sc = new SearchControls();
                 sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 sc.setReturningAttributes(new String[]{"dn"});
-                
+
                 String search_pattern = Strings.replaceSequenceWith(config.searchFilter, "%s", escapeString(loginString));
                 LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", config.ldapUrl, loginString, config.baseDn, search_pattern);
                 NamingEnumeration<SearchResult> result = ctx.search(config.baseDn, search_pattern, sc);
@@ -464,7 +464,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
                     final SearchResult sr = result.next();
                     LOG.debug("User found : {}", sr.getName());
                     user_dn = new StringBuilder(sr.getName()).append(',').append(config.baseDn).toString();
-                    
+
                     if (result.hasMoreElements()) {
                         LOG.error("More than one user for login string {} found in LDAP", loginString);
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();

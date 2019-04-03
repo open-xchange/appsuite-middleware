@@ -80,9 +80,8 @@ public class UCSAuthentication implements AuthenticationService {
      * Default constructor.
      *
      * @param configService The service to use
-     * @throws OXException If initialization fails
      */
-    public UCSAuthentication(UCSLookup ucsLookup) throws OXException {
+    public UCSAuthentication(UCSLookup ucsLookup) {
         super();
         this.ucsLookup = ucsLookup;
     }

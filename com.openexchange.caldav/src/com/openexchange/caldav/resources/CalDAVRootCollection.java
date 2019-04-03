@@ -113,10 +113,10 @@ public class CalDAVRootCollection extends DAVRootCollection {
         super(factory, "Calendars");
         this.factory = factory;
         includeProperties(
-            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO), 
-            new ScheduleDefaultCalendarURL(factory), 
-            new ScheduleDefaultTasksURL(factory), 
-            new SupportedReportSet(), 
+            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
+            new ScheduleDefaultCalendarURL(factory),
+            new ScheduleDefaultTasksURL(factory),
+            new SupportedReportSet(),
             new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
         );
     }
@@ -212,7 +212,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
         }
         children.add(new ScheduleOutboxCollection(factory));
         children.add(new ScheduleInboxCollection(factory));
-        LOG.debug("{}: got {} child resources.", getUrl(), children.size());
+        LOG.debug("{}: got {} child resources.", getUrl(), Integer.valueOf(children.size()));
         return children;
     }
 
@@ -286,7 +286,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
      * @param folder The folder to check
      * @return <code>true</code> if the folder should be considered for synchronization, <code>false</code>, otherwise
      */
-    private boolean isUsedForSync(UserizedFolder folder) throws OXException {
+    private boolean isUsedForSync(UserizedFolder folder) {
         if (Permission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             return false;
         }

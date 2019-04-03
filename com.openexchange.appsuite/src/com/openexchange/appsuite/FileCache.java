@@ -109,7 +109,7 @@ public class FileCache {
                 baos.flush(); // no-op
                 data = filter == null ? baos.toByteArray() : filter.filter(baos);
             } catch (final IOException e) {
-                LOG.debug("Could not read from '{}'", path);
+                LOG.debug("Could not read from '{}'", path, e);
                 data = null;
             } finally {
                 Streams.close(in);
@@ -147,30 +147,30 @@ public class FileCache {
      * @return The file contents as a byte array, or null if the file does not exist or is not a normal file.
      */
     public byte[] get(String path, Filter filter) {
-        path = filter == null ? path : filter.resolve(path);
+        String pathToUse = filter == null ? path : filter.resolve(path);
         for (int i = 0; i < roots.length; i++) {
-            File f = new File(roots[i], path);
+            File f = new File(roots[i], pathToUse);
             try {
                 if (!f.getCanonicalPath().startsWith(prefixes[i])) {
                     continue;
                 }
-            } catch (IOException e) {
+            } catch (@SuppressWarnings("unused") IOException e) {
                 continue;
             }
             if (f.isFile()) {
-                CacheEntry entry = cache.get(path);
+                CacheEntry entry = cache.get(pathToUse);
                 if (entry == null) {
                     entry = new CacheEntry(f);
-                    cache.put(path, entry);
+                    cache.put(pathToUse, entry);
                 }
                 return entry.getData(filter);
             }
         }
         StringBuilder sb = new StringBuilder("Could not find '");
-        sb.append(new File(roots[0], path));
+        sb.append(new File(roots[0], pathToUse));
         for (int i = 1; i < roots.length; i++) {
             sb.append("'\n            or '");
-            sb.append(new File(roots[i], path));
+            sb.append(new File(roots[i], pathToUse));
         }
         sb.append('\'');
         LOG.debug(sb.toString());
