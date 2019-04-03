@@ -78,7 +78,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
         final UpdateTaskProviderService providerService = context.getService(reference);
         final DynamicSet registry = DynamicSet.getInstance();
         // Get provider's collection
-        final Collection<UpdateTaskV2> collection = (Collection<UpdateTaskV2>) providerService.getUpdateTasks();
+        final Collection<? extends UpdateTaskV2> collection = providerService.getUpdateTasks();
         boolean error = false;
         for (final UpdateTaskV2 task : collection) {
             if (!registry.addUpdateTask(task)) {
@@ -111,7 +111,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
             try {
                 final DynamicSet registry = DynamicSet.getInstance();
                 final UpdateTaskProviderService providerService = service;
-                final Collection<UpdateTaskV2> collection = (Collection<UpdateTaskV2>) providerService.getUpdateTasks();
+                final Collection<? extends UpdateTaskV2> collection = providerService.getUpdateTasks();
                 for (final UpdateTaskV2 task : collection) {
                     registry.removeUpdateTask(task);
                 }

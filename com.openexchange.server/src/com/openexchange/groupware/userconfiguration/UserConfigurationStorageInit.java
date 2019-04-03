@@ -75,11 +75,9 @@ public final class UserConfigurationStorageInit implements Initialization {
          */
         DB("DB", CapabilityUserConfigurationStorage.class.getName(), CachingUserPermissionBitsStorage.class.getName());
 
-        private final String alias;
-
-        private final String impl;
-
-        private final String bitImpl;
+        final String alias;
+        final String impl;
+        final String bitImpl;
 
         private UserConfigurationImpl(final String alias, final String impl, final String bitImpl) {
             this.alias = alias;

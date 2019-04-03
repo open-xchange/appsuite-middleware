@@ -62,11 +62,11 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
 
 /**
@@ -101,7 +101,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
     }
 
     public static void main(final String[] args) {
-        final CommandLineParser parser = new PosixParser();
+        final CommandLineParser parser = new DefaultParser();
         boolean error = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
@@ -122,7 +122,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 if (null != val) {
                     try {
                         port = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (@SuppressWarnings("unused") final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
                         printHelp();
                         System.exit(1);
@@ -140,7 +140,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 if (null != val) {
                     try {
                         responseTimeout = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (@SuppressWarnings("unused") final NumberFormatException e) {
                         System.err.println("responsetimeout parameter is not a number: " + val);
                         printHelp();
                         System.exit(1);
@@ -192,7 +192,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 if (null != jmxConnector) {
                     try {
                         jmxConnector.close();
-                    } catch (final Exception e) {
+                    } catch (@SuppressWarnings("unused") final Exception e) {
                         // Ignore
                     }
                 }

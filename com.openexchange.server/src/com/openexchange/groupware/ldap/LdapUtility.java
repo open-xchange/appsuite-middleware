@@ -74,7 +74,7 @@ public final class LdapUtility {
     /**
      * Logger.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapUtility.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapUtility.class);
 
     /**
      * Empty map.
@@ -211,12 +211,12 @@ public final class LdapUtility {
         /**
          * User specific values to read the correct data from the ldap.
          */
-        private final Credentials values;
+        final Credentials values;
 
         /**
          * Dynamically replaced content.
          */
-        private final Map<String, String> datamap;
+        final Map<String, String> datamap;
     }
 
     /**

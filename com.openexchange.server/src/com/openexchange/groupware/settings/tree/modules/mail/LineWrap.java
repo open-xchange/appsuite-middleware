@@ -119,7 +119,7 @@ public class LineWrap implements PreferencesItemService {
                             int autoLinebreak;
                             try {
                                 autoLinebreak = (Integer.parseInt(s));
-                            } catch (NumberFormatException e) {
+                            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                                 autoLinebreak = (new BigInteger(s).intValue());
                             }
                             if (autoLinebreak != usm.getAutoLinebreak()) {

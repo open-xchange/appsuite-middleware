@@ -93,7 +93,7 @@ public class EmptyCurrent implements PreferencesItemService {
         };
     }
 
-    private static boolean hasEmptyPassword(Session session, User user) throws OXException {
+    static boolean hasEmptyPassword(Session session, User user) throws OXException {
         if (user.isGuest()) {
             ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
             if (null != shareService) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.reminder.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Collections;
 import java.util.Date;
@@ -132,7 +133,7 @@ public final class RangeAction extends AbstractReminderAction {
                 }
             }
 
-            if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(Types.APPOINTMENT)) {
+            if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(I(Types.APPOINTMENT))) {
                 addEventReminder(session, jsonResponseArray, reminderWriter, end);
             }
 

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -94,7 +95,7 @@ public final class TaskClearDelTablesTasks extends UpdateTaskAdapter {
 
             LOG.info("Clearing obsolete fields in 'del_task'...");
             int cleared = clearDeletedTasks(con);
-            LOG.info("Cleared {} rows in 'del_task'.", cleared);
+            LOG.info("Cleared {} rows in 'del_task'.", I(cleared));
 
             con.commit();
             rollback = 2;

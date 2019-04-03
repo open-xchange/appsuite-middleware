@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.DateFormat;
 import java.util.Locale;
 import java.util.Set;
@@ -163,8 +164,8 @@ public class TaskState extends LinkableState {
 	}
 
 	private static final Set<Integer> FIELDS_TO_IGNORE = ImmutableSet.of(
-	    Task.ALARM,
-	    Task.LAST_MODIFIED
+	    I(Task.ALARM),
+	    I(Task.LAST_MODIFIED)
 	);
 
     @Override

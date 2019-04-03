@@ -56,7 +56,6 @@ import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -66,14 +65,14 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class HostDataLoginHandler implements BlockingLoginHandlerService {
 
-    private final SystemNameService systemNameService;
+    // private final SystemNameService systemNameService;
     private final DispatcherPrefixService dispatcherPrefixService;
     private final ServiceLookup services;
 
     public HostDataLoginHandler(ServiceLookup services) {
         super();
         this.services = services;
-        this.systemNameService = services.getService(SystemNameService.class);
+        // this.systemNameService = services.getService(SystemNameService.class);
         this.dispatcherPrefixService = services.getService(DispatcherPrefixService.class);
     }
 
@@ -108,6 +107,8 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
         return host;
     }
 
+    /*-
+     *
     private String determineRoute(String httpSessionId) {
         final String retval;
         if (null == httpSessionId) {
@@ -121,6 +122,8 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
         }
         return retval;
     }
+     *
+     */
 
     @Override
     public void handleLogout(LoginResult logout) {

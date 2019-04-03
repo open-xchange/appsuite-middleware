@@ -81,7 +81,7 @@ public class ShowStrength implements PreferencesItemService {
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                Boolean property = service.getBoolProperty("com.openexchange.passwordchange.showStrength", false);
+                Boolean property = Boolean.valueOf(service.getBoolProperty("com.openexchange.passwordchange.showStrength", false));
                 setting.setSingleValue(property);
             }
 

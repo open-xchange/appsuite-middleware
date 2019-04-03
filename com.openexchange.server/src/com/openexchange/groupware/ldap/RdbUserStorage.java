@@ -826,7 +826,7 @@ public class RdbUserStorage extends UserStorage {
                 for (String alias : aliases) {
                     try {
                         tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
-                    } catch (Exception e) {
+                    } catch (@SuppressWarnings("unused") Exception e) {
                         tmp.add(alias);
                     }
                 }
@@ -838,8 +838,9 @@ public class RdbUserStorage extends UserStorage {
     private static final UserMapper MAPPER = new UserMapper();
 
     @Override
-    protected void updateUserInternal(Connection con, final User user, final Context context) throws OXException {
+    protected void updateUserInternal(Connection connection, final User user, final Context context) throws OXException {
         try {
+            Connection con = connection;
             if (con == null) {
                 final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
                 do {
@@ -1238,11 +1239,11 @@ public class RdbUserStorage extends UserStorage {
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error("Old: {}, New: {}, Added: {}, Removed: {}, Changed: {}.", oldAttributes, attributes, added, removed, changed, e);
-                        LOG.error("Expected lines: {} Updated lines: {}", size1, lines1);
+                        LOG.error("Expected lines: {} Updated lines: {}", I(size1), I(lines1));
                         final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keys()) {
-                            LOG.error("User {}: {}", i, map.get(i).getAttributes());
+                            LOG.error("User {}: {}", I(i), map.get(i).getAttributes());
                         }
                         throw e;
                     }
@@ -1495,7 +1496,8 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(Connection con, final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+    public int[] listAllUser(Connection connection, final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        Connection con = connection;
         boolean closeCon = false;
         if (con == null) {
             try {
@@ -1515,7 +1517,8 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+    public int[] listAllUser(Connection connection, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        Connection con = connection;
         DatabaseService databaseService = null;
         boolean closeCon = false;
         if (con == null) {

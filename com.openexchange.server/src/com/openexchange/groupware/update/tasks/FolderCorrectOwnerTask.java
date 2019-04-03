@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -180,7 +181,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                                 try {
                                     VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), ctx, con);
                                 } catch (Exception e) {
-                                    log.error("Failed to restore InfoStore/Drive files for document {} in context {}", documentId, contextId, e);
+                                    log.error("Failed to restore InfoStore/Drive files for document {} in context {}", documentId, I(contextId), e);
                                 }
                             }
 

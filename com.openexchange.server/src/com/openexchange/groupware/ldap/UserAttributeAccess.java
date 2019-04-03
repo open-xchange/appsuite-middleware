@@ -183,7 +183,7 @@ public final class UserAttributeAccess {
         Context context = null;
         try {
             context = ContextStorage.getStorageContext(contextId);
-        } catch (final OXException e) {
+        } catch (@SuppressWarnings("unused") final OXException e) {
             // Occurs if a context's admin is created
             context = new ContextImpl(contextId);
         }

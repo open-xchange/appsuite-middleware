@@ -316,7 +316,7 @@ public final class UploadUtility {
                 try {
                     // Might be ineffective if already fully parsed
                     req.setCharacterEncoding(defaultEnc);
-                } catch (Exception e) { /* Ignore */
+                } catch (@SuppressWarnings("unused") Exception e) { /* Ignore */
                 }
                 upload.setHeaderEncoding(defaultEnc);
             }
@@ -855,7 +855,7 @@ public final class UploadUtility {
                     ContentTypeParser parser = new ContentTypeParser(new StringReader(forcedMimeType));
                     parser.parseAll();
                     retval.setContentType(new StringBuilder(parser.getType()).append('/').append(parser.getSubType()).toString());
-                } catch (Exception e) {
+                } catch (@SuppressWarnings("unused") Exception e) {
                     // Assume invalid value
                     retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
                 }
@@ -1010,7 +1010,7 @@ public final class UploadUtility {
                     throw new IllegalStateException("Can't initialize. Are you running an incompatible java version?");
                 }
                 filesField.setAccessible(true);
-                LinkedHashSet<String> files = (LinkedHashSet<String>) filesField.get(null);
+                @SuppressWarnings("unchecked") LinkedHashSet<String> files = (LinkedHashSet<String>) filesField.get(null);
                 if (null == files) {
                     throw new IllegalStateException("Can't initialize. Are you running Java 6+ or within a restricted SecurityManager?");
                 }
@@ -1102,7 +1102,7 @@ public final class UploadUtility {
                 assert javaVersion.startsWith("1.6") : javaVersion;
                 String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_') + 1);
                 return Integer.parseInt(patchLevelStr) > 20;
-            } catch (RuntimeException e) {
+            } catch (@SuppressWarnings("unused") RuntimeException e) {
                 // Assume "yes"
                 return true;
             }

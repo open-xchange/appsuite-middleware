@@ -170,7 +170,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
                     objs[1] = Integer.valueOf(userId);
                     objs[2] = format;
                     results.add(objs);
-                } catch (JSONException e) {
+                } catch (@SuppressWarnings("unused") JSONException e) {
                     // Corrupt JSLob. Ignore
                 }
             } while (rs.next());

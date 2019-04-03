@@ -153,10 +153,9 @@ public class AvailableTimeZones implements PreferencesItemService {
                 int hours = seconds / 3600;
                 int extraMinutes = (seconds % 3600) / 60;
                 if (offset > 0) {
-                    return String.format("(GMT+%02d:%02d) %s", hours, extraMinutes, translate);
-                } else {
-                    return String.format("(GMT-%02d:%02d) %s", Math.abs(hours), Math.abs(extraMinutes), translate);
+                    return String.format("(GMT+%02d:%02d) %s", Integer.valueOf(hours), Integer.valueOf(extraMinutes), translate);
                 }
+                return String.format("(GMT-%02d:%02d) %s", Integer.valueOf(Math.abs(hours)), Integer.valueOf(Math.abs(extraMinutes)), translate);
             }
         }; // End of ReadOnlyValue implementation
     }

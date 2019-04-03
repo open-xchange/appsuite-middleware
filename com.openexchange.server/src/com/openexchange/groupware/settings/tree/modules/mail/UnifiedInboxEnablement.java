@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -121,7 +122,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                 boolean enable = Boolean.parseBoolean(value);
 
                 if (false == MailProviderRegistry.isUnifiedMailAvailable()) {
-                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), "Not available");
+                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", I(settings.getUserId()), I(settings.getCid()), "Not available");
                     return;
                 }
 
@@ -129,7 +130,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
-                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), e.getMessage(), e);
+                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", I(settings.getUserId()), I(settings.getCid()), e.getMessage(), e);
                     return;
                 }
                 try {

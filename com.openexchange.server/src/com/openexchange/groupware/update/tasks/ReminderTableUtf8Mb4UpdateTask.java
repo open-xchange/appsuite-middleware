@@ -72,12 +72,12 @@ public class ReminderTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        Map<String, Integer> varcharColumns = Collections.singletonMap("target_id", 255);
+        Map<String, Integer> varcharColumns = Collections.singletonMap("target_id", Integer.valueOf(255));
         changeTable(connection, params.getSchema().getSchema(), "reminder", varcharColumns);
     }
 }

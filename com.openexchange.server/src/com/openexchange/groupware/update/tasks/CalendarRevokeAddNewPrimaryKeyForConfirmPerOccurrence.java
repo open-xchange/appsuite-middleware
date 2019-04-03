@@ -369,7 +369,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             if (!Tools.existsPrimaryKey(connnection, table, columns)) {
                 try {
                     Tools.dropPrimaryKey(connnection, table);
-                } catch (final Exception x) {
+                } catch (@SuppressWarnings("unused") final Exception x) {
                     // Ignore failed deletion
                 }
                 Tools.createPrimaryKey(connnection, table, columns, lengths);

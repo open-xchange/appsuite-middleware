@@ -126,10 +126,12 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
         return dbService;
     }
 
+    @SuppressWarnings("unused")
     protected void before(Connection con) throws SQLException {
         // May be overridden
     }
 
+    @SuppressWarnings("unused")
     protected void after(Connection con) throws SQLException {
         // May be overridden
     }

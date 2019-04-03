@@ -295,7 +295,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public long getSequenceNumber() {
         if (null != sequenceNumber) {
-            return sequenceNumber;
+            return sequenceNumber.longValue();
         }
         Date lastModDate = getLastModified();
         if (null != lastModDate) {
@@ -306,7 +306,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
 
     @Override
     public void setSequenceNumber(long sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
+        this.sequenceNumber = Long.valueOf(sequenceNumber);
     }
 
     @Override
