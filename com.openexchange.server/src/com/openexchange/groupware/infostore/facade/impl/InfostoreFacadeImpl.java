@@ -869,8 +869,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (FolderObject.INFOSTORE != folderPermission.getPermission().getFolderModule()) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
         }
-        if (false == folderPermission.canCreateObjects()) {
-            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        if (false == folderPermission.isFolderVisible()) {
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         return getFileQuotaFor(session);
     }
@@ -896,8 +896,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (FolderObject.INFOSTORE != folderPermission.getPermission().getFolderModule()) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
         }
-        if (false == folderPermission.canCreateObjects()) {
-            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        if (false == folderPermission.isFolderVisible()) {
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
         int folderOwner = folderPermission.getFolderOwner();
