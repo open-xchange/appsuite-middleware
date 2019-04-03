@@ -86,7 +86,7 @@ public class Bug46641Test extends CardDAVTest {
          */
         String uid = randomUID();
         String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 9.0//EN" + "\r\n" + "N:untitled group" + "\r\n" + "FN:untitled group" + "\r\n" + "X-ADDRESSBOOKSERVER-KIND:group" + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "END:VCARD" + "\r\n";
-        postVCard(uid, vCard, 0);
+        postVCard(vCard, 0);
         /*
          * check that no contact was created on server
          */
