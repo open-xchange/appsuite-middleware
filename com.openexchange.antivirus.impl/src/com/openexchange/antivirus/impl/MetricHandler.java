@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.antivirus.impl.impl;
+package com.openexchange.antivirus.impl;
 
 import java.util.function.Consumer;
 import com.openexchange.metrics.MetricDescriptor;

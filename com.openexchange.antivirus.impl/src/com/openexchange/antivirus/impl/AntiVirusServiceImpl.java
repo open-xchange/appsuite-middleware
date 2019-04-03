@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.antivirus.impl.impl;
+package com.openexchange.antivirus.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -108,7 +109,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /**
      * Initialises a new {@link AntiVirusServiceImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public AntiVirusServiceImpl(ServiceLookup services) {
@@ -121,7 +122,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.antivirus.AntiVirusService#scan(com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure, java.lang.String, long)
      */
     @Override
@@ -131,7 +132,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.antivirus.AntiVirusService#scan(com.openexchange.ajax.fileholder.IFileHolder)
      */
     @Override
@@ -141,7 +142,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.antivirus.AntiVirusService#scan(java.io.File)
      */
     @Override
@@ -151,7 +152,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.antivirus.AntiVirusService#scan(com.openexchange.antivirus.ManagedFile)
      */
     @Override
@@ -161,7 +162,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.antivirus.AntiVirusService#canStream()
      */
     @Override
@@ -172,7 +173,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.antivirus.AntiVirusService#isEnabled(com.openexchange.session.Session)
      */
     @Override
@@ -188,10 +189,10 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         }
         CapabilitySet capabilitySet = capabilityService.getCapabilities(session);
         if (capabilitySet == null) {
-            throw AntiVirusServiceExceptionCodes.CAPABILITY_DISABLED.create(session.getUserId(), session.getContextId());
+            throw AntiVirusServiceExceptionCodes.CAPABILITY_DISABLED.create(I(session.getUserId()), I(session.getContextId()));
         }
         if (false == capabilitySet.contains("antivirus")) {
-            throw AntiVirusServiceExceptionCodes.CAPABILITY_DISABLED.create(session.getUserId(), session.getContextId());
+            throw AntiVirusServiceExceptionCodes.CAPABILITY_DISABLED.create(I(session.getUserId()), I(session.getContextId()));
         }
         LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
         if (leanConfigService == null) {
@@ -199,7 +200,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
             return false;
         }
         if (false == leanConfigService.getBooleanProperty(session.getUserId(), session.getContextId(), AntiVirusProperty.enabled)) {
-            throw AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_DISABLED.create(session.getUserId(), session.getContextId());
+            throw AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_DISABLED.create(I(session.getUserId()), I(session.getContextId()));
         }
         return true;
     }
@@ -208,7 +209,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     /**
      * Performs the Anti-Virus scan for the specified InputStream by executing an {@link ICAPRequest}
      * via the {@link ICAPClient}.
-     * 
+     *
      * @param stream The {@link InputStream} to scan
      * @param uniqueId The uniqueId that uniquely identifies the specified {@link InputStream}
      * @param contentLength The {@link InputStream}'s content length (or -1 if unknown)
@@ -221,7 +222,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         int maxFileSize = leanConfigurationService.getIntProperty(AntiVirusProperty.maxFileSize);
         long max = (long) (maxFileSize * Math.pow(1024, 2));
         if (contentLength > max) {
-            throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(maxFileSize);
+            throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(I(maxFileSize));
         }
         String server = leanConfigurationService.getProperty(AntiVirusProperty.server);
         int port = leanConfigurationService.getIntProperty(AntiVirusProperty.port);
@@ -234,7 +235,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
             options = client.getOptions(server, port, service);
         } catch (ExecutionException e) {
             LOG.error("", e);
-            return new AntiVirusResultImpl.Builder().withError(AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage())).build();
+            return AntiVirusResultImpl.builder().withError(AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage())).build();
         }
 
         // No unique id? No caching, just scan and return
@@ -245,7 +246,6 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         AntiVirusResult result = cachedResults.getIfPresent(uniqueId);
         if (result != null && result.getISTag().equals(options.getIsTag())) {
             metricHandler.incrementCacheHits();
-            result.setStreamScanned(false);
             return result;
         }
         metricHandler.incrementCacheMisses();
@@ -270,7 +270,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
             result = scan(stream, contentLength, server, port, service, mode, client, options);
             if (Strings.isNotEmpty(result.getISTag())) {
-                cachedResults.put(uniqueId, result);
+                cachedResults.put(uniqueId, new UnscannedAntiVirusResult(result));
             }
             return result;
         } finally {
@@ -280,7 +280,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /**
      * Performs the actual scan and (optionally) logs the trace times
-     * 
+     *
      * @param stream The {@link InputStream}
      * @param contentLength The {@link InputStream}'s content length
      * @param server The ICAP server
@@ -299,19 +299,19 @@ public class AntiVirusServiceImpl implements AntiVirusService {
             return parser.parse(response);
         } catch (UnknownHostException e) {
             LOG.error("", e);
-            return new AntiVirusResultImpl.Builder().withError(AntiVirusServiceExceptionCodes.UNKNOWN_HOST.create(e, e.getMessage())).build();
+            return AntiVirusResultImpl.builder().withError(AntiVirusServiceExceptionCodes.UNKNOWN_HOST.create(e, e.getMessage())).build();
         } catch (IOException e) {
             LOG.error("", e);
-            return new AntiVirusResultImpl.Builder().withError(AntiVirusServiceExceptionCodes.IO_ERROR.create(e, e.getMessage())).build();
+            return AntiVirusResultImpl.builder().withError(AntiVirusServiceExceptionCodes.IO_ERROR.create(e, e.getMessage())).build();
         } catch (OXException e) {
             LOG.error("", e);
-            return new AntiVirusResultImpl.Builder().withError(e).build();
+            return AntiVirusResultImpl.builder().withError(e).build();
         }
     }
 
     /**
      * Creates an {@link com.openexchange.icap.ICAPRequest.Builder} with the specified settings:
-     * 
+     *
      * <ul>
      * <li>Server: from the configuration</li>
      * <li>Port: from the configuration</li>
@@ -321,11 +321,10 @@ public class AntiVirusServiceImpl implements AntiVirusService {
      * <li>Allow: if available</li>
      * <li>Content-Length: if available</li>
      * </ul>
-     * 
+     *
      * @return The {@link com.openexchange.icap.ICAPRequest.Builder}
-     * @throws OXException if the ICAP server's options cannot be retrieved.
      */
-    private ICAPRequest.Builder createBuilder(ICAPOptions options, String server, int port, String service, OperationMode mode, InputStream inputStream, long contentLength) throws OXException {
+    private ICAPRequest.Builder createBuilder(ICAPOptions options, String server, int port, String service, OperationMode mode, InputStream inputStream, long contentLength) {
         // Base request
         ICAPRequest.Builder builder = new ICAPRequest.Builder();
         builder.withServer(server);
@@ -353,7 +352,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
     /**
      * Logs the runtime information
-     * 
+     *
      * @param start The start time
      * @param end The end time
      * @param contentLength The content length

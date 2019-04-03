@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.antivirus.impl.impl;
+package com.openexchange.antivirus.impl;
 
 import java.util.List;
 import com.openexchange.antivirus.AntiVirusResponseHeader;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
-import com.openexchange.antivirus.impl.impl.AntiVirusResultImpl.Builder;
+import com.openexchange.antivirus.impl.AntiVirusResultImpl.Builder;
 import com.openexchange.exception.OXException;
 import com.openexchange.icap.ICAPResponse;
 import com.openexchange.icap.header.ICAPResponseHeader;
@@ -100,7 +100,7 @@ class ICAPResponseParser {
                         continue;
                     }
                     builder.withThreatName(kv.get(1));
-                    builder.withInfected(true);
+                    builder.withInfected(Boolean.TRUE);
                     return;
                 }
             }
@@ -109,7 +109,7 @@ class ICAPResponseParser {
         /**
          * Parses the designated header from the specified {@link ICAPResponse} to
          * the specified {@link AntiVirusResultImpl}
-         * 
+         *
          * @param response The {@link ICAPResponse}
          * @param resultBuilder The {@link Builder}
          */
@@ -125,13 +125,13 @@ class ICAPResponseParser {
 
     /**
      * Parses the specified {@link ICAPResponse} and returns the {@link AntiVirusResult}
-     * 
+     *
      * @param response The {@link ICAPResponse} to parse
      * @return The {@link AntiVirusResult} to return
      * @throws OXException if a remote server error occurs
      */
     AntiVirusResult parse(ICAPResponse response) throws OXException {
-        Builder builder = new AntiVirusResultImpl.Builder();
+        AntiVirusResultImpl.Builder builder = AntiVirusResultImpl.builder();
         builder.withScanTimestamp(System.currentTimeMillis());
         builder.withStreamScanned(true);
         parseHeaders(response, builder);
@@ -150,7 +150,7 @@ class ICAPResponseParser {
 
     /**
      * Parses the headers of the response
-     * 
+     *
      * @param response The {@link ICAPResponse} to parse its headers
      * @param builder The {@link Builder} to parse the headers to
      */
@@ -162,7 +162,7 @@ class ICAPResponseParser {
 
     /**
      * Checks the encapsulated HTTP response with in the specified {@link ICAPResponse}
-     * 
+     *
      * @param response The {@link ICAPResponse}
      * @return <code>true</code> if no threats found, <code>false</code> otherwise
      * @throws OXException if a remote server error had occurs

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,42 @@
  *
  */
 
-package com.openexchange.antivirus;
+package com.openexchange.antivirus.impl;
 
-import java.io.Serializable;
+import com.openexchange.antivirus.AntiVirusResult;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AntiVirusResult}
+ * {@link AntiVirusResultEvaluatorServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public interface AntiVirusResult extends Serializable {
+public class AntiVirusResultEvaluatorServiceImpl implements AntiVirusResultEvaluatorService {
 
     /**
-     * Returns the Anti-Virus service id as returned from
-     * the ICAP Server (if available).
-     *
-     * @return the Anti-Virus service id, or an empty string if none available
+     * Initialises a new {@link AntiVirusResultEvaluatorServiceImpl}.
      */
-    String getAntiVirusServiceId();
+    public AntiVirusResultEvaluatorServiceImpl() {
+        super();
+    }
 
-    /**
-     * Returns the ISTag (a.k.a. ICAP Service Tag) of the Anti-Virus service.
-     * This tag represents the service's current state and validates that
-     * all previous ICAP responses are still considered fresh. If the ISTag is
-     * changed then all previous responses are considered invalid.
-     *
-     * @return the ISTag of the Anti-Virus service never <code>null</code>.
-     */
-    String getISTag();
-
-    /**
-     * Returns the name of the found thread
-     *
-     * @return the name of the found thread
-     */
-    String getThreatName();
-
-    /**
-     * Returns whether the scan result yielded an infected status.
-     *
-     * @return <code>true</code> if an infection was detected; <code>false</code> if clean;
-     *         <code>null</code> if scanning was not performed.
-     */
-    Boolean isInfected();
-
-    /**
-     * Returns the error that may have occurred during the anti-virus scanning process.
-     *
-     * @return the error that may have occurred during the anti-virus scanning process
-     *         or <code>null</code> if no error occurred.
-     */
-    OXException getError();
-
-    /**
-     * Returns the scan time stamp
-     *
-     * @return The scan time stamp
-     */
-    long getScanTimestamp();
-
-    /**
-     * Returns <code>true</code> if the stream was indeed scanned, <code>false</code>
-     * otherwise. This also indicates implicitly whether the result is being served
-     * from a cache.
-     *
-     * @return Returns <code>true</code> if the stream was indeed scanned, <code>false</code> otherwise
-     */
-    boolean isStreamScanned();
+    @Override
+    public void evaluate(AntiVirusResult result, String filename) throws OXException {
+        if (result == null) {
+            throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create("The anti-virus result was 'null'.");
+        }
+        if (null != result.getError()) {
+            throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(result.getError(), "Error while scanning for viruses.");
+        }
+        Boolean isInfected = result.isInfected();
+        if (isInfected == null) {
+            throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create("No scan was performed.");
+        }
+        if (isInfected.booleanValue()) {
+            throw AntiVirusServiceExceptionCodes.FILE_INFECTED.create(filename, result.getThreatName());
+        }
+    }
 }

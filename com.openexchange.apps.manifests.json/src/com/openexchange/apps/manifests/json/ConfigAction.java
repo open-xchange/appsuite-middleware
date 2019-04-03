@@ -137,8 +137,8 @@ public class ConfigAction implements AJAXActionService {
      * @throws OXException if an internal error occurs
      */
     private JSONObject asJSON(Map<String, Object> serverConfig) throws JSONException, OXException {
-        Set<Capability> capabilities = readAttributes(serverConfig, "capabilities", Set.class);
-        List<SimpleEntry<String, String>> languages = readAttributes(serverConfig, "languages", List.class);
+        @SuppressWarnings("unchecked") Set<Capability> capabilities = readAttributes(serverConfig, "capabilities", Set.class);
+        @SuppressWarnings("unchecked") List<SimpleEntry<String, String>> languages = readAttributes(serverConfig, "languages", List.class);
 
         //coerce
         JSONObject serverConfigurationObject = (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
