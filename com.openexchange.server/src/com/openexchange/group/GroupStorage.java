@@ -152,6 +152,17 @@ public interface GroupStorage {
     public Group getGroup(int gid, Context context) throws OXException;
 
     /**
+     * Reads a group from the persistent storage.
+     *
+     * @param gid Unique identifier of the group.
+     * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed)
+     * @param The context.
+     * @return The group data object.
+     * @throws OXException If an error occurs
+     */
+    public Group getGroup(int gid, boolean loadMembers, Context context) throws OXException;
+
+    /**
      * Reads group ids from the persistent storage.
      *
      * @param gid[] Array of unique identifiers of the group.

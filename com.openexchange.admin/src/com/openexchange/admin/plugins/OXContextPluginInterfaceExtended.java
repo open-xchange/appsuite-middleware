@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.plugins;
 
+import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
@@ -61,12 +62,22 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 public interface OXContextPluginInterfaceExtended extends OXContextPluginInterface {
 
     /**
-     * Define the operations which should be done after the real context delete process.
+     * Define the operations which should be done before the real context delete process.
      *
-     * @param ctx The context which has been deleted
-     * @param auth The authentication information
+     * @param ctx
+     * @param auth
+     * @return The undo information
+     * @throws PluginException
+     */
+    Map<String, Object> undoableDelete(final Context ctx, final Credentials auth) throws PluginException;
+
+    /**
+     * Undos context deletion.
+     *
+     * @param ctx The context which could not be deleted
+     * @param undoInfo The required information to undo the delete
      * @throws PluginException If operation fails
      */
-    void postDelete(Context ctx, Credentials auth) throws PluginException;
+    void undelete(Context ctx, Map<String, Object> undoInfo) throws PluginException;
 
 }

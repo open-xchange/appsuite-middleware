@@ -115,6 +115,58 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
         return lTrustManagers.build();
     }
 
+    /**
+     * Returns the {@link TrustedSSLSocketFactory} if desired to use only trusted connections
+     *
+     * @return an instance of {@link TrustedSSLSocketFactory}
+     */
+    public static SSLSocketFactory getDefault() {
+        return new TrustedSSLSocketFactory();
+    }
+
+    /**
+     * Returns the {@link SSLContext} if desired to use only trusted connections
+     *
+     * @return An instance of {@link SSLContext} or <code>null</code>
+     */
+    public static SSLContext getCreatingDefaultContext() {
+        return getSSLContext();
+    }
+
+    /**
+     * Gets an SSLSocketFactory based on the given (or default)
+     * KeyManager array, TrustManager array and SecureRandom and
+     * sets it to the instance var adapteeFactory.
+     */
+    private static SSLSocketFactory newAdapteeFactory() {
+        SSLContext sslcontext = getSSLContext();
+        return sslcontext == null ? null : sslcontext.getSocketFactory();
+    }
+
+    private static SSLContext getSSLContext() {
+        try {
+            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            initializeSSLContext(sslcontext);
+            return sslcontext;
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Unable to retrieve SSLContext.", e);
+        } catch (KeyManagementException e) {
+            LOG.error("Unable to initialize SSLContext.", e);
+        }
+
+        return null;
+    }
+
+    private static void initializeSSLContext(SSLContext sslcontext) throws KeyManagementException {
+        List<TrustManager> trustManagers = TRUST_MANAGERS.get();
+        if (trustManagers == null || trustManagers.isEmpty()) {
+            LOG.error("No trust managers available, maybe configuration error. Going to use default one for now. Please enable default or custom trust store.");
+            sslcontext.init(null, null, null);
+        } else {
+            sslcontext.init(null, trustManagers.toArray(new TrustManager[trustManagers.size()]), null);
+        }
+    }
+
     // -------------------------------------------------------------------------------------------
 
     /** Holds a SSLSocketFactory to pass all API-method-calls to */
@@ -125,45 +177,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
      */
     protected TrustedSSLSocketFactory() {
         super();
-        SSLSocketFactory adapteeFactory = null;
-        try {
-            // Get the SSLContext to get SSLSocketFactories from
-            SSLContext sslcontext = SSLContext.getInstance("TLS");
-            adapteeFactory = newAdapteeFactory(sslcontext);
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to retrieve SSLContext.", e);
-        } catch (KeyManagementException e) {
-            LOG.error("Unable to initialize SSLContext.", e);
-        }
-        this.adapteeFactory = adapteeFactory;
-    }
-
-    /**
-     * Gets an SSLSocketFactory based on the given (or default)
-     * KeyManager array, TrustManager array and SecureRandom and
-     * sets it to the instance var adapteeFactory.
-     *
-     * @throws KeyManagementException for key manager errors
-     */
-    private static SSLSocketFactory newAdapteeFactory(SSLContext sslcontext) throws KeyManagementException {
-        List<TrustManager> trustManagers = TRUST_MANAGERS.get();
-        if (trustManagers == null || trustManagers.isEmpty()) {
-            LOG.error("No trust managers available, maybe configuration error. Going to use default one for now. Please enable default or custom trust store.");
-            sslcontext.init(null, null, null);
-            return sslcontext.getSocketFactory();
-        }
-
-        sslcontext.init(null, trustManagers.toArray(new TrustManager[trustManagers.size()]), null);
-        return sslcontext.getSocketFactory();
-    }
-
-    /**
-     * Returns the {@link TrustedSSLSocketFactory} if desired to use only trusted connections
-     *
-     * @return an instance of {@link TrustedSSLSocketFactory}
-     */
-    public static SSLSocketFactory getDefault() {
-        return new TrustedSSLSocketFactory();
+        this.adapteeFactory = newAdapteeFactory();
     }
 
     @Override

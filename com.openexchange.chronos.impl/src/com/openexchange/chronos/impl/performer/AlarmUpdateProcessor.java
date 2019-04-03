@@ -115,7 +115,7 @@ public class AlarmUpdateProcessor {
          */
         List<Integer> removedAlarmIds = getRemovedAlarmIds(alarmUpdates);
         Map<Integer, ItemUpdate<Alarm, AlarmField>> updatedMasterAlarms = getUpdatedAlarms(alarmUpdates);
-        Map<Event, List<Alarm>> result = new HashMap<Event, List<Alarm>>(filteredUpdated.size());
+        Map<Event, List<Alarm>> result = new HashMap<Event, List<Alarm>>();
         for (Entry<Event, Map<Integer, Alarm>> entry : applicableExceptions.entrySet()) {
             List<Alarm> updatedExceptionAlarms = new ArrayList<>();
             /*

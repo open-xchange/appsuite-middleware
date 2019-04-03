@@ -541,7 +541,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
          */
         if (null == originalEvent.getOrganizer()) {
-            updatedEvent.setOrganizer(prepareOrganizer(session, folder, updatedEvent.getOrganizer()));
+            updatedEvent.setOrganizer(prepareOrganizer(session, folder, updatedEvent.getOrganizer(), null));
         } else if (updatedEvent.containsOrganizer()) {
             Organizer organizer = session.getEntityResolver().prepare(updatedEvent.getOrganizer(), CalendarUserType.INDIVIDUAL);
             if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {

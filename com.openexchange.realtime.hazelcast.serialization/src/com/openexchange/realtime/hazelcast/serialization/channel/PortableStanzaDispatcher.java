@@ -76,7 +76,8 @@ import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExce
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.serialization.FilteringObjectStreamFactory;
+import com.openexchange.serialization.FilteringObjectInputStream;
+import com.openexchange.serialization.FilteringObjectStreamBlacklistProvider;
 
 /**
  * {@link PortableStanzaDispatcher}
@@ -226,7 +227,7 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
      */
     private static Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
-        try (ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
+        try (ObjectInputStream objectInputStream = new FilteringObjectInputStream(byteArrayInputStream, Services.getService(FilteringObjectStreamBlacklistProvider.class).blacklist())) {
             return Stanza.class.cast(objectInputStream.readObject());
         }
     }

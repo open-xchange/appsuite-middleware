@@ -99,6 +99,11 @@ public final class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public Group getGroup(Context ctx, int groupId, boolean loadMembers) throws OXException {
+        return storage.getGroup(groupId, loadMembers, ctx);
+    }
+
+    @Override
     public Group[] search(Context ctx, String pattern, boolean loadMembers) throws OXException {
         return storage.searchGroups(pattern, loadMembers, ctx);
     }

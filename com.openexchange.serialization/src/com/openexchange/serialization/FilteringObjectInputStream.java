@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.serialization.impl;
+package com.openexchange.serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,23 +71,23 @@ public class FilteringObjectInputStream extends ObjectInputStream {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FilteringObjectInputStream.class);
     }
 
-    private final SerializationFilteringConfig config;
+    private final Iterable<Pattern> blacklist;
 
     /**
      * Initializes a new {@link FilteringObjectInputStream}.
      *
      * @param in The {@link InputStream}
+     * @param blacklist The blacklist
      * @throws IOException
      */
-    FilteringObjectInputStream(InputStream in, SerializationFilteringConfig config) throws IOException {
+    public FilteringObjectInputStream(InputStream in, Iterable<Pattern> blacklist) throws IOException {
         super(in);
-        this.config = config;
+        this.blacklist = blacklist;
     }
 
     @Override
     protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
-
-        for (Pattern blackPattern : config.blacklist()) {
+        for (Pattern blackPattern : blacklist) {
             Matcher blackMatcher = blackPattern.matcher(input.getName());
 
             if (blackMatcher.find()) {

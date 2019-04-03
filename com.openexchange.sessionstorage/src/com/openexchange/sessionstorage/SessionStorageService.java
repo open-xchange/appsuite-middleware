@@ -88,7 +88,9 @@ public interface SessionStorageService {
     Session lookupSession(String sessionId, long timeoutMillis) throws OXException;
 
     /**
-     * Adds a new session to session storage.
+     * Adds specified session to session storage.
+     * <p>
+     * Any existent session instance with the same session identifier is replaced.
      *
      * @param session The session
      * @throws OXException If adding session failed, e.g. duplicate session

@@ -70,7 +70,7 @@ import com.openexchange.realtime.hazelcast.serialization.packet.PortableIDFactor
 import com.openexchange.realtime.hazelcast.serialization.packet.PortablePresenceFactory;
 import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntryFactory;
 import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapFactory;
-import com.openexchange.serialization.FilteringObjectStreamFactory;
+import com.openexchange.serialization.FilteringObjectStreamBlacklistProvider;
 
 /**
  * {@link HazelcastSerializationActivator}
@@ -82,7 +82,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FilteringObjectStreamFactory.class };
+        return new Class[] { FilteringObjectStreamBlacklistProvider.class };
     }
 
     @Override

@@ -54,11 +54,11 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.filterByMembership;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAttendeeUpdates;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getResolvableEntities;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.chronos.impl.Utils.isSkipExternalAttendeeURIChecks;
 import static com.openexchange.java.Autoboxing.I;
@@ -71,13 +71,11 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
@@ -137,24 +135,6 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         attendeeHelper.processDeletedEvent();
         return attendeeHelper;
-    }
-
-    /**
-     * Gets the whitelist of identifiers of those entities that should be resolved automatically as used by the entity resolver.
-     * 
-     * @param session The calendar session
-     * @param folder The parent folder of the event being processed
-     * @param event The event being processed
-     * @return The identifiers of those entities that should be resolved automatically as used by the entity resolver
-     */
-    private static int[] getResolvableEntities(CalendarSession session, CalendarFolder folder, Event event) {
-        /*
-         * resolve calendar user only for externally organized group scheduled events, otherwise any entity
-         */
-        if (isGroupScheduled(event) && false == hasInternalOrganizer(session.getEntityResolver(), event)) {
-            return new int[] { folder.getCalendarUserId() };
-        }
-        return null;
     }
 
     /**
@@ -510,25 +490,6 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         for (Attendee originalMemberAttendee : filterByMembership(originalAttendees, groupUri)) {
             if (null == find(removedAttendees, originalMemberAttendee)) {
                 return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied event is organized by an <i>internal</i> entity or not.
-     * 
-     * @param entityResolver The entity resolver to use
-     * @param event The event to check
-     * @return <code>true</code> if the event has an <i>internal</i> organizer, false, otherwise
-     */
-    private static boolean hasInternalOrganizer(EntityResolver entityResolver, Event event) {
-        if (null != event.getOrganizer()) {
-            try {
-                CalendarUser organizer = entityResolver.prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL);
-                return CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL);
-            } catch (OXException e) {
-                LOG.warn("Error checking if event has internal organizer", e);
             }
         }
         return false;

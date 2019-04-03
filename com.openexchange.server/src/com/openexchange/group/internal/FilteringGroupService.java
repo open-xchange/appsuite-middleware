@@ -109,6 +109,13 @@ public class FilteringGroupService implements GroupService {
     }
 
     @Override
+    public Group getGroup(Context context, int groupId, boolean loadMembers) throws OXException {
+        Group group = delegate.getGroup(context, groupId, loadMembers);
+        Group[] groups = removeAdminFromGroups(context, new Group[] { group });
+        return groups[0];
+    }
+
+    @Override
     public Group[] listGroups(Context context, int[] groupIds) throws OXException {
         Group[] groups = delegate.listGroups(context, groupIds);
         HideAdminService hideAdminService = services.getOptionalService(HideAdminService.class);

@@ -81,6 +81,24 @@ public interface EntityResolver {
     <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType) throws OXException;
 
     /**
+     * Prepares a client-supplied calendar user. This includes:
+     * <ul>
+     * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value,
+     * and it is listed as <i>resolvable</i></li>
+     * <li>Verifying the existence of internal calendar user entities</li>
+     * <li>Applying further static properties of internal calendar users, which typically includes the calendar user's common name and the
+     * actual calendar user address</li>
+     * </ul>
+     *
+     * @param calendarUser The calendar user to prepare
+     * @param cuType The expected calendar user type, or <code>null</code> if not specified
+     * @param resolvableEntities A whitelist of identifiers of those entities that should be resolved by their URI value, or
+     *            <code>null</code> to resolve all resolvable entities
+     * @return The passed calendar user reference, possibly enriched by the resolved static entity data if a matching internal calendar user was found
+     */
+    <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, int[] resolvableEntities) throws OXException;
+
+    /**
      * Prepares a list of client-supplied attendees; (internal) resource identifiers are <b>not</b> resolved. This includes:
      * <ul>
      * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value</li>

@@ -221,76 +221,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         return null;
     }
 
-    /**
-     * Performs the resolve by uid operation.
-     *
-     * @param uids The unique identifiers to resolve
-     * @return The identifiers of the resolved events, mapped to their corresponding uid
-     */
-    public Map<String, String> resolveByUid(List<String> uids) throws OXException {
-        if (null == uids || uids.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        /*
-         * construct search term to find events by uid
-         */
-        SearchTerm<?> searchTerm;
-        if (1 == uids.size()) {
-            searchTerm = getSearchTerm(EventField.UID, SingleOperation.EQUALS, uids.get(0));
-        } else {
-            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            for (String uid : uids) {
-                orTerm.addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid));
-            }
-            searchTerm = orTerm;
-        }
-        /*
-         * don't include change exception events
-         */
-        searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(searchTerm)
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID))
-        ));
-        /*
-         * search for events matching the UIDs & verify equality via String#equals
-         */
-        Map<String, String> eventIdsByUid = new HashMap<String, String>(uids.size());
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
-        for (String uid : uids) {
-            Event event = findEventByUid(events, uid);
-            if (null != event) {
-                eventIdsByUid.put(uid, event.getId());
-            }
-        }
-        return eventIdsByUid;
-    }
-
-    /**
-     * Performs the resolve by filename operation.
-     *
-     * @param filename The filename to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
-     */
-    public String resolveByFilename(String filename) throws OXException {
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, filename))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        /*
-         * search for an event matching the filename
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : null;
-    }
-
     private List<Event> resolveByField(EventField field, CalendarFolder folder, String resourceName, EventField[] fields) throws OXException {
         /*
          * construct search term to lookup matching events in folder
@@ -423,17 +353,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }
-    }
-
-    private static Event findEventByUid(Collection<Event> events, String uid) {
-        if (null != events) {
-            for (Event event : events) {
-                if (uid.equals(event.getUid())) {
-                    return event;
-                }
-            }
-        }
-        return null;
     }
 
     private static List<Event> findEventsByUid(Collection<Event> events, String uid) {

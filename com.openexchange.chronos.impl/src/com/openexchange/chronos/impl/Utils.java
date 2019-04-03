@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.hasFurtherOccurrence
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -1235,18 +1236,48 @@ public class Utils {
     }
 
     /**
+     * Gets the whitelist of identifiers of those entities that should be resolved automatically when data of the event is passed to the 
+     * entity resolver.
+     * <p/>
+     * For externally organized events, only the calendar user itself should be resolved, otherwise, there are no restrictions.
+     * 
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param event The event being processed
+     * @return The identifiers of those entities that should be resolved automatically as used by the entity resolver
+     */
+    public static int[] getResolvableEntities(CalendarSession session, CalendarFolder folder, Event event) {
+        if (false == isGroupScheduled(event)) {
+            return null;
+        }
+        int[] calendarUserOnlyEntities = new int[] { folder.getCalendarUserId() };
+        try {
+            CalendarUser preparedOrganizer = session.getEntityResolver().prepare(
+                event.getOrganizer(), CalendarUserType.INDIVIDUAL, calendarUserOnlyEntities);
+            if (isInternal(preparedOrganizer, CalendarUserType.INDIVIDUAL)) {
+                return null;
+            }
+        } catch (OXException e) {
+            LOG.warn("Error checking if event has internal organizer, resolving calendar user, only.", e);
+        }
+        return calendarUserOnlyEntities;
+    }
+
+    /**
      * Prepares the organizer for an event, taking over an external organizer if specified.
      *
      * @param session The calendar session
      * @param folder The target calendar folder of the event
      * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the default organizer for the target folder
+     * @param resolvableEntities A whitelist of identifiers of those entities that should be resolved by their URI value, or
+     *            <code>null</code> to resolve all resolvable entities
      * @return The prepared organizer
      */
-    public static Organizer prepareOrganizer(CalendarSession session, CalendarFolder folder, Organizer organizerData) throws OXException {
+    public static Organizer prepareOrganizer(CalendarSession session, CalendarFolder folder, Organizer organizerData, int[] resolvableEntities) throws OXException {
         CalendarUser calendarUser = getCalendarUser(session, folder);
         Organizer organizer;
         if (null != organizerData) {
-            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
+            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL, resolvableEntities);
             if (0 < organizer.getEntity()) {
                 /*
                  * internal organizer must match the actual calendar user if specified

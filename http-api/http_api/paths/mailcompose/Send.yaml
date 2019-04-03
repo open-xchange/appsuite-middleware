@@ -1,14 +1,21 @@
 /mail/compose/{id}/send:
   post:
-    operationId: getSave
+    operationId: postMailComposeSend
     tags:
       - MailCompose
     summary: Send message. Space gets deleted. Optionally deletes draft if referenced.
+    consumes:
+      - multipart/form-data
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: path
         name: id
         description: The ID of the composition space
+        required: true
+        type: string
+      - name: JSON
+        in: formData
+        description: Represents the request body as JSON string containing the [MailMessageModel](#/definitions/MailComposeMessageModel).
         required: true
         type: string
     responses:

@@ -58,8 +58,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -507,34 +509,53 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
             // Trigger plug-in extensions for pre-deletion
+            Map<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfos = null;
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
-                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
-                        try {
-                            oxContextPlugin.delete(ctx, auth);
-                        } catch (final PluginException e) {
-                            LOGGER.error("", e);
-                            throw StorageException.wrapForRMI(e);
+                    List<OXContextPluginInterface> plugins = pluginInterfaces.getContextPlugins().getServiceList();
+                    for (final OXContextPluginInterface oxContextPlugin : plugins) {
+                        if (oxContextPlugin instanceof OXContextPluginInterfaceExtended) {
+                            OXContextPluginInterfaceExtended extended = (OXContextPluginInterfaceExtended) oxContextPlugin;
+                            try {
+                                Map<String, Object> undoInfo = extended.undoableDelete(ctx, auth);
+                                if (undoInfo != null) {
+                                    if (undeleteInfos == null) {
+                                        undeleteInfos = new LinkedHashMap<OXContextPluginInterfaceExtended, Map<String,Object>>(plugins.size());
+                                    }
+                                    undeleteInfos.put(extended, undoInfo);
+                                }
+                            } catch (final PluginException e) {
+                                LOGGER.error("", e);
+                                throw StorageException.wrapForRMI(e);
+                            }
+                        } else {
+                            try {
+                                oxContextPlugin.delete(ctx, auth);
+                            } catch (final PluginException e) {
+                                LOGGER.error("", e);
+                                throw StorageException.wrapForRMI(e);
+                            }
                         }
                     }
                 }
             }
 
-            oxcox.delete(ctx);
-
-            // Trigger plug-in extensions for post-deletion
-            {
-                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-                if (null != pluginInterfaces) {
-                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
-                        if (oxContextPlugin instanceof OXContextPluginInterfaceExtended) {
-                            OXContextPluginInterfaceExtended extended = (OXContextPluginInterfaceExtended) oxContextPlugin;
+            if (undeleteInfos == null) {
+                oxcox.delete(ctx);
+            } else {
+                boolean deleted = false;
+                try {
+                    oxcox.delete(ctx);
+                    deleted = true;
+                } finally {
+                    if (!deleted) {
+                        for (Map.Entry<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfo : undeleteInfos.entrySet()) {
                             try {
-                                extended.postDelete(ctx, auth);
-                            } catch (final PluginException e) {
-                                LOGGER.error("", e);
-                                throw StorageException.wrapForRMI(e);
+                                Map<String, Object> undoInfo = undeleteInfo.getValue();
+                                undeleteInfo.getKey().undelete(ctx, undoInfo);
+                            } catch (PluginException x) {
+                                LOGGER.warn("Undeletion failed", x);
                             }
                         }
                     }

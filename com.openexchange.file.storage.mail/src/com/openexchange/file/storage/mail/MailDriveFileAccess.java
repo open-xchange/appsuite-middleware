@@ -796,57 +796,55 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                 protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
                     List<File> files = new LinkedList<>();
 
-                    if (fullName.isNotDefaultFolder()) {
-                        IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
-                        folder.open(Folder.READ_ONLY);
-                        try {
-                            if (folder.getMessageCount() > 0) {
-                                Message[] sortedMessages = folder.getSortedMessages(sortTerm, new SubjectTerm(pattern));
+                    IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
+                    folder.open(Folder.READ_ONLY);
+                    try {
+                        if (folder.getMessageCount() > 0) {
+                            Message[] sortedMessages = folder.getSortedMessages(sortTerm, new SubjectTerm(pattern));
 
-                                // Slice...
-                                if ((start != NOT_SET) && (end != NOT_SET)) {
-                                    int size = sortedMessages.length;
-                                    if (start > size) {
-                                        // Return empty list if start is out of range
-                                        return Collections.emptyList();
-                                    }
-
-                                    // Reset end index if out of range
-                                    int toIndex = end;
-                                    if (toIndex >= size) {
-                                        toIndex = size;
-                                    }
-
-                                    int newLength = toIndex - start;
-                                    if (newLength < 0) {
-                                        return Collections.emptyList();
-                                    }
-
-                                    Message[] copy = new Message[newLength];
-                                    System.arraycopy(sortedMessages, start, copy, 0, Math.min(sortedMessages.length - start, newLength));
-                                    sortedMessages = copy;
+                            // Slice...
+                            if ((start != NOT_SET) && (end != NOT_SET)) {
+                                int size = sortedMessages.length;
+                                if (start > size) {
+                                    // Return empty list if start is out of range
+                                    return Collections.emptyList();
                                 }
 
-                                // Fetch for determined chunk
-                                folder.fetch(sortedMessages, FETCH_PROFILE_VIRTUAL);
+                                // Reset end index if out of range
+                                int toIndex = end;
+                                if (toIndex >= size) {
+                                    toIndex = size;
+                                }
 
-                                // Convert to files
-                                int i = 0;
-                                for (int k = sortedMessages.length; k-- > 0;) {
-                                    IMAPMessage message = (IMAPMessage) sortedMessages[i++];
-                                    long uid = message.getUID();
-                                    if (uid < 0) {
-                                        uid = folder.getUID(message);
-                                    }
-                                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
-                                    if (null != mailDriveFile) {
-                                        files.add(mailDriveFile);
-                                    }
+                                int newLength = toIndex - start;
+                                if (newLength < 0) {
+                                    return Collections.emptyList();
+                                }
+
+                                Message[] copy = new Message[newLength];
+                                System.arraycopy(sortedMessages, start, copy, 0, Math.min(sortedMessages.length - start, newLength));
+                                sortedMessages = copy;
+                            }
+
+                            // Fetch for determined chunk
+                            folder.fetch(sortedMessages, FETCH_PROFILE_VIRTUAL);
+
+                            // Convert to files
+                            int i = 0;
+                            for (int k = sortedMessages.length; k-- > 0;) {
+                                IMAPMessage message = (IMAPMessage) sortedMessages[i++];
+                                long uid = message.getUID();
+                                if (uid < 0) {
+                                    uid = folder.getUID(message);
+                                }
+                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
+                                if (null != mailDriveFile) {
+                                    files.add(mailDriveFile);
                                 }
                             }
-                        } finally {
-                            folder.close(false);
                         }
+                    } finally {
+                        folder.close(false);
                     }
 
                     return files;
@@ -860,32 +858,30 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                 protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
                     List<File> files = new LinkedList<>();
 
-                    if (fullName.isNotDefaultFolder()) {
-                        IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
-                        folder.open(Folder.READ_ONLY);
-                        try {
-                            if (folder.getMessageCount() > 0) {
-                                // Search and fetch for result set
-                                Message[] messages = folder.search(new SubjectTerm(pattern));
-                                folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
+                    IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
+                    folder.open(Folder.READ_ONLY);
+                    try {
+                        if (folder.getMessageCount() > 0) {
+                            // Search and fetch for result set
+                            Message[] messages = folder.search(new SubjectTerm(pattern));
+                            folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                                // Convert to files
-                                int i = 0;
-                                for (int k = messages.length; k-- > 0;) {
-                                    IMAPMessage message = (IMAPMessage) messages[i++];
-                                    long uid = message.getUID();
-                                    if (uid < 0) {
-                                        uid = folder.getUID(message);
-                                    }
-                                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
-                                    if (null != mailDriveFile) {
-                                        files.add(mailDriveFile);
-                                    }
+                            // Convert to files
+                            int i = 0;
+                            for (int k = messages.length; k-- > 0;) {
+                                IMAPMessage message = (IMAPMessage) messages[i++];
+                                long uid = message.getUID();
+                                if (uid < 0) {
+                                    uid = folder.getUID(message);
+                                }
+                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
+                                if (null != mailDriveFile) {
+                                    files.add(mailDriveFile);
                                 }
                             }
-                        } finally {
-                            folder.close(false);
                         }
+                    } finally {
+                        folder.close(false);
                     }
 
                     return files;

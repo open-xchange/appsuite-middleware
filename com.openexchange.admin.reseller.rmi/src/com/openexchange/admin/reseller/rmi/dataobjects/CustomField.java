@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,60 @@
  *
  */
 
-package com.openexchange.net.ssl;
+package com.openexchange.admin.reseller.rmi.dataobjects;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
- * The provider of the {@link SSLSocketFactory} based on the configuration made by the administrator.
+ * {@link CustomField}
  *
- * @since v7.8.3
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-@SingletonService
-public interface SSLSocketFactoryProvider {
+public class CustomField {
+
+    private final String customId;
+    private final long createTimestamp;
+    private final long modifyTimestamp;
 
     /**
-     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection.
-     * <p>
-     * Do not use the underlying {@link SSLSocketFactory} directly as this will bypass the server configuration.
+     * Initializes a new {@link CustomField}.
      *
-     * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
+     * @param customId The custom identifier
+     * @param createTimestamp The create time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @param modifyTimestamp The modified time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
-    SSLSocketFactory getDefault();
+    public CustomField(String customId, long createTimestamp, long modifyTimestamp) {
+        super();
+        this.customId = customId;
+        this.createTimestamp = createTimestamp;
+        this.modifyTimestamp = modifyTimestamp;
+    }
 
     /**
-     * Returns the originating {@link SSLContext}, that is used to create the {@link SSLSocketFactory} according to configuration.
+     * Gets the custom identifier
      *
-     * @return The {@link SSLContext} instance
+     * @return The custom identifier
      */
-    SSLContext getOriginatingDefaultContext();
+    public String getCustomId() {
+        return customId;
+    }
+
+    /**
+     * Gets the create time stamp; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     *
+     * @return The create time stamp
+     */
+    public long getCreateTimestamp() {
+        return createTimestamp;
+    }
+
+    /**
+     * Gets the modified time; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     *
+     * @return The modified time
+     */
+    public long getModifyTimestamp() {
+        return modifyTimestamp;
+    }
+
 }

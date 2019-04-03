@@ -333,7 +333,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         if (false == matches(getCalendarUser(session, targetFolder), originalEvent.getOrganizer())) {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
-            Organizer organizer = prepareOrganizer(session, targetFolder, null);
+            Organizer organizer = prepareOrganizer(session, targetFolder, null, null);
             eventUpdate.setOrganizer(organizer);
             Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
             storage.getEventStorage().updateEvent(eventUpdate);

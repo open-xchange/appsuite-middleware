@@ -280,14 +280,15 @@ public class EventPatches {
                  * take over the user's attendee comment if set
                  */
                 try {
+                    int calendarUserId = eventResource.getParent().getCalendarUser().getId();
                     EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
-                    entityResolver.prepare(importedEvent.getAttendees());
+                    entityResolver.prepare(importedEvent.getAttendees(), new int[] { calendarUserId });
+                    Attendee attendee = find(importedEvent.getAttendees(), calendarUserId);
+                    if (null != attendee && false == attendee.containsComment()) {
+                        attendee.setComment(String.valueOf(extendedProperty.getValue()));
+                    }
                 } catch (OXException e) {
                     LOG.warn("Error preparing attendees for imported event", e);
-                }
-                Attendee attendee = find(importedEvent.getAttendees(), eventResource.getFactory().getUser().getId());
-                if (null != attendee && false == attendee.containsComment()) {
-                    attendee.setComment(String.valueOf(extendedProperty.getValue()));
                 }
             }
         }

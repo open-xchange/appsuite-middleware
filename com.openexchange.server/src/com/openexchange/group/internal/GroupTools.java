@@ -73,7 +73,6 @@ public class GroupTools {
     private GroupTools() {
         super();
     }
-
     /**
      * Gets the static "All users" group (group <code>0</code>), containing all regular users in the context.
      *
@@ -81,9 +80,22 @@ public class GroupTools {
      * @return The all users group
      */
     public static Group getGroupZero(Context context) throws OXException {
+        return getGroupZero(context, true);
+    }
+
+    /**
+     * Gets the static "All users" group (group <code>0</code>), containing all regular users in the context.
+     *
+     * @param context The context to get the all users group for
+     * @param loadMembers <code>true</code> to load and set the group members, <code>false</code>, otherwise
+     * @return The all users group
+     */
+    public static Group getGroupZero(Context context, boolean loadMembers) throws OXException {
         Group group = new Group();
         group.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
-        group.setMember(UserStorage.getInstance().listAllUser(null, context, false, false));
+        if (loadMembers) {
+            group.setMember(UserStorage.getInstance().listAllUser(null, context, false, false));
+        }
         group.setLastModified(new Date());
         User admin = UserStorage.getInstance().getUser(context.getMailadmin(), context);
         group.setDisplayName(StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage())).getString(Groups.ALL_USERS));
@@ -97,9 +109,22 @@ public class GroupTools {
      * @return The guest group
      */
     public static Group getGuestGroup(Context context) throws OXException {
+        return getGroupZero(context, true);
+    }
+
+    /**
+     * Gets the static "Guests" group (group {@link Integer#MAX_VALUE}), containing all guest users in the context.
+     *
+     * @param context The context to get the guest group for
+     * @param loadMembers <code>true</code> to load and set the group members, <code>false</code>, otherwise
+     * @return The guest group
+     */
+    public static Group getGuestGroup(Context context, boolean loadMembers) throws OXException {
         Group group = new Group();
         group.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
-        group.setMember(UserStorage.getInstance().listAllUser(null, context, true, true));
+        if (loadMembers) {
+            group.setMember(UserStorage.getInstance().listAllUser(null, context, true, true));
+        }
         group.setLastModified(new Date());
         User admin = UserStorage.getInstance().getUser(context.getMailadmin(), context);
         group.setDisplayName(StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage())).getString(Groups.GUEST_GROUP));
