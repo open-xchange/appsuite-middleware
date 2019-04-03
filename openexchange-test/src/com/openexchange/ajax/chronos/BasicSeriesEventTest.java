@@ -131,13 +131,14 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         instance.add(Calendar.DAY_OF_MONTH, -7);
 
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testDeleteSeriesOccurence", 3, folderId);
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
         eventId.setFolder(expectedEventData.getFolder());
 
         List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
+        allEvents = getEventsByUid(allEvents, expectedEventData.getUid());
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -171,7 +172,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     @Test
     public void testUpdateSeriesMaster() throws Exception {
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testUpdateSeriesMaster", 3, folderId);
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
@@ -205,13 +206,14 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         instance.add(Calendar.DAY_OF_MONTH, -7);
 
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testUpdateSeriesOccurence", 3, folderId);
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
 
         EventId masterId = new EventId();
         masterId.setId(expectedEventData.getId());
         masterId.setFolder(expectedEventData.getFolder());
 
         List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
+        allEvents = getEventsByUid(allEvents, expectedEventData.getUid()); // Filter by series uid
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -259,7 +261,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         // Create a series event
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testGetSeries", 3, folderId);
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
 
         // Get series master
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
@@ -267,6 +269,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         // Get all events
         List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
+        allEvents = getEventsByUid(allEvents, expectedEventData.getUid());
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
