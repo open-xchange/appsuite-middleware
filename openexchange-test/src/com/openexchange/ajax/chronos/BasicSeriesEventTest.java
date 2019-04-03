@@ -90,7 +90,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSeries() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testCreateSeries", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testCreateSeries", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
@@ -101,7 +101,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testDeleteCompleteSeries() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteCompleteSeries", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testDeleteCompleteSeries", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -130,7 +130,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date until = instance.getTime();
         instance.add(Calendar.DAY_OF_MONTH, -7);
 
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteSeriesOccurence", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testDeleteSeriesOccurence", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -170,7 +170,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSeriesMaster() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesMaster", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testUpdateSeriesMaster", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -204,7 +204,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date until = instance.getTime();
         instance.add(Calendar.DAY_OF_MONTH, -7);
 
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesOccurence", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testUpdateSeriesOccurence", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId masterId = new EventId();
@@ -258,7 +258,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         instance.add(Calendar.DAY_OF_MONTH, -7);
 
         // Create a series event
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testGetSeries", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testGetSeries", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
@@ -302,7 +302,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         instance.add(Calendar.DAY_OF_MONTH, -7);
 
         // Create a series event
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testFloatingSeries", 3, folderId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testFloatingSeries", 3, folderId);
         instance.add(Calendar.DAY_OF_MONTH, 1);
         toCreate.setStartDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis()));
         toCreate.setEndDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis() + 5000));
