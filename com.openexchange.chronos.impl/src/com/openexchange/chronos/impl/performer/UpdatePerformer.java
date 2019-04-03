@@ -306,6 +306,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
         if (eventData.containsAlarms()) {
+            Event updatedEvent = loadEventData(originalEvent.getId());
             List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
             if(originalChangeExceptions != null) {
 
@@ -320,7 +321,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     updateAlarms(toUpdate.getKey(), calendarUserId, toUpdate.getKey().getAlarms(), toUpdate.getValue());
                 }
             }
-            updateAlarms(eventUpdate.getUpdate(), calendarUserId, originalAlarms, eventData.getAlarms());
+            updateAlarms(updatedEvent, calendarUserId, originalAlarms, eventData.getAlarms());
         }
         for (int userId : getUserIDs(eventUpdate.getAttendeeUpdates().getAddedItems())) {
             List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
