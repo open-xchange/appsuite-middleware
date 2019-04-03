@@ -64,17 +64,20 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.caldav.clientfields.Lightning;
 import com.openexchange.caldav.resources.CalendarAccessOperation;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -148,7 +151,7 @@ public class EventPatches {
     private static final String[] DERIVED_X_PROPERTIES = {
         "X-MICROSOFT-CDO-ALLDAYEVENT", "X-MICROSOFT-CDO-BUSYSTATUS",
         "X-CALENDARSERVER-PRIVATE-COMMENT", "X-CALENDARSERVER-ATTENDEE-COMMENT",
-        "X-MOZ-SNOOZE", "X-MOZ-SNOOZE-TIME*", "X-MOZ-LASTACK"
+        Lightning.X_MOZ_SNOOZE.getId(), Lightning.X_MOZ_SNOOZE_TIME.getId()+"*"
     };
 
     /**
@@ -322,7 +325,7 @@ public class EventPatches {
             }
         }
 
-        private static void adjustAlarms(EventResource resource, Event importedEvent, Event importedSeriesMaster) {
+        private static void adjustAlarms(EventResource resource, Event importedEvent, Event importedSeriesMaster, Calendar calendar) {
             List<Alarm> alarms = importedEvent.getAlarms();
             if (null == alarms || 0 == alarms.size()) {
                 return;
@@ -339,7 +342,7 @@ public class EventPatches {
                 /*
                  * handle acknowledged alarms via X-MOZ-LASTACK
                  */
-                adjustMozillaLastAcknowledged(importedEvent, importedSeriesMaster);
+                adjustMozillaLastAcknowledged(importedEvent, importedSeriesMaster, calendar);
             }
             if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent()) || DAVUserAgent.EM_CLIENT.equals(resource.getUserAgent())) {
 
@@ -528,7 +531,7 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          */
         private static void adjustMozillaSnooze(Event importedEvent) {
-            Date mozSnoozeDate = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-SNOOZE");
+            Date mozSnoozeDate = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_SNOOZE.getId());
             if (null == mozSnoozeDate || null == importedEvent.getAlarms()) {
                 return;
             }
@@ -576,7 +579,7 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          */
         private static void adjustMozillaSnoozeTime(Event importedEvent) {
-            Date mozSnoozeTime = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-SNOOZE-TIME*");
+            Date mozSnoozeTime = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_SNOOZE_TIME.getId()+"*");
             if (null == mozSnoozeTime || null == importedEvent.getAlarms()) {
                 return;
             }
@@ -585,7 +588,7 @@ public class EventPatches {
              */
             Alarm snoozeAlarm = new Alarm(new Trigger(mozSnoozeTime), AlarmAction.DISPLAY);
             snoozeAlarm.setDescription("Reminder");
-            snoozeAlarm.setAcknowledged(Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK"));
+            snoozeAlarm.setAcknowledged(Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId()));
             importedEvent.getAlarms().add(snoozeAlarm);
             addSnoozeRelationship(snoozeAlarm, importedEvent.getAlarms());
         }
@@ -597,19 +600,28 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          * @param importedSeriesMaster The imported series master event as sent by the client
          */
-        private static void adjustMozillaLastAcknowledged(Event importedEvent, Event importedSeriesMaster) {
+        private static void adjustMozillaLastAcknowledged(Event importedEvent, Event importedSeriesMaster, Calendar calendar) {
             if (null == importedEvent.getAlarms() || 0 == importedEvent.getAlarms().size()) {
                 return;
             }
             /*
              * take over latest "X-MOZ-LASTACK" from alarms and parent event component
              */
-            Date parentAcknowledged = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK");
+            Date parentAcknowledged = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId());
             if (null != importedSeriesMaster) {
-                parentAcknowledged = Tools.getLatestModified(parentAcknowledged, Tools.optExtendedPropertyAsDate(importedSeriesMaster.getExtendedProperties(), "X-MOZ-LASTACK"));
+                parentAcknowledged = Tools.getLatestModified(parentAcknowledged, Tools.optExtendedPropertyAsDate(importedSeriesMaster.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId()));
+            } else {
+                if (calendar != null) {
+                    for (Event event : calendar.getEvents()) {
+                        ExtendedProperty fakeMaster = Tools.optExtendedProperty(event.getExtendedProperties(), Lightning.X_MOZ_FAKED_MASTER.getId());
+                        if (fakeMaster != null) {
+                            parentAcknowledged = Tools.optExtendedPropertyAsDate(event.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId());
+                        }
+                    }
+                }
             }
             for (Alarm alarm : importedEvent.getAlarms()) {
-                Date acknowledged = Tools.getLatestModified(Tools.optExtendedPropertyAsDate(alarm.getExtendedProperties(), "X-MOZ-LASTACK"), alarm.getAcknowledged());
+                Date acknowledged = Tools.getLatestModified(Tools.optExtendedPropertyAsDate(alarm.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId()), alarm.getAcknowledged());
                 acknowledged = Tools.getLatestModified(parentAcknowledged, acknowledged);
                 alarm.setAcknowledged(acknowledged);
             }
@@ -754,7 +766,7 @@ public class EventPatches {
                 adjustProposedTimePrefixes(importedEvent);
                 restoreDeclinedDeleteExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
-                adjustAlarms(resource, importedEvent, null);
+                adjustAlarms(resource, importedEvent, null, null);
                 applyManagedAttachments(importedEvent);
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
             }
@@ -765,7 +777,7 @@ public class EventPatches {
                 for (Event importedChangeException : importedChangeExceptions) {
                     adjustAttendeeComments(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
-                    adjustAlarms(resource, importedChangeException, importedEvent);
+                    adjustAlarms(resource, importedChangeException, importedEvent, caldavImport.getCalender());
                     applyManagedAttachments(importedChangeException);
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
@@ -900,7 +912,7 @@ public class EventPatches {
                      * also supply the acknowledged date via X-MOZ-LASTACK, both in alarm and parent event component
                      */
                     if (null != exportedAlarm.getAcknowledged()) {
-                        ExtendedProperty mozLastAckProperty = new ExtendedProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
+                        ExtendedProperty mozLastAckProperty = new ExtendedProperty(Lightning.X_MOZ_LASTACK.getId(), Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
                         alarm.setExtendedProperties(addExtendedProperty(alarm.getExtendedProperties(), mozLastAckProperty, true));
                         exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), mozLastAckProperty, true));
                     }
@@ -921,7 +933,7 @@ public class EventPatches {
                                         exportedEvent, snoozedAlarm.getAcknowledged(), null);
                                     if (iterator.hasNext()) {
                                         DateTime relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
-                                        String propertyName = "X-MOZ-SNOOZE-TIME-" + String.valueOf(relatedDate.getTimestamp()) + "000";
+                                        String propertyName = Lightning.X_MOZ_SNOOZE_TIME.getId() + "-" + String.valueOf(relatedDate.getTimestamp()) + "000";
                                         addExtendedProperty(exportedEvent, new ExtendedProperty(propertyName, Tools.formatAsUTC(snoozeTime)));
                                     }
                                 } catch (OXException e) {
@@ -929,7 +941,7 @@ public class EventPatches {
                                 }
                             } else {
                                 if (null != snoozeTime) {
-                                    addExtendedProperty(exportedEvent, new ExtendedProperty("X-MOZ-SNOOZE-TIME", Tools.formatAsUTC(snoozeTime)));
+                                    addExtendedProperty(exportedEvent, new ExtendedProperty(Lightning.X_MOZ_SNOOZE_TIME.getId(), Tools.formatAsUTC(snoozeTime)));
                                 }
                             }
                         }
@@ -1009,14 +1021,66 @@ public class EventPatches {
             return exportedEvent;
         }
 
-        public static CalendarExport applyExport(EventResource eventResource, CalendarExport calendarExport) {
+        public static CalendarExport applyExport(EventResource eventResource, CalendarExport calendarExport, List<Event> exportedEvents) throws OXException {
             if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
                 Event event = eventResource.getEvent();
                 if (null != event && false == CalendarUtils.isPublicClassification(event)) {
                     calendarExport.add(new ExtendedProperty("X-CALENDARSERVER-ACCESS", String.valueOf(event.getClassification())));
                 }
             }
+            if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(eventResource.getUserAgent()) && PhantomMaster.class.isInstance(eventResource.getEvent())) {
+                // Add fake master
+                Event phantom = eventResource.getEvent();
+                Event fake = createFakeMaster(phantom, exportedEvents);
+                calendarExport.add(fake);
+            }
             return calendarExport;
+        }
+        
+        /**
+         * Creates a fake master from the given phantom and exported events
+         *
+         * @param phantom The phantom event
+         * @param exportedEvents The exported events
+         * @return The fake master event
+         */
+        private static Event createFakeMaster(Event phantom, List<Event> exportedEvents) {
+            Event fake = new Event();
+            fake.setUid(phantom.getUid());
+            fake.setLastModified(phantom.getLastModified());
+            fake.setCreated(phantom.getCreated());
+            fake.setTimestamp(phantom.getTimestamp());
+            SortedSet<RecurrenceId> recurrenceIds = CalendarUtils.getRecurrenceIds(exportedEvents);
+            fake.setRecurrenceDates(recurrenceIds);
+            fake.setStartDate(recurrenceIds.first().getValue());
+            
+            ExtendedProperties extendedProperties = new ExtendedProperties();
+            extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_FAKED_MASTER.getId(), "1"));
+            extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_GENERATION.getId(), Integer.valueOf(phantom.getSequence())));
+            Optional<Object> ack = findXMOZASTACK(exportedEvents);
+            if(ack.isPresent()) {
+                extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_LASTACK.getId(), ack.get()));
+            }
+            fake.setExtendedProperties(extendedProperties);
+            return fake;
+        }
+        
+        /**
+         * Finds the first X-MOZ-ACK property in the alarms of the given events
+         *
+         * @param events The events to search for
+         * @return An optional which may or may not contain the X-MOZ-ACK value
+         */
+        private static Optional<Object> findXMOZASTACK (List<Event> events) {
+            for(Event eve: events) {
+                if(eve.containsAlarms()) {
+                    Optional<Alarm> findAny = eve.getAlarms().stream().filter((alarm) -> alarm.containsExtendedProperties() && alarm.getExtendedProperties().contains(Lightning.X_MOZ_LASTACK.getId())).findAny();
+                    if(findAny.isPresent()) {
+                        return Optional.ofNullable(findAny.get().getExtendedProperties().get(Lightning.X_MOZ_LASTACK.getId()).getValue());
+                    }
+                }
+            }
+            return Optional.empty();
         }
 
     }

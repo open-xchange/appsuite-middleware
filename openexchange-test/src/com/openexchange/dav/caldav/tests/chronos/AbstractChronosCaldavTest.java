@@ -347,6 +347,14 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
         }
         return defaultFolderID;
     }
+    
+    protected String getCaldavFolder(String folderId) {
+        String result = folderId;
+        if (result.indexOf("/") != -1) {
+            result = result.substring(result.lastIndexOf("/") + 1, result.length());
+        }
+        return result;
+    }
 
     protected int putICal(String folderID, String resourceName, String iCal) throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
@@ -516,6 +524,26 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
             release(get);
         }
     }
+    
+    protected ICalResource get(WebDAVClient client, String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
+        GetMethod get = null;
+        try {
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            get = new GetMethod(getBaseUri() + href);
+            if (null != ifNoneMatchEtag) {
+                get.addRequestHeader(Headers.IF_NONE_MATCH, ifNoneMatchEtag);
+            }
+            if (null != ifMatchEtag) {
+                get.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            Assert.assertEquals("response code wrong", StatusCodes.SC_OK, client.executeMethod(get));
+            byte[] responseBody = get.getResponseBody();
+            assertNotNull("got no response body", responseBody);
+            return new ICalResource(new String(responseBody, Charsets.UTF_8), href, get.getResponseHeader("ETag").getValue());
+        } finally {
+            release(get);
+        }
+    }
 
     private static String urlEncode(String name) throws URISyntaxException {
         return new URI(null, name, null).toString();
@@ -539,6 +567,22 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
             release(put);
         }
     }
+    
+    protected int putICalUpdate(WebDAVClient client, String folderID, String resourceName, String iCal, String ifMatchEtag) throws Exception {
+        PutMethod put = null;
+        try {
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            put = new PutMethod(getBaseUri() + href);
+            if (null != ifMatchEtag) {
+                put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
+            return client.executeMethod(put);
+        } finally {
+            release(put);
+        }
+    }
+    
 
     protected int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;
