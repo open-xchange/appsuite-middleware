@@ -81,7 +81,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSession(java.lang.String)
      */
     @Override
@@ -91,7 +91,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSessions(java.lang.String, boolean)
      */
     @Override
@@ -102,7 +102,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
         if (global) {
             try {
                 SessionHandler.removeRemoteSessions(SessionFilter.create(sb.toString()));
-            } catch (IllegalArgumentException | OXException e) {
+            } catch (IllegalArgumentException e) {
                 throw new RemoteException(e.getMessage(), e);
             }
         }
@@ -111,7 +111,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearContextSessions(int)
      */
     @Override
@@ -121,7 +121,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearContextSessionsGlobally(int)
      */
     @Override
@@ -131,7 +131,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearContextSessionsGlobal(java.util.Set)
      */
     @Override
@@ -146,7 +146,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSessions(int, int)
      */
     @Override
@@ -156,7 +156,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSessionsGlobally(int, int)
      */
     @Override
@@ -172,7 +172,7 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearSessionStorage()
      */
     @Override
